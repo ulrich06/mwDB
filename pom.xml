@@ -1,17 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.kevoree.modeling</groupId>
-    <artifactId>framework</artifactId>
+    <groupId>org.mwdb</groupId>
+    <artifactId>root</artifactId>
     <packaging>pom</packaging>
-    <version>4.27.1-SNAPSHOT</version>
-    <name>KMF :: Root</name>
-    <url>https://github.com/kevoree-modeling/kevoree-modeling-framework</url>
-    <description>Kevoree Modeling Framework</description>
-
-    <properties>
-        <java2typescript.plugin.version>46</java2typescript.plugin.version>
-        <kmf.ast.version>1.0.0</kmf.ast.version>
-    </properties>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>mwDB :: Root</name>
+    <url>https://github.com/kevoree-modeling/mwDB</url>
+    <description>Many-World Database</description>
 
     <licenses>
         <license>
@@ -21,9 +16,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:kevoree-modeling/framework.git</connection>
-        <developerConnection>scm:git:git@github.com:kevoree-modeling/framework.git</developerConnection>
-        <url>http://github.com/kevoree-modeling/framework.git</url>
+        <connection>scm:git:git@github.com:kevoree-modeling/mwDB.git</connection>
+        <developerConnection>scm:git:git@github.com:kevoree-modeling/mwDB.git</developerConnection>
+        <url>http://github.com/kevoree-modeling/mwDB.git</url>
     </scm>
 
     <parent>
@@ -74,14 +69,8 @@
     </developers>
 
     <modules>
-        <!-- MicroFramework -->
-        <module>microframework</module>
-        <module>microframework.browser</module>
-        <module>microframework.umd</module>
-        <!-- CodeGenerator and associated tools -->
-        <module>generator</module>
-        <module>generator.standalone</module>
-        <module>generator.mavenplugin</module>
+        <module>api</module>
+        <module>core</module>
     </modules>
 
     <dependencies>
@@ -120,10 +109,9 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.7</version>
+                <version>1.8</version>
                 <configuration>
                     <verbose>false</verbose>
-                    <addSvnKeyWords>true</addSvnKeyWords>
                 </configuration>
                 <executions>
                     <execution>
@@ -133,9 +121,9 @@
                         </goals>
                         <phase>process-sources</phase>
                         <configuration>
-                            <licenseName>lgpl_v3</licenseName>
-                            <organizationName>org.kevoree</organizationName>
-                            <inceptionYear>2015</inceptionYear>
+                            <licenseName>apache_v2</licenseName>
+                            <organizationName>org.mwdb</organizationName>
+                            <inceptionYear>2016</inceptionYear>
                             <includes>
                                 <include>*.java</include>
                             </includes>
@@ -194,40 +182,5 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <failOnError>false</failOnError>
-                                    <additionalparam>-Xdoclint:none</additionalparam>
-                                    <maxmemory>128M</maxmemory>
-                                    <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
-                                    <tags>
-                                        <tag>
-                                            <name>native</name>
-                                            <placement>X</placement>
-                                        </tag>
-                                    </tags>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
