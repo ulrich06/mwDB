@@ -15,7 +15,7 @@ public class KType {
      * Primitive Arrays
      */
     public static final int DOUBLE_ARRAY = 6;
-    public static final int LONG_ARRAY = 6;
-    public static final int INT_ARRAY = 6;
+    public static final int LONG_ARRAY = 7;
+    public static final int INT_ARRAY = 8;
     
 }

@@ -2,7 +2,6 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
-import org.mwdb.KCallback;
 import org.mwdb.chunk.*;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -217,7 +216,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         if (this._elementCount.get() == 0) {
             return null;
         }
-        int index = (PrimitiveHelper.tripleHash(universe, time, obj) & 0x7FFFFFFF) % this._maxEntries;
+        int index = PrimitiveHelper.tripleHash(universe, time, obj, this._maxEntries);
         int m = this.elementHash[index];
         while (m != -1) {
             if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
@@ -234,14 +233,14 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public KChunk create(long p_world, long p_time, long p_id, short p_type) {
         switch (p_type) {
-            case Constants.OBJECT_CHUNK:
-                return new HeapObjectChunk(p_world, p_time, p_id, this);
+            case Constants.STATE_CHUNK:
+                //return new HeapObjectChunk(p_world, p_time, p_id, this);
             case Constants.LONG_LONG_MAP:
                 return new ArrayLongLongMap(p_world, p_time, p_id, this);
             case Constants.LONG_TREE:
                 return new ArrayLongTree(p_world, p_time, p_id, this);
-            case Constants.OBJECT_CHUNK_INDEX:
-                //return new HeapObjectIndexChunk(p_universe, p_time, p_obj, this);
+            case Constants.INDEX_STATE_CHUNK:
+                return new HeapIndexStateChunk(p_world, p_time, p_id, this);
             default:
                 return null;
         }
@@ -265,9 +264,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     public KChunk put(long p_world, long p_time, long p_id, KChunk p_elem) {
         KChunk result;
         int entry;
-        int index;
-        int hash = PrimitiveHelper.tripleHash(p_world, p_time, p_id);//  (int) (universe ^ time ^ p_obj);
-        index = (hash & 0x7FFFFFFF) % this._maxEntries;
+        int index = PrimitiveHelper.tripleHash(p_world, p_time, p_id, this._maxEntries);
         entry = findNonNullKeyEntry(p_world, p_time, p_id, index);
         if (entry == -1) {
             //we look for nextIndex
@@ -296,8 +293,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 long victimUniverse = victim.world();
                 long victimTime = victim.time();
                 long victimObj = victim.id();
-                int hashVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj);
-                int indexVictim = (hashVictim & 0x7FFFFFFF) % this._maxEntries;
+                int indexVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj, this._maxEntries);
                 int previousMagic;
                 do {
                     previousMagic = random.nextInt();
@@ -403,9 +399,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
-        int hash = PrimitiveHelper.tripleHash(world, time, id);
-        int index = (hash & 0x7FFFFFFF) % this._maxEntries;
-        int entry = findNonNullKeyEntry(world, time, id, index);
+        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int entry = findNonNullKeyEntry(world, time, id, hashIndex);
         if (entry != -1) {
             boolean success = false;
             while (!success) {
