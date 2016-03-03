@@ -468,7 +468,7 @@ public class HeapStateChunk implements KStateChunk {
      * Flags management section
      */
     @Override
-    public long getFlags() {
+    public long flags() {
         return _flags.get();
     }
 

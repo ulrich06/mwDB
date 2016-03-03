@@ -98,7 +98,7 @@ public abstract class AbstractArrayTree implements KChunk {
         return this._id;
     }
 
-    public long getFlags() {
+    public long flags() {
         return _flags.get();
     }
 

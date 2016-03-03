@@ -427,7 +427,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public long getFlags() {
+    public long flags() {
         return _flags.get();
     }
 

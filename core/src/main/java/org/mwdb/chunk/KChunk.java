@@ -39,7 +39,7 @@ public interface KChunk {
     /**
      * Flags management
      */
-    long getFlags();
+    long flags();
 
     void setFlags(long bitsToEnable, long bitsToDisable);
 

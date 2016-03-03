@@ -15,6 +15,13 @@ public class HelloWorldTest {
             @Override
             public void on(Object o) {
                 KNode node0 = graph.createNode(0, 0);
+                //do something with the node
+                node0.attSet("name", "MyValue");
+
+                System.out.println(node0.att("name"));
+
+                //destroy it explicitly without waiting GC
+                node0.free();
 
             }
         });

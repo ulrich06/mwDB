@@ -212,14 +212,14 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     */
 
     @Override
-    public final KChunk getAndMark(long universe, long time, long obj) {
+    public final KChunk getAndMark(long world, long time, long id) {
         if (this._elementCount.get() == 0) {
             return null;
         }
-        int index = PrimitiveHelper.tripleHash(universe, time, obj, this._maxEntries);
+        int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this.elementHash[index];
         while (m != -1) {
-            if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
+            if (world == this.elementK3a[m] && time == this.elementK3b[m] && id == elementK3c[m]) {
                 //GET VALUE
                 //_lru.reenqueue(m);
                 KChunk foundChunk = this._values[m];
@@ -240,19 +240,35 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmark(long world, long time, long id) {
-        //TODO
-    }
-
-    @Override
-    public void unmarkChunk(KChunk elem) {
-        //TODO
+        if (this._elementCount.get() == 0) {
+            return;
+        }
+        int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int m = this.elementHash[index];
+        while (m != -1) {
+            if (world == this.elementK3a[m] && time == this.elementK3b[m] && id == elementK3c[m]) {
+                //GET VALUE
+                //_lru.reenqueue(m);
+                KChunk foundChunk = this._values[m];
+                if (foundChunk.unmark() == 0) {
+                    //check if object is dirty
+                    if ((foundChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
+                        //declare available for recycling
+                        this._lru.reenqueue(m);
+                    }
+                }
+                return;
+            } else {
+                m = this.elementNext[m];
+            }
+        }
     }
 
     @Override
     public KChunk create(long p_world, long p_time, long p_id, short p_type) {
         switch (p_type) {
             case Constants.STATE_CHUNK:
-                //return new HeapObjectChunk(p_world, p_time, p_id, this);
+                return new HeapStateChunk(p_world, p_time, p_id, this);
             case Constants.LONG_LONG_MAP:
                 return new ArrayLongLongMap(p_world, p_time, p_id, this);
             case Constants.LONG_TREE:
@@ -292,7 +308,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             int currentVictimIndex = this._lru.dequeue();
             while (this._values[currentVictimIndex] != null && (
                     this._values[currentVictimIndex].marks() > 0 /*&& nbTry < this._maxEntries*/
-                            || (this._values[currentVictimIndex].getFlags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT)
+                            || (this._values[currentVictimIndex].flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT)
                     ) {
                 this._lru.enqueue(currentVictimIndex);
                 currentVictimIndex = this._lru.dequeue();
@@ -346,7 +362,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
                 /*
                 //TEST IF VICTIM IS DIRTY
-                if ((victim.getFlags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
+                if ((victim.flags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
                     //SAVE VICTIM
                     saveChunk(victim, metaModel, new KCallback<Throwable>() {
                         @Override
@@ -478,7 +494,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             for (int i = 0; i < this._values.length; i++) {
                 KChunk loopChunk = this._values[i];
                 if (loopChunk != null) {
-                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.chunkType() + "(count:" + loopChunk.marks() + ",flag:" + loopChunk.getFlags() + ")" + "==>" + loopChunk.serialize() + "\n");
+                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.chunkType() + "(count:" + loopChunk.marks() + ",flag:" + loopChunk.flags() + ")" + "==>" + loopChunk.serialize() + "\n");
                 }
             }
         } catch (Exception e) {

@@ -1,8 +1,5 @@
 package org.mwdb.chunk;
 
-
-import org.mwdb.KNode;
-
 public interface KChunkSpace {
 
     /**
@@ -10,23 +7,26 @@ public interface KChunkSpace {
      */
     KChunk create(long world, long time, long id, short type);
 
-    ///** Get the chunk, warning no garanty */
-    //KChunk get(long world, long time, long id);
-
+    /**
+     * Get and mark chunk for the association of keys
+     */
     KChunk getAndMark(long world, long time, long id);
 
-    void unmark(long world, long time, long id);
-
-    void unmarkChunk(KChunk elem);
-
+    /**
+     * Insert the chunk into the space and mark it before as used
+     */
+    KChunk putAndMark(KChunk elem);
 
     /**
-     * ;
-     * <p>
-     * void unmark(long universe, long time, long obj);
+     * UnMark chunk for the association of keys
      */
+    void unmark(long world, long time, long id);
 
-    KChunk putAndMark(KChunk elem);
+    /**
+     * Declare the chunk as dirty
+     */
+    void declareDirty(KChunk elem);
+
 
     //void remove(long universe, long time, long obj);
     //KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel);
@@ -37,7 +37,6 @@ public interface KChunkSpace {
 
     int size();
 
-    void declareDirty(KChunk elem);
 
     KChunkIterator detachDirties();
 

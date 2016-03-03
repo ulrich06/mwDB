@@ -27,6 +27,7 @@ public class MWGResolver implements KResolver {
         if (metaClassIndex == MetaClassIndex.INSTANCE.index()) {
             chunkType = KChunkTypes.OBJECT_CHUNK_INDEX;
         }*/
+
         KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK);
         cacheEntry.init(null);
         cacheEntry.setFlags(Constants.DIRTY_BIT, 0);
@@ -38,13 +39,14 @@ public class MWGResolver implements KResolver {
         //initiate time management
         KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.LONG_TREE);
         timeTree.init(null);
-        timeTree.insertKey(node.time());
         this._space.putAndMark(timeTree);
+        timeTree.insertKey(node.time());
+
         //initiate universe management
         KLongLongMap objectWorldOrder = (KLongLongMap) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
         objectWorldOrder.init(null);
-        objectWorldOrder.put(node.world(), node.time());
         this._space.putAndMark(objectWorldOrder);
+        objectWorldOrder.put(node.world(), node.time());
         //mark the global
         this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         //monitor the node object
@@ -66,23 +68,23 @@ public class MWGResolver implements KResolver {
                                     @Override
                                     public void on(KChunk theObjectUniverseOrderElement) {
                                         if (theObjectUniverseOrderElement == null) {
-                                            selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                            selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                                             callback.on(null);
                                         } else {
-                                            long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
+                                            final long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
                                             selfPointer.getOrLoadAndMark(closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                                 @Override
                                                 public void on(KChunk theObjectTimeTreeElement) {
                                                     if (theObjectTimeTreeElement == null) {
-                                                        selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
-                                                        selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                        selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, id);
+                                                        selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                                                         callback.on(null);
                                                     } else {
                                                         long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
                                                         if (closestTime == Constants.NULL_LONG) {
-                                                            selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
-                                                            selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
-                                                            selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                            selfPointer._space.unmark(closestUniverse, Constants.NULL_LONG, id);
+                                                            selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, id);
+                                                            selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                                                             callback.on(null);
                                                             return;
                                                         }
@@ -90,9 +92,9 @@ public class MWGResolver implements KResolver {
                                                             @Override
                                                             public void on(KChunk theObjectChunk) {
                                                                 if (theObjectChunk == null) {
-                                                                    selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
-                                                                    selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
-                                                                    selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                                    selfPointer._space.unmark(closestUniverse, Constants.NULL_LONG, id);
+                                                                    selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, id);
+                                                                    selfPointer._space.unmark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                                                                     callback.on(null);
                                                                 } else {
                                                                     Node newNode = new Node(world, time, id, selfPointer, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());

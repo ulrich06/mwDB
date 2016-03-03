@@ -436,7 +436,7 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
      * Flags management section
      */
     @Override
-    public long getFlags() {
+    public long flags() {
         return _flags.get();
     }
 
