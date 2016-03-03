@@ -31,6 +31,8 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("MyName2", node0.att("name").toString()));
                 Assert.assertTrue(PrimitiveHelper.equals("MyValue", node0.att("value").toString()));
 
+                System.out.println(node0);
+
                 //destroy the node explicitly without waiting GC
                 node0.free();
 

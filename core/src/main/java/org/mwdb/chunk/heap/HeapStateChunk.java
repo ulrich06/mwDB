@@ -4,6 +4,8 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KStateChunk;
+import org.mwdb.chunk.KStateChunkCallBack;
+import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -160,6 +162,7 @@ public class HeapStateChunk implements KStateChunk {
             int newIndex = (this.elementCount + this.droppedCount - 1);
             state._elementK[newIndex] = p_elementIndex;
             state._elementV[newIndex] = p_elem;
+            state._elementType[newIndex] = p_elemType;
             int currentHashedIndex = state._elementHash[hashIndex];
             if (currentHashedIndex != -1) {
                 state._elementNext[newIndex] = currentHashedIndex;
@@ -170,6 +173,7 @@ public class HeapStateChunk implements KStateChunk {
             state._elementHash[hashIndex] = newIndex;
         } else {
             state._elementV[entry] = p_elem;/*setValue*/
+            state._elementType[entry] = p_elemType;
         }
         internal_set_dirty();
     }
@@ -190,6 +194,16 @@ public class HeapStateChunk implements KStateChunk {
             }
         }
         return Constants.NULL_LONG;
+    }
+
+    @Override
+    public void each(KStateChunkCallBack callBack, KResolver resolver) {
+        InternalState currentState = this.state;
+        for (int i = 0; i < (this.elementCount + this.droppedCount); i++) {
+            if (currentState._elementV[i] != null) {
+                callBack.on(resolver.value(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
+            }
+        }
     }
 
     @Override

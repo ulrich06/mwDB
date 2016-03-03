@@ -68,7 +68,6 @@ public interface KNode {
     /**
      * Bulk KNode management
      */
-    String toJSON();
 
     /*
     boolean equals(Object other);

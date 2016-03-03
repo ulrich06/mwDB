@@ -2,10 +2,8 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
-import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KIndexStateChunk;
-import org.mwdb.chunk.KStateChunk;
-import org.mwdb.chunk.KStringLongMapCallBack;
+import org.mwdb.chunk.*;
+import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -54,6 +52,11 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
 
     @Override
     public void cloneFrom(KStateChunk origin) {
+        throw new RuntimeException("Not implemented yet!!!");
+    }
+
+    @Override
+    public void each(KStateChunkCallBack callBack, KResolver resolver) {
 
     }
 
@@ -243,7 +246,7 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
     }
 
     @Override
-    public final long get(String key) {
+    public final long getValue(String key) {
         InternalState internalState = state;
         if (state.elementDataSize == 0) {
             return Constants.NULL_LONG;
@@ -258,6 +261,11 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
             }
         }
         return Constants.NULL_LONG;
+    }
+
+    @Override
+    public String getKey(long index) {
+        return this.state.elementK[(int) index];
     }
 
     @Override
@@ -290,7 +298,7 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
             //now the object is reachable to other thread everything should be ready
             state.elementHash[index] = newIndex;
         } else {
-            if(requestedValue != Constants.NULL_LONG){
+            if (requestedValue != Constants.NULL_LONG) {
                 state.elementV[entry] = value;/*setValue*/
             }
         }

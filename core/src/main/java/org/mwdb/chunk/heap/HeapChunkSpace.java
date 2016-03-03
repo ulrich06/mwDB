@@ -132,7 +132,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             int previous;
             boolean diff = false;
             do {
-                previous = dirtyHead.get();
+                previous = dirtyHead.getValue();
                 if (previous != index) {
                     diff = true;
                 }
@@ -145,7 +145,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
         @Override
         public boolean hasNext() {
-            return this.dirtyHead.get() != -1;
+            return this.dirtyHead.getValue() != -1;
         }
 
         @Override
@@ -153,7 +153,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             int unpop;
             int unpopNext;
             do {
-                unpop = this.dirtyHead.get();
+                unpop = this.dirtyHead.getValue();
                 unpopNext = this.dirtyNext[unpop];
             } while (unpop != -1 && !this.dirtyHead.compareAndSet(unpop, unpopNext));
             if (unpop == -1) {
@@ -165,7 +165,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
         @Override
         public int size() {
-            return this.dirtySize.get();
+            return this.dirtySize.getValue();
         }
     }
 */

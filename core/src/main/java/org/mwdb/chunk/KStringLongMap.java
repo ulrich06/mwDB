@@ -4,7 +4,9 @@ public interface KStringLongMap {
 
     boolean contains(String key);
 
-    long get(String key);
+    long getValue(String key);
+
+    String getKey(long index);
 
     void put(String key, long value);
 

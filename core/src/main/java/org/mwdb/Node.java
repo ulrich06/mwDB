@@ -1,6 +1,8 @@
 package org.mwdb;
 
+import org.mwdb.chunk.KStateChunk;
 import org.mwdb.plugin.KNodeState;
+import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -114,7 +116,64 @@ public class Node implements KNode {
     }
 
     @Override
-    public String toJSON() {
-        return null;
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{\"world\":");
+        builder.append(_world);
+        builder.append(",\"time\":");
+        builder.append(_time);
+        builder.append(",\"id\":");
+        builder.append(_id);
+        KStateChunk state = (KStateChunk) this._resolver.resolveState(this, true);
+        if (state != null) {
+            builder.append(",\"data\": {");
+            final boolean[] isFirst = {true};
+            state.each(new KStateChunkCallBack() {
+                @Override
+                public void on(String attributeName, int elemType, Object elem) {
+                    if (elem != null) {
+                        if (isFirst[0]) {
+                            isFirst[0] = false;
+                        } else {
+                            builder.append(",");
+                        }
+                        builder.append("\"");
+                        builder.append(attributeName);
+                        builder.append("\": ");
+                        switch (elemType) {
+                            case KType.BOOL: {
+                                if ((boolean) elem) {
+                                    builder.append("0");
+                                } else {
+                                    builder.append("1");
+                                }
+                                break;
+                            }
+                            case KType.STRING: {
+                                builder.append("\"");
+                                builder.append(elem);
+                                builder.append("\"");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }, this._resolver);
+            builder.append("} }");
+        }
+        return builder.toString();
     }
+
+    /*
+
+    public static final int STRING = 2;
+    public static final int LONG = 3;
+    public static final int INT = 4;
+    public static final int DOUBLE = 5;
+    public static final int DOUBLE_ARRAY = 6;
+    public static final int LONG_ARRAY = 7;
+    public static final int INT_ARRAY = 8;
+
+     */
+
 }
