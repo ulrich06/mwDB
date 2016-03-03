@@ -261,7 +261,11 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
     }
 
     @Override
-    public final synchronized void put(String key, long value) {
+    public final synchronized void put(String key, long requestedValue) {
+        long value = requestedValue;
+        if (value == Constants.NULL_LONG) {
+            value = size();
+        }
         int entry = -1;
         int index = -1;
         int hash = PrimitiveHelper.stringHash(key);

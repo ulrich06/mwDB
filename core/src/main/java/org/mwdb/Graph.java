@@ -1,6 +1,7 @@
 package org.mwdb;
 
 import org.mwdb.chunk.KChunkSpace;
+import org.mwdb.chunk.KIndexStateChunk;
 import org.mwdb.chunk.KLongLongMap;
 import org.mwdb.manager.KeyCalculator;
 import org.mwdb.plugin.KResolver;
@@ -34,6 +35,7 @@ class Graph implements KGraph {
     private static final int UNIVERSE_INDEX = 0;
     private static final int OBJ_INDEX = 1;
     private static final int GLO_TREE_INDEX = 2;
+    private static final int GLO_DIC_INDEX = 3;
 
     private static final String disconnectError = "Please connect your graph, prior to any usage of it";
 
@@ -51,7 +53,7 @@ class Graph implements KGraph {
 
     @Override
     public KNode createNode(long world, long time) {
-        if(!_isConnected.get()){
+        if (!_isConnected.get()) {
             throw new RuntimeException(disconnectError);
         }
         KNode newNode = new Node(world, time, _objectKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
@@ -61,14 +63,14 @@ class Graph implements KGraph {
 
     @Override
     public void lookup(long world, long time, long id, KCallback<KNode> callback) {
-        if(!_isConnected.get()){
+        if (!_isConnected.get()) {
             throw new RuntimeException(disconnectError);
         }
     }
 
     @Override
     public void lookupAllTimes(long world, long[] times, long id, KCallback<KNode[]> callback) {
-        if(!_isConnected.get()){
+        if (!_isConnected.get()) {
             throw new RuntimeException(disconnectError);
         }
     }
@@ -98,12 +100,13 @@ class Graph implements KGraph {
                                         long[] connectionKeys = new long[]{
                                                 Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, //LastUniverseIndexFromPrefix
                                                 Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, //LastObjectIndexFromPrefix
-                                                Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG //GlobalUniverseTree
+                                                Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, //GlobalUniverseTree
+                                                Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2] //Global dictionary
                                         };
                                         selfPointer._storage.get(connectionKeys, new KCallback<String[]>() {
                                             @Override
                                             public void on(String[] strings) {
-                                                if (strings.length == 3) {
+                                                if (strings.length == 4) {
                                                     Exception detected = null;
                                                     try {
                                                         String uniIndexPayload = strings[UNIVERSE_INDEX];
@@ -114,15 +117,26 @@ class Graph implements KGraph {
                                                         if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload, "")) {
                                                             objIndexPayload = "0";
                                                         }
+
                                                         //init the global universe tree (mandatory for synchronious create)
                                                         KLongLongMap globalUniverseTree = (KLongLongMap) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.LONG_LONG_MAP);
                                                         globalUniverseTree.init(strings[GLO_TREE_INDEX]);
                                                         selfPointer._space.putAndMark(globalUniverseTree);
+
+                                                        //init the global dictionary chunk
+                                                        KIndexStateChunk globalDictionaryChunk = (KIndexStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.INDEX_STATE_CHUNK);
+                                                        globalDictionaryChunk.init(strings[GLO_DIC_INDEX]);
+                                                        selfPointer._space.putAndMark(globalDictionaryChunk);
+
                                                         //TODO call the manager
                                                         long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
                                                         long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
                                                         selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, newUniIndex);
                                                         selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, newObjIndex);
+
+                                                        //init the resolver
+                                                        selfPointer._resolver.init();
+
                                                     } catch (Exception e) {
                                                         //e.printStackTrace();
                                                         detected = e;

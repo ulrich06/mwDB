@@ -5,6 +5,9 @@ import org.mwdb.KNode;
 
 public interface KResolver {
 
+    /** Init the resolver (to enforce optimizations) */
+    void init();
+
     /**
      * Init structure for a newly created node
      */

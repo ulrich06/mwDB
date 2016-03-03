@@ -23,6 +23,13 @@ public class MWGResolver implements KResolver {
         this._tracker = p_tracker;
     }
 
+    private KIndexStateChunk dictionary;
+
+    @Override
+    public void init() {
+        dictionary = (KIndexStateChunk) this._space.getAndMark(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
+    }
+
     @Override
     public void initNode(KNode node) {
         /*
@@ -455,13 +462,18 @@ public class MWGResolver implements KResolver {
      */
     @Override
     public long key(String name) {
-        return 0;
+        if (this.dictionary.contains(name)) {
+            return this.dictionary.get(name);
+        } else {
+            this.dictionary.put(name, Constants.NULL_LONG);
+            return this.dictionary.get(name);
+        }
     }
 
     @Override
     public String value(long key) {
+        //Need inverted dictionary, let's see if we need it!
         return null;
     }
-
-
+    
 }

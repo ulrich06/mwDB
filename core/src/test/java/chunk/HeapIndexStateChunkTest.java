@@ -1,0 +1,28 @@
+package chunk;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mwdb.chunk.KIndexStateChunk;
+import org.mwdb.chunk.heap.HeapIndexStateChunk;
+
+public class HeapIndexStateChunkTest {
+
+    @Test
+    public void testHeap() {
+        test(new HeapIndexStateChunk(-1, -1, -1, null));
+    }
+
+    private void test(KIndexStateChunk chunk) {
+
+        Assert.assertTrue(!chunk.contains("name"));
+        chunk.put("name",0);
+        Assert.assertTrue(chunk.contains("name"));
+
+        Assert.assertTrue(!chunk.contains("value"));
+        chunk.put("value",1);
+        Assert.assertTrue(chunk.contains("value"));
+
+
+    }
+
+}
