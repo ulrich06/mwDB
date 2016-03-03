@@ -265,6 +265,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
+    public void unmarkChunk(KChunk chunk) {
+        //TODO
+    }
+
+    @Override
     public KChunk create(long p_world, long p_time, long p_id, short p_type) {
         switch (p_type) {
             case Constants.STATE_CHUNK:

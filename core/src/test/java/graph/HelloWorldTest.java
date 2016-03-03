@@ -1,10 +1,7 @@
 package graph;
 
 import org.junit.Test;
-import org.mwdb.GraphBuilder;
-import org.mwdb.KCallback;
-import org.mwdb.KGraph;
-import org.mwdb.KNode;
+import org.mwdb.*;
 
 public class HelloWorldTest {
 
@@ -16,7 +13,7 @@ public class HelloWorldTest {
             public void on(Object o) {
                 KNode node0 = graph.createNode(0, 0);
                 //do something with the node
-                node0.attSet("name", "MyValue");
+                node0.attSet("name", KType.STRING, "MyValue");
 
                 System.out.println(node0.att("name"));
 

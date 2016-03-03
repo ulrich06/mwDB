@@ -1,5 +1,6 @@
 package org.mwdb;
 
+import org.mwdb.plugin.KNodeState;
 import org.mwdb.plugin.KResolver;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,11 +43,15 @@ public class Node implements KNode {
 
     @Override
     public Object att(String attributeName) {
+        KNodeState resolved = this._resolver.resolveState(this, true);
+        if (resolved != null) {
+
+        }
         return null;
     }
 
     @Override
-    public void attSet(String attributeName, Object value) {
+    public void attSet(String attributeName, int attributeType, Object attributeValue) {
 
     }
 

@@ -4,6 +4,7 @@ package org.mwdb.chunk.heap;
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KIndexStateChunk;
+import org.mwdb.chunk.KStateChunk;
 import org.mwdb.chunk.KStringLongMapCallBack;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -49,6 +50,11 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
     public Object get(long index) {
         //noop
         return null;
+    }
+
+    @Override
+    public void cloneFrom(KStateChunk origin) {
+
     }
 
     final class InternalState {

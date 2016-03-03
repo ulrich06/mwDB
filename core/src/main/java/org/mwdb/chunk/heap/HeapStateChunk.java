@@ -192,45 +192,16 @@ public class HeapStateChunk implements KStateChunk {
         return Constants.NULL_LONG;
     }
 
-
-    /*
     @Override
-    public KObjectChunk clone(long p_universe, long p_time, long p_obj, KMetaModel p_metaClass) {
-        HeapObjectIndexChunk cloned = new HeapObjectIndexChunk(p_universe, p_time, p_obj, _space);
-        cloned._metaClassIndex = this._metaClassIndex;
-        cloned.state = this.state.clone();
-        cloned.elementCount = this.elementCount;
-        cloned.droppedCount = this.droppedCount;
-        cloned.threshold = this.threshold;
-        return cloned;
+    public void cloneFrom(KStateChunk origin) {
+        //brutal cast, but mixed implementation is not allowed per space
+        HeapStateChunk casted = (HeapStateChunk) origin;
+        casted.state = this.state.clone();
+        casted.elementCount = this.elementCount;
+        casted.droppedCount = this.droppedCount;
+        casted.threshold = this.threshold;
+        setFlags(Constants.DIRTY_BIT, 0);
     }
-
-    @Override
-    public int metaClassIndex() {
-        return this._metaClassIndex;
-    }
-
-    @Override
-    public String toJSON(KMetaModel metaModel) {
-        return null;
-    }*/
-
-
-    /*
-    @Override
-    public final void clear() {
-        if (elementCount > 0) {
-            this.elementCount = 0;
-            this.droppedCount = 0;
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new Object[initialCapacity], new int[initialCapacity], new int[initialCapacity]);
-            for (int i = 0; i < initialCapacity; i++) {
-                newstate.elementNext[i] = -1;
-                newstate.elementHash[i] = -1;
-            }
-            this.state = newstate;
-            this.threshold = (int) (newstate.elementDataSize * loadFactor);
-        }
-    }*/
 
     protected final void rehashCapacity(int capacity) {
         int length = (capacity == 0 ? 1 : capacity << 1);

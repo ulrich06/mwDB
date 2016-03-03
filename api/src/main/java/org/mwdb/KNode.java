@@ -16,9 +16,9 @@ public interface KNode {
      */
     Object att(String attributeName);
 
-    void attSet(String attributeName, Object value);
+    void attSet(String attributeName, int attributeType, Object attributeValue);
 
-    void attRemove(String attributeName, Object value);
+    void attRemove(String attributeName, Object attributeValue);
 
     /**
      * Relationships Management

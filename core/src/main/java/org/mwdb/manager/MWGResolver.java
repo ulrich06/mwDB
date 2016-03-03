@@ -381,14 +381,19 @@ public class MWGResolver implements KResolver {
                     } while (!castedNode._previousResolveds.compareAndSet(previousResolveds, current));
                     if (diff) {
                         KStateChunk currentEntry = (KStateChunk) this._space.getAndMark(previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+                        //clone the chunk
+                        KStateChunk clonedChunk = (KStateChunk) this._space.create(nodeWorld, nodeTime, nodeId, Constants.STATE_CHUNK);
+                        clonedChunk.cloneFrom(currentEntry);
+                        this._space.putAndMark(clonedChunk);
+                        this._space.declareDirty(clonedChunk);
 
-
-                        KStateChunk clonedChunk = _spaceManager.cloneAndMark(currentEntry, universe, time, uuid, _manager.model().metaModel());
                         if (resolvedWorld == nodeWorld) {
                             objectTimeTree.insertKey(nodeTime);
                         } else {
                             KLongTree newTemporalTree = (KLongTree) this._space.create(nodeWorld, Constants.NULL_LONG, nodeId, Constants.LONG_TREE);
+                            this._space.putAndMark(newTemporalTree);
                             newTemporalTree.insertKey(nodeTime);
+                            //unmark the previous time tree, now we have switched to the new one
                             this._space.unmarkChunk(objectTimeTree);
                             objectUniverseMap.put(nodeWorld, nodeTime);
                         }
