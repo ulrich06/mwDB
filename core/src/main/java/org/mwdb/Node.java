@@ -17,6 +17,8 @@ public class Node implements KNode {
 
     public final AtomicReference<long[]> _previousResolveds;
 
+    private static final String cacheMissError = "Cache miss error";
+
     public Node(long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
         this._world = p_world;
         this._time = p_time;
@@ -45,19 +47,24 @@ public class Node implements KNode {
     public Object att(String attributeName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-
+            return resolved.get(this._resolver.key(attributeName));
         }
         return null;
     }
 
     @Override
     public void attSet(String attributeName, int attributeType, Object attributeValue) {
-
+        KNodeState preciseState = this._resolver.resolveState(this, false);
+        if (preciseState != null) {
+            preciseState.set(this._resolver.key(attributeName), attributeType, attributeValue);
+        } else {
+            throw new RuntimeException(cacheMissError);
+        }
     }
 
     @Override
     public void attRemove(String attributeName, Object value) {
-
+        attSet(attributeName, -1, null);
     }
 
     @Override
@@ -92,12 +99,13 @@ public class Node implements KNode {
 
     @Override
     public long timeDephasing() {
+        //TODO
         return 0;
     }
 
     @Override
     public void undephase() {
-
+        //TODO
     }
 
     @Override

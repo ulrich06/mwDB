@@ -450,5 +450,18 @@ public class MWGResolver implements KResolver {
         }
     }
 
+    /**
+     * Dictionary methods
+     */
+    @Override
+    public long key(String name) {
+        return 0;
+    }
+
+    @Override
+    public String value(long key) {
+        return null;
+    }
+
 
 }

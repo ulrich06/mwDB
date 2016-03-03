@@ -25,4 +25,11 @@ public interface KResolver {
      */
     KNodeState resolveState(KNode node, boolean allowDephasing);
 
+    /**
+     * Internal access to the dictionary
+     */
+    long key(String name);
+
+    String value(long key);
+
 }
