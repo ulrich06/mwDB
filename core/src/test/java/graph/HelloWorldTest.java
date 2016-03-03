@@ -49,6 +49,12 @@ public class HelloWorldTest {
                 node1.refAdd("children", node2);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1,3]}}", node1.toString()));
 
+                long[] refValuesThree = node1.refValues("children");
+                Assert.assertTrue(refValuesThree.length == 3);
+                Assert.assertTrue(refValuesThree[0] == 1);
+                Assert.assertTrue(refValuesThree[1] == 1);
+                Assert.assertTrue(refValuesThree[2] == 3);
+                
                 node1.refRemove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
 

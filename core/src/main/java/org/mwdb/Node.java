@@ -157,7 +157,7 @@ public class Node implements KNode {
 
     @Override
     public void undephase() {
-        //TODO
+        this._resolver.resolveState(this, false);
     }
 
     @Override
