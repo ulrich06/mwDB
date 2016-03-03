@@ -48,7 +48,4 @@ public interface KChunk {
      */
     short chunkType();
 
-    /*
-    KChunkSpace space();
-    */
 }
