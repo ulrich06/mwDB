@@ -44,10 +44,9 @@ public class Constants {
     public static final short DIRTY_BIT_INDEX = 0;
 
     public static final int DIRTY_BIT = 1 << DIRTY_BIT_INDEX;
-
-    public static final short REMOVED_BIT_INDEX = 1;
-
-    public static final int REMOVED_BIT = 1 << REMOVED_BIT_INDEX;
+    
+    //public static final short REMOVED_BIT_INDEX = 1;
+    //public static final int REMOVED_BIT = 1 << REMOVED_BIT_INDEX;
 
     /**
      * ChunkTypes
@@ -73,6 +72,8 @@ public class Constants {
      * Keys constants
      */
     public static final int KEYS_SIZE = 3;
+
+    public static final int PREFIX_TO_SAVE_SIZE = 2;
 
     public static final long[] PREFIX_KEY = new long[]{Constants.END_OF_TIME, Constants.NULL_LONG, Constants.NULL_LONG};
 

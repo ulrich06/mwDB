@@ -1,8 +1,6 @@
 package org.mwdb;
 
-import org.mwdb.chunk.KChunkSpace;
-import org.mwdb.chunk.KIndexStateChunk;
-import org.mwdb.chunk.KLongLongMap;
+import org.mwdb.chunk.*;
 import org.mwdb.manager.KeyCalculator;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
@@ -44,6 +42,7 @@ public class Graph implements KGraph {
         //subElements set
         this._storage = p_storage;
         this._space = p_space;
+        this._space.setGraph(this);
         this._scheduler = p_scheduler;
         this._resolver = p_resolver;
         //variables init
@@ -77,7 +76,8 @@ public class Graph implements KGraph {
 
     @Override
     public void save(KCallback callback) {
-        //TODO
+        KChunkIterator dirtyIterator = this._space.detachDirties();
+        saveDirtyList(dirtyIterator, callback);
     }
 
     @Override
@@ -211,6 +211,57 @@ public class Graph implements KGraph {
             if (PrimitiveHelper.isDefined(callback)) {
                 callback.on(null);
             }
+        }
+    }
+
+    private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Throwable> callback) {
+        if (dirtyIterator.size() == 0) {
+            if (PrimitiveHelper.isDefined(callback)) {
+                callback.on(null);
+            }
+        } else {
+            int sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
+            long[] toSaveKeys = new long[sizeToSaveKeys];
+            int sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
+            String[] toSaveValues = new String[sizeToSaveValues];
+            int i = 0;
+            while (dirtyIterator.hasNext()) {
+                KChunk loopChunk = dirtyIterator.next();
+                if (loopChunk != null && (loopChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
+                    toSaveKeys[i * Constants.KEYS_SIZE] = loopChunk.world();
+                    toSaveKeys[i * Constants.KEYS_SIZE + 1] = loopChunk.time();
+                    toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
+                    try {
+                        toSaveValues[i] = loopChunk.serialize();
+                        loopChunk.setFlags(0, Constants.DIRTY_BIT);
+                        i++;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            toSaveKeys[i * Constants.KEYS_SIZE] = Constants.BEGINNING_OF_TIME;
+            toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
+            toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._objectKeyCalculator.prefix();
+            toSaveValues[i] = "" + this._objectKeyCalculator.lastComputedIndex();
+            i++;
+            toSaveKeys[i * Constants.KEYS_SIZE] = Constants.END_OF_TIME;
+            toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
+            toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._universeKeyCalculator.prefix();
+            toSaveValues[i] = "" + this._universeKeyCalculator.lastComputedIndex();
+
+            //shrink in case of i != full size
+            if (i != sizeToSaveValues - 1) {
+                //shrinkValue
+                String[] toSaveValuesShrinked = new String[i + 1];
+                System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
+                toSaveValues = toSaveValuesShrinked;
+
+                long[] toSaveKeysShrinked = new long[(i + 1) * Constants.KEYS_SIZE];
+                System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * Constants.KEYS_SIZE);
+                toSaveKeys = toSaveKeysShrinked;
+            }
+            this._storage.put(toSaveKeys, toSaveValues, callback, -1);
         }
     }
 

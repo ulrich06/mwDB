@@ -1,5 +1,7 @@
 package org.mwdb.chunk;
 
+import org.mwdb.KGraph;
+
 public interface KChunkSpace {
 
     /**
@@ -31,6 +33,11 @@ public interface KChunkSpace {
      * Declare the chunk as dirty
      */
     void declareDirty(KChunk elem);
+
+    /**
+     * Set current working space
+     */
+    void setGraph(KGraph graph);
 
 
     //void remove(long universe, long time, long obj);

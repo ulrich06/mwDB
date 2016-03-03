@@ -88,7 +88,8 @@ public class HelloWorldTest {
                 node2.free();
 
 
-                System.out.println(((Graph)graph).space());
+                System.out.println(((Graph) graph).space());
+
 
             }
         });

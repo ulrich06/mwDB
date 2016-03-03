@@ -6,6 +6,7 @@ import org.mwdb.plugin.KNodeState;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.PrimitiveHelper;
 
 public class MWGResolver implements KResolver {
 

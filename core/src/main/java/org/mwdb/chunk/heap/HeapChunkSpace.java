@@ -2,6 +2,7 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -22,6 +23,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     private final AtomicInteger _elementCount;
 
     private KStack _lru;
+
+    private KGraph _graph;
 
     /**
      * HashMap variables
@@ -47,6 +50,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     public int collisions() {
         return this._collisions.get();
+    }
+
+    @Override
+    public void setGraph(KGraph p_graph) {
+        this._graph = p_graph;
     }
 
     final class InternalDirtyStateList implements KChunkIterator {
@@ -111,64 +119,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             return this._nextCounter.get();
         }
     }
-
-/*
-    final class InternalDirtyState implements KChunkIterator {
-
-        private AtomicInteger dirtyHead = new AtomicInteger(-1);
-
-        private AtomicInteger dirtySize = new AtomicInteger(0);
-
-        private int[] dirtyNext;
-
-        private PressHeapChunkSpace _parent;
-
-        public InternalDirtyState(int p_maxEntries, PressHeapChunkSpace p_parent) {
-            dirtyNext = new int[p_maxEntries];
-            this._parent = p_parent;
-        }
-
-        public void declareDirty(int index) {
-            int previous;
-            boolean diff = false;
-            do {
-                previous = dirtyHead.getValue();
-                if (previous != index) {
-                    diff = true;
-                }
-            } while (!dirtyHead.compareAndSet(previous, index));
-            if (diff) {
-                this.dirtyNext[index] = previous;
-                dirtySize.incrementAndGet();
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.dirtyHead.getValue() != -1;
-        }
-
-        @Override
-        public KChunk next() {
-            int unpop;
-            int unpopNext;
-            do {
-                unpop = this.dirtyHead.getValue();
-                unpopNext = this.dirtyNext[unpop];
-            } while (unpop != -1 && !this.dirtyHead.compareAndSet(unpop, unpopNext));
-            if (unpop == -1) {
-                return null;
-            } else {
-                return this._parent.values()[unpop];
-            }
-        }
-
-        @Override
-        public int size() {
-            return this.dirtySize.getValue();
-        }
-    }
-*/
 
     private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
@@ -486,28 +436,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     public void free() {
         //TODO
     }
-
-    /*
-    private void saveChunk(KChunk chunk, KMetaModel p_metaModel, KCallback<Throwable> result) {
-        if (this._manager != null) {
-            KContentDeliveryDriver cdn = this._manager.cdn();
-            if (cdn != null) {
-                long[] key = new long[3];
-                key[0] = chunk.universe();
-                key[1] = chunk.time();
-                key[2] = chunk.obj();
-                String[] payload = new String[1];
-                payload[0] = chunk.serialize(p_metaModel);
-                cdn.put(key, payload, new KCallback<Throwable>() {
-                    @Override
-                    public void on(Throwable throwable) {
-                        chunk.setFlags(0, KChunkFlags.DIRTY_BIT);
-                        result.on(throwable);
-                    }
-                }, -1);
-            }
-        }
-    }*/
 
     @Override
     public String toString() {

@@ -66,13 +66,12 @@ public class GraphBuilder {
         return this;
     }
 
-
     public KGraph buildGraph() {
         KStorage storagePlugin = storage();
-        KChunkSpace chunkSpace = space();
-        KNodeTracker nodeTracker = tracker();
-        KScheduler scheduler = scheduler();
-        return new Graph(storagePlugin, chunkSpace, scheduler, new MWGResolver(storagePlugin, chunkSpace, nodeTracker, scheduler));
+        KChunkSpace spacePlugin = space();
+        KNodeTracker nodeTrackerPlugin = tracker();
+        KScheduler schedulerPlugin = scheduler();
+        return new Graph(storagePlugin, spacePlugin, schedulerPlugin, new MWGResolver(storagePlugin, spacePlugin, nodeTrackerPlugin, schedulerPlugin));
     }
 
 }
