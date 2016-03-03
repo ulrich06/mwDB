@@ -111,7 +111,32 @@ public class Node implements KNode {
 
     @Override
     public void refRemove(String relationName, KNode relatedNode) {
-
+        KNodeState preciseState = this._resolver.resolveState(this, false);
+        long relationKey = this._resolver.key(relationName);
+        if (preciseState != null) {
+            long[] previous = (long[]) preciseState.get(relationKey);
+            if (previous != null) {
+                int indexToRemove = -1;
+                for (int i = 0; i < previous.length; i++) {
+                    if (previous[i] == relatedNode.id()) {
+                        indexToRemove = i;
+                        break;
+                    }
+                }
+                if (indexToRemove != -1) {
+                    if ((previous.length - 1) == 0) {
+                        preciseState.set(relationKey, KType.LONG_ARRAY, null);
+                    } else {
+                        long[] newArray = new long[previous.length - 1];
+                        System.arraycopy(previous, 0, newArray, 0, indexToRemove);
+                        System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
+                        preciseState.set(relationKey, KType.LONG_ARRAY, newArray);
+                    }
+                }
+            }
+        } else {
+            throw new RuntimeException(cacheMissError);
+        }
     }
 
     @Override
