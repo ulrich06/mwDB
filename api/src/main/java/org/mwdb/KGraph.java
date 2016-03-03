@@ -1,5 +1,7 @@
 package org.mwdb;
 
+import org.mwdb.plugin.KStorage;
+
 public interface KGraph {
 
     /**
@@ -23,7 +25,9 @@ public interface KGraph {
 
     void disconnect(KCallback callback);
 
-    /** Utilities */
+    /**
+     * Utilities
+     */
     KDeferCounter counter(int expectedCountCalls);
 
 }

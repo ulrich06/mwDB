@@ -12,7 +12,7 @@ import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class Graph implements KGraph {
+public class Graph implements KGraph {
 
     private final KStorage _storage;
 
@@ -39,7 +39,6 @@ class Graph implements KGraph {
     private static final int GLO_DIC_INDEX = 3;
 
     private static final String disconnectError = "Please connect your graph, prior to any usage of it";
-
 
     protected Graph(KStorage p_storage, KChunkSpace p_space, KScheduler p_scheduler, KResolver p_resolver) {
         //subElements set
@@ -218,6 +217,14 @@ class Graph implements KGraph {
     @Override
     public KDeferCounter counter(int expectedCountCalls) {
         return new DeferCounter(expectedCountCalls);
+    }
+
+    public KStorage storage() {
+        return this._storage;
+    }
+
+    public KChunkSpace space() {
+        return this._space;
     }
 
 }

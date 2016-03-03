@@ -62,9 +62,13 @@ public class HelloWorldTest {
                         Assert.assertTrue(resolvedNodes[0].id() == 1);
                         Assert.assertTrue(resolvedNodes[1].id() == 1);
                         Assert.assertTrue(resolvedNodes[2].id() == 3);
+
+                        resolvedNodes[0].free();
+                        resolvedNodes[1].free();
+                        resolvedNodes[2].free();
+
                     }
                 });
-
 
                 node1.refRemove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
@@ -78,13 +82,13 @@ public class HelloWorldTest {
                 long[] refValuesNull = node1.refValues("children");
                 Assert.assertTrue(refValuesNull == null);
 
-
-//                System.out.println(node1);
-
                 //destroy the node explicitly without waiting GC
                 node0.free();
                 node1.free();
                 node2.free();
+
+
+                System.out.println(((Graph)graph).space());
 
             }
         });
