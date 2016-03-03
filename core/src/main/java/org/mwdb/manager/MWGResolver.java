@@ -392,6 +392,7 @@ public class MWGResolver implements KResolver {
                         KStateChunk clonedChunk = (KStateChunk) this._space.create(nodeWorld, nodeTime, nodeId, Constants.STATE_CHUNK);
                         clonedChunk.cloneFrom(currentEntry);
                         this._space.putAndMark(clonedChunk);
+                        clonedChunk.setFlags(Constants.DIRTY_BIT, 0);
                         this._space.declareDirty(clonedChunk);
 
                         if (resolvedWorld == nodeWorld) {
@@ -463,7 +464,7 @@ public class MWGResolver implements KResolver {
     @Override
     public long key(String name) {
         long encodedKey = this.dictionary.get(name);
-        if(encodedKey == Constants.NULL_LONG){
+        if (encodedKey == Constants.NULL_LONG) {
             this.dictionary.put(name, Constants.NULL_LONG);
             encodedKey = this.dictionary.get(name);
         }
