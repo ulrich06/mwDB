@@ -5,7 +5,9 @@ import org.mwdb.KNode;
 
 public interface KResolver {
 
-    /** Init the resolver (to enforce optimizations) */
+    /**
+     * Init the resolver (to enforce optimizations)
+     */
     void init();
 
     /**
@@ -21,7 +23,12 @@ public interface KResolver {
     /**
      * Create a task to lookup a particular node
      */
-    KTask lookup(long world, long time, long id, KCallback<KNode> callback);
+    KCallback lookupTask(long world, long time, long id, KCallback<KNode> callback);
+
+    /**
+     * Create and scheduler a task to lookup a particular node
+     */
+    void lookup(long world, long time, long id, KCallback<KNode> callback);
 
     /**
      * Resolve the node state according to the resolution function, the second parameter define if this state should be aligned or not with the node

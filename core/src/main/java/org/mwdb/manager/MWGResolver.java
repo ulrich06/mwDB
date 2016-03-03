@@ -4,8 +4,8 @@ import org.mwdb.*;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KNodeState;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
-import org.mwdb.plugin.KTask;
 
 public class MWGResolver implements KResolver {
 
@@ -15,12 +15,15 @@ public class MWGResolver implements KResolver {
 
     private final KNodeTracker _tracker;
 
+    private final KScheduler _scheduler;
+
     private static final String deadNodeError = "This Node has been tagged destroyed, please don't use it anymore!";
 
-    public MWGResolver(KStorage p_storage, KChunkSpace p_space, KNodeTracker p_tracker) {
+    public MWGResolver(KStorage p_storage, KChunkSpace p_space, KNodeTracker p_tracker, KScheduler p_scheduler) {
         this._storage = p_storage;
         this._space = p_space;
         this._tracker = p_tracker;
+        this._scheduler = p_scheduler;
     }
 
     private KIndexStateChunk dictionary;
@@ -80,11 +83,16 @@ public class MWGResolver implements KResolver {
     }
 
     @Override
-    public KTask lookup(final long world, final long time, final long id, final KCallback<KNode> callback) {
+    public void lookup(long world, long time, long id, KCallback<KNode> callback) {
+        this._scheduler.dispatch(lookupTask(world, time, id, callback));
+    }
+
+    @Override
+    public KCallback lookupTask(final long world, final long time, final long id, final KCallback<KNode> callback) {
         final MWGResolver selfPointer = this;
-        return new KTask() {
+        return new KCallback() {
             @Override
-            public void run() {
+            public void on(Object o) {
                 try {
                     selfPointer.getOrLoadAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new KCallback<KChunk>() {
                         @Override

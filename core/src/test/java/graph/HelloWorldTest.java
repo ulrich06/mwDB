@@ -3,13 +3,14 @@ package graph;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class HelloWorldTest {
 
     @Test
     public void mwHeapTest() {
-        test(GraphBuilder.builder().buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph());
     }
 
     private void test(KGraph graph) {
@@ -54,7 +55,17 @@ public class HelloWorldTest {
                 Assert.assertTrue(refValuesThree[0] == 1);
                 Assert.assertTrue(refValuesThree[1] == 1);
                 Assert.assertTrue(refValuesThree[2] == 3);
-                
+
+                node1.ref("children", new KCallback<KNode[]>() {
+                    @Override
+                    public void on(KNode[] resolvedNodes) {
+                        Assert.assertTrue(resolvedNodes[0].id() == 1);
+                        Assert.assertTrue(resolvedNodes[1].id() == 1);
+                        Assert.assertTrue(resolvedNodes[2].id() == 3);
+                    }
+                });
+
+
                 node1.refRemove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
 
@@ -66,6 +77,7 @@ public class HelloWorldTest {
 
                 long[] refValuesNull = node1.refValues("children");
                 Assert.assertTrue(refValuesNull == null);
+
 
 //                System.out.println(node1);
 

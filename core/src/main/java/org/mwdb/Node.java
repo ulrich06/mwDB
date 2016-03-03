@@ -177,8 +177,12 @@ public class Node implements KNode {
 
     @Override
     public long timeDephasing() {
-        //TODO
-        return 0;
+        KStateChunk state = (KStateChunk) this._resolver.resolveState(this, true);
+        if (state != null) {
+            return (this._time - state.time());
+        } else {
+            throw new RuntimeException(cacheMissError);
+        }
     }
 
     @Override
