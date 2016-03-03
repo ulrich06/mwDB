@@ -2,6 +2,7 @@ package chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwdb.Constants;
 import org.mwdb.chunk.KIndexStateChunk;
 import org.mwdb.chunk.heap.HeapIndexStateChunk;
 
@@ -15,6 +16,7 @@ public class IndexStateChunkTest {
     private void test(KIndexStateChunk chunk) {
 
         Assert.assertTrue(!chunk.contains("name"));
+        Assert.assertTrue(chunk.get("name") == Constants.NULL_LONG);
         chunk.put("name", 0);
         Assert.assertTrue(chunk.contains("name"));
 

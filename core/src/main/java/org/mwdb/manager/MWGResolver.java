@@ -462,12 +462,12 @@ public class MWGResolver implements KResolver {
      */
     @Override
     public long key(String name) {
-        if (this.dictionary.contains(name)) {
-            return this.dictionary.get(name);
-        } else {
+        long encodedKey = this.dictionary.get(name);
+        if(encodedKey == Constants.NULL_LONG){
             this.dictionary.put(name, Constants.NULL_LONG);
-            return this.dictionary.get(name);
+            encodedKey = this.dictionary.get(name);
         }
+        return encodedKey;
     }
 
     @Override
@@ -475,5 +475,5 @@ public class MWGResolver implements KResolver {
         //Need inverted dictionary, let's see if we need it!
         return null;
     }
-    
+
 }
