@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mwdb.chunk.KIndexStateChunk;
 import org.mwdb.chunk.heap.HeapIndexStateChunk;
 
-public class HeapIndexStateChunkTest {
+public class IndexStateChunkTest {
 
     @Test
     public void testHeap() {
@@ -15,13 +15,15 @@ public class HeapIndexStateChunkTest {
     private void test(KIndexStateChunk chunk) {
 
         Assert.assertTrue(!chunk.contains("name"));
-        chunk.put("name",0);
+        chunk.put("name", 0);
         Assert.assertTrue(chunk.contains("name"));
 
         Assert.assertTrue(!chunk.contains("value"));
-        chunk.put("value",1);
+        chunk.put("value", 1);
         Assert.assertTrue(chunk.contains("value"));
 
+        Assert.assertTrue(0 == chunk.get("name"));
+        Assert.assertTrue(1 == chunk.get("value"));
 
     }
 

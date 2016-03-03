@@ -234,7 +234,7 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
-            if (key == internalState.elementK[m * 2] /* getKey */) {
+            if (PrimitiveHelper.equals(key, internalState.elementK[m]) /* getKey */) {
                 return true;
             }
             m = internalState.elementNext[m];
@@ -290,7 +290,9 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
             //now the object is reachable to other thread everything should be ready
             state.elementHash[index] = newIndex;
         } else {
-            state.elementV[entry] = value;/*setValue*/
+            if(requestedValue != Constants.NULL_LONG){
+                state.elementV[entry] = value;/*setValue*/
+            }
         }
         internal_set_dirty();
     }
