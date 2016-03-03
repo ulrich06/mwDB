@@ -252,7 +252,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 KChunk foundChunk = this._values[m];
                 if (foundChunk.unmark() == 0) {
                     //check if object is dirty
-                    if ((foundChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
+                    if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                         //declare available for recycling
                         this._lru.reenqueue(m);
                     }
@@ -266,7 +266,24 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmarkChunk(KChunk chunk) {
-        //TODO
+        int marks = chunk.unmark();
+        if (marks == 0) {
+            if ((chunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                long nodeWorld = chunk.world();
+                long nodeTime = chunk.time();
+                long nodeId = chunk.id();
+                int index = PrimitiveHelper.tripleHash(nodeWorld, nodeTime, nodeId, this._maxEntries);
+                int m = this.elementHash[index];
+                while (m != -1) {
+                    if (nodeWorld == this.elementK3a[m] && nodeTime == this.elementK3b[m] && nodeId == elementK3c[m]) {
+                        this._lru.reenqueue(m);
+                        return;
+                    } else {
+                        m = this.elementNext[m];
+                    }
+                }
+            }
+        }
     }
 
     @Override

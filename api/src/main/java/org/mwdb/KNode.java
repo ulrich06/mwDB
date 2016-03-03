@@ -25,7 +25,7 @@ public interface KNode {
      */
     void ref(String relationName, KCallback<KNode[]> callback);
 
-    void refValues(String relationName, long[] ids);
+    long[] refValues(String relationName);
 
     void refAdd(String relationName, KNode relatedNode);
 

@@ -71,17 +71,42 @@ public class Node implements KNode {
 
     @Override
     public void ref(String relationName, KCallback<KNode[]> callback) {
-
+        KNodeState resolved = this._resolver.resolveState(this, true);
+        if (resolved != null) {
+            long[] flatRefs = (long[]) resolved.get(this._resolver.key(relationName));
+            //this._resolver.lookup()
+        }
     }
 
     @Override
-    public void refValues(String relationName, long[] ids) {
-
+    public long[] refValues(String relationName) {
+        KNodeState resolved = this._resolver.resolveState(this, true);
+        if (resolved != null) {
+            return (long[]) resolved.get(this._resolver.key(relationName));
+        } else {
+            throw new RuntimeException(cacheMissError);
+        }
     }
 
     @Override
     public void refAdd(String relationName, KNode relatedNode) {
-
+        KNodeState preciseState = this._resolver.resolveState(this, false);
+        long relationKey = this._resolver.key(relationName);
+        if (preciseState != null) {
+            long[] previous = (long[]) preciseState.get(relationKey);
+            if (previous == null) {
+                previous = new long[1];
+                previous[0] = relatedNode.id();
+            } else {
+                long[] incArray = new long[previous.length + 1];
+                System.arraycopy(previous, 0, incArray, 0, previous.length);
+                incArray[previous.length] = relatedNode.id();
+                previous = incArray;
+            }
+            preciseState.set(relationKey, KType.LONG_ARRAY, previous);
+        } else {
+            throw new RuntimeException(cacheMissError);
+        }
     }
 
     @Override
@@ -209,7 +234,7 @@ public class Node implements KNode {
                     }
                 }
             }, this._resolver);
-            builder.append("} }");
+            builder.append("}}");
         }
         return builder.toString();
     }

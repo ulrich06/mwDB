@@ -182,7 +182,7 @@ public class HeapStateChunk implements KStateChunk {
     public Object get(long p_elementIndex) {
         InternalState internalState = state;
         if (state._elementDataSize == 0) {
-            return Constants.NULL_LONG;
+            return null;
         }
         int hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
         int m = internalState._elementHash[hashIndex];
@@ -193,7 +193,7 @@ public class HeapStateChunk implements KStateChunk {
                 m = internalState._elementNext[m];
             }
         }
-        return Constants.NULL_LONG;
+        return null;
     }
 
     @Override
