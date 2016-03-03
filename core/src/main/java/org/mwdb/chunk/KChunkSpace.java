@@ -23,6 +23,11 @@ public interface KChunkSpace {
     void unmark(long world, long time, long id);
 
     /**
+     * UnMark chunk
+     */
+    void unmarkChunk(KChunk chunk);
+
+    /**
      * Declare the chunk as dirty
      */
     void declareDirty(KChunk elem);

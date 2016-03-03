@@ -14,7 +14,7 @@ public class Node implements KNode {
 
     private final KResolver _resolver;
 
-    private final AtomicReference<long[]> _previousResolveds;
+    public final AtomicReference<long[]> _previousResolveds;
 
     public Node(long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
         this._world = p_world;
@@ -82,16 +82,7 @@ public class Node implements KNode {
 
     @Override
     public void free() {
-        long[] previous;
-        do {
-            previous = this._previousResolveds.get();
-        } while (!_previousResolveds.compareAndSet(previous, null));
-        if (previous != null) {
-            //this._graph.unmark(previous[Constants.PREVIOUS_RESOLVED_UNIVERSE_INDEX], previous[Constants.PREVIOUS_RESOLVED_TIME_INDEX], _id);//FREE OBJECT CHUNK
-            //this._graph.unmark(previous[Constants.PREVIOUS_RESOLVED_UNIVERSE_INDEX], Constants.NULL_LONG, _id);//FREE TIME TREE
-            //this._graph.unmark(Constants.NULL_LONG, Constants.NULL_LONG, _id); //FREE OBJECT UNIVERSE MAP
-            //this._graph.unmark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG); //FREE GLOBAL UNIVERSE MAP
-        }
+        this._resolver.freeNode(this);
     }
 
     @Override

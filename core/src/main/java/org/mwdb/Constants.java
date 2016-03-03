@@ -63,10 +63,10 @@ public class Constants {
     /**
      * Node constants
      **/
-    public static final int PREVIOUS_RESOLVED_UNIVERSE_INDEX = 0;
+    public static final int PREVIOUS_RESOLVED_WORLD_INDEX = 0;
     public static final int PREVIOUS_RESOLVED_TIME_INDEX = 1;
 
-    public static final int PREVIOUS_RESOLVED_UNIVERSE_MAGIC = 2;
+    public static final int PREVIOUS_RESOLVED_WORLD_MAGIC = 2;
     public static final int PREVIOUS_RESOLVED_TIME_MAGIC = 3;
 
     /**
