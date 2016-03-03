@@ -4,6 +4,8 @@ import org.mwdb.chunk.KStateChunk;
 import org.mwdb.plugin.KNodeState;
 import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.utility.DeferCounter;
+import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,10 +73,34 @@ public class Node implements KNode {
 
     @Override
     public void ref(String relationName, KCallback<KNode[]> callback) {
-        KNodeState resolved = this._resolver.resolveState(this, true);
+        if (!PrimitiveHelper.isDefined(callback)) {
+            return;
+        }
+        final KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            long[] flatRefs = (long[]) resolved.get(this._resolver.key(relationName));
-            //this._resolver.lookup()
+            final long[] flatRefs = (long[]) resolved.get(this._resolver.key(relationName));
+            if (flatRefs == null || flatRefs.length == 0) {
+                callback.on(new KNode[0]);
+            } else {
+                final KNode[] result = new KNode[flatRefs.length];
+                final DeferCounter counter = new DeferCounter(flatRefs.length);
+                for (int i = 0; i < flatRefs.length; i++) {
+                    final int fi = i;
+                    this._resolver.lookup(_world, _time, flatRefs[i], new KCallback<KNode>() {
+                        @Override
+                        public void on(KNode kNode) {
+                            result[fi] = kNode;
+                            counter.count();
+                        }
+                    });
+                }
+                counter.then(new KCallback() {
+                    @Override
+                    public void on(Object o) {
+                        callback.on(result);
+                    }
+                });
+            }
         }
     }
 
@@ -141,7 +167,7 @@ public class Node implements KNode {
 
     @Override
     public KNode[] refSync(String relationName) {
-        return new KNode[0];
+        throw new RuntimeException("not implemented yet!!!");
     }
 
     @Override

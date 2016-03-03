@@ -7,6 +7,7 @@ import org.mwdb.manager.KeyCalculator;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -212,6 +213,11 @@ class Graph implements KGraph {
                 callback.on(null);
             }
         }
+    }
+
+    @Override
+    public KDeferCounter counter(int expectedCountCalls) {
+        return new DeferCounter(expectedCountCalls);
     }
 
 }

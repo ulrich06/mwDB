@@ -23,4 +23,7 @@ public interface KGraph {
 
     void disconnect(KCallback callback);
 
+    /** Utilities */
+    KDeferCounter counter(int expectedCountCalls);
+
 }
