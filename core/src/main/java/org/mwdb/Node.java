@@ -141,6 +141,7 @@ public class Node implements KNode {
                         builder.append(attributeName);
                         builder.append("\": ");
                         switch (elemType) {
+                            /** Primitive types */
                             case KType.BOOL: {
                                 if ((boolean) elem) {
                                     builder.append("0");
@@ -155,6 +156,55 @@ public class Node implements KNode {
                                 builder.append("\"");
                                 break;
                             }
+                            case KType.LONG: {
+                                builder.append(elem);
+                                break;
+                            }
+                            case KType.INT: {
+                                builder.append(elem);
+                                break;
+                            }
+                            case KType.DOUBLE: {
+                                builder.append(elem);
+                                break;
+                            }
+                            /** Array types */
+                            case KType.DOUBLE_ARRAY: {
+                                builder.append("[");
+                                double[] castedArr = (double[]) elem;
+                                for (int j = 0; j < castedArr.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case KType.LONG_ARRAY: {
+                                builder.append("[");
+                                long[] castedArr2 = (long[]) elem;
+                                for (int j = 0; j < castedArr2.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr2[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case KType.INT_ARRAY: {
+                                builder.append("[");
+                                int[] castedArr3 = (int[]) elem;
+                                for (int j = 0; j < castedArr3.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr3[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
                         }
                     }
                 }
@@ -163,17 +213,5 @@ public class Node implements KNode {
         }
         return builder.toString();
     }
-
-    /*
-
-    public static final int STRING = 2;
-    public static final int LONG = 3;
-    public static final int INT = 4;
-    public static final int DOUBLE = 5;
-    public static final int DOUBLE_ARRAY = 6;
-    public static final int LONG_ARRAY = 7;
-    public static final int INT_ARRAY = 8;
-
-     */
 
 }
