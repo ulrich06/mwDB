@@ -1,0 +1,248 @@
+package org.mwdb.manager;
+
+import org.mwdb.*;
+import org.mwdb.chunk.*;
+import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KStorage;
+import org.mwdb.plugin.KTask;
+
+public class MWGResolver implements KResolver {
+
+    private final KStorage _storage;
+
+    private final KChunkSpace _space;
+
+    private final KNodeTracker _tracker;
+
+    public MWGResolver(KStorage p_storage, KChunkSpace p_space, KNodeTracker p_tracker) {
+        this._storage = p_storage;
+        this._space = p_space;
+        this._tracker = p_tracker;
+    }
+
+    @Override
+    public void initNode(KNode node) {
+        /*
+        short chunkType = KChunkTypes.OBJECT_CHUNK;
+        if (metaClassIndex == MetaClassIndex.INSTANCE.index()) {
+            chunkType = KChunkTypes.OBJECT_CHUNK_INDEX;
+        }*/
+        KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK);
+        cacheEntry.init(null);
+        cacheEntry.setFlags(Constants.DIRTY_BIT, 0);
+        //put and mark
+        this._space.putAndMark(cacheEntry);
+        //declare dirty now because potentially no insert could be done
+        this._space.declareDirty(cacheEntry);
+
+        //initiate time management
+        KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.LONG_TREE);
+        timeTree.init(null);
+        timeTree.insertKey(node.time());
+        this._space.putAndMark(timeTree);
+        //initiate universe management
+        KLongLongMap objectWorldOrder = (KLongLongMap) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
+        objectWorldOrder.init(null);
+        objectWorldOrder.put(node.world(), node.time());
+        this._space.putAndMark(objectWorldOrder);
+        //mark the global
+        this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        //monitor the node object
+        this._tracker.monitor(node);
+    }
+
+    @Override
+    public KTask lookup(final long world, final long time, final long id, final KCallback<KNode> callback) {
+        final MWGResolver selfPointer = this;
+        return new KTask() {
+            @Override
+            public void run() {
+                try {
+                    selfPointer.getOrLoadAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new KCallback<KChunk>() {
+                        @Override
+                        public void on(KChunk theGlobalUniverseOrderElement) {
+                            if (theGlobalUniverseOrderElement != null) {
+                                selfPointer.getOrLoadAndMark(Constants.NULL_LONG, Constants.NULL_LONG, id, new KCallback<KChunk>() {
+                                    @Override
+                                    public void on(KChunk theObjectUniverseOrderElement) {
+                                        if (theObjectUniverseOrderElement == null) {
+                                            selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                            callback.on(null);
+                                        } else {
+                                            long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
+                                            selfPointer.getOrLoadAndMark(closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
+                                                @Override
+                                                public void on(KChunk theObjectTimeTreeElement) {
+                                                    if (theObjectTimeTreeElement == null) {
+                                                        selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
+                                                        selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                        callback.on(null);
+                                                    } else {
+                                                        long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
+                                                        if (closestTime == Constants.NULL_LONG) {
+                                                            selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                            selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
+                                                            selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                            callback.on(null);
+                                                            return;
+                                                        }
+                                                        selfPointer.getOrLoadAndMark(closestUniverse, closestTime, id, new KCallback<KChunk>() {
+                                                            @Override
+                                                            public void on(KChunk theObjectChunk) {
+                                                                if (theObjectChunk == null) {
+                                                                    selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                                    selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
+                                                                    selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                                    callback.on(null);
+                                                                } else {
+                                                                    Node newNode = new Node(world, time, id, selfPointer, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
+                                                                    selfPointer._tracker.monitor(newNode);
+                                                                    callback.on(newNode);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            } else {
+                                callback.on(null);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
+
+    private long resolve_universe(final KLongLongMap globalWorldOrder, final KLongLongMap nodeWorldOrder, final long timeToResolve, long originWorld) {
+        if (globalWorldOrder == null || nodeWorldOrder == null) {
+            return originWorld;
+        }
+        long currentUniverse = originWorld;
+        long previousUniverse = Constants.NULL_LONG;
+        long divergenceTime = nodeWorldOrder.get(currentUniverse);
+        while (currentUniverse != previousUniverse) {
+            //check range
+            if (divergenceTime != Constants.NULL_LONG && divergenceTime <= timeToResolve) {
+                return currentUniverse;
+            }
+            //next round
+            previousUniverse = currentUniverse;
+            currentUniverse = globalWorldOrder.get(currentUniverse);
+            divergenceTime = nodeWorldOrder.get(currentUniverse);
+        }
+        return originWorld;
+    }
+
+    private void getOrLoadAndMark(final long world, final long time, final long id, final KCallback<KChunk> callback) {
+        if (world == Constants.NULL_KEY[0] && time == Constants.NULL_KEY[1] && id == Constants.NULL_KEY[2]) {
+            callback.on(null);
+            return;
+        }
+        KChunk cached = this._space.getAndMark(world, time, id);
+        if (cached != null) {
+            callback.on(cached);
+        } else {
+            load(new long[]{world, time, id}, new KCallback<KChunk[]>() {
+                @Override
+                public void on(KChunk[] loadedElements) {
+                    callback.on(loadedElements[0]);
+                }
+            });
+        }
+    }
+
+    private void getOrLoadAndMarkAll(long[] keys, final KCallback<KChunk[]> callback) {
+        int nbKeys = keys.length / Constants.KEYS_SIZE;
+        final boolean[] toLoadIndexes = new boolean[nbKeys];
+        int nbElem = 0;
+        final KChunk[] result = new KChunk[nbKeys];
+        for (int i = 0; i < nbKeys; i++) {
+            if (keys[i * Constants.KEYS_SIZE] == Constants.NULL_KEY[0] && keys[i * Constants.KEYS_SIZE + 1] == Constants.NULL_KEY[1] && keys[i * Constants.KEYS_SIZE + 2] == Constants.NULL_KEY[2]) {
+                toLoadIndexes[i] = false;
+                result[i] = null;
+            } else {
+                result[i] = this._space.getAndMark(keys[i * Constants.KEYS_SIZE], keys[i * Constants.KEYS_SIZE + 1], keys[i * Constants.KEYS_SIZE + 2]);
+                if (result[i] == null) {
+                    toLoadIndexes[i] = true;
+                    nbElem++;
+                } else {
+                    toLoadIndexes[i] = false;
+                }
+            }
+        }
+        if (nbElem == 0) {
+            callback.on(result);
+        } else {
+            long[] keysToLoad = new long[nbElem * 3];
+            int lastInsertedIndex = 0;
+            for (int i = 0; i < nbKeys; i++) {
+                if (toLoadIndexes[i]) {
+                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE];
+                    lastInsertedIndex++;
+                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE + 1];
+                    lastInsertedIndex++;
+                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE + 2];
+                    lastInsertedIndex++;
+                }
+            }
+            load(keysToLoad, new KCallback<KChunk[]>() {
+                @Override
+                public void on(KChunk[] loadedElements) {
+                    int currentIndexToMerge = 0;
+                    for (int i = 0; i < nbKeys; i++) {
+                        if (toLoadIndexes[i]) {
+                            result[i] = loadedElements[currentIndexToMerge];
+                            currentIndexToMerge++;
+                        }
+                    }
+                    callback.on(result);
+                }
+            });
+        }
+    }
+
+    private void load(long[] keys, KCallback<KChunk[]> callback) {
+        MWGResolver selfPointer = this;
+        this._storage.get(keys, new KCallback<String[]>() {
+            @Override
+            public void on(String[] payloads) {
+                KChunk[] results = new KChunk[keys.length / 3];
+                for (int i = 0; i < payloads.length; i++) {
+                    long loopWorld = keys[i * 3];
+                    long loopTime = keys[i * 3 + 1];
+                    long loopUuid = keys[i * 3 + 2];
+                    short elemType;
+                    if (loopWorld == Constants.NULL_LONG) {
+                        elemType = Constants.LONG_LONG_MAP;
+                    } else {
+                        if (loopTime == Constants.NULL_LONG) {
+                            elemType = Constants.LONG_TREE;
+                        } else {
+                            if (payloads[i] == null || payloads[i].length() < 1) {
+                                elemType = Constants.STATE_CHUNK;
+                            } else {
+                                char flag = payloads[i].charAt(0);
+                                if (flag == '#') {
+                                    elemType = Constants.INDEX_STATE_CHUNK;
+                                } else {
+                                    elemType = Constants.STATE_CHUNK;
+                                }
+                            }
+                        }
+                    }
+                    results[i] = selfPointer._space.create(loopWorld, loopTime, loopUuid, elemType);
+                    results[i].init(payloads[i]);
+                    selfPointer._space.putAndMark(results[i]);
+                }
+                callback.on(results);
+            }
+        });
+    }
+
+}

@@ -212,7 +212,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     */
 
     @Override
-    public final KChunk get(long universe, long time, long obj) {
+    public final KChunk getAndMark(long universe, long time, long obj) {
         if (this._elementCount.get() == 0) {
             return null;
         }
@@ -221,13 +221,31 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         while (m != -1) {
             if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == elementK3c[m]) {
                 //GET VALUE
-                _lru.reenqueue(m);
-                return this._values[m];
+                //_lru.reenqueue(m);
+                KChunk foundChunk = this._values[m];
+                if (foundChunk.mark() == 1) {
+                    //was at zero before, risky operation
+                    //_lru.dequeue(m);
+                    return foundChunk;
+                    //TODO
+                } else {
+                    return foundChunk;
+                }
             } else {
                 m = this.elementNext[m];
             }
         }
         return null;
+    }
+
+    @Override
+    public void unmark(long world, long time, long id) {
+        //TODO
+    }
+
+    @Override
+    public void unmarkChunk(KChunk elem) {
+        //TODO
     }
 
     @Override
@@ -261,11 +279,13 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }*/
 
     @Override
-    public KChunk put(long p_world, long p_time, long p_id, KChunk p_elem) {
+    public KChunk putAndMark(KChunk p_elem) {
+        //first mark the object
+        p_elem.mark();
         KChunk result;
         int entry;
-        int index = PrimitiveHelper.tripleHash(p_world, p_time, p_id, this._maxEntries);
-        entry = findNonNullKeyEntry(p_world, p_time, p_id, index);
+        int index = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
+        entry = findNonNullKeyEntry(p_elem.world(), p_elem.time(), p_elem.id(), index);
         if (entry == -1) {
             //we look for nextIndex
             int nbTry = 0;
@@ -344,9 +364,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 victim.free();
 
             }
-            elementK3a[currentVictimIndex] = p_world;
-            elementK3b[currentVictimIndex] = p_time;
-            elementK3c[currentVictimIndex] = p_id;
+            elementK3a[currentVictimIndex] = p_elem.world();
+            elementK3b[currentVictimIndex] = p_elem.time();
+            elementK3c[currentVictimIndex] = p_elem.id();
             _values[currentVictimIndex] = p_elem;
 
             int previousMagic;
@@ -387,11 +407,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public KChunkIterator detachDirties() {
         return _dirtyState.getAndSet(new InternalDirtyStateList(this._threeshold, this));
-    }
-
-    @Override
-    public void remove(long universe, long time, long obj) {
-        //NOOP, external remove is not allowed in press mode
     }
 
     @Override

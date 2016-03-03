@@ -60,4 +60,25 @@ public class Constants {
 
     public static final short LONG_LONG_MAP = 3;
 
+    /**
+     * Node constants
+     **/
+    public static final int PREVIOUS_RESOLVED_UNIVERSE_INDEX = 0;
+    public static final int PREVIOUS_RESOLVED_TIME_INDEX = 1;
+
+    public static final int PREVIOUS_RESOLVED_UNIVERSE_MAGIC = 2;
+    public static final int PREVIOUS_RESOLVED_TIME_MAGIC = 3;
+
+    /**
+     * Keys constants
+     */
+    public static final int KEYS_SIZE = 3;
+
+    public static final long[] PREFIX_KEY = new long[]{Constants.END_OF_TIME, Constants.NULL_LONG, Constants.NULL_LONG};
+
+    public static final long[] NULL_KEY = new long[]{END_OF_TIME, END_OF_TIME, END_OF_TIME};
+
+    public static final long[] GLOBAL_UNIVERSE_KEY = new long[]{NULL_LONG, NULL_LONG, NULL_LONG};
+
+
 }
