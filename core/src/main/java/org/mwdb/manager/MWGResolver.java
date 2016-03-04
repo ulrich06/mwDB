@@ -26,11 +26,11 @@ public class MWGResolver implements KResolver {
         this._scheduler = p_scheduler;
     }
 
-    private KIndexStateChunk dictionary;
+    private KStateChunk dictionary;
 
     @Override
     public void init() {
-        dictionary = (KIndexStateChunk) this._space.getAndMark(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
+        dictionary = (KStateChunk) this._space.getAndMark(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
     }
 
     @Override
@@ -263,12 +263,14 @@ public class MWGResolver implements KResolver {
                             if (payloads[i] == null || payloads[i].length() < 1) {
                                 elemType = Constants.STATE_CHUNK;
                             } else {
+                                elemType = Constants.STATE_CHUNK;
+                                /*
                                 char flag = payloads[i].charAt(0);
                                 if (flag == '#') {
                                     elemType = Constants.INDEX_STATE_CHUNK;
                                 } else {
                                     elemType = Constants.STATE_CHUNK;
-                                }
+                                }*/
                             }
                         }
                     }
@@ -521,18 +523,25 @@ public class MWGResolver implements KResolver {
      */
     @Override
     public long key(String name) {
-        long encodedKey = this.dictionary.getValue(name);
+        KStringLongMap dictionaryIndex = (KStringLongMap) this.dictionary.get(0);
+        if (dictionaryIndex == null) {
+            dictionaryIndex = (KStringLongMap) this.dictionary.init(0, KType.STRING_LONG_MAP);
+        }
+        long encodedKey = dictionaryIndex.getValue(name);
         if (encodedKey == Constants.NULL_LONG) {
-            this.dictionary.put(name, Constants.NULL_LONG);
-            encodedKey = this.dictionary.getValue(name);
+            dictionaryIndex.put(name, Constants.NULL_LONG);
+            encodedKey = dictionaryIndex.getValue(name);
         }
         return encodedKey;
     }
 
     @Override
     public String value(long key) {
-        //Need inverted dictionary, let's see if we need it!
-        return this.dictionary.getKey(key);
+        KStringLongMap dictionaryIndex = (KStringLongMap) this.dictionary.get(0);
+        if (dictionaryIndex != null) {
+            return dictionaryIndex.getKey(key);
+        }
+        return null;
     }
 
 }

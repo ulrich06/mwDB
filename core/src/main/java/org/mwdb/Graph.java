@@ -124,7 +124,7 @@ public class Graph implements KGraph {
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
-                                                        KIndexStateChunk globalDictionaryChunk = (KIndexStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.INDEX_STATE_CHUNK);
+                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK);
                                                         globalDictionaryChunk.init(strings[GLO_DIC_INDEX]);
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
@@ -138,7 +138,7 @@ public class Graph implements KGraph {
                                                         selfPointer._resolver.init();
 
                                                     } catch (Exception e) {
-                                                        //e.printStackTrace();
+                                                        e.printStackTrace();
                                                         detected = e;
                                                     }
                                                     selfPointer._lock.set(true);

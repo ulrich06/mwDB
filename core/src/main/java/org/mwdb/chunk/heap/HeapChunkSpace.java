@@ -238,8 +238,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 return new HeapLongLongMapChunk(p_world, p_time, p_id, this);
             case Constants.LONG_TREE:
                 return new ArrayLongTree(p_world, p_time, p_id, this);
-            case Constants.INDEX_STATE_CHUNK:
-                return new HeapIndexStateChunk(p_world, p_time, p_id, this);
+            //case Constants.INDEX_STATE_CHUNK:
+            //    return new HeapIndexStateChunk(p_world, p_time, p_id, this);
             default:
                 return null;
         }

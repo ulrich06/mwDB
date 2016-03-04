@@ -6,4 +6,6 @@ public interface KNodeState {
 
     Object get(long index);
 
+    Object init(long index, int elemType);
+
 }

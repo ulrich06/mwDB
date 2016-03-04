@@ -2,6 +2,7 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
 import org.mwdb.KType;
+import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KStateChunk;
 import org.mwdb.chunk.KStateChunkCallBack;
@@ -12,7 +13,7 @@ import org.mwdb.utility.PrimitiveHelper;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HeapStateChunk implements KStateChunk {
+public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     private static final float loadFactor = ((float) 75 / (float) 100);
 
@@ -44,6 +45,11 @@ public class HeapStateChunk implements KStateChunk {
     private final long _time;
 
     private final long _id;
+
+    @Override
+    public void declareDirty(KChunk chunk) {
+        internal_set_dirty();
+    }
 
     /**
      * Internal state for atomic change
@@ -124,7 +130,7 @@ public class HeapStateChunk implements KStateChunk {
 
     @Override
     public short chunkType() {
-        return Constants.INDEX_STATE_CHUNK;
+        return Constants.STATE_CHUNK;
     }
 
     /**
@@ -194,6 +200,21 @@ public class HeapStateChunk implements KStateChunk {
             }
         }
         return null;
+    }
+
+    @Override
+    public Object init(long p_elementIndex, int elemType) {
+        switch (elemType) {
+            case KType.LONG_LONG_MAP: {
+                set(p_elementIndex, elemType, new ArrayLongLongMap(this));
+                break;
+            }
+            case KType.STRING_LONG_MAP: {
+                set(p_elementIndex, elemType, new ArrayStringLongMap(this));
+                break;
+            }
+        }
+        return get(p_elementIndex);
     }
 
     @Override
