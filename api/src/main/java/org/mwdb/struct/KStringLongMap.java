@@ -1,4 +1,4 @@
-package org.mwdb.chunk;
+package org.mwdb.struct;
 
 public interface KStringLongMap {
 
@@ -6,7 +6,9 @@ public interface KStringLongMap {
 
     String getKey(long index);
 
-    /** NULL_LONG as value means replace atomically by the current */
+    /**
+     * NULL_LONG as value means replace atomically by the current
+     */
     void put(String key, long value);
 
     void each(KStringLongMapCallBack callback);

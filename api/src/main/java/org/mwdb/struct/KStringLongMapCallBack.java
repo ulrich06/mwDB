@@ -1,4 +1,4 @@
-package org.mwdb.chunk;
+package org.mwdb.struct;
 
 public interface KStringLongMapCallBack {
 

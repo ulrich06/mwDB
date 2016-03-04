@@ -321,7 +321,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     /* warning: this method is not thread safe */
     @Override
-    public void init(String payload) {
+    public void load(String payload) {
         if (payload == null || payload.length() == 0) {
             return;
         }
@@ -388,7 +388,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public String serialize() {
+    public String save() {
         final StringBuilder buffer = new StringBuilder();
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');

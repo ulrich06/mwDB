@@ -3,6 +3,7 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
 import org.mwdb.chunk.*;
+import org.mwdb.struct.KLongLongMapCallBack;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -306,7 +307,7 @@ public class HeapLongLongMapChunk implements KWorldOrderChunk {
 
     /* warning: this method is not thread safe */
     @Override
-    public void init(String payload) {
+    public void load(String payload) {
         //_metaClassIndex = metaClassIndex;
         if (payload == null || payload.length() == 0) {
             return;
@@ -375,7 +376,7 @@ public class HeapLongLongMapChunk implements KWorldOrderChunk {
     }
 
     @Override
-    public String serialize() {
+    public String save() {
         final StringBuilder buffer = new StringBuilder();//roughly approximate init size
         /*
         if (_metaClassIndex != -1) {

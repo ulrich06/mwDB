@@ -52,7 +52,7 @@ public class Constants {
      * ChunkTypes
      */
     public static final short STATE_CHUNK = 0;
-    
+
     public static final short LONG_TREE = 2;
 
     public static final short LONG_LONG_MAP = 3;
@@ -88,5 +88,13 @@ public class Constants {
     public static final int MAP_INITIAL_CAPACITY = 16;
 
     public static final float MAP_LOAD_FACTOR = ((float) 75 / (float) 100);
+
+    /**
+     * Error messages
+     */
+    public static final String DISCONNECTED_ERROR = "Please connect your graph, prior to any usage of it";
+
+    public static final String CACHE_MISS_ERROR = "Cache miss error";
+
 
 }

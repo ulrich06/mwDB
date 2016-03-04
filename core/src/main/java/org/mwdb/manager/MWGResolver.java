@@ -2,10 +2,11 @@ package org.mwdb.manager;
 
 import org.mwdb.*;
 import org.mwdb.chunk.*;
-import org.mwdb.plugin.KResolver.KNodeState;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.struct.KLongLongMap;
+import org.mwdb.struct.KStringLongMap;
 
 public class MWGResolver implements KResolver {
 
@@ -36,7 +37,7 @@ public class MWGResolver implements KResolver {
     @Override
     public void initNode(KNode node) {
         KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK);
-        cacheEntry.init(null);
+        cacheEntry.load(null);
         cacheEntry.setFlags(Constants.DIRTY_BIT, 0);
         //put and mark
         this._space.putAndMark(cacheEntry);
@@ -45,13 +46,13 @@ public class MWGResolver implements KResolver {
 
         //initiate time management
         KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.LONG_TREE);
-        timeTree.init(null);
+        timeTree.load(null);
         this._space.putAndMark(timeTree);
         timeTree.insertKey(node.time());
 
         //initiate universe management
         KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
-        objectWorldOrder.init(null);
+        objectWorldOrder.load(null);
         this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
         //mark the global
@@ -262,7 +263,7 @@ public class MWGResolver implements KResolver {
                         }
                     }
                     results[i] = selfPointer._space.create(loopWorld, loopTime, loopUuid, elemType);
-                    results[i].init(payloads[i]);
+                    results[i].load(payloads[i]);
                     selfPointer._space.putAndMark(results[i]);
                 }
                 callback.on(results);
@@ -335,9 +336,15 @@ public class MWGResolver implements KResolver {
         */
 
         //OK NOW WE HAVE THE MAGIC FOR UUID
+
+
+        //TODO optimization #3, same dephasing, no need to traverse tree and so on
+
         try {
+            //TODO protect this by optimization #3
             long resolvedWorld = resolve_world(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
             long resolvedTime = objectTimeTree.previousOrEqual(nodeTime);
+            //TODO end protection optimization #3
             if (resolvedWorld != Constants.NULL_LONG && resolvedTime != Constants.NULL_LONG) {
                 if (allowDephasing) {
                     KStateChunk newObjectEntry = (KStateChunk) this._space.getAndMark(resolvedWorld, resolvedTime, nodeId);

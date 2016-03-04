@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KStringLongMap;
-import org.mwdb.chunk.KStringLongMapCallBack;
+import org.mwdb.struct.KStringLongMap;
+import org.mwdb.struct.KStringLongMapCallBack;
 import org.mwdb.chunk.heap.ArrayStringLongMap;
 import org.mwdb.utility.PrimitiveHelper;
 

@@ -418,7 +418,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             for (int i = 0; i < this._values.length; i++) {
                 KChunk loopChunk = this._values[i];
                 if (loopChunk != null) {
-                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.chunkType() + "(count:" + loopChunk.marks() + ",flag:" + loopChunk.flags() + ")" + "==>" + loopChunk.serialize() + "\n");
+                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.chunkType() + "(count:" + loopChunk.marks() + ",flag:" + loopChunk.flags() + ")" + "==>" + loopChunk.save() + "\n");
                 }
             }
         } catch (Exception e) {

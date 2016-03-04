@@ -453,7 +453,7 @@ public abstract class AbstractArrayTree implements KChunk {
     }
 
     @Override
-    public final String serialize() {
+    public final String save() {
         //negociate a magic
         while (!this._magicToken.compareAndSet(false, true)) ;
 
@@ -505,7 +505,7 @@ public abstract class AbstractArrayTree implements KChunk {
     }
 
     @Override
-    public final void init(String payload) {
+    public final void load(String payload) {
         if (payload == null || payload.length() == 0) {
             return;
         }

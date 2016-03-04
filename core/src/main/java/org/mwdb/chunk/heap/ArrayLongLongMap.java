@@ -3,8 +3,8 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KLongLongMap;
-import org.mwdb.chunk.KLongLongMapCallBack;
+import org.mwdb.struct.KLongLongMap;
+import org.mwdb.struct.KLongLongMapCallBack;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -273,7 +273,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     /*
     @Override
-    public String serialize() {
+    public String save() {
         final StringBuilder buffer = new StringBuilder();//roughly approximate init size
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');

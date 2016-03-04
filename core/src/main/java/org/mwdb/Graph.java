@@ -36,8 +36,6 @@ public class Graph implements KGraph {
     private static final int GLO_TREE_INDEX = 2;
     private static final int GLO_DIC_INDEX = 3;
 
-    private static final String disconnectError = "Please connect your graph, prior to any usage of it";
-
     protected Graph(KStorage p_storage, KChunkSpace p_space, KScheduler p_scheduler, KResolver p_resolver) {
         //subElements set
         this._storage = p_storage;
@@ -53,7 +51,7 @@ public class Graph implements KGraph {
     @Override
     public KNode createNode(long world, long time) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(disconnectError);
+            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
         KNode newNode = new Node(world, time, _objectKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
         this._resolver.initNode(newNode);
@@ -63,14 +61,14 @@ public class Graph implements KGraph {
     @Override
     public void lookup(long world, long time, long id, KCallback<KNode> callback) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(disconnectError);
+            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
     }
 
     @Override
     public void lookupAllTimes(long world, long[] times, long id, KCallback<KNode[]> callback) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(disconnectError);
+            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
     }
 
@@ -120,12 +118,12 @@ public class Graph implements KGraph {
 
                                                         //init the global universe tree (mandatory for synchronious create)
                                                         KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.LONG_LONG_MAP);
-                                                        globalWorldOrder.init(strings[GLO_TREE_INDEX]);
+                                                        globalWorldOrder.load(strings[GLO_TREE_INDEX]);
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
                                                         KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK);
-                                                        globalDictionaryChunk.init(strings[GLO_DIC_INDEX]);
+                                                        globalDictionaryChunk.load(strings[GLO_DIC_INDEX]);
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                                         //TODO call the manager
@@ -232,7 +230,7 @@ public class Graph implements KGraph {
                     toSaveKeys[i * Constants.KEYS_SIZE + 1] = loopChunk.time();
                     toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
                     try {
-                        toSaveValues[i] = loopChunk.serialize();
+                        toSaveValues[i] = loopChunk.save();
                         loopChunk.setFlags(0, Constants.DIRTY_BIT);
                         i++;
                     } catch (Exception e) {

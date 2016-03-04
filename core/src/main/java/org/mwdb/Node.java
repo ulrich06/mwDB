@@ -21,8 +21,6 @@ public class Node implements KNode {
 
     public final AtomicReference<long[]> _previousResolveds;
 
-    private static final String cacheMissError = "Cache miss error";
-
     public Node(long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
         this._world = p_world;
         this._time = p_time;
@@ -62,7 +60,7 @@ public class Node implements KNode {
         if (preciseState != null) {
             preciseState.set(this._resolver.key(attributeName), attributeType, attributeValue);
         } else {
-            throw new RuntimeException(cacheMissError);
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 
@@ -110,7 +108,7 @@ public class Node implements KNode {
         if (resolved != null) {
             return (long[]) resolved.get(this._resolver.key(relationName));
         } else {
-            throw new RuntimeException(cacheMissError);
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 
@@ -131,7 +129,7 @@ public class Node implements KNode {
             }
             preciseState.set(relationKey, KType.LONG_ARRAY, previous);
         } else {
-            throw new RuntimeException(cacheMissError);
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 
@@ -161,7 +159,7 @@ public class Node implements KNode {
                 }
             }
         } else {
-            throw new RuntimeException(cacheMissError);
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 
@@ -181,7 +179,7 @@ public class Node implements KNode {
         if (state != null) {
             return (this._time - state.time());
         } else {
-            throw new RuntimeException(cacheMissError);
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 

@@ -21,9 +21,9 @@ public interface KChunk {
      * KMemorySegment: {... ,"name":value ...}
      * KUniverseOrderMap: className, size{... ,"key":value ...}
      */
-    String serialize();
+    String save();
 
-    void init(String payload);
+    void load(String payload);
 
     /**
      * Memory marks management

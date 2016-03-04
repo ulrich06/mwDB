@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.ArrayLongLongMap;
-import org.mwdb.chunk.heap.ArrayStringLongMap;
-import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.struct.KLongLongMap;
+import org.mwdb.struct.KLongLongMapCallBack;
 
 public class LongLongMapTest implements KChunkListener {
 
