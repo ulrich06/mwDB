@@ -71,7 +71,7 @@ public class HeapStateChunk implements KStateChunk {
             this._elementType = p_elementType;
         }
 
-        public InternalState clone() {
+        public InternalState cloneState() {
             long[] clonedElementK = new long[_elementK.length];
             System.arraycopy(_elementK, 0, clonedElementK, 0, _elementK.length);
             Object[] clonedElementV = new Object[_elementV.length];
@@ -210,7 +210,7 @@ public class HeapStateChunk implements KStateChunk {
     public void cloneFrom(KStateChunk origin) {
         //brutal cast, but mixed implementation is not allowed per space
         HeapStateChunk casted = (HeapStateChunk) origin;
-        casted.state = this.state.clone();
+        casted.state = this.state.cloneState();
         casted.elementCount = this.elementCount;
         casted.droppedCount = this.droppedCount;
         casted.threshold = this.threshold;
@@ -376,6 +376,9 @@ public class HeapStateChunk implements KStateChunk {
                     }
                     isFirst = false;
                     Base64.encodeLongToBuffer(loopKey, buffer);
+                    buffer.append(":");
+                    /** Encode to type of elem, for unSerialization */
+                    Base64.encodeIntToBuffer(internalState._elementType[i], buffer);
                     buffer.append(":");
                     switch (internalState._elementType[i]) {
                         /** Primitive Types */

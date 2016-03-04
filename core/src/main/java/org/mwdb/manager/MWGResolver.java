@@ -6,7 +6,6 @@ import org.mwdb.plugin.KNodeState;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
-import org.mwdb.utility.PrimitiveHelper;
 
 public class MWGResolver implements KResolver {
 
@@ -106,7 +105,7 @@ public class MWGResolver implements KResolver {
                                             selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                             callback.on(null);
                                         } else {
-                                            final long closestUniverse = resolve_universe((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
+                                            final long closestUniverse = resolve_world((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
                                             selfPointer.getOrLoadAndMark(closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                                 @Override
                                                 public void on(KChunk theObjectTimeTreeElement) {
@@ -156,7 +155,7 @@ public class MWGResolver implements KResolver {
         };
     }
 
-    private long resolve_universe(final KLongLongMap globalWorldOrder, final KLongLongMap nodeWorldOrder, final long timeToResolve, long originWorld) {
+    private long resolve_world(final KLongLongMap globalWorldOrder, final KLongLongMap nodeWorldOrder, final long timeToResolve, long originWorld) {
         if (globalWorldOrder == null || nodeWorldOrder == null) {
             return originWorld;
         }
@@ -348,7 +347,7 @@ public class MWGResolver implements KResolver {
 
         //OK NOW WE HAVE THE MAGIC FOR UUID
         try {
-            long resolvedWorld = resolve_universe(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
+            long resolvedWorld = resolve_world(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
             long resolvedTime = objectTimeTree.previousOrEqual(nodeTime);
             if (resolvedWorld != Constants.NULL_LONG && resolvedTime != Constants.NULL_LONG) {
                 if (allowDephasing) {
@@ -466,6 +465,56 @@ public class MWGResolver implements KResolver {
             return null;
         }
     }
+
+    /*
+    @Override
+    public void index(long world, long time, String indexName, boolean createIfAbsent, KCallback<KObjectIndex> callback) {
+        MWGResolver selfPointer = this;
+        lookup(world, time);
+        selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, KConfig.END_OF_TIME, new KCallback<KObject>() {
+            @Override
+            public void on(KObject kObject) {
+                KObjectIndex globalIndex = (KObjectIndex) kObject;
+                if (globalIndex == null && createIfAbsent) {
+                    globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                    initKObject(globalIndex);
+                }
+                if (globalIndex == null) {
+                    if (Checker.isDefined(callback)) {
+                        callback.on(null);
+                    }
+                } else {
+                    long indexUUID = globalIndex.getIndex(indexName);
+                    if (indexUUID == KConfig.NULL_LONG && createIfAbsent) {
+                        long nextKey = nextObjectKey();
+                        KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
+                        initKObject(namedIndex);
+                        globalIndex.setIndex(indexName, nextKey);
+                        if (Checker.isDefined(callback)) {
+                            callback.on(namedIndex);
+                        }
+                    } else {
+                        if (indexUUID == KConfig.NULL_LONG) {
+                            if (Checker.isDefined(callback)) {
+                                callback.on(null);
+                            }
+                        } else {
+                            selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, indexUUID, new KCallback<KObject>() {
+                                @Override
+                                public void on(KObject namedIndex) {
+                                    if (Checker.isDefined(callback)) {
+                                        callback.on((KObjectIndex) namedIndex);
+                                    }
+                                }
+                            }));
+                        }
+                    }
+                }
+            }
+        }));
+    }
+    */
+
 
     /**
      * Dictionary methods

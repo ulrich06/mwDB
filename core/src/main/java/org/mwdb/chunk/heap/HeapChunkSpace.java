@@ -154,13 +154,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    /*
-    @Override
-    public void setManager(KDataManager dataManager) {
-        this._manager = (KInternalDataManager) dataManager;
-    }
-    */
-
     @Override
     public final KChunk getAndMark(long world, long time, long id) {
         if (this._elementCount.get() == 0) {
@@ -252,20 +245,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    /*
-    @Override
-    public KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj) {
-        KObjectChunk cloned = (KObjectChunk) internal_put(newUniverse, newTime, newObj, previousElement.clone(newUniverse, newTime, newObj, metaModel), metaModel);
-        cloned.setFlags(KChunkFlags.DIRTY_BIT, 0);
-        declareDirty(cloned);
-        return cloned;
-    }*/
-
-    /*
-    private KChunk internal_createElement(long p_universe, long p_time, long p_obj, short type) {
-
-    }*/
-
     @Override
     public KChunk putAndMark(KChunk p_elem) {
         //first mark the object
@@ -290,11 +269,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                     System.err.println("GC " + nbTry);
                 }
             }
-
-            /*
-            if (nbTry == this._maxEntries) {
-                throw new RuntimeException("Press Cache is Full, too many object are reserved!");
-            }*/
 
             if (this._values[currentVictimIndex] != null) {
                 KChunk victim = this._values[currentVictimIndex];
