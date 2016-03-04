@@ -119,9 +119,9 @@ public class Graph implements KGraph {
                                                         }
 
                                                         //init the global universe tree (mandatory for synchronious create)
-                                                        KLongLongMap globalUniverseTree = (KLongLongMap) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.LONG_LONG_MAP);
-                                                        globalUniverseTree.init(strings[GLO_TREE_INDEX]);
-                                                        selfPointer._space.putAndMark(globalUniverseTree);
+                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.LONG_LONG_MAP);
+                                                        globalWorldOrder.init(strings[GLO_TREE_INDEX]);
+                                                        selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
                                                         KIndexStateChunk globalDictionaryChunk = (KIndexStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.INDEX_STATE_CHUNK);

@@ -56,7 +56,7 @@ public class MWGResolver implements KResolver {
         timeTree.insertKey(node.time());
 
         //initiate universe management
-        KLongLongMap objectWorldOrder = (KLongLongMap) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
+        KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
         objectWorldOrder.init(null);
         this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
@@ -131,7 +131,7 @@ public class MWGResolver implements KResolver {
                                                                     selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    Node newNode = new Node(world, time, id, selfPointer, closestUniverse, closestTime, ((KLongLongMap) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
+                                                                    Node newNode = new Node(world, time, id, selfPointer, closestUniverse, closestTime, ((KWorldOrderChunk) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     selfPointer._tracker.monitor(newNode);
                                                                     callback.on(newNode);
                                                                 }
@@ -305,7 +305,7 @@ public class MWGResolver implements KResolver {
         }
 
         //Retrieve Node needed chunks
-        KLongLongMap objectUniverseMap = (KLongLongMap) this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, nodeId);
+        KWorldOrderChunk objectUniverseMap = (KWorldOrderChunk) this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, nodeId);
         if (objectUniverseMap == null) {
             return null;
         }
@@ -330,7 +330,7 @@ public class MWGResolver implements KResolver {
         }
 
         //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
-        KLongLongMap globalUniverseTree = (KLongLongMap) this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        KWorldOrderChunk globalUniverseTree = (KWorldOrderChunk) this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         if (globalUniverseTree == null) {
             this._space.unmarkChunk(objectUniverseMap);
             this._space.unmarkChunk(objectTimeTree);

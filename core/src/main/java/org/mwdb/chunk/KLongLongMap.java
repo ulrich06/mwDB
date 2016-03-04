@@ -1,8 +1,6 @@
 package org.mwdb.chunk;
 
-public interface KLongLongMap extends KChunk {
-
-    boolean contains(long key);
+public interface KLongLongMap {
 
     long get(long key);
 
@@ -14,9 +12,9 @@ public interface KLongLongMap extends KChunk {
 
     int size();
 
-    void clear();
+    // void clear();
 
-    long magic();
+    // long magic();
 
     /**
      * extra methods

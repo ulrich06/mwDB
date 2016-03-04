@@ -65,9 +65,8 @@ public class StringLongMapTest implements KChunkListener {
         }
         //test that all values are consistent
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
-            Assert.assertTrue(map.getValue("i_"+i) == i);
+            Assert.assertTrue(map.getValue("i_" + i) == i);
         }
-
     }
 
     @Override

@@ -5,78 +5,26 @@ import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMap;
 import org.mwdb.chunk.KLongLongMapCallBack;
-import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ArrayLongLongMap implements KLongLongMap {
 
-    protected volatile int elementCount;
-
-    protected volatile int droppedCount;
-
-    protected volatile InternalState state = null;
-
-    protected int threshold;
-
-    private final int initialCapacity = 16;
-
-    private static final float loadFactor = ((float) 75 / (float) 100);
-
-    private final AtomicLong _flags;
-
-    private final AtomicInteger _counter;
+    private final AtomicReference<InternalState> state;
 
     private final KChunkListener _listener;
 
-    private final long _world;
-
-    private final long _time;
-
-    private final long _id;
-
-    private volatile long _magic;
-
-    /*
-    private int _metaClassIndex = -1;
-
-    private final AtomicInteger _objectToken;
-*/
-    @Override
-    public long world() {
-        return this._world;
-    }
-
-    @Override
-    public long time() {
-        return this._time;
-    }
-
-    @Override
-    public long id() {
-        return this._id;
-    }
-
-    public ArrayLongLongMap(long p_universe, long p_time, long p_obj, KChunkListener p_listener) {
-        this._world = p_universe;
-        this._time = p_time;
-        this._id = p_obj;
-        this._flags = new AtomicLong(0);
-        this._counter = new AtomicInteger(0);
-        // this._objectToken = new AtomicInteger(-1);
+    public ArrayLongLongMap(KChunkListener p_listener) {
         this._listener = p_listener;
-        this.elementCount = 0;
-        this.droppedCount = 0;
-        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
+        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
         for (int i = 0; i < initialCapacity; i++) {
-            newstate.elementNext[i] = -1;
-            newstate.elementHash[i] = -1;
+            newstate._elementNext[i] = -1;
+            newstate._elementHash[i] = -1;
         }
-        this.state = newstate;
-        this.threshold = (int) (newstate.elementDataSize * loadFactor);
-        this._magic = PrimitiveHelper.rand();
+        this.state = new AtomicReference<InternalState>();
+        this.state.set(newstate);
     }
 
     /**
@@ -84,190 +32,147 @@ public class ArrayLongLongMap implements KLongLongMap {
      */
     final class InternalState {
 
-        public final int elementDataSize;
+        public final int _stateSize;
 
-        public final long[] elementKV;
+        public final long[] _elementK;
 
-        public final int[] elementNext;
+        public final long[] _elementV;
 
-        public final int[] elementHash;
+        public final int[] _elementNext;
 
-        public InternalState(int elementDataSize, long[] elementKV, int[] elementNext, int[] elementHash) {
-            this.elementDataSize = elementDataSize;
-            this.elementKV = elementKV;
-            this.elementNext = elementNext;
-            this.elementHash = elementHash;
+        public final int[] _elementHash;
+
+        public final int _threshold;
+
+        protected volatile int _elementCount;
+
+        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount) {
+            this._stateSize = p_stateSize;
+            this._elementK = p_elementK;
+            this._elementV = p_elementV;
+            this._elementNext = p_elementNext;
+            this._elementHash = p_elementHash;
+            this._elementCount = p_elementCount;
+            this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
         }
-    }
-
-    @Override
-    public final int marks() {
-        return this._counter.get();
-    }
-
-    @Override
-    public final int mark() {
-        return this._counter.incrementAndGet();
-    }
-
-    @Override
-    public final int unmark() {
-        return this._counter.decrementAndGet();
-    }
-
-    public final void clear() {
-        if (elementCount > 0) {
-            this.elementCount = 0;
-            this.droppedCount = 0;
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
-            for (int i = 0; i < initialCapacity; i++) {
-                newstate.elementNext[i] = -1;
-                newstate.elementHash[i] = -1;
-            }
-            this.state = newstate;
-            this.threshold = (int) (newstate.elementDataSize * loadFactor);
-        }
-    }
-
-    @Override
-    public long magic() {
-        return this._magic;
-    }
-
-    protected final void rehashCapacity(int capacity) {
-        int length = (capacity == 0 ? 1 : capacity << 1);
-        long[] newElementKV = new long[length * 2];
-        System.arraycopy(state.elementKV, 0, newElementKV, 0, state.elementKV.length);
-        int[] newElementNext = new int[length];
-        int[] newElementHash = new int[length];
-        for (int i = 0; i < length; i++) {
-            newElementNext[i] = -1;
-            newElementHash[i] = -1;
-        }
-        //rehashEveryThing
-        for (int i = 0; i < state.elementNext.length; i++) {
-            if (state.elementNext[i] != -1) { //there is a real value
-                int index = ((int) state.elementKV[i * 2] & 0x7FFFFFFF) % length;
-                int currentHashedIndex = newElementHash[index];
-                if (currentHashedIndex != -1) {
-                    newElementNext[i] = currentHashedIndex;
-                } else {
-                    newElementNext[i] = -2; //special char to tag used values
-                }
-                newElementHash[index] = i;
-            }
-        }
-        //setPrimitiveType value for all
-        state = new InternalState(length, newElementKV, newElementNext, newElementHash);
-        this.threshold = (int) (length * loadFactor);
-    }
-
-    @Override
-    public final void each(KLongLongMapCallBack callback) {
-        InternalState internalState = state;
-        for (int i = 0; i < internalState.elementNext.length; i++) {
-            if (internalState.elementNext[i] != -1) { //there is a real value
-                callback.on(internalState.elementKV[i * 2], internalState.elementKV[i * 2 + 1]);
-            }
-        }
-    }
-
-    /*
-    @Override
-    public int metaClassIndex() {
-        return this._metaClassIndex;
-    }
-
-    @Override
-    public boolean tokenCompareAndSwap(int previous, int next) {
-        return this._objectToken.compareAndSet(previous, next);
-    }*/
-
-    @Override
-    public final boolean contains(long key) {
-        InternalState internalState = state;
-        if (state.elementDataSize == 0) {
-            return false;
-        }
-        int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = internalState.elementHash[index];
-        while (m >= 0) {
-            if (key == internalState.elementKV[m * 2] /* getKey */) {
-                return true;
-            }
-            m = internalState.elementNext[m];
-        }
-        return false;
     }
 
     @Override
     public final long get(long key) {
-        InternalState internalState = state;
-        if (state.elementDataSize == 0) {
+        InternalState internalState = state.get();
+        if (internalState._stateSize == 0) {
             return Constants.NULL_LONG;
         }
-        int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = internalState.elementHash[index];
+        int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
+        int m = internalState._elementHash[hashIndex];
         while (m >= 0) {
-            if (key == internalState.elementKV[m * 2] /* getKey */) {
-                return internalState.elementKV[(m * 2) + 1]; /* getValue */
+            if (key == internalState._elementK[m]) {
+                return internalState._elementV[m];
             } else {
-                m = internalState.elementNext[m];
+                m = internalState._elementNext[m];
             }
         }
         return Constants.NULL_LONG;
     }
 
     @Override
-    public final synchronized void put(long key, long value) {
-        int entry = -1;
-        int index = -1;
-        int hash = (int) (key);
-        if (state.elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % state.elementDataSize;
-            entry = findNonNullKeyEntry(key, index);
-        }
-        if (entry == -1) {
-            if (++elementCount > threshold) {
-                rehashCapacity(state.elementDataSize);
-                index = (hash & 0x7FFFFFFF) % state.elementDataSize;
-            }
-            int newIndex = (this.elementCount + this.droppedCount - 1);
-            state.elementKV[newIndex * 2] = key;
-            state.elementKV[newIndex * 2 + 1] = value;
-            int currentHashedIndex = state.elementHash[index];
-            if (currentHashedIndex != -1) {
-                state.elementNext[newIndex] = currentHashedIndex;
-            } else {
-                state.elementNext[newIndex] = -2; //special char to tag used values
-            }
-            //now the object is reachable to other thread everything should be ready
-            state.elementHash[index] = newIndex;
-            internal_set_dirty();
-            this._magic = PrimitiveHelper.rand();
-        } else {
-            if (state.elementKV[entry + 1] != value) {
-                //setValue
-                state.elementKV[entry + 1] = value;
-                internal_set_dirty();
-                this._magic = PrimitiveHelper.rand();
+    public final void each(KLongLongMapCallBack callback) {
+        InternalState internalState = state.get();
+        for (int i = 0; i < internalState._elementCount; i++) {
+            if (internalState._elementNext[i] != -1) { //there is a real value
+                callback.on(internalState._elementK[i], internalState._elementV[i]);
             }
         }
     }
 
-    final int findNonNullKeyEntry(long key, int index) {
-        int m = state.elementHash[index];
-        while (m >= 0) {
-            if (key == state.elementKV[m * 2] /* getKey */) {
-                return m;
+    @Override
+    public int size() {
+        return state.get()._elementCount;
+    }
+
+    @Override
+    public final synchronized void put(long key, long value) {
+        int entry = -1;
+        int hashIndex = -1;
+        InternalState internalState = state.get();
+        if (internalState._stateSize > 0) {
+            hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
+            int m = internalState._elementHash[hashIndex];
+            while (m >= 0) {
+                if (key == internalState._elementK[m]) {
+                    entry = m;
+                    break;
+                }
+                m = internalState._elementNext[m];
             }
-            m = state.elementNext[m];
         }
-        return -1;
+        if (entry == -1) {
+            //if need to reHash (too small or too much collisions)
+            if ((internalState._elementCount + 1) > internalState._threshold) {
+                //rehashCapacity(state.elementDataSize);
+                int newCapacity = internalState._stateSize << 1;
+                long[] newElementK = new long[newCapacity];
+                long[] newElementV = new long[newCapacity];
+                System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._stateSize);
+                System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._stateSize);
+                int[] newElementNext = new int[newCapacity];
+                int[] newElementHash = new int[newCapacity];
+                for (int i = 0; i < newCapacity; i++) {
+                    newElementNext[i] = -1;
+                    newElementHash[i] = -1;
+                }
+                //rehashEveryThing
+                for (int i = 0; i < internalState._elementCount; i++) {
+                    if (internalState._elementNext[i] != -1) { //there is a real value
+                        int newHashIndex = (int) PrimitiveHelper.longHash(internalState._elementK[i], newCapacity);
+                        int currentHashedIndex = newElementHash[newHashIndex];
+                        if (currentHashedIndex != -1) {
+                            newElementNext[i] = currentHashedIndex;
+                        } else {
+                            newElementNext[i] = -2;
+                        }
+                        newElementHash[newHashIndex] = i;
+                    }
+                }
+                //setPrimitiveType value for all
+                internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount);
+                state.set(internalState);
+                hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
+            }
+            int newIndex = internalState._elementCount;
+            internalState._elementK[newIndex] = key;
+            if (value == Constants.NULL_LONG) {
+                internalState._elementV[newIndex] = internalState._elementCount;
+            } else {
+                internalState._elementV[newIndex] = value;
+            }
+
+            int currentHashedElemIndex = internalState._elementHash[hashIndex];
+            if (currentHashedElemIndex != -1) {
+                internalState._elementNext[newIndex] = currentHashedElemIndex;
+            } else {
+                internalState._elementNext[newIndex] = -2;
+            }
+            //now the object is reachable to other thread everything should be ready
+            internalState._elementHash[hashIndex] = newIndex;
+            internalState._elementCount = internalState._elementCount + 1;
+            _listener.declareDirty(null);
+        } else {
+            if (internalState._elementV[entry] != value && value != Constants.NULL_LONG) {
+                //setValue
+                internalState._elementV[entry] = value;
+                _listener.declareDirty(null);
+            }
+        }
+    }
+
+    @Override
+    public void remove(long key) {
+        throw new RuntimeException("Not implemented yet!!!");
     }
 
     //TODO check intersection of remove and put
+    /*
     @Override
     public synchronized final void remove(long key) {
         InternalState internalState = state;
@@ -278,7 +183,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         int m = state.elementHash[index];
         int last = -1;
         while (m >= 0) {
-            if (key == state.elementKV[m * 2] /* getKey */) {
+            if (key == state.elementKV[m * 2]) {
                 break;
             }
             last = m;
@@ -299,13 +204,15 @@ public class ArrayLongLongMap implements KLongLongMap {
         state.elementNext[m] = -1;//flag to dropped value
         this.elementCount--;
         this.droppedCount++;
-    }
+    }*/
 
+    /*
     public final int size() {
         return this.elementCount;
-    }
+    }*/
 
     /* warning: this method is not thread safe */
+    /*
     @Override
     public void init(String payload) {
         //_metaClassIndex = metaClassIndex;
@@ -314,22 +221,12 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() /*&& payload.charAt(cursor) != ','*/ && payload.charAt(cursor) != '/') {
+        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
             cursor++;
         }
         if (cursor >= payload.length()) {
             return;
         }
-        /*
-        if (payload.charAt(cursor) == ',') {//className to parse
-            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
-            cursor++;
-            initPos = cursor;
-        }
-        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
-            cursor++;
-        }
-        */
         int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
         //reset the map
         int length = (nbElement == 0 ? 1 : nbElement << 1);
@@ -372,17 +269,12 @@ public class ArrayLongLongMap implements KLongLongMap {
         this.droppedCount = 0;
         this.state = temp_state;//TODO check with CnS
         this.threshold = (int) (length * loadFactor);
+    }*/
 
-    }
-
+    /*
     @Override
     public String serialize() {
         final StringBuilder buffer = new StringBuilder();//roughly approximate init size
-        /*
-        if (_metaClassIndex != -1) {
-            buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
-            buffer.append(',');
-        }*/
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.append('/');
         boolean isFirst = true;
@@ -401,46 +293,7 @@ public class ArrayLongLongMap implements KLongLongMap {
             }
         }
         return buffer.toString();
-    }
-
-    @Override
-    public void free() {
-        clear();
-    }
-
-    @Override
-    public short chunkType() {
-        return Constants.LONG_LONG_MAP;
-    }
-
-    private void internal_set_dirty() {
-        this._magic = PrimitiveHelper.rand();
-        if (_listener != null) {
-            if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                _listener.declareDirty(this);
-                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
-                setFlags(Constants.DIRTY_BIT, 0);
-            }
-        } else {
-            setFlags(Constants.DIRTY_BIT, 0);
-        }
-    }
-
-    @Override
-    public long flags() {
-        return _flags.get();
-    }
-
-    @Override
-    public void setFlags(long bitsToEnable, long bitsToDisable) {
-        long val;
-        long nval;
-        do {
-            val = _flags.get();
-            nval = val & ~bitsToDisable | bitsToEnable;
-        } while (!_flags.compareAndSet(val, nval));
-    }
-
+    }*/
 
 }
 
