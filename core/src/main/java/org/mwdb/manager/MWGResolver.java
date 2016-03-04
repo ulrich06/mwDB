@@ -43,13 +43,13 @@ public class MWGResolver implements KResolver {
         this._space.declareDirty(cacheEntry);
 
         //initiate time management
-        KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.LONG_TREE);
+        KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.TIME_TREE_CHUNK);
         timeTree.load(null);
         this._space.putAndMark(timeTree);
         timeTree.insertKey(node.time());
 
         //initiate universe management
-        KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.LONG_LONG_MAP);
+        KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.WORLD_ORDER_CHUNK);
         objectWorldOrder.load(null);
         this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
@@ -248,10 +248,10 @@ public class MWGResolver implements KResolver {
                     long loopUuid = keys[i * 3 + 2];
                     short elemType;
                     if (loopWorld == Constants.NULL_LONG) {
-                        elemType = Constants.LONG_LONG_MAP;
+                        elemType = Constants.WORLD_ORDER_CHUNK;
                     } else {
                         if (loopTime == Constants.NULL_LONG) {
-                            elemType = Constants.LONG_TREE;
+                            elemType = Constants.TIME_TREE_CHUNK;
                         } else {
                             if (payloads[i] == null || payloads[i].length() < 1) {
                                 elemType = Constants.STATE_CHUNK;
@@ -400,7 +400,7 @@ public class MWGResolver implements KResolver {
                         if (resolvedWorld == nodeWorld) {
                             objectTimeTree.insertKey(nodeTime);
                         } else {
-                            KLongTree newTemporalTree = (KLongTree) this._space.create(nodeWorld, Constants.NULL_LONG, nodeId, Constants.LONG_TREE);
+                            KLongTree newTemporalTree = (KLongTree) this._space.create(nodeWorld, Constants.NULL_LONG, nodeId, Constants.TIME_TREE_CHUNK);
                             this._space.putAndMark(newTemporalTree);
                             newTemporalTree.insertKey(nodeTime);
                             //unmark the previous time tree, now we have switched to the new one

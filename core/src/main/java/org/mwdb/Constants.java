@@ -34,10 +34,6 @@ public class Constants {
 
     public static final char CHUNK_VAL_SEP = '$';
 
-    public static final int CACHE_INIT_SIZE = 16;
-
-    public static final float CACHE_LOAD_FACTOR = ((float) 75 / (float) 100);
-
     /**
      * ChunkFlags
      */
@@ -53,9 +49,9 @@ public class Constants {
      */
     public static final short STATE_CHUNK = 0;
 
-    public static final short LONG_TREE = 2;
+    public static final short TIME_TREE_CHUNK = 2;
 
-    public static final short LONG_LONG_MAP = 3;
+    public static final short WORLD_ORDER_CHUNK = 3;
 
     /**
      * Node constants

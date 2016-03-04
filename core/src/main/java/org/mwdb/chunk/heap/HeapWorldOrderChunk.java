@@ -21,10 +21,6 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
 
     protected int threshold;
 
-    private final int initialCapacity = 16;
-
-    private static final float loadFactor = ((float) 75 / (float) 100);
-
     private final AtomicLong _flags;
 
     private final AtomicInteger _counter;
@@ -69,13 +65,14 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
         this._listener = p_listener;
         this.elementCount = 0;
         this.droppedCount = 0;
+        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
         InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
             newstate.elementNext[i] = -1;
             newstate.elementHash[i] = -1;
         }
         this.state = newstate;
-        this.threshold = (int) (newstate.elementDataSize * loadFactor);
+        this.threshold = (int) (newstate.elementDataSize * Constants.MAP_LOAD_FACTOR);
         this._magic = PrimitiveHelper.rand();
     }
 
@@ -115,6 +112,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
         return this._counter.decrementAndGet();
     }
 
+    /*
     public final void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
@@ -127,7 +125,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
             this.state = newstate;
             this.threshold = (int) (newstate.elementDataSize * loadFactor);
         }
-    }
+    }*/
 
     @Override
     public long magic() {
@@ -159,7 +157,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
         }
         //setPrimitiveType value for all
         state = new InternalState(length, newElementKV, newElementNext, newElementHash);
-        this.threshold = (int) (length * loadFactor);
+        this.threshold = (int) (length * Constants.MAP_LOAD_FACTOR);
     }
 
     @Override
@@ -372,7 +370,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
         this.elementCount = nbElement;
         this.droppedCount = 0;
         this.state = temp_state;//TODO check with CnS
-        this.threshold = (int) (length * loadFactor);
+        this.threshold = (int) (length * Constants.MAP_LOAD_FACTOR);
 
     }
 
@@ -406,12 +404,12 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
 
     @Override
     public void free() {
-        clear();
+        //clear();
     }
 
     @Override
     public short chunkType() {
-        return Constants.LONG_LONG_MAP;
+        return Constants.WORLD_ORDER_CHUNK;
     }
 
     private void internal_set_dirty() {

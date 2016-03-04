@@ -117,7 +117,7 @@ public class Graph implements KGraph {
                                                         }
 
                                                         //init the global universe tree (mandatory for synchronious create)
-                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.LONG_LONG_MAP);
+                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK);
                                                         globalWorldOrder.load(strings[GLO_TREE_INDEX]);
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 

@@ -725,7 +725,7 @@ public class HeapTimeTreeChunk implements KLongTree {
 
     @Override
     public short chunkType() {
-        return Constants.LONG_TREE;
+        return Constants.TIME_TREE_CHUNK;
     }
 
      /*

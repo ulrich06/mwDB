@@ -29,8 +29,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     /** */
     protected int threshold;
 
-    private final int initialCapacity = 16;
-
     private final AtomicLong _flags;
 
     private final AtomicInteger _counter;
@@ -101,6 +99,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         this._listener = p_listener;
         this.elementCount = 0;
         this.droppedCount = 0;
+        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
         InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity]);
         for (int i = 0; i < initialCapacity; i++) {
             newstate._elementNext[i] = -1;
@@ -386,7 +385,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         this.state = temp_state;//TODO check with CnS
         this.threshold = (int) (length * loadFactor);
     }
-
+    
     @Override
     public String save() {
         final StringBuilder buffer = new StringBuilder();
