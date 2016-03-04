@@ -331,11 +331,16 @@ public class HeapStateChunk implements KStateChunk {
                 cursor++;
             }
             int middleChunk = cursor;
+            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
+                cursor++;
+            }
+            int payloadChunk = cursor;
             while (cursor < payload.length() && payload.charAt(cursor) != ',') {
                 cursor++;
             }
             long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
-            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
+            int loopType = Base64.decodeToIntWithBounds(payload, middleChunk + 1, payloadChunk);
+            String loopVal = Base64.decodeToStringWithBounds(payload, payloadChunk + 1, cursor);
 
             //TODO
             int index = -1;
@@ -343,7 +348,9 @@ public class HeapStateChunk implements KStateChunk {
             //insert K/V
             int newIndex = this.elementCount;
             temp_state._elementK[newIndex] = loopKey;
+            temp_state._elementType[newIndex] = loopType;
             temp_state._elementV[newIndex] = loopVal;
+
             int currentHashedIndex = temp_state._elementHash[index];
             if (currentHashedIndex != -1) {
                 temp_state._elementNext[newIndex] = currentHashedIndex;

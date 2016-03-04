@@ -17,5 +17,12 @@ public class KType {
     public static final int DOUBLE_ARRAY = 6;
     public static final int LONG_ARRAY = 7;
     public static final int INT_ARRAY = 8;
-    
+
+    /**
+     * Primitive Maps
+     */
+    public static final int LONG_LONG_MAP = 9;
+    public static final int LONG_LONG_ARRAY_MAP = 10;
+    public static final int STRING_LONG_MAP = 110;
+
 }
