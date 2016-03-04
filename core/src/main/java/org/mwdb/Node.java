@@ -1,7 +1,7 @@
 package org.mwdb;
 
 import org.mwdb.chunk.KStateChunk;
-import org.mwdb.plugin.KNodeState;
+import org.mwdb.plugin.KResolver.KNodeState;
 import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;

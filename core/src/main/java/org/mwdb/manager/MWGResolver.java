@@ -2,7 +2,7 @@ package org.mwdb.manager;
 
 import org.mwdb.*;
 import org.mwdb.chunk.*;
-import org.mwdb.plugin.KNodeState;
+import org.mwdb.plugin.KResolver.KNodeState;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -454,7 +454,7 @@ public class MWGResolver implements KResolver {
             return null;
         }
     }
-    
+
     /**
      * Dictionary methods
      */
