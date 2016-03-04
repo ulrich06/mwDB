@@ -4,7 +4,9 @@ public interface KStack {
 
     void enqueue(int index);
 
-    int dequeue();
+    int dequeueTail();
+
+    int dequeue(int index);
 
     void reenqueue(int index);
 

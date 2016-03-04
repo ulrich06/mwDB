@@ -1,12 +1,10 @@
 package org.mwdb.manager;
 
 import org.mwdb.*;
-import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
-import org.mwdb.struct.KLongLongMap;
-import org.mwdb.struct.KStringLongMap;
+import org.mwdb.chunk.*;
 
 public class MWGResolver implements KResolver {
 

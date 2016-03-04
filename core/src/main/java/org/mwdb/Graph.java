@@ -1,10 +1,10 @@
 package org.mwdb;
 
-import org.mwdb.chunk.*;
 import org.mwdb.manager.KeyCalculator;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.chunk.*;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 

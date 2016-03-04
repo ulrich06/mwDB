@@ -256,13 +256,13 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         if (entry == -1) {
             //we look for nextIndex
             int nbTry = 0;
-            int currentVictimIndex = this._lru.dequeue();
+            int currentVictimIndex = this._lru.dequeueTail();
             while (this._values[currentVictimIndex] != null && (
                     this._values[currentVictimIndex].marks() > 0 /*&& nbTry < this._maxEntries*/
                             || (this._values[currentVictimIndex].flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT)
                     ) {
                 this._lru.enqueue(currentVictimIndex);
-                currentVictimIndex = this._lru.dequeue();
+                currentVictimIndex = this._lru.dequeueTail();
                 nbTry++;
                 if (nbTry % (this._maxEntries / 10) == 0) {
                     System.gc();

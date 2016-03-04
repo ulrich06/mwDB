@@ -3,8 +3,8 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
-import org.mwdb.struct.KStringLongMap;
-import org.mwdb.struct.KStringLongMapCallBack;
+import org.mwdb.chunk.KStringLongMap;
+import org.mwdb.chunk.KStringLongMapCallBack;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicReference;

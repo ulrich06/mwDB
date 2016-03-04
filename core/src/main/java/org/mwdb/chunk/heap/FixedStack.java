@@ -48,7 +48,7 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public int dequeue() {
+    public int dequeueTail() {
         lock();
         int currentHead = _head;
         int tail = this._previous[currentHead];
@@ -60,6 +60,21 @@ public class FixedStack implements KStack {
     }
 
     @Override
+    public int dequeue(int index) {
+        /*
+        lock();
+        int previous = this._previous[index];
+        int next = this._next[index];
+        this._next[previous] = next;
+        this._previous[next] = previous;
+        unlock();
+        return tail;
+        */
+        throw new RuntimeException("Not implemented yet!!!");
+    }
+
+
+    @Override
     public void reenqueue(int index) {
         lock();
         if (_previous[_next[index]] != index) {//the element has been detached
@@ -67,7 +82,7 @@ public class FixedStack implements KStack {
             return;
         }
 
-        if(index == _head) {
+        if (index == _head) {
             unlock();
             return;
         }

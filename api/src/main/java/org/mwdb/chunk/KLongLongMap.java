@@ -1,4 +1,4 @@
-package org.mwdb.struct;
+package org.mwdb.chunk;
 
 public interface KLongLongMap {
 
