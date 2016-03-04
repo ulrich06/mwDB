@@ -35,12 +35,6 @@ public class MWGResolver implements KResolver {
 
     @Override
     public void initNode(KNode node) {
-        /*
-        short chunkType = KChunkTypes.OBJECT_CHUNK;
-        if (metaClassIndex == MetaClassIndex.INSTANCE.index()) {
-            chunkType = KChunkTypes.OBJECT_CHUNK_INDEX;
-        }*/
-
         KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK);
         cacheEntry.init(null);
         cacheEntry.setFlags(Constants.DIRTY_BIT, 0);
@@ -460,57 +454,7 @@ public class MWGResolver implements KResolver {
             return null;
         }
     }
-
-    /*
-    @Override
-    public void index(long world, long time, String indexName, boolean createIfAbsent, KCallback<KObjectIndex> callback) {
-        MWGResolver selfPointer = this;
-        lookup(world, time);
-        selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, KConfig.END_OF_TIME, new KCallback<KObject>() {
-            @Override
-            public void on(KObject kObject) {
-                KObjectIndex globalIndex = (KObjectIndex) kObject;
-                if (globalIndex == null && createIfAbsent) {
-                    globalIndex = new GenericObjectIndex(universe, time, KConfig.END_OF_TIME, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
-                    initKObject(globalIndex);
-                }
-                if (globalIndex == null) {
-                    if (Checker.isDefined(callback)) {
-                        callback.on(null);
-                    }
-                } else {
-                    long indexUUID = globalIndex.getIndex(indexName);
-                    if (indexUUID == KConfig.NULL_LONG && createIfAbsent) {
-                        long nextKey = nextObjectKey();
-                        KObjectIndex namedIndex = new GenericObjectIndex(universe, time, nextKey, selfPointer, universe, time, KConfig.NULL_LONG, KConfig.NULL_LONG);
-                        initKObject(namedIndex);
-                        globalIndex.setIndex(indexName, nextKey);
-                        if (Checker.isDefined(callback)) {
-                            callback.on(namedIndex);
-                        }
-                    } else {
-                        if (indexUUID == KConfig.NULL_LONG) {
-                            if (Checker.isDefined(callback)) {
-                                callback.on(null);
-                            }
-                        } else {
-                            selfPointer._scheduler.dispatch(selfPointer._resolver.lookup(universe, time, indexUUID, new KCallback<KObject>() {
-                                @Override
-                                public void on(KObject namedIndex) {
-                                    if (Checker.isDefined(callback)) {
-                                        callback.on((KObjectIndex) namedIndex);
-                                    }
-                                }
-                            }));
-                        }
-                    }
-                }
-            }
-        }));
-    }
-    */
-
-
+    
     /**
      * Dictionary methods
      */
