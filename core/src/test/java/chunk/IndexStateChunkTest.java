@@ -15,14 +15,13 @@ public class IndexStateChunkTest {
 
     private void test(KIndexStateChunk chunk) {
 
-        Assert.assertTrue(!chunk.contains("name"));
         Assert.assertTrue(chunk.getValue("name") == Constants.NULL_LONG);
         chunk.put("name", 0);
-        Assert.assertTrue(chunk.contains("name"));
+        Assert.assertTrue(chunk.getValue("name") != Constants.NULL_LONG);
 
-        Assert.assertTrue(!chunk.contains("value"));
+        Assert.assertTrue(chunk.getValue("value") == Constants.NULL_LONG);
         chunk.put("value", 1);
-        Assert.assertTrue(chunk.contains("value"));
+        Assert.assertTrue(chunk.getValue("value") != Constants.NULL_LONG);
 
         Assert.assertTrue(0 == chunk.getValue("name"));
         Assert.assertTrue(1 == chunk.getValue("value"));

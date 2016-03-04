@@ -44,7 +44,7 @@ public class Constants {
     public static final short DIRTY_BIT_INDEX = 0;
 
     public static final int DIRTY_BIT = 1 << DIRTY_BIT_INDEX;
-    
+
     //public static final short REMOVED_BIT_INDEX = 1;
     //public static final int REMOVED_BIT = 1 << REMOVED_BIT_INDEX;
 
@@ -84,5 +84,11 @@ public class Constants {
 
     public static final long[] GLOBAL_DICTIONARY_KEY = new long[]{NULL_LONG, 0, 0};
 
+    /**
+     * Map constants
+     */
+    public static final int MAP_INITIAL_CAPACITY = 16;
+
+    public static final float MAP_LOAD_FACTOR = ((float) 75 / (float) 100);
 
 }

@@ -172,7 +172,7 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
         return this._counter.decrementAndGet();
     }
 
-    @Override
+    //@Override
     public final void clear() {
         if (elementCount > 0) {
             this.elementCount = 0;
@@ -227,7 +227,8 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
         }
     }
 
-    @Override
+    //@Override
+    /*
     public final boolean contains(String key) {
         InternalState internalState = state;
         if (state.elementDataSize == 0) {
@@ -237,13 +238,13 @@ public class HeapIndexStateChunk implements KIndexStateChunk {
         int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
         int m = internalState.elementHash[index];
         while (m >= 0) {
-            if (PrimitiveHelper.equals(key, internalState.elementK[m]) /* getKey */) {
+            if (PrimitiveHelper.equals(key, internalState.elementK[m])) {
                 return true;
             }
             m = internalState.elementNext[m];
         }
         return false;
-    }
+    }*/
 
     @Override
     public final long getValue(String key) {

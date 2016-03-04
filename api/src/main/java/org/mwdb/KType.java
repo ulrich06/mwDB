@@ -11,6 +11,7 @@ public class KType {
     public static final int INT = 4;
     public static final int DOUBLE = 5;
 
+    /** Types below are not supposed to be used directly by users */
     /**
      * Primitive Arrays
      */
