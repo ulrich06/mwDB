@@ -264,6 +264,13 @@ public class MWGResolver implements KResolver {
                                 elemType = Constants.STATE_CHUNK;
                             } else {
                                 elemType = Constants.STATE_CHUNK;
+                                /*
+                                char flag = payloads[i].charAt(0);
+                                if (flag == '#') {
+                                    elemType = Constants.INDEX_STATE_CHUNK;
+                                } else {
+                                    elemType = Constants.STATE_CHUNK;
+                                }*/
                             }
                         }
                     }
