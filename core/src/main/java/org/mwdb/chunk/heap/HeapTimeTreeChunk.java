@@ -1,8 +1,8 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
-import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
+import org.mwdb.chunk.KLongTree;
 import org.mwdb.chunk.KTreeWalker;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class AbstractArrayTree implements KChunk {
+public class HeapTimeTreeChunk implements KLongTree {
 
     //constants definition
     private static final char BLACK_LEFT = '{';
@@ -19,7 +19,7 @@ public abstract class AbstractArrayTree implements KChunk {
     private static final char RED_LEFT = '[';
     private static final char RED_RIGHT = ']';
     private static final int META_SIZE = 3;
-    private static final float LOAD_FACTOR = ((float) 75 / (float) 100);
+
     protected int kvSize = 1;
     private int _threshold = 0;
     //volatile variables
@@ -35,7 +35,7 @@ public abstract class AbstractArrayTree implements KChunk {
     //multi-thread sync
     private AtomicBoolean _magicToken;
 
-    public AbstractArrayTree(long p_world, long p_time, long p_obj, KChunkListener p_listener) {
+    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener) {
         //listener
         this._listener = p_listener;
         //identifier
@@ -113,11 +113,11 @@ public abstract class AbstractArrayTree implements KChunk {
 
     private void allocate(int capacity) {
         state = new InternalState(new int[capacity * META_SIZE], new long[capacity * kvSize], new boolean[capacity]);
-        _threshold = (int) (capacity * LOAD_FACTOR);
+        _threshold = (int) (capacity * Constants.MAP_LOAD_FACTOR);
     }
 
     private void reallocate(int newCapacity) {
-        _threshold = (int) (newCapacity * LOAD_FACTOR);
+        _threshold = (int) (newCapacity * Constants.MAP_LOAD_FACTOR);
         long[] new_back_kv = new long[newCapacity * kvSize];
         if (state != null && state._back_kv != null) {
             System.arraycopy(state._back_kv, 0, new_back_kv, 0, _size * kvSize);
@@ -705,6 +705,28 @@ public abstract class AbstractArrayTree implements KChunk {
         }
     }
 
+    public long previousOrEqual(long key) {
+        int result = internal_previousOrEqual_index(key);
+        if (result != -1) {
+            return key(result);
+        } else {
+            return Constants.NULL_LONG;
+        }
+    }
+
+    @Override
+    public long magic() {
+        return this._magic;
+    }
+
+    public void insertKey(long p_key) {
+        internal_insert(p_key, p_key);
+    }
+
+    @Override
+    public short chunkType() {
+        return Constants.LONG_TREE;
+    }
 
      /*
     public void delete(long key) {
@@ -799,8 +821,5 @@ public abstract class AbstractArrayTree implements KChunk {
             rotateRight(n.getParent());
         }
     }*/
-
-    @Override
-    public abstract short chunkType();
 
 }

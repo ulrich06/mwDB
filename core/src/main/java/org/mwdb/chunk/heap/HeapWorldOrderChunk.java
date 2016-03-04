@@ -11,7 +11,7 @@ import org.mwdb.utility.PrimitiveHelper;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HeapLongLongMapChunk implements KWorldOrderChunk {
+public class HeapWorldOrderChunk implements KWorldOrderChunk {
 
     protected volatile int elementCount;
 
@@ -59,7 +59,7 @@ public class HeapLongLongMapChunk implements KWorldOrderChunk {
         return this._id;
     }
 
-    public HeapLongLongMapChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener) {
+    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener) {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;
