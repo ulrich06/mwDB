@@ -2,10 +2,7 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
 import org.mwdb.KType;
-import org.mwdb.chunk.KChunk;
-import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KStateChunk;
-import org.mwdb.chunk.KStateChunkCallBack;
+import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -324,89 +321,267 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         if (payload == null || payload.length() == 0) {
             return;
         }
-        int initPos = 1;
+        //future map elements
+        long[] newElementK = null;
+        Object[] newElementV = null;
+        int[] newElementType = null;
+        int[] newElementNext = null;
+        int[] newElementHash = null;
+        int newNumberElement = 0;
+        int newStateCapacity = 0;
+        //reset size
+        int currentElemIndex = 0;
+
+
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
+        int payloadSize = payload.length();
+
+        int previousStart = -1;
+        long currentChunkElemKey = Constants.NULL_LONG;
+        int currentChunkElemType = -1;
+
+        boolean isFirstElem = true;
+
+        double[] currentDoubleArr = null;
+        long[] currentLongArr = null;
+        int[] currentIntArr = null;
+        int currentSubSize = -1;
+        int currentSubIndex = 0;
+
+        while (cursor < payloadSize) {
+            if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
+                if (isFirstElem) {
+                    //initial the map
+                    isFirstElem = false;
+                    int stateChunkSize = Base64.decodeToIntWithBounds(payload, 0, cursor);
+                    newNumberElement = stateChunkSize;
+                    int newStateChunkSize = (stateChunkSize == 0 ? 1 : stateChunkSize << 1);
+                    //init map element
+                    newElementK = new long[newStateChunkSize];
+                    newElementV = new Object[newStateChunkSize];
+                    newElementType = new int[newStateChunkSize];
+                    newStateCapacity = newStateChunkSize;
+                    //init hash and chaining
+                    newElementNext = new int[newStateChunkSize];
+                    newElementHash = new int[newStateChunkSize];
+                    for (int i = 0; i < newStateChunkSize; i++) {
+                        newElementNext[i] = -1;
+                        newElementHash[i] = -1;
+                    }
+                    previousStart = cursor + 1;
+                } else {
+                    //beginning of the Chunk elem
+                    //check if something is still in buffer
+                    if (currentChunkElemType != -1) {
+                        Object toInsert = null;
+                        switch (currentChunkElemType) {
+                            /** Primitive Object */
+                            case KType.BOOL: {
+                                if (payload.charAt(previousStart) == '0') {
+                                    toInsert = false;
+                                } else if (payload.charAt(previousStart) == '1') {
+                                    toInsert = true;
+                                }
+                                break;
+                            }
+                            case KType.STRING: {
+                                toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
+                                break;
+                            }
+                            case KType.DOUBLE: {
+                                toInsert = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                break;
+                            }
+                            case KType.LONG: {
+                                toInsert = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                break;
+                            }
+                            case KType.INT: {
+                                toInsert = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                break;
+                            }
+                            /** Arrays */
+                            case KType.DOUBLE_ARRAY: {
+                                currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                toInsert = currentDoubleArr;
+                                break;
+                            }
+                            case KType.LONG_ARRAY: {
+                                currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                toInsert = currentLongArr;
+                                break;
+                            }
+                            case KType.INT_ARRAY: {
+                                currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                toInsert = currentIntArr;
+                                break;
+                            }
+
+                        }
+                        if (toInsert != null) {
+                            //insert K/V
+                            int newIndex = currentElemIndex;
+                            newElementK[newIndex] = currentChunkElemKey;
+                            newElementV[newIndex] = toInsert;
+                            newElementType[newIndex] = currentChunkElemType;
+
+                            int hashIndex = (int) PrimitiveHelper.longHash(currentChunkElemKey, newStateCapacity);
+                            int currentHashedIndex = newElementHash[hashIndex];
+                            if (currentHashedIndex != -1) {
+                                newElementNext[newIndex] = currentHashedIndex;
+                            }
+                            newElementHash[hashIndex] = newIndex;
+                            currentElemIndex++;
+                        }
+                    }
+                    //next round...
+                    previousStart = cursor + 1;
+                    currentChunkElemKey = Constants.NULL_LONG;
+                    currentChunkElemType = -1;
+                    currentSubSize = -1;
+                    currentSubIndex = 0;
+                }
+            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SEP) {
+                if (currentChunkElemKey == Constants.NULL_LONG) {
+                    currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    previousStart = cursor + 1;
+                } else if (currentChunkElemType == -1) {
+                    currentChunkElemType = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    previousStart = cursor + 1;
+                }
+            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
+                if (currentSubSize == -1) {
+                    currentSubSize = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    //init array or maps
+                    switch (currentChunkElemType) {
+                        /** Arrays */
+                        case KType.DOUBLE_ARRAY: {
+                            currentDoubleArr = new double[currentSubSize];
+                            break;
+                        }
+                        case KType.LONG_ARRAY: {
+                            currentLongArr = new long[currentSubSize];
+                            break;
+                        }
+                        case KType.INT_ARRAY: {
+                            currentIntArr = new int[currentSubSize];
+                            break;
+                        }
+                        /** Maps */
+                    }
+                } else {
+                    switch (currentChunkElemType) {
+                        /** Arrays */
+                        case KType.DOUBLE_ARRAY: {
+                            currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                            currentSubIndex++;
+                            break;
+                        }
+                        case KType.LONG_ARRAY: {
+                            currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                            currentSubIndex++;
+                            break;
+                        }
+                        case KType.INT_ARRAY: {
+                            currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                            currentSubIndex++;
+                            break;
+                        }
+                        /** Maps */
+                    }
+                }
+                previousStart = cursor + 1;
+            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
+
+            }
             cursor++;
         }
-        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-        //reset the map
-        int length = (nbElement == 0 ? 1 : nbElement << 1);
-        long[] newElementK = new long[length];
-        Object[] newElementV = new Object[length];
-        int[] newElementType = new int[length];
-        //hash and chaining
-        int[] newElementNext = new int[length];
-        int[] newElementHash = new int[length];
-        for (int i = 0; i < length; i++) {
-            newElementNext[i] = -1;
-            newElementHash[i] = -1;
-        }
-        //setPrimitiveType value for all
-        InternalState temp_state = new InternalState(length, newElementK, newElementV, newElementNext, newElementHash, newElementType);
-        while (cursor < payload.length()) {
-            cursor++;
-            int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
-                cursor++;
-            }
-            int middleChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
-                cursor++;
-            }
-            int payloadChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
-                cursor++;
-            }
-            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
-            int loopType = Base64.decodeToIntWithBounds(payload, middleChunk + 1, payloadChunk);
-            String loopVal = Base64.decodeToStringWithBounds(payload, payloadChunk + 1, cursor);
 
-            //TODO
-            int index = -1;
-            // int index = (PrimitiveHelper.stringHash(loopKey) & 0x7FFFFFFF) % temp_state._elementDataSize;
-            //insert K/V
-            int newIndex = this.elementCount;
-            temp_state._elementK[newIndex] = loopKey;
-            temp_state._elementType[newIndex] = loopType;
-            temp_state._elementV[newIndex] = loopVal;
+        //take the last element
+        if (currentChunkElemType != -1) {
+            Object toInsert = null;
+            switch (currentChunkElemType) {
+                /** Primitive Object */
+                case KType.BOOL: {
+                    if (payload.charAt(previousStart) == '0') {
+                        toInsert = false;
+                    } else if (payload.charAt(previousStart) == '1') {
+                        toInsert = true;
+                    }
+                    break;
+                }
+                case KType.STRING: {
+                    toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
+                    break;
+                }
+                case KType.DOUBLE: {
+                    toInsert = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    break;
+                }
+                case KType.LONG: {
+                    toInsert = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    break;
+                }
+                case KType.INT: {
+                    toInsert = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    break;
+                }
+                /** Arrays */
+                case KType.DOUBLE_ARRAY: {
+                    currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    toInsert = currentDoubleArr;
+                    break;
+                }
+                case KType.LONG_ARRAY: {
+                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    toInsert = currentLongArr;
+                    break;
+                }
+                case KType.INT_ARRAY: {
+                    currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    toInsert = currentIntArr;
+                    break;
+                }
 
-            int currentHashedIndex = temp_state._elementHash[index];
-            if (currentHashedIndex != -1) {
-                temp_state._elementNext[newIndex] = currentHashedIndex;
-            } else {
-                temp_state._elementNext[newIndex] = -2; //special char to tag used values
             }
-            temp_state._elementHash[index] = newIndex;
-            this.elementCount++;
+            if (toInsert != null) {
+                //insert K/V
+                int newIndex = currentElemIndex;
+                newElementK[newIndex] = currentChunkElemKey;
+                newElementV[newIndex] = toInsert;
+                newElementType[newIndex] = currentChunkElemType;
+
+                int hashIndex = (int) PrimitiveHelper.longHash(currentChunkElemKey, newStateCapacity);
+                int currentHashedIndex = newElementHash[hashIndex];
+                if (currentHashedIndex != -1) {
+                    newElementNext[newIndex] = currentHashedIndex;
+                }
+                newElementHash[hashIndex] = newIndex;
+            }
         }
-        this.elementCount = nbElement;
+        //set the state
         this.droppedCount = 0;
-        this.state = temp_state;//TODO check with CnS
-        this.threshold = (int) (length * loadFactor);
+        this.elementCount = newNumberElement;
+        this.state = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType);//TODO check with CnS
+        this.threshold = (int) (newStateCapacity * loadFactor);
     }
-    
+
     @Override
     public String save() {
         final StringBuilder buffer = new StringBuilder();
         Base64.encodeIntToBuffer(elementCount, buffer);
-        buffer.append('/');
-        boolean isFirst = true;
         InternalState internalState = state;
-        for (int i = 0; i < internalState._elementNext.length; i++) {
-            if (internalState._elementNext[i] != -1) { //there is a real value
+        for (int i = 0; i < elementCount; i++) {
+            if (internalState._elementV[i] != null) { //there is a real value
                 long loopKey = internalState._elementK[i];
                 Object loopValue = internalState._elementV[i];
                 if (loopValue != null) {
-                    if (!isFirst) {
-                        buffer.append(",");
-                    }
-                    isFirst = false;
+                    buffer.append(Constants.CHUNK_SEP);
                     Base64.encodeLongToBuffer(loopKey, buffer);
-                    buffer.append(":");
+                    buffer.append(Constants.CHUNK_SUB_SEP);
                     /** Encode to type of elem, for unSerialization */
                     Base64.encodeIntToBuffer(internalState._elementType[i], buffer);
-                    buffer.append(":");
+                    buffer.append(Constants.CHUNK_SUB_SEP);
                     switch (internalState._elementType[i]) {
                         /** Primitive Types */
                         case KType.STRING:
@@ -433,7 +608,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                             double[] castedDoubleArr = (double[]) loopValue;
                             Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
                             for (int j = 0; j < castedDoubleArr.length; j++) {
-                                buffer.append(Constants.CHUNK_VAL_SEP);
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                             }
                             break;
@@ -441,17 +616,44 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);
                             for (int j = 0; j < castedLongArr.length; j++) {
-                                buffer.append(Constants.CHUNK_VAL_SEP);
-                                Base64.encodeDoubleToBuffer(castedLongArr[j], buffer);
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                             }
                             break;
                         case KType.INT_ARRAY:
-                            long[] castedIntArr = (long[]) loopValue;
+                            int[] castedIntArr = (int[]) loopValue;
                             Base64.encodeIntToBuffer(castedIntArr.length, buffer);
                             for (int j = 0; j < castedIntArr.length; j++) {
-                                buffer.append(Constants.CHUNK_VAL_SEP);
-                                Base64.encodeDoubleToBuffer(castedIntArr[j], buffer);
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeIntToBuffer(castedIntArr[j], buffer);
                             }
+                            break;
+                        /** Maps */
+                        case KType.LONG_LONG_MAP:
+                            KLongLongMap castedLongLongMap = (KLongLongMap) loopValue;
+                            Base64.encodeIntToBuffer(castedLongLongMap.size(), buffer);
+                            castedLongLongMap.each(new KLongLongMapCallBack() {
+                                @Override
+                                public void on(final long key, final long value) {
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(key, buffer);
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(value, buffer);
+                                }
+                            });
+                            break;
+                        case KType.STRING_LONG_MAP:
+                            KStringLongMap castedStringLongMap = (KStringLongMap) loopValue;
+                            Base64.encodeIntToBuffer(castedStringLongMap.size(), buffer);
+                            castedStringLongMap.each(new KStringLongMapCallBack() {
+                                @Override
+                                public void on(final String key, final long value) {
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeStringToBuffer(key, buffer);
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(value, buffer);
+                                }
+                            });
                             break;
                         default:
                             break;

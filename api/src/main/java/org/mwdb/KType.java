@@ -24,6 +24,6 @@ public class KType {
      */
     public static final int LONG_LONG_MAP = 9;
     public static final int LONG_LONG_ARRAY_MAP = 10;
-    public static final int STRING_LONG_MAP = 110;
+    public static final int STRING_LONG_MAP = 11;
 
 }

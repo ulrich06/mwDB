@@ -24,15 +24,17 @@ public class Constants {
     // Limit limit local index to LONG limit - prefix size
     public static final long KEY_PREFIX_MASK = 0x0000001FFFFFFFFFl;
 
-    public static final char KEY_SEP = '|';
 
-    public static final char ELEM_SEP = ';';
+    /**
+     * Chunk Save/Load special chars
+     */
+    public static final char CHUNK_SEP = '|';
 
-    public static final char VAL_SEP = ',';
+    public static final char CHUNK_SUB_SEP = ',';
 
-    public static final char CHUNK_ELEM_SEP = '%';
+    public static final char CHUNK_SUB_SUB_SEP = ':';
 
-    public static final char CHUNK_VAL_SEP = '$';
+    public static final char CHUNK_SUB_SUB_SUB_SEP = '%';
 
     /**
      * ChunkFlags
