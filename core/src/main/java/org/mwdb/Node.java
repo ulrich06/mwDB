@@ -65,6 +65,16 @@ public class Node implements KNode {
     }
 
     @Override
+    public Object attInit(String attributeName, int attributeType) {
+        KNodeState preciseState = this._resolver.resolveState(this, false);
+        if (preciseState != null) {
+            return preciseState.init(this._resolver.key(attributeName), attributeType);
+        } else {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+    }
+
+    @Override
     public void attRemove(String attributeName, Object value) {
         attSet(attributeName, -1, null);
     }

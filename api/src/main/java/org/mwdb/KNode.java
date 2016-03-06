@@ -16,9 +16,13 @@ public interface KNode {
      */
     Object att(String attributeName);
 
+    /** Ask for an initialization of an attribute, mandatory for maps */
+    Object attInit(String attributeName, int attributeType);
+
     void attSet(String attributeName, int attributeType, Object attributeValue);
 
     void attRemove(String attributeName, Object attributeValue);
+
 
     /**
      * Relationships Management

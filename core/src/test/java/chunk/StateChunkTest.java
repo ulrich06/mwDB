@@ -10,12 +10,17 @@ import org.mwdb.utility.PrimitiveHelper;
 
 public class StateChunkTest implements KChunkListener {
 
+    private int nbCount = 0;
+
     @Test
     public void heapStateChunkTest() {
         test(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this), new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
     }
 
     private void test(KStateChunk chunk, KStateChunk chunk2) {
+        //reset nb count
+        nbCount = 0;
+
         //init chunk with primitives
         chunk.set(0, KType.BOOL, true);
         chunk.set(1, KType.STRING, "hello");
@@ -65,11 +70,14 @@ public class StateChunkTest implements KChunkListener {
 
         //System.out.println(savedChunk);
         //System.out.println(savedChunk2);
+        //System.out.println(nbCount);
+
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
+        Assert.assertTrue(1 == nbCount);
     }
 
     @Override
     public void declareDirty(KChunk chunk) {
-        //TODO
+        nbCount++;
     }
 }

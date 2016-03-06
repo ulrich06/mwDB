@@ -17,14 +17,16 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     /**
      * volatile zone
      */
-    protected volatile int elementCount;
+    private volatile int elementCount;
 
-    protected volatile int droppedCount;
+    private volatile int droppedCount;
 
-    protected volatile InternalState state = null;
+    private volatile InternalState state = null;
+
+    private boolean inLoadMode = true;
 
     /** */
-    protected int threshold;
+    private int threshold;
 
     private final AtomicLong _flags;
 
@@ -43,7 +45,9 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public void declareDirty(KChunk chunk) {
-        internal_set_dirty();
+        if(!this.inLoadMode){
+            internal_set_dirty();
+        }
     }
 
     /**
@@ -321,6 +325,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         if (payload == null || payload.length() == 0) {
             return;
         }
+        inLoadMode = true;
         //future map elements
         long[] newElementK = null;
         Object[] newElementV = null;
@@ -659,6 +664,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         this.elementCount = newNumberElement;
         this.state = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType);//TODO check with CnS
         this.threshold = (int) (newStateCapacity * loadFactor);
+        inLoadMode = false;
     }
 
     @Override
