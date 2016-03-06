@@ -14,10 +14,11 @@ public class StateChunkTest implements KChunkListener {
 
     @Test
     public void heapStateChunkTest() {
-        test(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this), new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
+        //saveLoadTest(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this), new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
+        protectionTest(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
     }
 
-    private void test(KStateChunk chunk, KStateChunk chunk2) {
+    private void saveLoadTest(KStateChunk chunk, KStateChunk chunk2) {
         //reset nb count
         nbCount = 0;
 
@@ -74,6 +75,56 @@ public class StateChunkTest implements KChunkListener {
 
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
         Assert.assertTrue(1 == nbCount);
+    }
+
+    private void protectionTest(KStateChunk chunk) {
+        //boolean protection test
+        protectionMethod(chunk, KType.BOOL, null, true);
+        protectionMethod(chunk, KType.BOOL, true, false);
+        protectionMethod(chunk, KType.BOOL, "Hello", true);
+
+        protectionMethod(chunk, KType.DOUBLE, null, true);
+        protectionMethod(chunk, KType.DOUBLE, 0.5d, false);
+        protectionMethod(chunk, KType.DOUBLE, "Hello", true);
+
+        protectionMethod(chunk, KType.LONG, null, true);
+        protectionMethod(chunk, KType.LONG, 100000000l, false);
+        protectionMethod(chunk, KType.LONG, "Hello", true);
+
+        protectionMethod(chunk, KType.INT, null, true);
+        protectionMethod(chunk, KType.INT, 10, false);
+        protectionMethod(chunk, KType.INT, "Hello", true);
+
+        protectionMethod(chunk, KType.STRING, null, false);
+        protectionMethod(chunk, KType.STRING, "Hello", false);
+        protectionMethod(chunk, KType.STRING, true, true);
+
+        //arrays
+        protectionMethod(chunk, KType.DOUBLE_ARRAY, new double[]{0.1d, 0.2d, 0.3d}, false);
+        protectionMethod(chunk, KType.DOUBLE_ARRAY, "hello", true);
+
+        protectionMethod(chunk, KType.LONG_ARRAY, new long[]{10l, 100l, 1000l}, false);
+        protectionMethod(chunk, KType.LONG_ARRAY, "hello", true);
+
+        protectionMethod(chunk, KType.INT_ARRAY, new int[]{10, 100, 1000}, false);
+        protectionMethod(chunk, KType.INT_ARRAY, "hello", true);
+
+        //maps
+        protectionMethod(chunk, KType.STRING_LONG_MAP, "hello", true);
+        protectionMethod(chunk, KType.LONG_LONG_MAP, "hello", true);
+        //TODO
+        //protectionMethod(chunk, KType.LONG_LONG_ARRAY_MAP, "hello", true);
+
+    }
+
+    private void protectionMethod(KStateChunk chunk, int elemType, Object elem, boolean shouldCrash) {
+        boolean hasCrash = false;
+        try {
+            chunk.set(0, elemType, elem);
+        } catch (Throwable e) {
+            hasCrash = true;
+        }
+        Assert.assertTrue(hasCrash == shouldCrash);
     }
 
     @Override

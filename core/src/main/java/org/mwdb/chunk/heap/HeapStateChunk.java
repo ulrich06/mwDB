@@ -45,7 +45,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public void declareDirty(KChunk chunk) {
-        if(!this.inLoadMode){
+        if (!this.inLoadMode) {
             internal_set_dirty();
         }
     }
@@ -91,7 +91,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(long p_world, long p_time, long p_id, KChunkListener p_listener) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener) {
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
@@ -152,7 +152,54 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public synchronized void set(long p_elementIndex, int p_elemType, Object p_elem) {
+    public synchronized void set(final long p_elementIndex, final int p_elemType, final Object p_unsafe_elem) {
+        Object param_elem = null;
+        //check the param type
+        try {
+            switch (p_elemType) {
+                /** Primitives */
+                case KType.BOOL:
+                    param_elem = (boolean) p_unsafe_elem;
+                    break;
+                case KType.DOUBLE:
+                    param_elem = (double) p_unsafe_elem;
+                    break;
+                case KType.LONG:
+                    param_elem = (long) p_unsafe_elem;
+                    break;
+                case KType.INT:
+                    param_elem = (int) p_unsafe_elem;
+                    break;
+                case KType.STRING:
+                    param_elem = (String) p_unsafe_elem;
+                    break;
+                /** Arrays */
+                case KType.DOUBLE_ARRAY:
+                    param_elem = (double[]) p_unsafe_elem;
+                    break;
+                case KType.LONG_ARRAY:
+                    param_elem = (long[]) p_unsafe_elem;
+                    break;
+                case KType.INT_ARRAY:
+                    param_elem = (int[]) p_unsafe_elem;
+                    break;
+                /** Maps */
+                case KType.STRING_LONG_MAP:
+                    param_elem = (KStringLongMap) p_unsafe_elem;
+                    break;
+                case KType.LONG_LONG_MAP:
+                    param_elem = (KLongLongMap) p_unsafe_elem;
+                    break;
+                case KType.LONG_LONG_ARRAY_MAP:
+                    //TODO
+                    break;
+            }
+        } catch (Exception e) {
+            //e.printStackTrace();
+            throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
+        }
+
+
         int entry = -1;
         InternalState internalState = state;
         int hashIndex = -1;
@@ -167,7 +214,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             }
             int newIndex = (this.elementCount + this.droppedCount - 1);
             state._elementK[newIndex] = p_elementIndex;
-            state._elementV[newIndex] = p_elem;
+            state._elementV[newIndex] = param_elem;
             state._elementType[newIndex] = p_elemType;
             int currentHashedIndex = state._elementHash[hashIndex];
             if (currentHashedIndex != -1) {
@@ -178,7 +225,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             //now the object is reachable to other thread everything should be ready
             state._elementHash[hashIndex] = newIndex;
         } else {
-            state._elementV[entry] = p_elem;/*setValue*/
+            state._elementV[entry] = param_elem;/*setValue*/
             state._elementType[entry] = p_elemType;
         }
         internal_set_dirty();
@@ -205,14 +252,12 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     @Override
     public Object init(long p_elementIndex, int elemType) {
         switch (elemType) {
-            case KType.LONG_LONG_MAP: {
+            case KType.LONG_LONG_MAP:
                 set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY));
                 break;
-            }
-            case KType.STRING_LONG_MAP: {
+            case KType.STRING_LONG_MAP:
                 set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
                 break;
-            }
         }
         return get(p_elementIndex);
     }
@@ -392,14 +437,13 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                         Object toInsert = null;
                         switch (currentChunkElemType) {
                             /** Primitive Object */
-                            case KType.BOOL: {
+                            case KType.BOOL:
                                 if (payload.charAt(previousStart) == '0') {
                                     toInsert = false;
                                 } else if (payload.charAt(previousStart) == '1') {
                                     toInsert = true;
                                 }
                                 break;
-                            }
                             case KType.STRING:
                                 toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
                                 break;
@@ -486,50 +530,41 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                     //init array or maps
                     switch (currentChunkElemType) {
                         /** Arrays */
-                        case KType.DOUBLE_ARRAY: {
+                        case KType.DOUBLE_ARRAY:
                             currentDoubleArr = new double[currentSubSize];
                             break;
-                        }
-                        case KType.LONG_ARRAY: {
+                        case KType.LONG_ARRAY:
                             currentLongArr = new long[currentSubSize];
                             break;
-                        }
-                        case KType.INT_ARRAY: {
+                        case KType.INT_ARRAY:
                             currentIntArr = new int[currentSubSize];
                             break;
-                        }
                         /** Maps */
-                        case KType.STRING_LONG_MAP: {
+                        case KType.STRING_LONG_MAP:
                             currentStringLongMap = new ArrayStringLongMap(this, currentSubSize);
                             break;
-                        }
-                        case KType.LONG_LONG_MAP: {
+                        case KType.LONG_LONG_MAP:
                             currentLongLongMap = new ArrayLongLongMap(this, currentSubSize);
                             break;
-                        }
-                        case KType.LONG_LONG_ARRAY_MAP: {
+                        case KType.LONG_LONG_ARRAY_MAP:
                             //TODO
                             break;
-                        }
                     }
                 } else {
                     switch (currentChunkElemType) {
                         /** Arrays */
-                        case KType.DOUBLE_ARRAY: {
+                        case KType.DOUBLE_ARRAY:
                             currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
                             break;
-                        }
-                        case KType.LONG_ARRAY: {
+                        case KType.LONG_ARRAY:
                             currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
                             break;
-                        }
-                        case KType.INT_ARRAY: {
+                        case KType.INT_ARRAY:
                             currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
                             break;
-                        }
                         /** Maps */
                         case KType.LONG_LONG_ARRAY_MAP:
                             //TODO
@@ -587,46 +622,38 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             Object toInsert = null;
             switch (currentChunkElemType) {
                 /** Primitive Object */
-                case KType.BOOL: {
+                case KType.BOOL:
                     if (payload.charAt(previousStart) == '0') {
                         toInsert = false;
                     } else if (payload.charAt(previousStart) == '1') {
                         toInsert = true;
                     }
                     break;
-                }
-                case KType.STRING: {
+                case KType.STRING:
                     toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
                     break;
-                }
-                case KType.DOUBLE: {
+                case KType.DOUBLE:
                     toInsert = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
                     break;
-                }
-                case KType.LONG: {
+                case KType.LONG:
                     toInsert = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     break;
-                }
-                case KType.INT: {
+                case KType.INT:
                     toInsert = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     break;
-                }
                 /** Arrays */
-                case KType.DOUBLE_ARRAY: {
+                case KType.DOUBLE_ARRAY:
                     currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
                     toInsert = currentDoubleArr;
                     break;
-                }
-                case KType.LONG_ARRAY: {
+                case KType.LONG_ARRAY:
                     currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     toInsert = currentLongArr;
                     break;
-                }
-                case KType.INT_ARRAY: {
+                case KType.INT_ARRAY:
                     currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     toInsert = currentIntArr;
                     break;
-                }
                 /** Maps */
                 case KType.LONG_LONG_ARRAY_MAP:
                     //TODO
