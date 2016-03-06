@@ -15,9 +15,8 @@ public class ArrayStringLongMap implements KStringLongMap {
 
     private final KChunkListener _listener;
 
-    public ArrayStringLongMap(KChunkListener p_listener) {
+    public ArrayStringLongMap(KChunkListener p_listener, int initialCapacity) {
         this._listener = p_listener;
-        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
         InternalState newstate = new InternalState(initialCapacity, new String[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
         for (int i = 0; i < initialCapacity; i++) {
             newstate._elementNext[i] = -1;

@@ -4,9 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.KType;
-import org.mwdb.chunk.KChunk;
-import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KStateChunk;
+import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.HeapStateChunk;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -39,24 +37,35 @@ public class StateChunkTest implements KChunkListener {
             }
         }
 
-        //init chunk with primitives
+        //init chunk with arrays
         chunk.set(5, KType.LONG_ARRAY, new long[]{0, 1, 2, 3, 4});
         chunk.set(6, KType.DOUBLE_ARRAY, new double[]{0.1, 1.1, 2.1, 3.1, 4.1});
         chunk.set(7, KType.INT_ARRAY, new int[]{0, 1, 2, 3, 4});
-
-        //TO REMOVE AFTER
-        //chunk.set(6, KType.INT, 100);
 
         savedChunk = chunk.save();
         chunk2.load(savedChunk);
         savedChunk2 = chunk2.save();
 
-
-        System.out.println(savedChunk);
-        System.out.println(savedChunk2);
-
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
 
+        //init chunk with some maps
+        KLongLongMap long2longMap = (KLongLongMap) chunk.init(8, KType.LONG_LONG_MAP);
+        long2longMap.put(1, 1);
+        long2longMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
+        long2longMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
+
+        KStringLongMap string2longMap = (KStringLongMap) chunk.init(9, KType.STRING_LONG_MAP);
+        string2longMap.put("1", 1);
+        string2longMap.put(Constants.END_OF_TIME + "", Constants.END_OF_TIME);
+        string2longMap.put(Constants.BEGINNING_OF_TIME + "", Constants.BEGINNING_OF_TIME);
+
+        savedChunk = chunk.save();
+        chunk2.load(savedChunk);
+        savedChunk2 = chunk2.save();
+
+        //System.out.println(savedChunk);
+        //System.out.println(savedChunk2);
+        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
     }
 
     @Override

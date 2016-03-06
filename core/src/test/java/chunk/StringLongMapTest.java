@@ -16,7 +16,7 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new ArrayStringLongMap(this));
+        test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
     }
 
     private void test(KStringLongMap map) {
