@@ -2,12 +2,12 @@ package org.mwdb.chunk;
 
 public interface KStack {
 
-    void enqueue(int index);
+    boolean enqueue(int index);
 
     int dequeueTail();
 
-    int dequeue(int index);
+    boolean dequeue(int index);
 
-    void reenqueue(int index);
+    // void reenqueue(int index);
 
 }

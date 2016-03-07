@@ -6,7 +6,6 @@ import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
 import org.mwdb.utility.PrimitiveHelper;
 
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
@@ -14,38 +13,22 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     /**
-     * Global
+     * Global variables
      */
     private final int _maxEntries;
     private final int _threeshold;
     private final AtomicInteger _elementCount;
-    private KStack _lru;
+    private final KStack _lru;
     private KGraph _graph;
 
     /**
      * HashMap variables
      */
-    /*
-    private final long[] elementK3a;
-    private final long[] elementK3b;
-    private final long[] elementK3c;
-    */
-    private final int[] elementNext;
-    private final int[] elementHash;
-
-    private final AtomicIntegerArray elementHashLock;
+    private final int[] _elementNext;
+    private final int[] _elementHash;
     private final KChunk[] _values;
-
-    //private AtomicInteger _collisions;
-
-    public KChunk[] values() {
-        return this._values;
-    }
-
-    /*
-    public int collisions() {
-        return this._collisions.get();
-    }*/
+    private final AtomicIntegerArray _elementHashLock;
+    private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
     @Override
     public void setGraph(KGraph p_graph) {
@@ -55,14 +38,10 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     final class InternalDirtyStateList implements KChunkIterator {
 
         private final AtomicInteger _nextCounter;
-
         private final int[] _dirtyElements;
-
         private final int _max;
-
         private final AtomicInteger _iterationCounter;
-
-        private HeapChunkSpace _parent;
+        private final HeapChunkSpace _parent;
 
         public InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
 
@@ -115,63 +94,53 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    private final AtomicReference<InternalDirtyStateList> _dirtyState;
-
-    private Random random;
-
     public HeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
         this._threeshold = maxEntries / 100 * autoSavePercent;
-
         this._lru = new FixedStack(maxEntries);
-        this.random = new Random();
-        //this._collisions = new AtomicInteger(0);
-
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
 
         //init std variables
-        /*
-        this.elementK3a = new long[maxEntries];
-        this.elementK3b = new long[maxEntries];
-        this.elementK3c = new long[maxEntries];
-        */
-        this.elementNext = new int[maxEntries];
-        this.elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
-        this.elementHash = new int[maxEntries];
+        this._elementNext = new int[maxEntries];
+        this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
+        this._elementHash = new int[maxEntries];
         this._values = new KChunk[maxEntries];
         this._elementCount = new AtomicInteger(0);
 
         //init internal structures
         for (int i = 0; i < maxEntries; i++) {
-            this.elementNext[i] = -1;
-            this.elementHash[i] = -1;
-            this.elementHashLock.set(i, -1);
+            this._elementNext[i] = -1;
+            this._elementHash[i] = -1;
+            this._elementHashLock.set(i, -1);
         }
     }
 
     @Override
     public final KChunk getAndMark(long world, long time, long id) {
-        if (this._elementCount.get() == 0) {
-            return null;
-        }
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int m = this.elementHash[index];
+        int m = this._elementHash[index];
         while (m != -1) {
             KChunk foundChunk = this._values[m];
             if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 //GET VALUE
-                //_lru.reenqueue(m);
                 if (foundChunk.mark() == 1) {
-                    //was at zero before, risky operation
-                    //_lru.dequeue(m);
-                    return foundChunk;
-                    //TODO
+                    //was at zero before, risky operation, check with LRU
+                    if (this._lru.dequeue(m)) {
+                        return foundChunk;
+                    } else {
+                        if (foundChunk.mark() > 1) {
+                            //ok fine we are several on the same object...
+                        } else {
+                            //better return null the object will be recycled by somebody else...
+                            return null;
+                        }
+                    }
                 } else {
                     return foundChunk;
                 }
             } else {
-                m = this.elementNext[m];
+                m = this._elementNext[m];
             }
         }
         return null;
@@ -179,11 +148,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmark(long world, long time, long id) {
-        if (this._elementCount.get() == 0) {
-            return;
-        }
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int m = this.elementHash[index];
+        int m = this._elementHash[index];
         while (m != -1) {
             KChunk foundChunk = this._values[m];
             if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
@@ -191,12 +157,12 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                     //check if object is dirty
                     if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                         //declare available for recycling
-                        this._lru.reenqueue(m);
+                        this._lru.enqueue(m);
                     }
                 }
                 return;
             } else {
-                m = this.elementNext[m];
+                m = this._elementNext[m];
             }
         }
     }
@@ -210,14 +176,14 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 long nodeTime = chunk.time();
                 long nodeId = chunk.id();
                 int index = PrimitiveHelper.tripleHash(nodeWorld, nodeTime, nodeId, this._maxEntries);
-                int m = this.elementHash[index];
+                int m = this._elementHash[index];
                 while (m != -1) {
                     KChunk foundChunk = this._values[m];
                     if (foundChunk != null && nodeWorld == foundChunk.world() && nodeTime == foundChunk.time() && nodeId == foundChunk.id()) {
-                        this._lru.reenqueue(m);
+                        this._lru.enqueue(m);
                         return;
                     } else {
-                        m = this.elementNext[m];
+                        m = this._elementNext[m];
                     }
                 }
             }
@@ -240,48 +206,44 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public KChunk putAndMark(KChunk p_elem) {
         //first mark the object
-        p_elem.mark();
-        KChunk result;
+        if (p_elem.mark() != 1) {
+            throw new RuntimeException("Warning, trying to put an unsafe object " + p_elem);
+        }
         int entry = -1;
         int hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
-        int m = this.elementHash[hashIndex];
+        int m = this._elementHash[hashIndex];
         while (m >= 0) {
             KChunk currentM = this._values[m];
             if (currentM != null && p_elem.world() == currentM.world() && p_elem.time() == currentM.time() && p_elem.id() == currentM.id()) {
                 entry = m;
                 break;
             }
-            m = this.elementNext[m];
+            m = this._elementNext[m];
         }
         if (entry == -1) {
             //we look for nextIndex
-            int nbTry = 0;
             int currentVictimIndex = this._lru.dequeueTail();
-            while (this._values[currentVictimIndex] != null && (
-                    this._values[currentVictimIndex].marks() > 0 /*&& nbTry < this._maxEntries*/
-                            || (this._values[currentVictimIndex].flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT)
-                    ) {
-                this._lru.enqueue(currentVictimIndex);
+            if (currentVictimIndex == -1) {
+                //TODO cache is full :(
+                System.gc();
+                System.gc();
+                System.gc();
                 currentVictimIndex = this._lru.dequeueTail();
-                nbTry++;
-                if (nbTry % (this._maxEntries / 10) == 0) {
-                    System.gc();
-                    System.err.println("GC " + nbTry);
+                if (currentVictimIndex == -1) {
+                    throw new RuntimeException("mwDB crashed, cache is full, please avoid to much retention of nodes or augment cache capacity!");
                 }
             }
-
             if (this._values[currentVictimIndex] != null) {
                 KChunk victim = this._values[currentVictimIndex];
                 long victimWorld = victim.world();
                 long victimTime = victim.time();
                 long victimObj = victim.id();
                 int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._maxEntries);
-                int previousMagic;
-                do {
-                    previousMagic = random.nextInt();
-                } while (!this.elementHashLock.compareAndSet(indexVictim, -1, previousMagic));
+
+                //negociate a lock on the indexVictim hash
+                while (!this._elementHashLock.compareAndSet(indexVictim, -1, 1)) ;
                 //we obtains the token, now remove the element
-                m = elementHash[indexVictim];
+                m = _elementHash[indexVictim];
                 int last = -1;
                 while (m >= 0) {
                     KChunk currentM = this._values[m];
@@ -289,54 +251,37 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                         break;
                     }
                     last = m;
-                    m = elementNext[m];
+                    m = _elementNext[m];
                 }
                 //POP THE VALUE FROM THE NEXT LIST
                 if (last == -1) {
-                    int previousNext = elementNext[m];
-                    elementHash[indexVictim] = previousNext;
+                    int previousNext = _elementNext[m];
+                    _elementHash[indexVictim] = previousNext;
                 } else {
-                    elementNext[last] = elementNext[m];
+                    _elementNext[last] = _elementNext[m];
                 }
-                elementNext[m] = -1;//flag to dropped value
-
+                _elementNext[m] = -1;//flag to dropped value
                 //UNREF victim value object
                 _values[currentVictimIndex] = null;
 
                 //free the lock
-                this.elementHashLock.compareAndSet(indexVictim, previousMagic, -1);
+                this._elementHashLock.set(indexVictim, -1);
                 this._elementCount.decrementAndGet();
                 //FREE VICTIM FROM MEMORY
                 victim.free();
             }
-            /*
-            elementK3a[currentVictimIndex] = p_elem.world();
-            elementK3b[currentVictimIndex] = p_elem.time();
-            elementK3c[currentVictimIndex] = p_elem.id();
-            */
             _values[currentVictimIndex] = p_elem;
-
-            int previousMagic;
-            do {
-                previousMagic = random.nextInt();
-            } while (!this.elementHashLock.compareAndSet(hashIndex, -1, previousMagic));
-            /*
-            if (elementHash[index] != -1) {
-                this._collisions.incrementAndGet();
-            }*/
-            elementNext[currentVictimIndex] = elementHash[hashIndex];
-            elementHash[hashIndex] = currentVictimIndex;
-            result = p_elem;
+            //negociate the lock to write on hashIndex
+            while (!this._elementHashLock.compareAndSet(hashIndex, -1, 1)) ;
+            _elementNext[currentVictimIndex] = _elementHash[hashIndex];
+            _elementHash[hashIndex] = currentVictimIndex;
             //free the lock
-            this.elementHashLock.compareAndSet(hashIndex, previousMagic, -1);
+            this._elementHashLock.set(hashIndex, -1);
             this._elementCount.incrementAndGet();
-            //reEnqueue
-            this._lru.enqueue(currentVictimIndex);
+            return p_elem;
         } else {
-            result = _values[entry];
-            this._lru.reenqueue(entry);
+            return _values[entry];
         }
-        return result;
     }
 
     @Override
@@ -350,7 +295,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
         int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int m = this.elementHash[hashIndex];
+        int m = this._elementHash[hashIndex];
         while (m >= 0) {
             KChunk currentM = this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
@@ -364,7 +309,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 }
                 return;
             }
-            m = this.elementNext[m];
+            m = this._elementNext[m];
         }
         throw new RuntimeException("Try to declare a non existing object!");
     }
