@@ -467,7 +467,7 @@ public class MWGResolver implements KResolver {
     public long key(String name) {
         KStringLongMap dictionaryIndex = (KStringLongMap) this.dictionary.get(0);
         if (dictionaryIndex == null) {
-            dictionaryIndex = (KStringLongMap) this.dictionary.init(0, KType.STRING_LONG_MAP);
+            dictionaryIndex = (KStringLongMap) this.dictionary.getOrCreate(0, KType.STRING_LONG_MAP);
         }
         long encodedKey = dictionaryIndex.getValue(name);
         if (encodedKey == Constants.NULL_LONG) {

@@ -55,12 +55,12 @@ public class StateChunkTest implements KChunkListener {
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
 
         //init chunk with some maps
-        KLongLongMap long2longMap = (KLongLongMap) chunk.init(8, KType.LONG_LONG_MAP);
+        KLongLongMap long2longMap = (KLongLongMap) chunk.getOrCreate(8, KType.LONG_LONG_MAP);
         long2longMap.put(1, 1);
         long2longMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
         long2longMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
 
-        KStringLongMap string2longMap = (KStringLongMap) chunk.init(9, KType.STRING_LONG_MAP);
+        KStringLongMap string2longMap = (KStringLongMap) chunk.getOrCreate(9, KType.STRING_LONG_MAP);
         string2longMap.put("1", 1);
         string2longMap.put(Constants.END_OF_TIME + "", Constants.END_OF_TIME);
         string2longMap.put(Constants.BEGINNING_OF_TIME + "", Constants.BEGINNING_OF_TIME);

@@ -35,11 +35,6 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
 
     private volatile long _magic;
 
-    /*
-    private int _metaClassIndex = -1;
-
-    private final AtomicInteger _objectToken;
-*/
     @Override
     public long world() {
         return this._world;

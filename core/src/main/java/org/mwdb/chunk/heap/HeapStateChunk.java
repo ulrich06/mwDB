@@ -9,26 +9,9 @@ import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapStateChunk implements KStateChunk, KChunkListener {
-
-    /**
-     * volatile zone
-     */
-    private volatile int elementCount;
-
-    private volatile int droppedCount;
-
-    private volatile InternalState state = null;
-
-    private boolean inLoadMode = true;
-
-    /** */
-    private final AtomicLong _flags;
-
-    private final AtomicInteger _counter;
-
-    private final KChunkListener _listener;
 
     /**
      * Identification Section
@@ -38,6 +21,22 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     private final long _time;
 
     private final long _id;
+
+    /**
+     * Dirty management
+     */
+    private final AtomicLong _flags;
+
+    private final AtomicInteger _counter;
+
+    private final KChunkListener _listener;
+
+    /**
+     * Internal management
+     */
+    private final AtomicReference<InternalState> state;
+
+    private boolean inLoadMode;
 
     @Override
     public void declareDirty(KChunk chunk) {
@@ -65,13 +64,16 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
         public final int threshold;
 
-        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, int[] p_elementType) {
+        protected volatile int _elementCount;
+
+        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, int[] p_elementType, int p_elementCount) {
             this._elementDataSize = elementDataSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementType = p_elementType;
+            this._elementCount = p_elementCount;
             this.threshold = (int) (_elementDataSize * Constants.MAP_LOAD_FACTOR);
         }
 
@@ -86,26 +88,26 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             System.arraycopy(_elementHash, 0, clonedElementHash, 0, _elementHash.length);
             int[] clonedElementType = new int[_elementType.length];
             System.arraycopy(_elementType, 0, clonedElementType, 0, clonedElementType.length);
-            return new InternalState(_elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType);
+            return new InternalState(_elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType, _elementCount);
         }
     }
 
     public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener) {
+        this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
         this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._listener = p_listener;
-        this.elementCount = 0;
-        this.droppedCount = 0;
         int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-        InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity]);
+        InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity], 0);
         for (int i = 0; i < initialCapacity; i++) {
             newstate._elementNext[i] = -1;
             newstate._elementHash[i] = -1;
         }
-        this.state = newstate;
+        state = new AtomicReference<InternalState>();
+        state.set(newstate);
     }
 
     /**
@@ -197,47 +199,72 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
         }
         int entry = -1;
-        InternalState internalState = state;
+        InternalState internalState = state.get();
         int hashIndex = -1;
-        if (internalState._elementDataSize != 0) {
+        if (internalState._elementDataSize > 0) {
             hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
-            int m = state._elementHash[hashIndex];
-            while (m >= 0) {
-                if (p_elementIndex == state._elementK[m] /* getKey */) {
+            int m = internalState._elementHash[hashIndex];
+            while (m != -1) {
+                if (p_elementIndex == internalState._elementK[m] /* getKey */) {
                     entry = m;
                     break;
                 }
-                m = state._elementNext[m];
+                m = internalState._elementNext[m];
             }
         }
         if (entry == -1) {
-            if (++elementCount > state.threshold) {
-                rehashCapacity(state._elementDataSize);
-                hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, state._elementDataSize);
+            if (internalState._elementCount + 1 > internalState.threshold) {
+                int newLength = (internalState._elementDataSize == 0 ? 1 : internalState._elementDataSize << 1);
+                long[] newElementK = new long[newLength];
+                Object[] newElementV = new Object[newLength];
+                int[] newElementType = new int[newLength];
+                System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._elementDataSize);
+                System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._elementDataSize);
+                System.arraycopy(internalState._elementType, 0, newElementType, 0, internalState._elementDataSize);
+                int[] newElementNext = new int[newLength];
+                int[] newElementHash = new int[newLength];
+                for (int i = 0; i < newLength; i++) {
+                    newElementNext[i] = -1;
+                    newElementHash[i] = -1;
+                }
+                //rehashEveryThing
+                for (int i = 0; i < internalState._elementV.length; i++) {
+                    if (internalState._elementV[i] != null) { //there is a real value
+                        int keyHash = (int) PrimitiveHelper.longHash(internalState._elementK[i], newLength);
+                        int currentHashedIndex = newElementHash[keyHash];
+                        if (currentHashedIndex != -1) {
+                            newElementNext[i] = currentHashedIndex;
+                        }
+                        newElementHash[keyHash] = i;
+                    }
+                }
+                //setPrimitiveType value for all
+                internalState = new InternalState(newLength, newElementK, newElementV, newElementNext, newElementHash, newElementType, internalState._elementCount);
+                this.state.set(internalState);
+                hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
             }
-            int newIndex = (this.elementCount + this.droppedCount - 1);
-            state._elementK[newIndex] = p_elementIndex;
-            state._elementV[newIndex] = param_elem;
-            state._elementType[newIndex] = p_elemType;
-            int currentHashedIndex = state._elementHash[hashIndex];
+            int newIndex = internalState._elementCount;
+            internalState._elementCount = internalState._elementCount + 1;
+            internalState._elementK[newIndex] = p_elementIndex;
+            internalState._elementV[newIndex] = param_elem;
+            internalState._elementType[newIndex] = p_elemType;
+            int currentHashedIndex = internalState._elementHash[hashIndex];
             if (currentHashedIndex != -1) {
-                state._elementNext[newIndex] = currentHashedIndex;
-            } else {
-                state._elementNext[newIndex] = -2; //special char to tag used values
+                internalState._elementNext[newIndex] = currentHashedIndex;
             }
             //now the object is reachable to other thread everything should be ready
-            state._elementHash[hashIndex] = newIndex;
+            internalState._elementHash[hashIndex] = newIndex;
         } else {
-            state._elementV[entry] = param_elem;/*setValue*/
-            state._elementType[entry] = p_elemType;
+            internalState._elementV[entry] = param_elem;/*setValue*/
+            internalState._elementType[entry] = p_elemType;
         }
         internal_set_dirty();
     }
 
     @Override
     public Object get(long p_elementIndex) {
-        InternalState internalState = state;
-        if (state._elementDataSize == 0) {
+        InternalState internalState = state.get();
+        if (internalState._elementDataSize == 0) {
             return null;
         }
         int hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
@@ -253,7 +280,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public Object init(long p_elementIndex, int elemType) {
+    public Object getOrCreate(long p_elementIndex, int elemType) {
         switch (elemType) {
             case KType.LONG_LONG_MAP:
                 set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY));
@@ -267,8 +294,8 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public void each(KStateChunkCallBack callBack, KResolver resolver) {
-        InternalState currentState = this.state;
-        for (int i = 0; i < (this.elementCount + this.droppedCount); i++) {
+        InternalState currentState = this.state.get();
+        for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {
                 callBack.on(resolver.value(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
             }
@@ -279,82 +306,13 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     public void cloneFrom(KStateChunk origin) {
         //brutal cast, but mixed implementation is not allowed per space
         HeapStateChunk casted = (HeapStateChunk) origin;
-        casted.state = this.state.cloneState();
-        casted.elementCount = this.elementCount;
-        casted.droppedCount = this.droppedCount;
+        casted.state.set(this.state.get().cloneState());
         setFlags(Constants.DIRTY_BIT, 0);
     }
 
-    protected final void rehashCapacity(int capacity) {
-        int length = (capacity == 0 ? 1 : capacity << 1);
-        long[] newElementK = new long[length * 2];
-        Object[] newElementV = new Object[length * 2];
-        int[] newElementType = new int[length * 2];
-        System.arraycopy(state._elementK, 0, newElementK, 0, state._elementK.length);
-        System.arraycopy(state._elementV, 0, newElementV, 0, state._elementV.length);
-        System.arraycopy(state._elementType, 0, newElementType, 0, state._elementType.length);
-        int[] newElementNext = new int[length];
-        int[] newElementHash = new int[length];
-        for (int i = 0; i < length; i++) {
-            newElementNext[i] = -1;
-            newElementHash[i] = -1;
-        }
-        //rehashEveryThing
-        for (int i = 0; i < state._elementV.length; i++) {
-            if (state._elementV[i] != null) { //there is a real value
-                int keyHash = (int) PrimitiveHelper.longHash(state._elementK[i], length);
-                //int index = (PrimitiveHelper.stringHash(state._elementK[i]) & 0x7FFFFFFF) % length;
-                int currentHashedIndex = newElementHash[keyHash];
-                if (currentHashedIndex != -1) {
-                    newElementNext[i] = currentHashedIndex;
-                }
-                newElementHash[keyHash] = i;
-            }
-        }
-        //setPrimitiveType value for all
-        state = new InternalState(length, newElementK, newElementV, newElementNext, newElementHash, newElementType);
-    }
-
-    //TODO check intersection of remove and put
-    /*
-    @Override
-    public synchronized final void remove(String key) {
-        InternalState internalState = state;
-        if (state.elementDataSize == 0) {
-            return;
-        }
-        int index = (PrimitiveHelper.stringHash(key) & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = state.elementHash[index];
-        int last = -1;
-        while (m >= 0) {
-            if (PrimitiveHelper.equals(key, state.elementK[m])) {
-                break;
-            }
-            last = m;
-            m = state.elementNext[m];
-        }
-        if (m == -1) {
-            return;
-        }
-        if (last == -1) {
-            if (state.elementNext[m] > 0) {
-                state.elementHash[index] = m;
-            } else {
-                state.elementHash[index] = -1;
-            }
-        } else {
-            state.elementNext[last] = state.elementNext[m];
-        }
-        state.elementNext[m] = -1;//flag to dropped value
-        this.elementCount--;
-        this.droppedCount++;
-    }
-
-    public final int size() {
-        return this.elementCount;
-    }*/
-
-    /* warning: this method is not thread safe */
+    /**
+     * Warning: this method is not thread safe, but should only be used during the chunk safe init step
+     */
     @Override
     public void load(String payload) {
         if (payload == null || payload.length() == 0) {
@@ -677,18 +635,17 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             }
         }
         //set the state
-        this.droppedCount = 0;
-        this.elementCount = newNumberElement;
-        this.state = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType);//TODO check with CnS
-        inLoadMode = false;
+        InternalState newState = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement);
+        this.state.set(newState);
+        this.inLoadMode = false;
     }
 
     @Override
     public String save() {
         final StringBuilder buffer = new StringBuilder();
-        Base64.encodeIntToBuffer(elementCount, buffer);
-        InternalState internalState = state;
-        for (int i = 0; i < elementCount; i++) {
+        final InternalState internalState = state.get();
+        Base64.encodeIntToBuffer(internalState._elementCount, buffer);
+        for (int i = 0; i < internalState._elementCount; i++) {
             if (internalState._elementV[i] != null) { //there is a real value
                 long loopKey = internalState._elementK[i];
                 Object loopValue = internalState._elementV[i];

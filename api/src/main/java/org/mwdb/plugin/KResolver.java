@@ -49,7 +49,7 @@ public interface KResolver {
 
         Object get(long index);
 
-        Object init(long index, int elemType);
+        Object getOrCreate(long index, int elemType);
 
     }
 

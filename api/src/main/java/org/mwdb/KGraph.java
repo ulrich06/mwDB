@@ -1,7 +1,5 @@
 package org.mwdb;
 
-import org.mwdb.plugin.KStorage;
-
 public interface KGraph {
 
     /**
