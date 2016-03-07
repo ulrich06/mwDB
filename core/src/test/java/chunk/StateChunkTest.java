@@ -75,6 +75,16 @@ public class StateChunkTest implements KChunkListener {
 
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
         Assert.assertTrue(1 == nbCount);
+
+        //force reHash
+        for (int i = 0; i < 10; i++) {
+            chunk.set(1000 + i, KType.INT, i);
+        }
+        for (int i = 0; i < 10; i++) {
+            Assert.assertTrue(chunk.get(1000 + i).equals(i));
+        }
+
+
     }
 
     private void protectionTest(KStateChunk chunk) {
