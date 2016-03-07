@@ -307,7 +307,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         //brutal cast, but mixed implementation is not allowed per space
         HeapStateChunk casted = (HeapStateChunk) origin;
         casted.state.set(this.state.get().cloneState());
-        setFlags(Constants.DIRTY_BIT, 0);
     }
 
     /**
@@ -750,12 +749,8 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     private void internal_set_dirty() {
         if (this._listener != null) {
             if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
-                setFlags(Constants.DIRTY_BIT, 0);
                 this._listener.declareDirty(this);
             }
-        } else {
-            setFlags(Constants.DIRTY_BIT, 0);
         }
     }
 

@@ -231,7 +231,7 @@ public class Graph implements KGraph {
                     toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
                     try {
                         toSaveValues[i] = loopChunk.save();
-                        loopChunk.setFlags(0, Constants.DIRTY_BIT);
+                        this._space.declareClean(loopChunk);
                         i++;
                     } catch (Exception e) {
                         e.printStackTrace();

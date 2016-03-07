@@ -35,6 +35,11 @@ public interface KChunkSpace {
     void declareDirty(KChunk elem);
 
     /**
+     * Declare the chunk as clean
+     */
+    void declareClean(KChunk elem);
+
+    /**
      * Set current working space
      */
     void setGraph(KGraph graph);

@@ -140,5 +140,7 @@ public class StateChunkTest implements KChunkListener {
     @Override
     public void declareDirty(KChunk chunk) {
         nbCount++;
+        //simulate space management
+        chunk.setFlags(Constants.DIRTY_BIT,0);
     }
 }

@@ -697,11 +697,7 @@ public class HeapTimeTreeChunk implements KLongTree {
         if (_listener != null) {
             if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 _listener.declareDirty(this);
-                //the synchronization risk is minim here, at worse the object will be saved twice for the next iteration
-                setFlags(Constants.DIRTY_BIT, 0);
             }
-        } else {
-            setFlags(Constants.DIRTY_BIT, 0);
         }
     }
 

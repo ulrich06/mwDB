@@ -299,6 +299,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         while (m >= 0) {
             KChunk currentM = this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
+                dirtyChunk.setFlags(Constants.DIRTY_BIT, 0);
                 boolean success = false;
                 while (!success) {
                     InternalDirtyStateList previousState = this._dirtyState.get();
@@ -312,6 +313,28 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             m = this._elementNext[m];
         }
         throw new RuntimeException("Try to declare a non existing object!");
+    }
+
+    @Override
+    public void declareClean(KChunk cleanChunk) {
+        long world = cleanChunk.world();
+        long time = cleanChunk.time();
+        long id = cleanChunk.id();
+        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int m = this._elementHash[hashIndex];
+        while (m >= 0) {
+            KChunk currentM = this._values[m];
+            if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
+                cleanChunk.setFlags(0, Constants.DIRTY_BIT);
+                if (currentM.marks() == 0) {
+                    this._lru.enqueue(m);
+                }
+                return;
+            }
+            m = this._elementNext[m];
+        }
+        throw new RuntimeException("Try to declare a non existing object!");
+
     }
 
     @Override

@@ -36,7 +36,6 @@ public class MWGResolver implements KResolver {
     public void initNode(KNode node) {
         KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK);
         cacheEntry.load(null);
-        cacheEntry.setFlags(Constants.DIRTY_BIT, 0);
         //put and mark
         this._space.putAndMark(cacheEntry);
         //declare dirty now because potentially no insert could be done
@@ -394,7 +393,6 @@ public class MWGResolver implements KResolver {
                         KStateChunk clonedChunk = (KStateChunk) this._space.create(nodeWorld, nodeTime, nodeId, Constants.STATE_CHUNK);
                         clonedChunk.cloneFrom(currentEntry);
                         this._space.putAndMark(clonedChunk);
-                        clonedChunk.setFlags(Constants.DIRTY_BIT, 0);
                         this._space.declareDirty(clonedChunk);
 
                         if (resolvedWorld == nodeWorld) {
