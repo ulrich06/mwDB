@@ -12,8 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class HeapStateChunk implements KStateChunk, KChunkListener {
 
-    private static final float loadFactor = ((float) 75 / (float) 100);
-
     /**
      * volatile zone
      */
@@ -26,8 +24,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     private boolean inLoadMode = true;
 
     /** */
-    private int threshold;
-
     private final AtomicLong _flags;
 
     private final AtomicInteger _counter;
@@ -67,6 +63,8 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
         public final int[] _elementType;
 
+        public final int threshold;
+
         public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, int[] p_elementType) {
             this._elementDataSize = elementDataSize;
             this._elementK = p_elementK;
@@ -74,6 +72,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementType = p_elementType;
+            this.threshold = (int) (_elementDataSize * Constants.MAP_LOAD_FACTOR);
         }
 
         public InternalState cloneState() {
@@ -107,7 +106,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             newstate._elementHash[i] = -1;
         }
         this.state = newstate;
-        this.threshold = (int) (newstate._elementDataSize * loadFactor);
     }
 
     /**
@@ -198,17 +196,22 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             //e.printStackTrace();
             throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
         }
-
-
         int entry = -1;
         InternalState internalState = state;
         int hashIndex = -1;
         if (internalState._elementDataSize != 0) {
             hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
-            entry = findNonNullKeyEntry(p_elementIndex, hashIndex);
+            int m = state._elementHash[hashIndex];
+            while (m >= 0) {
+                if (p_elementIndex == state._elementK[m] /* getKey */) {
+                    entry = m;
+                    break;
+                }
+                m = state._elementNext[m];
+            }
         }
         if (entry == -1) {
-            if (++elementCount > threshold) {
+            if (++elementCount > state.threshold) {
                 rehashCapacity(state._elementDataSize);
                 hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, state._elementDataSize);
             }
@@ -279,7 +282,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         casted.state = this.state.cloneState();
         casted.elementCount = this.elementCount;
         casted.droppedCount = this.droppedCount;
-        casted.threshold = this.threshold;
         setFlags(Constants.DIRTY_BIT, 0);
     }
 
@@ -311,18 +313,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         }
         //setPrimitiveType value for all
         state = new InternalState(length, newElementK, newElementV, newElementNext, newElementHash, newElementType);
-        this.threshold = (int) (length * loadFactor);
-    }
-
-    final int findNonNullKeyEntry(long key, int keyHash) {
-        int m = state._elementHash[keyHash];
-        while (m >= 0) {
-            if (key == state._elementK[m] /* getKey */) {
-                return m;
-            }
-            m = state._elementNext[m];
-        }
-        return -1;
     }
 
     //TODO check intersection of remove and put
@@ -690,7 +680,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         this.droppedCount = 0;
         this.elementCount = newNumberElement;
         this.state = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType);//TODO check with CnS
-        this.threshold = (int) (newStateCapacity * loadFactor);
         inLoadMode = false;
     }
 
