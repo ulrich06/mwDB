@@ -17,40 +17,35 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
      * Global
      */
     private final int _maxEntries;
-
     private final int _threeshold;
-
     private final AtomicInteger _elementCount;
-
     private KStack _lru;
-
     private KGraph _graph;
 
     /**
      * HashMap variables
      */
-
+    /*
     private final long[] elementK3a;
     private final long[] elementK3b;
     private final long[] elementK3c;
-
+    */
     private final int[] elementNext;
-
     private final int[] elementHash;
 
     private final AtomicIntegerArray elementHashLock;
-
     private final KChunk[] _values;
+
+    //private AtomicInteger _collisions;
 
     public KChunk[] values() {
         return this._values;
     }
 
-    private AtomicInteger _collisions;
-
+    /*
     public int collisions() {
         return this._collisions.get();
-    }
+    }*/
 
     @Override
     public void setGraph(KGraph p_graph) {
@@ -130,16 +125,17 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
         this._lru = new FixedStack(maxEntries);
         this.random = new Random();
-        this._collisions = new AtomicInteger(0);
+        //this._collisions = new AtomicInteger(0);
 
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
 
         //init std variables
+        /*
         this.elementK3a = new long[maxEntries];
         this.elementK3b = new long[maxEntries];
         this.elementK3c = new long[maxEntries];
-
+        */
         this.elementNext = new int[maxEntries];
         this.elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this.elementHash = new int[maxEntries];
@@ -162,10 +158,10 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this.elementHash[index];
         while (m != -1) {
-            if (world == this.elementK3a[m] && time == this.elementK3b[m] && id == elementK3c[m]) {
+            KChunk foundChunk = this._values[m];
+            if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 //GET VALUE
                 //_lru.reenqueue(m);
-                KChunk foundChunk = this._values[m];
                 if (foundChunk.mark() == 1) {
                     //was at zero before, risky operation
                     //_lru.dequeue(m);
@@ -189,10 +185,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this.elementHash[index];
         while (m != -1) {
-            if (world == this.elementK3a[m] && time == this.elementK3b[m] && id == elementK3c[m]) {
-                //GET VALUE
-                //_lru.reenqueue(m);
-                KChunk foundChunk = this._values[m];
+            KChunk foundChunk = this._values[m];
+            if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 if (foundChunk.unmark() == 0) {
                     //check if object is dirty
                     if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
@@ -218,7 +212,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 int index = PrimitiveHelper.tripleHash(nodeWorld, nodeTime, nodeId, this._maxEntries);
                 int m = this.elementHash[index];
                 while (m != -1) {
-                    if (nodeWorld == this.elementK3a[m] && nodeTime == this.elementK3b[m] && nodeId == elementK3c[m]) {
+                    KChunk foundChunk = this._values[m];
+                    if (foundChunk != null && nodeWorld == foundChunk.world() && nodeTime == foundChunk.time() && nodeId == foundChunk.id()) {
                         this._lru.reenqueue(m);
                         return;
                     } else {
@@ -238,11 +233,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 return new HeapWorldOrderChunk(p_world, p_time, p_id, this);
             case Constants.TIME_TREE_CHUNK:
                 return new HeapTimeTreeChunk(p_world, p_time, p_id, this);
-            //case Constants.INDEX_STATE_CHUNK:
-            //    return new HeapIndexStateChunk(p_world, p_time, p_id, this);
-            default:
-                return null;
         }
+        return null;
     }
 
     @Override
@@ -250,9 +242,17 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         //first mark the object
         p_elem.mark();
         KChunk result;
-        int entry;
-        int index = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
-        entry = findNonNullKeyEntry(p_elem.world(), p_elem.time(), p_elem.id(), index);
+        int entry = -1;
+        int hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
+        int m = this.elementHash[hashIndex];
+        while (m >= 0) {
+            KChunk currentM = this._values[m];
+            if (currentM != null && p_elem.world() == currentM.world() && p_elem.time() == currentM.time() && p_elem.id() == currentM.id()) {
+                entry = m;
+                break;
+            }
+            m = this.elementNext[m];
+        }
         if (entry == -1) {
             //we look for nextIndex
             int nbTry = 0;
@@ -272,19 +272,20 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
             if (this._values[currentVictimIndex] != null) {
                 KChunk victim = this._values[currentVictimIndex];
-                long victimUniverse = victim.world();
+                long victimWorld = victim.world();
                 long victimTime = victim.time();
                 long victimObj = victim.id();
-                int indexVictim = PrimitiveHelper.tripleHash(victimUniverse, victimTime, victimObj, this._maxEntries);
+                int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._maxEntries);
                 int previousMagic;
                 do {
                     previousMagic = random.nextInt();
                 } while (!this.elementHashLock.compareAndSet(indexVictim, -1, previousMagic));
                 //we obtains the token, now remove the element
-                int m = elementHash[indexVictim];
+                m = elementHash[indexVictim];
                 int last = -1;
                 while (m >= 0) {
-                    if (victimUniverse == elementK3a[m] && victimTime == elementK3b[m] && victimObj == elementK3c[m]) {
+                    KChunk currentM = this._values[m];
+                    if (currentM != null && victimWorld == currentM.world() && victimTime == currentM.time() && victimObj == currentM.id()) {
                         break;
                     }
                     last = m;
@@ -305,46 +306,29 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 //free the lock
                 this.elementHashLock.compareAndSet(indexVictim, previousMagic, -1);
                 this._elementCount.decrementAndGet();
-
-                /*
-                //TEST IF VICTIM IS DIRTY
-                if ((victim.flags() & KChunkFlags.DIRTY_BIT) == KChunkFlags.DIRTY_BIT) {
-                    //SAVE VICTIM
-                    saveChunk(victim, metaModel, new KCallback<Throwable>() {
-                        @Override
-                        public void on(Throwable throwable) {
-                            //free victim from memory
-                            victim.free(metaModel);
-                        }
-                    });
-                } else {
-                    //FREE VICTIM FROM MEMORY
-                    victim.free(metaModel);
-                }*/
-
                 //FREE VICTIM FROM MEMORY
                 victim.free();
-
             }
+            /*
             elementK3a[currentVictimIndex] = p_elem.world();
             elementK3b[currentVictimIndex] = p_elem.time();
             elementK3c[currentVictimIndex] = p_elem.id();
+            */
             _values[currentVictimIndex] = p_elem;
 
             int previousMagic;
             do {
                 previousMagic = random.nextInt();
-            } while (!this.elementHashLock.compareAndSet(index, -1, previousMagic));
-
+            } while (!this.elementHashLock.compareAndSet(hashIndex, -1, previousMagic));
+            /*
             if (elementHash[index] != -1) {
                 this._collisions.incrementAndGet();
-            }
-
-            elementNext[currentVictimIndex] = elementHash[index];
-            elementHash[index] = currentVictimIndex;
+            }*/
+            elementNext[currentVictimIndex] = elementHash[hashIndex];
+            elementHash[hashIndex] = currentVictimIndex;
             result = p_elem;
             //free the lock
-            this.elementHashLock.compareAndSet(index, previousMagic, -1);
+            this.elementHashLock.compareAndSet(hashIndex, previousMagic, -1);
             this._elementCount.incrementAndGet();
             //reEnqueue
             this._lru.enqueue(currentVictimIndex);
@@ -353,17 +337,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             this._lru.reenqueue(entry);
         }
         return result;
-    }
-
-    private int findNonNullKeyEntry(long universe, long time, long obj, int index) {
-        int m = this.elementHash[index];
-        while (m >= 0) {
-            if (universe == this.elementK3a[m] && time == this.elementK3b[m] && obj == this.elementK3c[m]) {
-                return m;
-            }
-            m = this.elementNext[m];
-        }
-        return -1;
     }
 
     @Override
@@ -377,28 +350,23 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
         int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int entry = findNonNullKeyEntry(world, time, id, hashIndex);
-        if (entry != -1) {
-            boolean success = false;
-            while (!success) {
-                InternalDirtyStateList previousState = this._dirtyState.get();
-                success = previousState.declareDirty(entry);
-                if (!success) {
-                    /*
-                    _manager.saveDirtyList(_dirtyState.getAndSet(new InternalDirtyStateList(this._threeshold, this)), new KCallback<Throwable>() {
-                        @Override
-                        public void on(Throwable throwable) {
-                            if (throwable != null) {
-                                throwable.printStackTrace();
-                            }
-                        }
-                    });
-                    */
+        int m = this.elementHash[hashIndex];
+        while (m >= 0) {
+            KChunk currentM = this._values[m];
+            if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
+                boolean success = false;
+                while (!success) {
+                    InternalDirtyStateList previousState = this._dirtyState.get();
+                    success = previousState.declareDirty(m);
+                    if (!success) {
+                        this._graph.save(null);
+                    }
                 }
+                return;
             }
-        } else {
-            throw new RuntimeException("Try to declare a non existing object!");
+            m = this.elementNext[m];
         }
+        throw new RuntimeException("Try to declare a non existing object!");
     }
 
     @Override
@@ -418,7 +386,18 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             for (int i = 0; i < this._values.length; i++) {
                 KChunk loopChunk = this._values[i];
                 if (loopChunk != null) {
-                    buffer.append(i + "#:" + this.elementK3a[i] + "," + this.elementK3b[i] + "," + this.elementK3c[i] + "=>" + loopChunk.chunkType() + "(count:" + loopChunk.marks() + ",flag:" + loopChunk.flags() + ")" + "==>" + loopChunk.save() + "\n");
+                    buffer.append(i);
+                    buffer.append("#:");
+                    buffer.append(loopChunk.world());
+                    buffer.append(",");
+                    buffer.append(loopChunk.time());
+                    buffer.append(",");
+                    buffer.append(loopChunk.id());
+                    buffer.append("=>");
+                    buffer.append(loopChunk.chunkType());
+                    buffer.append(",");
+                    buffer.append(loopChunk.save());
+                    buffer.append("\n");
                 }
             }
         } catch (Exception e) {
