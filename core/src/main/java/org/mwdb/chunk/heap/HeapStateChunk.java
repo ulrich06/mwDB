@@ -205,7 +205,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
             int m = internalState._elementHash[hashIndex];
             while (m != -1) {
-                if (p_elementIndex == internalState._elementK[m] /* getKey */) {
+                if (p_elementIndex == internalState._elementK[m]) {
                     entry = m;
                     break;
                 }
