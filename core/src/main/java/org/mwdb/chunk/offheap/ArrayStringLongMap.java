@@ -51,33 +51,28 @@ public class ArrayStringLongMap implements KStringLongMap {
 
         // size
         setSize(initialCapacity);
+
         // elementK
         long elementK_ptr = unsafe.allocateMemory(initialCapacity * 8);
+        unsafe.setMemory(elementK_ptr, initialCapacity * 8, (byte) -1);
         setElementKPtr(elementK_ptr);
         // elementV
         long elementV_ptr = unsafe.allocateMemory(initialCapacity * 8);
+        unsafe.setMemory(elementV_ptr, initialCapacity * 8, (byte) -1);
         setElementVPtr(elementV_ptr);
         // elementNext
         long elementNext_ptr = unsafe.allocateMemory(initialCapacity * 8);
+        unsafe.setMemory(elementNext_ptr, initialCapacity * 8, (byte) -1);
         setElementNextPtr(elementNext_ptr);
         // elementHash
         long elementHash_ptr = unsafe.allocateMemory(initialCapacity + 8);
+        unsafe.setMemory(elementHash_ptr, initialCapacity * 8, (byte) -1);
         setElementHashPtr(elementHash_ptr);
         // threshold
         setThreshold((long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
         // elementCount
         setElementCount(0);
 
-        for (int i = 0; i < initialCapacity; i++) {
-            // elementNext
-            setElementNextValue(i, -1);
-            // elementHash
-            setElementHashValue(i, -1);
-            // elementK
-            setElementKValuePtr(i, -1);
-//            // elementV
-//            setElementVValue(i, -1);
-        }
     }
 
     @Override
@@ -138,31 +133,26 @@ public class ArrayStringLongMap implements KStringLongMap {
                 unsafe.setMemory(elementK_ptr, newCapacity * 8, (byte) -1);
                 unsafe.copyMemory(elementK_ptr_tmp, elementK_ptr, size * 8);
                 setElementKPtr(elementK_ptr);
-                unsafe.freeMemory(elementK_ptr_tmp);
+//                unsafe.freeMemory(elementK_ptr_tmp);
 
                 long elementV_ptr_tmp = getElementVPtr();
                 long elementV_ptr = unsafe.allocateMemory(newCapacity * 8);
                 unsafe.setMemory(elementV_ptr, newCapacity * 8, (byte) -1);
                 unsafe.copyMemory(elementV_ptr_tmp, elementV_ptr, size * 8);
                 setElementVPtr(elementV_ptr);
-                unsafe.freeMemory(elementV_ptr_tmp);
+//                unsafe.freeMemory(elementV_ptr_tmp);
 
                 long elementNext_ptr_tmp = getElementNextPtr();
                 long elementNext_ptr = unsafe.allocateMemory(newCapacity * 8);
                 unsafe.setMemory(elementNext_ptr, newCapacity * 8, (byte) -1);
                 setElementNextPtr(elementNext_ptr);
-                unsafe.freeMemory(elementNext_ptr_tmp);
+//                unsafe.freeMemory(elementNext_ptr_tmp);
 
                 long elementHash_ptr_tmp = getElementHashPtr();
                 long elementHash_ptr = unsafe.allocateMemory(newCapacity * 8);
                 unsafe.setMemory(elementHash_ptr, newCapacity * 8, (byte) -1);
                 setElementHashPtr(elementHash_ptr);
-                unsafe.freeMemory(elementHash_ptr_tmp);
-
-//                for (int i = 0; i < newCapacity; i++) {
-//                    setElementNextValue(i, -1);
-//                    setElementHashValue(i, -1);
-//                }
+//                unsafe.freeMemory(elementHash_ptr_tmp);
 
                 //rehashEveryThing
                 for (int i = 0; i < getElementCount(); i++) {
@@ -352,18 +342,25 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @return
      */
     private String getElementKValue(long index) {
-        long elementK_value_ptr = getElementKValuePtr(index);
-        if (elementK_value_ptr == -1) {
-            return null;
-        }
-
-        long len = unsafe.getLong(elementK_value_ptr);
-        StringBuffer buff = new StringBuffer();
-        for (int i = 0; i < len; i++) {
-            //buff.append(unsafe.getChar(elementK_value_ptr + 8 + i * 2));
-            buff.append((char) unsafe.getLong(elementK_value_ptr + 8 + i * 8));
-        }
-        return buff.toString();
+        return "";
+//        long elementK_value_ptr = getElementKValuePtr(index);
+//        if (elementK_value_ptr == -1) {
+//            return null;
+//        }
+//
+//        int length = (int) unsafe.getLong(elementK_value_ptr);
+//        byte[] bytes = new byte[length];
+//        for (int i = 0; i < bytes.length; i++) {
+//            bytes[i] = unsafe.getByte(elementK_value_ptr + 8 + i);
+//        }
+//        return new String(bytes);
+//
+//        long len = unsafe.getLong(elementK_value_ptr);
+//        StringBuffer buff = new StringBuffer();
+//        for (int i = 0; i < len; i++) {
+//            buff.append((char) unsafe.getLong(elementK_value_ptr + 8 + i * 8));
+//        }
+//        return buff.toString();
     }
 
     /**
@@ -371,24 +368,46 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @param string
      */
     private void setElementKValue(long index, String string) {
-        long elementK_value_ptr_tmp = getElementKValuePtr(index);
+//        long elementK_value_ptr_tmp = getElementKValuePtr(index);
 
-        long len = string.length();
-//        long elementK_value_ptr = unsafe.allocateMemory(8 + len * 2);
-        long elementK_value_ptr = unsafe.allocateMemory(8 + len * 8);
-        unsafe.putLong(elementK_value_ptr, len);
-        for (int i = 0; i < len; i++) {
-//            unsafe.putChar(elementK_value_ptr + 8 + i * 2, string.charAt(i));
-            unsafe.putLong(elementK_value_ptr + 8 + i * 8, (long) string.charAt(i));
+//        byte[] bytes = string.getBytes();
+//        long elementK_value_ptr = unsafe.allocateMemory(8 + bytes.length);
+//        unsafe.setMemory(elementK_value_ptr, 8 + bytes.length, (byte) -1);
+//
+//        long mem = kgv(bytes.length, 8);
+//        unsafe.putLong(elementK_value_ptr, bytes.length);
+//        for (int i = 0; i < bytes.length; i++) {
+//            unsafe.putByte(elementK_value_ptr + 8 + i, bytes[i]);
+//            unsafe.setMemory(elementK_value_ptr + 8 + i, 1, bytes[i]);
+//        }
+//
+//        setElementKValuePtr(index, elementK_value_ptr);
+//        if (elementK_value_ptr_tmp != -1) {
+//            unsafe.freeMemory(elementK_value_ptr_tmp);
+//        }
+
+//        long len = string.length();
+//        long elementK_value_ptr = unsafe.allocateMemory(8 + len * 8);
+//        unsafe.putLong(elementK_value_ptr, len);
+//        for (int i = 0; i < len; i++) {
+//            unsafe.putLong(elementK_value_ptr + 8 + i * 8, (long) string.charAt(i));
+//        }
+//
+//        // set new ptr
+//        setElementKValuePtr(index, elementK_value_ptr);
+//
+//        // clean old memory
+//        if (elementK_value_ptr_tmp != -1) {
+//            unsafe.freeMemory(elementK_value_ptr_tmp);
+//        }
+    }
+
+    private long kgv(long a, long b) {
+        for (long i = 1; i <= b; i++) {
+            if (i * a % b == 0)
+                return Math.abs(i * a);
         }
-
-        // set new ptr
-        setElementKValuePtr(index, elementK_value_ptr);
-
-        // clean old memory
-        if (elementK_value_ptr_tmp != -1) {
-            unsafe.freeMemory(elementK_value_ptr_tmp);
-        }
+        return 0;
     }
 
     /**
@@ -396,11 +415,7 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @return
      */
     private long getElementVValue(long index) {
-        long elementV_ptr = getElementVPtr();
-        if (elementV_ptr == -1) {
-            throw new RuntimeException("elementV memory block is not initialized");
-        }
-        return unsafe.getLong(elementV_ptr + index * 8);
+        return getRelativeTo(getElementVPtr(), index);
     }
 
     /**
@@ -408,11 +423,7 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @param value
      */
     private void setElementVValue(long index, long value) {
-        long elementV_ptr = getElementVPtr();
-        if (elementV_ptr == -1) {
-            throw new RuntimeException("elementV memory block is not initialized");
-        }
-        unsafe.putLong(elementV_ptr + index * 8, value);
+        setRelativeTo(getElementVPtr(), index, value);
     }
 
     /**
@@ -420,11 +431,7 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @return
      */
     private long getElementNextValue(long index) {
-        long elementNext_ptr = getElementNextPtr();
-        if (elementNext_ptr == -1) {
-            throw new RuntimeException("elementNext memory block is not initialized");
-        }
-        return unsafe.getLong(elementNext_ptr + index * 8);
+        return getRelativeTo(getElementNextPtr(), index);
     }
 
     /**
@@ -432,11 +439,7 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @param value
      */
     private void setElementNextValue(long index, long value) {
-        long elementNext_ptr = getElementNextPtr();
-        if (elementNext_ptr == -1) {
-            throw new RuntimeException("elementNext memory block is not initialized");
-        }
-        unsafe.putLong(elementNext_ptr + index * 8, value);
+        setRelativeTo(getElementNextPtr(), index, value);
     }
 
     /**
@@ -444,18 +447,38 @@ public class ArrayStringLongMap implements KStringLongMap {
      * @return
      */
     private long getElementHashValue(long index) {
-        long elementHash_ptr = getElementHashPtr();
-        if (elementHash_ptr == -1) {
-            throw new RuntimeException("elementHash memory block is not initialized");
-        }
-        return unsafe.getLong(elementHash_ptr + index * 8);
+        return getRelativeTo(getElementHashPtr(), index);
     }
 
+    /**
+     * @param index
+     * @param value
+     */
     private void setElementHashValue(long index, long value) {
-        long elementHash_ptr = getElementHashPtr();
-        if (elementHash_ptr == -1) {
-            throw new RuntimeException("elementHash memory block is not initialized");
+        setRelativeTo(getElementHashPtr(), index, value);
+    }
+
+    /**
+     * @param address
+     * @param index
+     * @return
+     */
+    private long getRelativeTo(long address, long index) {
+        if (address == -1) {
+            throw new RuntimeException("memory is not initialized");
         }
-        unsafe.putLong(elementHash_ptr + index * 8, value);
+        return unsafe.getLong(address + index * 8);
+    }
+
+    /**
+     * @param address
+     * @param index
+     * @param value
+     */
+    private void setRelativeTo(long address, long index, long value) {
+        if (address == -1) {
+            throw new RuntimeException("memory is not initialized");
+        }
+        unsafe.putLong(address + index * 8, value);
     }
 }
