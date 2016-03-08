@@ -13,7 +13,7 @@ public class Unsafe {
     public static sun.misc.Unsafe getUnsafe() {
         if (unsafe_instance == null) {
             try {
-                Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+                Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
                 theUnsafe.setAccessible(true);
                 unsafe_instance = (sun.misc.Unsafe) theUnsafe.get(null);
             } catch (Exception e) {

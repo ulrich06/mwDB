@@ -19,6 +19,12 @@ public class StringLongMapTest implements KChunkListener {
         test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
     }
 
+    @Test
+    public void arrayOffHeapTest() {
+        test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+    }
+
+
     private void test(KStringLongMap map) {
         dirtyCount = 0;
         map.put("Hello", 0);
@@ -63,6 +69,7 @@ public class StringLongMapTest implements KChunkListener {
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             map.put("i_" + i, i);
         }
+
         //test that all values are consistent
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.getValue("i_" + i) == i);
