@@ -5,9 +5,9 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.heap.ArrayLongLongMap;
 import org.mwdb.chunk.KLongLongMap;
 import org.mwdb.chunk.KLongLongMapCallBack;
+import org.mwdb.chunk.heap.ArrayLongLongMap;
 
 public class LongLongMapTest implements KChunkListener {
 
@@ -16,6 +16,11 @@ public class LongLongMapTest implements KChunkListener {
     @Test
     public void arrayHeapTest() {
         test(new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+    }
+
+    @Test
+    public void arrayOffHeapTest() {
+        test(new org.mwdb.chunk.offheap.ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY));
     }
 
     private void test(KLongLongMap map) {
