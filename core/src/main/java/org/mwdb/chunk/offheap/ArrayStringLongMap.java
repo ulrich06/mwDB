@@ -29,6 +29,7 @@ import org.mwdb.utility.Unsafe;
  */
 // TODO synchronize the put method
 public class ArrayStringLongMap implements KStringLongMap {
+
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final KChunkListener listener;

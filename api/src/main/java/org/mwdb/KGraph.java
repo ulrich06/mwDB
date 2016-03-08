@@ -35,7 +35,7 @@ public interface KGraph {
 
     void find(String indexName, KNode toIndexNode, String query, KCallback<KNode> callback);
 
-    void all(String indexName, KCallback<KNode[]> callback);
+    void all(long world, long time, String indexName, KCallback<KNode[]> callback);
 
     /**
      * Utilities

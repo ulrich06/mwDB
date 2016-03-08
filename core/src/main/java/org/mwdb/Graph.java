@@ -1,6 +1,7 @@
 package org.mwdb;
 
 import org.mwdb.manager.KeyCalculator;
+import org.mwdb.manager.MWGResolver;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -9,6 +10,7 @@ import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Graph implements KGraph {
 
@@ -291,9 +293,79 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void all(String indexName, KCallback<KNode[]> callback) {
-
+    public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
+        final Graph selfPointer = this;
+        final long indexNameCoded = this._resolver.key(indexName);
+        this._resolver.lookup(world, time, Constants.END_OF_TIME, new KCallback<KNode>() {
+            @Override
+            public void on(KNode globalIndexNode) {
+                if (globalIndexNode == null) {
+                    callback.on(new KNode[0]);
+                } else {
+                    KLongLongMap globalIndexContent = (KLongLongMap) globalIndexNode.att(Constants.INDEX_ATTRIBUTE);
+                    final long indexId = globalIndexContent.get(indexNameCoded);
+                    selfPointer._resolver.lookup(world, time, indexId, new KCallback<KNode>() {
+                        @Override
+                        public void on(KNode namedIndex) {
+                            if (namedIndex == null) {
+                                callback.on(new KNode[0]);
+                            } else {
+                                KLongLongArrayMap namedIndexContent = (KLongLongArrayMap) globalIndexNode.att(Constants.INDEX_ATTRIBUTE);
+                                final KNode[] resolved = new KNode[namedIndexContent.size()];
+                                DeferCounter waiter = new DeferCounter(namedIndexContent.size());
+                                //TODO replace by a parralel lookup
+                                final AtomicInteger loopInteger = new AtomicInteger(-1);
+                                namedIndexContent.each(new KLongLongArrayMapCallBack() {
+                                    @Override
+                                    public void on(final long hash, final long nodeId) {
+                                        selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
+                                            @Override
+                                            public void on(KNode resolvedNode) {
+                                                resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                                            }
+                                        });
+                                    }
+                                });
+                                waiter.then(new KCallback() {
+                                    @Override
+                                    public void on(Object o) {
+                                        callback.on(resolved);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
+
+    /*
+    private long buildHash(String ){
+        int iParam = 0;
+        int lastStart = iParam;
+        while (iParam < p_paramString.length()) {
+            if (p_paramString.charAt(iParam) == QueryEngine.VALS_SEP) {
+                String p = p_paramString.substring(lastStart, iParam).trim();
+                if (!PrimitiveHelper.equals(p, "")) {
+                    String[] pArray = p.split(QueryEngine.VAL_SEP);
+                    if (pArray.length > 1) {
+                        params.put(pArray[0].trim(), pArray[1].trim());
+                    }
+                }
+                lastStart = iParam + 1;
+            }
+            iParam = iParam + 1;
+        }
+        String lastParam = p_paramString.substring(lastStart, iParam).trim();
+        if (!PrimitiveHelper.equals(lastParam, "")) {
+            String[] pArray = lastParam.split(QueryEngine.VAL_SEP);
+            if (pArray.length > 1) {
+                params.put(pArray[0].trim(), pArray[1].trim());
+            }
+        }
+        return params;
+    }*/
 
     @Override
     public KDeferCounter counter(int expectedCountCalls) {

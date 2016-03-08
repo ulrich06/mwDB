@@ -82,6 +82,8 @@ public class Constants {
 
     public static final long[] GLOBAL_INDEX_KEY = new long[]{NULL_LONG, 1, 0};
 
+    public static final String INDEX_ATTRIBUTE = "index";
+
     /**
      * Map constants
      */

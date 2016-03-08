@@ -21,7 +21,7 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayOffHeapTest() {
-       // test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+        test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
     }
 
 
