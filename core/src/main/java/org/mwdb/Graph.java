@@ -49,11 +49,18 @@ public class Graph implements KGraph {
     }
 
     @Override
+    public long diverge(long world) {
+        long childWorld = this._universeKeyCalculator.nextKey();
+        this._resolver.initWorld(world, childWorld);
+        return childWorld;
+    }
+
+    @Override
     public KNode createNode(long world, long time) {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
-        KNode newNode = new Node(world, time, _objectKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
+        KNode newNode = new Node(world, time, this._objectKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
         this._resolver.initNode(newNode);
         return newNode;
     }
@@ -63,6 +70,7 @@ public class Graph implements KGraph {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
+        this._resolver.lookup(world, time, id, callback);
     }
 
     @Override
@@ -261,6 +269,30 @@ public class Graph implements KGraph {
             }
             this._storage.put(toSaveKeys, toSaveValues, callback, -1);
         }
+    }
+
+    @Override
+    public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
+        long indexNameCoded = this._resolver.key(indexName);
+
+    }
+
+    @Override
+    public void find(String indexName, KNode toIndexNode, String query, KCallback<KNode> callback) {
+        long indexNameCoded = this._resolver.key(indexName);
+        this._resolver.lookup(toIndexNode.world(), toIndexNode.time(), Constants.END_OF_TIME, new KCallback<KNode>() {
+            @Override
+            public void on(KNode globalIndexNode) {
+                //TODO, update later state of index if exists
+
+                //TODO
+            }
+        });
+    }
+
+    @Override
+    public void all(String indexName, KCallback<KNode[]> callback) {
+
     }
 
     @Override

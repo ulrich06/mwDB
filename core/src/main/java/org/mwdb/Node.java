@@ -199,8 +199,8 @@ public class Node implements KNode {
     }
 
     @Override
-    public void timepoints(KCallback<long[]> callback) {
-
+    public void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback) {
+        this._resolver.resolveTimepoints(this, beginningOfSearch, endOfSearch, callback);
     }
 
     @Override

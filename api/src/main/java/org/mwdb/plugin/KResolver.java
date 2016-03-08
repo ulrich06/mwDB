@@ -15,6 +15,9 @@ public interface KResolver {
      */
     void initNode(KNode node);
 
+    /** Init world according to the parent */
+    void initWorld(long parentWorld, long childWorld);
+
     /**
      * Mark node used structure to unused, potentially to be recycled
      */
@@ -35,6 +38,9 @@ public interface KResolver {
      */
     KNodeState resolveState(KNode node, boolean allowDephasing);
 
+    /** Resolve timepoints in a particular range */
+    void resolveTimepoints(KNode origin, long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
+
     /**
      * Internal access to the dictionary
      */
@@ -42,7 +48,9 @@ public interface KResolver {
 
     String value(long key);
 
-    /** Node state return by the resolver */
+    /**
+     * Node state return by the resolver
+     */
     interface KNodeState {
 
         void set(long index, int elemType, Object elem);

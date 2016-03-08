@@ -1,6 +1,7 @@
 package org.mwdb.manager;
 
 import org.mwdb.*;
+import org.mwdb.chunk.heap.ArrayLongLongMap;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -56,6 +57,13 @@ public class MWGResolver implements KResolver {
         this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         //monitor the node object
         this._tracker.monitor(node);
+    }
+
+    @Override
+    public void initWorld(long parentWorld, long childWorld) {
+        KWorldOrderChunk worldOrder = (KWorldOrderChunk) this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        worldOrder.put(childWorld, parentWorld);
+        worldOrder.unmark();
     }
 
     @Override
@@ -456,6 +464,122 @@ public class MWGResolver implements KResolver {
             }*/
             return null;
         }
+    }
+
+    @Override
+    public void resolveTimepoints(final KNode origin, final long beginningOfSearch, final long endOfSearch, final KCallback<long[]> callback) {
+        final MWGResolver selfPointer = this;
+        long[] keys = new long[]{
+                Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG,
+                Constants.NULL_LONG, Constants.NULL_LONG, origin.id()
+        };
+        getOrLoadAndMarkAll(keys, new KCallback<KChunk[]>() {
+            @Override
+            public void on(KChunk[] orders) {
+                if (orders == null || orders.length != 2) {
+                    callback.on(new long[0]);
+                    return;
+                }
+                final KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) orders[0];
+                final KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) orders[1];
+                //worlds collector
+                final int[] collectionSize = {Constants.MAP_INITIAL_CAPACITY};
+                final long[][] collectedWorlds = {new long[collectionSize[0]]};
+                int collectedIndex = 0;
+
+                long currentWorld = origin.world();
+                while (currentWorld != Constants.NULL_LONG) {
+                    long divergenceTimepoint = objectWorldOrder.get(currentWorld);
+                    if (divergenceTimepoint != Constants.NULL_LONG) {
+                        if (divergenceTimepoint < beginningOfSearch) {
+                            break;
+                        } else if (divergenceTimepoint > endOfSearch) {
+                            //next round, go to parent world
+                            currentWorld = globalWorldOrder.get(currentWorld);
+                        } else {
+                            //that's fit, add to search
+                            collectedWorlds[0][collectedIndex] = currentWorld;
+                            collectedIndex++;
+                            if (collectedIndex == collectionSize[0]) {
+                                //reallocate
+                                long[] temp_collectedWorlds = new long[collectionSize[0] * 2];
+                                System.arraycopy(collectedWorlds[0], 0, temp_collectedWorlds, 0, collectionSize[0]);
+                                collectedWorlds[0] = temp_collectedWorlds;
+                                collectionSize[0] = collectionSize[0] * 2;
+                            }
+                            //go to parent
+                            currentWorld = globalWorldOrder.get(currentWorld);
+                        }
+
+                    } else {
+                        //we are certainly at the initial world, let's consider only it's time tree
+                        collectedWorlds[0][collectedIndex] = currentWorld;
+                        break;
+                    }
+
+                }
+                //create request concat keys
+                int nbKeys = collectedIndex * 3;
+                final long[] timeTreeKeys = new long[nbKeys];
+                for (int i = 0; i < collectedIndex; i++) {
+                    timeTreeKeys[i * 3] = collectedWorlds[0][i];
+                    timeTreeKeys[i * 3 + 1] = Constants.NULL_LONG;
+                    timeTreeKeys[i * 3 + 2] = origin.id();
+                }
+                final int finalCollectedIndex = collectedIndex;
+                final long[] finalCollectedWorlds = collectedWorlds[0];
+                getOrLoadAndMarkAll(timeTreeKeys, new KCallback<KChunk[]>() {
+                    @Override
+                    public void on(final KChunk[] timeTrees) {
+                        if (timeTrees == null) {
+                            selfPointer._space.unmarkChunk(objectWorldOrder);
+                            selfPointer._space.unmarkChunk(globalWorldOrder);
+                            callback.on(new long[0]);
+                        } else {
+                            //time collector
+                            final int[] timelineSize = {Constants.MAP_INITIAL_CAPACITY};
+                            final long[][] timeline = {new long[timelineSize[0]]};
+                            final int[] timeline_index = {0};
+                            long previousDivergenceTime = endOfSearch;
+                            for (int i = 0; i < finalCollectedIndex; i++) {
+                                KLongTree timeTree = (KLongTree) timeTrees[i];
+                                if (timeTree != null) {
+                                    long currentDivergenceTime = objectWorldOrder.get(finalCollectedWorlds[i]);
+                                    if (currentDivergenceTime < beginningOfSearch) {
+                                        currentDivergenceTime = beginningOfSearch;
+                                    }
+                                    final long finalPreviousDivergenceTime = previousDivergenceTime;
+                                    timeTree.range(currentDivergenceTime, previousDivergenceTime, new KTreeWalker() {
+                                        @Override
+                                        public void elem(long t) {
+                                            timeline[0][timeline_index[0]] = t;
+                                            timeline_index[0]++;
+                                            if (timelineSize[0] == timeline_index[0]) {
+                                                //reallocate
+                                                long[] temp_timeline = new long[timelineSize[0] * 2];
+                                                System.arraycopy(timeline[0], 0, temp_timeline, 0, timelineSize[0]);
+                                                timeline[0] = temp_timeline;
+                                                timelineSize[0] = timelineSize[0] * 2;
+                                            }
+                                        }
+                                    });
+                                    previousDivergenceTime = currentDivergenceTime;
+                                }
+                                selfPointer._space.unmarkChunk(timeTree);
+                            }
+                            if (timeline_index[0] != timelineSize[0]) {
+                                long[] tempTimeline = new long[timeline_index[0]];
+                                System.arraycopy(timeline[0], 0, tempTimeline, 0, timeline_index[0]);
+                                timeline[0] = tempTimeline;
+                            }
+                            selfPointer._space.unmarkChunk(objectWorldOrder);
+                            selfPointer._space.unmarkChunk(globalWorldOrder);
+                            callback.on(timeline[0]);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     /**

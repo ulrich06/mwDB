@@ -80,6 +80,8 @@ public class Constants {
 
     public static final long[] GLOBAL_DICTIONARY_KEY = new long[]{NULL_LONG, 0, 0};
 
+    public static final long[] GLOBAL_INDEX_KEY = new long[]{NULL_LONG, 1, 0};
+
     /**
      * Map constants
      */

@@ -16,13 +16,14 @@ public interface KNode {
      */
     Object att(String attributeName);
 
-    /** Ask for an initialization of an attribute, mandatory for maps */
+    /**
+     * Ask for an initialization of an attribute, mandatory for maps
+     */
     Object attInit(String attributeName, int attributeType);
 
     void attSet(String attributeName, int attributeType, Object attributeValue);
 
     void attRemove(String attributeName, Object attributeValue);
-
 
     /**
      * Relationships Management
@@ -36,6 +37,15 @@ public interface KNode {
     void refRemove(String relationName, KNode relatedNode);
 
     /**
+     * Time managements
+     */
+    long timeDephasing();
+
+    void undephase();
+
+    void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
+
+    /**
      * Synchronous Wrapper
      */
     KNode[] refSync(String relationName);
@@ -44,16 +54,6 @@ public interface KNode {
      * Memory Management
      */
     void free();
-
-    /**
-     * Utility methods
-     */
-    long timeDephasing();
-
-    void undephase();
-
-    void timepoints(KCallback<long[]> callback);
-
 
     /**
      * Time related naviguation

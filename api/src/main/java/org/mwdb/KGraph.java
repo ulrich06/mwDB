@@ -15,6 +15,11 @@ public interface KGraph {
     void lookupAllTimes(long world, long[] times, long id, KCallback<KNode[]> callback);
 
     /**
+     * Many world management
+     */
+    long diverge(long world);
+
+    /**
      * Life cycle management
      */
     void save(KCallback callback);
@@ -22,6 +27,15 @@ public interface KGraph {
     void connect(KCallback callback);
 
     void disconnect(KCallback callback);
+
+    /**
+     * Global indexes management
+     */
+    void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback);
+
+    void find(String indexName, KNode toIndexNode, String query, KCallback<KNode> callback);
+
+    void all(String indexName, KCallback<KNode[]> callback);
 
     /**
      * Utilities
