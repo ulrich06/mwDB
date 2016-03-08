@@ -41,7 +41,6 @@ public class TimelineTest {
                     }
                 });
 
-
                 graph.lookup(node_t0.world(), 1, node_t0.id(), new KCallback<KNode>() {
                     @Override
                     public void on(KNode node_t1) {
@@ -66,6 +65,31 @@ public class TimelineTest {
                             }
                         });
 
+                        //now try to diverge the world
+                        long newWorld = graph.diverge(0);
+                        graph.lookup(newWorld, 2, node_t0.id(), new KCallback<KNode>() {
+                            @Override
+                            public void on(KNode node_t1_w0) {
+                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"data\": {\"name\": \"MyName@t1\"}}", node_t1_w0.toString()));
+                                Assert.assertTrue(node_t1_w0.timeDephasing() == 1);
+
+                                node_t1_w0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {
+                                    @Override
+                                    public void on(long[] longs) {
+                                        counter[0]++;
+                                        Assert.assertTrue(longs.length == 2);
+                                        Assert.assertTrue(longs[0] == 1);
+                                        Assert.assertTrue(longs[1] == 0);
+                                    }
+                                });
+
+
+                                System.out.println(node_t1_w0);
+
+
+                            }
+                        });
+
 
                     }
                 });
@@ -73,7 +97,7 @@ public class TimelineTest {
 
             }
         });
-        Assert.assertTrue(counter[0] == 4);
+        Assert.assertTrue(counter[0] == 5);
     }
 
 }

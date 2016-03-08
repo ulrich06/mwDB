@@ -513,9 +513,12 @@ public class MWGResolver implements KResolver {
                         }
 
                     } else {
+                        //go to parent
+                        currentWorld = globalWorldOrder.get(currentWorld);
+
                         //we are certainly at the initial world, let's consider only it's time tree
-                        collectedWorlds[0][collectedIndex] = currentWorld;
-                        break;
+                        //collectedWorlds[0][collectedIndex] = currentWorld;
+                        //break;
                     }
 
                 }
