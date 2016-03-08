@@ -15,7 +15,9 @@ public interface KResolver {
      */
     void initNode(KNode node);
 
-    /** Init world according to the parent */
+    /**
+     * Init world according to the parent
+     */
     void initWorld(long parentWorld, long childWorld);
 
     /**
@@ -29,7 +31,7 @@ public interface KResolver {
     KCallback lookupTask(long world, long time, long id, KCallback<KNode> callback);
 
     /**
-     * Create and scheduler a task to lookup a particular node
+     * Create and schedule a task to lookup a particular node
      */
     void lookup(long world, long time, long id, KCallback<KNode> callback);
 
@@ -38,7 +40,9 @@ public interface KResolver {
      */
     KNodeState resolveState(KNode node, boolean allowDephasing);
 
-    /** Resolve timepoints in a particular range */
+    /**
+     * Resolve timepoints in a particular range
+     */
     void resolveTimepoints(KNode origin, long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
 
     /**

@@ -105,7 +105,7 @@ public class TimelineTest {
                                         Assert.assertTrue(longs[1] == 0);
                                     }
                                 });
-                                
+
                             }
                         });
 
