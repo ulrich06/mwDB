@@ -511,16 +511,10 @@ public class MWGResolver implements KResolver {
                             //go to parent
                             currentWorld = globalWorldOrder.get(currentWorld);
                         }
-
                     } else {
                         //go to parent
                         currentWorld = globalWorldOrder.get(currentWorld);
-
-                        //we are certainly at the initial world, let's consider only it's time tree
-                        //collectedWorlds[0][collectedIndex] = currentWorld;
-                        //break;
                     }
-
                 }
                 //create request concat keys
                 int nbKeys = collectedIndex * 3;

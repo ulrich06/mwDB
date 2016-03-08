@@ -82,11 +82,30 @@ public class TimelineTest {
                                         Assert.assertTrue(longs[1] == 0);
                                     }
                                 });
-
-
-                                System.out.println(node_t1_w0);
-
-
+                                node_t1_w0.attSet("name", KType.STRING, "MyName@t1@w1");
+                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"data\": {\"name\": \"MyName@t1@w1\"}}", node_t1_w0.toString()));
+                                //test the new timeline
+                                node_t1_w0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {
+                                    @Override
+                                    public void on(long[] longs) {
+                                        counter[0]++;
+                                        Assert.assertTrue(longs.length == 3);
+                                        Assert.assertTrue(longs[0] == 2);
+                                        Assert.assertTrue(longs[1] == 1);
+                                        Assert.assertTrue(longs[2] == 0);
+                                    }
+                                });
+                                //test the old timeline
+                                node_t1.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {
+                                    @Override
+                                    public void on(long[] longs) {
+                                        counter[0]++;
+                                        Assert.assertTrue(longs.length == 2);
+                                        Assert.assertTrue(longs[0] == 1);
+                                        Assert.assertTrue(longs[1] == 0);
+                                    }
+                                });
+                                
                             }
                         });
 
@@ -97,7 +116,7 @@ public class TimelineTest {
 
             }
         });
-        Assert.assertTrue(counter[0] == 5);
+        Assert.assertTrue(counter[0] == 7);
     }
 
 }
