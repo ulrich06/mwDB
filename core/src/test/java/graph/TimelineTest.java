@@ -48,20 +48,32 @@ public class TimelineTest {
                         counter[0]++;
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t1.toString()));
                         Assert.assertTrue(node_t1.timeDephasing() == 1); //node has a dephasing of 1 with last known state
-                        node_t1.undephase();
+                        node_t1.undephase(); // force the object to move to timepoint 1
                         Assert.assertTrue(node_t1.timeDephasing() == 0); //node should be in phase now
-
-                        //TODO
-                        System.out.println(node_t1.toString());
-
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t1.toString()));
+
+                        node_t1.attSet("name", KType.STRING, "MyName@t1");
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName@t1\"}}", node_t1.toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t0.toString()));
+
+                        node_t1.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {
+                            @Override
+                            public void on(long[] longs) {
+                                counter[0]++;
+                                Assert.assertTrue(longs.length == 2);
+                                Assert.assertTrue(longs[0] == 1);
+                                Assert.assertTrue(longs[1] == 0);
+                            }
+                        });
+
+
                     }
                 });
 
 
             }
         });
-        Assert.assertTrue(counter[0] == 3);
+        Assert.assertTrue(counter[0] == 4);
     }
 
 }

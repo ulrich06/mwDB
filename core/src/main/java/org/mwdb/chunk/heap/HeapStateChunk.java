@@ -78,17 +78,17 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         }
 
         public InternalState cloneState() {
-            long[] clonedElementK = new long[_elementK.length];
-            System.arraycopy(_elementK, 0, clonedElementK, 0, _elementK.length);
-            Object[] clonedElementV = new Object[_elementV.length];
-            System.arraycopy(_elementV, 0, clonedElementV, 0, _elementV.length);
-            int[] clonedElementNext = new int[_elementNext.length];
-            System.arraycopy(_elementNext, 0, clonedElementNext, 0, _elementNext.length);
-            int[] clonedElementHash = new int[_elementHash.length];
-            System.arraycopy(_elementHash, 0, clonedElementHash, 0, _elementHash.length);
-            int[] clonedElementType = new int[_elementType.length];
-            System.arraycopy(_elementType, 0, clonedElementType, 0, clonedElementType.length);
-            return new InternalState(_elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType, _elementCount);
+            long[] clonedElementK = new long[this._elementDataSize];
+            System.arraycopy(_elementK, 0, clonedElementK, 0, this._elementDataSize);
+            Object[] clonedElementV = new Object[this._elementDataSize];
+            System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
+            int[] clonedElementNext = new int[this._elementDataSize];
+            System.arraycopy(_elementNext, 0, clonedElementNext, 0, this._elementDataSize);
+            int[] clonedElementHash = new int[this._elementDataSize];
+            System.arraycopy(_elementHash, 0, clonedElementHash, 0, this._elementDataSize);
+            int[] clonedElementType = new int[this._elementDataSize];
+            System.arraycopy(_elementType, 0, clonedElementType, 0, this._elementDataSize);
+            return new InternalState(this._elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType, _elementCount);
         }
     }
 
@@ -309,7 +309,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     public void cloneFrom(KStateChunk origin) {
         //brutal cast, but mixed implementation is not allowed per space
         HeapStateChunk casted = (HeapStateChunk) origin;
-        casted.state.set(this.state.get().cloneState());
+        this.state.set(casted.state.get().cloneState());
     }
 
     /**

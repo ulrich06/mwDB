@@ -400,6 +400,7 @@ public class MWGResolver implements KResolver {
                         //clone the chunk
                         KStateChunk clonedChunk = (KStateChunk) this._space.create(nodeWorld, nodeTime, nodeId, Constants.STATE_CHUNK);
                         clonedChunk.cloneFrom(currentEntry);
+
                         this._space.putAndMark(clonedChunk);
                         this._space.declareDirty(clonedChunk);
 

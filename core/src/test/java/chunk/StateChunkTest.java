@@ -14,11 +14,14 @@ public class StateChunkTest implements KChunkListener {
 
     @Test
     public void heapStateChunkTest() {
-        saveLoadTest(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this), new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
+        saveLoadTest(
+                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this),
+                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this),
+                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
         protectionTest(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
     }
 
-    private void saveLoadTest(KStateChunk chunk, KStateChunk chunk2) {
+    private void saveLoadTest(KStateChunk chunk, KStateChunk chunk2, KStateChunk chunk3) {
         //reset nb count
         nbCount = 0;
 
@@ -79,12 +82,6 @@ public class StateChunkTest implements KChunkListener {
         Assert.assertTrue(((KLongLongMap) chunk2.get(8)).size() == 3);
         Assert.assertTrue(((KLongLongArrayMap) chunk2.get(10)).size() == 4);
 
-
-        //System.out.println(savedChunk);
-        //System.out.println(savedChunk2);
-        //System.out.println(nbCount);
-
-
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
         Assert.assertTrue(1 == nbCount);
 
@@ -96,7 +93,11 @@ public class StateChunkTest implements KChunkListener {
             Assert.assertTrue(chunk.get(1000 + i).equals(i));
         }
 
-
+        chunk3.cloneFrom(chunk);
+        String savedChunk3 = chunk3.save();
+        savedChunk = chunk.save();
+        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk3));
+        
     }
 
     private void protectionTest(KStateChunk chunk) {
