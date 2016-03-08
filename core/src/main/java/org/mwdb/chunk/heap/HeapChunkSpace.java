@@ -226,8 +226,12 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             if (currentVictimIndex == -1) {
                 //TODO cache is full :(
                 System.gc();
-                System.gc();
-                System.gc();
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 currentVictimIndex = this._lru.dequeueTail();
                 if (currentVictimIndex == -1) {
                     throw new RuntimeException("mwDB crashed, cache is full, please avoid to much retention of nodes or augment cache capacity!");

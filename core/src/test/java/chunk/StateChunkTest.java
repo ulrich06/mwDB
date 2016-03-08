@@ -65,13 +65,25 @@ public class StateChunkTest implements KChunkListener {
         string2longMap.put(Constants.END_OF_TIME + "", Constants.END_OF_TIME);
         string2longMap.put(Constants.BEGINNING_OF_TIME + "", Constants.BEGINNING_OF_TIME);
 
+        KLongLongArrayMap long2longArrayMap = (KLongLongArrayMap) chunk.getOrCreate(10, KType.LONG_LONG_ARRAY_MAP);
+        long2longArrayMap.put(1, 1);
+        long2longArrayMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
+        long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
+        long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME);
+
         savedChunk = chunk.save();
         chunk2.load(savedChunk);
         savedChunk2 = chunk2.save();
 
+        Assert.assertTrue(((KStringLongMap) chunk2.get(9)).size() == 3);
+        Assert.assertTrue(((KLongLongMap) chunk2.get(8)).size() == 3);
+        Assert.assertTrue(((KLongLongArrayMap) chunk2.get(10)).size() == 4);
+
+
         //System.out.println(savedChunk);
         //System.out.println(savedChunk2);
         //System.out.println(nbCount);
+
 
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
         Assert.assertTrue(1 == nbCount);
@@ -122,8 +134,7 @@ public class StateChunkTest implements KChunkListener {
         //maps
         protectionMethod(chunk, KType.STRING_LONG_MAP, "hello", true);
         protectionMethod(chunk, KType.LONG_LONG_MAP, "hello", true);
-        //TODO
-        //protectionMethod(chunk, KType.LONG_LONG_ARRAY_MAP, "hello", true);
+        protectionMethod(chunk, KType.LONG_LONG_ARRAY_MAP, "hello", true);
 
     }
 
