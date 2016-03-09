@@ -35,7 +35,7 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
-                
+
                 graph.all(0, 0, "nodes", new KCallback<KNode[]>() {
                     @Override
                     public void on(KNode[] allNodes) {
