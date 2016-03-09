@@ -321,18 +321,18 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         long stringPtr = getRelativeTo(getElementKPtr(), index);
         int length = unsafe.getInt(stringPtr);
         byte[] bytes = new byte[length];
-        unsafe.copyMemory(null, stringPtr + 4, bytes, offset, length);
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = unsafe.getByte(stringPtr + 4 + i);
+        }
         return new String(bytes);
     }
-
-    private static long offset = unsafe.arrayBaseOffset(byte[].class);
-
+    
     private void setElementKValue(long index, String value) {
         long temp_stringPtr = getRelativeTo(getElementKPtr(), index);
         byte[] valueAsByte = value.getBytes();
         long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
         //copy size of the string
-        unsafe.putInt(newStringPtr, value.length());
+        unsafe.putInt(newStringPtr, valueAsByte.length);
         for (int i = 0; i < valueAsByte.length; i++) {
             unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
         }

@@ -25,18 +25,19 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void bigTest() {
-      //   KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 10_000_000);
+        //   KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 10_000_000);
         KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 10_000_000);
         //KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 10_000_000);
         // KLongLongMap map = new org.mwdb.chunk.heap.ArrayLongLongMap(this, 10_000_000);
-        
+
         long previous = System.currentTimeMillis();
         for (long i = 0; i < 10_000_000; i++) {
             if (i % 1_000_000 == 0) {
                 System.out.println(i);
             }
-            map.put("myVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContentmyVeryLongLongStringStringStringRandomContent"+i, i);
-           // map.put(i, i);
+            String toInsert = "_" + i;
+            map.put(toInsert, i);
+            // map.put(i, i);
         }
         long after = System.currentTimeMillis();
         System.out.println((after - previous));
