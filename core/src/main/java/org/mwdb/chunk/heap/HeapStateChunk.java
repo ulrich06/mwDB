@@ -280,6 +280,25 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
+    public int getType(long p_elementIndex) {
+        InternalState internalState = state.get();
+        if (internalState._elementDataSize == 0) {
+            return -1;
+        }
+        int hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
+        int m = internalState._elementHash[hashIndex];
+        while (m >= 0) {
+            if (p_elementIndex == internalState._elementK[m] /* getKey */) {
+                return internalState._elementType[m]; /* getValue */
+            } else {
+                m = internalState._elementNext[m];
+            }
+        }
+        return -1;
+    }
+
+
+    @Override
     public Object getOrCreate(long p_elementIndex, int elemType) {
         switch (elemType) {
             case KType.STRING_LONG_MAP:

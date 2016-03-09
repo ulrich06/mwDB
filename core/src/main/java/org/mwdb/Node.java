@@ -75,9 +75,19 @@ public class Node implements KNode {
     }
 
     @Override
-    public void attRemove(String attributeName, Object value) {
+    public int attType(String attributeName) {
+        KNodeState resolved = this._resolver.resolveState(this, true);
+        if (resolved != null) {
+            return resolved.getType(this._resolver.key(attributeName));
+        }
+        return -1;
+    }
+
+    @Override
+    public void attRemove(String attributeName) {
         attSet(attributeName, -1, null);
     }
+
 
     @Override
     public void ref(String relationName, KCallback<KNode[]> callback) {
@@ -174,11 +184,6 @@ public class Node implements KNode {
     }
 
     @Override
-    public KNode[] refSync(String relationName) {
-        throw new RuntimeException("not implemented yet!!!");
-    }
-
-    @Override
     public void free() {
         this._resolver.freeNode(this);
     }
@@ -201,6 +206,21 @@ public class Node implements KNode {
     @Override
     public void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback) {
         this._resolver.resolveTimepoints(this, beginningOfSearch, endOfSearch, callback);
+    }
+
+    @Override
+    public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
+//TODO
+    }
+
+    @Override
+    public void find(long world, long time, String indexName, String query, KCallback<KNode> callback) {
+//TODO
+    }
+
+    @Override
+    public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
+//TODO
     }
 
     @Override

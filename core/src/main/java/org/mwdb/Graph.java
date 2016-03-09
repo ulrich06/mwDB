@@ -9,6 +9,7 @@ import org.mwdb.chunk.*;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Query;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,13 +75,6 @@ public class Graph implements KGraph {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
         this._resolver.lookup(world, time, id, callback);
-    }
-
-    @Override
-    public void lookupAllTimes(long world, long[] times, long id, KCallback<KNode[]> callback) {
-        if (!_isConnected.get()) {
-            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
-        }
     }
 
     @Override
@@ -280,7 +274,7 @@ public class Graph implements KGraph {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KLongLongArrayMap>() {
             @Override
             public void on(KLongLongArrayMap namedIndexContent) {
-                FlatQuery flatQuery = new FlatQuery();
+                Query flatQuery = new Query();
                 KResolver.KNodeState nodeState = selfPointer._resolver.resolveState(toIndexNode, true);
                 for (int i = 0; i < keyAttributes.length; i++) {
                     long attKey = selfPointer._resolver.key(keyAttributes[i]);
@@ -311,7 +305,7 @@ public class Graph implements KGraph {
                     callback.on(null);
                     return;
                 }
-                final FlatQuery flatQuery = parseQuery(query);
+                final Query flatQuery = parseQuery(query);
                 final long[] foundId = namedIndexContent.get(flatQuery.hash);
                 if (foundId == null) {
                     callback.on(null);
@@ -459,71 +453,14 @@ public class Graph implements KGraph {
         });
     }
 
-    private class FlatQuery {
-        public long hash;
-
-        private int capacity = 1;
-        public long[] attributes = new long[capacity];
-        public String[] values = new String[capacity];
-        public int size = 0;
-
-        public void add(long att, String val) {
-            if (size == capacity) {
-                //init
-                int temp_capacity = capacity * 2;
-                long[] temp_attributes = new long[temp_capacity];
-                String[] temp_values = new String[temp_capacity];
-                //copy
-                System.arraycopy(attributes, 0, temp_attributes, 0, capacity);
-                System.arraycopy(values, 0, temp_values, 0, capacity);
-                //assign
-                attributes = temp_attributes;
-                values = temp_values;
-                capacity = temp_capacity;
-
-            }
-            attributes[size] = att;
-            values[size] = val;
-            size++;
-        }
-
-        public void compute() {
-            sort();
-            StringBuilder buffer = new StringBuilder();
-            for (int i = 0; i < size; i++) {
-                Base64.encodeLongToBuffer(attributes[i], buffer);
-                buffer.append(values[i]);
-            }
-            hash = PrimitiveHelper.stringHash(buffer.toString());
-        }
-
-        private void sort() {
-            for (int i = (size - 1); i >= 0; i--) {
-                for (int j = 1; j <= i; j++) {
-                    if (attributes[j - 1] > attributes[j]) {
-                        long tempK = attributes[j - 1];
-                        String tempV = values[j - 1];
-                        attributes[j - 1] = attributes[j];
-                        values[j - 1] = values[j];
-                        attributes[j] = tempK;
-                        values[j] = tempV;
-                    }
-                }
-            }
-        }
-
-
-
-    }
-
     /**
      * Parse the query and return the complex FlatQuery object, containing the decomposition of keys/values
      */
-    private FlatQuery parseQuery(String query) {
+    private Query parseQuery(String query) {
         int cursor = 0;
         long currentKey = Constants.NULL_LONG;
         int lastElemStart = 0;
-        FlatQuery flatQuery = new FlatQuery();
+        Query flatQuery = new Query();
         while (cursor < query.length()) {
             if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
                 if (lastElemStart != -1) {

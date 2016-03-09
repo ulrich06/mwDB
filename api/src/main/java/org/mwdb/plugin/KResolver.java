@@ -122,6 +122,13 @@ public interface KResolver {
          */
         Object getOrCreate(long index, int elemType);
 
+        /**
+         * Get the type of the stored element, -1 if not found
+         * @param index unique key of element
+         * @return type currently stored, encoded as a int according the KType defintion
+         */
+        int getType(long index);
+
     }
 
 }
