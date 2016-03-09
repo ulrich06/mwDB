@@ -283,40 +283,50 @@ public class Graph implements KGraph {
                 FlatQuery flatQuery = new FlatQuery();
                 KResolver.KNodeState nodeState = selfPointer._resolver.resolveState(toIndexNode, true);
                 for (int i = 0; i < keyAttributes.length; i++) {
-                    flatQuery.attributes[i] = selfPointer._resolver.key(keyAttributes[i]);
+                    long attKey = selfPointer._resolver.key(keyAttributes[i]);
                     Object attValue = nodeState.get(flatQuery.attributes[i]);
                     if (attValue != null) {
-                        flatQuery.values[i] = attValue.toString();
+                        flatQuery.add(attKey, attValue.toString());
                     } else {
-                        flatQuery.values[i] = null;
+                        flatQuery.add(attKey, null);
                     }
                 }
                 flatQuery.compute();
                 //TODO UNINDEX
                 namedIndexContent.put(flatQuery.hash, toIndexNode.id());
-                callback.on(null);
-
+                if (PrimitiveHelper.isDefined(callback)) {
+                    callback.on(null);
+                }
             }
         }, true);
     }
 
     @Override
-    public void find(String indexName, KNode toIndexNode, String query, KCallback<KNode> callback) {
+    public void find(long world, long time, String indexName, String query, KCallback<KNode> callback) {
         final Graph selfPointer = this;
-        getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KLongLongArrayMap>() {
+        getIndexOrCreate(world, time, indexName, new KCallback<KLongLongArrayMap>() {
             @Override
             public void on(KLongLongArrayMap namedIndexContent) {
+                if (namedIndexContent == null) {
+                    callback.on(null);
+                    return;
+                }
                 final FlatQuery flatQuery = parseQuery(query);
                 final long[] foundId = namedIndexContent.get(flatQuery.hash);
+                if (foundId == null) {
+                    callback.on(null);
+                    return;
+                }
                 final KNode[] resolved = new KNode[foundId.length];
-                final DeferCounter waiter = new DeferCounter(namedIndexContent.size());
+                final DeferCounter waiter = new DeferCounter(foundId.length);
                 //TODO replace by a parralel lookup
                 final AtomicInteger loopInteger = new AtomicInteger(-1);
                 for (int i = 0; i < foundId.length; i++) {
-                    selfPointer._resolver.lookup(toIndexNode.world(), toIndexNode.time(), foundId[i], new KCallback<KNode>() {
+                    selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
                             resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                            waiter.count();
                         }
                     });
                 }
@@ -379,6 +389,7 @@ public class Graph implements KGraph {
                                 @Override
                                 public void on(KNode resolvedNode) {
                                     resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                                    waiter.count();
                                 }
                             });
                         }
@@ -405,7 +416,8 @@ public class Graph implements KGraph {
                 } else {
                     KLongLongMap globalIndexContent;
                     if (globalIndexNodeUnsafe == null) {
-                        KNode globalIndexNode = createNode(world, time);
+                        KNode globalIndexNode = new Node(world, time, Constants.END_OF_TIME, selfPointer._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
+                        selfPointer._resolver.initNode(globalIndexNode);
                         globalIndexContent = (KLongLongMap) globalIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
                     } else {
                         globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.att(Constants.INDEX_ATTRIBUTE);
@@ -414,9 +426,10 @@ public class Graph implements KGraph {
                     if (indexId == Constants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
-                            globalIndexContent.put(indexNameCoded, Constants.NULL_LONG);
-                            //expect a incremental value
-                            indexId = globalIndexContent.get(indexNameCoded);
+                            KNode newIndexNode = createNode(0, 0);
+                            newIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
+                            indexId = newIndexNode.id();
+                            globalIndexContent.put(indexNameCoded, indexId);
                         } else {
                             callback.on(null);
                             return;
@@ -428,7 +441,6 @@ public class Graph implements KGraph {
                             KLongLongArrayMap namedIndexContent;
                             if (namedIndexUnsafe == null && !createIfNull) {
                                 callback.on(null);
-                                return;
                             } else {
                                 if (namedIndexUnsafe == null) {
                                     KNode namedIndex = createNode(world, time);
@@ -486,7 +498,7 @@ public class Graph implements KGraph {
     private FlatQuery parseQuery(String query) {
         int cursor = 0;
         long currentKey = Constants.NULL_LONG;
-        int lastElemStart = -1;
+        int lastElemStart = 0;
         FlatQuery flatQuery = new FlatQuery();
         while (cursor < query.length()) {
             if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
@@ -495,12 +507,17 @@ public class Graph implements KGraph {
                 }
                 lastElemStart = cursor + 1;
             } else if (query.charAt(cursor) == Constants.QUERY_SEP) {
-                if (lastElemStart != -1) {
+                if (currentKey != Constants.NULL_LONG) {
                     flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
                 }
                 currentKey = Constants.NULL_LONG;
                 lastElemStart = cursor + 1;
             }
+            cursor++;
+        }
+        //insert the last element
+        if (currentKey != Constants.NULL_LONG) {
+            flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
         }
         flatQuery.compute();
         return flatQuery;

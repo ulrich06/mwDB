@@ -49,7 +49,7 @@ public class KeyCalculator {
         }
         //moves the prefix 53-size(short) times to the left;
         long objectKey = _prefix + nextIndex;
-        if (objectKey >= Constants.NULL_LONG) {
+        if (objectKey >= Constants.END_OF_TIME) {
             throw new IndexOutOfBoundsException("Object Index exceeds teh maximum JavaScript number capacity. (2^" + Constants.LONG_SIZE + ")");
         }
         return objectKey;

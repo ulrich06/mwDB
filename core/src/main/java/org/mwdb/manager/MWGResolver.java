@@ -45,13 +45,13 @@ public class MWGResolver implements KResolver {
         //initiate time management
         KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.TIME_TREE_CHUNK);
         timeTree.load(null);
-        this._space.putAndMark(timeTree);
+        timeTree = (KLongTree) this._space.putAndMark(timeTree);
         timeTree.insertKey(node.time());
 
         //initiate universe management
         KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.WORLD_ORDER_CHUNK);
         objectWorldOrder.load(null);
-        this._space.putAndMark(objectWorldOrder);
+        objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
         //mark the global
         this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
@@ -267,9 +267,11 @@ public class MWGResolver implements KResolver {
                             }
                         }
                     }
-                    results[i] = selfPointer._space.create(loopWorld, loopTime, loopUuid, elemType);
-                    results[i].load(payloads[i]);
-                    selfPointer._space.putAndMark(results[i]);
+                    if (payloads[i] != null) {
+                        results[i] = selfPointer._space.create(loopWorld, loopTime, loopUuid, elemType);
+                        results[i].load(payloads[i]);
+                        selfPointer._space.putAndMark(results[i]);
+                    }
                 }
                 callback.on(results);
             }
