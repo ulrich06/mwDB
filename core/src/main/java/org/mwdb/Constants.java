@@ -99,4 +99,12 @@ public class Constants {
     public static final String CACHE_MISS_ERROR = "Cache miss error";
 
 
+    /**
+     * Queries
+     */
+    public static final char QUERY_SEP = ',';
+
+    public static final char QUERY_KV_SEP = ',';
+
+
 }

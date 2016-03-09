@@ -3,17 +3,16 @@ package chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
-import org.mwdb.chunk.KChunk;
-import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KStringLongMap;
-import org.mwdb.chunk.KStringLongMapCallBack;
+import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.ArrayStringLongMap;
+import org.mwdb.chunk.offheap.KOffHeapStateChunkElem;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StringLongMapTest implements KChunkListener {
 
     private int dirtyCount = 0;
 
+    /*
     @Test
     public void arrayHeapTest() {
         test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
@@ -22,8 +21,26 @@ public class StringLongMapTest implements KChunkListener {
     @Test
     public void arrayOffHeapTest() {
         test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
-    }
+    }*/
 
+    @Test
+    public void bigTest() {
+        //  KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 10_000_000);
+        // KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 10_000_000);
+        KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 10_000_000);
+        // KLongLongMap map = new org.mwdb.chunk.heap.ArrayLongLongMap(this, 10_000_000);
+        
+        long previous = System.currentTimeMillis();
+        for (long i = 0; i < 10_000_000; i++) {
+            if (i % 1_000_000 == 0) {
+                System.out.println(i);
+            }
+            map.put(i, i);
+        }
+        long after = System.currentTimeMillis();
+        System.out.println((after - previous));
+
+    }
 
     private void test(KStringLongMap map) {
         dirtyCount = 0;
@@ -73,6 +90,17 @@ public class StringLongMapTest implements KChunkListener {
         //test that all values are consistent
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.getValue("i_" + i) == i);
+        }
+
+        free(map);
+    }
+
+    /**
+     * @native ts
+     */
+    private void free(KStringLongMap map) {
+        if (map instanceof KOffHeapStateChunkElem) {
+            ((KOffHeapStateChunkElem) map).free();
         }
     }
 

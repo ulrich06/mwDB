@@ -6,6 +6,7 @@ import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
+import org.mwdb.utility.Base64;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -275,63 +276,167 @@ public class Graph implements KGraph {
 
     @Override
     public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
-        long indexNameCoded = this._resolver.key(indexName);
+        final Graph selfPointer = this;
+        getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KLongLongArrayMap>() {
+            @Override
+            public void on(KLongLongArrayMap namedIndexContent) {
+                FlatQuery flatQuery = new FlatQuery();
+                KResolver.KNodeState nodeState = selfPointer._resolver.resolveState(toIndexNode, true);
+                for (int i = 0; i < keyAttributes.length; i++) {
+                    flatQuery.attributes[i] = selfPointer._resolver.key(keyAttributes[i]);
+                    Object attValue = nodeState.get(flatQuery.attributes[i]);
+                    if (attValue != null) {
+                        flatQuery.values[i] = attValue.toString();
+                    } else {
+                        flatQuery.values[i] = null;
+                    }
+                }
+                flatQuery.compute();
+                //TODO UNINDEX
+                namedIndexContent.put(flatQuery.hash, toIndexNode.id());
+                callback.on(null);
 
+            }
+        }, true);
     }
 
     @Override
     public void find(String indexName, KNode toIndexNode, String query, KCallback<KNode> callback) {
-        long indexNameCoded = this._resolver.key(indexName);
-        this._resolver.lookup(toIndexNode.world(), toIndexNode.time(), Constants.END_OF_TIME, new KCallback<KNode>() {
+        final Graph selfPointer = this;
+        getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KLongLongArrayMap>() {
             @Override
-            public void on(KNode globalIndexNode) {
-                //TODO, update later state of index if exists
-
-                //TODO
+            public void on(KLongLongArrayMap namedIndexContent) {
+                final FlatQuery flatQuery = parseQuery(query);
+                final long[] foundId = namedIndexContent.get(flatQuery.hash);
+                final KNode[] resolved = new KNode[foundId.length];
+                final DeferCounter waiter = new DeferCounter(namedIndexContent.size());
+                //TODO replace by a parralel lookup
+                final AtomicInteger loopInteger = new AtomicInteger(-1);
+                for (int i = 0; i < foundId.length; i++) {
+                    selfPointer._resolver.lookup(toIndexNode.world(), toIndexNode.time(), foundId[i], new KCallback<KNode>() {
+                        @Override
+                        public void on(KNode resolvedNode) {
+                            resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                        }
+                    });
+                }
+                waiter.then(new KCallback() {
+                    @Override
+                    public void on(Object o) {
+                        //filter
+                        for (int i = 0; i < foundId.length; i++) {
+                            KNode resolvedNode = resolved[i];
+                            KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
+                            boolean exact = true;
+                            for (int j = 0; j < flatQuery.attributes.length; j++) {
+                                Object obj = resolvedState.get(flatQuery.attributes[j]);
+                                if (flatQuery.values[j] == null) {
+                                    if (obj != null) {
+                                        exact = false;
+                                        break;
+                                    }
+                                } else {
+                                    if (obj == null) {
+                                        exact = false;
+                                        break;
+                                    } else {
+                                        if (!PrimitiveHelper.equals(flatQuery.values[j], obj.toString())) {
+                                            exact = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (exact) {
+                                callback.on(resolvedNode);
+                                return;
+                            }
+                        }
+                    }
+                });
             }
-        });
+        }, false);
     }
 
     @Override
     public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
         final Graph selfPointer = this;
+        getIndexOrCreate(world, time, indexName, new KCallback<KLongLongArrayMap>() {
+            @Override
+            public void on(KLongLongArrayMap namedIndexContent) {
+                if (namedIndexContent == null) {
+                    callback.on(new KNode[0]);
+
+                } else {
+                    final KNode[] resolved = new KNode[namedIndexContent.size()];
+                    DeferCounter waiter = new DeferCounter(namedIndexContent.size());
+                    //TODO replace by a parralel lookup
+                    final AtomicInteger loopInteger = new AtomicInteger(-1);
+                    namedIndexContent.each(new KLongLongArrayMapCallBack() {
+                        @Override
+                        public void on(final long hash, final long nodeId) {
+                            selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
+                                @Override
+                                public void on(KNode resolvedNode) {
+                                    resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                                }
+                            });
+                        }
+                    });
+                    waiter.then(new KCallback() {
+                        @Override
+                        public void on(Object o) {
+                            callback.on(resolved);
+                        }
+                    });
+                }
+            }
+        }, false);
+    }
+
+    private void getIndexOrCreate(long world, long time, String indexName, KCallback<KLongLongArrayMap> callback, boolean createIfNull) {
+        final Graph selfPointer = this;
         final long indexNameCoded = this._resolver.key(indexName);
         this._resolver.lookup(world, time, Constants.END_OF_TIME, new KCallback<KNode>() {
             @Override
-            public void on(KNode globalIndexNode) {
-                if (globalIndexNode == null) {
-                    callback.on(new KNode[0]);
+            public void on(KNode globalIndexNodeUnsafe) {
+                if (globalIndexNodeUnsafe == null && !createIfNull) {
+                    callback.on(null);
                 } else {
-                    KLongLongMap globalIndexContent = (KLongLongMap) globalIndexNode.att(Constants.INDEX_ATTRIBUTE);
-                    final long indexId = globalIndexContent.get(indexNameCoded);
+                    KLongLongMap globalIndexContent;
+                    if (globalIndexNodeUnsafe == null) {
+                        KNode globalIndexNode = createNode(world, time);
+                        globalIndexContent = (KLongLongMap) globalIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
+                    } else {
+                        globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.att(Constants.INDEX_ATTRIBUTE);
+                    }
+                    long indexId = globalIndexContent.get(indexNameCoded);
+                    if (indexId == Constants.NULL_LONG) {
+                        if (createIfNull) {
+                            //insert null
+                            globalIndexContent.put(indexNameCoded, Constants.NULL_LONG);
+                            //expect a incremental value
+                            indexId = globalIndexContent.get(indexNameCoded);
+                        } else {
+                            callback.on(null);
+                            return;
+                        }
+                    }
                     selfPointer._resolver.lookup(world, time, indexId, new KCallback<KNode>() {
                         @Override
-                        public void on(KNode namedIndex) {
-                            if (namedIndex == null) {
-                                callback.on(new KNode[0]);
+                        public void on(KNode namedIndexUnsafe) {
+                            KLongLongArrayMap namedIndexContent;
+                            if (namedIndexUnsafe == null && !createIfNull) {
+                                callback.on(null);
+                                return;
                             } else {
-                                KLongLongArrayMap namedIndexContent = (KLongLongArrayMap) globalIndexNode.att(Constants.INDEX_ATTRIBUTE);
-                                final KNode[] resolved = new KNode[namedIndexContent.size()];
-                                DeferCounter waiter = new DeferCounter(namedIndexContent.size());
-                                //TODO replace by a parralel lookup
-                                final AtomicInteger loopInteger = new AtomicInteger(-1);
-                                namedIndexContent.each(new KLongLongArrayMapCallBack() {
-                                    @Override
-                                    public void on(final long hash, final long nodeId) {
-                                        selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
-                                            @Override
-                                            public void on(KNode resolvedNode) {
-                                                resolved[loopInteger.incrementAndGet()] = resolvedNode;
-                                            }
-                                        });
-                                    }
-                                });
-                                waiter.then(new KCallback() {
-                                    @Override
-                                    public void on(Object o) {
-                                        callback.on(resolved);
-                                    }
-                                });
+                                if (namedIndexUnsafe == null) {
+                                    KNode namedIndex = createNode(world, time);
+                                    namedIndexContent = (KLongLongArrayMap) namedIndex.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
+                                } else {
+                                    namedIndexContent = (KLongLongArrayMap) namedIndexUnsafe.att(Constants.INDEX_ATTRIBUTE);
+                                }
+                                callback.on(namedIndexContent);
                             }
                         }
                     });
@@ -340,32 +445,66 @@ public class Graph implements KGraph {
         });
     }
 
-    /*
-    private long buildHash(String ){
-        int iParam = 0;
-        int lastStart = iParam;
-        while (iParam < p_paramString.length()) {
-            if (p_paramString.charAt(iParam) == QueryEngine.VALS_SEP) {
-                String p = p_paramString.substring(lastStart, iParam).trim();
-                if (!PrimitiveHelper.equals(p, "")) {
-                    String[] pArray = p.split(QueryEngine.VAL_SEP);
-                    if (pArray.length > 1) {
-                        params.put(pArray[0].trim(), pArray[1].trim());
-                    }
+    private class FlatQuery {
+        public long hash;
+
+        private int capacity = 1;
+        public long[] attributes = new long[capacity];
+        public String values[] = new String[capacity];
+        public int size = 0;
+
+        public void add(long att, String val) {
+            if (size == capacity) {
+                capacity = capacity * 2;
+                attributes = new long[capacity];
+                values = new String[capacity];
+            }
+            attributes[size] = att;
+            values[size] = val;
+            size++;
+        }
+
+        public void compute() {
+            sort();
+            StringBuilder buffer = new StringBuilder();
+            for (int i = 0; i < size; i++) {
+                Base64.encodeLongToBuffer(attributes[i], buffer);
+                buffer.append(values[i]);
+            }
+            hash = PrimitiveHelper.stringHash(buffer.toString());
+        }
+
+        private void sort() {
+            //TODO
+        }
+
+    }
+
+    /**
+     * Parse the query and return the complex FlatQuery object, containing the decomposition of keys/values
+     */
+    private FlatQuery parseQuery(String query) {
+        int cursor = 0;
+        long currentKey = Constants.NULL_LONG;
+        int lastElemStart = -1;
+        FlatQuery flatQuery = new FlatQuery();
+        while (cursor < query.length()) {
+            if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
+                if (lastElemStart != -1) {
+                    currentKey = this._resolver.key(query.substring(lastElemStart, cursor));
                 }
-                lastStart = iParam + 1;
-            }
-            iParam = iParam + 1;
-        }
-        String lastParam = p_paramString.substring(lastStart, iParam).trim();
-        if (!PrimitiveHelper.equals(lastParam, "")) {
-            String[] pArray = lastParam.split(QueryEngine.VAL_SEP);
-            if (pArray.length > 1) {
-                params.put(pArray[0].trim(), pArray[1].trim());
+                lastElemStart = cursor + 1;
+            } else if (query.charAt(cursor) == Constants.QUERY_SEP) {
+                if (lastElemStart != -1) {
+                    flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
+                }
+                currentKey = Constants.NULL_LONG;
+                lastElemStart = cursor + 1;
             }
         }
-        return params;
-    }*/
+        flatQuery.compute();
+        return flatQuery;
+    }
 
     @Override
     public KDeferCounter counter(int expectedCountCalls) {

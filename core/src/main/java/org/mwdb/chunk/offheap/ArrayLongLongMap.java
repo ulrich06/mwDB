@@ -25,7 +25,7 @@ import org.mwdb.utility.Unsafe;
  * | size * long |
  */
 // TODO synchronize put method
-public class ArrayLongLongMap implements KLongLongMap {
+public class ArrayLongLongMap implements KLongLongMap, KOffHeapStateChunkElem {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final KChunkListener listener;
@@ -384,5 +384,14 @@ public class ArrayLongLongMap implements KLongLongMap {
             throw new RuntimeException("memory is not initialized");
         }
         unsafe.putLong(address + index * 8, value);
+    }
+
+    @Override
+    public void free() {
+        unsafe.freeMemory(getElementHashPtr());
+        unsafe.freeMemory(getElementNextPtr());
+        unsafe.freeMemory(getElementVPtr());
+        unsafe.freeMemory(getElementKPtr());
+        unsafe.freeMemory(start_ptr);
     }
 }
