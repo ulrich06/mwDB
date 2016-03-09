@@ -1,9 +1,13 @@
 package org.mwdb;
 
+
+/**
+ * KGraph is the main structure of mwDB.
+ */
 public interface KGraph {
 
     /**
-     * Create a new node in the Many world Graph
+     * Creates a new {@link KNode Node} in the KGraph
      *
      * @param world initial world of the node
      * @param time  initial time of the node
@@ -12,13 +16,13 @@ public interface KGraph {
     KNode createNode(long world, long time);
 
     /**
-     * Asynchronous lookup for a particular node.
-     * Based on the tuple World/Time/Node_ID this method will prepare a KNode object and return it as ready in the callback.
+     * Asynchronous lookup of a particular node.
+     * Based on the tuple &lt;World, Time, Node_ID&gt; this method seeks a {@link KNode} in the Graph and returns it to the callback.
      *
-     * @param world    current reading world
-     * @param time     current reading timePoint
-     * @param id       current nodeId
-     * @param callback closure result
+     * @param world    The world identifier in which the KNode must be searched.
+     * @param time     The time at which the KNode must be resolved.
+     * @param id       The unique identifier of the {@link KNode} researched.
+     * @param callback The task to be called when the {@link KNode} is retrieved.
      */
     void lookup(long world, long time, long id, KCallback<KNode> callback);
 
