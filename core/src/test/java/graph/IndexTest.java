@@ -105,10 +105,27 @@ public class IndexTest {
                     }
                 });
 
+                //local index usage
+                KNode node_index = graph.createNode(0, 0);
+                node_index.index("children", node_t1, new String[]{"name", "version"}, new KCallback() {
+                    @Override
+                    public void on(Object result) {
+                        counter[0]++;
+                    }
+                });
+                node_index.find(0, 0, "children", "name=MyName,version=1.0", new KCallback<KNode>() {
+                    @Override
+                    public void on(KNode kNode) {
+                        counter[0]++;
+                        Assert.assertTrue(kNode != null);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                    }
+                });
+
 
             }
         });
-        Assert.assertTrue(counter[0] == 9);
+        Assert.assertTrue(counter[0] == 11);
     }
 
 }

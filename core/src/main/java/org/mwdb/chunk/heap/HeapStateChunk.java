@@ -152,7 +152,11 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public synchronized void set(final long p_elementIndex, final int p_elemType, final Object p_unsafe_elem) {
+    public void set(final long p_elementIndex, final int p_elemType, final Object p_unsafe_elem) {
+        internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
+    }
+
+    private synchronized void internal_set(final long p_elementIndex, final int p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
         try {
@@ -255,8 +259,10 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             //now the object is reachable to other thread everything should be ready
             internalState._elementHash[hashIndex] = newIndex;
         } else {
-            internalState._elementV[entry] = param_elem;/*setValue*/
-            internalState._elementType[entry] = p_elemType;
+            if(replaceIfPresent){
+                internalState._elementV[entry] = param_elem;/*setValue*/
+                internalState._elementType[entry] = p_elemType;
+            }
         }
         internal_set_dirty();
     }
@@ -300,15 +306,19 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public Object getOrCreate(long p_elementIndex, int elemType) {
+        Object previousObject = get(p_elementIndex);
+        if (previousObject != null) {
+            return previousObject;
+        }
         switch (elemType) {
             case KType.STRING_LONG_MAP:
-                set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
                 break;
             case KType.LONG_LONG_MAP:
-                set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
                 break;
             case KType.LONG_LONG_ARRAY_MAP:
-                set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY));
+                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY), false);
                 break;
         }
         return get(p_elementIndex);

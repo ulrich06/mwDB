@@ -1,5 +1,4 @@
 before V0
 
 -> finish the Promise and Defer API
--> finish the Index wrapper API
--> lock for offheap
+-> lock for offHeap

@@ -1,5 +1,8 @@
 package org.mwdb.utility;
 
+import org.mwdb.Constants;
+import org.mwdb.plugin.KResolver;
+
 public class Query {
 
     public long hash;
@@ -52,6 +55,37 @@ public class Query {
                 }
             }
         }
+    }
+
+    /**
+     * Parse the query and return the complex FlatQuery object, containing the decomposition of keys/values
+     */
+    public static Query parseQuery(String query, KResolver p_resolver) {
+        int cursor = 0;
+        long currentKey = Constants.NULL_LONG;
+        int lastElemStart = 0;
+        Query flatQuery = new Query();
+        while (cursor < query.length()) {
+            if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
+                if (lastElemStart != -1) {
+                    currentKey = p_resolver.key(query.substring(lastElemStart, cursor));
+                }
+                lastElemStart = cursor + 1;
+            } else if (query.charAt(cursor) == Constants.QUERY_SEP) {
+                if (currentKey != Constants.NULL_LONG) {
+                    flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
+                }
+                currentKey = Constants.NULL_LONG;
+                lastElemStart = cursor + 1;
+            }
+            cursor++;
+        }
+        //insert the last element
+        if (currentKey != Constants.NULL_LONG) {
+            flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
+        }
+        flatQuery.compute();
+        return flatQuery;
     }
 
 

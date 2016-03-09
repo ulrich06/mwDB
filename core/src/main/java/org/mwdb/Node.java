@@ -214,7 +214,7 @@ public class Node implements KNode {
 
     @Override
     public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
-        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
+        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -240,7 +240,71 @@ public class Node implements KNode {
 
     @Override
     public void find(long world, long time, String indexName, String query, KCallback<KNode> callback) {
-//TODO
+        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
+        if (indexMap != null) {
+            final Node selfPointer = this;
+            final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
+            final long[] foundId = indexMap.get(flatQuery.hash);
+            if (foundId == null) {
+                callback.on(null);
+                return;
+            }
+            final KNode[] resolved = new KNode[foundId.length];
+            final DeferCounter waiter = new DeferCounter(foundId.length);
+            //TODO replace by a par lookup
+            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            for (int i = 0; i < foundId.length; i++) {
+                selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
+                    @Override
+                    public void on(KNode resolvedNode) {
+                        resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                        waiter.count();
+                    }
+                });
+            }
+            waiter.then(new KCallback() {
+                @Override
+                public void on(Object o) {
+                    //filter
+                    for (int i = 0; i < foundId.length; i++) {
+                        KNode resolvedNode = resolved[i];
+                        KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
+                        boolean exact = true;
+                        for (int j = 0; j < flatQuery.attributes.length; j++) {
+                            Object obj = resolvedState.get(flatQuery.attributes[j]);
+                            if (flatQuery.values[j] == null) {
+                                if (obj != null) {
+                                    exact = false;
+                                    break;
+                                }
+                            } else {
+                                if (obj == null) {
+                                    exact = false;
+                                    break;
+                                } else {
+                                    if (!PrimitiveHelper.equals(flatQuery.values[j], obj.toString())) {
+                                        exact = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (exact) {
+                            callback.on(resolvedNode);
+                            return;
+                        }
+                    }
+                    //not found :(
+                    callback.on(null);
+                }
+            });
+        } else {
+            callback.on(null);
+        }
     }
 
     @Override
@@ -251,7 +315,7 @@ public class Node implements KNode {
         }
         KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
         if (indexMap != null) {
-            Node selfPointer = this;
+            final Node selfPointer = this;
             final KNode[] resolved = new KNode[indexMap.size()];
             DeferCounter waiter = new DeferCounter(indexMap.size());
             //TODO replace by a parralel lookup
