@@ -7,14 +7,28 @@ public interface KStringLongMap {
     String getKey(long index);
 
     /**
-     * NULL_LONG as value means replace atomically by the current
+     * Add the tuple key/value to the map.
+     * In case the value is null, the value will be atomically replaced by the current size of the map and associated to the key
+     *
+     * @param key   to insert key
+     * @param value to insert value
      */
     void put(String key, long value);
 
+    void remove(String key);
+
+    /**
+     * Iterate over all Key/value tuple of the cam
+     *
+     * @param callback closure that will be called for each K/V tuple
+     */
     void each(KStringLongMapCallBack callback);
 
+    /**
+     * Size of the map
+     *
+     * @return the size of the map
+     */
     int size();
-
-    void remove(String key);
 
 }

@@ -14,8 +14,8 @@ public interface KLongLongMap {
      * Add the tuple key/value to the map.
      * In case the value is equals to Constants.NULL_LONG, the value will be atomically replaced by the current size of the map
      *
-     * @param key
-     * @param value
+     * @param key to insert key
+     * @param value to insert value
      */
     void put(long key, long value);
 
@@ -27,7 +27,7 @@ public interface KLongLongMap {
     void remove(long key);
 
     /**
-     * Iterate over all Key/value tuples of the cam
+     * Iterate over all Key/value tuple of the cam
      *
      * @param callback closure that will be called for each K/V tuple
      */
