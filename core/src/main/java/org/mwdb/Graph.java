@@ -487,7 +487,18 @@ public class Graph implements KGraph {
         }
 
         private void sort() {
-            //TODO
+            for (int i = (size - 1); i >= 0; i--) {
+                for (int j = 1; j < i; j++) {
+                    if (attributes[j - 1] > attributes[j]) {
+                        long tempK = attributes[j - 1];
+                        String tempV = values[j - 1];
+                        attributes[j - 1] = attributes[j];
+                        values[j - 1] = values[j];
+                        attributes[j] = tempK;
+                        values[j] = tempV;
+                    }
+                }
+            }
         }
 
     }

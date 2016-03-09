@@ -12,7 +12,7 @@ public class StringLongMapTest implements KChunkListener {
 
     private int dirtyCount = 0;
 
-    /*
+
     @Test
     public void arrayHeapTest() {
         test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
@@ -21,14 +21,15 @@ public class StringLongMapTest implements KChunkListener {
     @Test
     public void arrayOffHeapTest() {
         test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
-    }*/
+    }
 
+    /*
     @Test
     public void bigTest() {
         //   KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 10_000_000);
-        KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 10_000_000);
-        //KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 10_000_000);
-        // KLongLongMap map = new org.mwdb.chunk.heap.ArrayLongLongMap(this, 10_000_000);
+        //KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 10_000_000);
+        KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 10_000_000);
+    //    KLongLongMap map = new org.mwdb.chunk.heap.ArrayLongLongMap(this, 10_000_000);
 
         long previous = System.currentTimeMillis();
         for (long i = 0; i < 10_000_000; i++) {
@@ -36,13 +37,13 @@ public class StringLongMapTest implements KChunkListener {
                 System.out.println(i);
             }
             String toInsert = "_" + i;
-            map.put(toInsert, i);
-            // map.put(i, i);
+            //map.put(toInsert, i);
+             map.put(i, i);
         }
         long after = System.currentTimeMillis();
         System.out.println((after - previous));
 
-    }
+    }*/
 
     private void test(KStringLongMap map) {
         dirtyCount = 0;
