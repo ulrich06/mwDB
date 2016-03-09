@@ -284,7 +284,7 @@ public class Graph implements KGraph {
                 KResolver.KNodeState nodeState = selfPointer._resolver.resolveState(toIndexNode, true);
                 for (int i = 0; i < keyAttributes.length; i++) {
                     long attKey = selfPointer._resolver.key(keyAttributes[i]);
-                    Object attValue = nodeState.get(flatQuery.attributes[i]);
+                    Object attValue = nodeState.get(attKey);
                     if (attValue != null) {
                         flatQuery.add(attKey, attValue.toString());
                     } else {
@@ -462,14 +462,23 @@ public class Graph implements KGraph {
 
         private int capacity = 1;
         public long[] attributes = new long[capacity];
-        public String values[] = new String[capacity];
+        public String[] values = new String[capacity];
         public int size = 0;
 
         public void add(long att, String val) {
             if (size == capacity) {
-                capacity = capacity * 2;
-                attributes = new long[capacity];
-                values = new String[capacity];
+                //init
+                int temp_capacity = capacity * 2;
+                long[] temp_attributes = new long[temp_capacity];
+                String[] temp_values = new String[temp_capacity];
+                //copy
+                System.arraycopy(attributes, 0, temp_attributes, 0, capacity);
+                System.arraycopy(values, 0, temp_values, 0, capacity);
+                //assign
+                attributes = temp_attributes;
+                values = temp_values;
+                capacity = temp_capacity;
+
             }
             attributes[size] = att;
             values[size] = val;
