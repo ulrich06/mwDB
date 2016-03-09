@@ -362,6 +362,8 @@ public class Graph implements KGraph {
                                 return;
                             }
                         }
+                        //not found :(
+                        callback.on(null);
                     }
                 });
             }
@@ -497,7 +499,7 @@ public class Graph implements KGraph {
 
         private void sort() {
             for (int i = (size - 1); i >= 0; i--) {
-                for (int j = 1; j < i; j++) {
+                for (int j = 1; j <= i; j++) {
                     if (attributes[j - 1] > attributes[j]) {
                         long tempK = attributes[j - 1];
                         String tempV = values[j - 1];
@@ -509,6 +511,8 @@ public class Graph implements KGraph {
                 }
             }
         }
+
+
 
     }
 

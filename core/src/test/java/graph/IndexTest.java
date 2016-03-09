@@ -108,7 +108,7 @@ public class IndexTest {
 
             }
         });
-        Assert.assertTrue(counter[0] == 8);
+        Assert.assertTrue(counter[0] == 9);
     }
 
 }
