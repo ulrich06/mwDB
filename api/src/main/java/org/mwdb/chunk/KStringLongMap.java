@@ -1,8 +1,9 @@
 package org.mwdb.chunk;
 
 public interface KStringLongMap {
-
+    
     long getValue(String key);
+
 
     String getKey(long index);
 
