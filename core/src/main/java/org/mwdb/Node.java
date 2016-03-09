@@ -1,12 +1,16 @@
 package org.mwdb;
 
+import org.mwdb.chunk.KLongLongArrayMap;
+import org.mwdb.chunk.KLongLongArrayMapCallBack;
 import org.mwdb.chunk.KStateChunk;
 import org.mwdb.plugin.KResolver.KNodeState;
 import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Query;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Node implements KNode {
@@ -210,7 +214,28 @@ public class Node implements KNode {
 
     @Override
     public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
-//TODO
+        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.getOrCreate(this._resolver.key(indexName), KType.LONG_LONG_ARRAY_MAP);
+        Query flatQuery = new Query();
+        KResolver.KNodeState toIndexNodeState = this._resolver.resolveState(toIndexNode, true);
+        for (int i = 0; i < keyAttributes.length; i++) {
+            long attKey = this._resolver.key(keyAttributes[i]);
+            Object attValue = toIndexNodeState.get(attKey);
+            if (attValue != null) {
+                flatQuery.add(attKey, attValue.toString());
+            } else {
+                flatQuery.add(attKey, null);
+            }
+        }
+        flatQuery.compute();
+        //TODO AUTOMATIC UPDATE
+        indexMap.put(flatQuery.hash, toIndexNode.id());
+        if (PrimitiveHelper.isDefined(callback)) {
+            callback.on(null);
+        }
     }
 
     @Override
@@ -220,7 +245,38 @@ public class Node implements KNode {
 
     @Override
     public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
-//TODO
+        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
+        if (indexMap != null) {
+            Node selfPointer = this;
+            final KNode[] resolved = new KNode[indexMap.size()];
+            DeferCounter waiter = new DeferCounter(indexMap.size());
+            //TODO replace by a parralel lookup
+            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            indexMap.each(new KLongLongArrayMapCallBack() {
+                @Override
+                public void on(final long hash, final long nodeId) {
+                    selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
+                        @Override
+                        public void on(KNode resolvedNode) {
+                            resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                            waiter.count();
+                        }
+                    });
+                }
+            });
+            waiter.then(new KCallback() {
+                @Override
+                public void on(Object o) {
+                    callback.on(resolved);
+                }
+            });
+        } else {
+            callback.on(new KNode[0]);
+        }
     }
 
     @Override
