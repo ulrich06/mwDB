@@ -15,13 +15,22 @@ public interface KStorage {
 
     void remove(long[] keys, KCallback<Throwable> callback);
 
+    /**
+     * Connect the storage
+     *
+     * @param callback closure when ready
+     */
     void connect(KCallback<Throwable> callback);
 
+    /**
+     * Disconnect the storage
+     *
+     * @param callback closure when ready
+     */
     void disconnect(KCallback<Throwable> callback);
 
     /*
     int addUpdateListener(KContentUpdateListener interceptor);
-
     void removeUpdateListener(int id);
     */
 

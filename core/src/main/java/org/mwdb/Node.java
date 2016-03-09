@@ -194,7 +194,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void undephase() {
+    public void forcePhase() {
         this._resolver.resolveState(this, false);
     }
 

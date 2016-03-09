@@ -326,7 +326,7 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         }
         return new String(bytes);
     }
-    
+
     private void setElementKValue(long index, String value) {
         long temp_stringPtr = getRelativeTo(getElementKPtr(), index);
         byte[] valueAsByte = value.getBytes();
