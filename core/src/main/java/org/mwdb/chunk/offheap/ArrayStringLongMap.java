@@ -1,16 +1,18 @@
 package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
-import org.mwdb.chunk.*;
+import org.mwdb.chunk.KChunkListener;
+import org.mwdb.chunk.KStringLongMap;
+import org.mwdb.chunk.KStringLongMapCallBack;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
- * <p>
+ * <p/>
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
- * <p>
+ * <p/>
  * <b>root structure:</b>
  * | size (long) | elementK (ptr) | elementV (ptr) | elementNext (ptr) | elementHash (ptr) | threshold (long) | elementCount (long) |
  * <b>elementK:</b>
@@ -319,9 +321,10 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         long stringPtr = getRelativeTo(getElementKPtr(), index);
         int length = unsafe.getInt(stringPtr);
         byte[] bytes = new byte[length];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = unsafe.getByte(4 + stringPtr + i);
-        }
+
+        long offset = unsafe.arrayBaseOffset(byte[].class);
+        unsafe.copyMemory(null, stringPtr + 4, bytes, offset, length);
+
         return new String(bytes);
     }
 
@@ -331,12 +334,12 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         byte[] valueAsByte = value.getBytes();
         long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
         unsafe.putInt(newStringPtr, value.length());
-        for (int i = 0; i < valueAsByte.length; i++) {
-            unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
-        }
+
+        long offset = unsafe.arrayBaseOffset(byte[].class);
+        unsafe.copyMemory(valueAsByte, offset, null, newStringPtr + 4, valueAsByte.length);
+
         setRelativeTo(getElementKPtr(), index, newStringPtr);
         //freeMemory if notNull
-
         if (temp_stringPtr != -1) {
             unsafe.freeMemory(temp_stringPtr);
         }
