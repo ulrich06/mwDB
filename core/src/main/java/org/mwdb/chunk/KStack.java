@@ -4,7 +4,7 @@ public interface KStack {
 
     boolean enqueue(int index);
 
-    int dequeueTail();
+    long dequeueTail();
 
     boolean dequeue(int index);
 

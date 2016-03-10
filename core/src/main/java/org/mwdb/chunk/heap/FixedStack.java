@@ -59,7 +59,7 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public int dequeueTail() {
+    public long dequeueTail() {
         //lock
         while (!_lock.compareAndSet(false, true)) ;
 
