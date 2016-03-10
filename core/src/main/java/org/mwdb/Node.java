@@ -94,7 +94,7 @@ public class Node implements KNode {
 
 
     @Override
-    public void ref(String relationName, KCallback<KNode[]> callback) {
+    public void rel(String relationName, KCallback<KNode[]> callback) {
         if (!PrimitiveHelper.isDefined(callback)) {
             return;
         }
@@ -127,7 +127,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public long[] refValues(String relationName) {
+    public long[] relValues(String relationName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
             return (long[]) resolved.get(this._resolver.key(relationName));
@@ -137,7 +137,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void refAdd(String relationName, KNode relatedNode) {
+    public void relAdd(String relationName, KNode relatedNode) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         long relationKey = this._resolver.key(relationName);
         if (preciseState != null) {
@@ -158,7 +158,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void refRemove(String relationName, KNode relatedNode) {
+    public void relRemove(String relationName, KNode relatedNode) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         long relationKey = this._resolver.key(relationName);
         if (preciseState != null) {
@@ -213,14 +213,14 @@ public class Node implements KNode {
     }
 
     @Override
-    public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
+    public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
         KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.getOrCreate(this._resolver.key(indexName), KType.LONG_LONG_ARRAY_MAP);
         Query flatQuery = new Query();
-        KResolver.KNodeState toIndexNodeState = this._resolver.resolveState(toIndexNode, true);
+        KResolver.KNodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
         for (int i = 0; i < keyAttributes.length; i++) {
             long attKey = this._resolver.key(keyAttributes[i]);
             Object attValue = toIndexNodeState.get(attKey);
@@ -232,7 +232,7 @@ public class Node implements KNode {
         }
         flatQuery.compute();
         //TODO AUTOMATIC UPDATE
-        indexMap.put(flatQuery.hash, toIndexNode.id());
+        indexMap.put(flatQuery.hash, nodeToIndex.id());
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(null);
         }

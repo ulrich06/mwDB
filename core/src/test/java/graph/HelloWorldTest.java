@@ -40,23 +40,23 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
 
                 //attach the new node
-                node1.refAdd("children", node0);
+                node1.relAdd("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1]}}", node1.toString()));
 
-                node1.refAdd("children", node0);
+                node1.relAdd("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1]}}", node1.toString()));
 
                 KNode node2 = graph.newNode(0, 0);
-                node1.refAdd("children", node2);
+                node1.relAdd("children", node2);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1,3]}}", node1.toString()));
 
-                long[] refValuesThree = node1.refValues("children");
+                long[] refValuesThree = node1.relValues("children");
                 Assert.assertTrue(refValuesThree.length == 3);
                 Assert.assertTrue(refValuesThree[0] == 1);
                 Assert.assertTrue(refValuesThree[1] == 1);
                 Assert.assertTrue(refValuesThree[2] == 3);
 
-                node1.ref("children", new KCallback<KNode[]>() {
+                node1.rel("children", new KCallback<KNode[]>() {
                     @Override
                     public void on(KNode[] resolvedNodes) {
                         Assert.assertTrue(resolvedNodes[0].id() == 1);
@@ -70,16 +70,16 @@ public class HelloWorldTest {
                     }
                 });
 
-                node1.refRemove("children", node0);
+                node1.relRemove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
 
-                node1.refRemove("children", node0);
+                node1.relRemove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [3]}}", node1.toString()));
 
-                node1.refRemove("children", node2);
+                node1.relRemove("children", node2);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
 
-                long[] refValuesNull = node1.refValues("children");
+                long[] refValuesNull = node1.relValues("children");
                 Assert.assertTrue(refValuesNull == null);
 
                 //destroy the node explicitly without waiting GC

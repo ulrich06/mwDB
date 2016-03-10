@@ -1,115 +1,127 @@
 package org.mwdb;
 
+
+/**
+ * KNode is the base element contained in the {@link KGraph}.
+ * They belong to a world and time, have attributes, relationships, and indexes.
+ */
 public interface KNode {
 
     /**
-     * Current world where this node will read its state (attributes, relationships, indexes...)
+     * The world this node belongs to.
      *
-     * @return current world id
+     * @return World identifier
      */
     long world();
 
     /**
-     * Current time where this node will read its state (attributes, relationships, indexes...)
+     * Provides the timepoint of the node.
      *
-     * @return current time id (aka current timePoint)
+     * @return Timestamp value
      */
     long time();
 
     /**
-     * Current unique node identifier (consistent over the various timePoints and worlds)
+     * Provides the identifier for this node in the graph.
+     * Thsi identifier is constant over timePoints and worlds.
      *
-     * @return current node id
+     * @return the node id.
      */
     long id();
 
     /**
-     * Retrieve the content of an attribute in a node (similarly to an hashMap storage)
+     * Returns the value of an attribute of the node.
      *
-     * @param attributeName name of the attribute (should be unique per node)
-     * @return current content for this attribute for the current world and time (typed by one of the KType)
+     * @param attributeName The name of the attribute to be read.
+     * @return The value of the required attribute in this node for the current timepoint and world.
+     * The type of the returned object (i.e.: of the attribute) is given by {@link #attType(String)}
+     * (typed by one of the KType)
      */
     Object att(String attributeName);
 
     /**
-     * Retrieve the current type of this attribute.
-     * Should be in the list of KType definition.
+     * ALlows to know the type of an attribute. The returned value is one of {@link KType}.
      *
-     * @param attributeName name of the attribute (should be unique per node)
-     * @return current type (coded as a int) for the content of this attribute.
+     * @param attributeName The name of the attribute for which the type is asked.
+     * @return The type of the attribute inform of an int belonging to {@link KType}.
      */
     int attType(String attributeName);
 
     /**
-     * Fill a value for an attribute of this node (for this world and time)
+     * Sets the value of an attribute of this node, for its current world and time.
+     * This method has to be used for primitive types.
      *
-     * @param attributeName  name of the attribute (should be unique per node)
-     * @param attributeType  type of the attribute (should be one of the KType definition, a int value)
-     * @param attributeValue next payload of the attribute (should be consistent with the attributeType)
+     * @param attributeName  The name of the attribute. Must be unique per node.
+     * @param attributeType  The type of the attribute. Must be one of {@link KType} int value.
+     * @param attributeValue The value of the attribute. Must be consistent with the attributeType.
      */
     void attSet(String attributeName, int attributeType, Object attributeValue);
 
     /**
-     * Get or create the content of an attribute.
-     * This method atomically get or create the value according to the type passed as parameter.
-     * In particular this method is mandatory to use complex types such as maps.
+     * Gets or creates atomically a complex type (such as Maps).
+     * It returns a mutable Map.
      *
-     * @param attributeName name of the attribute (should be unique per node)
-     * @param attributeType type of the attribute (should be one of the KType definition, a int value)
-     * @return current content for this attribute for the current world and time (typed by one of the KType)
+     * @param attributeName The name of the Map to create. Must be unique per node.
+     * @param attributeType The type of the attribute. Must be one of {@link KType} int value.
+     * @return A Map instance that can be altered at the current world and time.
      */
     Object attMap(String attributeName, int attributeType);
 
     /**
-     * Remove the named attribute from this node
+     * Removes an attribute from the node.
      *
-     * @param attributeName name of the attribute (should be unique per node)
+     * @param attributeName The name of the attribute to remove.
      */
     void attRemove(String attributeName);
 
     /**
-     * Retrieve asynchronously related nodes based on the relation name.
-     * @param relationName name of the relation (should be unique per node)
-     * @param callback result closure
+     * Retrieves asynchronously the nodes contained in a relation.
+     * @param relationName The name of the relation to retrieve.
+     * @param callback Callback to be called when the nodes of the relationship have been connected.
      */
-    void ref(String relationName, KCallback<KNode[]> callback);
+    void rel(String relationName, KCallback<KNode[]> callback);
 
     /**
-     * Retrieve synchronously values of a relation
-     * @param relationName name of the relation (should be unique per node)
-     * @return array of node ids contained in the relation.
+     * Retrieves asynchronously the nodes contained in a relation.
+     * @param relationName The name of the relation to retrieve.
+     * @return An array of node ids contained in the relation.
      */
-    long[] refValues(String relationName);
+    long[] relValues(String relationName);
 
     /**
-     * Add a node to a relation
-     * @param relationName name of the relation (should be unique per node)
-     * @param relatedNode node to insert in the relation
+     * Adds a node to a relation.
+     * If the relationship doesn't exist, it is created on the fly.
+     * The relation name must be unique in the node.
+     *
+     * @param relationName The name of the relation in which to add the node.
+     * @param relatedNode The node to insert in the relation.
      */
-    void refAdd(String relationName, KNode relatedNode);
+    void relAdd(String relationName, KNode relatedNode);
 
     /**
-     * Remove a node from a relation
-     * @param relationName name of the relation (should be unique per node)
-     * @param relatedNode node to remove in the relation
+     * Removes a node from a relation.
+     * @param relationName The name of the relation.
+     * @param relatedNode The node to remove from the relation.
      */
-    void refRemove(String relationName, KNode relatedNode);
+    void relRemove(String relationName, KNode relatedNode);
 
     /**
-     * Index a node by the current one.
+     * Creates or compliments an index of nodes.
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.
+     * Index names must be unique within a given node.
      *
-     * @param indexName     name of the index (should be unique per node)
-     * @param toIndexNode   node to index
-     * @param keyAttributes list of key names to be part of the index (order does not matter)
-     * @param callback      result closure
+     * @param indexName     The name of the index (should be unique per node).
+     * @param nodeToIndex   The new node to index.
+     * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
+     * @param callback      Called when the index has been created/updated. The boolean value specifies the success of the operation.
      */
-    void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback);
+    void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieve a node in a particular index based on a query (containing key,value tuples)
+     * Retrieves a node from an index that satisfies a query.
+     * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
-     * @param world     current reading world
+     * @param world     The current reading world
      * @param time      current reading timePoint
      * @param indexName name of the index (should be unique per node)
      * @param query     textual query of the form (attName=val,attName2=val2...) such as: name=john,age=30
