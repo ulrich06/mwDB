@@ -25,7 +25,7 @@ public class OffHeapLongArray {
         //reset the segment with -1
         unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
-        unsafe.copyMemory(newBiggerMemorySegment, addr, previousCapacity * 8);
+        unsafe.copyMemory(addr,newBiggerMemorySegment, previousCapacity * 8);
         //free the previous
         unsafe.freeMemory(addr);
         //return the newly created segment

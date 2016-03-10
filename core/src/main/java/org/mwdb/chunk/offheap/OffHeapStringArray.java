@@ -25,7 +25,7 @@ public class OffHeapStringArray {
         //reset the segment with -1
         unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
-        unsafe.copyMemory(newBiggerMemorySegment, addr, previousCapacity * 8);
+        unsafe.copyMemory(addr, newBiggerMemorySegment, previousCapacity * 8);
         //free the previous
         unsafe.freeMemory(addr);
         //return the newly created segment
@@ -66,7 +66,9 @@ public class OffHeapStringArray {
     public static void free(final long addr, final long capacity) {
         for (long i = 0; i < capacity; i++) {
             long stringPtr = unsafe.getLong(addr + i * 8);
-            unsafe.freeMemory(stringPtr);
+            if (stringPtr != Constants.OFFHEAP_NULL_PTR) {
+                unsafe.freeMemory(stringPtr);
+            }
         }
         unsafe.freeMemory(addr);
     }

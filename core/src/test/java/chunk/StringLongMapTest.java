@@ -20,15 +20,15 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayOffHeapTest() {
-      //  test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1));
+        test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1));
     }
 
-
-   // @Test
+    /*
+    @Test
     public void bigTest() {
-        //   KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 10_000_000);
-           KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 100_000_000, -1);
-       // KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 100_000_000);
+        //KStringLongMap map = new org.mwdb.chunk.heap.ArrayStringLongMap(this, 1_000_000);
+        KStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, 100_000_000, -1);
+        // KLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, 100_000_000);
         //    KLongLongMap map = new org.mwdb.chunk.heap.ArrayLongLongMap(this, 10_000_000);
 
         long previous = System.currentTimeMillis();
@@ -36,14 +36,14 @@ public class StringLongMapTest implements KChunkListener {
             if (i % 1_000_000 == 0) {
                 System.out.println(i);
             }
-              String toInsert = "hello_" + i;
-             map.put(toInsert, i);
-            //map.put(i, i);
+            String toInsert = "hello_" + i;
+            map.put(toInsert, i);
+            Assert.assertTrue(PrimitiveHelper.equals(toInsert, map.getKey(i)));
+            Assert.assertTrue(i == map.getValue(toInsert));
         }
         long after = System.currentTimeMillis();
         System.out.println((after - previous));
-
-    }
+    }*/
 
     private void test(KStringLongMap map) {
         dirtyCount = 0;
@@ -89,12 +89,10 @@ public class StringLongMapTest implements KChunkListener {
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             map.put("i_" + i, i);
         }
-
         //test that all values are consistent
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.getValue("i_" + i) == i);
         }
-
         free(map);
     }
 
