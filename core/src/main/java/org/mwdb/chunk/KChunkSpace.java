@@ -44,21 +44,12 @@ public interface KChunkSpace {
      */
     void setGraph(KGraph graph);
 
-
-    //void remove(long universe, long time, long obj);
-    //KObjectChunk clone(KObjectChunk previousElement, long newUniverse, long newTime, long newObj, KMetaModel metaModel);
-
     void clear();
 
     void free();
 
     int size();
 
-
     KChunkIterator detachDirties();
-
-    // void declareDirty(KChunk dirtyChunk);
-
-    // void printDebug(KMetaModel p_metaModel);
-
+    
 }
