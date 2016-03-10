@@ -33,7 +33,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     public ArrayLongLongMap(KChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
-            this.root_array_ptr = OffHeapLongArray.allocate(9);
+            this.root_array_ptr = OffHeapLongArray.allocate(8);
             /** Init long variables */
             //init lock
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_LOCK, 0);

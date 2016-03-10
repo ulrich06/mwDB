@@ -338,23 +338,6 @@ public class Graph implements KGraph {
                     } else {
                         selfPointer._resolver.lookup(world, time, indexId, callback);
                     }
-                    /*
-                    selfPointer._resolver.lookup(world, time, indexId, new KCallback<KNode>() {
-                        @Override
-                        public void on(KNode namedIndexUnsafe) {
-                            if (namedIndexUnsafe == null && !createIfNull) {
-                                callback.on(null);
-                            } else {
-                                if (namedIndexUnsafe == null) {
-                                    KNode namedIndex = newNode(world, time);
-                                    namedIndexContent = (KLongLongArrayMap) namedIndex.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
-                                } else {
-                                    callback.on(namedIndexUnsafe);;
-                                }
-
-                            }
-                        }
-                    });*/
                 }
             }
         });
