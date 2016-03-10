@@ -55,7 +55,7 @@ public interface KNode {
      * @param attributeType  The type of the attribute. Must be one of {@link KType} int value.
      * @param attributeValue The value of the attribute. Must be consistent with the attributeType.
      */
-    void attSet(String attributeName, int attributeType, Object attributeValue);
+    void attSet(String attributeName, short attributeType, Object attributeValue);
 
     /**
      * Gets or creates atomically a complex type (such as Maps).
@@ -65,7 +65,7 @@ public interface KNode {
      * @param attributeType The type of the attribute. Must be one of {@link KType} int value.
      * @return A Map instance that can be altered at the current world and time.
      */
-    Object attMap(String attributeName, int attributeType);
+    Object attMap(String attributeName, short attributeType);
 
     /**
      * Removes an attribute from the node.
@@ -121,23 +121,19 @@ public interface KNode {
      * Retrieves a node from an index that satisfies a query.
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
-     * @param world     The current reading world
-     * @param time      current reading timePoint
      * @param indexName name of the index (should be unique per node)
      * @param query     textual query of the form (attName=val,attName2=val2...) such as: name=john,age=30
      * @param callback  result closure
      */
-    void find(long world, long time, String indexName, String query, KCallback<KNode> callback);
+    void find(String indexName, String query, KCallback<KNode> callback);
 
     /**
      * Retrieve all indexed nodes by a particular index
      *
-     * @param world     current reading world
-     * @param time      current reading timePoint
      * @param indexName name of the index (should be unique per node)
      * @param callback  result closure
      */
-    void all(long world, long time, String indexName, KCallback<KNode[]> callback);
+    void all(String indexName, KCallback<KNode[]> callback);
 
     /**
      * Compute the time dephasing of this node (difference between last modification and desired time).

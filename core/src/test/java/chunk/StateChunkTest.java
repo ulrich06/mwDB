@@ -139,7 +139,7 @@ public class StateChunkTest implements KChunkListener {
 
     }
 
-    private void protectionMethod(KStateChunk chunk, int elemType, Object elem, boolean shouldCrash) {
+    private void protectionMethod(KStateChunk chunk, short elemType, Object elem, boolean shouldCrash) {
         boolean hasCrash = false;
         try {
             chunk.set(0, elemType, elem);

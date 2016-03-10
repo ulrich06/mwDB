@@ -1,10 +1,7 @@
 package org.mwdb;
 
-import org.mwdb.chunk.KLongLongArrayMap;
-import org.mwdb.chunk.KLongLongArrayMapCallBack;
-import org.mwdb.chunk.KStateChunk;
+import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver.KNodeState;
-import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
@@ -59,7 +56,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void attSet(String attributeName, int attributeType, Object attributeValue) {
+    public void attSet(String attributeName, short attributeType, Object attributeValue) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
             preciseState.set(this._resolver.key(attributeName), attributeType, attributeValue);
@@ -69,7 +66,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public Object attMap(String attributeName, int attributeType) {
+    public Object attMap(String attributeName, short attributeType) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
             return preciseState.getOrCreate(this._resolver.key(attributeName), attributeType);
@@ -89,7 +86,7 @@ public class Node implements KNode {
 
     @Override
     public void attRemove(String attributeName) {
-        attSet(attributeName, -1, null);
+        attSet(attributeName, KType.INT, null);
     }
 
 
@@ -239,7 +236,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void find(long world, long time, String indexName, String query, KCallback<KNode> callback) {
+    public void find(String indexName, String query, KCallback<KNode> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -258,7 +255,7 @@ public class Node implements KNode {
             //TODO replace by a par lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
+                selfPointer._resolver.lookup(selfPointer._world, selfPointer._time, foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
                         resolved[loopInteger.incrementAndGet()] = resolvedNode;
@@ -308,7 +305,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
+    public void all(String indexName, KCallback<KNode[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -323,7 +320,7 @@ public class Node implements KNode {
             indexMap.each(new KLongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
-                    selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
+                    selfPointer._resolver.lookup(selfPointer._world, selfPointer._time, nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
                             resolved[loopInteger.incrementAndGet()] = resolvedNode;

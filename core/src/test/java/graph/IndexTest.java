@@ -113,7 +113,7 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
-                node_index.find(0, 0, "children", "name=MyName,version=1.0", new KCallback<KNode>() {
+                node_index.find("children", "name=MyName,version=1.0", new KCallback<KNode>() {
                     @Override
                     public void on(KNode kNode) {
                         counter[0]++;

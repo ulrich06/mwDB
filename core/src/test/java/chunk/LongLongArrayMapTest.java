@@ -19,7 +19,6 @@ public class LongLongArrayMapTest implements KChunkListener {
         test(new org.mwdb.chunk.offheap.ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, -1));
     }
 
-
     private void test(KLongLongArrayMap map) {
         dirtyCount = 0;
 
@@ -38,7 +37,7 @@ public class LongLongArrayMapTest implements KChunkListener {
         map.put(10, 100);
         Assert.assertTrue(map.size() == 2);
         Assert.assertTrue(map.get(10).length == 2);
-        
+
 
         //force reHash
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
@@ -51,6 +50,8 @@ public class LongLongArrayMapTest implements KChunkListener {
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(getRes[i] == (Constants.MAP_INITIAL_CAPACITY - i - 1));
         }
+
+        Assert.assertTrue(dirtyCount == 18);
 
     }
 

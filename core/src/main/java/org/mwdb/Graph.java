@@ -284,7 +284,7 @@ public class Graph implements KGraph {
                         callback.on(null);
                     }
                 } else {
-                    result.find(world, time, Constants.INDEX_ATTRIBUTE, query, callback);
+                    result.find(Constants.INDEX_ATTRIBUTE, query, callback);
                 }
             }
         }, false);
@@ -300,7 +300,7 @@ public class Graph implements KGraph {
                         callback.on(new KNode[0]);
                     }
                 } else {
-                    result.all(world, time, Constants.INDEX_ATTRIBUTE, callback);
+                    result.all(Constants.INDEX_ATTRIBUTE, callback);
                 }
             }
         }, false);

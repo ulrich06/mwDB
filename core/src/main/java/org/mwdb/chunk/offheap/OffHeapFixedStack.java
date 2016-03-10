@@ -2,15 +2,11 @@ package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
 import org.mwdb.chunk.KStack;
-import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
- * Memory layout: all structures are memory blocks of either primitive values (as longs)
- * or pointers to memory blocks
  */
 public class OffHeapFixedStack implements KStack {
-    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     //long arrays
     private static final int INDEX_PREVIOUS = 0;
