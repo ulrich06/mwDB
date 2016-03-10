@@ -197,6 +197,8 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                 case KType.LONG_LONG_ARRAY_MAP:
                     param_elem = (KLongLongArrayMap) p_unsafe_elem;
                     break;
+                default:
+                    throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
             }
         } catch (Exception e) {
             //e.printStackTrace();
@@ -259,7 +261,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             //now the object is reachable to other thread everything should be ready
             internalState._elementHash[hashIndex] = newIndex;
         } else {
-            if(replaceIfPresent){
+            if (replaceIfPresent) {
                 internalState._elementV[entry] = param_elem;/*setValue*/
                 internalState._elementType[entry] = p_elemType;
             }
