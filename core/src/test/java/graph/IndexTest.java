@@ -15,9 +15,9 @@ public class IndexTest {
 
     private void test(KGraph graph) {
         final int[] counter = {0};
-        graph.connect(new KCallback() {
+        graph.connect(new KCallback<Boolean>() {
             @Override
-            public void on(Object o) {
+            public void on(Boolean o) {
                 KNode node_t0 = graph.newNode(0, 0);
                 node_t0.attSet("name", KType.STRING, "MyName");
 
@@ -29,9 +29,9 @@ public class IndexTest {
                     }
                 });
 
-                graph.index("nodes", node_t0, new String[]{"name"}, new KCallback() {
+                graph.index("nodes", node_t0, new String[]{"name"}, new KCallback<Boolean>() {
                     @Override
-                    public void on(Object o) {
+                    public void on(Boolean o) {
                         counter[0]++;
                     }
                 });
@@ -68,9 +68,9 @@ public class IndexTest {
                 node_t1.attSet("name", KType.STRING, "MyName");
                 node_t1.attSet("version", KType.STRING, "1.0");
 
-                graph.index("nodes", node_t1, new String[]{"name", "version"}, new KCallback() {
+                graph.index("nodes", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
                     @Override
-                    public void on(Object o) {
+                    public void on(Boolean o) {
                         counter[0]++;
                     }
                 });
@@ -106,10 +106,10 @@ public class IndexTest {
                 });
 
                 //local index usage
-                KNode node_index = graph.createNode(0, 0);
-                node_index.index("children", node_t1, new String[]{"name", "version"}, new KCallback() {
+                KNode node_index = graph.newNode(0, 0);
+                node_index.index("children", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
                     @Override
-                    public void on(Object result) {
+                    public void on(Boolean result) {
                         counter[0]++;
                     }
                 });

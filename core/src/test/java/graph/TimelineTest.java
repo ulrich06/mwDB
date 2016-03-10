@@ -15,9 +15,9 @@ public class TimelineTest {
 
     private void test(KGraph graph) {
         final int[] counter = {0};
-        graph.connect(new KCallback() {
+        graph.connect(new KCallback<Boolean>() {
             @Override
-            public void on(Object o) {
+            public void on(Boolean o) {
                 KNode node_t0 = graph.newNode(0, 0);
                 //timeTree should be already filled
                 node_t0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {

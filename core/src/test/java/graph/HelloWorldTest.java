@@ -14,9 +14,9 @@ public class HelloWorldTest {
     }
 
     private void test(KGraph graph) {
-        graph.connect(new KCallback() {
+        graph.connect(new KCallback<Boolean>() {
             @Override
-            public void on(Object o) {
+            public void on(Boolean o) {
                 KNode node0 = graph.newNode(0, 0);
                 //do something with the node
 
