@@ -5,13 +5,11 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.ArrayStringLongMap;
-import org.mwdb.chunk.offheap.KOffHeapStateChunkElem;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StringLongMapTest implements KChunkListener {
 
     private int dirtyCount = 0;
-
 
     @Test
     public void arrayHeapTest() {
@@ -20,7 +18,9 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayOffHeapTest() {
-        test(new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1));
+        org.mwdb.chunk.offheap.ArrayStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1);
+        test(map);
+        map.free();
     }
 
     /*
@@ -92,16 +92,6 @@ public class StringLongMapTest implements KChunkListener {
         //test that all values are consistent
         for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.getValue("i_" + i) == i);
-        }
-        free(map);
-    }
-
-    /**
-     * @native ts
-     */
-    private void free(KStringLongMap map) {
-        if (map instanceof KOffHeapStateChunkElem) {
-            ((KOffHeapStateChunkElem) map).free();
         }
     }
 

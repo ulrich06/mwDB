@@ -9,7 +9,7 @@ import org.mwdb.utility.Unsafe;
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
  */
-public class OffHeapFixedStack implements KStack, KOffHeapStateChunkElem {
+public class OffHeapFixedStack implements KStack {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     //long arrays
@@ -58,7 +58,6 @@ public class OffHeapFixedStack implements KStack, KOffHeapStateChunkElem {
         }
     }
 
-    @Override
     public void free() {
         OffHeapLongArray.free(next_ptr);
         OffHeapLongArray.free(previous_ptr);

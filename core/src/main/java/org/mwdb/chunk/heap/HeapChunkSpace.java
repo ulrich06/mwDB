@@ -222,7 +222,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
         if (entry == -1) {
             //we look for nextIndex
-            int currentVictimIndex = this._lru.dequeueTail();
+            int currentVictimIndex = (int) this._lru.dequeueTail();
             if (currentVictimIndex == -1) {
                 //TODO cache is full :(
                 System.gc();
@@ -232,7 +232,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                     e.printStackTrace();
                 }
 
-                currentVictimIndex = this._lru.dequeueTail();
+                currentVictimIndex = (int) this._lru.dequeueTail();
                 if (currentVictimIndex == -1) {
                     throw new RuntimeException("mwDB crashed, cache is full, please avoid to much retention of nodes or augment cache capacity!");
                 }

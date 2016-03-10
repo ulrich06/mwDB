@@ -9,7 +9,7 @@ import org.mwdb.utility.PrimitiveHelper;
 /**
  * @ignore ts
  */
-public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkElem {
+public class ArrayStringLongMap implements KStringLongMap {
 
     private final KChunkListener listener;
     private final long root_array_ptr;
@@ -62,7 +62,7 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
             elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
             /** Init String[] variables */
-            //init elementV
+            //init elementK
             elementK_ptr = OffHeapStringArray.allocate(initialCapacity);
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
         } else {
@@ -163,7 +163,6 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         throw new RuntimeException("Not implemented yet!!!");
     }
 
-    @Override
     public void free() {
         long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
         //free String[]
@@ -239,7 +238,7 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
                 capacity = newCapacity;
                 OffHeapLongArray.set(root_array_ptr, INDEX_CAPACITY, capacity);
                 OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
-                hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), capacity);
+                hashIndex = PrimitiveHelper.longHash(hashedKey, capacity);
             }
             //set K and associated K_H
             OffHeapStringArray.set(elementK_ptr, count, key);
