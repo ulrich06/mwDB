@@ -9,97 +9,85 @@ import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
- * <p>
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
- * <p>
- * <b>root structure:</b>
- * | size (long) | elementK (ptr) | elementV (ptr) | elementNext (ptr) | elementHash (ptr) | threshold (long) | elementCount (long) |
- * <b>elementK:</b>
- * | size * long |
- * <b>elementV:</b>
- * | size * long |
- * <b>elementNext:</b>
- * | size * long |
- * <b>elementHash:</b>
- * | size * long |
  */
-// TODO synchronize put method
 public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkElem {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final KChunkListener listener;
-    private final long start_ptr;
+    private final long root_array_ptr;
+    //LongArrays
+    private static final int INDEX_ELEMENT_V = 0;
+    private static final int INDEX_ELEMENT_K_H = 1;
+    private static final int INDEX_ELEMENT_NEXT = 2;
+    private static final int INDEX_ELEMENT_HASH = 3;
+    //StringArrays
+    private static final int INDEX_ELEMENT_K = 4;
+    //Long values
+    private static final int INDEX_ELEMENT_LOCK = 5;
+    private static final int INDEX_THRESHOLD = 6;
+    private static final int INDEX_ELEMENT_COUNT = 7;
+    private static final int INDEX_CAPACITY = 8;
 
-    private static final int OFFSET_SIZE = 0;
-    private static final int OFFSET_ELEMENT_LOCK = OFFSET_SIZE + 8;
-    private static final int OFFSET_ELEMENT_K = OFFSET_ELEMENT_LOCK + 8;
-    private static final int OFFSET_ELEMENT_K_HASH = OFFSET_ELEMENT_K + 8;
-    private static final int OFFSET_ELEMENT_V = OFFSET_ELEMENT_K_HASH + 8;
-    private static final int OFFSET_ELEMENT_NEXT = OFFSET_ELEMENT_V + 8;
-    private static final int OFFSET_ELEMENT_HASH = OFFSET_ELEMENT_NEXT + 8;
-    private static final int OFFSET_THRESHOLD = OFFSET_ELEMENT_HASH + 8;
-    private static final int OFFSET_ELEMENT_COUNT = OFFSET_THRESHOLD + 8;
+    private long elementK_ptr;
+    private long elementK_H_ptr;
+    private long elementV_ptr;
+    private long elementNext_ptr;
+    private long elementHash_ptr;
 
-
-    public ArrayStringLongMap(KChunkListener listener, long initialCapacity) {
+    public ArrayStringLongMap(KChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
+        if (previousAddr == -1) {
+            this.root_array_ptr = OffHeapLongArray.allocate(9);
+            /** Init long variables */
+            //init lock
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_LOCK, 0);
+            //init capacity
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_CAPACITY, initialCapacity);
+            //init threshold
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
+            //init elementCount
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_COUNT, 0);
 
-        // 7 fields of either long or ptr
-        this.start_ptr = unsafe.allocateMemory(8 * 8);
-
-        //initialize lock
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_LOCK, 0);
-
-        // size
-        setSize(initialCapacity);
-        // elementK
-        long elementK_ptr = unsafe.allocateMemory(initialCapacity * 8);
-        unsafe.setMemory(elementK_ptr, initialCapacity * 8, (byte) -1);
-        setElementKPtr(elementK_ptr);
-        // elementK_HASH
-        long elementK_H_ptr = unsafe.allocateMemory(initialCapacity * 8);
-        unsafe.setMemory(elementK_H_ptr, initialCapacity * 8, (byte) -1);
-        setElementKHashPtr(elementK_H_ptr);
-        // elementV
-        long elementV_ptr = unsafe.allocateMemory(initialCapacity * 8);
-        unsafe.setMemory(elementV_ptr, initialCapacity * 8, (byte) -1);
-        setElementVPtr(elementV_ptr);
-        // elementNext
-        long elementNext_ptr = unsafe.allocateMemory(initialCapacity * 8);
-        unsafe.setMemory(elementNext_ptr, initialCapacity * 8, (byte) -1);
-        setElementNextPtr(elementNext_ptr);
-        // elementHash
-        long elementHash_ptr = unsafe.allocateMemory(initialCapacity * 8);
-        unsafe.setMemory(elementHash_ptr, initialCapacity * 8, (byte) -1);
-        setElementHashPtr(elementHash_ptr);
-        // threshold
-        setThreshold((long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
-        // elementCount
-        setElementCount(0);
-    }
-
-    private void lock() {
-        while (unsafe.compareAndSwapLong(null, this.start_ptr + OFFSET_ELEMENT_LOCK, 0, 1)) ;
-    }
-
-    private void unlock() {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_LOCK, 0);
+            /** Init Long[] variables */
+            //init elementV
+            elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_V, elementV_ptr);
+            //init elementK_H
+            elementK_H_ptr = OffHeapLongArray.allocate(initialCapacity);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_K_H, elementK_H_ptr);
+            //init elementNext
+            elementNext_ptr = OffHeapLongArray.allocate(initialCapacity);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+            //init elementHash
+            elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
+            /** Init String[] variables */
+            //init elementV
+            elementK_ptr = OffHeapStringArray.allocate(initialCapacity);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
+        } else {
+            this.root_array_ptr = previousAddr;
+            elementK_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_K);
+            elementHash_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_HASH);
+            elementNext_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_NEXT);
+            elementK_H_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_K_H);
+            elementV_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V);
+        }
     }
 
     @Override
     public final long getValue(String key) {
-        long size = getSize();
-        if (size == 0) {
-            return Constants.NULL_LONG;
-        }
-        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), size);
-        long m = getElementHashValue(hashIndex);
-        while (m >= 0) {
-            if (PrimitiveHelper.equals(key, getElementKValue(m))) {
-                return getElementVValue(m);
+        //TODO cas protection
+        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        while (m != -1) {
+            //TODO accelerate with the stored hash
+            if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
+                return OffHeapLongArray.get(elementV_ptr, m);
             } else {
-                m = getElementNextValue(m);
+                m = OffHeapLongArray.get(elementNext_ptr, m);
             }
         }
         return Constants.NULL_LONG;
@@ -107,32 +95,69 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
 
     @Override
     public String getKey(long index) {
-        long size = getSize();
-        if (index < size) {
-            return getElementKValue(index);
+        long capacity = OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY);
+        if (index < capacity) {
+            //TODO CAS protection
+            return OffHeapStringArray.get(elementK_ptr, index);
         }
         return null;
     }
 
     @Override
-    public final void put(String key, long value) {
-        //lock();
-
-        long entry = -1;
-        long hashIndex = -1;
-
-        long size = getSize();
-        if (size > 0) {
-            hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), size);
-            long m = getElementHashValue(hashIndex);
-            while (m >= 0) {
-                if (PrimitiveHelper.equals(key, getElementKValue(m))) {
-                    entry = m;
-                    break;
-                }
-                m = getElementNextValue(m);
+    public void each(KStringLongMapCallBack callback) {
+        long elementCount = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
+        for (int i = 0; i < elementCount; i++) {
+            String loopKey = OffHeapStringArray.get(elementK_ptr, i);
+            if (loopKey != null) {
+                callback.on(loopKey, OffHeapLongArray.get(elementV_ptr, i));
             }
         }
+    }
+
+    @Override
+    public int size() {
+        return (int) OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
+    }
+
+    @Override
+    public void remove(String key) {
+        throw new RuntimeException("Not implemented yet!!!");
+    }
+
+    @Override
+    public void free() {
+        long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+        OffHeapStringArray.free(elementK_ptr, capacity);
+
+        OffHeapLongArray.free(elementV_ptr);
+        OffHeapLongArray.free(elementNext_ptr);
+        OffHeapLongArray.free(elementHash_ptr);
+        OffHeapLongArray.free(elementK_H_ptr);
+
+        OffHeapLongArray.free(root_array_ptr);
+    }
+
+    @Override
+    public final void put(String key, long value) {
+        /*
+
+        //cas to put a lock flag
+        while (OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
+
+        long entry = -1;
+        long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), capacity);
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        while (m != Constants.OFFHEAP_NULL_PTR) {
+            //TODO optimize with the second stored hash
+            if (PrimitiveHelper.equals(key, getElementKValue(m))) {
+                entry = m;
+                break;
+            }
+            m = OffHeapLongArray.get(elementNext_ptr, hashIndex);
+        }
+
+
         if (entry == -1) {
             //if need to reHash (too small or too much collisions)
             if ((getElementCount() + 1) > getThreshold()) {
@@ -228,265 +253,7 @@ public class ArrayStringLongMap implements KStringLongMap, KOffHeapStateChunkEle
         }
 
         unlock();
-    }
-
-    @Override
-    public void each(KStringLongMapCallBack callback) {
-        long elementCount = getElementCount();
-        for (int i = 0; i < elementCount; i++) {
-            if (getElementNextValue(i) != -1) { //there is a real value
-                callback.on(getElementKValue(i), getElementVValue(i));
-            }
-        }
-    }
-
-    @Override
-    public int size() {
-        return (int) getElementCount();
-    }
-
-    @Override
-    public void remove(String key) {
-        throw new RuntimeException("Not implemented yet!!!");
-    }
-
-    /**
-     * @param ptr
-     */
-    private void setElementHashPtr(long ptr) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_HASH, ptr);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementHashPtr() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_HASH);
-    }
-
-    /**
-     * @param value
-     */
-    private void setElementNextPtr(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_NEXT, value);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementNextPtr() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_NEXT);
-    }
-
-    /**
-     * @param value
-     */
-    private void setElementKPtr(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_K, value);
-    }
-
-    /**
-     * @param value
-     */
-    private void setElementKHashPtr(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_K_HASH, value);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementKPtr() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_K);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementKHPtr() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_K_HASH);
-    }
-
-    /**
-     * @param value
-     */
-    private void setElementVPtr(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_V, value);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementVPtr() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_V);
-    }
-
-    /**
-     * @return
-     */
-    private long getSize() {
-        return unsafe.getLong(this.start_ptr + OFFSET_SIZE);
-    }
-
-    /**
-     * @param value
-     */
-    private void setSize(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_SIZE, value);
-    }
-
-    /**
-     * @return
-     */
-    private long getThreshold() {
-        return unsafe.getLong(this.start_ptr + OFFSET_THRESHOLD);
-    }
-
-    /**
-     * @param value
-     */
-    private void setThreshold(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_THRESHOLD, value);
-    }
-
-    /**
-     * @return
-     */
-    private long getElementCount() {
-        return unsafe.getLong(this.start_ptr + OFFSET_ELEMENT_COUNT);
-    }
-
-    /**
-     * @param value
-     */
-    private void setElementCount(long value) {
-        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_COUNT, value);
-    }
-
-
-
-
-    /**
-     * @param index
-     * @return
-     */
-    private String getElementKValue(long index) {
-        long stringPtr = getRelativeTo(getElementKPtr(), index);
-        int length = unsafe.getInt(stringPtr);
-        byte[] bytes = new byte[length];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = unsafe.getByte(stringPtr + 4 + i);
-        }
-        return new String(bytes);
-    }
-
-    private void setElementKValue(long index, String value) {
-        long temp_stringPtr = getRelativeTo(getElementKPtr(), index);
-        byte[] valueAsByte = value.getBytes();
-        long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
-        //copy size of the string
-        unsafe.putInt(newStringPtr, valueAsByte.length);
-        for (int i = 0; i < valueAsByte.length; i++) {
-            unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
-        }
-        //register the new stringPtr
-        setRelativeTo(getElementKPtr(), index, newStringPtr);
-        //freeMemory if notNull
-        if (temp_stringPtr != -1) {
-            unsafe.freeMemory(temp_stringPtr);
-        }
-    }
-
-    private String getElementKHValue(long index) {
-        long intPtr = getRelativeTo(getElementKHPtr(), index);
-        int length = unsafe.getInt(stringPtr);
-        byte[] bytes = new byte[length];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = unsafe.getByte(stringPtr + 4 + i);
-        }
-        return new String(bytes);
-    }
-
-
-    /**
-     * @param index
-     * @return
-     */
-    private long getElementVValue(long index) {
-        return getRelativeTo(getElementVPtr(), index);
-    }
-
-    /**
-     * @param index
-     * @param value
-     */
-    private void setElementVValue(long index, long value) {
-        setRelativeTo(getElementVPtr(), index, value);
-    }
-
-    /**
-     * @param index
-     * @return
-     */
-    private long getElementNextValue(long index) {
-        return getRelativeTo(getElementNextPtr(), index);
-    }
-
-    /**
-     * @param index
-     * @param value
-     */
-    private void setElementNextValue(long index, long value) {
-        setRelativeTo(getElementNextPtr(), index, value);
-    }
-
-    /**
-     * @param index
-     * @return
-     */
-    private long getElementHashValue(long index) {
-        return getRelativeTo(getElementHashPtr(), index);
-    }
-
-    private void setElementHashValue(long index, long value) {
-        setRelativeTo(getElementHashPtr(), index, value);
-    }
-
-    /**
-     * @param address
-     * @param index
-     * @return
-     */
-    private long getRelativeTo(long address, long index) {
-        if (address == -1) {
-            throw new RuntimeException("memory is not initialized");
-        }
-        return unsafe.getLong(address + index * 8);
-    }
-
-    /**
-     * @param address
-     * @param index
-     * @param value
-     */
-    private void setRelativeTo(long address, long index, long value) {
-        if (address == -1) {
-            throw new RuntimeException("memory is not initialized");
-        }
-        unsafe.putLong(address + index * 8, value);
-    }
-
-    @Override
-    public void free() {
-        unsafe.freeMemory(getElementHashPtr());
-        unsafe.freeMemory(getElementNextPtr());
-        unsafe.freeMemory(getElementVPtr());
-        //free all String values
-        long keys_adr = getElementKPtr();
-        for (long i = 0; i < getElementCount(); i++) {
-            unsafe.freeMemory(getRelativeTo(keys_adr, i));
-        }
-        unsafe.freeMemory(keys_adr);
-        unsafe.freeMemory(start_ptr);
+        */
     }
 
 }

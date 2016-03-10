@@ -1,7 +1,11 @@
 package org.mwdb.chunk.offheap;
 
+import org.mwdb.Constants;
 import org.mwdb.utility.Unsafe;
 
+/**
+ * @ignore ts
+ */
 public class OffHeapStringArray {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
@@ -10,7 +14,7 @@ public class OffHeapStringArray {
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
         //init the memory
-        unsafe.setMemory(newMemorySegment, capacity * 8, (byte) -1);
+        unsafe.setMemory(newMemorySegment, capacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
         //return the newly created segment
         return newMemorySegment;
     }
@@ -19,7 +23,7 @@ public class OffHeapStringArray {
         //allocate a new bigger segment
         long newBiggerMemorySegment = unsafe.allocateMemory(nextCapacity * 8);
         //reset the segment with -1
-        unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) -1);
+        unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
         unsafe.copyMemory(newBiggerMemorySegment, addr, previousCapacity * 8);
         //free the previous
@@ -28,7 +32,7 @@ public class OffHeapStringArray {
         return newBiggerMemorySegment;
     }
 
-    public static void set(final long addr, final int index, final String valueToInsert) {
+    public static void set(final long addr, final long index, final String valueToInsert) {
         long temp_stringPtr = unsafe.getLong(addr + index * 8);
         byte[] valueAsByte = valueToInsert.getBytes();
         long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
@@ -46,8 +50,11 @@ public class OffHeapStringArray {
         }
     }
 
-    public static String get(final long addr, final int index) {
+    public static String get(final long addr, final long index) {
         long stringPtr = unsafe.getLong(addr + index * 8);
+        if (stringPtr == Constants.OFFHEAP_NULL_PTR) {
+            return null;
+        }
         int length = unsafe.getInt(stringPtr);
         byte[] bytes = new byte[length];
         for (int i = 0; i < bytes.length; i++) {

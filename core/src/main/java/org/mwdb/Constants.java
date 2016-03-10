@@ -106,5 +106,9 @@ public class Constants {
 
     public static final char QUERY_KV_SEP = '=';
 
+    /**
+     * OffHeap
+     */
+    public static final int OFFHEAP_NULL_PTR = -1;
 
 }
