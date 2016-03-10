@@ -58,7 +58,7 @@ public interface KNode {
      * @param attributeType type of the attribute (should be one of the KType definition, a int value)
      * @return current content for this attribute for the current world and time (typed by one of the KType)
      */
-    Object attInit(String attributeName, int attributeType);
+    Object attMap(String attributeName, int attributeType);
 
     /**
      * Remove the named attribute from this node

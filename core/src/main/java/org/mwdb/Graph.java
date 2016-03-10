@@ -7,10 +7,8 @@ import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
-import org.mwdb.utility.Query;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Graph implements KGraph {
 
@@ -321,7 +319,7 @@ public class Graph implements KGraph {
                     if (globalIndexNodeUnsafe == null) {
                         KNode globalIndexNode = new Node(world, time, Constants.END_OF_TIME, selfPointer._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
                         selfPointer._resolver.initNode(globalIndexNode);
-                        globalIndexContent = (KLongLongMap) globalIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
+                        globalIndexContent = (KLongLongMap) globalIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
                     } else {
                         globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.att(Constants.INDEX_ATTRIBUTE);
                     }
@@ -330,7 +328,7 @@ public class Graph implements KGraph {
                         if (createIfNull) {
                             //insert null
                             KNode newIndexNode = newNode(0, 0);
-                            newIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
+                            newIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);
                             callback.on(newIndexNode);
@@ -349,7 +347,7 @@ public class Graph implements KGraph {
                             } else {
                                 if (namedIndexUnsafe == null) {
                                     KNode namedIndex = newNode(world, time);
-                                    namedIndexContent = (KLongLongArrayMap) namedIndex.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
+                                    namedIndexContent = (KLongLongArrayMap) namedIndex.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                                 } else {
                                     callback.on(namedIndexUnsafe);;
                                 }
