@@ -60,7 +60,9 @@ public class OffHeapFixedStack implements KStack, KOffHeapStateChunkElem {
 
     @Override
     public void free() {
-
+        OffHeapLongArray.free(next_ptr);
+        OffHeapLongArray.free(previous_ptr);
+        OffHeapLongArray.free(root_array_ptr);
     }
 
     @Override
@@ -154,23 +156,23 @@ public class OffHeapFixedStack implements KStack, KOffHeapStateChunkElem {
     public String toString() {
         final StringBuffer buff = new StringBuffer();
         buff.append("_head=" + OffHeapLongArray.get(root_array_ptr, INDEX_HEAD) + "\n");
-        long max = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
-        buff.append("_next= ");
-        for (long i = 0; i < max; i++) {
-            buff.append(OffHeapLongArray.get(next_ptr, i));
-            if (i < max - 1) {
-                buff.append(", ");
-            }
-        }
         buff.append("\n");
-        buff.append("_prev= ");
+
+        long max = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+        final StringBuffer nextBuff = new StringBuffer();
+        final StringBuffer previousBuff = new StringBuffer();
+        nextBuff.append("_next= ");
+        previousBuff.append("_prev= ");
         for (long i = 0; i < max; i++) {
-            buff.append(OffHeapLongArray.get(previous_ptr, i));
+            nextBuff.append(OffHeapLongArray.get(next_ptr, i));
+            previousBuff.append(OffHeapLongArray.get(previous_ptr, i));
             if (i < max - 1) {
                 buff.append(", ");
             }
         }
-
+        buff.append(nextBuff.toString());
+        buff.append("\n");
+        buff.append(previousBuff.toString());
         return buff.toString();
     }
 
