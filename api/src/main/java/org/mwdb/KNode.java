@@ -104,7 +104,7 @@ public interface KNode {
      * @param keyAttributes list of key names to be part of the index (order does not matter)
      * @param callback      result closure
      */
-    void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback);
+    void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
      * Retrieve a node in a particular index based on a query (containing key,value tuples)

@@ -1,5 +1,8 @@
 package org.mwdb;
 
+/**
+ * Defines the constants used in mwDB.
+ */
 public class KType {
 
     /**
@@ -11,9 +14,9 @@ public class KType {
     public static final int INT = 4;
     public static final int DOUBLE = 5;
 
-    /** Types below are not supposed to be used directly by users */
     /**
      * Primitive Arrays
+     * SHOULD NOT BE USED OUTSIDE THE CORE IMPLEMENTATION.
      */
     public static final int DOUBLE_ARRAY = 6;
     public static final int LONG_ARRAY = 7;
@@ -21,6 +24,7 @@ public class KType {
 
     /**
      * Primitive Maps
+     * SHOULD NOT BE USED OUTSIDE THE CORE IMPLEMENTATION.
      */
     public static final int LONG_LONG_MAP = 9;
     public static final int LONG_LONG_ARRAY_MAP = 10;

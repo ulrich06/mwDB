@@ -1,12 +1,10 @@
 package org.mwdb;
 
 import org.mwdb.manager.KeyCalculator;
-import org.mwdb.manager.MWGResolver;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
-import org.mwdb.utility.Base64;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Query;
@@ -60,7 +58,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public KNode createNode(long world, long time) {
+    public KNode newNode(long world, long time) {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
@@ -331,7 +329,7 @@ public class Graph implements KGraph {
                     if (indexId == Constants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
-                            KNode newIndexNode = createNode(0, 0);
+                            KNode newIndexNode = newNode(0, 0);
                             newIndexNode.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);
@@ -350,7 +348,7 @@ public class Graph implements KGraph {
                                 callback.on(null);
                             } else {
                                 if (namedIndexUnsafe == null) {
-                                    KNode namedIndex = createNode(world, time);
+                                    KNode namedIndex = newNode(world, time);
                                     namedIndexContent = (KLongLongArrayMap) namedIndex.attInit(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                                 } else {
                                     callback.on(namedIndexUnsafe);;

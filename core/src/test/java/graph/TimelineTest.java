@@ -18,7 +18,7 @@ public class TimelineTest {
         graph.connect(new KCallback() {
             @Override
             public void on(Object o) {
-                KNode node_t0 = graph.createNode(0, 0);
+                KNode node_t0 = graph.newNode(0, 0);
                 //timeTree should be already filled
                 node_t0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new KCallback<long[]>() {
                     @Override

@@ -18,7 +18,7 @@ public class IndexTest {
         graph.connect(new KCallback() {
             @Override
             public void on(Object o) {
-                KNode node_t0 = graph.createNode(0, 0);
+                KNode node_t0 = graph.newNode(0, 0);
                 node_t0.attSet("name", KType.STRING, "MyName");
 
                 graph.all(0, 0, "nodes", new KCallback<KNode[]>() {
@@ -64,7 +64,7 @@ public class IndexTest {
                 });
 
 
-                KNode node_t1 = graph.createNode(0, 0);
+                KNode node_t1 = graph.newNode(0, 0);
                 node_t1.attSet("name", KType.STRING, "MyName");
                 node_t1.attSet("version", KType.STRING, "1.0");
 

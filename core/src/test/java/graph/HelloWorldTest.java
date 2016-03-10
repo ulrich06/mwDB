@@ -17,7 +17,7 @@ public class HelloWorldTest {
         graph.connect(new KCallback() {
             @Override
             public void on(Object o) {
-                KNode node0 = graph.createNode(0, 0);
+                KNode node0 = graph.newNode(0, 0);
                 //do something with the node
 
                 node0.attSet("name", KType.STRING, "MyName");
@@ -36,7 +36,7 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName2\",\"value\": \"MyValue\"}}", node0.toString()));
 
                 //Create a new node
-                KNode node1 = graph.createNode(0, 0);
+                KNode node1 = graph.newNode(0, 0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
 
                 //attach the new node
@@ -46,7 +46,7 @@ public class HelloWorldTest {
                 node1.refAdd("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1]}}", node1.toString()));
 
-                KNode node2 = graph.createNode(0, 0);
+                KNode node2 = graph.newNode(0, 0);
                 node1.refAdd("children", node2);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1,3]}}", node1.toString()));
 

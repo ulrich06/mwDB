@@ -1,19 +1,18 @@
 package org.mwdb;
 
-
 /**
  * KGraph is the main structure of mwDB.
  */
 public interface KGraph {
 
     /**
-     * Creates a new {@link KNode Node} in the KGraph
+     * Creates a new {@link KNode Node} in the KGraph and returns the new KNode.
      *
      * @param world initial world of the node
      * @param time  initial time of the node
      * @return newly created node
      */
-    KNode createNode(long world, long time);
+    KNode newNode(long world, long time);
 
     /**
      * Asynchronous lookup of a particular node.
@@ -27,9 +26,9 @@ public interface KGraph {
     void lookup(long world, long time, long id, KCallback<KNode> callback);
 
     /**
-     * Create a spin-off world from the world passed as parameter.
-     * This forked world will allow independant modification.
-     * However, every modification from the parent will be inherited.
+     * Creates a spin-off world from the world given as parameter.
+     * The forked world can then be altered independently of its parent.
+     * Every modification in the parent world will nevertheless be inherited.
      *
      * @param world origin world id
      * @return newly created child world id (to be used later in lookup method for instance)
@@ -37,65 +36,69 @@ public interface KGraph {
     long diverge(long world);
 
     /**
-     * Trigger a save task for the current graph.
-     * This method synchronize RAM memory with current configured storage driver
+     * Triggers a save task for the current graph.
+     * This method synchronizes the storage with the current RAM memory.
      *
-     * @param callback result closure
+     * @param callback Called when the save is finished. The parameter specifies whether or not the save succeeded.
      */
-    void save(KCallback callback);
+    void save(KCallback<Boolean> callback);
 
     /**
-     * Connect the current graph (mandatory before any other method call)
+     * Connects the current graph to its storage (mandatory before any other method call)
      *
-     * @param callback result closure
+     * @param callback Called when the connection is done. The parameter specifies whether or not the connection succeeded.
      */
-    void connect(KCallback callback);
+    void connect(KCallback<Boolean> callback);
 
     /**
-     * Disconnect the current graph (a save will be trigger safely before the exit)
+     * Disconnects the current graph from its storage (a save will be trigger safely before the exit)
      *
-     * @param callback result closure
+     * @param callback Called when the disconnection is completed. The parameter specifies whether or not the disconnection succeeded.
      */
-    void disconnect(KCallback callback);
+    void disconnect(KCallback<Boolean> callback);
 
     /**
-     * Index a node by the current one.
-     * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.
+     * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.
+     * If the index does not exist, it is created on the fly.
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, KCallback)} using the same attributes.
      *
-     * @param indexName     name of the index (should be unique per node)
-     * @param toIndexNode   node to index
-     * @param keyAttributes list of key names to be part of the index (order does not matter)
-     * @param callback      result closure
+     * @param indexName     A string uniquely identifying the index in the {@link KGraph}.
+     * @param nodeToIndex   The node to add in the index.
+     * @param keyAttributes The set of attributes used as keys to index the node. The order does not matter.
+     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing has succeeded.
      */
-    void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback);
+    void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieve a node in a particular index based on a query (containing key,value tuples)
+     * Retrieves the node from an index that satisfies the query.
+     * The query must be defined using at least sub-set attributes used for the indexing, or all of them.
+     * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").
+     * e.g: "name=john,age=30"
      *
-     * @param world     current reading world
-     * @param time      current reading timePoint
-     * @param indexName name of the index (should be unique per node)
-     * @param query     textual query of the form (attName=val,attName2=val2...) such as: name=john,age=30
-     * @param callback  result closure
+     * @param world     The world id in which the search must be performed.
+     * @param time      The timepoint at which the search must be performed.
+     * @param indexName The name of the index in which to search.
+     * @param query     The query the node must satisfy.
+     * @param callback  Called when the search is finished. The requested node is given in parameter, null otherwise.
      */
     void find(long world, long time, String indexName, String query, KCallback<KNode> callback);
 
     /**
-     * Retrieve all indexed nodes by a particular index
+     * Retrieves all nodes registered in a particular index.
      *
-     * @param world     current reading world
-     * @param time      current reading timePoint
-     * @param indexName name of the index (should be unique per node)
-     * @param callback  result closure
+     * @param world     The world from which the index must be retrieved.
+     * @param time      The timepoint at which the index must be retrieved.
+     * @param indexName The unique identifier of the index.
+     * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
      */
     void all(long world, long time, String indexName, KCallback<KNode[]> callback);
 
     /**
      * Utility method to create a waiter based on a counter
      *
-     * @param expectedCountCalls number of expected call to count method before continuing.
-     * @return waiter object.
+     * @param expectedEventsCount number of expected events to count before running a task.
+     * @return The waiter object.
      */
-    KDeferCounter counter(int expectedCountCalls);
+    KDeferCounter counter(int expectedEventsCount);
 
 }
