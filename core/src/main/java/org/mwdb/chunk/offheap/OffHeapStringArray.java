@@ -6,7 +6,7 @@ public class OffHeapStringArray {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
-    public static long init(final long capacity) {
+    public static long allocate(final long capacity) {
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
         //init the memory
@@ -15,21 +15,21 @@ public class OffHeapStringArray {
         return newMemorySegment;
     }
 
-    public static long reallocate(final long adr, final long previousCapacity, final long nextCapacity) {
+    public static long reallocate(final long addr, final long previousCapacity, final long nextCapacity) {
         //allocate a new bigger segment
         long newBiggerMemorySegment = unsafe.allocateMemory(nextCapacity * 8);
         //reset the segment with -1
         unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) -1);
         //copy previous memory segment content
-        unsafe.copyMemory(newBiggerMemorySegment, adr, previousCapacity * 8);
+        unsafe.copyMemory(newBiggerMemorySegment, addr, previousCapacity * 8);
         //free the previous
-        unsafe.freeMemory(adr);
+        unsafe.freeMemory(addr);
         //return the newly created segment
         return newBiggerMemorySegment;
     }
 
-    public static void set(final long adr, final int index, final String valueToInsert) {
-        long temp_stringPtr = unsafe.getLong(adr + index * 8);
+    public static void set(final long addr, final int index, final String valueToInsert) {
+        long temp_stringPtr = unsafe.getLong(addr + index * 8);
         byte[] valueAsByte = valueToInsert.getBytes();
         long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
         //copy size of the string
@@ -39,15 +39,15 @@ public class OffHeapStringArray {
             unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
         }
         //register the new stringPtr
-        unsafe.putLong(adr + index * 8, newStringPtr);
+        unsafe.putLong(addr + index * 8, newStringPtr);
         //freeMemory if notNull
         if (temp_stringPtr != -1) {
             unsafe.freeMemory(temp_stringPtr);
         }
     }
 
-    public static String get(final long adr, final int index) {
-        long stringPtr = unsafe.getLong(adr + index * 8);
+    public static String get(final long addr, final int index) {
+        long stringPtr = unsafe.getLong(addr + index * 8);
         int length = unsafe.getInt(stringPtr);
         byte[] bytes = new byte[length];
         for (int i = 0; i < bytes.length; i++) {
@@ -56,12 +56,12 @@ public class OffHeapStringArray {
         return new String(bytes);
     }
 
-    public static void free(final long adr, final long capacity) {
+    public static void free(final long addr, final long capacity) {
         for (long i = 0; i < capacity; i++) {
-            long stringPtr = unsafe.getLong(adr + i * 8);
+            long stringPtr = unsafe.getLong(addr + i * 8);
             unsafe.freeMemory(stringPtr);
         }
-        unsafe.freeMemory(adr);
+        unsafe.freeMemory(addr);
     }
 
 }
