@@ -9,10 +9,10 @@ import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
- * <p/>
+ * <p>
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
- * <p/>
+ * <p>
  * <b>root structure:</b>
  * | size (long) | elementK (ptr) | elementV (ptr) | elementNext (ptr) | elementHash (ptr) | threshold (long) | elementCount (long) |
  * <b>elementK:</b>
@@ -32,19 +32,22 @@ public class ArrayLongLongMap implements KLongLongMap, KOffHeapStateChunkElem {
     private final long start_ptr;
 
     private static final int OFFSET_SIZE = 0;
-    private static final int OFFSET_ELEMENT_K = OFFSET_SIZE + 8;
+    private static final int OFFSET_ELEMENT_LOCK = OFFSET_SIZE + 8;
+    private static final int OFFSET_ELEMENT_K = OFFSET_ELEMENT_LOCK + 8;
     private static final int OFFSET_ELEMENT_V = OFFSET_ELEMENT_K + 8;
     private static final int OFFSET_ELEMENT_NEXT = OFFSET_ELEMENT_V + 8;
     private static final int OFFSET_ELEMENT_HASH = OFFSET_ELEMENT_NEXT + 8;
     private static final int OFFSET_THRESHOLD = OFFSET_ELEMENT_HASH + 8;
     private static final int OFFSET_ELEMENT_COUNT = OFFSET_THRESHOLD + 8;
 
-
     public ArrayLongLongMap(KChunkListener listener, long initialCapacity) {
         this.listener = listener;
 
         // 7 fields of either long or ptr
         this.start_ptr = unsafe.allocateMemory(7 * 8);
+
+        //initialize lock
+        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_LOCK, 0);
 
         // size
         setSize(initialCapacity);
@@ -70,6 +73,13 @@ public class ArrayLongLongMap implements KLongLongMap, KOffHeapStateChunkElem {
         setElementCount(0);
     }
 
+    private void lock() {
+        while (unsafe.compareAndSwapLong(null, this.start_ptr + OFFSET_ELEMENT_LOCK, 0, 1)) ;
+    }
+
+    private void unlock() {
+        unsafe.putLong(this.start_ptr + OFFSET_ELEMENT_LOCK, 0);
+    }
 
     @Override
     public final long get(long key) {
@@ -91,7 +101,8 @@ public class ArrayLongLongMap implements KLongLongMap, KOffHeapStateChunkElem {
     }
 
     @Override
-    public final synchronized void put(long key, long value) {
+    public final void put(long key, long value) {
+        lock();
         long entry = -1;
         long hashIndex = -1;
 
@@ -185,7 +196,7 @@ public class ArrayLongLongMap implements KLongLongMap, KOffHeapStateChunkElem {
                 this.listener.declareDirty(null);
             }
         }
-
+        unlock();
     }
 
     @Override
