@@ -56,7 +56,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void attSet(String attributeName, short attributeType, Object attributeValue) {
+    public void attSet(String attributeName, byte attributeType, Object attributeValue) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
             preciseState.set(this._resolver.key(attributeName), attributeType, attributeValue);
@@ -66,7 +66,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public Object attMap(String attributeName, short attributeType) {
+    public Object attMap(String attributeName, byte attributeType) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
             return preciseState.getOrCreate(this._resolver.key(attributeName), attributeType);

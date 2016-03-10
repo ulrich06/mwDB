@@ -129,7 +129,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public short chunkType() {
+    public byte chunkType() {
         return Constants.STATE_CHUNK;
     }
 
@@ -152,11 +152,11 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     @Override
-    public void set(final long p_elementIndex, final short p_elemType, final Object p_unsafe_elem) {
+    public void set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem) {
         internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
     }
 
-    private synchronized void internal_set(final long p_elementIndex, final short p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
+    private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
         try {
@@ -307,7 +307,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
 
 
     @Override
-    public Object getOrCreate(long p_elementIndex, short elemType) {
+    public Object getOrCreate(long p_elementIndex, byte elemType) {
         Object previousObject = get(p_elementIndex);
         if (previousObject != null) {
             return previousObject;

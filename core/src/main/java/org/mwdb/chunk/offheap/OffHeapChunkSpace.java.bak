@@ -1,16 +1,19 @@
 
-package org.mwdb.chunk.heap;
+package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
 import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
+import org.mwdb.chunk.heap.HeapStateChunk;
+import org.mwdb.chunk.heap.HeapTimeTreeChunk;
+import org.mwdb.chunk.heap.HeapWorldOrderChunk;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class HeapChunkSpace implements KChunkSpace, KChunkListener {
+public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     /**
      * Global variables
@@ -24,9 +27,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     /**
      * HashMap variables
      */
-    private final int[] _elementNext;
-    private final int[] _elementHash;
-    private final KChunk[] _values;
+    private final long _elementNext;
+    private final long _elementHash;
+    private final long _values;
+    private final long _types;
+
     private final AtomicIntegerArray _elementHashLock;
     private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
@@ -41,9 +46,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         private final int[] _dirtyElements;
         private final int _max;
         private final AtomicInteger _iterationCounter;
-        private final HeapChunkSpace _parent;
+        private final OffHeapChunkSpace _parent;
 
-        public InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
+        public InternalDirtyStateList(int maxSize, OffHeapChunkSpace p_parent) {
 
             this._dirtyElements = new int[maxSize];
 
@@ -94,17 +99,18 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    public HeapChunkSpace(int maxEntries, int autoSavePercent) {
+    public OffHeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
         this._threeshold = maxEntries / 100 * autoSavePercent;
-        this._lru = new FixedStack(maxEntries);
+        this._lru = new OffHeapFixedStack(maxEntries, Constants.OFFHEAP_NULL_PTR); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
 
         //init std variables
         this._elementNext = new int[maxEntries];
-        this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this._elementHash = new int[maxEntries];
+
+        this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this._values = new KChunk[maxEntries];
         this._elementCount = new AtomicInteger(0);
 

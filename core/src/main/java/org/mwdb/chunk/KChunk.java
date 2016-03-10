@@ -36,6 +36,6 @@ public interface KChunk {
     /**
      * Utility methods
      */
-    short chunkType();
+    byte chunkType();
 
 }

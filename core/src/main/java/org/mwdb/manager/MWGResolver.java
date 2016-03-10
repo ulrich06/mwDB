@@ -253,7 +253,7 @@ public class MWGResolver implements KResolver {
                     long loopWorld = keys[i * 3];
                     long loopTime = keys[i * 3 + 1];
                     long loopUuid = keys[i * 3 + 2];
-                    short elemType;
+                    byte elemType;
                     if (loopWorld == Constants.NULL_LONG) {
                         elemType = Constants.WORLD_ORDER_CHUNK;
                     } else {

@@ -102,7 +102,7 @@ public interface KResolver {
          * @param elemType type of the element (based on KType definition)
          * @param elem     element to be set
          */
-        void set(long index, short elemType, Object elem);
+        void set(long index, byte elemType, Object elem);
 
         /**
          * Get the named state element
@@ -120,7 +120,7 @@ public interface KResolver {
          * @param elemType type of the element (according to KType definition)
          * @return new or previously stored element
          */
-        Object getOrCreate(long index, short elemType);
+        Object getOrCreate(long index, byte elemType);
 
         /**
          * Get the type of the stored element, -1 if not found

@@ -80,7 +80,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void connect(KCallback callback) {
+    public void connect(KCallback<Boolean> callback) {
         //negociate a lock
         while (this._lock.compareAndSet(false, true)) ;
         //ok we have it, let's go
@@ -106,7 +106,7 @@ public class Graph implements KGraph {
                                             @Override
                                             public void on(String[] strings) {
                                                 if (strings.length == 4) {
-                                                    Exception detected = null;
+                                                    Boolean noError = true;
                                                     try {
                                                         String uniIndexPayload = strings[UNIVERSE_INDEX];
                                                         if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload, "")) {
@@ -138,16 +138,16 @@ public class Graph implements KGraph {
 
                                                     } catch (Exception e) {
                                                         e.printStackTrace();
-                                                        detected = e;
+                                                        noError = false;
                                                     }
                                                     selfPointer._lock.set(true);
                                                     if (PrimitiveHelper.isDefined(callback)) {
-                                                        callback.on(detected);
+                                                        callback.on(noError);
                                                     }
                                                 } else {
                                                     selfPointer._lock.set(true);
                                                     if (PrimitiveHelper.isDefined(callback)) {
-                                                        callback.on(new Exception("Error while connecting the KDataStore..."));
+                                                        callback.on(false);
                                                     }
                                                 }
 

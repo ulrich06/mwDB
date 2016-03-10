@@ -49,11 +49,11 @@ public class Constants {
     /**
      * ChunkTypes
      */
-    public static final short STATE_CHUNK = 0;
+    public static final byte STATE_CHUNK = 0;
 
-    public static final short TIME_TREE_CHUNK = 2;
+    public static final byte TIME_TREE_CHUNK = 2;
 
-    public static final short WORLD_ORDER_CHUNK = 3;
+    public static final byte WORLD_ORDER_CHUNK = 3;
 
     /**
      * Node constants

@@ -55,7 +55,7 @@ public interface KNode {
      * @param attributeType  The type of the attribute. Must be one of {@link KType} int value.
      * @param attributeValue The value of the attribute. Must be consistent with the attributeType.
      */
-    void attSet(String attributeName, short attributeType, Object attributeValue);
+    void attSet(String attributeName, byte attributeType, Object attributeValue);
 
     /**
      * Gets or creates atomically a complex type (such as Maps).
@@ -65,7 +65,7 @@ public interface KNode {
      * @param attributeType The type of the attribute. Must be one of {@link KType} int value.
      * @return A Map instance that can be altered at the current world and time.
      */
-    Object attMap(String attributeName, short attributeType);
+    Object attMap(String attributeName, byte attributeType);
 
     /**
      * Removes an attribute from the node.
@@ -76,13 +76,15 @@ public interface KNode {
 
     /**
      * Retrieves asynchronously the nodes contained in a relation.
+     *
      * @param relationName The name of the relation to retrieve.
-     * @param callback Callback to be called when the nodes of the relationship have been connected.
+     * @param callback     Callback to be called when the nodes of the relationship have been connected.
      */
     void rel(String relationName, KCallback<KNode[]> callback);
 
     /**
      * Retrieves asynchronously the nodes contained in a relation.
+     *
      * @param relationName The name of the relation to retrieve.
      * @return An array of node ids contained in the relation.
      */
@@ -94,14 +96,15 @@ public interface KNode {
      * The relation name must be unique in the node.
      *
      * @param relationName The name of the relation in which to add the node.
-     * @param relatedNode The node to insert in the relation.
+     * @param relatedNode  The node to insert in the relation.
      */
     void relAdd(String relationName, KNode relatedNode);
 
     /**
      * Removes a node from a relation.
+     *
      * @param relationName The name of the relation.
-     * @param relatedNode The node to remove from the relation.
+     * @param relatedNode  The node to remove from the relation.
      */
     void relRemove(String relationName, KNode relatedNode);
 

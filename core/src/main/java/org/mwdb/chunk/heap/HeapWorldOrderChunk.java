@@ -403,7 +403,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
     }
 
     @Override
-    public short chunkType() {
+    public byte chunkType() {
         return Constants.WORLD_ORDER_CHUNK;
     }
 
