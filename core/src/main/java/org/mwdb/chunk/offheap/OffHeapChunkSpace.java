@@ -18,21 +18,21 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     /**
      * Global variables
      */
-    private final int _maxEntries;
-    private final int _threeshold;
-    private final AtomicInteger _elementCount;
+    private final long _maxEntries;
+    private final long _threshold;
     private final KStack _lru;
+
     private KGraph _graph;
 
     /**
      * HashMap variables
      */
+    private final long _elementCount;
     private final long _elementNext;
     private final long _elementHash;
     private final long _values;
     private final long _types;
-
-    private final AtomicIntegerArray _elementHashLock;
+    private final long _elementHashLock;
     private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
     @Override
@@ -101,17 +101,18 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     public OffHeapChunkSpace(int maxEntries, int autoSavePercent) {
         this._maxEntries = maxEntries;
-        this._threeshold = maxEntries / 100 * autoSavePercent;
+        this._threshold = maxEntries / 100 * autoSavePercent;
         this._lru = new OffHeapFixedStack(maxEntries, Constants.OFFHEAP_NULL_PTR); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
-        this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
+        this._dirtyState.set(new InternalDirtyStateList(this._threshold, this));
 
         //init std variables
-        this._elementNext = new int[maxEntries];
-        this._elementHash = new int[maxEntries];
+        this._elementNext = OffHeapLongArray.allocate(maxEntries);
+        this._elementHash = OffHeapLongArray.allocate(maxEntries);
+        this._values = OffHeapLongArray.allocate(maxEntries);
+        this._types = OffHeapByteArray.allocate(maxEntries);
 
         this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
-        this._values = new KChunk[maxEntries];
         this._elementCount = new AtomicInteger(0);
 
         //init internal structures
@@ -198,6 +199,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public KChunk create(long p_world, long p_time, long p_id, byte p_type) {
+        //TODO
+        /*
         switch (p_type) {
             case Constants.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this);
@@ -206,6 +209,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
             case Constants.TIME_TREE_CHUNK:
                 return new HeapTimeTreeChunk(p_world, p_time, p_id, this);
         }
+        */
         return null;
     }
 
