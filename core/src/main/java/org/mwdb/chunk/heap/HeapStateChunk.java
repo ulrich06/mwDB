@@ -81,6 +81,8 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             long[] clonedElementK = new long[this._elementDataSize];
             System.arraycopy(_elementK, 0, clonedElementK, 0, this._elementDataSize);
             Object[] clonedElementV = new Object[this._elementDataSize];
+
+            //TODO warning do a deep clone, or copy on write here !!!
             System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
             int[] clonedElementNext = new int[this._elementDataSize];
             System.arraycopy(_elementNext, 0, clonedElementNext, 0, this._elementDataSize);
