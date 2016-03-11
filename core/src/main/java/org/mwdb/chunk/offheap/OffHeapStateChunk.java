@@ -313,13 +313,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                     newNumberElement = stateChunkSize;
                     long newStateChunkSize = (stateChunkSize == 0 ? 1 : stateChunkSize << 1);
                     //init map element
-                    newElementK_ptr = OffHeapLongArray.allocate(newStateCapacity);
-                    newElementV_ptr = OffHeapLongArray.allocate(newStateCapacity);
-                    newElementType_ptr = OffHeapLongArray.allocate(newStateCapacity);
+                    newElementK_ptr = OffHeapLongArray.allocate(newStateChunkSize);
+                    newElementV_ptr = OffHeapLongArray.allocate(newStateChunkSize);
+                    newElementType_ptr = OffHeapLongArray.allocate(newStateChunkSize);
                     newStateCapacity = newStateChunkSize;
                     //init hash and chaining
-                    newElementNext_ptr = OffHeapLongArray.allocate(newStateCapacity);
-                    newElementHash_ptr = OffHeapLongArray.allocate(newStateCapacity);
+                    newElementNext_ptr = OffHeapLongArray.allocate(newStateChunkSize);
+                    newElementHash_ptr = OffHeapLongArray.allocate(newStateChunkSize);
                     previousStart = cursor + 1;
                 } else {
                     //beginning of the Chunk elem
@@ -330,9 +330,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                             /** Primitive Object */
                             case KType.BOOL:
                                 if (payload.charAt(previousStart) == '0') {
-                                    toInsert = 0;
+                                    toInsert = false;
                                 } else if (payload.charAt(previousStart) == '1') {
-                                    toInsert = 1;
+                                    toInsert = true;
                                 }
                                 break;
                             case KType.STRING:
@@ -712,6 +712,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                     break;
                 case KType.INT_ARRAY:
                     param_elem = (int[]) p_unsafe_elem;
+                    break;
                 default:
                     throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
             }
