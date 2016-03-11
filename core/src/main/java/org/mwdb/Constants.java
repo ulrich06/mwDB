@@ -1,13 +1,7 @@
 package org.mwdb;
 
-public class Constants {
+public class Constants /*extends KConstants*/ {
 
-    /**
-     * Configuration constants
-     */
-    public static final int CAS_MAX_TRY = 1000;
-
-    public static final int CALLBACK_HISTORY = 1000;
 
     // Limit long lengths to 53 bits because of JS limitation
 
@@ -24,6 +18,11 @@ public class Constants {
     // Limit limit local index to LONG limit - prefix size
     public static final long KEY_PREFIX_MASK = 0x0000001FFFFFFFFFl;
 
+
+
+    /**
+     * Configuration constants
+     */
 
     /**
      * Chunk Save/Load special chars

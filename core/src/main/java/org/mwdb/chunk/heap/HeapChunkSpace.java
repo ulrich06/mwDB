@@ -129,7 +129,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                     if (this._lru.dequeue(m)) {
                         return foundChunk;
                     } else {
-                        if (foundChunk.mark() > 1) {
+                        if (foundChunk.marks() > 1) {
                             //ok fine we are several on the same object...
                         } else {
                             //better return null the object will be recycled by somebody else...

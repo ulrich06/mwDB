@@ -25,7 +25,7 @@ public class OffHeapLongArray {
         //reset the segment with -1
         unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
-        unsafe.copyMemory(addr, newBiggerMemorySegment, previousCapacity * 8);
+        unsafe.copyMemory(addr,newBiggerMemorySegment, previousCapacity * 8);
         //free the previous
         unsafe.freeMemory(addr);
         //return the newly created segment
@@ -46,10 +46,6 @@ public class OffHeapLongArray {
 
     public static boolean compareAndSwap(final long addr, final long index, final long expectedValue, final long updatedValue) {
         return unsafe.compareAndSwapLong(null, addr + index * 8, expectedValue, updatedValue);
-    }
-
-    public static void copy(final long srcAddr, final long destAddr, long numberOfElemsToCopy) {
-        unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy);
     }
 
 }

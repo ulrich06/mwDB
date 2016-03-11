@@ -128,31 +128,67 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public final KChunk getAndMark(long world, long time, long id) {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int m = this._elementHash[index];
-        while (m != -1) {
-            KChunk foundChunk = this._values[m];
-            if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
-                //GET VALUE
-                if (foundChunk.mark() == 1) {
+        long m = OffHeapLongArray.get(_elementHash, index);
+        while (m != Constants.OFFHEAP_NULL_PTR) {
+            long foundChunkPtr = OffHeapLongArray.get(_values, m);
+            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+                    ) {
+
+                //CAS on the mark of the chunk
+                long previousFlag;
+                long newFlag;
+                do {
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                    newFlag = previousFlag + 1;
+                }
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
+
+                if (newFlag == 1) {
                     //was at zero before, risky operation, check with LRU
                     if (this._lru.dequeue(m)) {
+                        //read the type
+
+                        //create the KChunk wrapper
+
                         return foundChunk;
                     } else {
-                        if (foundChunk.mark() > 1) {
+                        if (OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS) > 1) {
                             //ok fine we are several on the same object...
+
+                            //return it
                         } else {
                             //better return null the object will be recycled by somebody else...
                             return null;
                         }
                     }
                 } else {
+
+                    //create the new object
+
                     return foundChunk;
                 }
             } else {
-                m = this._elementNext[m];
+                m = OffHeapLongArray.get(_elementNext, m);
             }
         }
         return null;
+    }
+
+    private KChunk internal_create(long addr, long chunkIndex) {
+        byte chunkType = OffHeapByteArray.get(_types,chunkIndex);
+        switch (chunkType){
+            case Constants.STATE_CHUNK:
+                break;
+            case Constants.STATE_CHUNK:
+                break;
+            case Constants.STATE_CHUNK:
+                break;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -171,36 +207,23 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 long previousFlag;
                 long newFlag;
                 do {
-                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS);
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
                     newFlag = previousFlag - 1;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, newFlag));
-
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
+                //check if this object has to be re-enqueue to the list of available
                 if (newFlag == 0) {
                     //check if object is dirty
-                    if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                    if (((int) (OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS)) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                         //declare available for recycling
                         this._lru.enqueue(m);
                     }
                 }
-
+                //in any case we go out, we have found the good chunk
                 return;
-
             } else {
                 m = OffHeapLongArray.get(_elementNext, m);
             }
-
-
-            if (foundChunk.unmark() == 0) {
-                //check if object is dirty
-                if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                    //declare available for recycling
-                    this._lru.enqueue(m);
-                }
-            }
-            return;
-
-
         }
     }
 
