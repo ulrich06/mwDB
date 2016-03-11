@@ -953,6 +953,16 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                     intArray[i] = (int) OffHeapLongArray.get(elemIntPtr, 1 + i);
                 }
                 return intArray;
+            /** Maps */
+            case KType.STRING_LONG_MAP:
+                long elemStringLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
+                return new ArrayStringLongMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemStringLongMapPtr);
+            case KType.LONG_LONG_MAP:
+                long elemLongLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
+                return new ArrayLongLongMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemLongLongMapPtr);
+            case KType.LONG_LONG_ARRAY_MAP:
+                long elemLongLongArrayMapPtr = OffHeapLongArray.get(elementV_ptr, index);
+                return new ArrayLongLongArrayMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
             default:
                 throw new RuntimeException("Should never happen");
         }
