@@ -49,7 +49,7 @@ public class OffHeapLongArray {
     }
 
     public static void copy(final long srcAddr, final long destAddr, long numberOfElemsToCopy) {
-        unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy);
+        unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy * 8);
     }
 
     public static long decrementAndGet(final long addr, final long index) {

@@ -6,6 +6,7 @@ import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
@@ -13,7 +14,10 @@ import org.mwdb.utility.PrimitiveHelper;
  * or pointers to memory blocks
  */
 // TODO check synchronization
-public class OffHeapStateChunk implements KStateChunk, KChunkListener {
+public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapChunk {
+
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
+
     // keys
     private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
     private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
@@ -88,6 +92,11 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
             elementType_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE);
         }
 
+    }
+
+    @Override
+    public long addr() {
+        return this.root_array_ptr;
     }
 
     private void cloneFrom(OffHeapStateChunk origin) {
@@ -435,13 +444,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                             break;
                         /** Maps */
                         case KType.STRING_LONG_MAP:
-                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentStringLongMap = new ArrayStringLongMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                         case KType.LONG_LONG_MAP:
-                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentLongLongMap = new ArrayLongLongMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
-                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                     }
                 } else {
@@ -624,26 +633,28 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                 byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, i);
                 switch (elemType) {
                     /** Primitive Object */
-                    case KType.BOOL:
-                        break;
                     case KType.STRING:
-                        OffHeapStringArray.free(elemV_ptr, 0);
-                        break;
-                    case KType.DOUBLE:
-                        break;
-                    case KType.LONG:
-                        break;
-                    case KType.INT:
+                        unsafe.freeMemory(elemV_ptr);
                         break;
                     /** Arrays */
                     case KType.DOUBLE_ARRAY:
                         OffHeapDoubleArray.free(elemV_ptr);
                         break;
                     case KType.LONG_ARRAY:
-                        OffHeapLongArray.free(elementV_ptr);
+                        OffHeapLongArray.free(elemV_ptr);
                         break;
                     case KType.INT_ARRAY:
-                        OffHeapLongArray.free(elementV_ptr);
+                        OffHeapLongArray.free(elemV_ptr);
+                        break;
+                    /** Maps */
+                    case KType.STRING_LONG_MAP:
+                        OffHeapDoubleArray.free(elemV_ptr);
+                        break;
+                    case KType.LONG_LONG_MAP:
+                        OffHeapLongArray.free(elemV_ptr);
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        OffHeapLongArray.free(elemV_ptr);
                         break;
                 }
             }
@@ -753,15 +764,16 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                 long newElementV_ptr = OffHeapLongArray.allocate(newLength);
                 long newElementType_ptr = OffHeapLongArray.allocate(newLength);
 
-                OffHeapLongArray.copy(OffHeapLongArray.get(root_array_ptr, elementK_ptr), newElementK_ptr, elementDataSize);
-                OffHeapLongArray.copy(OffHeapLongArray.get(root_array_ptr, elementV_ptr), newElementV_ptr, elementDataSize);
-                OffHeapLongArray.copy(OffHeapLongArray.get(root_array_ptr, elementType_ptr), newElementType_ptr, elementDataSize);
+                OffHeapLongArray.copy(elementK_ptr, newElementK_ptr, elementDataSize);
+                OffHeapLongArray.copy(elementV_ptr, newElementV_ptr, elementDataSize);
+                OffHeapLongArray.copy(elementType_ptr, newElementType_ptr, elementDataSize);
+
                 long newElementNext_ptr = OffHeapLongArray.allocate(newLength);
                 long newElementHash_ptr = OffHeapLongArray.allocate(newLength);
 
                 //rehashEveryThing
-                for (int i = 0; i < elementDataSize; i++) {
-                    if (OffHeapLongArray.get(root_array_ptr, elementV_ptr) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
+                for (long i = 0; i < elementDataSize; i++) {
+                    if (OffHeapLongArray.get(elementType_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
                         long keyHash = PrimitiveHelper.longHash(OffHeapLongArray.get(elementK_ptr, i), newLength);
                         long currentHashedIndex = OffHeapLongArray.get(newElementHash_ptr, keyHash);
                         if (currentHashedIndex != -1) {
@@ -771,11 +783,12 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                     }
                 }
 
-                OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_K));
-                OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_V));
-                OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_NEXT));
-                OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_HASH));
-                OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE));
+                OffHeapLongArray.free(elementK_ptr);
+                OffHeapLongArray.free(elementV_ptr);
+                OffHeapLongArray.free(elementType_ptr);
+
+                OffHeapLongArray.free(elementNext_ptr);
+                OffHeapLongArray.free(elementHash_ptr);
 
                 //setPrimitiveType value for all
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DATA_SIZE, newLength);
@@ -793,7 +806,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                 elementHash_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_HASH);
                 elementType_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE);
 
-                hashIndex = PrimitiveHelper.longHash(p_elementIndex, OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE));
+                hashIndex = PrimitiveHelper.longHash(p_elementIndex, newLength);
             }
             long newIndex = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT) + 1);
@@ -904,7 +917,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         while (m >= 0) {
             if (index == OffHeapLongArray.get(elementK_ptr, m) /* getKey */) {
-                return internal_getElementV(index); /* getValue */
+                return internal_getElementV(m); /* getValue */
             } else {
                 m = OffHeapLongArray.get(elementNext_ptr, m);
             }
@@ -967,13 +980,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
             /** Maps */
             case KType.STRING_LONG_MAP:
                 long elemStringLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayStringLongMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemStringLongMapPtr);
+                return new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, elemStringLongMapPtr);
             case KType.LONG_LONG_MAP:
                 long elemLongLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayLongLongMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemLongLongMapPtr);
+                return new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, elemLongLongMapPtr);
             case KType.LONG_LONG_ARRAY_MAP:
                 long elemLongLongArrayMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayLongLongArrayMap(_listener, Constants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
+                return new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
             default:
                 throw new RuntimeException("Should never happen");
         }
