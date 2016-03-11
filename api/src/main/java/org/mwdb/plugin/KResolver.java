@@ -6,92 +6,92 @@ import org.mwdb.KNode;
 public interface KResolver {
 
     /**
-     * Init the resolver (to enforce optimizations)
+     * Initializes the resolver.
      */
     void init();
 
     /**
-     * Init background structures for the newly created node passed as parameter
+     * Initializes backend structures for the newly created node passed as parameter
      *
-     * @param node newly created node
+     * @param node The node to initialize.
      */
     void initNode(KNode node);
 
     /**
-     * Init the newly created world, and register the parent relationship.
+     * Initializes a newly created world, and sets the parent relationship.
      *
-     * @param parentWorld world with shared past data
-     * @param childWorld  newly created world id
+     * @param parentWorld The parent world
+     * @param childWorld  The new world to initialize.
      */
     void initWorld(long parentWorld, long childWorld);
 
     /**
-     * Mark node used structure to unused, potentially to be recycled
+     * Frees a node structure so it might be recycled.
      *
-     * @param node node to be recycled
+     * @param node The node to free.
      */
     void freeNode(KNode node);
 
     /**
-     * Create a lookup task, to retrieve a particular node based on world/time/node_id
+     * Creates a lookup task to retrieve a particular node based on world/time/node_id
      *
-     * @param world    current world id
-     * @param time     current timePoint
-     * @param id       node id to resolve
-     * @param callback result closure
-     * @return task that have to be scheduled later
+     * @param world    The world identifier
+     * @param time     The timepoint.
+     * @param id       The id of the node to retrieve.
+     * @param callback Called when the node is retrieved.
+     * @return The created lookup task to be given to the scheduler.
      */
     KCallback lookupTask(long world, long time, long id, KCallback<KNode> callback);
 
     /**
-     * Create and schedule lookup task, to retrieve a particular node based on world/time/node_id
+     * Creates and schedules a lookup task.
      *
-     * @param world    current world id
-     * @param time     current timePoint
-     * @param id       node id to resolve
-     * @param callback result closure
+     * @param world    The world identifier
+     * @param time     The timepoint.
+     * @param id       The id of the node to retrieve.
+     * @param callback Called when the node is retrieved.
      */
     void lookup(long world, long time, long id, KCallback<KNode> callback);
 
     /**
-     * Resolve the state of a node (where are stored attributes, relations, indexes...)
-     * In case dephasing is allowed the previous or state is taken.
-     * In case dephasing is false, the state has to be in phased and will be cloned to the same timePoint than the current node.
+     * Resolves the state of a node, to access attributes, relations, and indexes.
+     * In case dephasing is allowed the latest state available is returned.
+     * In case dephasing is not allowed (false), the state is phased, i.e.: cloned at the timePoint of the node.
      *
-     * @param node           origin node attached to the state
-     * @param allowDephasing boolean parameter to allows or not dePhasing for the resolved state.
-     * @return
+     * @param node           The node for which the state mush be collected.
+     * @param allowDephasing Specifies if the requested state can be dephased. If not, it will be cloned at the timepoint of the node.
+     * @return The resolved state of the node.
      */
     KNodeState resolveState(KNode node, boolean allowDephasing);
 
     /**
-     * Resolve timePoints for a particular node
+     * Resolves the timePoints of a node.
      *
-     * @param origin            current node from where the resolution has to start
-     * @param beginningOfSearch lower timePoint bound of the search
-     * @param endOfSearch       upper timePoint bound of the search
-     * @param callback          result closure
+     * @param node              The node for which timepoints are requested.
+     * @param beginningOfSearch The earliest timePoint of the search (included).
+     * @param endOfSearch       The latest timePoint of the search (included).
+     * @param callback          Called when finished, with the list of timepoints included in the bounds for this node.
      */
-    void resolveTimepoints(KNode origin, long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
+    void resolveTimepoints(KNode node, long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
 
     /**
-     * Encode a string a unique key or return the previously existing one if already encoded.
+     * Maps a String to a unique long. Can be reversed using {@link #longKeyToString(long)}.
      *
-     * @param name value to be encoded
-     * @return unique key
+     * @param name The string value to be mapped.
+     * @return The unique long identifier for the string.
      */
-    long key(String name);
+    long stringToLongKey(String name);
 
     /**
-     * Convert a dictionary key to the previously encoded string
+     * Returns the String associated to a long key.
      *
-     * @param key dictionary key
-     * @return encoded value
+     * @param key The long key.
+     * @return The string value associated to the long key.
      */
-    String value(long key);
+    String longKeyToString(long key);
 
     /**
-     * Node state return by the resolver
+     * Node state
      */
     interface KNodeState {
 

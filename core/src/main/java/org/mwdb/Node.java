@@ -50,7 +50,7 @@ public class Node implements KNode {
     public Object att(String attributeName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.get(this._resolver.key(attributeName));
+            return resolved.get(this._resolver.stringToLongKey(attributeName));
         }
         return null;
     }
@@ -59,7 +59,7 @@ public class Node implements KNode {
     public void attSet(String attributeName, byte attributeType, Object attributeValue) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            preciseState.set(this._resolver.key(attributeName), attributeType, attributeValue);
+            preciseState.set(this._resolver.stringToLongKey(attributeName), attributeType, attributeValue);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -69,7 +69,7 @@ public class Node implements KNode {
     public Object attMap(String attributeName, byte attributeType) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            return preciseState.getOrCreate(this._resolver.key(attributeName), attributeType);
+            return preciseState.getOrCreate(this._resolver.stringToLongKey(attributeName), attributeType);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -79,7 +79,7 @@ public class Node implements KNode {
     public int attType(String attributeName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.getType(this._resolver.key(attributeName));
+            return resolved.getType(this._resolver.stringToLongKey(attributeName));
         }
         return -1;
     }
@@ -97,7 +97,7 @@ public class Node implements KNode {
         }
         final KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            final long[] flatRefs = (long[]) resolved.get(this._resolver.key(relationName));
+            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
             if (flatRefs == null || flatRefs.length == 0) {
                 callback.on(new KNode[0]);
             } else {
@@ -127,7 +127,7 @@ public class Node implements KNode {
     public long[] relValues(String relationName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return (long[]) resolved.get(this._resolver.key(relationName));
+            return (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -136,7 +136,7 @@ public class Node implements KNode {
     @Override
     public void relAdd(String relationName, KNode relatedNode) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.key(relationName);
+        long relationKey = this._resolver.stringToLongKey(relationName);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous == null) {
@@ -157,7 +157,7 @@ public class Node implements KNode {
     @Override
     public void relRemove(String relationName, KNode relatedNode) {
         KNodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.key(relationName);
+        long relationKey = this._resolver.stringToLongKey(relationName);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous != null) {
@@ -215,11 +215,11 @@ public class Node implements KNode {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.getOrCreate(this._resolver.key(indexName), KType.LONG_LONG_ARRAY_MAP);
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToLongKey(indexName), KType.LONG_LONG_ARRAY_MAP);
         Query flatQuery = new Query();
         KResolver.KNodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
         for (int i = 0; i < keyAttributes.length; i++) {
-            long attKey = this._resolver.key(keyAttributes[i]);
+            long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
             Object attValue = toIndexNodeState.get(attKey);
             if (attValue != null) {
                 flatQuery.add(attKey, attValue.toString());
@@ -241,7 +241,7 @@ public class Node implements KNode {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
         if (indexMap != null) {
             final Node selfPointer = this;
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
@@ -310,7 +310,7 @@ public class Node implements KNode {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
         if (indexMap != null) {
             final Node selfPointer = this;
             final KNode[] resolved = new KNode[(int) indexMap.size()];

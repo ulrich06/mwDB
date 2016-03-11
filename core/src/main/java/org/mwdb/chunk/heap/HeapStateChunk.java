@@ -342,7 +342,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         InternalState currentState = this.state.get();
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {
-                callBack.on(resolver.value(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
+                callBack.on(resolver.longKeyToString(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
             }
         }
     }

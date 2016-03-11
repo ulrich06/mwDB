@@ -68,7 +68,7 @@ public class Query {
         while (cursor < query.length()) {
             if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
                 if (lastElemStart != -1) {
-                    currentKey = p_resolver.key(query.substring(lastElemStart, cursor));
+                    currentKey = p_resolver.stringToLongKey(query.substring(lastElemStart, cursor));
                 }
                 lastElemStart = cursor + 1;
             } else if (query.charAt(cursor) == Constants.QUERY_SEP) {

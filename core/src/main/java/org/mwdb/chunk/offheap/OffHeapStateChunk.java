@@ -130,7 +130,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
     public void each(KStateChunkCallBack callBack, KResolver resolver) {
         for (int i = 0; i < OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT); i++) {
             if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
-                callBack.on(resolver.value(OffHeapLongArray.get(elementK_ptr, i)),
+                callBack.on(resolver.longKeyToString(OffHeapLongArray.get(elementK_ptr, i)),
                         (int) OffHeapLongArray.get(elementType_ptr, i),
                         OffHeapLongArray.get(elementV_ptr, i));
             }

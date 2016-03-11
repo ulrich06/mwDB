@@ -15,7 +15,7 @@ public interface KGraph {
     KNode newNode(long world, long time);
 
     /**
-     * Asynchronous lookup of a particular node.
+     * Asynchronous lookup of a particular node.<br>
      * Based on the tuple &lt;World, Time, Node_ID&gt; this method seeks a {@link KNode} in the Graph and returns it to the callback.
      *
      * @param world    The world identifier in which the KNode must be searched.
@@ -26,8 +26,8 @@ public interface KGraph {
     void lookup(long world, long time, long id, KCallback<KNode> callback);
 
     /**
-     * Creates a spin-off world from the world given as parameter.
-     * The forked world can then be altered independently of its parent.
+     * Creates a spin-off world from the world given as parameter.<br>
+     * The forked world can then be altered independently of its parent.<br>
      * Every modification in the parent world will nevertheless be inherited.
      *
      * @param world origin world id
@@ -36,7 +36,7 @@ public interface KGraph {
     long diverge(long world);
 
     /**
-     * Triggers a save task for the current graph.
+     * Triggers a save task for the current graph.<br>
      * This method synchronizes the storage with the current RAM memory.
      *
      * @param callback Called when the save is finished. The parameter specifies whether or not the save succeeded.
@@ -58,8 +58,8 @@ public interface KGraph {
     void disconnect(KCallback<Boolean> callback);
 
     /**
-     * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.
-     * If the index does not exist, it is created on the fly.
+     * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
+     * If the index does not exist, it is created on the fly.<br>
      * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, KCallback)} using the same attributes.
      *
      * @param indexName     A string uniquely identifying the index in the {@link KGraph}.
@@ -70,9 +70,9 @@ public interface KGraph {
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves the node from an index that satisfies the query.
-     * The query must be defined using at least sub-set attributes used for the indexing, or all of them.
-     * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").
+     * Retrieves the node from an index that satisfies the query.<br>
+     * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
+     * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>
      * e.g: "name=john,age=30"
      *
      * @param world     The world id in which the search must be performed.

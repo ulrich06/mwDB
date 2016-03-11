@@ -6,7 +6,7 @@ package org.mwdb;
 public interface KDeferCounter {
 
     /**
-     * Notifies the counter that an awaited event has occurred.
+     * Notifies the counter that an awaited event has occurred.<br>
      * If the total amount of awaited events is reached, the task registered by the {@link #then(KCallback) then} method is executed.
      */
     void count();
