@@ -5,11 +5,13 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMap;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
  */
 public class ArrayLongLongMap implements KLongLongMap {
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final KChunkListener listener;
     private final long root_array_ptr;
@@ -230,6 +232,37 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     public long rootAddress() {
         return root_array_ptr;
+    }
+
+    public static long cloneMap(long srcAddr) {
+        // capacity
+        long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
+
+        long newSrcAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(srcAddr, newSrcAddr, capacity * 8);
+
+        long elementVAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_V);
+        long newElementVAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementVAddr, newElementVAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementVAddr);
+
+        long elementKAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K);
+        long newElementKAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementKAddr, newElementKAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementKAddr);
+
+
+        long elementNextAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_NEXT);
+        long newElementNextAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementNextAddr, newElementNextAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_NEXT, newElementNextAddr);
+
+        long elementHashAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_HASH);
+        long newElementHashAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementHashAddr, newElementHashAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_HASH, newElementHashAddr);
+
+        return newSrcAddr;
     }
 
 }

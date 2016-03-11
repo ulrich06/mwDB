@@ -104,15 +104,15 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         long elementCount = OffHeapLongArray.get(origin.root_array_ptr, INDEX_ELEMENT_COUNT);
 
         long clonedElementK_ptr = OffHeapLongArray.allocate(elementDataSize);
-        OffHeapLongArray.copy(origin.elementK_ptr, clonedElementK_ptr, elementDataSize);
+        unsafe.copyMemory(origin.elementK_ptr, clonedElementK_ptr, elementDataSize);
         long clonedElementV_ptr = OffHeapLongArray.allocate(elementDataSize);
-        OffHeapLongArray.copy(origin.elementV_ptr, clonedElementV_ptr, elementDataSize);
+        unsafe.copyMemory(origin.elementV_ptr, clonedElementV_ptr, elementDataSize);
         long clonedElementNext_ptr = OffHeapLongArray.allocate(elementDataSize);
-        OffHeapLongArray.copy(origin.elementNext_ptr, clonedElementNext_ptr, elementDataSize);
+        unsafe.copyMemory(origin.elementNext_ptr, clonedElementNext_ptr, elementDataSize);
         long clonedElementHash_ptr = OffHeapLongArray.allocate(elementDataSize);
-        OffHeapLongArray.copy(origin.elementHash_ptr, clonedElementHash_ptr, elementDataSize);
+        unsafe.copyMemory(origin.elementHash_ptr, clonedElementHash_ptr, elementDataSize);
         long clonedElementType_ptr = OffHeapLongArray.allocate(elementDataSize);
-        OffHeapLongArray.copy(origin.elementType_ptr, clonedElementType_ptr, elementDataSize);
+        unsafe.copyMemory(origin.elementType_ptr, clonedElementType_ptr, elementDataSize);
 
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DATA_SIZE, elementDataSize);
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, elementCount);
@@ -159,9 +159,11 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                         OffHeapLongArray.set(elemPtr, i, stringLongMapPtr);
                         break;
                     case KType.LONG_LONG_MAP:
-                        
+                        long longLongMapPtr = ArrayLongLongMap.cloneMap(elemPtr);
+                        OffHeapLongArray.set(elemPtr, i, longLongMapPtr);
                         break;
                     case KType.LONG_LONG_ARRAY_MAP:
+                        // TODO
                         break;
                 }
             }
@@ -807,9 +809,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 long newElementV_ptr = OffHeapLongArray.allocate(newLength);
                 long newElementType_ptr = OffHeapLongArray.allocate(newLength);
 
-                OffHeapLongArray.copy(elementK_ptr, newElementK_ptr, elementDataSize);
-                OffHeapLongArray.copy(elementV_ptr, newElementV_ptr, elementDataSize);
-                OffHeapLongArray.copy(elementType_ptr, newElementType_ptr, elementDataSize);
+                unsafe.copyMemory(elementK_ptr, newElementK_ptr, elementDataSize);
+                unsafe.copyMemory(elementV_ptr, newElementV_ptr, elementDataSize);
+                unsafe.copyMemory(elementType_ptr, newElementType_ptr, elementDataSize);
 
                 long newElementNext_ptr = OffHeapLongArray.allocate(newLength);
                 long newElementHash_ptr = OffHeapLongArray.allocate(newLength);
