@@ -15,7 +15,5 @@ public interface KChunk {
     long flags();
 
     String save();
-
-    void load(String payload);
-
+    
 }

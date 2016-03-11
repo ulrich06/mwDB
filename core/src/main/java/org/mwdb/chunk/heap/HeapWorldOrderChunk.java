@@ -2,6 +2,7 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
@@ -50,7 +51,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this._id;
     }
 
-    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener) {
+    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, String initialPayload, KChunk origin) {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;
@@ -60,14 +61,20 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         this._listener = p_listener;
         this.elementCount = 0;
         this.droppedCount = 0;
-        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
-        for (int i = 0; i < initialCapacity; i++) {
-            newstate.elementNext[i] = -1;
-            newstate.elementHash[i] = -1;
+
+        if (initialPayload != null) {
+            load(initialPayload);
+        } else {
+            int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
+            for (int i = 0; i < initialCapacity; i++) {
+                newstate.elementNext[i] = -1;
+                newstate.elementHash[i] = -1;
+            }
+            this.state = newstate;
+            this.threshold = (int) (newstate.elementDataSize * Constants.MAP_LOAD_FACTOR);
         }
-        this.state = newstate;
-        this.threshold = (int) (newstate.elementDataSize * Constants.MAP_LOAD_FACTOR);
+
         this._magic = PrimitiveHelper.rand();
     }
 
@@ -300,9 +307,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this.elementCount;
     }
 
-    /* warning: this method is not thread safe */
-    @Override
-    public void load(String payload) {
+    private void load(String payload) {
         //_metaClassIndex = metaClassIndex;
         if (payload == null || payload.length() == 0) {
             return;

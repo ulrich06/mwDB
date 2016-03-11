@@ -7,7 +7,7 @@ public interface KChunkSpace {
     /**
      * Create KChunk, out of the space, not marked, used as a factory
      */
-    KChunk create(long world, long time, long id, byte type);
+    KChunk create(long world, long time, long id, byte type, String initialPayload, KChunk origin);
 
     /**
      * Get and mark chunk for the association of keys

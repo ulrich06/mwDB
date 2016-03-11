@@ -94,7 +94,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, String initialPayload, KChunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
@@ -102,14 +102,23 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
         this._listener = p_listener;
-        int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-        InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity], 0);
-        for (int i = 0; i < initialCapacity; i++) {
-            newstate._elementNext[i] = -1;
-            newstate._elementHash[i] = -1;
-        }
         state = new AtomicReference<InternalState>();
-        state.set(newstate);
+
+        if (initialPayload != null) {
+            load(initialPayload);
+        } else if (origin != null) {
+            HeapStateChunk castedOrigin = (HeapStateChunk) origin;
+            state.set(castedOrigin.state.get().cloneState());
+        } else {
+            //init a new state
+            int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity], 0);
+            for (int i = 0; i < initialCapacity; i++) {
+                newstate._elementNext[i] = -1;
+                newstate._elementHash[i] = -1;
+            }
+            state.set(newstate);
+        }
     }
 
     /**
@@ -338,18 +347,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    @Override
-    public void cloneFrom(KStateChunk origin) {
-        //brutal cast, but mixed implementation is not allowed per space
-        HeapStateChunk casted = (HeapStateChunk) origin;
-        this.state.set(casted.state.get().cloneState());
-    }
-
-    /**
-     * Warning: this method is not thread safe, but should only be used during the chunk safe init step
-     */
-    @Override
-    public void load(String payload) {
+    private void load(String payload) {
         if (payload == null || payload.length() == 0) {
             return;
         }

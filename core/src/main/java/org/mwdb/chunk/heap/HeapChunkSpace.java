@@ -192,14 +192,14 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(long p_world, long p_time, long p_id, byte p_type) {
+    public KChunk create(long p_world, long p_time, long p_id, byte p_type, String p_initialPayload, KChunk origin) {
         switch (p_type) {
             case Constants.STATE_CHUNK:
-                return new HeapStateChunk(p_world, p_time, p_id, this);
+                return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
             case Constants.WORLD_ORDER_CHUNK:
-                return new HeapWorldOrderChunk(p_world, p_time, p_id, this);
+                return new HeapWorldOrderChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
             case Constants.TIME_TREE_CHUNK:
-                return new HeapTimeTreeChunk(p_world, p_time, p_id, this);
+                return new HeapTimeTreeChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
         }
         return null;
     }

@@ -85,7 +85,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public int size() {
+    public long size() {
         return state.get()._elementCount;
     }
 
