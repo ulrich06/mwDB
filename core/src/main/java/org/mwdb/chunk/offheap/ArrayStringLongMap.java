@@ -271,4 +271,8 @@ public class ArrayStringLongMap implements KStringLongMap {
         }
     }
 
+    public long rootAddress() {
+        return root_array_ptr;
+    }
+
 }

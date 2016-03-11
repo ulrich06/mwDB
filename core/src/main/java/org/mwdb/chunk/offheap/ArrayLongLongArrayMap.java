@@ -246,4 +246,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         }
     }
 
+    public long rootAddress() {
+        return root_array_ptr;
+    }
 }

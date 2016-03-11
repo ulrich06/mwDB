@@ -228,4 +228,8 @@ public class ArrayLongLongMap implements KLongLongMap {
         }
     }
 
+    public long rootAddress() {
+        return root_array_ptr;
+    }
+
 }
