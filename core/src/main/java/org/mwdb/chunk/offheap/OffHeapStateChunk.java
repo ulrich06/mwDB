@@ -3,6 +3,8 @@ package org.mwdb.chunk.offheap;
 import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
+import org.mwdb.chunk.heap.ArrayLongLongArrayMap;
+import org.mwdb.chunk.heap.ArrayLongLongMap;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -877,12 +879,41 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public Object getOrCreate(long index, byte elemType) {
-        return null;
+        Object previousObject = get(index);
+        if (previousObject != null) {
+            return previousObject;
+        }
+        switch (elemType) {
+            case KType.STRING_LONG_MAP:
+                internal_set(index, elemType, new org.mwdb.chunk.heap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                break;
+            case KType.LONG_LONG_MAP:
+                internal_set(index, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                break;
+            case KType.LONG_LONG_ARRAY_MAP:
+                internal_set(index, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                break;
+        }
+        return get(index);
+
     }
 
 
     @Override
     public int getType(long index) {
-        return 0;
+        long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
+        if (elementDataSize == 0) {
+            return -1;
+        }
+        long hashIndex = PrimitiveHelper.longHash(index, elementDataSize);
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        while (m >= 0) {
+            if (index == OffHeapLongArray.get(elementK_ptr, m) /* getKey */) {
+                return (int) OffHeapLongArray.get(elementType_ptr, m); /* getValue */
+            } else {
+                m = OffHeapLongArray.get(elementNext_ptr, m);
+            }
+        }
+        return -1;
     }
 }

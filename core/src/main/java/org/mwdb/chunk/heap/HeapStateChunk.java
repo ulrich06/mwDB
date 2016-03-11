@@ -148,7 +148,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
      * Marks management section
      */
     @Override
-    public final int marks() {
+    public final long marks() {
         return this._counter.get();
     }
 
