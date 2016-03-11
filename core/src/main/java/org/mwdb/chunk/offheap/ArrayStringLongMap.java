@@ -163,17 +163,17 @@ public class ArrayStringLongMap implements KStringLongMap {
         throw new RuntimeException("Not implemented yet!!!");
     }
 
-    public void free() {
-        long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+    public static void free(long addr) {
+        long capacity = OffHeapLongArray.get(addr, INDEX_CAPACITY);
         //free String[]
-        OffHeapStringArray.free(elementK_ptr, capacity);
+        OffHeapStringArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K), capacity);
         //free all long[]
-        OffHeapLongArray.free(elementV_ptr);
-        OffHeapLongArray.free(elementNext_ptr);
-        OffHeapLongArray.free(elementHash_ptr);
-        OffHeapLongArray.free(elementK_H_ptr);
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K_H));
         //free master array
-        OffHeapLongArray.free(root_array_ptr);
+        OffHeapLongArray.free(addr);
     }
 
     @Override

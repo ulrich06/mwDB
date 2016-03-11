@@ -148,15 +148,15 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         throw new RuntimeException("Not implemented yet!!!");
     }
 
-    public void free() {
+    public static void free(long addr) {
         //free all long[]
-        OffHeapLongArray.free(elementK_ptr);
-        OffHeapLongArray.free(elementV_ptr);
-        OffHeapLongArray.free(elementNext_ptr);
-        OffHeapLongArray.free(elementHash_ptr);
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
 
         //free master array
-        OffHeapLongArray.free(root_array_ptr);
+        OffHeapLongArray.free(addr);
     }
 
     @Override

@@ -648,13 +648,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                         break;
                     /** Maps */
                     case KType.STRING_LONG_MAP:
-                        OffHeapDoubleArray.free(elemV_ptr);
+                        ArrayStringLongMap.free(elemV_ptr);
                         break;
                     case KType.LONG_LONG_MAP:
-                        OffHeapLongArray.free(elemV_ptr);
+                        ArrayLongLongMap.free(elemV_ptr);
                         break;
                     case KType.LONG_LONG_ARRAY_MAP:
-                        OffHeapLongArray.free(elemV_ptr);
+                        ArrayLongLongArrayMap.free(elemV_ptr);
                         break;
                 }
             }
