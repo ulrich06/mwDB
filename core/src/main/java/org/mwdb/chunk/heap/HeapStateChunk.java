@@ -199,6 +199,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     param_elem = (int[]) p_unsafe_elem;
                     break;
                 /** Maps */
+            /*
                 case KType.STRING_LONG_MAP:
                     param_elem = (KStringLongMap) p_unsafe_elem;
                     break;
@@ -208,6 +209,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 case KType.LONG_LONG_ARRAY_MAP:
                     param_elem = (KLongLongArrayMap) p_unsafe_elem;
                     break;
+                    */
                 default:
                     throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
             }

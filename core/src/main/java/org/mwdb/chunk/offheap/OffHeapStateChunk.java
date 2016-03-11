@@ -822,59 +822,60 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     public Object internal_getElementV(long index) {
-        long elemPtr = OffHeapLongArray.get(elementV_ptr, index);
-        if (elemPtr == Constants.OFFHEAP_NULL_PTR) {
-            return null;
-        }
-        Object elem = null;
         byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, index); // can be safely casted
         switch (elemType) {
             /** Primitives */
             case KType.BOOL:
-                elem = elemPtr == 1 ? true : false;
-                break;
+                return OffHeapLongArray.get(elementType_ptr, index) == 1 ? true : false;
             case KType.DOUBLE:
-                elem = elemPtr; // no indirection, value is directly inside
-                break;
+                return OffHeapDoubleArray.get(elementV_ptr, index); // no indirection, value is directly inside
             case KType.LONG:
-                elem = elemPtr; // no indirection, value is directly inside
-                break;
+                return OffHeapLongArray.get(elementV_ptr, index);  // no indirection, value is directly inside
             case KType.INT:
-                elem = elemPtr; // no indirection, value is directly inside
-                break;
+                return (int) OffHeapLongArray.get(elementV_ptr, index); // no indirection, value is directly inside
             case KType.STRING:
-                elem = OffHeapStringArray.get(elemPtr, 0);
-                break;
+                long elemStringPtr = OffHeapLongArray.get(elementV_ptr, index);
+                if (elemStringPtr == Constants.OFFHEAP_NULL_PTR) {
+                    return null;
+                }
+                return OffHeapStringArray.get(elemStringPtr, 0);
             /** Arrays */
             case KType.DOUBLE_ARRAY:
-                int doubleArrayLength = (int) OffHeapLongArray.get(elemPtr, 0); // can be safely casted
+                long elemDoublePtr = OffHeapLongArray.get(elementV_ptr, index);
+                if (elemDoublePtr == Constants.OFFHEAP_NULL_PTR) {
+                    return null;
+                }
+                int doubleArrayLength = (int) OffHeapLongArray.get(elemDoublePtr, 0); // can be safely casted
                 double[] doubleArray = new double[doubleArrayLength];
                 for (int i = 0; i < doubleArrayLength; i++) {
-                    doubleArray[i] = OffHeapDoubleArray.get(elemPtr, 1 + i);
+                    doubleArray[i] = OffHeapDoubleArray.get(elemDoublePtr, 1 + i);
                 }
-                elem = doubleArray;
-                break;
+                return doubleArray;
             case KType.LONG_ARRAY:
-                int longArrayLength = (int) OffHeapLongArray.get(elemPtr, 0); // can be safely casted
+                long elemLongPtr = OffHeapLongArray.get(elementV_ptr, index);
+                if (elemLongPtr == Constants.OFFHEAP_NULL_PTR) {
+                    return null;
+                }
+                int longArrayLength = (int) OffHeapLongArray.get(elemLongPtr, 0); // can be safely casted
                 long[] longArray = new long[longArrayLength];
                 for (int i = 0; i < longArrayLength; i++) {
-                    longArray[i] = OffHeapLongArray.get(elemPtr, 1 + i);
+                    longArray[i] = OffHeapLongArray.get(elemLongPtr, 1 + i);
                 }
-                elem = longArray;
-                break;
+                return longArray;
             case KType.INT_ARRAY:
-                int intArrayLength = (int) OffHeapLongArray.get(elemPtr, 0); // can be safely casted
+                long elemIntPtr = OffHeapLongArray.get(elementV_ptr, index);
+                if (elemIntPtr == Constants.OFFHEAP_NULL_PTR) {
+                    return null;
+                }
+                int intArrayLength = (int) OffHeapLongArray.get(elemIntPtr, 0); // can be safely casted
                 int[] intArray = new int[intArrayLength];
                 for (int i = 0; i < intArrayLength; i++) {
-                    intArray[i] = (int) OffHeapLongArray.get(elemPtr, 1 + i);
+                    intArray[i] = (int) OffHeapLongArray.get(elemIntPtr, 1 + i);
                 }
-                elem = intArray;
-                break;
+                return intArray;
             default:
                 throw new RuntimeException("Should never happen");
         }
-
-        return elem;
     }
 
     @Override

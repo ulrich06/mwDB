@@ -10,6 +10,7 @@ import org.mwdb.chunk.heap.HeapStateChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.KOffHeapChunk;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
+import org.mwdb.chunk.offheap.OffHeapStateChunk;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StateChunkTest implements KChunkListener {
@@ -22,7 +23,6 @@ public class StateChunkTest implements KChunkListener {
 
     @Test
     public void heapStateChunkTest() {
-
         StateChunkFactory factory = new StateChunkFactory() {
 
             @Override
@@ -30,7 +30,19 @@ public class StateChunkTest implements KChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
+        saveLoadTest(factory);
+        protectionTest(factory);
+    }
 
+    @Test
+    public void offHeapStateChunkTest() {
+        StateChunkFactory factory = new StateChunkFactory() {
+
+            @Override
+            public KStateChunk create(KChunkListener listener, String payload, KChunk origin) {
+                return new OffHeapStateChunk(listener, payload, origin, Constants.OFFHEAP_NULL_PTR);
+            }
+        };
         saveLoadTest(factory);
         protectionTest(factory);
     }
@@ -187,11 +199,11 @@ public class StateChunkTest implements KChunkListener {
         nbCount++;
         //simulate space management
 
-        if(chunk instanceof KHeapChunk){
-            ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT,0);
-        } else if(chunk instanceof KOffHeapChunk){
+        if (chunk instanceof KHeapChunk) {
+            ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
+        } else if (chunk instanceof KOffHeapChunk) {
             long addr = ((KOffHeapChunk) chunk).addr();
-            OffHeapLongArray.set(addr,Constants.OFFHEAP_CHUNK_INDEX_FLAGS,Constants.DIRTY_BIT);
+            OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
         }
 
     }
