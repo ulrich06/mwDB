@@ -52,4 +52,12 @@ public class OffHeapLongArray {
         unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy);
     }
 
+    public static long decrementAndGet(final long addr, final long index) {
+        return unsafe.getAndAddLong(null, addr + index * 8, -1) - 1;
+    }
+
+    public static long incrementAndGet(final long addr, final long index) {
+        return unsafe.getAndAddLong(null, addr + index * 8, 1) + 1;
+    }
+
 }

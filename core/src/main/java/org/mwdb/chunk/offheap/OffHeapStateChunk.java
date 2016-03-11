@@ -4,6 +4,7 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
 /**
@@ -153,8 +154,114 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public String save() {
-        // TODO
-        return null;
+        final StringBuilder buffer = new StringBuilder();
+        long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
+        Base64.encodeLongToBuffer(elementCount, buffer);
+        for (int i = 0; i < elementCount; i++) {
+            if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
+                long loopKey = OffHeapLongArray.get(elementK_ptr, i);
+                Object loopValue = internal_getElementV(i);
+                if (loopValue != null) {
+                    buffer.append(Constants.CHUNK_SEP);
+                    Base64.encodeLongToBuffer(loopKey, buffer);
+                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    /** Encode to type of elem, for unSerialization */
+                    byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
+                    Base64.encodeLongToBuffer(elementType, buffer);
+                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    switch (elementType) {
+                        /** Primitive Types */
+                        case KType.STRING:
+                            Base64.encodeStringToBuffer((String) loopValue, buffer);
+                            break;
+                        case KType.BOOL:
+                            if ((boolean) loopValue) {
+                                buffer.append("1");
+                            } else {
+                                buffer.append("0");
+                            }
+                            break;
+                        case KType.LONG:
+                            Base64.encodeLongToBuffer((long) loopValue, buffer);
+                            break;
+                        case KType.DOUBLE:
+                            Base64.encodeDoubleToBuffer((double) loopValue, buffer);
+                            break;
+                        case KType.INT:
+                            Base64.encodeIntToBuffer((int) loopValue, buffer);
+                            break;
+                        /** Arrays */
+                        case KType.DOUBLE_ARRAY:
+                            double[] castedDoubleArr = (double[]) loopValue;
+                            Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
+                            for (int j = 0; j < castedDoubleArr.length; j++) {
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
+                            }
+                            break;
+                        case KType.LONG_ARRAY:
+                            long[] castedLongArr = (long[]) loopValue;
+                            Base64.encodeIntToBuffer(castedLongArr.length, buffer);
+                            for (int j = 0; j < castedLongArr.length; j++) {
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeLongToBuffer(castedLongArr[j], buffer);
+                            }
+                            break;
+                        case KType.INT_ARRAY:
+                            int[] castedIntArr = (int[]) loopValue;
+                            Base64.encodeIntToBuffer(castedIntArr.length, buffer);
+                            for (int j = 0; j < castedIntArr.length; j++) {
+                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeIntToBuffer(castedIntArr[j], buffer);
+                            }
+                            break;
+                        /** Maps */
+                        case KType.STRING_LONG_MAP:
+                            KStringLongMap castedStringLongMap = (KStringLongMap) loopValue;
+                            Base64.encodeLongToBuffer(castedStringLongMap.size(), buffer);
+                            castedStringLongMap.each(new KStringLongMapCallBack() {
+                                @Override
+                                public void on(final String key, final long value) {
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    Base64.encodeStringToBuffer(key, buffer);
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(value, buffer);
+                                }
+                            });
+                            break;
+                        case KType.LONG_LONG_MAP:
+                            KLongLongMap castedLongLongMap = (KLongLongMap) loopValue;
+                            Base64.encodeLongToBuffer(castedLongLongMap.size(), buffer);
+                            castedLongLongMap.each(new KLongLongMapCallBack() {
+                                @Override
+                                public void on(final long key, final long value) {
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(key, buffer);
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(value, buffer);
+                                }
+                            });
+                            break;
+                        case KType.LONG_LONG_ARRAY_MAP:
+                            KLongLongArrayMap castedLongLongArrayMap = (KLongLongArrayMap) loopValue;
+                            Base64.encodeLongToBuffer(castedLongLongArrayMap.size(), buffer);
+                            castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
+                                @Override
+                                public void on(final long key, final long value) {
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(key, buffer);
+                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    Base64.encodeLongToBuffer(value, buffer);
+                                }
+                            });
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        return buffer.toString();
     }
 
     @Override
@@ -164,41 +271,48 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
 
     @Override
     public int marks() {
-        return 0;
+        return (int) OffHeapLongArray.get(root_array_ptr, INDEX_COUNTER);
     }
 
     @Override
     public int mark() {
-        return 0;
+        return (int) OffHeapLongArray.incrementAndGet(root_array_ptr, INDEX_COUNTER);
     }
 
     @Override
     public int unmark() {
-        return 0;
+        return (int) OffHeapLongArray.decrementAndGet(root_array_ptr, INDEX_COUNTER);
     }
 
     public void free() {
-
+        // TODO
     }
 
     @Override
     public long flags() {
-        return 0;
+        return OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS);
     }
 
     @Override
     public void setFlags(long bitsToEnable, long bitsToDisable) {
-
+        long val;
+        long nval;
+        do {
+            val = OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS);
+            nval = val & ~bitsToDisable | bitsToEnable;
+        } while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_FLAGS, val, nval));
     }
 
     @Override
     public byte chunkType() {
-        return 0;
+        return Constants.STATE_CHUNK;
     }
 
     @Override
     public void declareDirty(KChunk chunk) {
-
+        if (OffHeapLongArray.get(root_array_ptr, INDEX_IN_LOAD_MODE) == 0) {
+            internal_set_dirty();
+        }
     }
 
     @Override
@@ -412,16 +526,34 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
     }
 
     private void internal_set_dirty() {
-//        if (this._listener != null) {
-//            if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-//                this._listener.declareDirty(this);
-//            }
-//        }
+        if (this._listener != null) {
+            if ((OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                this._listener.declareDirty(this);
+            }
+        }
     }
 
 
     @Override
     public Object get(long index) {
+        long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
+        if (elementDataSize == 0) {
+            return null;
+        }
+        long hashIndex = PrimitiveHelper.longHash(index, elementDataSize);
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        while (m >= 0) {
+            if (index == OffHeapLongArray.get(elementK_ptr, m) /* getKey */) {
+                return internal_getElementV(index); /* getValue */
+            } else {
+                m = OffHeapLongArray.get(elementNext_ptr, m);
+            }
+        }
+        return null;
+    }
+
+    public Object internal_getElementV(long index) {
+        // TODO
         return null;
     }
 
