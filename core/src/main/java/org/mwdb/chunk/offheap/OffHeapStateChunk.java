@@ -3,8 +3,10 @@ package org.mwdb.chunk.offheap;
 import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
+import org.mwdb.chunk.heap.*;
 import org.mwdb.chunk.heap.ArrayLongLongArrayMap;
 import org.mwdb.chunk.heap.ArrayLongLongMap;
+import org.mwdb.chunk.heap.ArrayStringLongMap;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -367,6 +369,25 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                                 currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                                 toInsert = currentIntArr;
                                 break;
+                            /** Maps */
+                            case KType.STRING_LONG_MAP:
+                                if (currentMapStringKey != null) {
+                                    currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                }
+                                toInsert = currentStringLongMap;
+                                break;
+                            case KType.LONG_LONG_MAP:
+                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                    currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                }
+                                toInsert = currentLongLongMap;
+                                break;
+                            case KType.LONG_LONG_ARRAY_MAP:
+                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                    currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                }
+                                toInsert = currentLongLongArrayMap;
+                                break;
                         }
                         if (toInsert != null) {
                             //insert K/V
@@ -416,6 +437,16 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                         case KType.INT_ARRAY:
                             currentIntArr = new int[currentSubSize];
                             break;
+                        /** Maps */
+                        case KType.STRING_LONG_MAP:
+                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize);
+                            break;
+                        case KType.LONG_LONG_MAP:
+                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize);
+                            break;
+                        case KType.LONG_LONG_ARRAY_MAP:
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize);
+                            break;
                     }
                 } else {
                     switch (currentChunkElemType) {
@@ -432,6 +463,26 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                             currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
                             break;
+                        /** Maps */
+                        case KType.STRING_LONG_MAP:
+                            if (currentMapStringKey != null) {
+                                currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentMapStringKey = null;
+                            }
+                            break;
+                        case KType.LONG_LONG_MAP:
+                            if (currentMapLongKey != Constants.NULL_LONG) {
+                                currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentMapLongKey = Constants.NULL_LONG;
+                            }
+                            break;
+                        case KType.LONG_LONG_ARRAY_MAP:
+                            if (currentMapLongKey != Constants.NULL_LONG) {
+                                currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentMapLongKey = Constants.NULL_LONG;
+                            }
+                            break;
+
                     }
                 }
                 previousStart = cursor + 1;
@@ -507,6 +558,26 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                     currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     toInsert = currentIntArr;
                     break;
+                /** Maps */
+                case KType.STRING_LONG_MAP:
+                    if (currentMapStringKey != null) {
+                        currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                    }
+                    toInsert = currentStringLongMap;
+                    break;
+                case KType.LONG_LONG_MAP:
+                    if (currentMapLongKey != Constants.NULL_LONG) {
+                        currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                    }
+                    toInsert = currentLongLongMap;
+                    break;
+                case KType.LONG_LONG_ARRAY_MAP:
+                    if (currentMapLongKey != Constants.NULL_LONG) {
+                        currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                    }
+                    toInsert = currentLongLongArrayMap;
+                    break;
+
 
             }
             if (toInsert != null) {
