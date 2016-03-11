@@ -3,10 +3,6 @@ package org.mwdb.chunk.offheap;
 import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
-import org.mwdb.chunk.heap.*;
-import org.mwdb.chunk.heap.ArrayLongLongArrayMap;
-import org.mwdb.chunk.heap.ArrayLongLongMap;
-import org.mwdb.chunk.heap.ArrayStringLongMap;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -439,13 +435,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                             break;
                         /** Maps */
                         case KType.STRING_LONG_MAP:
-                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize);
+                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                         case KType.LONG_LONG_MAP:
-                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize);
+                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
-                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize);
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize, Constants.OFFHEAP_NULL_PTR);
                             break;
                     }
                 } else {
@@ -860,6 +856,19 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
                 }
                 OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
                 break;
+            /** Maps */
+            case KType.STRING_LONG_MAP:
+                long stringLongMap_ptr = ((ArrayStringLongMap) elem).rootAddress();
+                OffHeapLongArray.set(addr, index, stringLongMap_ptr);
+                break;
+            case KType.LONG_LONG_MAP:
+                long longLongMap_ptr = ((ArrayLongLongMap) elem).rootAddress();
+                OffHeapLongArray.set(addr, index, longLongMap_ptr);
+                break;
+            case KType.LONG_LONG_ARRAY_MAP:
+                long longLongArrayMap_ptr = ((ArrayLongLongArrayMap) elem).rootAddress();
+                OffHeapLongArray.set(addr, index, longLongArrayMap_ptr);
+                break;
             default:
                 throw new RuntimeException("Should never happen...");
         }
@@ -957,13 +966,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener {
         }
         switch (elemType) {
             case KType.STRING_LONG_MAP:
-                internal_set(index, elemType, new org.mwdb.chunk.heap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(index, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
                 break;
             case KType.LONG_LONG_MAP:
-                internal_set(index, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(index, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
                 break;
             case KType.LONG_LONG_ARRAY_MAP:
-                internal_set(index, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(index, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
                 break;
         }
         return get(index);
