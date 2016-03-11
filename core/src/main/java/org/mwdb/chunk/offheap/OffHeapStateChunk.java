@@ -136,6 +136,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 switch (elementType) {
                     /** Primitive Types */
                     case KType.STRING:
+                        // TODO
                         break;
                     /** Arrays */
                     case KType.DOUBLE_ARRAY:
@@ -163,7 +164,8 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                         OffHeapLongArray.set(elemPtr, i, longLongMapPtr);
                         break;
                     case KType.LONG_LONG_ARRAY_MAP:
-                        // TODO
+                        long longLongArrayMapPtr = ArrayLongLongArrayMap.cloneMap(elemPtr);
+                        OffHeapLongArray.set(elemPtr, i, longLongArrayMapPtr);
                         break;
                 }
             }
