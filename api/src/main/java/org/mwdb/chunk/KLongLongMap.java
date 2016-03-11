@@ -38,6 +38,6 @@ public interface KLongLongMap {
      *
      * @return the size of the map
      */
-    int size();
+    long size();
 
 }

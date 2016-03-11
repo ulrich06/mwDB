@@ -30,6 +30,6 @@ public interface KStringLongMap {
      *
      * @return the size of the map
      */
-    int size();
+    long size();
 
 }

@@ -115,5 +115,6 @@ public class Constants {
     public static final int OFFHEAP_CHUNK_INDEX_ID = 2;
     public static final int OFFHEAP_CHUNK_INDEX_TYPE = 3;
     public static final int OFFHEAP_CHUNK_INDEX_FLAGS = 4;
+    public static final int OFFHEAP_CHUNK_INDEX_MARKS = 5;
 
 }

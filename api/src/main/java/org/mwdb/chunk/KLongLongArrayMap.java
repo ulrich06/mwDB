@@ -40,6 +40,6 @@ public interface KLongLongArrayMap {
      *
      * @return the size of the map
      */
-    int size();
+    long size();
 
 }

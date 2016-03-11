@@ -125,7 +125,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         consistencyCheck();
 
         long elementCount = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
-        for (int i = 0; i < elementCount; i++) {
+        for (long i = 0; i < elementCount; i++) {
             long loopValue = OffHeapLongArray.get(elementV_ptr, i);
             if (loopValue != Constants.NULL_LONG) {
                 callback.on(OffHeapLongArray.get(elementK_ptr, i), loopValue);
@@ -139,8 +139,8 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
     }
 
     @Override
-    public int size() {
-        return (int) OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
+    public long size() {
+        return OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
 
                 //rehashEveryThing
-                for (int i = 0; i < elementCount; i++) {
+                for (long i = 0; i < elementCount; i++) {
                     long previousValue = OffHeapLongArray.get(elementV_ptr, i);
                     long previousKey = OffHeapLongArray.get(elementK_ptr, i);
                     if (previousValue != Constants.NULL_LONG) {

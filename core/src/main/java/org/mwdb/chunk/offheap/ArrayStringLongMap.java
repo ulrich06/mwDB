@@ -140,7 +140,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         consistencyCheck();
 
         long elementCount = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
-        for (int i = 0; i < elementCount; i++) {
+        for (long i = 0; i < elementCount; i++) {
             String loopKey = OffHeapStringArray.get(elementK_ptr, i);
             if (loopKey != null) {
                 callback.on(loopKey, OffHeapLongArray.get(elementV_ptr, i));
@@ -154,8 +154,8 @@ public class ArrayStringLongMap implements KStringLongMap {
     }
 
     @Override
-    public int size() {
-        return (int) OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
+    public long size() {
+        return OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class ArrayStringLongMap implements KStringLongMap {
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
 
                 //rehashEveryThing
-                for (int i = 0; i < count; i++) {
+                for (long i = 0; i < count; i++) {
                     long previousHash = OffHeapLongArray.get(elementK_H_ptr, i);
                     if (previousHash != Constants.OFFHEAP_NULL_PTR) {
                         long newHashIndex = PrimitiveHelper.longHash(OffHeapLongArray.get(elementK_H_ptr, i), newCapacity);

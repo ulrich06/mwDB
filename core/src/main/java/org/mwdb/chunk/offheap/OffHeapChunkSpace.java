@@ -27,7 +27,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     /**
      * HashMap variables
      */
-    private final long _elementCount;
+    private final AtomicInteger _elementCount;
+
     private final long _elementNext;
     private final long _elementHash;
     private final long _values;
@@ -111,6 +112,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         this._elementHash = OffHeapLongArray.allocate(maxEntries);
         this._values = OffHeapLongArray.allocate(maxEntries);
         this._types = OffHeapByteArray.allocate(maxEntries);
+        this._elementHashLock = OffHeapLongArray.allocate(maxEntries);
 
         this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
         this._elementCount = new AtomicInteger(0);
@@ -156,21 +158,49 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public void unmark(long world, long time, long id) {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        int m = this._elementHash[index];
-        while (m != -1) {
-            KChunk foundChunk = this._values[m];
-            if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
-                if (foundChunk.unmark() == 0) {
+        long m = OffHeapLongArray.get(_elementHash, index);
+        while (m != Constants.OFFHEAP_NULL_PTR) {
+            long foundChunkPtr = OffHeapLongArray.get(_values, m);
+            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+                    ) {
+
+                //CAS on the mark of the chunk
+                long previousFlag;
+                long newFlag;
+                do {
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS);
+                    newFlag = previousFlag - 1;
+                }
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, newFlag));
+
+                if (newFlag == 0) {
                     //check if object is dirty
                     if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                         //declare available for recycling
                         this._lru.enqueue(m);
                     }
                 }
+
                 return;
+
             } else {
-                m = this._elementNext[m];
+                m = OffHeapLongArray.get(_elementNext, m);
             }
+
+
+            if (foundChunk.unmark() == 0) {
+                //check if object is dirty
+                if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                    //declare available for recycling
+                    this._lru.enqueue(m);
+                }
+            }
+            return;
+
+
         }
     }
 
