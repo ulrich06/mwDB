@@ -2,7 +2,7 @@ package org.mwdb;
 
 
 /**
- * KNode is the base element contained in the {@link KGraph}.<br/>
+ * KNode is the base element contained in the {@link KGraph}.<br>
  * They belong to a world and time, have attributes, relationships, and indexes.
  */
 public interface KNode {
@@ -22,7 +22,7 @@ public interface KNode {
     long time();
 
     /**
-     * Provides the identifier for this node in the graph.<br/>
+     * Provides the identifier for this node in the graph.<br>
      * This identifier is constant over timePoints and worlds.
      *
      * @return the node id.
@@ -40,7 +40,7 @@ public interface KNode {
     Object att(String attributeName);
 
     /**
-     * <p>Allows to know the type of an attribute. The returned value is one of {@link KType}.</p>
+     * Allows to know the type of an attribute. The returned value is one of {@link KType}.
      *
      * @param attributeName The name of the attribute for which the type is asked.
      * @return The type of the attribute inform of an int belonging to {@link KType}.
@@ -48,7 +48,7 @@ public interface KNode {
     int attType(String attributeName);
 
     /**
-     * Sets the value of an attribute of this node, for its current world and time.<br/>
+     * Sets the value of an attribute of this node, for its current world and time.<br>
      * This method has to be used for primitive types.
      *
      * @param attributeName  The name of the attribute. Must be unique per node.
@@ -58,7 +58,7 @@ public interface KNode {
     void attSet(String attributeName, byte attributeType, Object attributeValue);
 
     /**
-     * Gets or creates atomically a complex type (such as Maps).<br/>
+     * Gets or creates atomically a complex type (such as Maps).<br>
      * It returns a mutable Map.
      *
      * @param attributeName The name of the Map to create. Must be unique per node.
@@ -91,8 +91,8 @@ public interface KNode {
     long[] relValues(String relationName);
 
     /**
-     * Adds a node to a relation.<br/>
-     * If the relationship doesn't exist, it is created on the fly.<br/>
+     * Adds a node to a relation.<br>
+     * If the relationship doesn't exist, it is created on the fly.<br>
      * The relation name must be unique in the node.
      *
      * @param relationName The name of the relation in which to add the node.
@@ -109,8 +109,8 @@ public interface KNode {
     void relRemove(String relationName, KNode relatedNode);
 
     /**
-     * Creates or compliments an index of nodes.<br/>
-     * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br/>
+     * Creates or compliments an index of nodes.<br>
+     * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
      * Index names must be unique within a given node.
      *
      * @param indexName     The name of the index (should be unique per node).
@@ -121,7 +121,7 @@ public interface KNode {
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves a node from an index that satisfies a query.<br/>
+     * Retrieves a node from an index that satisfies a query.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per node)
@@ -146,15 +146,15 @@ public interface KNode {
     long timeDephasing();
 
     /**
-     * Forces the creation of a new timePoint of a node for its time.<br/>
-     * Clones the previous state to the exact time of this node.<br/>
+     * Forces the creation of a new timePoint of a node for its time.<br>
+     * Clones the previous state to the exact time of this node.<br>
      * This cancels the dephasing between the current timepoint of the node and the last record timepoint.
      */
     void forcePhase();
 
     /**
-     * Retrieves all timePoints from the timeLine of this node when alterations occurred.<br/>
-     * This method also jumps over the world hierarchy to collect all available timepoints.<br/>
+     * Retrieves all timePoints from the timeLine of this node when alterations occurred.<br>
+     * This method also jumps over the world hierarchy to collect all available timepoints.<br>
      * To unbound the search, please use {@link KConstants#BEGINNING_OF_TIME} and {@link KConstants#END_OF_TIME} as bounds.
      *
      * @param beginningOfSearch (inclusive) earliest bound for the search.
@@ -168,8 +168,8 @@ public interface KNode {
      */
 
     /**
-     * Informs mwDB memory manager that this node object can be freed from the memory.<br/>
-     * <b>Warning: this MUST be the last method called on this node.</b><br/>
+     * Informs mwDB memory manager that this node object can be freed from the memory.<br>
+     * <b>Warning: this MUST be the last method called on this node.</b><br>
      * To work with the node afterwards, a new lookup is mandatory.
      */
     void free();
