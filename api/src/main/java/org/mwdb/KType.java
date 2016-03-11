@@ -14,7 +14,7 @@ public class KType {
     public static final byte INT = 4;
     public static final byte DOUBLE = 5;
 
-    /**
+    /*
      * Primitive Arrays
      * SHOULD NOT BE USED OUTSIDE THE CORE IMPLEMENTATION.
      */
@@ -22,7 +22,7 @@ public class KType {
     public static final byte LONG_ARRAY = 7;
     public static final byte INT_ARRAY = 8;
 
-    /**
+    /*
      * Primitive Maps
      * SHOULD NOT BE USED OUTSIDE THE CORE IMPLEMENTATION.
      */

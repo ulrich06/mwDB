@@ -468,11 +468,11 @@ public class MWGResolver implements KResolver {
     }
 
     @Override
-    public void resolveTimepoints(final KNode origin, final long beginningOfSearch, final long endOfSearch, final KCallback<long[]> callback) {
+    public void resolveTimepoints(final KNode node, final long beginningOfSearch, final long endOfSearch, final KCallback<long[]> callback) {
         final MWGResolver selfPointer = this;
         long[] keys = new long[]{
                 Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG,
-                Constants.NULL_LONG, Constants.NULL_LONG, origin.id()
+                Constants.NULL_LONG, Constants.NULL_LONG, node.id()
         };
         getOrLoadAndMarkAll(keys, new KCallback<KChunk[]>() {
             @Override
@@ -488,7 +488,7 @@ public class MWGResolver implements KResolver {
                 final long[][] collectedWorlds = {new long[collectionSize[0]]};
                 int collectedIndex = 0;
 
-                long currentWorld = origin.world();
+                long currentWorld = node.world();
                 while (currentWorld != Constants.NULL_LONG) {
                     long divergenceTimepoint = objectWorldOrder.get(currentWorld);
                     if (divergenceTimepoint != Constants.NULL_LONG) {
@@ -522,7 +522,7 @@ public class MWGResolver implements KResolver {
                 for (int i = 0; i < collectedIndex; i++) {
                     timeTreeKeys[i * 3] = collectedWorlds[0][i];
                     timeTreeKeys[i * 3 + 1] = Constants.NULL_LONG;
-                    timeTreeKeys[i * 3 + 2] = origin.id();
+                    timeTreeKeys[i * 3 + 2] = node.id();
                 }
                 final int finalCollectedIndex = collectedIndex;
                 final long[] finalCollectedWorlds = collectedWorlds[0];
@@ -584,7 +584,7 @@ public class MWGResolver implements KResolver {
      * Dictionary methods
      */
     @Override
-    public long key(String name) {
+    public long stringToLongKey(String name) {
         KStringLongMap dictionaryIndex = (KStringLongMap) this.dictionary.get(0);
         if (dictionaryIndex == null) {
             dictionaryIndex = (KStringLongMap) this.dictionary.getOrCreate(0, KType.STRING_LONG_MAP);
@@ -598,7 +598,7 @@ public class MWGResolver implements KResolver {
     }
 
     @Override
-    public String value(long key) {
+    public String longKeyToString(long key) {
         KStringLongMap dictionaryIndex = (KStringLongMap) this.dictionary.get(0);
         if (dictionaryIndex != null) {
             return dictionaryIndex.getKey(key);

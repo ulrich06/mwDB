@@ -308,7 +308,7 @@ public class Graph implements KGraph {
 
     private void getIndexOrCreate(long world, long time, String indexName, KCallback<KNode> callback, boolean createIfNull) {
         final Graph selfPointer = this;
-        final long indexNameCoded = this._resolver.key(indexName);
+        final long indexNameCoded = this._resolver.stringToLongKey(indexName);
         this._resolver.lookup(world, time, Constants.END_OF_TIME, new KCallback<KNode>() {
             @Override
             public void on(KNode globalIndexNodeUnsafe) {
