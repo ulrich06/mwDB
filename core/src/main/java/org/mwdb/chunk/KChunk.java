@@ -10,7 +10,7 @@ public interface KChunk {
 
     byte chunkType();
 
-    int marks();
+    long marks();
 
     long flags();
 
