@@ -128,6 +128,44 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         elementHash_ptr = clonedElementHash_ptr;
         elementType_ptr = clonedElementType_ptr;
 
+        // deep cloneArray
+        for (long i = 0; i < elementCount; i++) {
+            byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i);
+            if (elementType != Constants.OFFHEAP_NULL_PTR) { // is there a real value?
+                long elemPtr = OffHeapLongArray.get(elementV_ptr, i);
+                switch (elementType) {
+                    /** Primitive Types */
+                    case KType.STRING:
+                        break;
+                    /** Arrays */
+                    case KType.DOUBLE_ARRAY:
+                        long doubleArrayLen = OffHeapLongArray.get(elemPtr, 0); // read the length (first long)
+                        long doubleArrayPtr = OffHeapDoubleArray.clone(elemPtr, doubleArrayLen);
+                        OffHeapLongArray.set(elemPtr, i, doubleArrayPtr);
+                        break;
+                    case KType.LONG_ARRAY:
+                        long longArrayLen = OffHeapLongArray.get(elemPtr, 0); // read the length (first long)
+                        long longArrayPtr = OffHeapLongArray.cloneArray(elemPtr, longArrayLen);
+                        OffHeapLongArray.set(elemPtr, i, longArrayPtr);
+                        break;
+                    case KType.INT_ARRAY:
+                        long intArrayLen = OffHeapLongArray.get(elemPtr, 0); // read the length (first long)
+                        long intArrayPtr = OffHeapLongArray.cloneArray(elemPtr, intArrayLen);
+                        OffHeapLongArray.set(elemPtr, i, intArrayPtr);
+                        break;
+                    /** Maps */
+                    case KType.STRING_LONG_MAP:
+                        long stringLongMapPtr = ArrayStringLongMap.cloneMap(elemPtr);
+                        OffHeapLongArray.set(elemPtr, i, stringLongMapPtr);
+                        break;
+                    case KType.LONG_LONG_MAP:
+                        
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        break;
+                }
+            }
+        }
     }
 
     @Override

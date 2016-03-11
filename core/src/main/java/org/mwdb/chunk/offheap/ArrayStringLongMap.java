@@ -5,11 +5,13 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KStringLongMap;
 import org.mwdb.chunk.KStringLongMapCallBack;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
  */
 public class ArrayStringLongMap implements KStringLongMap {
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final KChunkListener listener;
     private final long root_array_ptr;
@@ -275,4 +277,38 @@ public class ArrayStringLongMap implements KStringLongMap {
         return root_array_ptr;
     }
 
+    public static long cloneMap(long srcAddr) {
+        // capacity
+        long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
+
+        long newSrcAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(srcAddr, newSrcAddr, capacity * 8);
+
+        long elementVAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_V);
+        long newElementVAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementVAddr, newElementVAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementVAddr);
+
+        long elementKHashAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K_H);
+        long newElementKHashAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementKHashAddr, newElementKHashAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_K_H, newElementKHashAddr);
+
+        long elementKAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K);
+        long newElementKAddr = OffHeapStringArray.allocate(capacity);
+        // TODO copy the content
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_K, newElementKAddr);
+
+        long elementNextAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_NEXT);
+        long newElementNextAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementNextAddr, newElementNextAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_NEXT, newElementNextAddr);
+
+        long elementHashAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_HASH);
+        long newElementHashAddr = OffHeapLongArray.allocate(capacity);
+        unsafe.copyMemory(elementHashAddr, newElementHashAddr, capacity * 8);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_HASH, newElementHashAddr);
+
+        return newSrcAddr;
+    }
 }
