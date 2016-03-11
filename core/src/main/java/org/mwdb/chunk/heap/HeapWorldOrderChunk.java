@@ -11,7 +11,7 @@ import org.mwdb.utility.PrimitiveHelper;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HeapWorldOrderChunk implements KWorldOrderChunk {
+public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
 
     protected volatile int elementCount;
 
@@ -295,7 +295,8 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
         this.droppedCount++;
     }
 
-    public final int size() {
+    @Override
+    public final long size() {
         return this.elementCount;
     }
 
@@ -395,11 +396,6 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk {
             }
         }
         return buffer.toString();
-    }
-
-    @Override
-    public void free() {
-        //clear();
     }
 
     @Override

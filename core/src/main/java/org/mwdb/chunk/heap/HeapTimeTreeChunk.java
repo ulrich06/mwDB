@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HeapTimeTreeChunk implements KLongTree {
+public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
 
     //constants definition
     private static final char BLACK_LEFT = '{';
@@ -581,13 +581,6 @@ public class HeapTimeTreeChunk implements KLongTree {
                 currentLoopIndex++;
             }
         }
-    }
-
-    @Override
-    public final void free() {
-        this.state = null;
-        this._size = 0;
-        this._threshold = 0;
     }
 
     protected final void internal_insert(long p_key, long p_value) {

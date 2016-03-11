@@ -121,7 +121,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this._elementHash[index];
         while (m != -1) {
-            KChunk foundChunk = this._values[m];
+            KHeapChunk foundChunk = (KHeapChunk) this._values[m];
             if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 //GET VALUE
                 if (foundChunk.mark() == 1) {
@@ -151,7 +151,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this._elementHash[index];
         while (m != -1) {
-            KChunk foundChunk = this._values[m];
+            KHeapChunk foundChunk = (KHeapChunk) this._values[m];
             if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 if (foundChunk.unmark() == 0) {
                     //check if object is dirty
@@ -169,7 +169,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmarkChunk(KChunk chunk) {
-        int marks = chunk.unmark();
+        KHeapChunk heapChunk = (KHeapChunk) chunk;
+        int marks = heapChunk.unmark();
         if (marks == 0) {
             if ((chunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 long nodeWorld = chunk.world();
@@ -206,7 +207,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public KChunk putAndMark(KChunk p_elem) {
         //first mark the object
-        if (p_elem.mark() != 1) {
+        KHeapChunk heapChunk = (KHeapChunk) p_elem;
+        if (heapChunk.mark() != 1) {
             throw new RuntimeException("Warning, trying to put an unsafe object " + p_elem);
         }
         int entry = -1;
@@ -271,8 +273,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
                 //free the lock
                 this._elementHashLock.set(indexVictim, -1);
                 this._elementCount.decrementAndGet();
-                //FREE VICTIM FROM MEMORY
-                victim.free();
             }
             _values[currentVictimIndex] = p_elem;
             //negociate the lock to write on hashIndex
@@ -301,9 +301,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this._elementHash[hashIndex];
         while (m >= 0) {
-            KChunk currentM = this._values[m];
+            KHeapChunk currentM = (KHeapChunk) this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
-                dirtyChunk.setFlags(Constants.DIRTY_BIT, 0);
+                currentM.setFlags(Constants.DIRTY_BIT, 0);
                 boolean success = false;
                 while (!success) {
                     InternalDirtyStateList previousState = this._dirtyState.get();
@@ -327,9 +327,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
         int m = this._elementHash[hashIndex];
         while (m >= 0) {
-            KChunk currentM = this._values[m];
+            KHeapChunk currentM = (KHeapChunk) this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
-                cleanChunk.setFlags(0, Constants.DIRTY_BIT);
+                currentM.setFlags(0, Constants.DIRTY_BIT);
                 if (currentM.marks() == 0) {
                     this._lru.enqueue(m);
                 }

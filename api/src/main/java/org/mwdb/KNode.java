@@ -83,7 +83,7 @@ public interface KNode {
     void rel(String relationName, KCallback<KNode[]> callback);
 
     /**
-     * Retrieves asynchronously the nodes contained in a relation.
+     * Retrieves synchronously the nodes contained in a relation.
      *
      * @param relationName The name of the relation to retrieve.
      * @return An array of node ids contained in the relation.

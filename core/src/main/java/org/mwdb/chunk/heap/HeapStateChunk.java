@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class HeapStateChunk implements KStateChunk, KChunkListener {
+public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
     /**
      * Identification Section
@@ -165,39 +165,39 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             switch (p_elemType) {
                 /** Primitives */
                 case KType.BOOL:
-                    param_elem = (boolean) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.DOUBLE:
-                    param_elem = (double) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.LONG:
-                    param_elem = (long) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.INT:
-                    param_elem = (int) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.STRING:
-                    param_elem = (String) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 /** Arrays */
                 case KType.DOUBLE_ARRAY:
-                    param_elem = (double[]) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.LONG_ARRAY:
-                    param_elem = (long[]) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.INT_ARRAY:
-                    param_elem = (int[]) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 /** Maps */
                 case KType.STRING_LONG_MAP:
-                    param_elem = (KStringLongMap) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.LONG_LONG_MAP:
-                    param_elem = (KLongLongMap) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 case KType.LONG_LONG_ARRAY_MAP:
-                    param_elem = (KLongLongArrayMap) p_unsafe_elem;
+                    param_elem = p_unsafe_elem;
                     break;
                 default:
                     throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
@@ -386,7 +386,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
         KLongLongArrayMap currentLongLongArrayMap = null;
 
         //array variables
-        int currentSubSize = -1;
+        long currentSubSize = -1;
         int currentSubIndex = 0;
 
         //map key variables
@@ -513,28 +513,28 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                 }
             } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
-                    currentSubSize = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    currentSubSize = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     //init array or maps
                     switch (currentChunkElemType) {
                         /** Arrays */
                         case KType.DOUBLE_ARRAY:
-                            currentDoubleArr = new double[currentSubSize];
+                            currentDoubleArr = new double[(int) currentSubSize];
                             break;
                         case KType.LONG_ARRAY:
-                            currentLongArr = new long[currentSubSize];
+                            currentLongArr = new long[(int) currentSubSize];
                             break;
                         case KType.INT_ARRAY:
-                            currentIntArr = new int[currentSubSize];
+                            currentIntArr = new int[(int) currentSubSize];
                             break;
                         /** Maps */
                         case KType.STRING_LONG_MAP:
-                            currentStringLongMap = new ArrayStringLongMap(this, currentSubSize);
+                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize);
                             break;
                         case KType.LONG_LONG_MAP:
-                            currentLongLongMap = new ArrayLongLongMap(this, currentSubSize);
+                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize);
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
-                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, currentSubSize);
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize);
                             break;
                     }
                 } else {
@@ -752,7 +752,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                         /** Maps */
                         case KType.STRING_LONG_MAP:
                             KStringLongMap castedStringLongMap = (KStringLongMap) loopValue;
-                            Base64.encodeIntToBuffer(castedStringLongMap.size(), buffer);
+                            Base64.encodeLongToBuffer(castedStringLongMap.size(), buffer);
                             castedStringLongMap.each(new KStringLongMapCallBack() {
                                 @Override
                                 public void on(final String key, final long value) {
@@ -765,7 +765,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                             break;
                         case KType.LONG_LONG_MAP:
                             KLongLongMap castedLongLongMap = (KLongLongMap) loopValue;
-                            Base64.encodeIntToBuffer(castedLongLongMap.size(), buffer);
+                            Base64.encodeLongToBuffer(castedLongLongMap.size(), buffer);
                             castedLongLongMap.each(new KLongLongMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
@@ -778,7 +778,7 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
                             KLongLongArrayMap castedLongLongArrayMap = (KLongLongArrayMap) loopValue;
-                            Base64.encodeIntToBuffer(castedLongLongArrayMap.size(), buffer);
+                            Base64.encodeLongToBuffer(castedLongLongArrayMap.size(), buffer);
                             castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
@@ -796,11 +796,6 @@ public class HeapStateChunk implements KStateChunk, KChunkListener {
             }
         }
         return buffer.toString();
-    }
-
-    @Override
-    public void free() {
-        // clear();
     }
 
     private void internal_set_dirty() {
