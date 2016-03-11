@@ -123,7 +123,7 @@ public class StateChunkTest implements KChunkListener {
         for (int i = 0; i < 10; i++) {
             Assert.assertTrue(chunk.get(1000 + i).equals(i));
         }
-        
+
         KStateChunk chunk3 = factory.create(this, null, chunk);
         String savedChunk3 = chunk3.save();
         savedChunk = chunk.save();

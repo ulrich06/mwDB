@@ -627,36 +627,10 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
     public void free() {
         long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
-        for (int i = 0; i < elementDataSize; i++) {
+        for (long i = 0; i < elementDataSize; i++) {
             long elemV_ptr = OffHeapLongArray.get(elementV_ptr, i);
             if (elemV_ptr != Constants.OFFHEAP_NULL_PTR) {
-                byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, i);
-                switch (elemType) {
-                    /** Primitive Object */
-                    case KType.STRING:
-                        unsafe.freeMemory(elemV_ptr);
-                        break;
-                    /** Arrays */
-                    case KType.DOUBLE_ARRAY:
-                        OffHeapDoubleArray.free(elemV_ptr);
-                        break;
-                    case KType.LONG_ARRAY:
-                        OffHeapLongArray.free(elemV_ptr);
-                        break;
-                    case KType.INT_ARRAY:
-                        OffHeapLongArray.free(elemV_ptr);
-                        break;
-                    /** Maps */
-                    case KType.STRING_LONG_MAP:
-                        ArrayStringLongMap.free(elemV_ptr);
-                        break;
-                    case KType.LONG_LONG_MAP:
-                        ArrayLongLongMap.free(elemV_ptr);
-                        break;
-                    case KType.LONG_LONG_ARRAY_MAP:
-                        ArrayLongLongArrayMap.free(elemV_ptr);
-                        break;
-                }
+                freeElement(elemV_ptr, i);
             }
         }
 
@@ -668,6 +642,37 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
         OffHeapLongArray.free(root_array_ptr);
     }
+
+    private void freeElement(long addr, long index) {
+        byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, index);
+        switch (elemType) {
+            /** Primitive Object */
+            case KType.STRING:
+                unsafe.freeMemory(addr);
+                break;
+            /** Arrays */
+            case KType.DOUBLE_ARRAY:
+                OffHeapDoubleArray.free(addr);
+                break;
+            case KType.LONG_ARRAY:
+                OffHeapLongArray.free(addr);
+                break;
+            case KType.INT_ARRAY:
+                OffHeapLongArray.free(addr);
+                break;
+            /** Maps */
+            case KType.STRING_LONG_MAP:
+                ArrayStringLongMap.free(addr);
+                break;
+            case KType.LONG_LONG_MAP:
+                ArrayLongLongMap.free(addr);
+                break;
+            case KType.LONG_LONG_ARRAY_MAP:
+                ArrayLongLongArrayMap.free(addr);
+                break;
+        }
+    }
+
 
     @Override
     public long flags() {
@@ -812,7 +817,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT) + 1);
             OffHeapLongArray.set(elementK_ptr, newIndex, p_elementIndex);
             internal_setElementV(elementV_ptr, newIndex, p_elemType, param_elem);
-            OffHeapLongArray.set(elementType_ptr, newIndex, p_elemType);
 
             long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, hashIndex);
             if (currentHashedIndex != -1) {
@@ -823,7 +827,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         } else {
             if (replaceIfPresent) {
                 internal_setElementV(elementV_ptr, entry, p_elemType, param_elem); /*setValue*/
-                OffHeapLongArray.set(elementType_ptr, entry, p_elemType);
             }
         }
         internal_set_dirty();
@@ -848,54 +851,93 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 break;
             case KType.STRING:
                 String stringToInsert = (String) elem;
-                long stringToInsert_ptr = OffHeapStringArray.allocate(stringToInsert.length());
-                OffHeapStringArray.set(stringToInsert_ptr, 0, stringToInsert);
-                OffHeapLongArray.set(addr, index, stringToInsert_ptr);
+                long tempStringPtr = OffHeapLongArray.get(addr, index);
+                if (stringToInsert == null) {
+                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                } else {
+                    byte[] valueAsByte = stringToInsert.getBytes();
+                    long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
+                    //copy size of the string
+                    unsafe.putInt(newStringPtr, valueAsByte.length);
+                    //copy string content
+                    for (int i = 0; i < valueAsByte.length; i++) {
+                        unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
+                    }
+                    OffHeapLongArray.set(addr, index, newStringPtr);
+                }
+                if (tempStringPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempStringPtr, index);
+                }
                 break;
             /** Arrays */
             case KType.DOUBLE_ARRAY:
                 double[] doubleArrayToInsert = (double[]) elem;
+                long tempDoubleArrPtr = OffHeapLongArray.get(addr, index);
                 long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(1 + doubleArrayToInsert.length); // length + content of the array
                 OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, doubleArrayToInsert.length);// set length
                 for (int i = 0; i < doubleArrayToInsert.length; i++) {
                     OffHeapDoubleArray.set(doubleArrayToInsert_ptr, 1 + i, doubleArrayToInsert[i]);
                 }
                 OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
+                if (tempDoubleArrPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempDoubleArrPtr, index);
+                }
                 break;
             case KType.LONG_ARRAY:
                 long[] longArrayToInsert = (long[]) elem;
+                long tempLongArrPtr = OffHeapLongArray.get(addr, index);
                 long longArrayToInsert_ptr = OffHeapLongArray.allocate(1 + longArrayToInsert.length); // length + content of the array
                 OffHeapLongArray.set(longArrayToInsert_ptr, 0, longArrayToInsert.length);// set length
                 for (int i = 0; i < longArrayToInsert.length; i++) {
                     OffHeapLongArray.set(longArrayToInsert_ptr, 1 + i, longArrayToInsert[i]);
                 }
                 OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
+                if (tempLongArrPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempLongArrPtr, index);
+                }
                 break;
             case KType.INT_ARRAY:
                 int[] intArrayToInsert = (int[]) elem;
+                long tempIntArrPtr = OffHeapLongArray.get(addr, index);
                 long intArrayToInsert_ptr = OffHeapLongArray.allocate(1 + intArrayToInsert.length); // length + content of the array
                 OffHeapLongArray.set(intArrayToInsert_ptr, 0, intArrayToInsert.length);// set length
                 for (int i = 0; i < intArrayToInsert.length; i++) {
                     OffHeapLongArray.set(intArrayToInsert_ptr, 1 + i, intArrayToInsert[i]);
                 }
                 OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
+                if (tempIntArrPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempIntArrPtr, index);
+                }
                 break;
             /** Maps */
             case KType.STRING_LONG_MAP:
+                long tempStringLongPtr = OffHeapLongArray.get(addr, index);
                 long stringLongMap_ptr = ((ArrayStringLongMap) elem).rootAddress();
                 OffHeapLongArray.set(addr, index, stringLongMap_ptr);
+                if (tempStringLongPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempStringLongPtr, index);
+                }
                 break;
             case KType.LONG_LONG_MAP:
+                long tempLongLongPtr = OffHeapLongArray.get(addr, index);
                 long longLongMap_ptr = ((ArrayLongLongMap) elem).rootAddress();
                 OffHeapLongArray.set(addr, index, longLongMap_ptr);
+                if (tempLongLongPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempLongLongPtr, index);
+                }
                 break;
             case KType.LONG_LONG_ARRAY_MAP:
+                long tempLongLongArrPtr = OffHeapLongArray.get(addr, index);
                 long longLongArrayMap_ptr = ((ArrayLongLongArrayMap) elem).rootAddress();
                 OffHeapLongArray.set(addr, index, longLongArrayMap_ptr);
+                if (tempLongLongArrPtr != Constants.OFFHEAP_NULL_PTR) {
+                    freeElement(tempLongLongArrPtr, index);
+                }
                 break;
             default:
                 throw new RuntimeException("Should never happen...");
         }
+        OffHeapLongArray.set(elementType_ptr, index, elemType);
     }
 
     private void internal_set_dirty() {
@@ -942,7 +984,12 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 if (elemStringPtr == Constants.OFFHEAP_NULL_PTR) {
                     return null;
                 }
-                return OffHeapStringArray.get(elemStringPtr, 0);
+                int length = unsafe.getInt(elemStringPtr);
+                byte[] bytes = new byte[length];
+                for (int i = 0; i < bytes.length; i++) {
+                    bytes[i] = unsafe.getByte(elemStringPtr + 4 + i);
+                }
+                return new String(bytes);
             /** Arrays */
             case KType.DOUBLE_ARRAY:
                 long elemDoublePtr = OffHeapLongArray.get(elementV_ptr, index);

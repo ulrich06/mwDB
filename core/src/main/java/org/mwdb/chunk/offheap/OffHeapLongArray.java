@@ -51,5 +51,5 @@ public class OffHeapLongArray {
     public static void copy(final long srcAddr, final long destAddr, long numberOfElemsToCopy) {
         unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy * 8);
     }
-
+    
 }
