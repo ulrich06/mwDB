@@ -40,7 +40,7 @@ public interface KNode {
     Object att(String attributeName);
 
     /**
-     * Allows to know the type of an attribute. The returned value is one of {@link KType}.<br/>
+     * <p>Allows to know the type of an attribute. The returned value is one of {@link KType}.</p>
      *
      * @param attributeName The name of the attribute for which the type is asked.
      * @return The type of the attribute inform of an int belonging to {@link KType}.
