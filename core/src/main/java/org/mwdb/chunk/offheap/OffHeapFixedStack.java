@@ -61,7 +61,7 @@ public class OffHeapFixedStack implements KStack {
     }
 
     @Override
-    public boolean enqueue(int index) {
+    public boolean enqueue(long index) {
         //lock
 
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ;
@@ -113,7 +113,7 @@ public class OffHeapFixedStack implements KStack {
     }
 
     @Override
-    public boolean dequeue(int index) {
+    public boolean dequeue(long index) {
         //lock
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ;
 

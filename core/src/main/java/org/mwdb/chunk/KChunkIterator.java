@@ -6,6 +6,6 @@ public interface KChunkIterator {
 
     KChunk next();
 
-    int size();
+    long size();
 
 }

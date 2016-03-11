@@ -89,7 +89,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
 
         @Override
-        public int size() {
+        public long size() {
             return this._nextCounter.get();
         }
     }

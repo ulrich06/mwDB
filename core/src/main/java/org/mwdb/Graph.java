@@ -118,13 +118,11 @@ public class Graph implements KGraph {
                                                         }
 
                                                         //init the global universe tree (mandatory for synchronious create)
-                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK);
-                                                        globalWorldOrder.load(strings[GLO_TREE_INDEX]);
+                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK, strings[GLO_TREE_INDEX], null);
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
-                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK);
-                                                        globalDictionaryChunk.load(strings[GLO_DIC_INDEX]);
+                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK, strings[GLO_DIC_INDEX], null);
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                                         //TODO call the manager
@@ -219,10 +217,10 @@ public class Graph implements KGraph {
                 callback.on(null);
             }
         } else {
-            int sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
-            long[] toSaveKeys = new long[sizeToSaveKeys];
-            int sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
-            String[] toSaveValues = new String[sizeToSaveValues];
+            long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
+            long[] toSaveKeys = new long[(int) sizeToSaveKeys];
+            long sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
+            String[] toSaveValues = new String[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
                 KChunk loopChunk = dirtyIterator.next();

@@ -38,11 +38,12 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public boolean enqueue(int index) {
+    public boolean enqueue(long index) {
+        int castedIndex = (int) index;
         //lock
         while (!_lock.compareAndSet(false, true)) ;
 
-        if (this._next[index] != -1) {
+        if (this._next[castedIndex] != -1) {
             //unlock
             _lock.compareAndSet(true, false);
             //already enqueue, return false
@@ -50,9 +51,9 @@ public class FixedStack implements KStack {
         }
 
         //head is now the index
-        this._previous[this._head] = index;
-        this._next[index] = this._head;
-        this._head = index;
+        this._previous[this._head] = castedIndex;
+        this._next[castedIndex] = this._head;
+        this._head = castedIndex;
 
         _lock.compareAndSet(true, false);
         return true;
@@ -89,24 +90,26 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public boolean dequeue(int index) {
+    public boolean dequeue(long index) {
+        int castedIndex = (int) index;
+
         //lock
         while (!_lock.compareAndSet(false, true)) ;
 
-        if (_next[index] != -1 || this._tail == -1) {//the element has been detached or tail is empty
+        if (_next[castedIndex] != -1 || this._tail == -1) {//the element has been detached or tail is empty
             //unlock
             _lock.compareAndSet(true, false);
             return false;
         }
 
-        int currentNext = this._next[index];
-        int currentPrevious = this._previous[index];
+        int currentNext = this._next[castedIndex];
+        int currentPrevious = this._previous[castedIndex];
         if (this._tail == index) {
             this._next[currentPrevious] = -2; //tag as used
             this._tail = currentPrevious;
             //tag index as unused
-            this._next[index] = -1;
-            this._previous[index] = -1;
+            this._next[castedIndex] = -1;
+            this._previous[castedIndex] = -1;
             _lock.compareAndSet(true, false);
         } else {
             //reChain

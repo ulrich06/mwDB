@@ -36,7 +36,6 @@ public class MWGResolver implements KResolver {
     @Override
     public void initNode(KNode node) {
         KStateChunk cacheEntry = (KStateChunk) this._space.create(node.world(), node.time(), node.id(), Constants.STATE_CHUNK, null, null);
-        cacheEntry.load(null);
         //put and mark
         this._space.putAndMark(cacheEntry);
         //declare dirty now because potentially no insert could be done
@@ -44,13 +43,11 @@ public class MWGResolver implements KResolver {
 
         //initiate time management
         KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.TIME_TREE_CHUNK, null, null);
-        timeTree.load(null);
         timeTree = (KLongTree) this._space.putAndMark(timeTree);
         timeTree.insertKey(node.time());
 
         //initiate universe management
         KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.WORLD_ORDER_CHUNK, null, null);
-        objectWorldOrder.load(null);
         objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
         //mark the global
