@@ -18,22 +18,22 @@ public class NoopStorage implements KStorage {
     }
 
     @Override
-    public void put(long[] keys, String[] values, KCallback<Throwable> callback, int excludeListener) {
+    public void put(long[] keys, String[] values, KCallback<Boolean> callback, int excludeListener) {
         callback.on(null);
     }
 
     @Override
-    public void remove(long[] keys, KCallback<Throwable> callback) {
+    public void remove(long[] keys, KCallback<Boolean> callback) {
         callback.on(null);
     }
 
     @Override
-    public void connect(KCallback<Throwable> callback) {
+    public void connect(KCallback<Boolean> callback) {
         callback.on(null);
     }
 
     @Override
-    public void disconnect(KCallback<Throwable> callback) {
+    public void disconnect(KCallback<Boolean> callback) {
         callback.on(null);
     }
 }

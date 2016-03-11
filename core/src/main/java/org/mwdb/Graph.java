@@ -88,10 +88,10 @@ public class Graph implements KGraph {
             //first connect the scheduler
             this._scheduler.start();
             final Graph selfPointer = this;
-            this._storage.connect(new KCallback<Throwable>() {
+            this._storage.connect(new KCallback<Boolean>() {
                 @Override
-                public void on(Throwable throwable) {
-                    if (throwable == null) {
+                public void on(Boolean connectResult) {
+                    if (connectResult) {
                         selfPointer._storage.atomicGetIncrement(Constants.PREFIX_KEY,
                                 new KCallback<Short>() {
                                     @Override
@@ -185,9 +185,9 @@ public class Graph implements KGraph {
                     selfPointer._scheduler.stop();
                     //_blas.disconnect();
                     if (selfPointer._storage != null) {
-                        selfPointer._storage.disconnect(new KCallback<Throwable>() {
+                        selfPointer._storage.disconnect(new KCallback<Boolean>() {
                             @Override
-                            public void on(Throwable throwable) {
+                            public void on(Boolean result) {
                                 selfPointer._lock.set(true);
                                 if (PrimitiveHelper.isDefined(callback)) {
                                     callback.on(null);
@@ -211,7 +211,7 @@ public class Graph implements KGraph {
         }
     }
 
-    private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Throwable> callback) {
+    private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
             if (PrimitiveHelper.isDefined(callback)) {
                 callback.on(null);

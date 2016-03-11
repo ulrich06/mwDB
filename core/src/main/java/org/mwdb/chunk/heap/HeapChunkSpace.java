@@ -197,9 +197,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             case Constants.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
             case Constants.WORLD_ORDER_CHUNK:
-                return new HeapWorldOrderChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
+                return new HeapWorldOrderChunk(p_world, p_time, p_id, this, p_initialPayload);
             case Constants.TIME_TREE_CHUNK:
-                return new HeapTimeTreeChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
+                return new HeapTimeTreeChunk(p_world, p_time, p_id, this, p_initialPayload);
         }
         return null;
     }

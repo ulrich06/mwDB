@@ -2,7 +2,6 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
-import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
@@ -51,7 +50,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this._id;
     }
 
-    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, String initialPayload, KChunk origin) {
+    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, String initialPayload) {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;
@@ -100,7 +99,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     }
 
     @Override
-    public final int marks() {
+    public final long marks() {
         return this._counter.get();
     }
 

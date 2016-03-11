@@ -1,7 +1,6 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
-import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongTree;
 import org.mwdb.chunk.KTreeWalker;
@@ -36,7 +35,7 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
     //multi-thread sync
     private AtomicBoolean _magicToken;
 
-    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener, String initialPayload, KChunk origin) {
+    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener, String initialPayload) {
         //listener
         this._listener = p_listener;
         //identifier
@@ -67,7 +66,7 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
     }
 
     @Override
-    public final int marks() {
+    public final long marks() {
         return this._counter.get();
     }
 
