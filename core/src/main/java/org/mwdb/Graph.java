@@ -265,7 +265,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback callback) {
+    public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KNode>() {
             @Override
             public void on(KNode result) {

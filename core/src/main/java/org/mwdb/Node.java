@@ -210,7 +210,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback callback) {
+    public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -231,7 +231,7 @@ public class Node implements KNode {
         //TODO AUTOMATIC UPDATE
         indexMap.put(flatQuery.hash, nodeToIndex.id());
         if (PrimitiveHelper.isDefined(callback)) {
-            callback.on(null);
+            callback.on(true);
         }
     }
 
@@ -313,8 +313,8 @@ public class Node implements KNode {
         KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.key(indexName));
         if (indexMap != null) {
             final Node selfPointer = this;
-            final KNode[] resolved = new KNode[indexMap.size()];
-            DeferCounter waiter = new DeferCounter(indexMap.size());
+            final KNode[] resolved = new KNode[(int) indexMap.size()];
+            DeferCounter waiter = new DeferCounter((int) indexMap.size());
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
             indexMap.each(new KLongLongArrayMapCallBack() {
