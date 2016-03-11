@@ -174,39 +174,39 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             switch (p_elemType) {
                 /** Primitives */
                 case KType.BOOL:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (boolean) p_unsafe_elem;
                     break;
                 case KType.DOUBLE:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (double) p_unsafe_elem;
                     break;
                 case KType.LONG:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (long) p_unsafe_elem;
                     break;
                 case KType.INT:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (int) p_unsafe_elem;
                     break;
                 case KType.STRING:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (String) p_unsafe_elem;
                     break;
                 /** Arrays */
                 case KType.DOUBLE_ARRAY:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (double[]) p_unsafe_elem;
                     break;
                 case KType.LONG_ARRAY:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (long[]) p_unsafe_elem;
                     break;
                 case KType.INT_ARRAY:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (int[]) p_unsafe_elem;
                     break;
                 /** Maps */
                 case KType.STRING_LONG_MAP:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (KStringLongMap) p_unsafe_elem;
                     break;
                 case KType.LONG_LONG_MAP:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (KLongLongMap) p_unsafe_elem;
                     break;
                 case KType.LONG_LONG_ARRAY_MAP:
-                    param_elem = p_unsafe_elem;
+                    param_elem = (KLongLongArrayMap) p_unsafe_elem;
                     break;
                 default:
                     throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);

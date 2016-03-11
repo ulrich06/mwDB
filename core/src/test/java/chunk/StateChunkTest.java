@@ -3,37 +3,53 @@ package chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
+import org.mwdb.KConstants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.HeapStateChunk;
+import org.mwdb.chunk.heap.KHeapChunk;
+import org.mwdb.chunk.offheap.KOffHeapChunk;
+import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StateChunkTest implements KChunkListener {
 
     private int nbCount = 0;
 
-    @Test
-    public void heapStateChunkTest() {
-        saveLoadTest(
-                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this),
-                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this),
-                new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
-        protectionTest(new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, this));
+    public interface StateChunkFactory {
+        KStateChunk create(KChunkListener listener, String payload, KChunk origin);
     }
 
-    private void saveLoadTest(KStateChunk chunk, KStateChunk chunk2, KStateChunk chunk3) {
+    @Test
+    public void heapStateChunkTest() {
+
+        StateChunkFactory factory = new StateChunkFactory() {
+
+            @Override
+            public KStateChunk create(KChunkListener listener, String payload, KChunk origin) {
+                return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
+            }
+        };
+
+        saveLoadTest(factory);
+        protectionTest(factory);
+    }
+
+    private void saveLoadTest(StateChunkFactory factory) {
         //reset nb count
         nbCount = 0;
+
+        KStateChunk chunk = factory.create(this, null, null);
 
         //init chunk with primitives
         chunk.set(0, KType.BOOL, true);
         chunk.set(1, KType.STRING, "hello");
         chunk.set(2, KType.DOUBLE, 1.0);
-        chunk.set(3, KType.LONG, 1000l);//TODO check for solution for long cast
+        chunk.set(3, KType.LONG, 1000l);
         chunk.set(4, KType.INT, 100);
 
         String savedChunk = chunk.save();
-        chunk2.load(savedChunk);
+        KStateChunk chunk2 = factory.create(this, savedChunk, null);
         String savedChunk2 = chunk2.save();
 
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
@@ -52,7 +68,8 @@ public class StateChunkTest implements KChunkListener {
         chunk.set(7, KType.INT_ARRAY, new int[]{0, 1, 2, 3, 4});
 
         savedChunk = chunk.save();
-        chunk2.load(savedChunk);
+        free(chunk2);
+        chunk2 = factory.create(this, savedChunk, null);
         savedChunk2 = chunk2.save();
 
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
@@ -75,7 +92,8 @@ public class StateChunkTest implements KChunkListener {
         long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME);
 
         savedChunk = chunk.save();
-        chunk2.load(savedChunk);
+        free(chunk2);
+        chunk2 = factory.create(this, savedChunk, null);
         savedChunk2 = chunk2.save();
 
         Assert.assertTrue(((KStringLongMap) chunk2.get(9)).size() == 3);
@@ -93,14 +111,27 @@ public class StateChunkTest implements KChunkListener {
             Assert.assertTrue(chunk.get(1000 + i).equals(i));
         }
 
-        chunk3.cloneFrom(chunk);
+        KStateChunk chunk3 = factory.create(this, null, chunk);
         String savedChunk3 = chunk3.save();
         savedChunk = chunk.save();
         Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk3));
-        
+
+        free(chunk3);
+        free(chunk2);
+        free(chunk);
+
     }
 
-    private void protectionTest(KStateChunk chunk) {
+    private void free(KStateChunk chunk) {
+        if (chunk instanceof KOffHeapChunk) {
+            ((KOffHeapChunk) chunk).free();
+        }
+    }
+
+    private void protectionTest(StateChunkFactory factory) {
+
+        KStateChunk chunk = factory.create(this, null, null);
+
         //boolean protection test
         protectionMethod(chunk, KType.BOOL, null, true);
         protectionMethod(chunk, KType.BOOL, true, false);
@@ -137,6 +168,8 @@ public class StateChunkTest implements KChunkListener {
         protectionMethod(chunk, KType.LONG_LONG_MAP, "hello", true);
         protectionMethod(chunk, KType.LONG_LONG_ARRAY_MAP, "hello", true);
 
+        free(chunk);
+
     }
 
     private void protectionMethod(KStateChunk chunk, byte elemType, Object elem, boolean shouldCrash) {
@@ -153,6 +186,13 @@ public class StateChunkTest implements KChunkListener {
     public void declareDirty(KChunk chunk) {
         nbCount++;
         //simulate space management
-        chunk.setFlags(Constants.DIRTY_BIT, 0);
+
+        if(chunk instanceof KHeapChunk){
+            ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT,0);
+        } else if(chunk instanceof KOffHeapChunk){
+            long addr = ((KOffHeapChunk) chunk).addr();
+            OffHeapLongArray.set(addr,Constants.OFFHEAP_CHUNK_INDEX_FLAGS,Constants.DIRTY_BIT);
+        }
+
     }
 }

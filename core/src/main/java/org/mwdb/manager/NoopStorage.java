@@ -24,16 +24,16 @@ public class NoopStorage implements KStorage {
 
     @Override
     public void remove(long[] keys, KCallback<Boolean> callback) {
-        callback.on(null);
+        callback.on(true);
     }
 
     @Override
     public void connect(KCallback<Boolean> callback) {
-        callback.on(null);
+        callback.on(true);
     }
 
     @Override
     public void disconnect(KCallback<Boolean> callback) {
-        callback.on(null);
+        callback.on(true);
     }
 }
