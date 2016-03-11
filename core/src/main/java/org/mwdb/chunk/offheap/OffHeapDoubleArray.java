@@ -6,7 +6,7 @@ import org.mwdb.utility.Unsafe;
 /**
  * @ignore ts
  */
-public class OffHeapLongArray {
+public class OffHeapDoubleArray {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
@@ -32,12 +32,12 @@ public class OffHeapLongArray {
         return newBiggerMemorySegment;
     }
 
-    public static void set(final long addr, final long index, final long valueToInsert) {
-        unsafe.putLong(addr + index * 8, valueToInsert);
+    public static void set(final long addr, final long index, final double valueToInsert) {
+        unsafe.putDouble(addr + index * 8, valueToInsert);
     }
 
-    public static long get(final long addr, final long index) {
-        return unsafe.getLong(addr + index * 8);
+    public static double get(final long addr, final long index) {
+        return unsafe.getDouble(addr + index * 8);
     }
 
     public static void free(final long addr) {
