@@ -253,34 +253,27 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
     }
 
     public static long cloneMap(long srcAddr) {
-        // TODO incomplete at the moment. it is just the clone of a flat ArrayLongLongMap
-        
         // capacity
         long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
 
-        long newSrcAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(srcAddr, newSrcAddr, capacity * 8);
-
-        long elementVAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_V);
-        long newElementVAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(elementVAddr, newElementVAddr, capacity * 8);
-        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementVAddr);
-
-        long elementKAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K);
-        long newElementKAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(elementKAddr, newElementKAddr, capacity * 8);
-        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementKAddr);
-
-
-        long elementNextAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_NEXT);
-        long newElementNextAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(elementNextAddr, newElementNextAddr, capacity * 8);
-        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_NEXT, newElementNextAddr);
-
-        long elementHashAddr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_HASH);
-        long newElementHashAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(elementHashAddr, newElementHashAddr, capacity * 8);
-        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_HASH, newElementHashAddr);
+        // clone root array
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 9);
+        // copy elementK array
+        long elementK_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K);
+        long newElementK_ptr = OffHeapLongArray.cloneArray(elementK_ptr, capacity);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementK_ptr);
+        // copy elementV array
+        long elementV_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_V);
+        long newElementV_ptr = OffHeapLongArray.cloneArray(elementV_ptr, capacity);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, newElementV_ptr);
+        // copy elementNext array
+        long elementNext_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_NEXT);
+        long newElementNext_ptr = OffHeapLongArray.cloneArray(elementNext_ptr, capacity);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_NEXT, newElementNext_ptr);
+        // copy elementHash array
+        long elementHash_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_HASH);
+        long newElementHash_ptr = OffHeapLongArray.cloneArray(elementHash_ptr, capacity);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_HASH, newElementHash_ptr);
 
         return newSrcAddr;
     }

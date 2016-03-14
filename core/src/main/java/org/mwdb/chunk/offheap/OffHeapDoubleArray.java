@@ -52,8 +52,8 @@ public class OffHeapDoubleArray {
         unsafe.copyMemory(srcAddr, destAddr, numberOfElemsToCopy);
     }
 
-    public static long clone(final long srcAddr, final long length) {
-        long newAddr = allocate(length * 8);
+    public static long cloneArray(final long srcAddr, final long length) {
+        long newAddr = unsafe.allocateMemory(length * 8);
         unsafe.copyMemory(srcAddr, newAddr, length * 8);
         return newAddr;
     }
