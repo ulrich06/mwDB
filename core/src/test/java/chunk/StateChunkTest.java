@@ -30,11 +30,14 @@ public class StateChunkTest implements KChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
-        saveLoadTest(factory);
-        protectionTest(factory);
+        //saveLoadTest(factory);
+        //protectionTest(factory);
+        //typeSwitchTest(factory);
+        cloneTest(factory);
     }
 
-    @Test
+
+    //@Test
     public void offHeapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
 
@@ -45,6 +48,7 @@ public class StateChunkTest implements KChunkListener {
         };
         saveLoadTest(factory);
         protectionTest(factory);
+        typeSwitchTest(factory);
     }
 
     private void saveLoadTest(StateChunkFactory factory) {
@@ -185,6 +189,94 @@ public class StateChunkTest implements KChunkListener {
 
     }
 
+    private void typeSwitchTest(StateChunkFactory factory) {
+        KStateChunk chunk = factory.create(this, null, null);
+
+        //init primitives
+        chunk.set(0, KType.BOOL, true);
+        chunk.set(1, KType.STRING, "hello");
+        chunk.set(2, KType.LONG, 1000l);
+        chunk.set(3, KType.INT, 100);
+        chunk.set(4, KType.DOUBLE, 1.0);
+        //init arrays
+        chunk.set(5, KType.DOUBLE_ARRAY, new double[]{1.0, 2.0, 3.0});
+        chunk.set(6, KType.LONG_ARRAY, new long[]{1, 2, 3});
+        chunk.set(7, KType.INT_ARRAY, new int[]{1, 2, 3});
+        //init maps
+        ((KLongLongMap) chunk.getOrCreate(8, KType.LONG_LONG_MAP)).put(100, 100);
+        ((KLongLongArrayMap) chunk.getOrCreate(9, KType.LONG_LONG_ARRAY_MAP)).put(100, 100);
+        ((KStringLongMap) chunk.getOrCreate(10, KType.STRING_LONG_MAP)).put("100", 100);
+
+        //ok now switch all types
+
+        //switch primitives
+        chunk.set(10, KType.BOOL, true);
+        Assert.assertTrue(chunk.getType(10) == KType.BOOL);
+        Assert.assertTrue((boolean) chunk.get(10));
+
+        chunk.set(0, KType.STRING, "hello");
+        Assert.assertTrue(chunk.getType(0) == KType.STRING);
+        Assert.assertTrue(PrimitiveHelper.equals(chunk.get(0).toString(), "hello"));
+
+        chunk.set(1, KType.LONG, 1000l);
+        Assert.assertTrue(chunk.getType(1) == KType.LONG);
+        Assert.assertTrue((long) chunk.get(1) == 1000l);
+
+        chunk.set(2, KType.INT, 100);
+        Assert.assertTrue(chunk.getType(2) == KType.INT);
+        Assert.assertTrue((int) chunk.get(2) == 100);
+
+        chunk.set(3, KType.DOUBLE, 1.0);
+        Assert.assertTrue(chunk.getType(3) == KType.DOUBLE);
+        Assert.assertTrue((double) chunk.get(3) == 1.0);
+
+        //switch arrays
+        chunk.set(4, KType.DOUBLE_ARRAY, new double[]{1.0, 2.0, 3.0});
+        Assert.assertTrue(chunk.getType(4) == KType.DOUBLE_ARRAY);
+        Assert.assertTrue(((double[]) chunk.get(4))[0] == 1.0);
+
+        chunk.set(5, KType.LONG_ARRAY, new long[]{1, 2, 3});
+        Assert.assertTrue(chunk.getType(5) == KType.LONG_ARRAY);
+        Assert.assertTrue(((long[]) chunk.get(5))[0] == 1);
+
+        chunk.set(6, KType.INT_ARRAY, new int[]{1, 2, 3});
+        Assert.assertTrue(chunk.getType(6) == KType.INT_ARRAY);
+        Assert.assertTrue(((int[]) chunk.get(6))[0] == 1);
+
+        //switch maps
+        ((KLongLongMap) chunk.getOrCreate(7, KType.LONG_LONG_MAP)).put(100, 100);
+        ((KLongLongArrayMap) chunk.getOrCreate(8, KType.LONG_LONG_ARRAY_MAP)).put(100, 100);
+        ((KStringLongMap) chunk.getOrCreate(9, KType.STRING_LONG_MAP)).put("100", 100);
+
+        free(chunk);
+    }
+
+    private void cloneTest(StateChunkFactory factory) {
+        KStateChunk chunk = factory.create(this, null, null);
+
+        //init primitives
+        chunk.set(0, KType.BOOL, true);
+        chunk.set(1, KType.STRING, "hello");
+        chunk.set(2, KType.LONG, 1000l);
+        chunk.set(3, KType.INT, 100);
+        chunk.set(4, KType.DOUBLE, 1.0);
+        //init arrays
+        chunk.set(5, KType.DOUBLE_ARRAY, new double[]{1.0, 2.0, 3.0});
+        chunk.set(6, KType.LONG_ARRAY, new long[]{1, 2, 3});
+        chunk.set(7, KType.INT_ARRAY, new int[]{1, 2, 3});
+        //init maps
+        ((KLongLongMap) chunk.getOrCreate(8, KType.LONG_LONG_MAP)).put(100, 100);
+        ((KLongLongArrayMap) chunk.getOrCreate(9, KType.LONG_LONG_ARRAY_MAP)).put(100, 100);
+        ((KStringLongMap) chunk.getOrCreate(10, KType.STRING_LONG_MAP)).put("100", 100);
+
+        //clone the chunk
+        KStateChunk chunk2 = factory.create(this, null, chunk);
+        
+
+        free(chunk);
+    }
+
+
     private void protectionMethod(KStateChunk chunk, byte elemType, Object elem, boolean shouldCrash) {
         boolean hasCrash = false;
         try {
@@ -199,7 +291,6 @@ public class StateChunkTest implements KChunkListener {
     public void declareDirty(KChunk chunk) {
         nbCount++;
         //simulate space management
-
         if (chunk instanceof KHeapChunk) {
             ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
         } else if (chunk instanceof KOffHeapChunk) {

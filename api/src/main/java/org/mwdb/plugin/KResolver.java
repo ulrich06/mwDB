@@ -128,7 +128,7 @@ public interface KResolver {
          * @param index unique key of element
          * @return type currently stored, encoded as a int according the KType defintion
          */
-        int getType(long index);
+        byte getType(long index);
 
     }
 

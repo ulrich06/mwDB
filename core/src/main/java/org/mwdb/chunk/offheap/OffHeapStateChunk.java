@@ -1104,7 +1104,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
 
     @Override
-    public int getType(long index) {
+    public byte getType(long index) {
         long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
         if (elementDataSize == 0) {
             return -1;
@@ -1113,7 +1113,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         while (m >= 0) {
             if (index == OffHeapLongArray.get(elementK_ptr, m) /* getKey */) {
-                return (int) OffHeapLongArray.get(elementType_ptr, m); /* getValue */
+                return (byte) OffHeapLongArray.get(elementType_ptr, m); /* getValue */
             } else {
                 m = OffHeapLongArray.get(elementNext_ptr, m);
             }

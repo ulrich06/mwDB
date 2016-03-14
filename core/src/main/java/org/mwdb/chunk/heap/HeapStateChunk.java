@@ -60,13 +60,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
         public final int[] _elementHash;
 
-        public final int[] _elementType;
+        public final byte[] _elementType;
 
         public final int threshold;
 
         protected volatile int _elementCount;
 
-        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, int[] p_elementType, int p_elementCount) {
+        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount) {
             this._elementDataSize = elementDataSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
@@ -88,7 +88,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             System.arraycopy(_elementNext, 0, clonedElementNext, 0, this._elementDataSize);
             int[] clonedElementHash = new int[this._elementDataSize];
             System.arraycopy(_elementHash, 0, clonedElementHash, 0, this._elementDataSize);
-            int[] clonedElementType = new int[this._elementDataSize];
+            byte[] clonedElementType = new byte[this._elementDataSize];
             System.arraycopy(_elementType, 0, clonedElementType, 0, this._elementDataSize);
             return new InternalState(this._elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType, _elementCount);
         }
@@ -112,7 +112,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         } else {
             //init a new state
             int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-            InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new int[initialCapacity], 0);
+            InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new byte[initialCapacity], 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
@@ -209,13 +209,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 case KType.LONG_LONG_ARRAY_MAP:
                     param_elem = (KLongLongArrayMap) p_unsafe_elem;
                     break;
-
                 default:
-                    throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
+                    throw new RuntimeException("Internal Exception, unknown type");
             }
         } catch (Exception e) {
-            //e.printStackTrace();
-            throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
+            throw new RuntimeException("mwDB usage error, set method called with type " + KType.typeName(p_elemType) + " while param object is " + p_unsafe_elem);
         }
         int entry = -1;
         InternalState internalState = state.get();
@@ -236,7 +234,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 int newLength = (internalState._elementDataSize == 0 ? 1 : internalState._elementDataSize << 1);
                 long[] newElementK = new long[newLength];
                 Object[] newElementV = new Object[newLength];
-                int[] newElementType = new int[newLength];
+                byte[] newElementType = new byte[newLength];
                 System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._elementDataSize);
                 System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._elementDataSize);
                 System.arraycopy(internalState._elementType, 0, newElementType, 0, internalState._elementDataSize);
@@ -274,7 +272,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             //now the object is reachable to other thread everything should be ready
             internalState._elementHash[hashIndex] = newIndex;
         } else {
-            if (replaceIfPresent) {
+            if (replaceIfPresent || (p_elemType != internalState._elementType[entry])) {
                 internalState._elementV[entry] = param_elem;/*setValue*/
                 internalState._elementType[entry] = p_elemType;
             }
@@ -301,7 +299,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public int getType(long p_elementIndex) {
+    public byte getType(long p_elementIndex) {
         InternalState internalState = state.get();
         if (internalState._elementDataSize == 0) {
             return -1;
@@ -322,7 +320,8 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     @Override
     public Object getOrCreate(long p_elementIndex, byte elemType) {
         Object previousObject = get(p_elementIndex);
-        if (previousObject != null) {
+        byte previousType = getType(p_elementIndex);
+        if (previousObject != null && previousType == elemType) {
             return previousObject;
         }
         switch (elemType) {
@@ -357,7 +356,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         //future map elements
         long[] newElementK = null;
         Object[] newElementV = null;
-        int[] newElementType = null;
+        byte[] newElementType = null;
         int[] newElementNext = null;
         int[] newElementHash = null;
         int newNumberElement = 0;
@@ -370,7 +369,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
         int previousStart = -1;
         long currentChunkElemKey = Constants.NULL_LONG;
-        int currentChunkElemType = -1;
+        byte currentChunkElemType = -1;
 
         //init detections
         boolean isFirstElem = true;
@@ -404,7 +403,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     //init map element
                     newElementK = new long[newStateChunkSize];
                     newElementV = new Object[newStateChunkSize];
-                    newElementType = new int[newStateChunkSize];
+                    newElementType = new byte[newStateChunkSize];
                     newStateCapacity = newStateChunkSize;
                     //init hash and chaining
                     newElementNext = new int[newStateChunkSize];
@@ -508,7 +507,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 } else if (currentChunkElemType == -1) {
-                    currentChunkElemType = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    currentChunkElemType = (byte) Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
             } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES

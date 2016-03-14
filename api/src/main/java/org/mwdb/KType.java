@@ -30,4 +30,36 @@ public class KType {
     public static final byte LONG_LONG_ARRAY_MAP = 10;
     public static final byte STRING_LONG_MAP = 11;
 
+    public static String typeName(byte p_type) {
+        switch (p_type) {
+            /** Primitives */
+            case KType.BOOL:
+                return "boolean";
+            case KType.STRING:
+                return "string";
+            case KType.LONG:
+                return "long";
+            case KType.INT:
+                return "int";
+            case KType.DOUBLE:
+                return "double";
+            /** Arrays */
+            case KType.DOUBLE_ARRAY:
+                return "double[]";
+            case KType.LONG_ARRAY:
+                return "long[]";
+            case KType.INT_ARRAY:
+                return "int[]";
+            /** Maps */
+            case KType.LONG_LONG_MAP:
+                return "map(long->long)";
+            case KType.LONG_LONG_ARRAY_MAP:
+                return "map(long->long[])";
+            case KType.STRING_LONG_MAP:
+                return "map(string->long)";
+            default:
+                return "unknown";
+        }
+    }
+
 }
