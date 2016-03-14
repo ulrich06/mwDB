@@ -3,6 +3,7 @@ package org.mwdb.chunk.heap;
 import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongTree;
+import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
@@ -11,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
+public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     //constants definition
     private static final char BLACK_LEFT = '{';
@@ -20,17 +21,21 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
     private static final char RED_RIGHT = ']';
     private static final int META_SIZE = 3;
 
-    protected int kvSize = 1;
     private int _threshold = 0;
     //volatile variables
     private volatile int _root_index = -1;
     private volatile int _size = 0;
-    private volatile InternalState state;
     //final local variables
     private final AtomicLong _flags;
     private final AtomicInteger _counter;
+
     protected volatile long _magic;
+
     private final KChunkListener _listener;
+
+    private int[] _back_meta;
+    private long[] _back_kv;
+    private boolean[] _back_colors;
 
     //multi-thread sync
     private AtomicBoolean _magicToken;
@@ -50,19 +55,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
 
         load(initialPayload);
 
-    }
-
-    class InternalState {
-
-        public InternalState(int[] _back_meta, long[] _back_kv, boolean[] _back_colors) {
-            this._back_meta = _back_meta;
-            this._back_kv = _back_kv;
-            this._back_colors = _back_colors;
-        }
-
-        final int[] _back_meta;
-        final long[] _back_kv;
-        final boolean[] _back_colors;
     }
 
     @Override
@@ -115,34 +107,38 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
     }
 
     private void allocate(int capacity) {
-        state = new InternalState(new int[capacity * META_SIZE], new long[capacity * kvSize], new boolean[capacity]);
+        _back_meta = new int[capacity * META_SIZE];
+        _back_kv = new long[capacity];
+        _back_colors = new boolean[capacity];
         _threshold = (int) (capacity * Constants.MAP_LOAD_FACTOR);
     }
 
     private void reallocate(int newCapacity) {
         _threshold = (int) (newCapacity * Constants.MAP_LOAD_FACTOR);
-        long[] new_back_kv = new long[newCapacity * kvSize];
-        if (state != null && state._back_kv != null) {
-            System.arraycopy(state._back_kv, 0, new_back_kv, 0, _size * kvSize);
+        long[] new_back_kv = new long[newCapacity];
+        if (_back_kv != null) {
+            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size);
         }
         boolean[] new_back_colors = new boolean[newCapacity];
-        if (state != null && state._back_colors != null) {
-            System.arraycopy(state._back_colors, 0, new_back_colors, 0, _size);
+        if (_back_colors != null) {
+            System.arraycopy(_back_colors, 0, new_back_colors, 0, _size);
             for (int i = _size; i < newCapacity; i++) {
                 new_back_colors[i] = false;
             }
         }
         int[] new_back_meta = new int[newCapacity * META_SIZE];
-        if (state != null && state._back_meta != null) {
-            System.arraycopy(state._back_meta, 0, new_back_meta, 0, _size * META_SIZE);
+        if (_back_meta != null) {
+            System.arraycopy(_back_meta, 0, new_back_meta, 0, _size * META_SIZE);
             for (int i = _size * META_SIZE; i < newCapacity * META_SIZE; i++) {
                 new_back_meta[i] = -1;
             }
         }
-        state = new InternalState(new_back_meta, new_back_kv, new_back_colors);
+        _back_meta = new_back_meta;
+        _back_kv = new_back_kv;
+        _back_colors = new_back_colors;
     }
 
-    public int size() {
+    public long size() {
         return _size;
     }
 
@@ -150,66 +146,66 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return state._back_kv[p_currentIndex * kvSize];
+        return _back_kv[p_currentIndex];
     }
 
     private void setKey(int p_currentIndex, long p_paramIndex) {
-        state._back_kv[p_currentIndex * kvSize] = p_paramIndex;
+        _back_kv[p_currentIndex] = p_paramIndex;
     }
 
     protected final long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return state._back_kv[(p_currentIndex * kvSize) + 1];
+        return _back_kv[(p_currentIndex) + 1];
     }
 
     private void setValue(int p_currentIndex, long p_paramIndex) {
-        state._back_kv[(p_currentIndex * kvSize) + 1] = p_paramIndex;
+        _back_kv[(p_currentIndex) + 1] = p_paramIndex;
     }
 
     private int left(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return state._back_meta[p_currentIndex * META_SIZE];
+        return _back_meta[p_currentIndex * META_SIZE];
     }
 
     private void setLeft(int p_currentIndex, int p_paramIndex) {
-        state._back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
+        _back_meta[p_currentIndex * META_SIZE] = p_paramIndex;
     }
 
     private int right(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return state._back_meta[(p_currentIndex * META_SIZE) + 1];
+        return _back_meta[(p_currentIndex * META_SIZE) + 1];
     }
 
     private void setRight(int p_currentIndex, int p_paramIndex) {
-        state._back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
+        _back_meta[(p_currentIndex * META_SIZE) + 1] = p_paramIndex;
     }
 
     private int parent(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return state._back_meta[(p_currentIndex * META_SIZE) + 2];
+        return _back_meta[(p_currentIndex * META_SIZE) + 2];
     }
 
     private void setParent(int p_currentIndex, int p_paramIndex) {
-        state._back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
+        _back_meta[(p_currentIndex * META_SIZE) + 2] = p_paramIndex;
     }
 
     private boolean color(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return true;
         }
-        return state._back_colors[p_currentIndex];
+        return _back_colors[p_currentIndex];
     }
 
     private void setColor(int p_currentIndex, boolean p_paramIndex) {
-        state._back_colors[p_currentIndex] = p_paramIndex;
+        _back_colors[p_currentIndex] = p_paramIndex;
     }
 
     private int grandParent(int p_currentIndex) {
@@ -291,7 +287,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
             }
         }
     }
-
 
     /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
     public final long lookup(long p_key) {
@@ -466,15 +461,14 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
             return "0";
         }
         int savedRoot = _root_index;
-        InternalState internalState = state;
         StringBuilder builder = new StringBuilder();
         int treeSize = 0;
-        for (int i = 0; i < internalState._back_meta.length / META_SIZE; i++) {
-            int parentIndex = internalState._back_meta[(i * META_SIZE) + 2];
+        for (int i = 0; i < _back_meta.length / META_SIZE; i++) {
+            int parentIndex = _back_meta[(i * META_SIZE) + 2];
             if (parentIndex != -1 || i == savedRoot) {
                 boolean isOnLeft = false;
                 if (parentIndex != -1) {
-                    isOnLeft = internalState._back_meta[parentIndex * META_SIZE] == i;
+                    isOnLeft = _back_meta[parentIndex * META_SIZE] == i;
                 }
                 if (!color(i)) {
                     if (isOnLeft) {
@@ -489,14 +483,10 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
                         builder.append(RED_RIGHT);
                     }
                 }
-                Base64.encodeLongToBuffer(internalState._back_kv[i * kvSize], builder);
+                Base64.encodeLongToBuffer(_back_kv[i], builder);
                 builder.append(',');
                 if (parentIndex != -1) {
                     Base64.encodeIntToBuffer(parentIndex, builder);
-                }
-                if (kvSize > 1) {
-                    builder.append(',');
-                    Base64.encodeLongToBuffer(internalState._back_kv[(i * kvSize) + 1], builder);
                 }
                 treeSize++;
             }
@@ -528,9 +518,9 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
         allocate(_size);
         for (int i = 0; i < _size; i++) {
             int offsetI = i * META_SIZE;
-            state._back_meta[offsetI] = -1;
-            state._back_meta[offsetI + 1] = -1;
-            state._back_meta[offsetI + 2] = -1;
+            _back_meta[offsetI] = -1;
+            _back_meta[offsetI + 1] = -1;
+            _back_meta[offsetI + 2] = -1;
         }
         int currentLoopIndex = 0;
         while (cursor < payload.length()) {
@@ -597,9 +587,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
         int newIndex = _size;
         if (newIndex == 0) {
             setKey(newIndex, p_key);
-            if (kvSize == 2) {
-                setValue(newIndex, p_value);
-            }
             setColor(newIndex, false);
             setLeft(newIndex, -1);
             setRight(newIndex, -1);
@@ -618,9 +605,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
                         setKey(newIndex, p_key);
-                        if (kvSize == 2) {
-                            setValue(newIndex, p_value);
-                        }
                         setColor(newIndex, false);
                         setLeft(newIndex, -1);
                         setRight(newIndex, -1);
@@ -634,9 +618,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
                 } else {
                     if (right(n) == -1) {
                         setKey(newIndex, p_key);
-                        if (kvSize == 2) {
-                            setValue(newIndex, p_value);
-                        }
                         setColor(newIndex, false);
                         setLeft(newIndex, -1);
                         setRight(newIndex, -1);
@@ -657,35 +638,6 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
 
         //free magic
         this._magicToken.set(false);
-    }
-
-    protected final long internal_lookup_value(long p_key) {
-
-        //negociate a magic
-        while (!this._magicToken.compareAndSet(false, true)) ;
-
-        int n = _root_index;
-        if (n == -1) {
-            //free magic
-            this._magicToken.set(false);
-            return Constants.NULL_LONG;
-        }
-        while (n != -1) {
-            if (p_key == key(n)) {
-                //free magic
-                this._magicToken.set(false);
-                return value(n);
-            } else {
-                if (p_key < key(n)) {
-                    n = left(n);
-                } else {
-                    n = right(n);
-                }
-            }
-        }
-        //free magic
-        this._magicToken.set(false);
-        return n;
     }
 
     private void internal_set_dirty() {
@@ -710,7 +662,7 @@ public class HeapTimeTreeChunk implements KLongTree, KHeapChunk {
         return this._magic;
     }
 
-    public void insertKey(long p_key) {
+    public void insert(long p_key) {
         internal_insert(p_key, p_key);
     }
 

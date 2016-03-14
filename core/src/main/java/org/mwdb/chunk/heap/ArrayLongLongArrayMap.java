@@ -80,7 +80,6 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             System.arraycopy(_columnSize, 0, cloned_columnSize, 0, _stateSize);
             return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, cloned_columnSize, _elementCount);
         }
-
     }
 
     @Override

@@ -42,9 +42,9 @@ public class MWGResolver implements KResolver {
         this._space.declareDirty(cacheEntry);
 
         //initiate time management
-        KLongTree timeTree = (KLongTree) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.TIME_TREE_CHUNK, null, null);
-        timeTree = (KLongTree) this._space.putAndMark(timeTree);
-        timeTree.insertKey(node.time());
+        KTimeTreeChunk timeTree = (KTimeTreeChunk) this._space.create(node.world(), Constants.NULL_LONG, node.id(), Constants.TIME_TREE_CHUNK, null, null);
+        timeTree = (KTimeTreeChunk) this._space.putAndMark(timeTree);
+        timeTree.insert(node.time());
 
         //initiate universe management
         KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.NULL_LONG, Constants.NULL_LONG, node.id(), Constants.WORLD_ORDER_CHUNK, null, null);
@@ -302,7 +302,7 @@ public class MWGResolver implements KResolver {
         if (objectUniverseMap == null) {
             return null;
         }
-        KLongTree objectTimeTree = (KLongTree) this._space.getAndMark(previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+        KTimeTreeChunk objectTimeTree = (KTimeTreeChunk) this._space.getAndMark(previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
         if (objectTimeTree == null) {
             this._space.unmarkChunk(objectUniverseMap);
             return null;
@@ -402,11 +402,11 @@ public class MWGResolver implements KResolver {
                         this._space.declareDirty(clonedChunk);
 
                         if (resolvedWorld == nodeWorld) {
-                            objectTimeTree.insertKey(nodeTime);
+                            objectTimeTree.insert(nodeTime);
                         } else {
-                            KLongTree newTemporalTree = (KLongTree) this._space.create(nodeWorld, Constants.NULL_LONG, nodeId, Constants.TIME_TREE_CHUNK, null, null);
+                            KTimeTreeChunk newTemporalTree = (KTimeTreeChunk) this._space.create(nodeWorld, Constants.NULL_LONG, nodeId, Constants.TIME_TREE_CHUNK, null, null);
                             this._space.putAndMark(newTemporalTree);
-                            newTemporalTree.insertKey(nodeTime);
+                            newTemporalTree.insert(nodeTime);
                             //unmark the previous time tree, now we have switched to the new one
                             this._space.unmarkChunk(objectTimeTree);
                             objectUniverseMap.put(nodeWorld, nodeTime);
@@ -537,7 +537,7 @@ public class MWGResolver implements KResolver {
                             final int[] timeline_index = {0};
                             long previousDivergenceTime = endOfSearch;
                             for (int i = 0; i < finalCollectedIndex; i++) {
-                                KLongTree timeTree = (KLongTree) timeTrees[i];
+                                KTimeTreeChunk timeTree = (KTimeTreeChunk) timeTrees[i];
                                 if (timeTree != null) {
                                     long currentDivergenceTime = objectWorldOrder.get(finalCollectedWorlds[i]);
                                     if (currentDivergenceTime < beginningOfSearch) {

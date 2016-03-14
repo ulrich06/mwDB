@@ -171,40 +171,10 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         }
     }
 
-    /*
-    @Override
-    public int metaClassIndex() {
-        return this._metaClassIndex;
-    }
-
-    @Override
-    public boolean tokenCompareAndSwap(int previous, int next) {
-        return this._objectToken.compareAndSet(previous, next);
-    }*/
-
-    /*
-    @Override
-    public final boolean contains(long key) {
-        InternalState internalState = state;
-        if (state.elementDataSize == 0) {
-            return false;
-        }
-        int hash = (int) (key);
-        int index = (hash & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = internalState.elementHash[index];
-        while (m >= 0) {
-            if (key == internalState.elementKV[m * 2] ) {
-                return true;
-            }
-            m = internalState.elementNext[m];
-        }
-        return false;
-    }*/
-
     @Override
     public final long get(long key) {
         InternalState internalState = state;
-        if (state.elementDataSize == 0) {
+        if (internalState.elementDataSize == 0) {
             return Constants.NULL_LONG;
         }
         int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
@@ -270,6 +240,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     //TODO check intersection of remove and put
     @Override
     public synchronized final void remove(long key) {
+        /*
         InternalState internalState = state;
         if (state.elementDataSize == 0) {
             return;
@@ -278,7 +249,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         int m = state.elementHash[index];
         int last = -1;
         while (m >= 0) {
-            if (key == state.elementKV[m * 2] /* getKey */) {
+            if (key == state.elementKV[m * 2]) {
                 break;
             }
             last = m;
@@ -299,6 +270,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         state.elementNext[m] = -1;//flag to dropped value
         this.elementCount--;
         this.droppedCount++;
+        */
     }
 
     @Override
@@ -319,16 +291,6 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         if (cursor >= payload.length()) {
             return;
         }
-        /*
-        if (payload.charAt(cursor) == ',') {//className to parse
-            _metaClassIndex = metaModel.metaClassByName(payload.substring(initPos, cursor)).index();
-            cursor++;
-            initPos = cursor;
-        }
-        while (cursor < payload.length() && payload.charAt(cursor) != '/') {
-            cursor++;
-        }
-        */
         int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
         //reset the map
         int length = (nbElement == 0 ? 1 : nbElement << 1);
