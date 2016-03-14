@@ -876,7 +876,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             //now the object is reachable to other thread everything should be ready
             OffHeapLongArray.set(elementHash_ptr, hashIndex, newIndex);
         } else {
-            if (replaceIfPresent) {
+            if (replaceIfPresent || (p_elemType != OffHeapLongArray.get(elementType_ptr, entry))) {
                 internal_setElementV(elementV_ptr, entry, elementType_ptr, p_elemType, param_elem); /*setValue*/
             }
         }
@@ -1093,7 +1093,8 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     @Override
     public Object getOrCreate(long index, byte elemType) {
         Object previousObject = get(index);
-        if (previousObject != null) {
+        byte previousType = getType(index);
+        if (previousObject != null && previousType == elemType) {
             return previousObject;
         }
         switch (elemType) {
