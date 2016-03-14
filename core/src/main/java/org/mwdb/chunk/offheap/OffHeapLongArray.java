@@ -33,7 +33,7 @@ public class OffHeapLongArray {
     }
 
     public static void set(final long addr, final long index, final long valueToInsert) {
-        unsafe.putLong(addr + index * 8, valueToInsert);
+        unsafe.putLongVolatile(null,addr + index * 8, valueToInsert);
     }
 
     public static long get(final long addr, final long index) {

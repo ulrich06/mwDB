@@ -22,7 +22,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private int nbCount = 0;
 
-    //@Test
+    @Test
     public void heapTest() {
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
@@ -45,11 +45,9 @@ public class TimeTreeTest implements KChunkListener {
                 return new OffHeapTimeTreeChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, payload);
             }
         };
-        //previousOrEqualsTest(factory);
-        //saveLoad(factory);
-
+        previousOrEqualsTest(factory);
+        saveLoad(factory);
         massiveTest(factory);
-
     }
 
     private void previousOrEqualsTest(KTimeTreeChunkFactory factory) {
@@ -103,11 +101,11 @@ public class TimeTreeTest implements KChunkListener {
     private void massiveTest(KTimeTreeChunkFactory factory) {
         nbCount = 0;
         KTimeTreeChunk tree = factory.create(null);
-        long beforeTime = System.currentTimeMillis();
-        for (long i = 0; i <= 1_000_000; i = i + 2) {
+        //  long beforeTime = System.currentTimeMillis();
+        for (long i = 0; i <= 10_000_000; i = i + 2) {
             tree.insert(i);
         }
-        System.out.println(System.currentTimeMillis() - beforeTime);
+        // System.out.println(System.currentTimeMillis() - beforeTime);
 
         free(tree);
         Assert.assertTrue(nbCount == 1);

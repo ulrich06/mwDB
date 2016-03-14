@@ -16,7 +16,9 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private static final char RED_RIGHT = ']';
     private static final int META_SIZE = 3;
 
-    // keys
+    /**
+     * Global KChunk indexes
+     */
     private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
     private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
     private static final int INDEX_ID = Constants.OFFHEAP_CHUNK_INDEX_ID;
@@ -24,11 +26,12 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private static final int INDEX_FLAGS = Constants.OFFHEAP_CHUNK_INDEX_FLAGS;
     private static final int INDEX_MARKS = Constants.OFFHEAP_CHUNK_INDEX_MARKS;
 
-    // long arrays
+    /**
+     * Local indexes
+     */
     private static final int INDEX_META = 6;
     private static final int INDEX_K = 7;
     private static final int INDEX_COLORS = 8;
-
     private static final int INDEX_ROOT_ELEM = 9;
     private static final int INDEX_THRESHOLD = 10;
     private static final int INDEX_MAGIC = 11;
@@ -36,6 +39,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private static final int INDEX_SIZE = 13;
 
     private long addr;
+
     private long metaPtr;
     private long kPtr;
     private long colorsPtr;
@@ -54,13 +58,13 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         } else {
             long capacity = Constants.MAP_INITIAL_CAPACITY;
             //init k array
-            kPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY);
+            kPtr = OffHeapLongArray.allocate(capacity);
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
             //init meta array
-            metaPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY * META_SIZE);
+            metaPtr = OffHeapLongArray.allocate(capacity * META_SIZE);
             OffHeapLongArray.set(addr, INDEX_META, metaPtr);
             //init colors array
-            colorsPtr = OffHeapByteArray.allocate(Constants.MAP_INITIAL_CAPACITY);
+            colorsPtr = OffHeapByteArray.allocate(capacity);
             OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
 
             OffHeapLongArray.set(addr, INDEX_LOCK, 0);
@@ -76,7 +80,10 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     @Override
     public void free() {
-        // long temp = kPtr OffHeapLongArray.get(addr, INDEX_K);
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_K));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_META));
+        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_COLORS));
+        OffHeapLongArray.free(addr);
     }
 
 
@@ -216,16 +223,17 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
         long size = OffHeapLongArray.get(addr, INDEX_SIZE);
         if ((size + 1) > OffHeapLongArray.get(addr, INDEX_THRESHOLD)) {
+
             long newLength = (size == 0 ? 1 : size << 1);
 
             kPtr = OffHeapLongArray.reallocate(kPtr, size, newLength);
-            metaPtr = OffHeapLongArray.reallocate(metaPtr, size, newLength);
+            metaPtr = OffHeapLongArray.reallocate(metaPtr, size, newLength * META_SIZE);
             colorsPtr = OffHeapByteArray.reallocate(colorsPtr, size, newLength);
+
 
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
             OffHeapLongArray.set(addr, INDEX_META, metaPtr);
             OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
-
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (newLength * Constants.MAP_LOAD_FACTOR));
         }
         if (size == 0) {
