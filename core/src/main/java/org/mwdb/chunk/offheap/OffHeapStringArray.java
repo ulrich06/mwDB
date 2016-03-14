@@ -73,4 +73,20 @@ public class OffHeapStringArray {
         unsafe.freeMemory(addr);
     }
 
+    public static long cloneArray(final long srcAddr, final long length) {
+        // copy the string pointers
+        long newAddr = unsafe.allocateMemory(length * 8);
+        unsafe.copyMemory(srcAddr, newAddr, length * 8);
+        // copy the strings
+        for (int i = 0; i < length; i++) {
+            long stringPtr = unsafe.getLong(newAddr + i * 8);
+            long len = unsafe.getInt(stringPtr);
+            long newStringPtr = unsafe.allocateMemory(4 + len);
+            unsafe.copyMemory(stringPtr, newStringPtr, 4 + len);
+            unsafe.putLong(newAddr + i * 8, newStringPtr);
+        }
+        return newAddr;
+    }
+
+
 }
