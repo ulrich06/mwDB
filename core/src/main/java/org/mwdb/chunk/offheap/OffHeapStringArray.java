@@ -80,10 +80,12 @@ public class OffHeapStringArray {
         // copy the strings
         for (int i = 0; i < length; i++) {
             long stringPtr = unsafe.getLong(newAddr + i * 8);
-            long len = unsafe.getInt(stringPtr);
-            long newStringPtr = unsafe.allocateMemory(4 + len);
-            unsafe.copyMemory(stringPtr, newStringPtr, 4 + len);
-            unsafe.putLong(newAddr + i * 8, newStringPtr);
+            if (stringPtr != Constants.OFFHEAP_NULL_PTR) {
+                long len = unsafe.getInt(stringPtr);
+                long newStringPtr = unsafe.allocateMemory(4 + len);
+                unsafe.copyMemory(stringPtr, newStringPtr, 4 + len);
+                unsafe.putLong(newAddr + i * 8, newStringPtr);
+            }
         }
         return newAddr;
     }
