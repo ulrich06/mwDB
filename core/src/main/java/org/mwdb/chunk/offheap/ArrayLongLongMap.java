@@ -239,7 +239,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
 
         // copy root array
-        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, capacity);
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 8);
         // copy elementK array
         long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K);
         long newElementK_ptr = OffHeapLongArray.cloneArray(elementK_ptr, capacity);

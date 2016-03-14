@@ -53,7 +53,7 @@ public class OffHeapDoubleArray {
     }
 
     public static long cloneArray(final long srcAddr, final long length) {
-        long newAddr = allocate(length * 8);
+        long newAddr = unsafe.allocateMemory(length * 8);
         unsafe.copyMemory(srcAddr, newAddr, length * 8);
         return newAddr;
     }
