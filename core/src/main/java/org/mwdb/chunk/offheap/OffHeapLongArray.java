@@ -37,7 +37,7 @@ public class OffHeapLongArray {
     }
 
     public static long get(final long addr, final long index) {
-        return unsafe.getLong(addr + index * 8);
+        return unsafe.getLongVolatile(null, addr + index * 8);
     }
 
     public static void free(final long addr) {
