@@ -141,7 +141,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     /** Arrays */
                     case KType.DOUBLE_ARRAY:
                         long doubleArrayLen = OffHeapLongArray.get(elemPtr, 0); // read the length (first long)
-                        long doubleArrayPtr = OffHeapDoubleArray.clone(elemPtr, doubleArrayLen);
+                        long doubleArrayPtr = OffHeapDoubleArray.cloneArray(elemPtr, doubleArrayLen);
                         OffHeapLongArray.set(elemPtr, i, doubleArrayPtr);
                         break;
                     case KType.LONG_ARRAY:
