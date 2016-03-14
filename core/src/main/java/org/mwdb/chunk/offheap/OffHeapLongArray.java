@@ -34,10 +34,12 @@ public class OffHeapLongArray {
 
     public static void set(final long addr, final long index, final long valueToInsert) {
         unsafe.putLong(addr + index * 8, valueToInsert);
+//        long expected = unsafe.getLongVolatile(null, addr + index * 8);
+//        unsafe.compareAndSwapLong(null, addr + index * 8, expected, valueToInsert);
     }
 
     public static long get(final long addr, final long index) {
-        return unsafe.getLong(addr + index * 8);
+        return unsafe.getLongVolatile(null, addr + index * 8);
     }
 
     public static void free(final long addr) {

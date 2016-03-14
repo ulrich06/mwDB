@@ -34,8 +34,8 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     private static final int INDEX_ELEMENT_TYPE = 10;
 
     // long values
-    private static final int INDEX_COUNTER = 11;
-    private static final int INDEX_IN_LOAD_MODE = 12;
+    private static final int INDEX_LOCK = 11;
+    private static final int INDEX_COUNTER = 12;
     private static final int INDEX_ELEMENT_DATA_SIZE = 13;
     private static final int INDEX_ELEMENT_THRESHOLD = 14;
     private static final int INDEX_ELEMENT_COUNT = 15;
@@ -49,11 +49,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     private long elementType_ptr;
     private final long root_array_ptr;
 
+    // simple values
+    boolean inLoadMode = false;
+
     public OffHeapStateChunk(KChunkListener listener, String initialPayload, KChunk origin, long previousAddr) {
         _listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(16);
-            OffHeapLongArray.set(root_array_ptr, INDEX_IN_LOAD_MODE, 0);
             OffHeapLongArray.set(root_array_ptr, INDEX_FLAGS, 0);
             OffHeapLongArray.set(root_array_ptr, INDEX_COUNTER, 0);
             long initialCapacity = Constants.MAP_INITIAL_CAPACITY;
@@ -61,6 +63,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, 0);
             long threshold = (long) (initialCapacity * Constants.MAP_LOAD_FACTOR);
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, threshold);
+            OffHeapLongArray.set(root_array_ptr, INDEX_LOCK, 0); // not locked
+
+            inLoadMode = false;
 
             if (initialPayload != null) {
                 load(initialPayload);
@@ -323,7 +328,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         if (payload == null || payload.length() == 0) {
             return;
         }
-        OffHeapLongArray.set(root_array_ptr, INDEX_IN_LOAD_MODE, 1);
+        inLoadMode = true;
 
         //future map elements
         long newElementK_ptr = Constants.OFFHEAP_NULL_PTR;
@@ -668,7 +673,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         long threshold = (long) (newStateCapacity * Constants.MAP_LOAD_FACTOR);
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, threshold);
 
-        OffHeapLongArray.set(root_array_ptr, INDEX_IN_LOAD_MODE, 0);
+        inLoadMode = false;
     }
 
     @Override
@@ -737,18 +742,21 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
     @Override
     public void declareDirty(KChunk chunk) {
-        if (OffHeapLongArray.get(root_array_ptr, INDEX_IN_LOAD_MODE) == 0) {
+        if (!inLoadMode) {
             internal_set_dirty();
         }
     }
 
     @Override
     public void set(long index, byte elemType, Object elem) {
-        internal_set(index, elemType, elem, true);
-
+        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ; // lock
+        try {
+            internal_set(index, elemType, elem, true);
+        } finally {
+            while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) ; // unlock
+        }
     }
 
-    // TODO synchronize method
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
@@ -883,7 +891,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         internal_set_dirty();
     }
 
-    // TODO before we set something, we first have to check what was there before and free the memory in case
     private void internal_setElementV(long addr, long index, long elementTypeAddr, byte elemType, Object elem) {
         // no additional check needed, we are sure it is one of these types
         switch (elemType) {
