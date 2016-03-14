@@ -282,8 +282,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
 
         // copy root array
-        long newSrcAddr = OffHeapLongArray.allocate(capacity);
-        unsafe.copyMemory(srcAddr, newSrcAddr, capacity * 8);
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, capacity);
         // copy elementK array
         long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K); // OffHeapStringArray
         long newElementK_ptr = OffHeapStringArray.cloneArray(elementK_ptr, capacity);
