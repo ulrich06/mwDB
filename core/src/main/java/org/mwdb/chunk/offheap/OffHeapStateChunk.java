@@ -13,7 +13,6 @@ import org.mwdb.utility.Unsafe;
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
  */
-// TODO check synchronization
 public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
@@ -757,7 +756,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
-    private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
+    private void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
         try {

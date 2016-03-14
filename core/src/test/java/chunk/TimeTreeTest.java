@@ -102,7 +102,7 @@ public class TimeTreeTest implements KChunkListener {
         nbCount = 0;
         KTimeTreeChunk tree = factory.create(null);
         //  long beforeTime = System.currentTimeMillis();
-        for (long i = 0; i <= 10_000_000; i = i + 2) {
+        for (long i = 0; i <= 1_000_000; i = i + 2) {
             tree.insert(i);
         }
         // System.out.println(System.currentTimeMillis() - beforeTime);
