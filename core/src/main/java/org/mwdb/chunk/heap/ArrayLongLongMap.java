@@ -15,15 +15,24 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     private final KChunkListener _listener;
 
-    public ArrayLongLongMap(KChunkListener p_listener, int initialCapacity) {
+    private volatile boolean aligned;
+
+    public ArrayLongLongMap(KChunkListener p_listener, int initialCapacity, ArrayLongLongMap p_origin) {
         this._listener = p_listener;
-        InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
-        for (int i = 0; i < initialCapacity; i++) {
-            newstate._elementNext[i] = -1;
-            newstate._elementHash[i] = -1;
-        }
         this.state = new AtomicReference<InternalState>();
-        this.state.set(newstate);
+
+        if (p_origin == null) {
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
+            for (int i = 0; i < initialCapacity; i++) {
+                newstate._elementNext[i] = -1;
+                newstate._elementHash[i] = -1;
+            }
+            this.state.set(newstate);
+            aligned = true;
+        } else {
+            this.state.set(p_origin.state.get());
+            aligned = false;
+        }
     }
 
     /**
@@ -54,6 +63,19 @@ public class ArrayLongLongMap implements KLongLongMap {
             this._elementCount = p_elementCount;
             this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
         }
+
+        public InternalState clone() {
+            long[] cloned_elementK = new long[_stateSize];
+            System.arraycopy(_elementK, 0, cloned_elementK, 0, _stateSize);
+            long[] cloned_elementV = new long[_stateSize];
+            System.arraycopy(_elementV, 0, cloned_elementV, 0, _stateSize);
+            int[] cloned_elementNext = new int[_stateSize];
+            System.arraycopy(_elementNext, 0, cloned_elementNext, 0, _stateSize);
+            int[] cloned_elementHash = new int[_stateSize];
+            System.arraycopy(_elementHash, 0, cloned_elementHash, 0, _stateSize);
+            return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, _elementCount);
+        }
+
     }
 
     @Override
@@ -91,6 +113,13 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final synchronized void put(long key, long value) {
+
+        if (!aligned) {
+            //clone the state
+            state.set(state.get().clone());
+            aligned = true;
+        }
+
         int entry = -1;
         int hashIndex = -1;
         InternalState internalState = state.get();

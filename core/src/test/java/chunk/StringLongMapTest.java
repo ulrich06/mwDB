@@ -13,7 +13,7 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY));
+        test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, null));
     }
 
     @Test

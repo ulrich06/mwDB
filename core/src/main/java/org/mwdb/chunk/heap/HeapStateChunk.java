@@ -81,8 +81,6 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             long[] clonedElementK = new long[this._elementDataSize];
             System.arraycopy(_elementK, 0, clonedElementK, 0, this._elementDataSize);
             Object[] clonedElementV = new Object[this._elementDataSize];
-
-            //TODO warning do a deep clone, or copy on write here !!!
             System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
             int[] clonedElementNext = new int[this._elementDataSize];
             System.arraycopy(_elementNext, 0, clonedElementNext, 0, this._elementDataSize);
@@ -108,7 +106,29 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             load(initialPayload);
         } else if (origin != null) {
             HeapStateChunk castedOrigin = (HeapStateChunk) origin;
-            state.set(castedOrigin.state.get().cloneState());
+            InternalState clonedState = castedOrigin.state.get().cloneState();
+            state.set(clonedState);
+            //deep clone for map
+            for (int i = 0; i < clonedState._elementCount; i++) {
+                switch (clonedState._elementType[i]) {
+                    case KType.LONG_LONG_MAP:
+                        if (clonedState._elementV[i] != null) {
+                            clonedState._elementV[i] = new ArrayLongLongMap(this, -1, (ArrayLongLongMap) clonedState._elementV[i]);
+                        }
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        if (clonedState._elementV[i] != null) {
+                            clonedState._elementV[i] = new ArrayLongLongArrayMap(this, -1, (ArrayLongLongArrayMap) clonedState._elementV[i]);
+                        }
+                        break;
+                    case KType.STRING_LONG_MAP:
+                        if (clonedState._elementV[i] != null) {
+                            clonedState._elementV[i] = new ArrayStringLongMap(this, -1, (ArrayStringLongMap) clonedState._elementV[i]);
+                        }
+                        break;
+                }
+            }
+
         } else {
             //init a new state
             int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
@@ -326,13 +346,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
         switch (elemType) {
             case KType.STRING_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
                 break;
             case KType.LONG_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
                 break;
             case KType.LONG_LONG_ARRAY_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
                 break;
         }
         return get(p_elementIndex);
@@ -527,13 +547,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             break;
                         /** Maps */
                         case KType.STRING_LONG_MAP:
-                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize);
+                            currentStringLongMap = new ArrayStringLongMap(this, (int) currentSubSize, null);
                             break;
                         case KType.LONG_LONG_MAP:
-                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize);
+                            currentLongLongMap = new ArrayLongLongMap(this, (int) currentSubSize, null);
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
-                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize);
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, (int) currentSubSize, null);
                             break;
                     }
                 } else {

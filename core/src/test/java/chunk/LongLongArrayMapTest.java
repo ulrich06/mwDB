@@ -11,7 +11,7 @@ public class LongLongArrayMapTest implements KChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new org.mwdb.chunk.heap.ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY));
+        test(new org.mwdb.chunk.heap.ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, null));
     }
 
     @Test

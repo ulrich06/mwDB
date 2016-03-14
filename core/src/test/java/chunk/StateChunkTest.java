@@ -30,14 +30,14 @@ public class StateChunkTest implements KChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
-        //saveLoadTest(factory);
-        //protectionTest(factory);
-        //typeSwitchTest(factory);
+        saveLoadTest(factory);
+        protectionTest(factory);
+        typeSwitchTest(factory);
         cloneTest(factory);
     }
 
 
-    //@Test
+    @Test
     public void offHeapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
 
@@ -49,6 +49,7 @@ public class StateChunkTest implements KChunkListener {
         saveLoadTest(factory);
         protectionTest(factory);
         typeSwitchTest(factory);
+        cloneTest(factory);
     }
 
     private void saveLoadTest(StateChunkFactory factory) {
@@ -271,9 +272,78 @@ public class StateChunkTest implements KChunkListener {
 
         //clone the chunk
         KStateChunk chunk2 = factory.create(this, null, chunk);
-        
+
+        //test primitives
+        Assert.assertTrue(chunk2.getType(0) == KType.BOOL);
+        Assert.assertTrue((boolean) chunk.get(0));
+
+        Assert.assertTrue(chunk2.getType(1) == KType.STRING);
+        Assert.assertTrue(PrimitiveHelper.equals(chunk2.get(1).toString(), "hello"));
+
+        Assert.assertTrue(chunk2.getType(2) == KType.LONG);
+        Assert.assertTrue((long) chunk2.get(2) == 1000l);
+
+        Assert.assertTrue(chunk2.getType(3) == KType.INT);
+        Assert.assertTrue((int) chunk2.get(3) == 100);
+
+        Assert.assertTrue(chunk2.getType(4) == KType.DOUBLE);
+        Assert.assertTrue((double) chunk2.get(4) == 1.0);
+
+        //test arrays
+        Assert.assertTrue(chunk2.getType(5) == KType.DOUBLE_ARRAY);
+        Assert.assertTrue(((double[]) chunk2.get(5))[0] == 1.0);
+
+        Assert.assertTrue(chunk2.getType(6) == KType.LONG_ARRAY);
+        Assert.assertTrue(((long[]) chunk2.get(6))[0] == 1);
+
+        Assert.assertTrue(chunk2.getType(7) == KType.INT_ARRAY);
+        Assert.assertTrue(((int[]) chunk2.get(7))[0] == 1);
+
+        //test maps
+        Assert.assertTrue(((KLongLongMap) chunk2.get(8)).get(100) == 100);
+        Assert.assertTrue(((KLongLongArrayMap) chunk2.get(9)).get(100)[0] == 100);
+        Assert.assertTrue(((KStringLongMap) chunk2.get(10)).getValue("100") == 100);
+
+        //now we test the co-evolution of clone
+
+        //STRINGS
+        chunk.set(1, KType.STRING, "helloPast");
+        Assert.assertTrue(PrimitiveHelper.equals(chunk.get(1).toString(), "helloPast"));
+        Assert.assertTrue(PrimitiveHelper.equals(chunk2.get(1).toString(), "hello"));
+
+        chunk2.set(1, KType.STRING, "helloFuture");
+        Assert.assertTrue(PrimitiveHelper.equals(chunk2.get(1).toString(), "helloFuture"));
+        Assert.assertTrue(PrimitiveHelper.equals(chunk.get(1).toString(), "helloPast"));
+
+        //ARRAYS
+        chunk2.set(5, KType.DOUBLE_ARRAY, new double[]{3.0, 4.0, 5.0});
+        Assert.assertTrue(((double[]) chunk2.get(5))[0] == 3.0);
+        Assert.assertTrue(((double[]) chunk.get(5))[0] == 1.0);
+
+        chunk2.set(6, KType.LONG_ARRAY, new long[]{100, 200, 300});
+        Assert.assertTrue(((long[]) chunk2.get(6))[0] == 100);
+        Assert.assertTrue(((long[]) chunk.get(6))[0] == 1);
+
+        chunk2.set(7, KType.INT_ARRAY, new int[]{100, 200, 300});
+        Assert.assertTrue(((int[]) chunk2.get(7))[0] == 100);
+        Assert.assertTrue(((int[]) chunk.get(7))[0] == 1);
+
+        //MAPS
+        ((KLongLongMap) chunk2.get(8)).put(100, 200);
+        Assert.assertTrue(((KLongLongMap) chunk2.get(8)).get(100) == 200);
+        Assert.assertTrue(((KLongLongMap) chunk.get(8)).get(100) == 100);
+
+        ((KLongLongArrayMap) chunk2.get(9)).put(100, 200);
+        Assert.assertTrue(((KLongLongArrayMap) chunk2.get(9)).get(100)[0] == 200);
+        Assert.assertTrue(((KLongLongArrayMap) chunk2.get(9)).get(100)[1] == 100);
+        Assert.assertTrue(((KLongLongArrayMap) chunk.get(9)).get(100)[0] == 100);
+
+        ((KStringLongMap) chunk2.get(10)).put("100", 200);
+        Assert.assertTrue(((KStringLongMap) chunk2.get(10)).getValue("100") == 200);
+        Assert.assertTrue(((KStringLongMap) chunk.get(10)).getValue("100") == 100);
 
         free(chunk);
+        free(chunk2);
     }
 
 
