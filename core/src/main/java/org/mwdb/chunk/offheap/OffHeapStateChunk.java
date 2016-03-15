@@ -680,24 +680,25 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         return OffHeapLongArray.get(root_array_ptr, INDEX_COUNTER);
     }
 
-    public static void free(long addr) {
+    public static void free(long root_array_ptr) {
 
-        long elementType_ptr = OffHeapLongArray.get(addr, INDEX_ELEMENT_TYPE);
-        long elementDataSize = OffHeapLongArray.get(addr, INDEX_ELEMENT_DATA_SIZE);
+        long elementType_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE);
+        long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
+        long elementV_array_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_V);
         for (long i = 0; i < elementDataSize; i++) {
-            long elemV_ptr = OffHeapLongArray.get(addr, i);
+            long elemV_ptr = OffHeapLongArray.get(elementV_array_ptr, i);
             if (elemV_ptr != Constants.OFFHEAP_NULL_PTR) {
                 freeElement(elemV_ptr, (byte) OffHeapLongArray.get(elementType_ptr, i));
             }
         }
 
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
+        OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_V));
+        OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_K));
+        OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_NEXT));
+        OffHeapLongArray.free(OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_HASH));
         OffHeapLongArray.free(elementType_ptr);
 
-        OffHeapLongArray.free(addr);
+        OffHeapLongArray.free(root_array_ptr);
     }
 
     private static void freeElement(long addr, byte elemType) {
