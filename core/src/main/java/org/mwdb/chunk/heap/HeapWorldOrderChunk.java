@@ -5,6 +5,7 @@ import org.mwdb.Constants;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
+import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -146,7 +147,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         //rehashEveryThing
         for (int i = 0; i < state.elementNext.length; i++) {
             if (state.elementNext[i] != -1) { //there is a real value
-                int index = ((int) state.elementKV[i * 2] & 0x7FFFFFFF) % length;
+                int index = (int) PrimitiveHelper.longHash(state.elementKV[i * 2], length); // ((int) state.elementKV[i * 2] & 0x7FFFFFFF) % length;
                 int currentHashedIndex = newElementHash[index];
                 if (currentHashedIndex != -1) {
                     newElementNext[i] = currentHashedIndex;
@@ -177,7 +178,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         if (internalState.elementDataSize == 0) {
             return Constants.NULL_LONG;
         }
-        int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
+        int index = (int) PrimitiveHelper.longHash(key, internalState.elementDataSize);
         int m = internalState.elementHash[index];
         while (m >= 0) {
             if (key == internalState.elementKV[m * 2] /* getKey */) {
@@ -193,15 +194,14 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     public final synchronized void put(long key, long value) {
         int entry = -1;
         int index = -1;
-        int hash = (int) (key);
         if (state.elementDataSize != 0) {
-            index = (hash & 0x7FFFFFFF) % state.elementDataSize;
+            index = (int) PrimitiveHelper.longHash(key, state.elementDataSize);
             entry = findNonNullKeyEntry(key, index);
         }
         if (entry == -1) {
             if (++elementCount > threshold) {
                 rehashCapacity(state.elementDataSize);
-                index = (hash & 0x7FFFFFFF) % state.elementDataSize;
+                index = (int) PrimitiveHelper.longHash(key, state.elementDataSize);
             }
             int newIndex = (this.elementCount + this.droppedCount - 1);
             state.elementKV[newIndex * 2] = key;
@@ -279,87 +279,106 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     }
 
     private void load(String payload) {
-        //_metaClassIndex = metaClassIndex;
         if (payload == null || payload.length() == 0) {
             return;
         }
-        int initPos = 0;
-        int cursor = 0;
-        while (cursor < payload.length() /*&& payload.charAt(cursor) != ','*/ && payload.charAt(cursor) != '/') {
-            cursor++;
-        }
-        if (cursor >= payload.length()) {
-            return;
-        }
-        int nbElement = Base64.decodeToIntWithBounds(payload, initPos, cursor);
-        //reset the map
-        int length = (nbElement == 0 ? 1 : nbElement << 1);
-        long[] newElementKV = new long[length * 2];
-        int[] newElementNext = new int[length];
-        int[] newElementHash = new int[length];
-        for (int i = 0; i < length; i++) {
-            newElementNext[i] = -1;
-            newElementHash[i] = -1;
-        }
-        //setPrimitiveType value for all
-        InternalState temp_state = new InternalState(length, newElementKV, newElementNext, newElementHash);
-        while (cursor < payload.length()) {
-            cursor++;
-            int beginChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ':') {
-                cursor++;
-            }
-            int middleChunk = cursor;
-            while (cursor < payload.length() && payload.charAt(cursor) != ',') {
-                cursor++;
-            }
-            long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, middleChunk);
-            long loopVal = Base64.decodeToLongWithBounds(payload, middleChunk + 1, cursor);
-            int index = (((int) (loopKey)) & 0x7FFFFFFF) % temp_state.elementDataSize;
-            //insert K/V
-            int newIndex = this.elementCount;
-            temp_state.elementKV[newIndex * 2] = loopKey;
-            temp_state.elementKV[newIndex * 2 + 1] = loopVal;
-            int currentHashedIndex = temp_state.elementHash[index];
-            if (currentHashedIndex != -1) {
-                temp_state.elementNext[newIndex] = currentHashedIndex;
-            } else {
-                temp_state.elementNext[newIndex] = -2; //special char to tag used values
-            }
-            temp_state.elementHash[index] = newIndex;
-            this.elementCount++;
-        }
-        this.elementCount = nbElement;
-        this.droppedCount = 0;
-        this.state = temp_state;//TODO check with CnS
-        this.threshold = (int) (length * Constants.MAP_LOAD_FACTOR);
 
+        int cursor = 0;
+
+        long loopKey = Constants.NULL_LONG;
+        int previousStart = -1;
+        long capacity = -1;
+        int insertIndex = 0;
+        InternalState temp_state = null;
+        while (cursor < payload.length()) {
+
+            if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
+                long size = Base64.decodeToLongWithBounds(payload, 0, cursor);
+                if (size == 0) {
+                    capacity = 1;
+                } else {
+                    capacity = size << 1;
+                }
+
+                long[] newElementKV = new long[(int) (capacity * 2)];
+                int[] newElementNext = new int[(int) capacity];
+                int[] newElementHash = new int[(int) capacity];
+                for (int i = 0; i < capacity; i++) {
+                    newElementNext[i] = -1;
+                    newElementHash[i] = -1;
+                }
+                //setPrimitiveType value for all
+                temp_state = new InternalState((int) capacity, newElementKV, newElementNext, newElementHash);
+
+                this.elementCount = (int) size;
+                this.droppedCount = 0;
+                this.threshold = (int) (capacity * Constants.MAP_LOAD_FACTOR);
+
+                //reset for next round
+                previousStart = cursor + 1;
+
+            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SEP && temp_state != null) {
+                if (loopKey != Constants.NULL_LONG) {
+                    long loopValue = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    //insert raw
+                    temp_state.elementKV[insertIndex * 2] = loopKey;
+                    temp_state.elementKV[insertIndex * 2 + 1] = loopValue;
+
+                    //insert hash
+                    int hashIndex = (int) PrimitiveHelper.longHash(loopKey, capacity);
+                    int currentHashedIndex = temp_state.elementHash[hashIndex];
+                    if (currentHashedIndex != -1) {
+                        temp_state.elementNext[insertIndex] = currentHashedIndex;
+                    }
+                    temp_state.elementHash[hashIndex] = insertIndex;
+                    insertIndex++;
+                    //reset key for next round
+                    loopKey = Constants.NULL_LONG;
+                }
+                previousStart = cursor + 1;
+            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
+                loopKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                previousStart = cursor + 1;
+            }
+            //loop in all case
+            cursor++;
+        }
+        if (loopKey != Constants.NULL_LONG && temp_state != null) {
+            long loopValue = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+            //insert raw
+            temp_state.elementKV[insertIndex * 2] = loopKey;
+            temp_state.elementKV[insertIndex * 2 + 1] = loopValue;
+
+            //insert hash
+            int hashIndex = (int) PrimitiveHelper.longHash(loopKey, capacity);
+            int currentHashedIndex = temp_state.elementHash[hashIndex];
+            if (currentHashedIndex != -1) {
+                temp_state.elementNext[insertIndex] = currentHashedIndex;
+            }
+            temp_state.elementHash[hashIndex] = insertIndex;
+        }
+        if (temp_state != null) {
+            this.state = temp_state;
+        }
     }
 
     @Override
     public String save() {
         final StringBuilder buffer = new StringBuilder();//roughly approximate init size
-        /*
-        if (_metaClassIndex != -1) {
-            buffer.append(metaModel.metaClass(_metaClassIndex).metaName());
-            buffer.append(',');
-        }*/
         Base64.encodeIntToBuffer(elementCount, buffer);
-        buffer.append('/');
+        buffer.append(Constants.CHUNK_SEP);
         boolean isFirst = true;
         InternalState internalState = state;
-        for (int i = 0; i < internalState.elementNext.length; i++) {
-            if (internalState.elementNext[i] != -1) { //there is a real value
-                long loopKey = internalState.elementKV[i * 2];
-                long loopValue = internalState.elementKV[i * 2 + 1];
-                if (!isFirst) {
-                    buffer.append(",");
-                }
-                isFirst = false;
-                Base64.encodeLongToBuffer(loopKey, buffer);
-                buffer.append(":");
-                Base64.encodeLongToBuffer(loopValue, buffer);
+        for (int i = 0; i < elementCount; i++) {
+            long loopKey = internalState.elementKV[i * 2];
+            long loopValue = internalState.elementKV[i * 2 + 1];
+            if (!isFirst) {
+                buffer.append(Constants.CHUNK_SUB_SEP);
             }
+            isFirst = false;
+            Base64.encodeLongToBuffer(loopKey, buffer);
+            buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+            Base64.encodeLongToBuffer(loopValue, buffer);
         }
         return buffer.toString();
     }

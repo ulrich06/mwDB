@@ -659,18 +659,6 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
                         setRight(parentRaw, currentLoopIndex);
                     }
                 }
-                /*
-                if (cursor < payload.length() && payload.charAt(cursor) == ',') {
-                    cursor++;
-                    beginChunk = cursor;
-                    while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
-                        cursor++;
-                    }
-                    if (cursor > beginChunk) {
-                        long currentValue = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
-                        setValue(currentLoopIndex, currentValue);
-                    }
-                }*/
                 currentLoopIndex++;
             }
         }

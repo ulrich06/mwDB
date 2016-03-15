@@ -162,14 +162,11 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         byte chunkType = (byte) OffHeapLongArray.get(addr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
         switch (chunkType) {
             case Constants.STATE_CHUNK:
-                //TODO
-                return null;
+                return new OffHeapStateChunk(this, null, null, addr);
             case Constants.TIME_TREE_CHUNK:
-                //TODO
-                return null;
+                return new OffHeapTimeTreeChunk(this, addr, null);
             case Constants.WORLD_ORDER_CHUNK:
-                //TODO
-                return null;
+                return new OffHeapWorldOrderChunk(this, addr, null);
             default:
                 return null;
         }
@@ -218,16 +215,14 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public KChunk create(long p_world, long p_time, long p_id, byte p_type, String initialPayload, KChunk previousChunk) {
-        KOffHeapChunk newChunk;
+        KOffHeapChunk newChunk = null;
         switch (p_type) {
             case Constants.STATE_CHUNK:
-                newChunk = null; //TODO
+                newChunk = new OffHeapStateChunk(this, initialPayload, previousChunk, Constants.OFFHEAP_NULL_PTR);
             case Constants.WORLD_ORDER_CHUNK:
-                newChunk = null; //TODO
+                newChunk = new OffHeapWorldOrderChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
             case Constants.TIME_TREE_CHUNK:
-                newChunk = null; //TODO
-            default:
-                newChunk = null;
+                newChunk = new OffHeapTimeTreeChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
         }
         if (newChunk != null) {
             long newChunkPtr = newChunk.addr();
