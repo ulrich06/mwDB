@@ -142,7 +142,7 @@ public class StateChunkTest implements KChunkListener {
 
     private void free(KStateChunk chunk) {
         if (chunk instanceof KOffHeapChunk) {
-            ((KOffHeapChunk) chunk).free();
+            OffHeapStateChunk.free(((KOffHeapChunk) chunk).addr());
         }
     }
 

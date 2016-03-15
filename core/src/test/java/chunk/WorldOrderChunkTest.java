@@ -98,7 +98,7 @@ public class WorldOrderChunkTest implements KChunkListener {
 
     private void free(KChunk chunk) {
         if (chunk instanceof KOffHeapChunk) {
-            ((KOffHeapChunk) chunk).free();
+            OffHeapWorldOrderChunk.free(((KOffHeapChunk) chunk).addr());
         }
     }
 

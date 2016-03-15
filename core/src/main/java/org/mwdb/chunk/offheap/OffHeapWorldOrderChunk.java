@@ -93,15 +93,6 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
         return rootPtr;
     }
 
-    @Override
-    public void free() {
-        OffHeapLongArray.free(elementK_ptr);
-        OffHeapLongArray.free(elementV_ptr);
-        OffHeapLongArray.free(elementNext_ptr);
-        OffHeapLongArray.free(elementHash_ptr);
-        OffHeapLongArray.free(rootPtr);
-    }
-
     public static void free(long addr) {
         //free all long[]
         OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K));
@@ -342,7 +333,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
 
             if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
                 long size = Base64.decodeToLongWithBounds(payload, 0, cursor);
-                if(size == 0){
+                if (size == 0) {
                     capacity = 1;
                 } else {
                     capacity = size << 1;

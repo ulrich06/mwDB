@@ -328,7 +328,18 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 }
                 this._elementCount.decrementAndGet();
                 //FREE VICTIM FROM MEMORY
-                internal_create(currentVictimPtr).free();
+                byte chunkType = (byte) OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+                switch (chunkType) {
+                    case Constants.STATE_CHUNK:
+                        OffHeapStateChunk.free(currentVictimPtr);
+                        break;
+                    case Constants.TIME_TREE_CHUNK:
+                        OffHeapTimeTreeChunk.free(currentVictimPtr);
+                        break;
+                    case Constants.WORLD_ORDER_CHUNK:
+                        OffHeapWorldOrderChunk.free(currentVictimPtr);
+                        break;
+                }
             }
             OffHeapLongArray.set(_elementValues, currentVictimIndex, elemPtr);
             //negociate the lock to write on hashIndex

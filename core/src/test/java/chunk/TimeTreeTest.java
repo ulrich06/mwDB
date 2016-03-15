@@ -127,7 +127,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private void free(KChunk chunk) {
         if (chunk instanceof KOffHeapChunk) {
-            ((KOffHeapChunk) chunk).free();
+            OffHeapTimeTreeChunk.free(((KOffHeapChunk) chunk).addr());
         }
     }
 
