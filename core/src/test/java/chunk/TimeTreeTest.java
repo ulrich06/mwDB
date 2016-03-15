@@ -101,10 +101,11 @@ public class TimeTreeTest implements KChunkListener {
     private void massiveTest(KTimeTreeChunkFactory factory) {
         nbCount = 0;
         KTimeTreeChunk tree = factory.create(null);
-        for (long i = 0; i <= 1_000_000; i = i + 2) {
+        long max = 24;
+        for (long i = 0; i <= max; i = i + 2) {
             tree.insert(i);
         }
-        for (long i = 1; i <= 1_000_000; i = i + 2) {
+        for (long i = 1; i <= max; i = i + 2) {
             Assert.assertTrue(tree.previousOrEqual(i) == i - 1);
         }
         free(tree);

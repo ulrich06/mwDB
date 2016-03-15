@@ -227,14 +227,14 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             long newLength = (size == 0 ? 1 : size << 1);
 
             kPtr = OffHeapLongArray.reallocate(kPtr, size, newLength);
-            metaPtr = OffHeapLongArray.reallocate(metaPtr, size, newLength * META_SIZE);
+            metaPtr = OffHeapLongArray.reallocate(metaPtr, size * META_SIZE, newLength * META_SIZE);
             colorsPtr = OffHeapByteArray.reallocate(colorsPtr, size, newLength);
-
 
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
             OffHeapLongArray.set(addr, INDEX_META, metaPtr);
             OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (newLength * Constants.MAP_LOAD_FACTOR));
+
         }
         if (size == 0) {
             setKey(size, p_key);
@@ -587,13 +587,14 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
             return;
         }
+
         int initPos = 0;
         int cursor = 0;
         while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
             cursor++;
         }
         long newSize = 0;
-        if (payload.charAt(cursor) == ',') {//className to parse
+        if (payload.charAt(cursor) == ',') {
             newSize = Base64.decodeToIntWithBounds(payload, initPos, cursor);
             cursor++;
             initPos = cursor;
