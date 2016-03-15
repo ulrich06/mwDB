@@ -52,6 +52,8 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         //init
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             addr = OffHeapLongArray.allocate(14);
+        } else {
+            addr = previousAddr;
         }
         if (initialPayload != null) {
             load(initialPayload);

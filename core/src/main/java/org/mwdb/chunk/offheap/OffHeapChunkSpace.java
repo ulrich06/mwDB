@@ -68,6 +68,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
             do {
                 previous = this._iterationCounter.get();
                 if (this._nextCounter.get() == previous) {
+                    OffHeapLongArray.free(this._dirtyElements);
                     return null;
                 }
                 next = previous + 1;
@@ -219,16 +220,19 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         switch (p_type) {
             case Constants.STATE_CHUNK:
                 newChunk = new OffHeapStateChunk(this, initialPayload, previousChunk, Constants.OFFHEAP_NULL_PTR);
+                break;
             case Constants.WORLD_ORDER_CHUNK:
                 newChunk = new OffHeapWorldOrderChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
+                break;
             case Constants.TIME_TREE_CHUNK:
                 newChunk = new OffHeapTimeTreeChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
+                break;
         }
         if (newChunk != null) {
             long newChunkPtr = newChunk.addr();
             OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD, p_world);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME, p_world);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID, p_world);
+            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME, p_time);
+            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID, p_id);
 
             OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, 0);
             OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE, p_type);
@@ -262,7 +266,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         long entry = -1;
         long hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
-        while (m >= 0) {
+        while (m != -1) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
@@ -298,7 +302,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._maxEntries);
 
                 //negociate a lock on the indexVictim hash
-                while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, 0, 1)) ;
+                while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, -1, 0)) ;
                 //we obtains the token, now remove the element
                 m = OffHeapLongArray.get(_elementHash, indexVictim);
                 long last = Constants.OFFHEAP_NULL_PTR;
@@ -323,7 +327,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 OffHeapLongArray.set(_elementNext, m, Constants.OFFHEAP_NULL_PTR);
                 //free the lock
 
-                if (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, 1, 0)) {
+                if (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, 0, -1)) {
                     throw new RuntimeException("CAS Error !!!");
                 }
                 this._elementCount.decrementAndGet();
@@ -343,11 +347,11 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
             }
             OffHeapLongArray.set(_elementValues, currentVictimIndex, elemPtr);
             //negociate the lock to write on hashIndex
-            while (!OffHeapLongArray.compareAndSwap(_elementHashLock, hashIndex, 0, 1)) ;
+            while (!OffHeapLongArray.compareAndSwap(_elementHashLock, hashIndex, -1, 0)) ;
             OffHeapLongArray.set(_elementNext, currentVictimIndex, OffHeapLongArray.get(_elementHash, hashIndex));
             OffHeapLongArray.set(_elementHash, hashIndex, currentVictimIndex);
             //free the lock
-            if (!OffHeapLongArray.compareAndSwap(_elementHashLock, hashIndex, 1, 0)) {
+            if (!OffHeapLongArray.compareAndSwap(_elementHashLock, hashIndex, 0, -1)) {
                 throw new RuntimeException("CAS Error !!!");
             }
 

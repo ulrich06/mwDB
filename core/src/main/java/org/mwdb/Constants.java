@@ -33,9 +33,9 @@ public class Constants extends KConstants {
      */
     public static final byte STATE_CHUNK = 0;
 
-    public static final byte TIME_TREE_CHUNK = 2;
+    public static final byte TIME_TREE_CHUNK = 1;
 
-    public static final byte WORLD_ORDER_CHUNK = 3;
+    public static final byte WORLD_ORDER_CHUNK = 2;
 
     /**
      * Node constants

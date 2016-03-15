@@ -191,7 +191,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
                 callBack.on(resolver.longKeyToString(OffHeapLongArray.get(elementK_ptr, i)),
                         (int) OffHeapLongArray.get(elementType_ptr, i),
-                        OffHeapLongArray.get(elementV_ptr, i));
+                        internal_getElementV(i) /*OffHeapLongArray.get(elementV_ptr, i)*/);
             }
         }
     }

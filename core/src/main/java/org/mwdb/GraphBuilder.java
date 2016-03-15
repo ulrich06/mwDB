@@ -66,6 +66,11 @@ public class GraphBuilder {
         return this;
     }
 
+    public GraphBuilder withSpace(KChunkSpace p_space) {
+        this._space = p_space;
+        return this;
+    }
+
     public KGraph buildGraph() {
         KStorage storagePlugin = storage();
         KChunkSpace spacePlugin = space();

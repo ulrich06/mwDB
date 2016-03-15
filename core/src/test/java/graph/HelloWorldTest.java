@@ -3,20 +3,27 @@ package graph;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.chunk.offheap.OffHeapChunkSpace;
 import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class HelloWorldTest {
 
     @Test
-    public void mwHeapTest() {
+    public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph());
+    }
+
+    @Test
+    public void offHeapTest() {
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10000,20)).buildGraph());
     }
 
     private void test(KGraph graph) {
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean o) {
+
                 KNode node0 = graph.newNode(0, 0);
                 //do something with the node
 
@@ -33,6 +40,10 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("MyValue", node0.att("value").toString()));
 
                 //check the simple json print
+
+                String flatNode0 = "{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName2\",\"value\": \"MyValue\"}}";
+
+                Assert.assertTrue(flatNode0.length() == node0.toString().length());
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName2\",\"value\": \"MyValue\"}}", node0.toString()));
 
                 //Create a new node

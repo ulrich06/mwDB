@@ -74,7 +74,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void save(KCallback callback) {
+    public void save(KCallback<Boolean> callback) {
         KChunkIterator dirtyIterator = this._space.detachDirties();
         saveDirtyList(dirtyIterator, callback);
     }
@@ -178,9 +178,9 @@ public class Graph implements KGraph {
         if (_isConnected.compareAndSet(true, false)) {
             //JS workaround for closure encapsulation and this variable
             final Graph selfPointer = this;
-            save(new KCallback<Throwable>() {
+            save(new KCallback<Boolean>() {
                 @Override
-                public void on(Throwable throwable) {
+                public void on(Boolean result) {
                     //TODO maybe change to asynchronous code
                     selfPointer._scheduler.stop();
                     //_blas.disconnect();
@@ -190,14 +190,14 @@ public class Graph implements KGraph {
                             public void on(Boolean result) {
                                 selfPointer._lock.set(true);
                                 if (PrimitiveHelper.isDefined(callback)) {
-                                    callback.on(null);
+                                    callback.on(result);
                                 }
                             }
                         });
                     } else {
                         selfPointer._lock.set(true);
                         if (PrimitiveHelper.isDefined(callback)) {
-                            callback.on(null);
+                            callback.on(result);
                         }
                     }
                 }
