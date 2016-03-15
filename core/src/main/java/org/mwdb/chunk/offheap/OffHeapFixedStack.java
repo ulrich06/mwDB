@@ -99,8 +99,8 @@ public class OffHeapFixedStack implements KStack {
             OffHeapLongArray.set(previous_ptr, currentTail, -1);
             if (nextTail == -1) {
                 //FIFO is now empty
-                OffHeapLongArray.set(root_array_ptr, INDEX_TAIL, -1);
-                OffHeapLongArray.set(root_array_ptr, INDEX_HEAD, -1);
+                OffHeapLongArray.set(root_array_ptr, INDEX_TAIL, 0);
+                OffHeapLongArray.set(root_array_ptr, INDEX_HEAD, 0);
             } else {
                 //FIFO contains at least one
                 OffHeapLongArray.set(next_ptr, nextTail, -2); //tag as still used
@@ -117,7 +117,7 @@ public class OffHeapFixedStack implements KStack {
         //lock
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ;
 
-        if (OffHeapLongArray.get(next_ptr, index) != -1 || OffHeapLongArray.get(root_array_ptr, INDEX_TAIL) == -1) {//the element has been detached or tail is empty
+        if (OffHeapLongArray.get(next_ptr, index) == -1 || OffHeapLongArray.get(root_array_ptr, INDEX_TAIL) == -1) {//the element has been detached or tail is empty
             //unlock
             OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0);
             return false;
@@ -125,12 +125,13 @@ public class OffHeapFixedStack implements KStack {
 
         long currentNext = OffHeapLongArray.get(next_ptr, index);
         long currentPrevious = OffHeapLongArray.get(previous_ptr, index);
+        //tag index as unused
+        OffHeapLongArray.set(next_ptr, index, -1);
+        OffHeapLongArray.set(previous_ptr, index, -1);
+
         if (OffHeapLongArray.get(root_array_ptr, INDEX_TAIL) == index) {
             OffHeapLongArray.set(next_ptr, currentPrevious, -2); //tag as used
             OffHeapLongArray.set(root_array_ptr, INDEX_TAIL, currentPrevious);
-            //tag index as unused
-            OffHeapLongArray.set(next_ptr, index, -1);
-            OffHeapLongArray.set(previous_ptr, index, -1);
             OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0);
         } else {
             //reChain

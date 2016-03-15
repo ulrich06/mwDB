@@ -76,8 +76,8 @@ public class FixedStack implements KStack {
             this._previous[currentTail] = -1;
             if (nextTail == -1) {
                 //FIFO is now empty
-                this._tail = -1;
-                this._head = -1;
+                this._tail = 0;
+                this._head = 0;
             } else {
                 //FIFO contains at least one
                 this._next[nextTail] = -2; //tag as still used
@@ -96,7 +96,7 @@ public class FixedStack implements KStack {
         //lock
         while (!_lock.compareAndSet(false, true)) ;
 
-        if (_next[castedIndex] != -1 || this._tail == -1) {//the element has been detached or tail is empty
+        if (_next[castedIndex] == -1 || this._tail == -1) {//the element has been detached or tail is empty
             //unlock
             _lock.compareAndSet(true, false);
             return false;
@@ -104,17 +104,19 @@ public class FixedStack implements KStack {
 
         int currentNext = this._next[castedIndex];
         int currentPrevious = this._previous[castedIndex];
+        //tag index as unused
+        this._next[castedIndex] = -1;
+        this._previous[castedIndex] = -1;
+
         if (this._tail == index) {
             this._next[currentPrevious] = -2; //tag as used
             this._tail = currentPrevious;
-            //tag index as unused
-            this._next[castedIndex] = -1;
-            this._previous[castedIndex] = -1;
             _lock.compareAndSet(true, false);
         } else {
             //reChain
             if (currentNext != -1) {
                 this._previous[currentNext] = currentPrevious;
+
             }
             if (currentPrevious != -1) {
                 this._next[currentPrevious] = currentNext;
