@@ -336,13 +336,22 @@ public class MWGResolver implements KResolver {
         objectUniverseMap.lock();
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
-        //TODO optimization #3, same dephasing, no need to traverse tree and so on
-
+        //REFRESH magics
+        objectUniverseMapMagic = objectUniverseMap.magic();
+        objectTimeTreeMagic = objectTimeTree.magic();
         try {
-            //TODO protect this by optimization #3
-            long resolvedWorld = resolve_world(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
-            long resolvedTime = objectTimeTree.previousOrEqual(nodeTime);
-            //TODO end protection optimization #3
+            long resolvedWorld;
+            long resolvedTime;
+            // OPTIMIZATION #3: SAME DEPHASING THAN BEFORE, DIRECTLY CLONE THE PREVIOUSLY RESOLVED TUPLE
+            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == objectUniverseMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == objectTimeTreeMagic) {
+                resolvedWorld = previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX];
+                resolvedTime = previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX];
+            } else {
+                resolvedWorld = resolve_world(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
+                resolvedTime = objectTimeTree.previousOrEqual(nodeTime);
+                System.err.println("WTF");
+            }
+
             if (resolvedWorld != Constants.NULL_LONG && resolvedTime != Constants.NULL_LONG) {
                 if (allowDephasing) {
                     KStateChunk newObjectEntry = (KStateChunk) this._space.getAndMark(resolvedWorld, resolvedTime, nodeId);

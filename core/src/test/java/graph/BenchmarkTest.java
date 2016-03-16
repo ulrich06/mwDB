@@ -16,11 +16,11 @@ public class BenchmarkTest {
 
     @Test
     public void offHeapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(1_000_000, 10_000)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
     //final int valuesToInsert = 10_000_000;
-    final int valuesToInsert = 5_000_000;
+    final int valuesToInsert = 10_000_000;
 
     final long timeOrigin = 1000;
 
