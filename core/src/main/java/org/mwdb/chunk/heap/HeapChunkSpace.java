@@ -154,11 +154,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             KHeapChunk foundChunk = (KHeapChunk) this._values[m];
             if (foundChunk != null && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 if (foundChunk.unmark() == 0) {
-                    //check if object is dirty
-                    if ((foundChunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                        //declare available for recycling
-                        this._lru.enqueue(m);
-                    }
+                    //declare available for recycling
+                    this._lru.enqueue(m);
                 }
                 return;
             } else {
@@ -170,22 +167,20 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public void unmarkChunk(KChunk chunk) {
         KHeapChunk heapChunk = (KHeapChunk) chunk;
-        int marks = heapChunk.unmark();
-        if (marks == 0) {
-            if ((chunk.flags() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                long nodeWorld = chunk.world();
-                long nodeTime = chunk.time();
-                long nodeId = chunk.id();
-                int index = PrimitiveHelper.tripleHash(nodeWorld, nodeTime, nodeId, this._maxEntries);
-                int m = this._elementHash[index];
-                while (m != -1) {
-                    KChunk foundChunk = this._values[m];
-                    if (foundChunk != null && nodeWorld == foundChunk.world() && nodeTime == foundChunk.time() && nodeId == foundChunk.id()) {
-                        this._lru.enqueue(m);
-                        return;
-                    } else {
-                        m = this._elementNext[m];
-                    }
+        if (heapChunk.unmark() == 0) {
+            long nodeWorld = chunk.world();
+            long nodeTime = chunk.time();
+            long nodeId = chunk.id();
+            int index = PrimitiveHelper.tripleHash(nodeWorld, nodeTime, nodeId, this._maxEntries);
+            int m = this._elementHash[index];
+            while (m != -1) {
+                KChunk foundChunk = this._values[m];
+                if (foundChunk != null && nodeWorld == foundChunk.world() && nodeTime == foundChunk.time() && nodeId == foundChunk.id()) {
+                    //chunk is available for recycling
+                    this._lru.enqueue(m);
+                    return;
+                } else {
+                    m = this._elementNext[m];
                 }
             }
         }
@@ -295,6 +290,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void declareDirty(KChunk dirtyChunk) {
+        KHeapChunk heapChunk = (KHeapChunk) dirtyChunk;
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
@@ -303,15 +299,20 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         while (m >= 0) {
             KHeapChunk currentM = (KHeapChunk) this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
-                currentM.setFlags(Constants.DIRTY_BIT, 0);
-                boolean success = false;
-                while (!success) {
-                    InternalDirtyStateList previousState = this._dirtyState.get();
-                    success = previousState.declareDirty(m);
-                    if (!success) {
-                        this._graph.save(null);
+                if (currentM.setFlags(Constants.DIRTY_BIT, 0)) {
+                    //add an additional mark
+                    heapChunk.mark();
+                    //now enqueue in the dirtyList to be saved later
+                    boolean success = false;
+                    while (!success) {
+                        InternalDirtyStateList previousState = this._dirtyState.get();
+                        success = previousState.declareDirty(m);
+                        if (!success) {
+                            this._graph.save(null);
+                        }
                     }
                 }
+
                 return;
             }
             m = this._elementNext[m];
@@ -321,6 +322,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void declareClean(KChunk cleanChunk) {
+        KHeapChunk heapChunk = (KHeapChunk) cleanChunk;
         long world = cleanChunk.world();
         long time = cleanChunk.time();
         long id = cleanChunk.id();
@@ -330,7 +332,8 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             KHeapChunk currentM = (KHeapChunk) this._values[m];
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
                 currentM.setFlags(0, Constants.DIRTY_BIT);
-                if (currentM.marks() == 0) {
+                //free the save mark
+                if (heapChunk.unmark() == 0) {
                     this._lru.enqueue(m);
                 }
                 return;

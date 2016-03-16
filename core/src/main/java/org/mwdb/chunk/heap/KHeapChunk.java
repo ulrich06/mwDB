@@ -8,6 +8,6 @@ public interface KHeapChunk extends KChunk {
 
     int unmark();
 
-    void setFlags(long bitsToEnable, long bitsToDisable);
+    boolean setFlags(long bitsToEnable, long bitsToDisable);
 
 }

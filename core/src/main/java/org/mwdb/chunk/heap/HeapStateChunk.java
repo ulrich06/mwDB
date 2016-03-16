@@ -834,12 +834,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public void setFlags(long bitsToEnable, long bitsToDisable) {
+    public boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
         long nval;
         do {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
         } while (!_flags.compareAndSet(val, nval));
+        return val != nval;
     }
 }

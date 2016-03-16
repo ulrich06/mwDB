@@ -16,7 +16,7 @@ public class HelloWorldTest {
 
     @Test
     public void offHeapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10000, 20)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10_000, 20)).buildGraph());
     }
 
     private void test(KGraph graph) {
@@ -32,7 +32,6 @@ public class HelloWorldTest {
                         Assert.assertTrue(result.id() == node0.id());
                     }
                 });
-
 
                 node0.attSet("name", KType.STRING, "MyName");
                 Assert.assertTrue(PrimitiveHelper.equals("MyName", node0.att("name").toString()));

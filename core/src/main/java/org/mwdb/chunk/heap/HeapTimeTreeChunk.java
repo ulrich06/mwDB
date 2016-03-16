@@ -97,13 +97,14 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         return _flags.get();
     }
 
-    public void setFlags(long bitsToEnable, long bitsToDisable) {
+    public boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
         long nval;
         do {
             val = _flags.get();
             nval = val & ~bitsToDisable | bitsToEnable;
         } while (!_flags.compareAndSet(val, nval));
+        return val != nval;
     }
 
     private void allocate(int capacity) {
