@@ -8,6 +8,8 @@ import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @ignore ts
  */
@@ -37,6 +39,8 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private static final int INDEX_SIZE = 12;
     private static final int INDEX_CAPACITY = 13;
     private static final int INDEX_MAGIC = 14;
+    private static final int INDEX_LOCK_EXT = 15;
+
 
     //long[]
     private long elementK_ptr;
@@ -54,10 +58,10 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             elementHash_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_HASH);
             elementNext_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_NEXT);
         } else if (initialString != null) {
-            this.rootPtr = OffHeapLongArray.allocate(15);
+            this.rootPtr = OffHeapLongArray.allocate(16);
             load(initialString);
         } else {
-            this.rootPtr = OffHeapLongArray.allocate(15);
+            this.rootPtr = OffHeapLongArray.allocate(16);
             long initialCapacity = Constants.MAP_INITIAL_CAPACITY;
             /** Init long variables */
             //init lock
@@ -86,6 +90,18 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
         }
 
+    }
+
+    @Override
+    public void lock() {
+        while (!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, -1, 1)) ;
+    }
+
+    @Override
+    public void unlock() {
+        if(!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, 1, -1)){
+            throw new RuntimeException("CAS Error !!!");
+        }
     }
 
     @Override

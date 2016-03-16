@@ -332,15 +332,9 @@ public class MWGResolver implements KResolver {
         }
 
         //SOMETHING WILL MOVE HERE ANYWAY SO WE SYNC THE OBJECT
-        /*
-        int magic;
-        do {
-            magic = random.nextInt();
-        } while (!objectUniverseMap.tokenCompareAndSwap(-1, magic));
-        */
 
-        //OK NOW WE HAVE THE MAGIC FOR UUID
-
+        objectUniverseMap.lock();
+        //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
         //TODO optimization #3, same dephasing, no need to traverse tree and so on
 
@@ -374,12 +368,8 @@ public class MWGResolver implements KResolver {
                     this._space.unmarkChunk(objectTimeTree);
                     this._space.unmarkChunk(globalUniverseTree);
                     this._space.unmarkChunk(objectUniverseMap);
-                    /*
                     //free lock
-                    if (!objectUniverseMap.tokenCompareAndSwap(magic, -1)) {
-                        throw new RuntimeException("BadCompareAndSwap");
-                    }
-                    */
+                    objectUniverseMap.unlock();
                     return newObjectEntry;
                 } else {
                     long[] current;
@@ -419,12 +409,8 @@ public class MWGResolver implements KResolver {
                         this._space.unmarkChunk(objectTimeTree);
                         this._space.unmarkChunk(objectUniverseMap);
                         this._space.unmarkChunk(globalUniverseTree);
-                        /*
                         //free lock
-                        if (!objectUniverseMap.tokenCompareAndSwap(magic, -1)) {
-                            throw new RuntimeException("BadCompareAndSwap");
-                        }
-                        */
+                        objectUniverseMap.unlock();
                         return clonedChunk;
                     } else {
                         //somebody as clone for us, now waiting for the chunk to be available
@@ -433,12 +419,8 @@ public class MWGResolver implements KResolver {
                         this._space.unmarkChunk(globalUniverseTree);
                         KStateChunk waitingChunk = (KStateChunk) this._space.getAndMark(nodeWorld, nodeTime, nodeId);
                         this._space.unmarkChunk(waitingChunk);
-                        /*
                         //free lock
-                        if (!objectUniverseMap.tokenCompareAndSwap(magic, -1)) {
-                            throw new RuntimeException("BadCompareAndSwap");
-                        }
-                        */
+                        objectUniverseMap.unlock();
                         return waitingChunk;
                     }
                 }
@@ -446,21 +428,15 @@ public class MWGResolver implements KResolver {
                 this._space.unmarkChunk(objectTimeTree);
                 this._space.unmarkChunk(globalUniverseTree);
                 this._space.unmarkChunk(objectUniverseMap);
-                /*
                 //free lock
-                if (!objectUniverseMap.tokenCompareAndSwap(magic, -1)) {
-                    throw new RuntimeException("BadCompareAndSwap");
-                }*/
+                objectUniverseMap.unlock();
                 return null;
             }
 
         } catch (Throwable r) {
             //free lock
             r.printStackTrace();
-            /*
-            if (!objectUniverseMap.tokenCompareAndSwap(magic, -1)) {
-                throw new RuntimeException("BadCompareAndSwap");
-            }*/
+            objectUniverseMap.unlock();
             return null;
         }
     }

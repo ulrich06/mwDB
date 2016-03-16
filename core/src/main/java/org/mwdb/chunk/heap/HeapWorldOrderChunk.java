@@ -21,6 +21,8 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     private final AtomicLong _flags;
     private final AtomicInteger _counter;
     private final KChunkListener _listener;
+    private final AtomicLong _lock;
+
 
     private volatile int elementCount;
     private AtomicReference<InternalState> state;
@@ -49,7 +51,10 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         this._id = p_obj;
         this._flags = new AtomicLong(0);
         this._counter = new AtomicInteger(0);
-        // this._objectToken = new AtomicInteger(-1);
+
+        this._lock = new AtomicLong();
+        this._lock.set(0);
+
         this._listener = p_listener;
         this.elementCount = 0;
         this.state = new AtomicReference<InternalState>();
@@ -68,6 +73,19 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
 
         this._magic = PrimitiveHelper.rand();
     }
+
+    @Override
+    public void lock() {
+        while (!this._lock.compareAndSet(0, 1)) ;
+    }
+
+    @Override
+    public void unlock() {
+        if (!this._lock.compareAndSet(1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
 
     /**
      * Internal Map state, to be replace in a compare and swap manner

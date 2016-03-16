@@ -4,4 +4,8 @@ public interface KWorldOrderChunk extends KChunk, KLongLongMap {
 
     long magic();
 
+    void lock();
+
+    void unlock();
+
 }
