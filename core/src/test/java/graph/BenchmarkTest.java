@@ -1,5 +1,6 @@
 package graph;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.heap.HeapChunkSpace;
@@ -8,17 +9,19 @@ import org.mwdb.manager.NoopScheduler;
 
 public class BenchmarkTest {
 
-    @Test
+    //@Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(2_200_000, 10_000)).buildGraph());
     }
 
-    @Test
+    //@Test
     public void offHeapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(3_000_000, 10_000)).buildGraph());
     }
 
-    final int valuesToInsert = 10_000_000;
+    //final int valuesToInsert = 10_000_000;
+    final int valuesToInsert = 5_000_000;
+
     final long timeOrigin = 1000;
 
     private void test(KGraph graph) {
@@ -30,17 +33,14 @@ public class BenchmarkTest {
                 final KDeferCounter counter = graph.counter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
-
                     if (i % 1000 == 0) {
                         node.free();
                         node = graph.newNode(0, 0);
                     }
 
-
                     if (i % 1_000_000 == 0) {
-                        System.out.println(">" + i + " " + (System.currentTimeMillis() - before) / 1000 + "s");
+                        System.out.println("<insert til " + i + " in " + (System.currentTimeMillis() - before) / 1000 + "s");
                     }
-
 
                     final double value = i * 0.3;
                     final long time = timeOrigin + i;
@@ -56,7 +56,38 @@ public class BenchmarkTest {
                 counter.then(new KCallback() {
                     @Override
                     public void on(Object result) {
-                        System.out.println("end>" + " " + (System.currentTimeMillis() - before) / 1000 + "s");
+
+                        long beforeRead = System.currentTimeMillis();
+
+                        System.out.println("<end insert phase>" + " " + (System.currentTimeMillis() - before) / 1000 + "s");
+                        System.out.println("result: " + (valuesToInsert / ((System.currentTimeMillis() - before) / 1000) / 1000) + "kv/s");
+
+                        /*
+                        final KDeferCounter counterRead = graph.counter(valuesToInsert);
+                        for (long i = 0; i < valuesToInsert; i++) {
+                            final double value = i * 0.3;
+                            final long time = timeOrigin + i;
+
+                            graph.lookup(0, time, node.id(), new KCallback<KNode>() {
+                                @Override
+                                public void on(KNode timedNode) {
+                                    Assert.assertTrue((double) timedNode.att("value") == value);
+                                    counterRead.count();
+                                    timedNode.free();//free the node, for cache management
+                                }
+                            });
+                        }
+                        counterRead.then(new KCallback() {
+                            @Override
+                            public void on(Object result) {
+                                long afterRead = System.currentTimeMillis();
+                                System.out.println("<end read phase>" + " " + (afterRead - beforeRead) / 1000 + "s ");
+                                System.out.println("result: " + (valuesToInsert / ((afterRead - beforeRead) / 1000) / 1000) + "kv/s");
+
+                            }
+                        });
+*/
+
                     }
                 });
 

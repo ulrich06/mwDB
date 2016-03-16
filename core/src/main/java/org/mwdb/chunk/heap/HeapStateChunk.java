@@ -66,7 +66,10 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
         protected volatile int _elementCount;
 
-        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount) {
+        private boolean hashReadOnly;
+
+        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount, boolean p_hashReadOnly) {
+            this.hashReadOnly = p_hashReadOnly;
             this._elementDataSize = elementDataSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
@@ -77,18 +80,22 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             this.threshold = (int) (_elementDataSize * Constants.MAP_LOAD_FACTOR);
         }
 
-        public InternalState cloneState() {
+        public InternalState deepClone() {
             long[] clonedElementK = new long[this._elementDataSize];
             System.arraycopy(_elementK, 0, clonedElementK, 0, this._elementDataSize);
-            Object[] clonedElementV = new Object[this._elementDataSize];
-            System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
             int[] clonedElementNext = new int[this._elementDataSize];
             System.arraycopy(_elementNext, 0, clonedElementNext, 0, this._elementDataSize);
             int[] clonedElementHash = new int[this._elementDataSize];
             System.arraycopy(_elementHash, 0, clonedElementHash, 0, this._elementDataSize);
             byte[] clonedElementType = new byte[this._elementDataSize];
             System.arraycopy(_elementType, 0, clonedElementType, 0, this._elementDataSize);
-            return new InternalState(this._elementDataSize, clonedElementK, clonedElementV, clonedElementNext, clonedElementHash, clonedElementType, _elementCount);
+            return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came from a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
+        }
+
+        public InternalState softClone() {
+            Object[] clonedElementV = new Object[this._elementDataSize];
+            System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
+            return new InternalState(this._elementDataSize, _elementK, clonedElementV, _elementNext, _elementHash, _elementType, _elementCount, true);
         }
     }
 
@@ -106,7 +113,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             load(initialPayload);
         } else if (origin != null) {
             HeapStateChunk castedOrigin = (HeapStateChunk) origin;
-            InternalState clonedState = castedOrigin.state.get().cloneState();
+            InternalState clonedState = castedOrigin.state.get().softClone();
             state.set(clonedState);
             //deep clone for map
             for (int i = 0; i < clonedState._elementCount; i++) {
@@ -132,7 +139,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         } else {
             //init a new state
             int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-            InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new byte[initialCapacity], 0);
+            InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new byte[initialCapacity], 0, false);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
@@ -276,9 +283,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     }
                 }
                 //setPrimitiveType value for all
-                internalState = new InternalState(newLength, newElementK, newElementV, newElementNext, newElementHash, newElementType, internalState._elementCount);
+                internalState = new InternalState(newLength, newElementK, newElementV, newElementNext, newElementHash, newElementType, internalState._elementCount, false);
                 this.state.set(internalState);
                 hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
+            } else if (internalState.hashReadOnly) {
+                //deepClone state
+                internalState = internalState.deepClone();
+                state.set(internalState);
             }
             int newIndex = internalState._elementCount;
             internalState._elementCount = internalState._elementCount + 1;
@@ -294,7 +305,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         } else {
             if (replaceIfPresent || (p_elemType != internalState._elementType[entry])) {
                 internalState._elementV[entry] = param_elem;/*setValue*/
-                internalState._elementType[entry] = p_elemType;
+                if (internalState._elementType[entry] != p_elemType) {
+                    //typeSwitch, we have to deep clone as well
+                    internalState = internalState.deepClone();
+                    state.set(internalState);
+                    internalState._elementType[entry] = p_elemType;
+                }
+
             }
         }
         internal_set_dirty();
@@ -701,7 +718,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             }
         }
         //set the state
-        InternalState newState = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement);
+        InternalState newState = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement, false);
         this.state.set(newState);
         this.inLoadMode = false;
     }
