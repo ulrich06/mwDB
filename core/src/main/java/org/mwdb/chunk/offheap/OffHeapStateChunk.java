@@ -932,12 +932,18 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             case KType.DOUBLE_ARRAY:
                 double[] doubleArrayToInsert = (double[]) elem;
                 long tempDoubleArrPtr = OffHeapLongArray.get(addr, index);
-                long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(1 + doubleArrayToInsert.length); // length + content of the array
-                OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, doubleArrayToInsert.length);// set length
-                for (int i = 0; i < doubleArrayToInsert.length; i++) {
-                    OffHeapDoubleArray.set(doubleArrayToInsert_ptr, 1 + i, doubleArrayToInsert[i]);
+
+                if (doubleArrayToInsert != null) {
+                    long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(1 + doubleArrayToInsert.length); // length + content of the array
+                    OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, doubleArrayToInsert.length);// set length
+                    for (int i = 0; i < doubleArrayToInsert.length; i++) {
+                        OffHeapDoubleArray.set(doubleArrayToInsert_ptr, 1 + i, doubleArrayToInsert[i]);
+                    }
+                    OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
+                } else {
+                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-                OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
+
                 if (tempDoubleArrPtr != Constants.OFFHEAP_NULL_PTR) {
                     freeElement(tempDoubleArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
                 }
@@ -945,12 +951,18 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             case KType.LONG_ARRAY:
                 long[] longArrayToInsert = (long[]) elem;
                 long tempLongArrPtr = OffHeapLongArray.get(addr, index);
-                long longArrayToInsert_ptr = OffHeapLongArray.allocate(1 + longArrayToInsert.length); // length + content of the array
-                OffHeapLongArray.set(longArrayToInsert_ptr, 0, longArrayToInsert.length);// set length
-                for (int i = 0; i < longArrayToInsert.length; i++) {
-                    OffHeapLongArray.set(longArrayToInsert_ptr, 1 + i, longArrayToInsert[i]);
+
+                if (longArrayToInsert != null) {
+                    long longArrayToInsert_ptr = OffHeapLongArray.allocate(1 + longArrayToInsert.length); // length + content of the array
+                    OffHeapLongArray.set(longArrayToInsert_ptr, 0, longArrayToInsert.length);// set length
+                    for (int i = 0; i < longArrayToInsert.length; i++) {
+                        OffHeapLongArray.set(longArrayToInsert_ptr, 1 + i, longArrayToInsert[i]);
+                    }
+                    OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
+                } else {
+                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-                OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
+
                 if (tempLongArrPtr != Constants.OFFHEAP_NULL_PTR) {
                     freeElement(tempLongArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
                 }
@@ -958,12 +970,18 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             case KType.INT_ARRAY:
                 int[] intArrayToInsert = (int[]) elem;
                 long tempIntArrPtr = OffHeapLongArray.get(addr, index);
-                long intArrayToInsert_ptr = OffHeapLongArray.allocate(1 + intArrayToInsert.length); // length + content of the array
-                OffHeapLongArray.set(intArrayToInsert_ptr, 0, intArrayToInsert.length);// set length
-                for (int i = 0; i < intArrayToInsert.length; i++) {
-                    OffHeapLongArray.set(intArrayToInsert_ptr, 1 + i, intArrayToInsert[i]);
+
+                if (intArrayToInsert != null) {
+                    long intArrayToInsert_ptr = OffHeapLongArray.allocate(1 + intArrayToInsert.length); // length + content of the array
+                    OffHeapLongArray.set(intArrayToInsert_ptr, 0, intArrayToInsert.length);// set length
+                    for (int i = 0; i < intArrayToInsert.length; i++) {
+                        OffHeapLongArray.set(intArrayToInsert_ptr, 1 + i, intArrayToInsert[i]);
+                    }
+                    OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
+                } else {
+                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-                OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
+
                 if (tempIntArrPtr != Constants.OFFHEAP_NULL_PTR) {
                     freeElement(tempIntArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
                 }

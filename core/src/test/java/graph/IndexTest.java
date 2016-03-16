@@ -3,14 +3,20 @@ package graph;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.chunk.offheap.OffHeapChunkSpace;
 import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class IndexTest {
 
     @Test
-    public void mwHeapTimelineTest() {
+    public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph());
+    }
+
+    @Test
+    public void offHeapTest() {
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10000, 20)).buildGraph());
     }
 
     private void test(KGraph graph) {
