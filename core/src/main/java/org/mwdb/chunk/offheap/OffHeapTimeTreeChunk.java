@@ -50,14 +50,13 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         //listener
         this._listener = p_listener;
         //init
-        if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
-            addr = OffHeapLongArray.allocate(14);
-        } else {
+        if (previousAddr != Constants.OFFHEAP_NULL_PTR) {
             addr = previousAddr;
-        }
-        if (initialPayload != null) {
+        } else if (initialPayload != null) {
+            addr = OffHeapLongArray.allocate(14);
             load(initialPayload);
         } else {
+            addr = OffHeapLongArray.allocate(14);
             long capacity = Constants.MAP_INITIAL_CAPACITY;
             //init k array
             kPtr = OffHeapLongArray.allocate(capacity);
@@ -75,8 +74,8 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
-
         }
+        
     }
 
     public static void free(long addr) {

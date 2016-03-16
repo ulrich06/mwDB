@@ -15,7 +15,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     /**
      * Global variables
      */
-    private final long _maxEntries;
+    private final long _capacity;
     private final long _threshold;
     private final KStack _lru;
 
@@ -31,7 +31,6 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     private final long _elementValues;
 
     private final long _elementHashLock;
-    private final long _capacity;
 
     private final AtomicReference<InternalDirtyStateList> _dirtyState;
 
@@ -99,26 +98,23 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     public OffHeapChunkSpace(long capacity, int autoSavePercent) {
         this._capacity = capacity;
-        this._maxEntries = _capacity;
-        this._threshold = _capacity / 100 * autoSavePercent;
-        this._lru = new OffHeapFixedStack(_capacity, Constants.OFFHEAP_NULL_PTR); //only one object
+        this._threshold = capacity / 100 * autoSavePercent;
+        this._lru = new OffHeapFixedStack(capacity, Constants.OFFHEAP_NULL_PTR); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(this._threshold, this));
 
         //init std variables
-        this._elementNext = OffHeapLongArray.allocate(_capacity);
-        this._elementHash = OffHeapLongArray.allocate(_capacity);
-        this._elementValues = OffHeapLongArray.allocate(_capacity);
-        this._elementHashLock = OffHeapLongArray.allocate(_capacity);
-
+        this._elementNext = OffHeapLongArray.allocate(capacity);
+        this._elementHash = OffHeapLongArray.allocate(capacity);
+        this._elementValues = OffHeapLongArray.allocate(capacity);
+        this._elementHashLock = OffHeapLongArray.allocate(capacity);
         this._elementCount = new AtomicInteger(0);
-
     }
 
     @Override
     public final KChunk getAndMark(long world, long time, long id) {
-        int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
-        long m = OffHeapLongArray.get(_elementHash, index);
+        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+        long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
@@ -163,7 +159,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         byte chunkType = (byte) OffHeapLongArray.get(addr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
         switch (chunkType) {
             case Constants.STATE_CHUNK:
-                return new OffHeapStateChunk(this, null, null, addr);
+                return new OffHeapStateChunk(this, addr, null, null);
             case Constants.TIME_TREE_CHUNK:
                 return new OffHeapTimeTreeChunk(this, addr, null);
             case Constants.WORLD_ORDER_CHUNK:
@@ -175,7 +171,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmark(long world, long time, long id) {
-        int index = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int index = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, index);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -219,7 +215,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         KOffHeapChunk newChunk = null;
         switch (p_type) {
             case Constants.STATE_CHUNK:
-                newChunk = new OffHeapStateChunk(this, initialPayload, previousChunk, Constants.OFFHEAP_NULL_PTR);
+                newChunk = new OffHeapStateChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload, previousChunk);
                 break;
             case Constants.WORLD_ORDER_CHUNK:
                 newChunk = new OffHeapWorldOrderChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
@@ -264,7 +260,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         final long id = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
 
         long entry = -1;
-        long hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
+        long hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != -1) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -299,7 +295,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 long victimWorld = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD);
                 long victimTime = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME);
                 long victimObj = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
-                int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._maxEntries);
+                int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._capacity);
 
                 //negociate a lock on the indexVictim hash
                 while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, -1, 0)) ;
@@ -373,7 +369,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
-        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -411,7 +407,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         long world = cleanChunk.world();
         long time = cleanChunk.time();
         long id = cleanChunk.id();
-        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._maxEntries);
+        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);

@@ -51,6 +51,7 @@ public class MWGResolver implements KResolver {
         objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
         //mark the global
+
         this._space.getAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         //monitor the node object
         this._tracker.monitor(node);

@@ -43,7 +43,7 @@ public class StateChunkTest implements KChunkListener {
 
             @Override
             public KStateChunk create(KChunkListener listener, String payload, KChunk origin) {
-                return new OffHeapStateChunk(listener, payload, origin, Constants.OFFHEAP_NULL_PTR);
+                return new OffHeapStateChunk(listener, Constants.OFFHEAP_NULL_PTR, payload, origin);
             }
         };
         saveLoadTest(factory);

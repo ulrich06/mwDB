@@ -51,7 +51,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     // simple values
     boolean inLoadMode = false;
 
-    public OffHeapStateChunk(KChunkListener listener, String initialPayload, KChunk origin, long previousAddr) {
+    public OffHeapStateChunk(KChunkListener listener, long previousAddr, String initialPayload, KChunk origin) {
         _listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(16);
