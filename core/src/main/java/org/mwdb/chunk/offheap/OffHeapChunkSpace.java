@@ -16,7 +16,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
      * Global variables
      */
     private final long _capacity;
-    private final long _threshold;
+    private final long _saveBatchSize;
     private final KStack _lru;
 
     private KGraph _graph;
@@ -64,6 +64,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         public KChunk next() {
             long previous;
             long next;
+            boolean shouldReturnNull = false;
             do {
                 previous = this._iterationCounter.get();
                 if (this._nextCounter.get() == previous) {
@@ -72,7 +73,9 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 }
                 next = previous + 1;
             } while (!this._iterationCounter.compareAndSet(previous, next));
-            return this._parent.internal_create(OffHeapLongArray.get(_dirtyElements, previous));
+            long chunkIndex = OffHeapLongArray.get(_dirtyElements, previous);
+            long chunkRootAddr = OffHeapLongArray.get(_elementValues, chunkIndex);
+            return this._parent.internal_create(chunkRootAddr);
         }
 
         public boolean declareDirty(long dirtyIndex) {
@@ -96,18 +99,23 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    public OffHeapChunkSpace(long capacity, int autoSavePercent) {
-        this._capacity = capacity;
-        this._threshold = capacity / 100 * autoSavePercent;
-        this._lru = new OffHeapFixedStack(capacity, Constants.OFFHEAP_NULL_PTR); //only one object
+    public OffHeapChunkSpace(long initialCapacity, int saveBatchSize) {
+
+        if (saveBatchSize > initialCapacity) {
+            throw new RuntimeException("Save Batch Size can't be bigger than cache size");
+        }
+
+        this._capacity = initialCapacity;
+        this._saveBatchSize = saveBatchSize;
+        this._lru = new OffHeapFixedStack(initialCapacity, Constants.OFFHEAP_NULL_PTR); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
-        this._dirtyState.set(new InternalDirtyStateList(this._threshold, this));
+        this._dirtyState.set(new InternalDirtyStateList(this._saveBatchSize, this));
 
         //init std variables
-        this._elementNext = OffHeapLongArray.allocate(capacity);
-        this._elementHash = OffHeapLongArray.allocate(capacity);
-        this._elementValues = OffHeapLongArray.allocate(capacity);
-        this._elementHashLock = OffHeapLongArray.allocate(capacity);
+        this._elementNext = OffHeapLongArray.allocate(initialCapacity);
+        this._elementHash = OffHeapLongArray.allocate(initialCapacity);
+        this._elementValues = OffHeapLongArray.allocate(initialCapacity);
+        this._elementHashLock = OffHeapLongArray.allocate(initialCapacity);
         this._elementCount = new AtomicInteger(0);
     }
 
@@ -171,6 +179,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmark(long world, long time, long id) {
+
         int index = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, index);
         while (m != Constants.OFFHEAP_NULL_PTR) {
@@ -191,11 +200,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
                 //check if this object has to be re-enqueue to the list of available
                 if (newFlag == 0) {
-                    //check if object is dirty
-                    if (((int) (OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS)) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                        //declare available for recycling
-                        this._lru.enqueue(m);
-                    }
+                    //declare available for recycling
+                    this._lru.enqueue(m);
                 }
                 //in any case we go out, we have found the good chunk
                 return;
@@ -207,7 +213,38 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void unmarkChunk(KChunk chunk) {
-        unmark(chunk.world(), chunk.time(), chunk.id());
+
+        long chunkAddr = ((KOffHeapChunk) chunk).addr();
+
+        long previousMarks;
+        long newMarks;
+        do {
+            previousMarks = OffHeapLongArray.get(chunkAddr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+            newMarks = previousMarks - 1;
+        }
+        while (!OffHeapLongArray.compareAndSwap(chunkAddr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, newMarks));
+        if (newMarks == 0) {
+
+            long world = chunk.world();
+            long time = chunk.time();
+            long id = chunk.id();
+            int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+            long m = OffHeapLongArray.get(_elementHash, hashIndex);
+            while (m != Constants.OFFHEAP_NULL_PTR) {
+                long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
+                if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+                        ) {
+                    //declare available for recycling
+                    this._lru.enqueue(m);
+                    break;
+                } else {
+                    m = OffHeapLongArray.get(_elementNext, m);
+                }
+            }
+        }
     }
 
     @Override
@@ -361,11 +398,12 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public KChunkIterator detachDirties() {
-        return _dirtyState.getAndSet(new InternalDirtyStateList(this._threshold, this));
+        return _dirtyState.getAndSet(new InternalDirtyStateList(this._saveBatchSize, this));
     }
 
     @Override
     public void declareDirty(KChunk dirtyChunk) {
+
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
@@ -386,13 +424,23 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                     nextFlag = previousFlag | Constants.DIRTY_BIT;
                 }
                 while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
-
-                boolean success = false;
-                while (!success) {
-                    InternalDirtyStateList previousState = this._dirtyState.get();
-                    success = previousState.declareDirty(m);
-                    if (!success) {
-                        this._graph.save(null);
+                if (previousFlag != nextFlag) {
+                    //add an additional mark
+                    long previousMarks;
+                    long nextMarks;
+                    do {
+                        previousMarks = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                        nextMarks = previousMarks + 1;
+                    }
+                    while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
+                    //add to dirty list
+                    boolean success = false;
+                    while (!success) {
+                        InternalDirtyStateList previousState = this._dirtyState.get();
+                        success = previousState.declareDirty(m);
+                        if (!success) {
+                            this._graph.save(null);
+                        }
                     }
                 }
                 return;
@@ -417,6 +465,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
 
+                //remove the dirty bit
                 long previousFlag;
                 long nextFlag;
                 do {
@@ -424,8 +473,15 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                     nextFlag = previousFlag & ~Constants.DIRTY_BIT;
                 }
                 while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
-
-                if (OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS) == 0) {
+                //unmark
+                long previousMarks;
+                long nextMarks;
+                do {
+                    previousMarks = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                    nextMarks = previousMarks - 1;
+                }
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
+                if (nextMarks == 0) {
                     this._lru.enqueue(m);
                 }
                 return;

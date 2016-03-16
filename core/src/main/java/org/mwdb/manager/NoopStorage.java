@@ -3,6 +3,7 @@ package org.mwdb.manager;
 import org.mwdb.Constants;
 import org.mwdb.KCallback;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.PrimitiveHelper;
 
 public class NoopStorage implements KStorage {
 
@@ -19,7 +20,9 @@ public class NoopStorage implements KStorage {
 
     @Override
     public void put(long[] keys, String[] values, KCallback<Boolean> callback, int excludeListener) {
-        callback.on(null);
+        if (PrimitiveHelper.isDefined(callback)) {
+            callback.on(null);
+        }
     }
 
     @Override

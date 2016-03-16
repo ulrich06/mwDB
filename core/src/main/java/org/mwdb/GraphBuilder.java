@@ -36,7 +36,7 @@ public class GraphBuilder {
 
     public KChunkSpace space() {
         if (this._space == null) {
-            this._space = new HeapChunkSpace(100000, 10);
+            this._space = new HeapChunkSpace(100000, 1000);
         }
         return _space;
     }

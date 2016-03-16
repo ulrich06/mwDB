@@ -16,7 +16,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
      * Global variables
      */
     private final int _maxEntries;
-    private final int _threeshold;
+    private final int _saveBatchSize;
     private final AtomicInteger _elementCount;
     private final KStack _lru;
     private KGraph _graph;
@@ -94,22 +94,27 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         }
     }
 
-    public HeapChunkSpace(int maxEntries, int autoSavePercent) {
-        this._maxEntries = maxEntries;
-        this._threeshold = maxEntries / 100 * autoSavePercent;
-        this._lru = new FixedStack(maxEntries);
+    public HeapChunkSpace(int initialCapacity, int saveBatchSize) {
+
+        if (saveBatchSize > initialCapacity) {
+            throw new RuntimeException("Save Batch Size can't be bigger than cache size");
+        }
+
+        this._maxEntries = initialCapacity;
+        this._saveBatchSize = saveBatchSize;
+        this._lru = new FixedStack(initialCapacity);
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
-        this._dirtyState.set(new InternalDirtyStateList(this._threeshold, this));
+        this._dirtyState.set(new InternalDirtyStateList(saveBatchSize, this));
 
         //init std variables
-        this._elementNext = new int[maxEntries];
-        this._elementHashLock = new AtomicIntegerArray(new int[maxEntries]);
-        this._elementHash = new int[maxEntries];
-        this._values = new KChunk[maxEntries];
+        this._elementNext = new int[initialCapacity];
+        this._elementHashLock = new AtomicIntegerArray(new int[initialCapacity]);
+        this._elementHash = new int[initialCapacity];
+        this._values = new KChunk[initialCapacity];
         this._elementCount = new AtomicInteger(0);
 
         //init internal structures
-        for (int i = 0; i < maxEntries; i++) {
+        for (int i = 0; i < initialCapacity; i++) {
             this._elementNext[i] = -1;
             this._elementHash[i] = -1;
             this._elementHashLock.set(i, -1);
@@ -285,7 +290,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public KChunkIterator detachDirties() {
-        return _dirtyState.getAndSet(new InternalDirtyStateList(this._threeshold, this));
+        return _dirtyState.getAndSet(new InternalDirtyStateList(this._saveBatchSize, this));
     }
 
     @Override
