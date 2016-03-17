@@ -1,7 +1,6 @@
 package org.mwdb.manager;
 
 import org.mwdb.*;
-import org.mwdb.chunk.heap.ArrayLongLongMap;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -243,9 +242,9 @@ public class MWGResolver implements KResolver {
 
     private void load(long[] keys, KCallback<KChunk[]> callback) {
         MWGResolver selfPointer = this;
-        this._storage.get(keys, new KCallback<KStorage.KBuffer[]>() {
+        this._storage.get(keys, new KCallback<KBuffer[]>() {
             @Override
-            public void on(KStorage.KBuffer[] payloads) {
+            public void on(KBuffer[] payloads) {
                 KChunk[] results = new KChunk[keys.length / 3];
                 for (int i = 0; i < payloads.length; i++) {
                     long loopWorld = keys[i * 3];

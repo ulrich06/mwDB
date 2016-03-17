@@ -4,7 +4,6 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -100,7 +99,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, KStorage.KBuffer initialPayload, KChunk origin) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, KBuffer initialPayload, KChunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
@@ -386,7 +385,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    private void load(KStorage.KBuffer payload) {
+    private void load(KBuffer payload) {
         if (payload == null || payload.size() == 0) {
             return;
         }
@@ -725,7 +724,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public void save(KStorage.KBuffer buffer) {
+    public void save(KBuffer buffer) {
         final InternalState internalState = state.get();
         Base64.encodeIntToBuffer(internalState._elementCount, buffer);
         for (int i = 0; i < internalState._elementCount; i++) {

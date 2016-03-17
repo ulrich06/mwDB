@@ -2,11 +2,10 @@ package org.mwdb.manager;
 
 import org.mwdb.Constants;
 import org.mwdb.KCallback;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
-
-import java.nio.ByteBuffer;
 
 public class NoopStorage implements KStorage {
 
@@ -42,9 +41,5 @@ public class NoopStorage implements KStorage {
     public void disconnect(KCallback<Boolean> callback) {
         callback.on(true);
     }
-
-    @Override
-    public KBuffer newBuffer() {
-        return Buffer.newHeapBuffer();
-    }
+    
 }

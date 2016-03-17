@@ -1,15 +1,12 @@
 package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KWorldOrderChunk;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
-import org.mwdb.utility.Unsafe;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @ignore ts
@@ -49,7 +46,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private long elementNext_ptr;
     private long elementHash_ptr;
 
-    public OffHeapWorldOrderChunk(KChunkListener listener, long previousAddr, KStorage.KBuffer initialString) {
+    public OffHeapWorldOrderChunk(KChunkListener listener, long previousAddr, KBuffer initialString) {
         this.listener = listener;
 
         if (previousAddr != Constants.OFFHEAP_NULL_PTR) {
@@ -306,7 +303,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     }
 
     @Override
-    public void save(KStorage.KBuffer buffer) {
+    public void save(KBuffer buffer) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
         consistencyCheck();
@@ -336,7 +333,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
         }
     }
 
-    private void load(KStorage.KBuffer buffer) {
+    private void load(KBuffer buffer) {
 
         int cursor = 0;
 

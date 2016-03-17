@@ -2,10 +2,10 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -45,7 +45,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this._id;
     }
 
-    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, KStorage.KBuffer initialPayload) {
+    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, KBuffer initialPayload) {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;
@@ -272,7 +272,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this.elementCount;
     }
 
-    private void load(KStorage.KBuffer buffer) {
+    private void load(KBuffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
         }
@@ -356,7 +356,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     }
 
     @Override
-    public void save(KStorage.KBuffer buffer) {
+    public void save(KBuffer buffer) {
         InternalState internalState = state.get();
         Base64.encodeIntToBuffer(elementCount, buffer);
         buffer.write(Constants.CHUNK_SEP);

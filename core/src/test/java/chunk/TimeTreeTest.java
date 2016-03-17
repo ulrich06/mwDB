@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.KConstants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
@@ -12,13 +13,12 @@ import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.KOffHeapChunk;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapTimeTreeChunk;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Buffer;
 
 public class TimeTreeTest implements KChunkListener {
 
     private interface KTimeTreeChunkFactory {
-        KTimeTreeChunk create(KStorage.KBuffer payload);
+        KTimeTreeChunk create(KBuffer payload);
     }
 
     private int nbCount = 0;
@@ -28,7 +28,7 @@ public class TimeTreeTest implements KChunkListener {
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(KStorage.KBuffer payload) {
+            public KTimeTreeChunk create(KBuffer payload) {
                 return new HeapTimeTreeChunk(-1, -1, -1, selfPointer, payload);
             }
         };
@@ -42,7 +42,7 @@ public class TimeTreeTest implements KChunkListener {
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(KStorage.KBuffer payload) {
+            public KTimeTreeChunk create(KBuffer payload) {
                 return new OffHeapTimeTreeChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, payload);
             }
         };
@@ -83,7 +83,7 @@ public class TimeTreeTest implements KChunkListener {
             tree.insert(i);
         }
 
-        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        KBuffer buffer = Buffer.newOffHeapBuffer();
         tree.save(buffer);
         Assert.assertTrue(compareWithString(buffer, "G,C{A,C]C,}E,C"));
         Assert.assertTrue(tree.size() == 3);
@@ -91,7 +91,7 @@ public class TimeTreeTest implements KChunkListener {
         KTimeTreeChunk tree2 = factory.create(buffer);
         Assert.assertTrue(tree2.size() == 3);
 
-        KStorage.KBuffer buffer2 = Buffer.newHeapBuffer();
+        KBuffer buffer2 = Buffer.newOffHeapBuffer();
         tree2.save(buffer2);
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
@@ -106,7 +106,7 @@ public class TimeTreeTest implements KChunkListener {
         Assert.assertTrue(nbCount == 2);
     }
 
-    private boolean compareWithString(KStorage.KBuffer buffer, String content) {
+    private boolean compareWithString(KBuffer buffer, String content) {
         for (int i = 0; i < content.length(); i++) {
             if (buffer.read(i) != content.charAt(i)) {
                 return false;
@@ -115,7 +115,7 @@ public class TimeTreeTest implements KChunkListener {
         return true;
     }
 
-    private boolean compareBuffers(KStorage.KBuffer buffer, KStorage.KBuffer buffer2) {
+    private boolean compareBuffers(KBuffer buffer, KBuffer buffer2) {
         if (buffer.size() != buffer2.size()) {
             return false;
         }

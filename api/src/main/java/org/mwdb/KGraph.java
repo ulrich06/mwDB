@@ -1,5 +1,7 @@
 package org.mwdb;
 
+import org.mwdb.chunk.KBuffer;
+
 /**
  * KGraph is the main structure of mwDB.
  */
@@ -100,5 +102,7 @@ public interface KGraph {
      * @return The waiter object.
      */
     KDeferCounter counter(int expectedEventsCount);
+
+    KBuffer newBuffer();
 
 }

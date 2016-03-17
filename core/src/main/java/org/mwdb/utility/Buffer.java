@@ -1,13 +1,13 @@
 package org.mwdb.utility;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.offheap.OffHeapByteArray;
-import org.mwdb.plugin.KStorage;
 
 public class Buffer {
     
-    public static KStorage.KBuffer newOffHeapBuffer() {
-        return new KStorage.KBuffer() {
+    public static KBuffer newOffHeapBuffer() {
+        return new KBuffer() {
 
             private long bufferPtr = Constants.OFFHEAP_NULL_PTR;
 
@@ -57,8 +57,8 @@ public class Buffer {
         };
     }
 
-    public static KStorage.KBuffer newHeapBuffer() {
-        return new KStorage.KBuffer() {
+    public static KBuffer newHeapBuffer() {
+        return new KBuffer() {
 
             private byte[] buffer;
 

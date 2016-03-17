@@ -4,7 +4,6 @@ package org.mwdb.chunk.heap;
 import org.mwdb.Constants;
 import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -193,7 +192,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(long p_world, long p_time, long p_id, byte p_type, KStorage.KBuffer p_initialPayload, KChunk origin) {
+    public KChunk create(long p_world, long p_time, long p_id, byte p_type, KBuffer p_initialPayload, KChunk origin) {
         switch (p_type) {
             case Constants.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);

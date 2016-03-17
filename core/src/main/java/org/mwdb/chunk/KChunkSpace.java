@@ -1,14 +1,13 @@
 package org.mwdb.chunk;
 
 import org.mwdb.KGraph;
-import org.mwdb.plugin.KStorage;
 
 public interface KChunkSpace {
 
     /**
      * Create KChunk, out of the space, not marked, used as a factory
      */
-    KChunk create(long world, long time, long id, byte type, KStorage.KBuffer initialPayload, KChunk origin);
+    KChunk create(long world, long time, long id, byte type, KBuffer initialPayload, KChunk origin);
 
     /**
      * Get and mark chunk for the association of keys

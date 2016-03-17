@@ -6,6 +6,7 @@ import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
 import org.mwdb.utility.Base64;
+import org.mwdb.utility.Buffer;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -103,9 +104,9 @@ public class Graph implements KGraph {
                                                 Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, //GlobalUniverseTree
                                                 Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2] //Global dictionary
                                         };
-                                        selfPointer._storage.get(connectionKeys, new KCallback<KStorage.KBuffer[]>() {
+                                        selfPointer._storage.get(connectionKeys, new KCallback<KBuffer[]>() {
                                             @Override
-                                            public void on(KStorage.KBuffer[] payloads) {
+                                            public void on(KBuffer[] payloads) {
                                                 if (payloads.length == 4) {
                                                     Boolean noError = true;
                                                     try {
@@ -209,6 +210,12 @@ public class Graph implements KGraph {
         }
     }
 
+    @Override
+    public KBuffer newBuffer() {
+        // return Buffer.newOffHeapBuffer();
+        return Buffer.newHeapBuffer();
+    }
+
     private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
             if (PrimitiveHelper.isDefined(callback)) {
@@ -218,7 +225,7 @@ public class Graph implements KGraph {
             long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
             long[] toSaveKeys = new long[(int) sizeToSaveKeys];
             long sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
-            KStorage.KBuffer[] toSaveValues = new KStorage.KBuffer[(int) sizeToSaveValues];
+            KBuffer[] toSaveValues = new KBuffer[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
                 KChunk loopChunk = dirtyIterator.next();
@@ -227,7 +234,7 @@ public class Graph implements KGraph {
                     toSaveKeys[i * Constants.KEYS_SIZE + 1] = loopChunk.time();
                     toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
                     try {
-                        KStorage.KBuffer newBuffer = _storage.newBuffer();
+                        KBuffer newBuffer = newBuffer();
                         toSaveValues[i] = newBuffer;
                         loopChunk.save(newBuffer);
                         this._space.declareClean(loopChunk);
@@ -240,19 +247,19 @@ public class Graph implements KGraph {
             toSaveKeys[i * Constants.KEYS_SIZE] = Constants.BEGINNING_OF_TIME;
             toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
             toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._objectKeyCalculator.prefix();
-            toSaveValues[i] = _storage.newBuffer();
+            toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._objectKeyCalculator.lastComputedIndex(), toSaveValues[i]);
             i++;
             toSaveKeys[i * Constants.KEYS_SIZE] = Constants.END_OF_TIME;
             toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
             toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._universeKeyCalculator.prefix();
-            toSaveValues[i] = _storage.newBuffer();
+            toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._universeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
 
             //shrink in case of i != full size
             if (i != sizeToSaveValues - 1) {
                 //shrinkValue
-                KStorage.KBuffer[] toSaveValuesShrinked = new KStorage.KBuffer[i + 1];
+                KBuffer[] toSaveValuesShrinked = new KBuffer[i + 1];
                 System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
                 toSaveValues = toSaveValuesShrinked;
 
@@ -260,7 +267,19 @@ public class Graph implements KGraph {
                 System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * Constants.KEYS_SIZE);
                 toSaveKeys = toSaveKeysShrinked;
             }
-            this._storage.put(toSaveKeys, toSaveValues, callback, -1);
+            final KBuffer[] finalToSaveValues = toSaveValues;
+            this._storage.put(toSaveKeys, toSaveValues, new KCallback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    //free all value
+                    for (int i = 0; i < finalToSaveValues.length; i++) {
+                        finalToSaveValues[i].free();
+                    }
+                    if (PrimitiveHelper.isDefined(callback)) {
+                        callback.on(result);
+                    }
+                }
+            }, -1);
         }
     }
 

@@ -1,10 +1,10 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -40,7 +40,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     //multi-thread sync
     private AtomicBoolean _magicToken;
 
-    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener, KStorage.KBuffer initialPayload) {
+    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener, KBuffer initialPayload) {
         //listener
         this._listener = p_listener;
         //identifier
@@ -452,7 +452,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     }
 
     @Override
-    public final void save(KStorage.KBuffer buffer) {
+    public final void save(KBuffer buffer) {
         //negociate a magic
         while (!this._magicToken.compareAndSet(false, true)) ;
 
@@ -495,7 +495,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         this._magicToken.set(false);
     }
 
-    private void load(KStorage.KBuffer buffer) {
+    private void load(KBuffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
         }

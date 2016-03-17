@@ -1,6 +1,6 @@
 package org.mwdb.utility;
 
-import org.mwdb.plugin.KStorage;
+import org.mwdb.chunk.KBuffer;
 
 /**
  * @native ts
@@ -328,7 +328,7 @@ public class Base64 {
         result += Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)];
         return result;
     }*/
-    public static void encodeLongToBuffer(long l, KStorage.KBuffer buffer) {
+    public static void encodeLongToBuffer(long l, KBuffer buffer) {
         boolean empty = true;
         long tmp = l;
         if (l < 0) {
@@ -366,7 +366,7 @@ public class Base64 {
     }
 
 
-    public static void encodeIntToBuffer(int l, KStorage.KBuffer buffer) {
+    public static void encodeIntToBuffer(int l, KBuffer buffer) {
         boolean empty = true;
         int tmp = l;
         if (l < 0) {
@@ -386,7 +386,7 @@ public class Base64 {
         return decodeToLongWithBounds(s, 0, s.length());
     }*/
 
-    public static long decodeToLongWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
+    public static long decodeToLongWithBounds(KBuffer buffer, long offsetBegin, long offsetEnd) {
         long result = 0;
         result += (Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) >> 1;
         for (int i = 1; i < (offsetEnd - offsetBegin); i++) {
@@ -404,7 +404,7 @@ public class Base64 {
     }
     */
 
-    public static int decodeToIntWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
+    public static int decodeToIntWithBounds(KBuffer buffer, long offsetBegin, long offsetEnd) {
         int result = 0;
         result += (Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) >> 1;
         for (int i = 1; i < (offsetEnd - offsetBegin); i++) {
@@ -436,7 +436,7 @@ public class Base64 {
         }
         return result;
     }*/
-    public static void encodeBoolArrayToBuffer(boolean[] boolArr, KStorage.KBuffer buffer) {
+    public static void encodeBoolArrayToBuffer(boolean[] boolArr, KBuffer buffer) {
         int tmpVal = 0;
         for (int i = 0; i < boolArr.length; i++) {
             tmpVal = tmpVal | ((boolArr[i] ? 1 : 0) << i % 6);
@@ -453,7 +453,7 @@ public class Base64 {
     }*/
 
 
-    public static boolean[] decodeToBoolArrayWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd, int arraySize) {
+    public static boolean[] decodeToBoolArrayWithBounds(KBuffer buffer, long offsetBegin, long offsetEnd, int arraySize) {
         boolean[] resultTmp = new boolean[arraySize];
         for (int i = 0; i < (offsetEnd - offsetBegin); i++) {
             int bitarray = Base64.decodeArray[buffer.read(offsetBegin + i)] & 0xFF;
@@ -493,7 +493,7 @@ public class Base64 {
         }
         return result;
     }*/
-    public static void encodeDoubleToBuffer(double d, KStorage.KBuffer buffer) {
+    public static void encodeDoubleToBuffer(double d, KBuffer buffer) {
         long l = Double.doubleToLongBits(d);
         //encode sign + exp
         buffer.write(Base64.encodeArray[(int) (l >> 58) & 0x3F]);
@@ -513,7 +513,7 @@ public class Base64 {
         return decodeToDoubleWithBounds(s, 0, s.length());
     }*/
 
-    public static double decodeToDoubleWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
+    public static double decodeToDoubleWithBounds(KBuffer buffer, long offsetBegin, long offsetEnd) {
         long result = 0;
         //sign + exponent
         result += ((long) Base64.decodeArray[buffer.read(offsetBegin)] & 0xFF) << 58;
@@ -556,7 +556,7 @@ public class Base64 {
         return result;
     }
 
-    public static void encodeStringToBuffer(String s, KStorage.KBuffer buffer) {
+    public static void encodeStringToBuffer(String s, KBuffer buffer) {
         int sLength = s.length();
         char currentSourceChar;
         int currentEncodedChar = 0;
@@ -589,7 +589,7 @@ public class Base64 {
         return decodeToStringWithBounds(s, 0, s.length());
     }*/
 
-    public static String decodeToStringWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
+    public static String decodeToStringWithBounds(KBuffer buffer, long offsetBegin, long offsetEnd) {
         if (offsetBegin == offsetEnd) {
             return null;
         }

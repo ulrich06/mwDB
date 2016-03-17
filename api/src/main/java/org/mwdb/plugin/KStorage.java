@@ -1,6 +1,7 @@
 package org.mwdb.plugin;
 
 import org.mwdb.KCallback;
+import org.mwdb.chunk.KBuffer;
 
 /**
  * KStorage defines the interface any storage solution must comply with to be plugged to mwDB.
@@ -56,41 +57,5 @@ public interface KStorage {
      * @param callback Called when the disconnection process is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
     void disconnect(KCallback<Boolean> callback);
-
-    /**
-     * KBuffer defines the interface to exchange byte[] (payload), between KStorage and the various KChunk
-     */
-    interface KBuffer {
-
-        /**
-         * Append a byte to the buffer
-         *
-         * @param b
-         */
-        void write(Byte b);
-
-        /**
-         * Read the buffer at a precise position
-         *
-         * @param position index in the buffer
-         * @return read byte
-         */
-        byte read(long position);
-
-        /**
-         * Size of the buffer
-         *
-         * @return length of the buffer
-         */
-        long size();
-
-        /**
-         * Free the buffer from memory, this method should be the last called
-         */
-        void free();
-
-    }
-
-    KBuffer newBuffer();
-
+    
 }

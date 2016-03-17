@@ -4,7 +4,6 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
@@ -51,7 +50,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     // simple values
     boolean inLoadMode = false;
 
-    public OffHeapStateChunk(KChunkListener listener, long previousAddr, KStorage.KBuffer initialPayload, KChunk origin) {
+    public OffHeapStateChunk(KChunkListener listener, long previousAddr, KBuffer initialPayload, KChunk origin) {
         _listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(17);
@@ -297,7 +296,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     @Override
-    public final void save(KStorage.KBuffer buffer) {
+    public final void save(KBuffer buffer) {
         long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
         Base64.encodeLongToBuffer(elementCount, buffer);
         for (int i = 0; i < elementCount; i++) {
@@ -406,7 +405,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
-    private void load(KStorage.KBuffer buffer) {
+    private void load(KBuffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
         }

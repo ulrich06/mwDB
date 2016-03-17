@@ -1,10 +1,10 @@
 package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 /**
@@ -49,7 +49,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     private final KChunkListener _listener;
 
-    public OffHeapTimeTreeChunk(KChunkListener p_listener, long previousAddr, KStorage.KBuffer initialPayload) {
+    public OffHeapTimeTreeChunk(KChunkListener p_listener, long previousAddr, KBuffer initialPayload) {
         //listener
         this._listener = p_listener;
         //init
@@ -153,7 +153,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void save(KStorage.KBuffer buffer) {
+    public final void save(KBuffer buffer) {
         //OffHeap lock
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         ptrConsistency();
@@ -562,7 +562,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         }
     }
 
-    private void load(KStorage.KBuffer buffer) {
+    private void load(KBuffer buffer) {
 
         if (buffer == null || buffer.size() == 0) {
 
