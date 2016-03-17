@@ -5,6 +5,7 @@ import org.mwdb.chunk.heap.HeapChunkSpace;
 import org.mwdb.manager.*;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
+import org.mwdb.task.NoopScheduler;
 
 public class GraphBuilder {
 

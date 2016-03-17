@@ -1,4 +1,4 @@
-package org.mwdb.manager;
+package org.mwdb.task;
 
 import org.mwdb.KCallback;
 import org.mwdb.plugin.KScheduler;

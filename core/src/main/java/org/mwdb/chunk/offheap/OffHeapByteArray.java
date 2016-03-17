@@ -36,11 +36,11 @@ public class OffHeapByteArray {
     }
 
     public static void set(final long addr, final long index, final byte valueToInsert) {
-        unsafe.putByte(addr + index, valueToInsert);
+        unsafe.putByteVolatile(null, addr + index, valueToInsert);
     }
 
     public static byte get(final long addr, final long index) {
-        return unsafe.getByte(addr + index);
+        return unsafe.getByteVolatile(null, addr + index);
     }
 
     public static void free(final long addr) {

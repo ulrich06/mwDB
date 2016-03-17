@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.offheap.OffHeapChunkSpace;
-import org.mwdb.manager.NoopScheduler;
+import org.mwdb.task.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class TimelineTest {

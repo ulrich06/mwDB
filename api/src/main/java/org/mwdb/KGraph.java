@@ -105,4 +105,6 @@ public interface KGraph {
 
     KBuffer newBuffer();
 
+    /** Create a new lookup task */
+
 }
