@@ -7,10 +7,13 @@ import org.mwdb.utility.Unsafe;
  * @ignore ts
  */
 public class OffHeapDoubleArray {
+    public static long alloc_counter = 0;
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     public static long allocate(final long capacity) {
+        alloc_counter++;
+
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
         //init the memory
@@ -41,6 +44,8 @@ public class OffHeapDoubleArray {
     }
 
     public static void free(final long addr) {
+        alloc_counter--;
+
         unsafe.freeMemory(addr);
     }
 
@@ -53,6 +58,8 @@ public class OffHeapDoubleArray {
     }
 
     public static long cloneArray(final long srcAddr, final long length) {
+        alloc_counter++;
+
         long newAddr = unsafe.allocateMemory(length * 8);
         unsafe.copyMemory(srcAddr, newAddr, length * 8);
         return newAddr;

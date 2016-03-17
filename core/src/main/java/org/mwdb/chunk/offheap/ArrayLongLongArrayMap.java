@@ -69,7 +69,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         }
     }
 
-    private void consistencyCheck() {
+    private final void consistencyCheck() {
         if (OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V) != elementV_ptr) {
             elementK_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_K);
             elementV_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V);
@@ -159,12 +159,9 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
-
-            //free master array
-            OffHeapLongArray.free(addr);
-        } else {
-            incrementCopyOnWriteCounter(addr);
         }
+        //free master array -> it is just a proxy
+        OffHeapLongArray.free(addr);
     }
 
     @Override

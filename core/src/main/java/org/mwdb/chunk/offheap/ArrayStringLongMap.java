@@ -177,11 +177,9 @@ public class ArrayStringLongMap implements KStringLongMap {
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
             OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K_H));
-            //free master array
-            OffHeapLongArray.free(addr);
-        } else {
-            incrementCopyOnWriteCounter(addr);
         }
+        //free master array -> it is just a proxy
+        OffHeapLongArray.free(addr);
     }
 
     @Override
@@ -210,7 +208,6 @@ public class ArrayStringLongMap implements KStringLongMap {
 
             // cow counter
             OffHeapLongArray.set(newElementV_ptr, 0, 1);
-
         } else {
             incrementCopyOnWriteCounter(root_array_ptr);
         }

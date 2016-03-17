@@ -4,12 +4,15 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
+ * Memory layout: all structures are memory blocks of either primitive values (as longs)
+ * or pointers to memory blocks
  */
 public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapChunk {
 
@@ -215,6 +218,12 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, elementCount);
         // set hashReadOnly
         OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
+
+        // clean up old content
+//        OffHeapLongArray.free(elementK_ptr);
+//        OffHeapLongArray.free(elementNext_ptr);
+//        OffHeapLongArray.free(elementHash_ptr);
+//        OffHeapLongArray.free(elementType_ptr);
 
 //        // increase the copy on write counters
 //        for (long i = 0; i < elementCount; i++) {
@@ -465,6 +474,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     newStateCapacity = newStateChunkSize;
                     //init hash and chaining
                     newElementNext_ptr = OffHeapLongArray.allocate(newStateChunkSize + 1); //cow counter + size
+                    OffHeapLongArray.set(newElementNext_ptr, 0, 1); //init cow counter
                     newElementHash_ptr = OffHeapLongArray.allocate(newStateChunkSize);
                     previousStart = cursor + 1;
                 } else {
@@ -795,8 +805,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 cowCounter = unsafe.getAndAddLong(null, addr, -1) - 1;
                 if (cowCounter == 0) {
                     unsafe.freeMemory(addr);
-                } else {
-                    unsafe.getAndAddLong(null, addr, -1);
                 }
                 break;
             /** Arrays */
@@ -804,24 +812,18 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 cowCounter = unsafe.getAndAddLong(null, addr, -1) - 1;
                 if (cowCounter == 0) {
                     OffHeapDoubleArray.free(addr);
-                } else {
-                    unsafe.getAndAddLong(null, addr, -1);
                 }
                 break;
             case KType.LONG_ARRAY:
                 cowCounter = unsafe.getAndAddLong(null, addr, -1) - 1;
                 if (cowCounter == 0) {
                     OffHeapLongArray.free(addr);
-                } else {
-                    unsafe.getAndAddLong(null, addr, -1);
                 }
                 break;
             case KType.INT_ARRAY:
                 cowCounter = unsafe.getAndAddLong(null, addr, -1) - 1;
                 if (cowCounter == 0) {
                     OffHeapLongArray.free(addr);
-                } else {
-                    unsafe.getAndAddLong(null, addr, -1);
                 }
                 break;
             /** Maps */
@@ -941,6 +943,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 unsafe.copyMemory(elementType_ptr, newElementType_ptr, elementDataSize * 8);
 
                 long newElementNext_ptr = OffHeapLongArray.allocate(newLength + 1); //cow counter + length
+                OffHeapLongArray.set(newElementNext_ptr, 0, 1); //init cow counter
                 long newElementHash_ptr = OffHeapLongArray.allocate(newLength);
 
                 //rehashEveryThing
@@ -1007,7 +1010,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     private void internal_setElementV(long addr, long index, long elementTypeAddr, byte elemType, Object elem) {
-        // no additional check needed, we are sure it is one of these types
+        long tempPtr = OffHeapLongArray.get(addr, index);
         switch (elemType) {
             /** Primitives */
             case KType.BOOL:
@@ -1025,7 +1028,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             /** String */
             case KType.STRING:
                 String stringToInsert = (String) elem;
-                long tempStringPtr = OffHeapLongArray.get(addr, index);
                 if (stringToInsert == null) {
                     OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 } else {
@@ -1041,15 +1043,10 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     }
                     OffHeapLongArray.set(addr, index, newStringPtr);
                 }
-                if (tempStringPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempStringPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             /** Arrays */
             case KType.DOUBLE_ARRAY:
                 double[] doubleArrayToInsert = (double[]) elem;
-                long tempDoubleArrPtr = OffHeapLongArray.get(addr, index);
-
                 if (doubleArrayToInsert != null) {
                     long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(2 + doubleArrayToInsert.length); // cow counter + length + content of the array
                     OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, 1);// set cow counter
@@ -1061,15 +1058,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 } else {
                     OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-
-                if (tempDoubleArrPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempDoubleArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             case KType.LONG_ARRAY:
                 long[] longArrayToInsert = (long[]) elem;
-                long tempLongArrPtr = OffHeapLongArray.get(addr, index);
-
                 if (longArrayToInsert != null) {
                     long longArrayToInsert_ptr = OffHeapLongArray.allocate(2 + longArrayToInsert.length); // cow counter + length + content of the array
                     OffHeapLongArray.set(longArrayToInsert_ptr, 0, 1);// init cow counter
@@ -1081,15 +1072,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 } else {
                     OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-
-                if (tempLongArrPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempLongArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             case KType.INT_ARRAY:
                 int[] intArrayToInsert = (int[]) elem;
-                long tempIntArrPtr = OffHeapLongArray.get(addr, index);
-
                 if (intArrayToInsert != null) {
                     long intArrayToInsert_ptr = OffHeapLongArray.allocate(2 + intArrayToInsert.length); // cow counter + length + content of the array
                     OffHeapLongArray.set(intArrayToInsert_ptr, 0, 1);// init cow counter
@@ -1101,41 +1086,29 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 } else {
                     OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                 }
-
-                if (tempIntArrPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempIntArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             /** Maps */
             case KType.STRING_LONG_MAP:
-                long tempStringLongPtr = OffHeapLongArray.get(addr, index);
                 long stringLongMap_ptr = ((ArrayStringLongMap) elem).rootAddress();
                 ArrayStringLongMap.incrementCopyOnWriteCounter(stringLongMap_ptr);
                 OffHeapLongArray.set(addr, index, stringLongMap_ptr);
-                if (tempStringLongPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempStringLongPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             case KType.LONG_LONG_MAP:
-                long tempLongLongPtr = OffHeapLongArray.get(addr, index);
                 long longLongMap_ptr = ((ArrayLongLongMap) elem).rootAddress();
                 ArrayLongLongMap.incrementCopyOnWriteCounter(longLongMap_ptr);
                 OffHeapLongArray.set(addr, index, longLongMap_ptr);
-                if (tempLongLongPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempLongLongPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             case KType.LONG_LONG_ARRAY_MAP:
-                long tempLongLongArrPtr = OffHeapLongArray.get(addr, index);
                 long longLongArrayMap_ptr = ((ArrayLongLongArrayMap) elem).rootAddress();
                 ArrayLongLongArrayMap.incrementCopyOnWriteCounter(longLongArrayMap_ptr);
                 OffHeapLongArray.set(addr, index, longLongArrayMap_ptr);
-                if (tempLongLongArrPtr != Constants.OFFHEAP_NULL_PTR) {
-                    freeElement(tempLongLongArrPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
-                }
                 break;
             default:
                 throw new RuntimeException("Should never happen...");
+        }
+        // free the previous elements
+        if (tempPtr != Constants.OFFHEAP_NULL_PTR) {
+            freeElement(tempPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
         }
         OffHeapLongArray.set(elementTypeAddr, index, elemType);
     }
