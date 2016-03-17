@@ -5,6 +5,7 @@ import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
+import org.mwdb.utility.Base64;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -102,34 +103,31 @@ public class Graph implements KGraph {
                                                 Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, //GlobalUniverseTree
                                                 Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2] //Global dictionary
                                         };
-                                        selfPointer._storage.get(connectionKeys, new KCallback<String[]>() {
+                                        selfPointer._storage.get(connectionKeys, new KCallback<KStorage.KBuffer[]>() {
                                             @Override
-                                            public void on(String[] strings) {
-                                                if (strings.length == 4) {
+                                            public void on(KStorage.KBuffer[] payloads) {
+                                                if (payloads.length == 4) {
                                                     Boolean noError = true;
                                                     try {
-                                                        String uniIndexPayload = strings[UNIVERSE_INDEX];
-                                                        if (uniIndexPayload == null || PrimitiveHelper.equals(uniIndexPayload, "")) {
-                                                            uniIndexPayload = "0";
-                                                        }
-                                                        String objIndexPayload = strings[OBJ_INDEX];
-                                                        if (objIndexPayload == null || PrimitiveHelper.equals(objIndexPayload, "")) {
-                                                            objIndexPayload = "0";
-                                                        }
-
                                                         //init the global universe tree (mandatory for synchronious create)
-                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK, strings[GLO_TREE_INDEX], null);
+                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK, payloads[GLO_TREE_INDEX], null);
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
-                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK, strings[GLO_DIC_INDEX], null);
+                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK, payloads[GLO_DIC_INDEX], null);
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
-                                                        //TODO call the manager
-                                                        long newUniIndex = PrimitiveHelper.parseLong(uniIndexPayload);
-                                                        long newObjIndex = PrimitiveHelper.parseLong(objIndexPayload);
-                                                        selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, newUniIndex);
-                                                        selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, newObjIndex);
+                                                        if (payloads[UNIVERSE_INDEX] != null) {
+                                                            selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
+                                                        } else {
+                                                            selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                                        }
+
+                                                        if (payloads[OBJ_INDEX] != null) {
+                                                            selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
+                                                        } else {
+                                                            selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                                        }
 
                                                         //init the resolver
                                                         selfPointer._resolver.init();
@@ -220,7 +218,7 @@ public class Graph implements KGraph {
             long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
             long[] toSaveKeys = new long[(int) sizeToSaveKeys];
             long sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
-            String[] toSaveValues = new String[(int) sizeToSaveValues];
+            KStorage.KBuffer[] toSaveValues = new KStorage.KBuffer[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
                 KChunk loopChunk = dirtyIterator.next();
@@ -229,7 +227,9 @@ public class Graph implements KGraph {
                     toSaveKeys[i * Constants.KEYS_SIZE + 1] = loopChunk.time();
                     toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
                     try {
-                        toSaveValues[i] = loopChunk.save();
+                        KStorage.KBuffer newBuffer = _storage.newBuffer();
+                        toSaveValues[i] = newBuffer;
+                        loopChunk.save(newBuffer);
                         this._space.declareClean(loopChunk);
                         i++;
                     } catch (Exception e) {
@@ -240,17 +240,19 @@ public class Graph implements KGraph {
             toSaveKeys[i * Constants.KEYS_SIZE] = Constants.BEGINNING_OF_TIME;
             toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
             toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._objectKeyCalculator.prefix();
-            toSaveValues[i] = "" + this._objectKeyCalculator.lastComputedIndex();
+            toSaveValues[i] = _storage.newBuffer();
+            Base64.encodeLongToBuffer(this._objectKeyCalculator.lastComputedIndex(), toSaveValues[i]);
             i++;
             toSaveKeys[i * Constants.KEYS_SIZE] = Constants.END_OF_TIME;
             toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
             toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._universeKeyCalculator.prefix();
-            toSaveValues[i] = "" + this._universeKeyCalculator.lastComputedIndex();
+            toSaveValues[i] = _storage.newBuffer();
+            Base64.encodeLongToBuffer(this._universeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
 
             //shrink in case of i != full size
             if (i != sizeToSaveValues - 1) {
                 //shrinkValue
-                String[] toSaveValuesShrinked = new String[i + 1];
+                KStorage.KBuffer[] toSaveValuesShrinked = new KStorage.KBuffer[i + 1];
                 System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
                 toSaveValues = toSaveValuesShrinked;
 

@@ -243,9 +243,9 @@ public class MWGResolver implements KResolver {
 
     private void load(long[] keys, KCallback<KChunk[]> callback) {
         MWGResolver selfPointer = this;
-        this._storage.get(keys, new KCallback<String[]>() {
+        this._storage.get(keys, new KCallback<KStorage.KBuffer[]>() {
             @Override
-            public void on(String[] payloads) {
+            public void on(KStorage.KBuffer[] payloads) {
                 KChunk[] results = new KChunk[keys.length / 3];
                 for (int i = 0; i < payloads.length; i++) {
                     long loopWorld = keys[i * 3];
@@ -258,7 +258,7 @@ public class MWGResolver implements KResolver {
                         if (loopTime == Constants.NULL_LONG) {
                             elemType = Constants.TIME_TREE_CHUNK;
                         } else {
-                            if (payloads[i] == null || payloads[i].length() < 1) {
+                            if (payloads[i] == null || payloads[i].size() < 1) {
                                 elemType = Constants.STATE_CHUNK;
                             } else {
                                 elemType = Constants.STATE_CHUNK;

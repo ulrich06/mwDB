@@ -5,12 +5,16 @@ import org.mwdb.plugin.KResolver;
 
 public class Query {
 
-    public long hash;
+    private long _hash;
 
     private int capacity = 1;
     public long[] attributes = new long[capacity];
     public String[] values = new String[capacity];
     public int size = 0;
+
+    public long hash() {
+        return this._hash;
+    }
 
     public void add(long att, String val) {
         if (size == capacity) {
@@ -34,12 +38,15 @@ public class Query {
 
     public void compute() {
         sort();
-        StringBuilder buffer = new StringBuilder();
+        _hash = 0;
         for (int i = 0; i < size; i++) {
-            Base64.encodeLongToBuffer(attributes[i], buffer);
-            buffer.append(values[i]);
+            _hash = ((_hash << 5) - _hash) + attributes[i];
+            if (values[i] != null) {
+                for (int j = 0; j < values[i].length(); j++) {
+                    _hash = ((_hash << 5) - _hash) + values[i].charAt(j);
+                }
+            }
         }
-        hash = PrimitiveHelper.stringHash(buffer.toString());
     }
 
     private void sort() {

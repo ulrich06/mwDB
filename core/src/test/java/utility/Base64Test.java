@@ -3,7 +3,9 @@ package utility;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
+import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class Base64Test {
@@ -39,13 +41,15 @@ public class Base64Test {
     }
 
     private void testLong(long val) {
-        //System.out.println("Encode");
-        String enc = Base64.encodeLong(val);
-        //System.out.println("Decode");
-        long dec = Base64.decodeToLong(enc);
-        //System.out.println(val + " -> " + enc + " -> " + dec);
+
+
+
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        Base64.encodeLongToBuffer(val, buffer);
+        long dec = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
         Assert.assertEquals(val, dec);
 
+        /*
         //System.out.println("Encode");
         StringBuilder buffer = new StringBuilder();
         Base64.encodeLongToBuffer(val, buffer);
@@ -53,6 +57,7 @@ public class Base64Test {
         dec = Base64.decodeToLong(buffer.toString());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec);
+        */
     }
 
 
@@ -67,13 +72,14 @@ public class Base64Test {
     }
 
     private void testInt(int val) {
-        //System.out.println("Encode");
-        String enc = Base64.encodeInt(val);
-        //System.out.println("Decode");
-        int dec = Base64.decodeToInt(enc);
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        Base64.encodeIntToBuffer(val, buffer);
+        int dec = Base64.decodeToIntWithBounds(buffer, 0, buffer.size());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec);
+        buffer.free();
 
+        /*
         //System.out.println("Encode");
         StringBuilder buffer = new StringBuilder();
         Base64.encodeIntToBuffer(val, buffer);
@@ -81,6 +87,7 @@ public class Base64Test {
         dec = Base64.decodeToInt(buffer.toString());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec);
+        */
     }
 
 
@@ -143,13 +150,14 @@ public class Base64Test {
      * org.junit.Assert.assertEquals(val, dec);
      */
     private void testDouble(double val) {
-        //System.out.println("Encode");
-        String enc = Base64.encodeDouble(val);
-        //System.out.println("Decode");
-        double dec = Base64.decodeToDouble(enc);
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        Base64.encodeDoubleToBuffer(val, buffer);
+        double dec = Base64.decodeToDoubleWithBounds(buffer, 0, buffer.size());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec, 0);
+        buffer.free();
 
+        /*
         //System.out.println("Encode");
         StringBuilder buffer = new StringBuilder();
         Base64.encodeDoubleToBuffer(val, buffer);
@@ -157,6 +165,7 @@ public class Base64Test {
         dec = Base64.decodeToDouble(buffer.toString());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec, 0);
+        */
     }
 
 
@@ -173,9 +182,9 @@ public class Base64Test {
     }
 
     private void boolArrayInnerTest(boolean[] array) {
-        String enc = Base64.encodeBoolArray(array);
-        //System.out.println("Decode");
-        boolean[] dec = Base64.decodeBoolArray(enc, array.length);
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        Base64.encodeBoolArrayToBuffer(array,buffer);
+        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer,0,buffer.size(), array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertTrue(array.length == dec.length);
         for (int i = 0; i < array.length; i++) {

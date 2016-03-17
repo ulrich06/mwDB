@@ -4,6 +4,7 @@ package org.mwdb.chunk.heap;
 import org.mwdb.Constants;
 import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -192,7 +193,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(long p_world, long p_time, long p_id, byte p_type, String p_initialPayload, KChunk origin) {
+    public KChunk create(long p_world, long p_time, long p_id, byte p_type, KStorage.KBuffer p_initialPayload, KChunk origin) {
         switch (p_type) {
             case Constants.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
@@ -357,33 +358,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     @Override
     public void free() {
         //TODO
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder buffer = new StringBuilder();
-        try {
-            for (int i = 0; i < this._values.length; i++) {
-                KChunk loopChunk = this._values[i];
-                if (loopChunk != null) {
-                    buffer.append(i);
-                    buffer.append("#:");
-                    buffer.append(loopChunk.world());
-                    buffer.append(",");
-                    buffer.append(loopChunk.time());
-                    buffer.append(",");
-                    buffer.append(loopChunk.id());
-                    buffer.append("=>");
-                    buffer.append(loopChunk.chunkType());
-                    buffer.append(",");
-                    buffer.append(loopChunk.save());
-                    buffer.append("\n");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return buffer.toString();
     }
 
     @Override

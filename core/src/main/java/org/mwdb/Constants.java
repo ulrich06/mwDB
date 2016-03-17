@@ -10,13 +10,13 @@ public class Constants extends KConstants {
     /**
      * Chunk Save/Load special chars
      */
-    public static final char CHUNK_SEP = '|';
+    public static final byte CHUNK_SEP = '|';
 
-    public static final char CHUNK_SUB_SEP = ',';
+    public static final byte CHUNK_SUB_SEP = ',';
 
-    public static final char CHUNK_SUB_SUB_SEP = ':';
+    public static final byte CHUNK_SUB_SUB_SEP = ':';
 
-    public static final char CHUNK_SUB_SUB_SUB_SEP = '%';
+    public static final byte CHUNK_SUB_SUB_SUB_SEP = '%';
 
     /**
      * ChunkFlags

@@ -4,16 +4,17 @@ import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     //constants definition
-    private static final char BLACK_LEFT = '{';
-    private static final char BLACK_RIGHT = '}';
-    private static final char RED_LEFT = '[';
-    private static final char RED_RIGHT = ']';
+    private static final byte BLACK_LEFT = '{';
+    private static final byte BLACK_RIGHT = '}';
+    private static final byte RED_LEFT = '[';
+    private static final byte RED_RIGHT = ']';
     private static final int META_SIZE = 3;
 
     /**
@@ -46,7 +47,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     private final KChunkListener _listener;
 
-    public OffHeapTimeTreeChunk(KChunkListener p_listener, long previousAddr, String initialPayload) {
+    public OffHeapTimeTreeChunk(KChunkListener p_listener, long previousAddr, KStorage.KBuffer initialPayload) {
         //listener
         this._listener = p_listener;
         //init
@@ -75,7 +76,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
         }
-        
+
     }
 
     public static void free(long addr) {
@@ -150,7 +151,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public final String save() {
+    public final void save(KStorage.KBuffer buffer) {
         //OffHeap lock
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         ptrConsistency();
@@ -161,12 +162,12 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
                 throw new RuntimeException("CAS Error !!!");
             }
-            return "0";
+            buffer.write((byte) '0');
+            return;
         }
-        StringBuilder buffer = new StringBuilder();
         long treeSize = OffHeapLongArray.get(addr, INDEX_SIZE);
         Base64.encodeLongToBuffer(OffHeapLongArray.get(addr, INDEX_SIZE), buffer);
-        buffer.append(",");
+        buffer.write(Constants.CHUNK_SUB_SEP);
         Base64.encodeLongToBuffer(rootElem, buffer);
 
         for (long i = 0; i < treeSize; i++) {
@@ -178,19 +179,19 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
                 }
                 if (!color(i)) {
                     if (isOnLeft) {
-                        buffer.append(BLACK_LEFT);
+                        buffer.write(BLACK_LEFT);
                     } else {
-                        buffer.append(BLACK_RIGHT);
+                        buffer.write(BLACK_RIGHT);
                     }
                 } else {//red
                     if (isOnLeft) {
-                        buffer.append(RED_LEFT);
+                        buffer.write(RED_LEFT);
                     } else {
-                        buffer.append(RED_RIGHT);
+                        buffer.write(RED_RIGHT);
                     }
                 }
                 Base64.encodeLongToBuffer(OffHeapLongArray.get(kPtr, i), buffer);
-                buffer.append(',');
+                buffer.write(Constants.CHUNK_SUB_SEP);
                 if (parentIndex != -1) {
                     Base64.encodeLongToBuffer(parentIndex, buffer);
                 }
@@ -201,7 +202,6 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
             throw new RuntimeException("CAS Error !!!");
         }
-        return buffer.toString();
     }
 
     private void ptrConsistency() {
@@ -560,9 +560,9 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         }
     }
 
-    private void load(String payload) {
+    private void load(KStorage.KBuffer buffer) {
 
-        if (payload == null || payload.length() == 0) {
+        if (buffer == null || buffer.size() == 0) {
 
             long capacity = Constants.MAP_INITIAL_CAPACITY;
 
@@ -588,19 +588,19 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
         int initPos = 0;
         int cursor = 0;
-        while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
             cursor++;
         }
         long newSize = 0;
-        if (payload.charAt(cursor) == ',') {
-            newSize = Base64.decodeToIntWithBounds(payload, initPos, cursor);
+        if (buffer.read(cursor) == ',') {
+            newSize = Base64.decodeToIntWithBounds(buffer, initPos, cursor);
             cursor++;
             initPos = cursor;
         }
-        while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
             cursor++;
         }
-        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, Base64.decodeToLongWithBounds(payload, initPos, cursor));
+        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, Base64.decodeToLongWithBounds(buffer, initPos, cursor));
 
 
         long capacity = newSize * 2;
@@ -622,12 +622,12 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
 
         int currentLoopIndex = 0;
-        while (cursor < payload.length()) {
-            while (cursor < payload.length() && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+        while (cursor < buffer.size()) {
+            while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
                 cursor++;
             }
-            if (cursor < payload.length()) {
-                char elem = payload.charAt(cursor);
+            if (cursor < buffer.size()) {
+                byte elem = buffer.read(cursor);
                 boolean isOnLeft = false;
                 if (elem == BLACK_LEFT || elem == RED_LEFT) {
                     isOnLeft = true;
@@ -639,18 +639,18 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
                 }
                 cursor++;
                 int beginChunk = cursor;
-                while (cursor < payload.length() && payload.charAt(cursor) != ',') {
+                while (cursor < buffer.size() && buffer.read(cursor) != ',') {
                     cursor++;
                 }
-                long loopKey = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                long loopKey = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
                 setKey(currentLoopIndex, loopKey);
                 cursor++;
                 beginChunk = cursor;
-                while (cursor < payload.length() && payload.charAt(cursor) != ',' && payload.charAt(cursor) != BLACK_LEFT && payload.charAt(cursor) != BLACK_RIGHT && payload.charAt(cursor) != RED_LEFT && payload.charAt(cursor) != RED_RIGHT) {
+                while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
                     cursor++;
                 }
                 if (cursor > beginChunk) {
-                    long parentRaw = Base64.decodeToLongWithBounds(payload, beginChunk, cursor);
+                    long parentRaw = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
                     setParent(currentLoopIndex, parentRaw);
                     if (isOnLeft) {
                         setLeft(parentRaw, currentLoopIndex);

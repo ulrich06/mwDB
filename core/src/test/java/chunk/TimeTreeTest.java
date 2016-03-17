@@ -12,12 +12,13 @@ import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.KOffHeapChunk;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapTimeTreeChunk;
-import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.Buffer;
 
 public class TimeTreeTest implements KChunkListener {
 
     private interface KTimeTreeChunkFactory {
-        KTimeTreeChunk create(String payload);
+        KTimeTreeChunk create(KStorage.KBuffer payload);
     }
 
     private int nbCount = 0;
@@ -27,7 +28,7 @@ public class TimeTreeTest implements KChunkListener {
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(String payload) {
+            public KTimeTreeChunk create(KStorage.KBuffer payload) {
                 return new HeapTimeTreeChunk(-1, -1, -1, selfPointer, payload);
             }
         };
@@ -41,7 +42,7 @@ public class TimeTreeTest implements KChunkListener {
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(String payload) {
+            public KTimeTreeChunk create(KStorage.KBuffer payload) {
                 return new OffHeapTimeTreeChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, payload);
             }
         };
@@ -81,22 +82,51 @@ public class TimeTreeTest implements KChunkListener {
         for (long i = 0; i <= 2; i++) {
             tree.insert(i);
         }
-        String saved0 = tree.save();
-        Assert.assertEquals("G,C{A,C]C,}E,C", saved0);
+
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        tree.save(buffer);
+        Assert.assertTrue(compareWithString(buffer, "G,C{A,C]C,}E,C"));
         Assert.assertTrue(tree.size() == 3);
 
-        KTimeTreeChunk tree2 = factory.create(saved0);
+        KTimeTreeChunk tree2 = factory.create(buffer);
         Assert.assertTrue(tree2.size() == 3);
-        String saved2 = tree2.save();
-        Assert.assertTrue(PrimitiveHelper.equals(saved0, saved2));
+
+        KStorage.KBuffer buffer2 = Buffer.newHeapBuffer();
+        tree2.save(buffer2);
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         tree2.insert(10_000);
 
         free(tree);
         free(tree2);
 
+        buffer2.free();
+        buffer.free();
+
         Assert.assertTrue(nbCount == 2);
     }
+
+    private boolean compareWithString(KStorage.KBuffer buffer, String content) {
+        for (int i = 0; i < content.length(); i++) {
+            if (buffer.read(i) != content.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean compareBuffers(KStorage.KBuffer buffer, KStorage.KBuffer buffer2) {
+        if (buffer.size() != buffer2.size()) {
+            return false;
+        }
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.read(i) != buffer2.read(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     private void massiveTest(KTimeTreeChunkFactory factory) {
         nbCount = 0;

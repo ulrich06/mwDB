@@ -4,6 +4,7 @@ import org.mwdb.Constants;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.KWorldOrderChunk;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
@@ -48,7 +49,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private long elementNext_ptr;
     private long elementHash_ptr;
 
-    public OffHeapWorldOrderChunk(KChunkListener listener, long previousAddr, String initialString) {
+    public OffHeapWorldOrderChunk(KChunkListener listener, long previousAddr, KStorage.KBuffer initialString) {
         this.listener = listener;
 
         if (previousAddr != Constants.OFFHEAP_NULL_PTR) {
@@ -99,7 +100,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
 
     @Override
     public void unlock() {
-        if(!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, 1, -1)){
+        if (!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, 1, -1)) {
             throw new RuntimeException("CAS Error !!!");
         }
     }
@@ -305,15 +306,14 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     }
 
     @Override
-    public String save() {
+    public void save(KStorage.KBuffer buffer) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
         consistencyCheck();
 
-        final StringBuilder buffer = new StringBuilder();
         long size = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
         Base64.encodeLongToBuffer(size, buffer);
-        buffer.append(Constants.CHUNK_SEP);
+        buffer.write(Constants.CHUNK_SEP);
         boolean isFirst = true;
 
         long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
@@ -321,11 +321,11 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             long loopValue = OffHeapLongArray.get(elementV_ptr, i);
             if (loopValue != Constants.NULL_LONG) {
                 if (!isFirst) {
-                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
                 }
                 isFirst = false;
                 Base64.encodeLongToBuffer(OffHeapLongArray.get(elementK_ptr, i), buffer);
-                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                 Base64.encodeLongToBuffer(loopValue, buffer);
             }
         }
@@ -334,10 +334,9 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
         if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
             throw new RuntimeException("CAS error !!!");
         }
-        return buffer.toString();
     }
 
-    private void load(String payload) {
+    private void load(KStorage.KBuffer buffer) {
 
         int cursor = 0;
 
@@ -345,10 +344,10 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
         int previousStart = -1;
         long capacity = -1;
         int insertIndex = 0;
-        while (cursor < payload.length()) {
+        while (cursor < buffer.size()) {
 
-            if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
-                long size = Base64.decodeToLongWithBounds(payload, 0, cursor);
+            if (buffer.read(cursor) == Constants.CHUNK_SEP) {
+                long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
                 if (size == 0) {
                     capacity = 1;
                 } else {
@@ -381,9 +380,9 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
                 //reset for next round
                 previousStart = cursor + 1;
 
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SEP) {
+            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP) {
                 if (loopKey != Constants.NULL_LONG) {
-                    long loopValue = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     //insert raw
                     OffHeapLongArray.set(elementK_ptr, insertIndex, loopKey);
                     OffHeapLongArray.set(elementV_ptr, insertIndex, loopValue);
@@ -399,15 +398,15 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
                     loopKey = Constants.NULL_LONG;
                 }
                 previousStart = cursor + 1;
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
-                loopKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
+                loopKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                 previousStart = cursor + 1;
             }
             //loop in all case
             cursor++;
         }
         if (loopKey != Constants.NULL_LONG) {
-            long loopValue = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+            long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
             //insert raw
             OffHeapLongArray.set(elementK_ptr, insertIndex, loopKey);
             OffHeapLongArray.set(elementV_ptr, insertIndex, loopValue);

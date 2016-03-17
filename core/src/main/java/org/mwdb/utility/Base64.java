@@ -1,5 +1,7 @@
 package org.mwdb.utility;
 
+import org.mwdb.plugin.KStorage;
+
 /**
  * @native ts
  * private static encodeArray = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'];
@@ -192,34 +194,34 @@ package org.mwdb.utility;
  * }
  * return resultTmp;
  * }
- *
- *
+ * <p>
+ * <p>
  * public static encodeString(s : string) {
  * var result = "";
  * var sLength = s.length;
  * var currentSourceChar;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
- *
+ * <p>
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
- *   currentSourceChar = s.charCodeAt(charIdx);
- *   if(freeBitsInCurrentChar == 6) {
- *     result += Base64.encodeArray[(currentSourceChar / 4) & 0x3F];
- *     currentEncodedChar = (currentSourceChar & 0x3) * 16;
- *     freeBitsInCurrentChar = 4;
- *   } else if(freeBitsInCurrentChar == 4) {
- *     result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F];
- *     currentEncodedChar = (currentSourceChar & 0xF) * 4;
- *     freeBitsInCurrentChar = 2;
- *   } else if(freeBitsInCurrentChar == 2) {
- *     result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F];
- *     result += Base64.encodeArray[currentSourceChar & 0x3F];
- *     freeBitsInCurrentChar = 6;
- *   }
+ * currentSourceChar = s.charCodeAt(charIdx);
+ * if(freeBitsInCurrentChar == 6) {
+ * result += Base64.encodeArray[(currentSourceChar / 4) & 0x3F];
+ * currentEncodedChar = (currentSourceChar & 0x3) * 16;
+ * freeBitsInCurrentChar = 4;
+ * } else if(freeBitsInCurrentChar == 4) {
+ * result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F];
+ * currentEncodedChar = (currentSourceChar & 0xF) * 4;
+ * freeBitsInCurrentChar = 2;
+ * } else if(freeBitsInCurrentChar == 2) {
+ * result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F];
+ * result += Base64.encodeArray[currentSourceChar & 0x3F];
+ * freeBitsInCurrentChar = 6;
  * }
- *
+ * }
+ * <p>
  * if(freeBitsInCurrentChar != 6) {
- *   result += Base64.encodeArray[currentEncodedChar];
+ * result += Base64.encodeArray[currentEncodedChar];
  * }
  * return result;
  * }
@@ -228,26 +230,26 @@ package org.mwdb.utility;
  * var currentSourceChar;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
- *
+ * <p>
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
- *   currentSourceChar = s.charCodeAt(charIdx);
- *   if(freeBitsInCurrentChar == 6) {
- *     buffer.append(Base64.encodeArray[(currentSourceChar / 4) & 0x3F]);
- *     currentEncodedChar = (currentSourceChar & 0x3) * 16;
- *     freeBitsInCurrentChar = 4;
- *   } else if(freeBitsInCurrentChar == 4) {
- *     buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F]);
- *     currentEncodedChar = (currentSourceChar & 0xF) * 4;
- *     freeBitsInCurrentChar = 2;
- *   } else if(freeBitsInCurrentChar == 2) {
- *     buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F]);
- *     buffer.append(Base64.encodeArray[currentSourceChar & 0x3F]);
- *     freeBitsInCurrentChar = 6;
- *   }
+ * currentSourceChar = s.charCodeAt(charIdx);
+ * if(freeBitsInCurrentChar == 6) {
+ * buffer.append(Base64.encodeArray[(currentSourceChar / 4) & 0x3F]);
+ * currentEncodedChar = (currentSourceChar & 0x3) * 16;
+ * freeBitsInCurrentChar = 4;
+ * } else if(freeBitsInCurrentChar == 4) {
+ * buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F]);
+ * currentEncodedChar = (currentSourceChar & 0xF) * 4;
+ * freeBitsInCurrentChar = 2;
+ * } else if(freeBitsInCurrentChar == 2) {
+ * buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F]);
+ * buffer.append(Base64.encodeArray[currentSourceChar & 0x3F]);
+ * freeBitsInCurrentChar = 6;
  * }
- *
+ * }
+ * <p>
  * if(freeBitsInCurrentChar != 6) {
- *   buffer.append(Base64.encodeArray[currentEncodedChar]);
+ * buffer.append(Base64.encodeArray[currentEncodedChar]);
  * }
  * }
  * public static decodeString(s : string) {
@@ -258,44 +260,44 @@ package org.mwdb.utility;
  * var currentSourceChar;
  * var currentDecodedChar = 0;
  * var freeBitsInCurrentChar = 8;
- *
+ * <p>
  * for(var charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
- *  currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
- *  if(freeBitsInCurrentChar == 8) {
- *    currentDecodedChar = currentSourceChar * 4;
- *    freeBitsInCurrentChar = 2;
- *  } else if(freeBitsInCurrentChar == 2) {
- *    result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 16));
- *    currentDecodedChar = (currentSourceChar & 0xF) * 16;
- *    freeBitsInCurrentChar = 4;
- *  } else if(freeBitsInCurrentChar == 4) {
- *    result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 4));
- *    currentDecodedChar = (currentSourceChar & 0x3) * 64;
- *    freeBitsInCurrentChar = 6;
- *  } else if(freeBitsInCurrentChar == 6) {
- *    result += String.fromCharCode(currentDecodedChar | currentSourceChar);
- *    freeBitsInCurrentChar = 8;
- *  }
+ * currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
+ * if(freeBitsInCurrentChar == 8) {
+ * currentDecodedChar = currentSourceChar * 4;
+ * freeBitsInCurrentChar = 2;
+ * } else if(freeBitsInCurrentChar == 2) {
+ * result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 16));
+ * currentDecodedChar = (currentSourceChar & 0xF) * 16;
+ * freeBitsInCurrentChar = 4;
+ * } else if(freeBitsInCurrentChar == 4) {
+ * result += String.fromCharCode(currentDecodedChar | (currentSourceChar / 4));
+ * currentDecodedChar = (currentSourceChar & 0x3) * 64;
+ * freeBitsInCurrentChar = 6;
+ * } else if(freeBitsInCurrentChar == 6) {
+ * result += String.fromCharCode(currentDecodedChar | currentSourceChar);
+ * freeBitsInCurrentChar = 8;
+ * }
  * }
  * return result;
- *}
+ * }
  */
 public class Base64 {
 
-    private final static char[] encodeArray = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+    private final static byte[] encodeArray = new byte[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
     private final static int[] decodeArray = new int[123];
 
     static {
         int i = 0;
-        for (char c = 'A'; c <= 'Z'; c++) {
+        for (byte c = 'A'; c <= 'Z'; c++) {
             decodeArray[c] = i;
             i++;
         }
-        for (char c = 'a'; c <= 'z'; c++) {
+        for (byte c = 'a'; c <= 'z'; c++) {
             decodeArray[c] = i;
             i++;
         }
-        for (char c = '0'; c <= '9'; c++) {
+        for (byte c = '0'; c <= '9'; c++) {
             decodeArray[c] = i;
             i++;
         }
@@ -311,6 +313,7 @@ public class Base64 {
      * @param l the long to encode
      * @return the encoded string
      */
+    /*
     public static String encodeLong(long l) {
         String result = "";
         long tmp = l;
@@ -324,9 +327,8 @@ public class Base64 {
         }
         result += Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)];
         return result;
-    }
-
-    public static void encodeLongToBuffer(long l, StringBuilder buffer) {
+    }*/
+    public static void encodeLongToBuffer(long l, KStorage.KBuffer buffer) {
         boolean empty = true;
         long tmp = l;
         if (l < 0) {
@@ -335,10 +337,10 @@ public class Base64 {
         for (int i = 47; i >= 5; i -= 6) {
             if (!(empty && ((int) (tmp >> i) & 0x3F) == 0)) {
                 empty = false;
-                buffer.append(encodeArray[(int) (tmp >> i) & 0x3F]);
+                buffer.write(encodeArray[(int) (tmp >> i) & 0x3F]);
             }
         }
-        buffer.append(Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
+        buffer.write(Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
     }
 
 
@@ -364,7 +366,7 @@ public class Base64 {
     }
 
 
-    public static void encodeIntToBuffer(int l, StringBuilder buffer) {
+    public static void encodeIntToBuffer(int l, KStorage.KBuffer buffer) {
         boolean empty = true;
         int tmp = l;
         if (l < 0) {
@@ -373,39 +375,42 @@ public class Base64 {
         for (int i = 29; i >= 5; i -= 6) {
             if (!(empty && ((int) (tmp >> i) & 0x3F) == 0)) {
                 empty = false;
-                buffer.append(encodeArray[(tmp >> i) & 0x3F]);
+                buffer.write(encodeArray[(tmp >> i) & 0x3F]);
             }
         }
-        buffer.append(Base64.encodeArray[((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
+        buffer.write(Base64.encodeArray[((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
     }
 
+    /*
     public static long decodeToLong(String s) {
         return decodeToLongWithBounds(s, 0, s.length());
-    }
+    }*/
 
-    public static long decodeToLongWithBounds(String s, int offsetBegin, int offsetEnd) {
+    public static long decodeToLongWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
         long result = 0;
-        result += (Base64.decodeArray[s.charAt(offsetEnd - 1)] & 0xFF) >> 1;
+        result += (Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) >> 1;
         for (int i = 1; i < (offsetEnd - offsetBegin); i++) {
-            result += ((long) (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF)) << ((6 * i) - 1);
+            result += ((long) (Base64.decodeArray[buffer.read((offsetEnd - 1) - i)] & 0xFF)) << ((6 * i) - 1);
         }
-        if (((Base64.decodeArray[s.charAt(offsetEnd - 1)] & 0xFF) & 0x1) != 0) {
+        if (((Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) & 0x1) != 0) {
             result = -result;
         }
         return result;
     }
 
+    /*
     public static int decodeToInt(String s) {
         return decodeToIntWithBounds(s, 0, s.length());
     }
+    */
 
-    public static int decodeToIntWithBounds(String s, int offsetBegin, int offsetEnd) {
+    public static int decodeToIntWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
         int result = 0;
-        result += (Base64.decodeArray[s.charAt(offsetEnd - 1)] & 0xFF) >> 1;
+        result += (Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) >> 1;
         for (int i = 1; i < (offsetEnd - offsetBegin); i++) {
-            result += (Base64.decodeArray[s.charAt((offsetEnd - 1) - i)] & 0xFF) << ((6 * i) - 1);
+            result += (Base64.decodeArray[buffer.read((offsetEnd - 1) - i)] & 0xFF) << ((6 * i) - 1);
         }
-        if (((Base64.decodeArray[s.charAt(offsetEnd - 1)] & 0xFF) & 0x1) != 0) {
+        if (((Base64.decodeArray[buffer.read(offsetEnd - 1)] & 0xFF) & 0x1) != 0) {
             result = -result;
         }
         return result;
@@ -418,6 +423,7 @@ public class Base64 {
      * @param boolArr the array to encode
      * @return the string encoding the array.
      */
+    /*
     public static String encodeBoolArray(boolean[] boolArr) {
         String result = "";
         int tmpVal = 0;
@@ -429,27 +435,28 @@ public class Base64 {
             }
         }
         return result;
-    }
-
-    public static void encodeBoolArrayToBuffer(boolean[] boolArr, StringBuilder buffer) {
+    }*/
+    public static void encodeBoolArrayToBuffer(boolean[] boolArr, KStorage.KBuffer buffer) {
         int tmpVal = 0;
         for (int i = 0; i < boolArr.length; i++) {
             tmpVal = tmpVal | ((boolArr[i] ? 1 : 0) << i % 6);
             if (i % 6 == 5 || i == boolArr.length - 1) {
-                buffer.append(Base64.encodeArray[tmpVal]);
+                buffer.write(Base64.encodeArray[tmpVal]);
                 tmpVal = 0;
             }
         }
     }
 
+    /*
     public static boolean[] decodeBoolArray(String s, int arraySize) {
         return decodeToBoolArrayWithBounds(s, 0, s.length(), arraySize);
-    }
+    }*/
 
-    public static boolean[] decodeToBoolArrayWithBounds(String s, int offsetBegin, int offsetEnd, int arraySize) {
+
+    public static boolean[] decodeToBoolArrayWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd, int arraySize) {
         boolean[] resultTmp = new boolean[arraySize];
         for (int i = 0; i < (offsetEnd - offsetBegin); i++) {
-            int bitarray = Base64.decodeArray[s.charAt(offsetBegin + i)] & 0xFF;
+            int bitarray = Base64.decodeArray[buffer.read(offsetBegin + i)] & 0xFF;
             for (int bit_i = 0; bit_i < 6; bit_i++) {
                 if ((6 * i) + bit_i < arraySize) {
                     resultTmp[(6 * i) + bit_i] = (bitarray & (1 << bit_i)) != 0;
@@ -469,6 +476,7 @@ public class Base64 {
      * @param d the double to encode
      * @return the encoding string
      */
+    /*
     public static String encodeDouble(double d) {
         String result = "";
         long l = Double.doubleToLongBits(d);
@@ -484,35 +492,35 @@ public class Base64 {
             result += Base64.encodeArray[(int) (l >> i) & 0x3F];
         }
         return result;
-    }
-
-    public static void encodeDoubleToBuffer(double d, StringBuilder buffer) {
+    }*/
+    public static void encodeDoubleToBuffer(double d, KStorage.KBuffer buffer) {
         long l = Double.doubleToLongBits(d);
         //encode sign + exp
-        buffer.append(Base64.encodeArray[(int) (l >> 58) & 0x3F]);
-        buffer.append(Base64.encodeArray[(int) (l >> 52) & 0x3F]);
+        buffer.write(Base64.encodeArray[(int) (l >> 58) & 0x3F]);
+        buffer.write(Base64.encodeArray[(int) (l >> 52) & 0x3F]);
         //encode mantisse
-        buffer.append(Base64.encodeArray[(int) (l >> 48) & 0x0F]);
+        buffer.write(Base64.encodeArray[(int) (l >> 48) & 0x0F]);
         for (int i = 42; i >= 0; i -= 6) {
             if (((l >> i) & 0x3F) == 0 && (l & (~(0xFFFFFFFFFFFFFFFFl << i))) == 0) {
                 return;
             }
-            buffer.append(Base64.encodeArray[(int) (l >> i) & 0x3F]);
+            buffer.write(Base64.encodeArray[(int) (l >> i) & 0x3F]);
         }
     }
 
+    /*
     public static double decodeToDouble(String s) {
         return decodeToDoubleWithBounds(s, 0, s.length());
-    }
+    }*/
 
-    public static double decodeToDoubleWithBounds(String s, int offsetBegin, int offsetEnd) {
+    public static double decodeToDoubleWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
         long result = 0;
         //sign + exponent
-        result += ((long) Base64.decodeArray[s.charAt(offsetBegin)] & 0xFF) << 58;
-        result += ((long) Base64.decodeArray[s.charAt(offsetBegin+1)] & 0xFF) << 52;
+        result += ((long) Base64.decodeArray[buffer.read(offsetBegin)] & 0xFF) << 58;
+        result += ((long) Base64.decodeArray[buffer.read(offsetBegin + 1)] & 0xFF) << 52;
         //Mantisse
         for (int i = 2; i < (offsetEnd - offsetBegin); i++) {
-            result += ((long) Base64.decodeArray[s.charAt(offsetBegin + i)] & 0xFF) << (48 - (6 * (i - 2)));
+            result += ((long) Base64.decodeArray[buffer.read(offsetBegin + i)] & 0xFF) << (48 - (6 * (i - 2)));
         }
         return Double.longBitsToDouble(result);
     }
@@ -525,63 +533,64 @@ public class Base64 {
         int currentEncodedChar = 0;
         int freeBitsInCurrentChar = 6;
 
-        for(int charIdx = 0; charIdx < sLength; charIdx++) {
+        for (int charIdx = 0; charIdx < sLength; charIdx++) {
             currentSourceChar = s.charAt(charIdx);
-            if(freeBitsInCurrentChar == 6) {
+            if (freeBitsInCurrentChar == 6) {
                 result += Base64.encodeArray[currentSourceChar >> 2 & 0x3F];
                 currentEncodedChar = (currentSourceChar & 0x3) << 4;
                 freeBitsInCurrentChar = 4;
-            } else if(freeBitsInCurrentChar == 4) {
+            } else if (freeBitsInCurrentChar == 4) {
                 result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 4) & 0xF)) & 0x3F];
                 currentEncodedChar = (currentSourceChar & 0xF) << 2;
                 freeBitsInCurrentChar = 2;
-            } else if(freeBitsInCurrentChar == 2) {
+            } else if (freeBitsInCurrentChar == 2) {
                 result += Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 6) & 0x3)) & 0x3F];
                 result += Base64.encodeArray[currentSourceChar & 0x3F];
                 freeBitsInCurrentChar = 6;
             }
         }
 
-        if(freeBitsInCurrentChar != 6) {
+        if (freeBitsInCurrentChar != 6) {
             result += Base64.encodeArray[currentEncodedChar];
         }
         return result;
     }
 
-    public static void encodeStringToBuffer(String s, StringBuilder buffer) {
+    public static void encodeStringToBuffer(String s, KStorage.KBuffer buffer) {
         int sLength = s.length();
         char currentSourceChar;
         int currentEncodedChar = 0;
         int freeBitsInCurrentChar = 6;
 
-        for(int charIdx = 0; charIdx < sLength; charIdx++) {
+        for (int charIdx = 0; charIdx < sLength; charIdx++) {
             currentSourceChar = s.charAt(charIdx);
-            if(freeBitsInCurrentChar == 6) {
-                buffer.append(Base64.encodeArray[currentSourceChar >> 2 & 0x3F]);
+            if (freeBitsInCurrentChar == 6) {
+                buffer.write(Base64.encodeArray[currentSourceChar >> 2 & 0x3F]);
                 currentEncodedChar = (currentSourceChar & 0x3) << 4;
                 freeBitsInCurrentChar = 4;
-            } else if(freeBitsInCurrentChar == 4) {
-                buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 4) & 0xF)) & 0x3F]);
+            } else if (freeBitsInCurrentChar == 4) {
+                buffer.write(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 4) & 0xF)) & 0x3F]);
                 currentEncodedChar = (currentSourceChar & 0xF) << 2;
                 freeBitsInCurrentChar = 2;
-            } else if(freeBitsInCurrentChar == 2) {
-                buffer.append(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 6) & 0x3)) & 0x3F]);
-                buffer.append(Base64.encodeArray[currentSourceChar & 0x3F]);
+            } else if (freeBitsInCurrentChar == 2) {
+                buffer.write(Base64.encodeArray[(currentEncodedChar | ((currentSourceChar >> 6) & 0x3)) & 0x3F]);
+                buffer.write(Base64.encodeArray[currentSourceChar & 0x3F]);
                 freeBitsInCurrentChar = 6;
             }
         }
 
-        if(freeBitsInCurrentChar != 6) {
-            buffer.append(Base64.encodeArray[currentEncodedChar]);
+        if (freeBitsInCurrentChar != 6) {
+            buffer.write(Base64.encodeArray[currentEncodedChar]);
         }
     }
 
+    /*
     public static String decodeToString(String s) {
         return decodeToStringWithBounds(s, 0, s.length());
-    }
+    }*/
 
-    public static String decodeToStringWithBounds(String s, int offsetBegin, int offsetEnd) {
-        if(offsetBegin == offsetEnd) {
+    public static String decodeToStringWithBounds(KStorage.KBuffer buffer, long offsetBegin, long offsetEnd) {
+        if (offsetBegin == offsetEnd) {
             return null;
         }
         String result = "";
@@ -590,21 +599,21 @@ public class Base64 {
         int currentDecodedChar = 0;
         int freeBitsInCurrentChar = 8;
 
-        for(int charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
-            currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
-            if(freeBitsInCurrentChar == 8) {
+        for (long charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
+            currentSourceChar = Base64.decodeArray[buffer.read(charIdx)];
+            if (freeBitsInCurrentChar == 8) {
                 currentDecodedChar = currentSourceChar << 2;
                 freeBitsInCurrentChar = 2;
-            } else if(freeBitsInCurrentChar == 2) {
-                result += (char)(currentDecodedChar | (currentSourceChar >> 4));
+            } else if (freeBitsInCurrentChar == 2) {
+                result += (char) (currentDecodedChar | (currentSourceChar >> 4));
                 currentDecodedChar = (currentSourceChar & 0xF) << 4;
                 freeBitsInCurrentChar = 4;
-            } else if(freeBitsInCurrentChar == 4) {
-                result += (char)(currentDecodedChar | (currentSourceChar >> 2));
+            } else if (freeBitsInCurrentChar == 4) {
+                result += (char) (currentDecodedChar | (currentSourceChar >> 2));
                 currentDecodedChar = (currentSourceChar & 0x3) << 6;
                 freeBitsInCurrentChar = 6;
-            } else if(freeBitsInCurrentChar == 6) {
-                result += (char)(currentDecodedChar | currentSourceChar);
+            } else if (freeBitsInCurrentChar == 6) {
+                result += (char) (currentDecodedChar | currentSourceChar);
                 freeBitsInCurrentChar = 8;
             }
         }

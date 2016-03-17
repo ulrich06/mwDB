@@ -4,6 +4,7 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
@@ -51,7 +52,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     // simple values
     boolean inLoadMode = false;
 
-    public OffHeapStateChunk(KChunkListener listener, long previousAddr, String initialPayload, KChunk origin) {
+    public OffHeapStateChunk(KChunkListener listener, long previousAddr, KStorage.KBuffer initialPayload, KChunk origin) {
         _listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(16);
@@ -212,8 +213,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     @Override
-    public String save() {
-        final StringBuilder buffer = new StringBuilder();
+    public final void save(KStorage.KBuffer buffer) {
         long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
         Base64.encodeLongToBuffer(elementCount, buffer);
         for (int i = 0; i < elementCount; i++) {
@@ -221,13 +221,13 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 long loopKey = OffHeapLongArray.get(elementK_ptr, i);
                 Object loopValue = internal_getElementV(i);
                 if (loopValue != null) {
-                    buffer.append(Constants.CHUNK_SEP);
+                    buffer.write(Constants.CHUNK_SEP);
                     Base64.encodeLongToBuffer(loopKey, buffer);
-                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
                     /** Encode to type of elem, for unSerialization */
                     byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
                     Base64.encodeIntToBuffer(elementType, buffer);
-                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
                     switch (elementType) {
                         /** Primitive Types */
                         case KType.STRING:
@@ -235,9 +235,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             break;
                         case KType.BOOL:
                             if ((boolean) loopValue) {
-                                buffer.append("1");
+                                buffer.write((byte) '1');
                             } else {
-                                buffer.append("0");
+                                buffer.write((byte) '0');
                             }
                             break;
                         case KType.LONG:
@@ -254,7 +254,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             double[] castedDoubleArr = (double[]) loopValue;
                             Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
                             for (int j = 0; j < castedDoubleArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                             }
                             break;
@@ -262,7 +262,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);
                             for (int j = 0; j < castedLongArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                             }
                             break;
@@ -270,7 +270,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             int[] castedIntArr = (int[]) loopValue;
                             Base64.encodeIntToBuffer(castedIntArr.length, buffer);
                             for (int j = 0; j < castedIntArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeIntToBuffer(castedIntArr[j], buffer);
                             }
                             break;
@@ -281,9 +281,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             castedStringLongMap.each(new KStringLongMapCallBack() {
                                 @Override
                                 public void on(final String key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeStringToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -294,9 +294,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             castedLongLongMap.each(new KLongLongMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -307,9 +307,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                             castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -320,11 +320,10 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 }
             }
         }
-        return buffer.toString();
     }
 
-    private void load(String payload) {
-        if (payload == null || payload.length() == 0) {
+    private void load(KStorage.KBuffer buffer) {
+        if (buffer == null || buffer.size() == 0) {
             return;
         }
         inLoadMode = true;
@@ -341,7 +340,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         long currentElemIndex = 0;
 
         int cursor = 0;
-        long payloadSize = payload.length();
+        long payloadSize = buffer.size();
 
         int previousStart = -1;
         long currentChunkElemKey = Constants.NULL_LONG;
@@ -369,11 +368,11 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         String currentMapStringKey = null;
 
         while (cursor < payloadSize) {
-            if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
+            if (buffer.read(cursor) == Constants.CHUNK_SEP) {
                 if (isFirstElem) {
                     //initial the map
                     isFirstElem = false;
-                    long stateChunkSize = Base64.decodeToLongWithBounds(payload, 0, cursor);
+                    long stateChunkSize = Base64.decodeToLongWithBounds(buffer, 0, cursor);
                     newNumberElement = stateChunkSize;
                     long newStateChunkSize = (stateChunkSize == 0 ? 1 : stateChunkSize << 1);
                     //init map element
@@ -393,58 +392,58 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                         switch (currentChunkElemType) {
                             /** Primitive Object */
                             case KType.BOOL:
-                                if (payload.charAt(previousStart) == '0') {
+                                if (buffer.read(previousStart) == '0') {
                                     toInsert = false;
-                                } else if (payload.charAt(previousStart) == '1') {
+                                } else if (buffer.read(previousStart) == '1') {
                                     toInsert = true;
                                 }
                                 break;
                             case KType.STRING:
-                                toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
+                                toInsert = Base64.decodeToStringWithBounds(buffer, previousStart, cursor);
                                 break;
 
                             case KType.DOUBLE:
-                                toInsert = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                toInsert = Base64.decodeToDoubleWithBounds(buffer, previousStart, cursor);
                                 break;
 
                             case KType.LONG:
-                                toInsert = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                toInsert = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                                 break;
 
                             case KType.INT:
-                                toInsert = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                toInsert = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                                 break;
                             /** Arrays */
                             case KType.DOUBLE_ARRAY:
-                                currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(buffer, previousStart, cursor);
                                 toInsert = currentDoubleArr;
                                 break;
 
                             case KType.LONG_ARRAY:
-                                currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                                 toInsert = currentLongArr;
                                 break;
 
                             case KType.INT_ARRAY:
-                                currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                                 toInsert = currentIntArr;
                                 break;
                             /** Maps */
                             case KType.STRING_LONG_MAP:
                                 if (currentMapStringKey != null) {
-                                    currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                    currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 }
                                 toInsert = currentStringLongMap;
                                 break;
                             case KType.LONG_LONG_MAP:
                                 if (currentMapLongKey != Constants.NULL_LONG) {
-                                    currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                    currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongMap;
                                 break;
                             case KType.LONG_LONG_ARRAY_MAP:
                                 if (currentMapLongKey != Constants.NULL_LONG) {
-                                    currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                    currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongArrayMap;
                                 break;
@@ -474,17 +473,17 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     currentMapLongKey = Constants.NULL_LONG;
                     currentMapStringKey = null;
                 }
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
+            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
                 if (currentChunkElemKey == Constants.NULL_LONG) {
-                    currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    currentChunkElemKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     previousStart = cursor + 1;
                 } else if (currentChunkElemType == -1) {
-                    currentChunkElemType = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    currentChunkElemType = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
+            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
-                    currentSubSize = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    currentSubSize = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     //init array or maps
                     switch (currentChunkElemType) {
                         /** Arrays */
@@ -512,33 +511,33 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     switch (currentChunkElemType) {
                         /** Arrays */
                         case KType.DOUBLE_ARRAY:
-                            currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                            currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(buffer, previousStart, cursor);
                             currentSubIndex++;
                             break;
                         case KType.LONG_ARRAY:
-                            currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                            currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                             currentSubIndex++;
                             break;
                         case KType.INT_ARRAY:
-                            currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                            currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                             currentSubIndex++;
                             break;
                         /** Maps */
                         case KType.STRING_LONG_MAP:
                             if (currentMapStringKey != null) {
-                                currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 currentMapStringKey = null;
                             }
                             break;
                         case KType.LONG_LONG_MAP:
                             if (currentMapLongKey != Constants.NULL_LONG) {
-                                currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 currentMapLongKey = Constants.NULL_LONG;
                             }
                             break;
                         case KType.LONG_LONG_ARRAY_MAP:
                             if (currentMapLongKey != Constants.NULL_LONG) {
-                                currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                                currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 currentMapLongKey = Constants.NULL_LONG;
                             }
                             break;
@@ -546,31 +545,31 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                     }
                 }
                 previousStart = cursor + 1;
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
+            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
                 switch (currentChunkElemType) {
                     case KType.STRING_LONG_MAP:
                         if (currentMapStringKey == null) {
-                            currentMapStringKey = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
+                            currentMapStringKey = Base64.decodeToStringWithBounds(buffer, previousStart, cursor);
                         } else {
-                            currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                            currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                             //reset key for next loop
                             currentMapStringKey = null;
                         }
                         break;
                     case KType.LONG_LONG_MAP:
                         if (currentMapLongKey == Constants.NULL_LONG) {
-                            currentMapLongKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                            currentMapLongKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                         } else {
-                            currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                            currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                             //reset key for next loop
                             currentMapLongKey = Constants.NULL_LONG;
                         }
                         break;
                     case KType.LONG_LONG_ARRAY_MAP:
                         if (currentMapLongKey == Constants.NULL_LONG) {
-                            currentMapLongKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                            currentMapLongKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                         } else {
-                            currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                            currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                             //reset key for next loop
                             currentMapLongKey = Constants.NULL_LONG;
                         }
@@ -587,53 +586,53 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             switch (currentChunkElemType) {
                 /** Primitive Object */
                 case KType.BOOL:
-                    if (payload.charAt(previousStart) == '0') {
+                    if (buffer.read(previousStart) == '0') {
                         toInsert = false;
-                    } else if (payload.charAt(previousStart) == '1') {
+                    } else if (buffer.read(previousStart) == '1') {
                         toInsert = true;
                     }
                     break;
                 case KType.STRING:
-                    toInsert = Base64.decodeToStringWithBounds(payload, previousStart, cursor);
+                    toInsert = Base64.decodeToStringWithBounds(buffer, previousStart, cursor);
                     break;
                 case KType.DOUBLE:
-                    toInsert = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    toInsert = Base64.decodeToDoubleWithBounds(buffer, previousStart, cursor);
                     break;
                 case KType.LONG:
-                    toInsert = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    toInsert = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     break;
                 case KType.INT:
-                    toInsert = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    toInsert = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     break;
                 /** Arrays */
                 case KType.DOUBLE_ARRAY:
-                    currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(buffer, previousStart, cursor);
                     toInsert = currentDoubleArr;
                     break;
                 case KType.LONG_ARRAY:
-                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     toInsert = currentLongArr;
                     break;
                 case KType.INT_ARRAY:
-                    currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     toInsert = currentIntArr;
                     break;
                 /** Maps */
                 case KType.STRING_LONG_MAP:
                     if (currentMapStringKey != null) {
-                        currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                        currentStringLongMap.put(currentMapStringKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                     }
                     toInsert = currentStringLongMap;
                     break;
                 case KType.LONG_LONG_MAP:
                     if (currentMapLongKey != Constants.NULL_LONG) {
-                        currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                        currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                     }
                     toInsert = currentLongLongMap;
                     break;
                 case KType.LONG_LONG_ARRAY_MAP:
                     if (currentMapLongKey != Constants.NULL_LONG) {
-                        currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
+                        currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                     }
                     toInsert = currentLongLongArrayMap;
                     break;

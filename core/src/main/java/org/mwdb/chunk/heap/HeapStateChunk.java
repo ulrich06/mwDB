@@ -4,6 +4,7 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -99,7 +100,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, String initialPayload, KChunk origin) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, KStorage.KBuffer initialPayload, KChunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
@@ -385,8 +386,8 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    private void load(String payload) {
-        if (payload == null || payload.length() == 0) {
+    private void load(KStorage.KBuffer payload) {
+        if (payload == null || payload.size() == 0) {
             return;
         }
         inLoadMode = true;
@@ -402,7 +403,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         int currentElemIndex = 0;
 
         int cursor = 0;
-        int payloadSize = payload.length();
+        long payloadSize = payload.size();
 
         int previousStart = -1;
         long currentChunkElemKey = Constants.NULL_LONG;
@@ -430,7 +431,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         String currentMapStringKey = null;
 
         while (cursor < payloadSize) {
-            if (payload.charAt(cursor) == Constants.CHUNK_SEP) {
+            if (payload.read(cursor) == Constants.CHUNK_SEP) {
                 if (isFirstElem) {
                     //initial the map
                     isFirstElem = false;
@@ -458,9 +459,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                         switch (currentChunkElemType) {
                             /** Primitive Object */
                             case KType.BOOL:
-                                if (payload.charAt(previousStart) == '0') {
+                                if (payload.read(previousStart) == '0') {
                                     toInsert = false;
-                                } else if (payload.charAt(previousStart) == '1') {
+                                } else if (payload.read(previousStart) == '1') {
                                     toInsert = true;
                                 }
                                 break;
@@ -539,7 +540,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     currentMapLongKey = Constants.NULL_LONG;
                     currentMapStringKey = null;
                 }
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
+            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
                 if (currentChunkElemKey == Constants.NULL_LONG) {
                     currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
@@ -547,7 +548,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     currentChunkElemType = (byte) Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
+            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
                     currentSubSize = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     //init array or maps
@@ -610,7 +611,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     }
                 }
                 previousStart = cursor + 1;
-            } else if (payload.charAt(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
+            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
                 switch (currentChunkElemType) {
                     case KType.STRING_LONG_MAP:
                         if (currentMapStringKey == null) {
@@ -651,9 +652,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             switch (currentChunkElemType) {
                 /** Primitive Object */
                 case KType.BOOL:
-                    if (payload.charAt(previousStart) == '0') {
+                    if (payload.read(previousStart) == '0') {
                         toInsert = false;
-                    } else if (payload.charAt(previousStart) == '1') {
+                    } else if (payload.read(previousStart) == '1') {
                         toInsert = true;
                     }
                     break;
@@ -724,8 +725,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public String save() {
-        final StringBuilder buffer = new StringBuilder();
+    public void save(KStorage.KBuffer buffer) {
         final InternalState internalState = state.get();
         Base64.encodeIntToBuffer(internalState._elementCount, buffer);
         for (int i = 0; i < internalState._elementCount; i++) {
@@ -733,12 +733,12 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 long loopKey = internalState._elementK[i];
                 Object loopValue = internalState._elementV[i];
                 if (loopValue != null) {
-                    buffer.append(Constants.CHUNK_SEP);
+                    buffer.write(Constants.CHUNK_SEP);
                     Base64.encodeLongToBuffer(loopKey, buffer);
-                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
                     /** Encode to type of elem, for unSerialization */
                     Base64.encodeIntToBuffer(internalState._elementType[i], buffer);
-                    buffer.append(Constants.CHUNK_SUB_SEP);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
                     switch (internalState._elementType[i]) {
                         /** Primitive Types */
                         case KType.STRING:
@@ -746,9 +746,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             break;
                         case KType.BOOL:
                             if ((boolean) internalState._elementV[i]) {
-                                buffer.append("1");
+                                buffer.write((byte) '1');
                             } else {
-                                buffer.append("0");
+                                buffer.write((byte) '0');
                             }
                             break;
                         case KType.LONG:
@@ -765,7 +765,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             double[] castedDoubleArr = (double[]) loopValue;
                             Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
                             for (int j = 0; j < castedDoubleArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                             }
                             break;
@@ -773,7 +773,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);
                             for (int j = 0; j < castedLongArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                             }
                             break;
@@ -781,7 +781,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             int[] castedIntArr = (int[]) loopValue;
                             Base64.encodeIntToBuffer(castedIntArr.length, buffer);
                             for (int j = 0; j < castedIntArr.length; j++) {
-                                buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeIntToBuffer(castedIntArr[j], buffer);
                             }
                             break;
@@ -792,9 +792,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             castedStringLongMap.each(new KStringLongMapCallBack() {
                                 @Override
                                 public void on(final String key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeStringToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -805,9 +805,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             castedLongLongMap.each(new KLongLongMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -818,9 +818,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                             castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.append(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -831,7 +831,6 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 }
             }
         }
-        return buffer.toString();
     }
 
     private void internal_set_dirty() {

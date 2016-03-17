@@ -229,7 +229,7 @@ public class Node implements KNode {
         }
         flatQuery.compute();
         //TODO AUTOMATIC UPDATE
-        indexMap.put(flatQuery.hash, nodeToIndex.id());
+        indexMap.put(flatQuery.hash(), nodeToIndex.id());
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }
@@ -245,7 +245,7 @@ public class Node implements KNode {
         if (indexMap != null) {
             final Node selfPointer = this;
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
-            final long[] foundId = indexMap.get(flatQuery.hash);
+            final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
                 callback.on(null);
                 return;

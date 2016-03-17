@@ -1,5 +1,7 @@
 package org.mwdb.chunk;
 
+import org.mwdb.plugin.KStorage;
+
 public interface KChunk {
 
     long world();
@@ -14,6 +16,6 @@ public interface KChunk {
 
     long flags();
 
-    String save();
-    
+    void save(KStorage.KBuffer buffer);
+
 }

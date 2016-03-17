@@ -11,6 +11,8 @@ import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.KOffHeapChunk;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapWorldOrderChunk;
+import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class WorldOrderChunkTest implements KChunkListener {
@@ -18,7 +20,7 @@ public class WorldOrderChunkTest implements KChunkListener {
     private int nbCount = 0;
 
     private interface WorldOrderChunkFactory {
-        KWorldOrderChunk create(String initialPayload);
+        KWorldOrderChunk create(KStorage.KBuffer initialPayload);
     }
 
     @Test
@@ -27,7 +29,7 @@ public class WorldOrderChunkTest implements KChunkListener {
         WorldOrderChunkFactory factory = new WorldOrderChunkFactory() {
 
             @Override
-            public KWorldOrderChunk create(String initialPayload) {
+            public KWorldOrderChunk create(KStorage.KBuffer initialPayload) {
                 return new HeapWorldOrderChunk(-1, -1, -1, selfPointer, initialPayload);
             }
         };
@@ -41,7 +43,7 @@ public class WorldOrderChunkTest implements KChunkListener {
         WorldOrderChunkFactory factory = new WorldOrderChunkFactory() {
 
             @Override
-            public KWorldOrderChunk create(String initialPayload) {
+            public KWorldOrderChunk create(KStorage.KBuffer initialPayload) {
                 return new OffHeapWorldOrderChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, initialPayload);
             }
         };
@@ -74,13 +76,17 @@ public class WorldOrderChunkTest implements KChunkListener {
         }
         Assert.assertTrue(map.size() == 10_000);
 
-        String saved = map.save();
-        KWorldOrderChunk map2 = factory.create(saved);
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        map.save(buffer);
+        KWorldOrderChunk map2 = factory.create(buffer);
         for (long i = 0; i < 10_000; i++) {
             Assert.assertTrue(map2.get(i) == i * 3);
         }
-        String saved2 = map2.save();
-        Assert.assertTrue(PrimitiveHelper.equals(saved, saved2));
+        KStorage.KBuffer buffer2 = Buffer.newHeapBuffer();
+        map2.save(buffer2);
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
+        buffer.free();
+        buffer2.free();
         Assert.assertTrue(nbCount == 1);
     }
 
@@ -100,6 +106,18 @@ public class WorldOrderChunkTest implements KChunkListener {
         if (chunk instanceof KOffHeapChunk) {
             OffHeapWorldOrderChunk.free(((KOffHeapChunk) chunk).addr());
         }
+    }
+
+    private boolean compareBuffers(KStorage.KBuffer buffer, KStorage.KBuffer buffer2) {
+        if (buffer.size() != buffer2.size()) {
+            return false;
+        }
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.read(i) != buffer2.read(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

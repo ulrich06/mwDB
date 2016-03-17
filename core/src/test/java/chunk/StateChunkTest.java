@@ -11,6 +11,8 @@ import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.KOffHeapChunk;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapStateChunk;
+import org.mwdb.plugin.KStorage;
+import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StateChunkTest implements KChunkListener {
@@ -18,7 +20,7 @@ public class StateChunkTest implements KChunkListener {
     private int nbCount = 0;
 
     public interface StateChunkFactory {
-        KStateChunk create(KChunkListener listener, String payload, KChunk origin);
+        KStateChunk create(KChunkListener listener, KStorage.KBuffer payload, KChunk origin);
     }
 
     @Test
@@ -26,7 +28,7 @@ public class StateChunkTest implements KChunkListener {
         StateChunkFactory factory = new StateChunkFactory() {
 
             @Override
-            public KStateChunk create(KChunkListener listener, String payload, KChunk origin) {
+            public KStateChunk create(KChunkListener listener, KStorage.KBuffer payload, KChunk origin) {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
@@ -42,7 +44,7 @@ public class StateChunkTest implements KChunkListener {
         StateChunkFactory factory = new StateChunkFactory() {
 
             @Override
-            public KStateChunk create(KChunkListener listener, String payload, KChunk origin) {
+            public KStateChunk create(KChunkListener listener, KStorage.KBuffer payload, KChunk origin) {
                 return new OffHeapStateChunk(listener, Constants.OFFHEAP_NULL_PTR, payload, origin);
             }
         };
@@ -50,6 +52,18 @@ public class StateChunkTest implements KChunkListener {
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
+    }
+
+    private boolean compareBuffers(KStorage.KBuffer buffer, KStorage.KBuffer buffer2) {
+        if (buffer.size() != buffer2.size()) {
+            return false;
+        }
+        for (int i = 0; i < buffer.size(); i++) {
+            if (buffer.read(i) != buffer2.read(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void saveLoadTest(StateChunkFactory factory) {
@@ -65,11 +79,13 @@ public class StateChunkTest implements KChunkListener {
         chunk.set(3, KType.LONG, 1000l);
         chunk.set(4, KType.INT, 100);
 
-        String savedChunk = chunk.save();
-        KStateChunk chunk2 = factory.create(this, savedChunk, null);
-        String savedChunk2 = chunk2.save();
+        KStorage.KBuffer buffer = Buffer.newHeapBuffer();
+        chunk.save(buffer);
+        KStateChunk chunk2 = factory.create(this, buffer, null);
+        KStorage.KBuffer buffer2 = Buffer.newHeapBuffer();
+        chunk2.save(buffer2);
 
-        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         for (int i = 0; i < 5; i++) {
             if (i == 1) {
@@ -84,12 +100,18 @@ public class StateChunkTest implements KChunkListener {
         chunk.set(6, KType.DOUBLE_ARRAY, new double[]{0.1, 1.1, 2.1, 3.1, 4.1});
         chunk.set(7, KType.INT_ARRAY, new int[]{0, 1, 2, 3, 4});
 
-        savedChunk = chunk.save();
-        free(chunk2);
-        chunk2 = factory.create(this, savedChunk, null);
-        savedChunk2 = chunk2.save();
+        buffer.free();
+        buffer = Buffer.newHeapBuffer();
 
-        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
+        chunk.save(buffer);
+        free(chunk2);
+        chunk2 = factory.create(this, buffer, null);
+
+        buffer2.free();
+        buffer2 = Buffer.newHeapBuffer();
+        chunk2.save(buffer2);
+
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         //init chunk with some maps
         KLongLongMap long2longMap = (KLongLongMap) chunk.getOrCreate(8, KType.LONG_LONG_MAP);
@@ -108,16 +130,21 @@ public class StateChunkTest implements KChunkListener {
         long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
         long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME);
 
-        savedChunk = chunk.save();
+        buffer.free();
+        buffer = Buffer.newHeapBuffer();
+        chunk.save(buffer);
         free(chunk2);
-        chunk2 = factory.create(this, savedChunk, null);
-        savedChunk2 = chunk2.save();
+        chunk2 = factory.create(this, buffer, null);
+
+        buffer2.free();
+        buffer2 = Buffer.newHeapBuffer();
+        chunk2.save(buffer2);
 
         Assert.assertTrue(((KStringLongMap) chunk2.get(9)).size() == 3);
         Assert.assertTrue(((KLongLongMap) chunk2.get(8)).size() == 3);
         Assert.assertTrue(((KLongLongArrayMap) chunk2.get(10)).size() == 4);
 
-        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk2));
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
         Assert.assertTrue(1 == nbCount);
 
         //force reHash
@@ -130,9 +157,17 @@ public class StateChunkTest implements KChunkListener {
         }
 
         KStateChunk chunk3 = factory.create(this, null, chunk);
-        String savedChunk3 = chunk3.save();
-        savedChunk = chunk.save();
-        Assert.assertTrue(PrimitiveHelper.equals(savedChunk, savedChunk3));
+        KStorage.KBuffer buffer3 = Buffer.newHeapBuffer();
+        chunk3.save(buffer3);
+
+        buffer.free();
+        buffer = Buffer.newHeapBuffer();
+        chunk.save(buffer);
+        Assert.assertTrue(compareBuffers(buffer, buffer3));
+
+        buffer3.free();
+        buffer2.free();
+        buffer.free();
 
         free(chunk3);
         free(chunk2);

@@ -4,6 +4,7 @@ package org.mwdb.chunk.offheap;
 import org.mwdb.Constants;
 import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
+import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.PrimitiveHelper;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -248,7 +249,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(long p_world, long p_time, long p_id, byte p_type, String initialPayload, KChunk previousChunk) {
+    public KChunk create(long p_world, long p_time, long p_id, byte p_type, KStorage.KBuffer initialPayload, KChunk previousChunk) {
         KOffHeapChunk newChunk = null;
         switch (p_type) {
             case Constants.STATE_CHUNK:
