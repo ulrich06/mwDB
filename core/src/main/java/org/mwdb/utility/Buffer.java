@@ -1,14 +1,60 @@
 package org.mwdb.utility;
 
 import org.mwdb.Constants;
+import org.mwdb.chunk.offheap.OffHeapByteArray;
 import org.mwdb.plugin.KStorage;
 
 public class Buffer {
-
-    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
-
+    
     public static KStorage.KBuffer newOffHeapBuffer() {
-        return null;
+        return new KStorage.KBuffer() {
+
+            private long bufferPtr = Constants.OFFHEAP_NULL_PTR;
+
+            private int writeCursor = 0;
+
+            private long capacity = 0;
+
+            @Override
+            public void write(Byte b) {
+                if (bufferPtr == Constants.OFFHEAP_NULL_PTR) {
+                    capacity = Constants.MAP_INITIAL_CAPACITY;
+                    bufferPtr = OffHeapByteArray.allocate(capacity);
+                    OffHeapByteArray.set(bufferPtr, writeCursor, b);
+                    writeCursor++;
+                } else if (writeCursor == capacity) {
+                    long newCapacity = capacity << 1;
+                    bufferPtr = OffHeapByteArray.reallocate(bufferPtr, capacity, newCapacity);
+                    capacity = newCapacity;
+                    OffHeapByteArray.set(bufferPtr, writeCursor, b);
+                    writeCursor++;
+                } else {
+                    OffHeapByteArray.set(bufferPtr, writeCursor, b);
+                    writeCursor++;
+                }
+            }
+
+            @Override
+            public byte read(long position) {
+                if (bufferPtr != Constants.OFFHEAP_NULL_PTR && position < capacity) {
+                    return OffHeapByteArray.get(bufferPtr, position);
+                }
+                return -1;
+            }
+
+            @Override
+            public long size() {
+                return writeCursor;
+            }
+
+            @Override
+            public void free() {
+                if (bufferPtr != Constants.OFFHEAP_NULL_PTR) {
+                    OffHeapByteArray.free(bufferPtr);
+                    bufferPtr = Constants.OFFHEAP_NULL_PTR;
+                }
+            }
+        };
     }
 
     public static KStorage.KBuffer newHeapBuffer() {

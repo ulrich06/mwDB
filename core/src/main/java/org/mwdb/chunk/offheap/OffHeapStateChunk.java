@@ -11,8 +11,6 @@ import org.mwdb.utility.Unsafe;
 
 /**
  * @ignore ts
- * Memory layout: all structures are memory blocks of either primitive values (as longs)
- * or pointers to memory blocks
  */
 public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapChunk {
 

@@ -69,7 +69,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         }
     }
 
-    private final void consistencyCheck() {
+    private void consistencyCheck() {
         if (OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V) != elementV_ptr) {
             elementK_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_K);
             elementV_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V);

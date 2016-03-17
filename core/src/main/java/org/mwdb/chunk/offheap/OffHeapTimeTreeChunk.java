@@ -7,7 +7,9 @@ import org.mwdb.chunk.KTreeWalker;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
-
+/**
+ * @ignore ts
+ */
 public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     //constants definition
