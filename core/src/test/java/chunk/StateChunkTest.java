@@ -28,6 +28,7 @@ public class StateChunkTest implements KChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
+
         saveLoadTest(factory);
         protectionTest(factory);
         typeSwitchTest(factory);
@@ -45,10 +46,20 @@ public class StateChunkTest implements KChunkListener {
             }
         };
 
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         saveLoadTest(factory);
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
     private boolean compareBuffers(KBuffer buffer, KBuffer buffer2) {
@@ -170,11 +181,6 @@ public class StateChunkTest implements KChunkListener {
         free(chunk2);
         free(chunk);
 
-//        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
-
     }
 
     private void free(KStateChunk chunk) {
@@ -224,11 +230,6 @@ public class StateChunkTest implements KChunkListener {
         protectionMethod(chunk, KType.LONG_LONG_ARRAY_MAP, "hello", true);
 
         free(chunk);
-
-//        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
 
     }
 
@@ -292,11 +293,6 @@ public class StateChunkTest implements KChunkListener {
         ((KStringLongMap) chunk.getOrCreate(9, KType.STRING_LONG_MAP)).put("100", 100);
 
         free(chunk);
-
-//        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
 
     }
 
@@ -392,11 +388,6 @@ public class StateChunkTest implements KChunkListener {
 
         free(chunk);
         free(chunk2);
-
-//        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
-//        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
 
     }
 
