@@ -5,6 +5,10 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.ArrayStringLongMap;
+import org.mwdb.chunk.offheap.OffHeapByteArray;
+import org.mwdb.chunk.offheap.OffHeapDoubleArray;
+import org.mwdb.chunk.offheap.OffHeapLongArray;
+import org.mwdb.chunk.offheap.OffHeapStringArray;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class StringLongMapTest implements KChunkListener {
@@ -18,9 +22,21 @@ public class StringLongMapTest implements KChunkListener {
 
     @Test
     public void arrayOffHeapTest() {
+
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         org.mwdb.chunk.offheap.ArrayStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1);
         test(map);
         org.mwdb.chunk.offheap.ArrayStringLongMap.free(map.rootAddress());
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
+
     }
 
     /*
