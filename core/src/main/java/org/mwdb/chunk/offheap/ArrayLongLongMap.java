@@ -25,7 +25,6 @@ public class ArrayLongLongMap implements KLongLongMap {
     private static final int INDEX_THRESHOLD = 5;
     private static final int INDEX_ELEMENT_COUNT = 6;
     private static final int INDEX_CAPACITY = 7;
-    private static final int INDEX_ALIGNED = 8;
 
     //long[]
     private long elementK_ptr;
@@ -36,7 +35,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     public ArrayLongLongMap(KChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
-            this.root_array_ptr = OffHeapLongArray.allocate(9);
+            this.root_array_ptr = OffHeapLongArray.allocate(8);
             /** Init long variables */
             //init lock
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_LOCK, 0);
@@ -46,8 +45,6 @@ public class ArrayLongLongMap implements KLongLongMap {
             OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_COUNT, 0);
-            //init aligned
-            OffHeapLongArray.set(this.root_array_ptr, INDEX_ALIGNED, 1);
 
             /** Init Long[] variables */
             //init elementK
@@ -69,7 +66,6 @@ public class ArrayLongLongMap implements KLongLongMap {
             elementV_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_V);
             elementHash_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_HASH);
             elementNext_ptr = OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_NEXT);
-            OffHeapLongArray.set(this.root_array_ptr, INDEX_ALIGNED, 0);
         }
     }
 
@@ -279,7 +275,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     public static long softClone(long srcAddr) {
         // copy root array
-        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 9);
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 8);
         // link elementK array
         long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K);
         OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_K, elementK_ptr);
@@ -302,7 +298,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
 
         // copy root array
-        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 9);
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 8);
         // copy elementK array
         long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K);
         long newElementK_ptr = OffHeapLongArray.cloneArray(elementK_ptr, capacity);

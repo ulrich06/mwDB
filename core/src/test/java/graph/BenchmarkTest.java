@@ -3,7 +3,7 @@ package graph;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.heap.HeapChunkSpace;
-import org.mwdb.chunk.offheap.OffHeapChunkSpace;
+import org.mwdb.chunk.offheap.*;
 import org.mwdb.task.NoopScheduler;
 
 public class BenchmarkTest {
@@ -15,6 +15,11 @@ public class BenchmarkTest {
 
     @Test
     public void offHeapTest() {
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
@@ -94,6 +99,11 @@ public class BenchmarkTest {
                             @Override
                             public void on(Boolean result) {
                                 System.out.println("Graph disconnected");
+
+                                System.out.println(OffHeapByteArray.alloc_counter);
+                                System.out.println(OffHeapDoubleArray.alloc_counter);
+                                System.out.println(OffHeapLongArray.alloc_counter);
+                                System.out.println(OffHeapStringArray.alloc_counter);
                             }
                         });
 
