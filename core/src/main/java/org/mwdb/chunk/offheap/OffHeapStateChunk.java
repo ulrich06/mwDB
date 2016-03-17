@@ -4,7 +4,6 @@ import org.mwdb.Constants;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
-import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
@@ -224,6 +223,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 //        OffHeapLongArray.free(elementNext_ptr);
 //        OffHeapLongArray.free(elementHash_ptr);
 //        OffHeapLongArray.free(elementType_ptr);
+
 
 //        // increase the copy on write counters
 //        for (long i = 0; i < elementCount; i++) {
