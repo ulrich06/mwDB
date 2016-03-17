@@ -9,12 +9,12 @@ import org.mwdb.manager.NoopScheduler;
 
 public class BenchmarkTest {
 
-    @Test
+    //@Test
     public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
-    @Test
+    //@Test
     public void offHeapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }
