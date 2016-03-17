@@ -52,7 +52,8 @@ public class ArrayStringLongMap implements KStringLongMap {
 
             /** Init Long[] variables */
             //init elementV
-            elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
+            elementV_ptr = OffHeapLongArray.allocate(initialCapacity + 1); // cow counter + capacity
+            OffHeapLongArray.set(elementV_ptr, 0, 0); //init cow counter
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_V, elementV_ptr);
             //init elementK_H
             elementK_H_ptr = OffHeapLongArray.allocate(initialCapacity);
@@ -102,7 +103,7 @@ public class ArrayStringLongMap implements KStringLongMap {
             //optimization to avoid string comparison for all collisions
             if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
                 if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
-                    result = OffHeapLongArray.get(elementV_ptr, m);
+                    result = OffHeapLongArray.get(elementV_ptr + 8, m);
                     break;
                 }
             }
@@ -145,7 +146,7 @@ public class ArrayStringLongMap implements KStringLongMap {
         for (long i = 0; i < elementCount; i++) {
             String loopKey = OffHeapStringArray.get(elementK_ptr, i);
             if (loopKey != null) {
-                callback.on(loopKey, OffHeapLongArray.get(elementV_ptr, i));
+                callback.on(loopKey, OffHeapLongArray.get(elementV_ptr + 8, i));
             }
         }
 
@@ -166,20 +167,54 @@ public class ArrayStringLongMap implements KStringLongMap {
     }
 
     public static void free(long addr) {
-        long capacity = OffHeapLongArray.get(addr, INDEX_CAPACITY);
-        //free String[]
-        OffHeapStringArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K), capacity);
-        //free all long[]
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K_H));
-        //free master array
-        OffHeapLongArray.free(addr);
+        long thisCowCounter = decrementCopyOnWriteCounter(addr);
+        if (thisCowCounter == 0) {
+            long capacity = OffHeapLongArray.get(addr, INDEX_CAPACITY);
+            //free String[]
+            OffHeapStringArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K), capacity);
+            //free all long[]
+            OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_V));
+            OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_NEXT));
+            OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_HASH));
+            OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_ELEMENT_K_H));
+            //free master array
+            OffHeapLongArray.free(addr);
+        } else {
+            incrementCopyOnWriteCounter(addr);
+        }
     }
 
     @Override
     public final void put(String key, long value) {
+        long thisCowCounter = decrementCopyOnWriteCounter(root_array_ptr);
+        if (thisCowCounter > 0) {
+            /** all fields must be copied: real deep clone */
+            long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+
+            // the root array itself is already copied
+            // copy elementK array
+            long newElementK_ptr = OffHeapStringArray.cloneArray(elementK_ptr, capacity);
+            OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, newElementK_ptr);
+            // copy elementV array
+            long newElementV_ptr = OffHeapLongArray.cloneArray(elementV_ptr, capacity + 1);
+            OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, newElementV_ptr);
+            // copy elementKHash array
+            long newElementKHash_ptr = OffHeapLongArray.cloneArray(elementK_H_ptr, capacity);
+            OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K_H, newElementKHash_ptr);
+            // copy elementNext array
+            long newElementNext_ptr = OffHeapLongArray.cloneArray(elementNext_ptr, capacity);
+            OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, newElementNext_ptr);
+            // copy elementHash array
+            long newElementHash_ptr = OffHeapLongArray.cloneArray(elementHash_ptr, capacity);
+            OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, newElementHash_ptr);
+
+            // cow counter
+            OffHeapLongArray.set(newElementV_ptr, 0, 1);
+
+        } else {
+            incrementCopyOnWriteCounter(root_array_ptr);
+        }
+
         //compute the hash of the key
         long hashedKey = PrimitiveHelper.stringHash(key);
 
@@ -211,7 +246,7 @@ public class ArrayStringLongMap implements KStringLongMap {
                 elementK_ptr = OffHeapStringArray.reallocate(elementK_ptr, capacity, newCapacity);
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
                 //reallocate the long[] values
-                elementV_ptr = OffHeapLongArray.reallocate(elementV_ptr, capacity, newCapacity);
+                elementV_ptr = OffHeapLongArray.reallocate(elementV_ptr, capacity + 1, newCapacity + 1);
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, elementV_ptr);
                 elementK_H_ptr = OffHeapLongArray.reallocate(elementK_H_ptr, capacity, newCapacity);
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K_H, elementK_H_ptr);
@@ -247,9 +282,9 @@ public class ArrayStringLongMap implements KStringLongMap {
             OffHeapLongArray.set(elementK_H_ptr, count, hashedKey);
             //set value or index if null
             if (value == Constants.NULL_LONG) {
-                OffHeapLongArray.set(elementV_ptr, count, count);
+                OffHeapLongArray.set(elementV_ptr + 8, count, count);
             } else {
-                OffHeapLongArray.set(elementV_ptr, count, value);
+                OffHeapLongArray.set(elementV_ptr + 8, count, value);
             }
             long currentHashedElemIndex = OffHeapLongArray.get(elementHash_ptr, hashIndex);
             if (currentHashedElemIndex != -1) {
@@ -262,9 +297,9 @@ public class ArrayStringLongMap implements KStringLongMap {
             //inform the listener
             this.listener.declareDirty(null);
         } else {
-            if (OffHeapLongArray.get(elementV_ptr, entry) != value && value != Constants.NULL_LONG) {
+            if (OffHeapLongArray.get(elementV_ptr + 8, entry) != value && value != Constants.NULL_LONG) {
                 //setValue
-                OffHeapLongArray.set(elementV_ptr, entry, value);
+                OffHeapLongArray.set(elementV_ptr + 8, entry, value);
                 this.listener.declareDirty(null);
             }
         }
@@ -277,12 +312,46 @@ public class ArrayStringLongMap implements KStringLongMap {
         return root_array_ptr;
     }
 
+    public static long incrementCopyOnWriteCounter(long addr) {
+        long elemV_ptr = OffHeapLongArray.get(addr, INDEX_ELEMENT_V);
+        return unsafe.getAndAddLong(null, elemV_ptr, 1) + 1;
+    }
+
+    public static long decrementCopyOnWriteCounter(long addr) {
+        long elemV_ptr = OffHeapLongArray.get(addr, INDEX_ELEMENT_V);
+        return unsafe.getAndAddLong(null, elemV_ptr, -1) - 1;
+    }
+
+
+    public static long softClone(long srcAddr) {
+        // copy root array
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 9);
+        // link elementK array
+        long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K); // OffHeapStringArray
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_K, elementK_ptr);
+        // link elementV array
+        long elementV_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_V);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_V, elementV_ptr);
+        // link elementKHash array
+        long elementKHash_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_K_H);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_K_H, elementKHash_ptr);
+        // link elementNext array
+        long elementNext_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_NEXT);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+        // copy elementHash array
+        long elementHashA_ptr = OffHeapLongArray.get(srcAddr, INDEX_ELEMENT_HASH);
+        OffHeapLongArray.set(newSrcAddr, INDEX_ELEMENT_HASH, elementHashA_ptr);
+
+        return newSrcAddr;
+    }
+
+    /*
     public static long cloneMap(long srcAddr) {
         // capacity
         long capacity = OffHeapLongArray.get(srcAddr, INDEX_CAPACITY);
 
         // copy root array
-        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 9);
+        long newSrcAddr = OffHeapLongArray.cloneArray(srcAddr, 10);
         // copy elementK array
         long elementK_ptr = OffHeapLongArray.get(newSrcAddr, INDEX_ELEMENT_K); // OffHeapStringArray
         long newElementK_ptr = OffHeapStringArray.cloneArray(elementK_ptr, capacity);
@@ -306,4 +375,6 @@ public class ArrayStringLongMap implements KStringLongMap {
 
         return newSrcAddr;
     }
+    */
+
 }
