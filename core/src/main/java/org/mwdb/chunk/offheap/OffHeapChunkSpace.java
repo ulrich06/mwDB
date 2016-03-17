@@ -32,7 +32,6 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     private final long _elementNext;
     private final long _elementHash;
     private final long _elementValues;
-
     private final long _elementHashLock;
 
     private final AtomicReference<InternalDirtyStateList> _dirtyState;
@@ -56,6 +55,10 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
             this._iterationCounter = new AtomicLong(0);
             this._max = dirtiesCapacity;
             this._parent = p_parent;
+        }
+
+        public void free() {
+            OffHeapLongArray.free(_dirtyElements);
         }
 
         @Override
@@ -100,6 +103,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         public long size() {
             return this._nextCounter.get();
         }
+
     }
 
     public OffHeapChunkSpace(long initialCapacity, int saveBatchSize) {
@@ -501,8 +505,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void free() {
-        for(long i=0;i<this._elementCount.get();i++){
-            long previousPtr = OffHeapLongArray.get(_elementValues,i);
+        for (long i = 0; i < this._elementCount.get(); i++) {
+            long previousPtr = OffHeapLongArray.get(_elementValues, i);
             byte chunkType = (byte) OffHeapLongArray.get(previousPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
             switch (chunkType) {
                 case Constants.STATE_CHUNK:
@@ -516,6 +520,11 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                     break;
             }
         }
+        _dirtyState.get().free();
+        OffHeapLongArray.free(_elementNext);
+        OffHeapLongArray.free(_elementHash);
+        OffHeapLongArray.free(_elementValues);
+        OffHeapLongArray.free(_elementHashLock);
     }
 
     @Override

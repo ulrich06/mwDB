@@ -177,11 +177,12 @@ public class Graph implements KGraph {
         if (_isConnected.compareAndSet(true, false)) {
             //JS workaround for closure encapsulation and this variable
             final Graph selfPointer = this;
+            //first we stop scheduler, no tasks will be executed anymore
+            selfPointer._scheduler.stop();
             save(new KCallback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
                     //TODO maybe change to asynchronous code
-                    selfPointer._scheduler.stop();
                     selfPointer._space.free();
                     //_blas.disconnect();
                     if (selfPointer._storage != null) {
