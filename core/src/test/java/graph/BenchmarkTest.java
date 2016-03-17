@@ -28,13 +28,18 @@ public class BenchmarkTest {
             @Override
             public void on(Boolean result) {
                 final long before = System.currentTimeMillis();
-                KNode node = graph.newNode(0, 0);
+
+                KNode tempNode = graph.newNode(0, 0);
+                long node = tempNode.id();
+                tempNode.free();
+
                 final KDeferCounter counter = graph.counter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
                     if (i % 1000 == 0) {
-                        node.free();
-                        node = graph.newNode(0, 0);
+                        tempNode = graph.newNode(0, 0);
+                        node = tempNode.id();
+                        tempNode.free();
                     }
 
                     if (i % 1_000_000 == 0) {
@@ -43,7 +48,7 @@ public class BenchmarkTest {
 
                     final double value = i * 0.3;
                     final long time = timeOrigin + i;
-                    graph.lookup(0, time, node.id(), new KCallback<KNode>() {
+                    graph.lookup(0, time, node, new KCallback<KNode>() {
                         @Override
                         public void on(KNode timedNode) {
                             timedNode.attSet("value", KType.DOUBLE, value);
