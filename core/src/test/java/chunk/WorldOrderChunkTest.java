@@ -9,9 +9,7 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
 import org.mwdb.chunk.heap.HeapWorldOrderChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
-import org.mwdb.chunk.offheap.KOffHeapChunk;
-import org.mwdb.chunk.offheap.OffHeapLongArray;
-import org.mwdb.chunk.offheap.OffHeapWorldOrderChunk;
+import org.mwdb.chunk.offheap.*;
 import org.mwdb.utility.Buffer;
 
 public class WorldOrderChunkTest implements KChunkListener {
@@ -38,6 +36,12 @@ public class WorldOrderChunkTest implements KChunkListener {
 
     @Test
     public void offHeapTest() {
+
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         final KChunkListener selfPointer = this;
         WorldOrderChunkFactory factory = new WorldOrderChunkFactory() {
 
@@ -48,6 +52,12 @@ public class WorldOrderChunkTest implements KChunkListener {
         };
         orderTest(factory);
         saveLoadTest(factory);
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
+
     }
 
     private void orderTest(WorldOrderChunkFactory factory) {
@@ -86,6 +96,10 @@ public class WorldOrderChunkTest implements KChunkListener {
         Assert.assertTrue(compareBuffers(buffer, buffer2));
         buffer.free();
         buffer2.free();
+
+        free(map);
+        free(map2);
+
         Assert.assertTrue(nbCount == 1);
     }
 
