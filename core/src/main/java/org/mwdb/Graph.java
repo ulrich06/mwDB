@@ -182,6 +182,7 @@ public class Graph implements KGraph {
                 public void on(Boolean result) {
                     //TODO maybe change to asynchronous code
                     selfPointer._scheduler.stop();
+                    selfPointer._space.free();
                     //_blas.disconnect();
                     if (selfPointer._storage != null) {
                         selfPointer._storage.disconnect(new KCallback<Boolean>() {

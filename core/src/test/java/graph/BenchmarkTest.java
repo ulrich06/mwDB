@@ -90,6 +90,14 @@ public class BenchmarkTest {
                         });
 */
 
+                        graph.disconnect(new KCallback<Boolean>() {
+                            @Override
+                            public void on(Boolean result) {
+                                System.out.println("Graph disconnected");
+                            }
+                        });
+
+
                     }
                 });
 

@@ -501,7 +501,21 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void free() {
-        //TODO
+        for(long i=0;i<this._elementCount.get();i++){
+            long previousPtr = OffHeapLongArray.get(_elementValues,i);
+            byte chunkType = (byte) OffHeapLongArray.get(previousPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+            switch (chunkType) {
+                case Constants.STATE_CHUNK:
+                    OffHeapStateChunk.free(previousPtr);
+                    break;
+                case Constants.TIME_TREE_CHUNK:
+                    OffHeapTimeTreeChunk.free(previousPtr);
+                    break;
+                case Constants.WORLD_ORDER_CHUNK:
+                    OffHeapWorldOrderChunk.free(previousPtr);
+                    break;
+            }
+        }
     }
 
     @Override
