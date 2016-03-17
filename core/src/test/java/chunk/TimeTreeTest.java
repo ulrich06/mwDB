@@ -10,9 +10,7 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.heap.HeapTimeTreeChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
-import org.mwdb.chunk.offheap.KOffHeapChunk;
-import org.mwdb.chunk.offheap.OffHeapLongArray;
-import org.mwdb.chunk.offheap.OffHeapTimeTreeChunk;
+import org.mwdb.chunk.offheap.*;
 import org.mwdb.utility.Buffer;
 
 public class TimeTreeTest implements KChunkListener {
@@ -39,6 +37,12 @@ public class TimeTreeTest implements KChunkListener {
 
     @Test
     public void offHeapTest() {
+
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
@@ -49,6 +53,12 @@ public class TimeTreeTest implements KChunkListener {
         previousOrEqualsTest(factory);
         saveLoad(factory);
         massiveTest(factory);
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
+
     }
 
     private void previousOrEqualsTest(KTimeTreeChunkFactory factory) {

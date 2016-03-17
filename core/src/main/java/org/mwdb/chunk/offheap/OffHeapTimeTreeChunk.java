@@ -84,7 +84,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     public static void free(long addr) {
         OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_K));
         OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_META));
-        OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_COLORS));
+        OffHeapByteArray.free(OffHeapLongArray.get(addr, INDEX_COLORS));
         OffHeapLongArray.free(addr);
     }
 
