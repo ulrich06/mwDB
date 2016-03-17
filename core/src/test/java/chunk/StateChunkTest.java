@@ -46,9 +46,9 @@ public class StateChunkTest implements KChunkListener {
                 return new OffHeapStateChunk(listener, Constants.OFFHEAP_NULL_PTR, payload, origin);
             }
         };
-//        saveLoadTest(factory);
-//        protectionTest(factory);
-//        typeSwitchTest(factory);
+        saveLoadTest(factory);
+        protectionTest(factory);
+        typeSwitchTest(factory);
         cloneTest(factory);
     }
 
