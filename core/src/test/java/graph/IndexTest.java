@@ -111,6 +111,41 @@ public class IndexTest {
                     }
                 });
 
+                //unIndex the node @t1
+                graph.unindex("nodes", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
+                    @Override
+                    public void on(Boolean o) {
+                        counter[0]++;
+                    }
+                });
+
+                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode>() {
+                    @Override
+                    public void on(KNode kNode) {
+                        counter[0]++;
+                        Assert.assertTrue(kNode == null);
+                    }
+                });
+
+                //reIndex
+                graph.index("nodes", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
+                    @Override
+                    public void on(Boolean o) {
+                        counter[0]++;
+                    }
+                });
+
+                //should work again
+                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode>() {
+                    @Override
+                    public void on(KNode kNode) {
+                        counter[0]++;
+                        Assert.assertTrue(kNode != null);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                    }
+                });
+
+
                 //local index usage
                 KNode node_index = graph.newNode(0, 0);
                 node_index.index("children", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
@@ -131,7 +166,7 @@ public class IndexTest {
 
             }
         });
-        Assert.assertTrue(counter[0] == 11);
+        Assert.assertTrue(counter[0] == 15);
     }
 
 }
