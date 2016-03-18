@@ -505,7 +505,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     @Override
     public void free() {
-        for (long i = 0; i < this._elementCount.get(); i++) {
+        for (long i = 0; i < this._capacity; i++) {
             long previousPtr = OffHeapLongArray.get(_elementValues, i);
             if (previousPtr != Constants.OFFHEAP_NULL_PTR) {
                 byte chunkType = (byte) OffHeapLongArray.get(previousPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
