@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.chunk.KStack;
 import org.mwdb.chunk.heap.FixedStack;
-import org.mwdb.chunk.offheap.OffHeapFixedStack;
+import org.mwdb.chunk.offheap.*;
 
 public class FixedStackTest {
     private static final int CAPACITY = 15;
@@ -18,7 +18,19 @@ public class FixedStackTest {
 
     @Test
     public void offHeapFixedStackTest() {
-        test(new OffHeapFixedStack(CAPACITY, Constants.OFFHEAP_NULL_PTR));
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
+        OffHeapFixedStack stack = new OffHeapFixedStack(CAPACITY, Constants.OFFHEAP_NULL_PTR);
+        test(stack);
+        stack.free();
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
     public void test(KStack stack) {
