@@ -306,111 +306,116 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
     @Override
     public final void save(KBuffer buffer) {
-        long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
-        Base64.encodeLongToBuffer(elementCount, buffer);
-        for (int i = 0; i < elementCount; i++) {
-            if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
-                long loopKey = OffHeapLongArray.get(elementK_ptr, i);
-                Object loopValue = internal_getElementV(i);
-                if (loopValue != null) {
-                    buffer.write(Constants.CHUNK_SEP);
-                    Base64.encodeLongToBuffer(loopKey, buffer);
-                    buffer.write(Constants.CHUNK_SUB_SEP);
-                    /** Encode to type of elem, for unSerialization */
-                    byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
-                    Base64.encodeIntToBuffer(elementType, buffer);
-                    buffer.write(Constants.CHUNK_SUB_SEP);
-                    switch (elementType) {
-                        /** Primitive Types */
-                        case KType.STRING:
-                            Base64.encodeStringToBuffer((String) loopValue, buffer);
-                            break;
-                        case KType.BOOL:
-                            if ((boolean) loopValue) {
-                                buffer.write((byte) '1');
-                            } else {
-                                buffer.write((byte) '0');
-                            }
-                            break;
-                        case KType.LONG:
-                            Base64.encodeLongToBuffer((long) loopValue, buffer);
-                            break;
-                        case KType.DOUBLE:
-                            Base64.encodeDoubleToBuffer((double) loopValue, buffer);
-                            break;
-                        case KType.INT:
-                            Base64.encodeIntToBuffer((int) loopValue, buffer);
-                            break;
-                        /** Arrays */
-                        case KType.DOUBLE_ARRAY:
-                            double[] castedDoubleArr = (double[]) loopValue;
-                            Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
-                            for (int j = 0; j < castedDoubleArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
-                            }
-                            break;
-                        case KType.LONG_ARRAY:
-                            long[] castedLongArr = (long[]) loopValue;
-                            Base64.encodeIntToBuffer(castedLongArr.length, buffer);
-                            for (int j = 0; j < castedLongArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                Base64.encodeLongToBuffer(castedLongArr[j], buffer);
-                            }
-                            break;
-                        case KType.INT_ARRAY:
-                            int[] castedIntArr = (int[]) loopValue;
-                            Base64.encodeIntToBuffer(castedIntArr.length, buffer);
-                            for (int j = 0; j < castedIntArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                Base64.encodeIntToBuffer(castedIntArr[j], buffer);
-                            }
-                            break;
-                        /** Maps */
-                        case KType.STRING_LONG_MAP:
-                            KStringLongMap castedStringLongMap = (KStringLongMap) loopValue;
-                            Base64.encodeLongToBuffer(castedStringLongMap.size(), buffer);
-                            castedStringLongMap.each(new KStringLongMapCallBack() {
-                                @Override
-                                public void on(final String key, final long value) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                    Base64.encodeStringToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
-                                    Base64.encodeLongToBuffer(value, buffer);
+        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ; // lock
+        try {
+            long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
+            Base64.encodeLongToBuffer(elementCount, buffer);
+            for (int i = 0; i < elementCount; i++) {
+                if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
+                    long loopKey = OffHeapLongArray.get(elementK_ptr, i);
+                    Object loopValue = internal_getElementV(i);
+                    if (loopValue != null) {
+                        buffer.write(Constants.CHUNK_SEP);
+                        Base64.encodeLongToBuffer(loopKey, buffer);
+                        buffer.write(Constants.CHUNK_SUB_SEP);
+                        /** Encode to type of elem, for unSerialization */
+                        byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
+                        Base64.encodeIntToBuffer(elementType, buffer);
+                        buffer.write(Constants.CHUNK_SUB_SEP);
+                        switch (elementType) {
+                            /** Primitive Types */
+                            case KType.STRING:
+                                Base64.encodeStringToBuffer((String) loopValue, buffer);
+                                break;
+                            case KType.BOOL:
+                                if ((boolean) loopValue) {
+                                    buffer.write((byte) '1');
+                                } else {
+                                    buffer.write((byte) '0');
                                 }
-                            });
-                            break;
-                        case KType.LONG_LONG_MAP:
-                            KLongLongMap castedLongLongMap = (KLongLongMap) loopValue;
-                            Base64.encodeLongToBuffer(castedLongLongMap.size(), buffer);
-                            castedLongLongMap.each(new KLongLongMapCallBack() {
-                                @Override
-                                public void on(final long key, final long value) {
+                                break;
+                            case KType.LONG:
+                                Base64.encodeLongToBuffer((long) loopValue, buffer);
+                                break;
+                            case KType.DOUBLE:
+                                Base64.encodeDoubleToBuffer((double) loopValue, buffer);
+                                break;
+                            case KType.INT:
+                                Base64.encodeIntToBuffer((int) loopValue, buffer);
+                                break;
+                            /** Arrays */
+                            case KType.DOUBLE_ARRAY:
+                                double[] castedDoubleArr = (double[]) loopValue;
+                                Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
+                                for (int j = 0; j < castedDoubleArr.length; j++) {
                                     buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                    Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
-                                    Base64.encodeLongToBuffer(value, buffer);
+                                    Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                                 }
-                            });
-                            break;
-                        case KType.LONG_LONG_ARRAY_MAP:
-                            KLongLongArrayMap castedLongLongArrayMap = (KLongLongArrayMap) loopValue;
-                            Base64.encodeLongToBuffer(castedLongLongArrayMap.size(), buffer);
-                            castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
-                                @Override
-                                public void on(final long key, final long value) {
+                                break;
+                            case KType.LONG_ARRAY:
+                                long[] castedLongArr = (long[]) loopValue;
+                                Base64.encodeIntToBuffer(castedLongArr.length, buffer);
+                                for (int j = 0; j < castedLongArr.length; j++) {
                                     buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                                    Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
-                                    Base64.encodeLongToBuffer(value, buffer);
+                                    Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                                 }
-                            });
-                            break;
-                        default:
-                            break;
+                                break;
+                            case KType.INT_ARRAY:
+                                int[] castedIntArr = (int[]) loopValue;
+                                Base64.encodeIntToBuffer(castedIntArr.length, buffer);
+                                for (int j = 0; j < castedIntArr.length; j++) {
+                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    Base64.encodeIntToBuffer(castedIntArr[j], buffer);
+                                }
+                                break;
+                            /** Maps */
+                            case KType.STRING_LONG_MAP:
+                                KStringLongMap castedStringLongMap = (KStringLongMap) loopValue;
+                                Base64.encodeLongToBuffer(castedStringLongMap.size(), buffer);
+                                castedStringLongMap.each(new KStringLongMapCallBack() {
+                                    @Override
+                                    public void on(final String key, final long value) {
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        Base64.encodeStringToBuffer(key, buffer);
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        Base64.encodeLongToBuffer(value, buffer);
+                                    }
+                                });
+                                break;
+                            case KType.LONG_LONG_MAP:
+                                KLongLongMap castedLongLongMap = (KLongLongMap) loopValue;
+                                Base64.encodeLongToBuffer(castedLongLongMap.size(), buffer);
+                                castedLongLongMap.each(new KLongLongMapCallBack() {
+                                    @Override
+                                    public void on(final long key, final long value) {
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        Base64.encodeLongToBuffer(key, buffer);
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        Base64.encodeLongToBuffer(value, buffer);
+                                    }
+                                });
+                                break;
+                            case KType.LONG_LONG_ARRAY_MAP:
+                                KLongLongArrayMap castedLongLongArrayMap = (KLongLongArrayMap) loopValue;
+                                Base64.encodeLongToBuffer(castedLongLongArrayMap.size(), buffer);
+                                castedLongLongArrayMap.each(new KLongLongArrayMapCallBack() {
+                                    @Override
+                                    public void on(final long key, final long value) {
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        Base64.encodeLongToBuffer(key, buffer);
+                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        Base64.encodeLongToBuffer(value, buffer);
+                                    }
+                                });
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
+        } finally {
+            while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) ; // unlock
         }
     }
 
