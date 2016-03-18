@@ -298,7 +298,7 @@ public class Node implements KNode {
                         KNode resolvedNode = resolved[i];
                         KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
                         boolean exact = true;
-                        for (int j = 0; j < flatQuery.attributes.length; j++) {
+                        for (int j = 0; j < flatQuery.size; j++) {
                             Object obj = resolvedState.get(flatQuery.attributes[j]);
                             if (flatQuery.values[j] == null) {
                                 if (obj != null) {
