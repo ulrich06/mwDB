@@ -211,6 +211,11 @@ public class ArrayStringLongMap implements KStringLongMap {
             long newElementHash_ptr = OffHeapLongArray.cloneArray(elementHash_ptr, capacity);
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, newElementHash_ptr);
 
+            elementK_ptr = newElementK_ptr;
+            elementV_ptr = newElementV_ptr;
+            elementHash_ptr = newElementHash_ptr;
+            elementNext_ptr = newElementNext_ptr;
+
             // cow counter
             OffHeapLongArray.set(newElementV_ptr, 0, 1);
         } else {
