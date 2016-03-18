@@ -184,6 +184,11 @@ public class ArrayStringLongMap implements KStringLongMap {
 
     @Override
     public final void put(String key, long value) {
+
+        //cas to put a lock flag
+        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
+        consistencyCheck();
+
         long thisCowCounter = decrementCopyOnWriteCounter(root_array_ptr);
         if (thisCowCounter > 0) {
             /** all fields must be copied: real deep clone */
@@ -214,10 +219,6 @@ public class ArrayStringLongMap implements KStringLongMap {
 
         //compute the hash of the key
         long hashedKey = PrimitiveHelper.stringHash(key);
-
-        //cas to put a lock flag
-        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
-        consistencyCheck();
 
         long entry = -1;
         long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
