@@ -8,4 +8,6 @@ public interface KChunkIterator {
 
     long size();
 
+    void free();
+
 }

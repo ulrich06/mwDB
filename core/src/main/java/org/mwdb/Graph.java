@@ -220,6 +220,7 @@ public class Graph implements KGraph {
 
     private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
+            dirtyIterator.free();
             if (PrimitiveHelper.isDefined(callback)) {
                 callback.on(null);
             }
@@ -277,6 +278,7 @@ public class Graph implements KGraph {
                     for (int i = 0; i < finalToSaveValues.length; i++) {
                         finalToSaveValues[i].free();
                     }
+                    dirtyIterator.free();
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(result);
                     }

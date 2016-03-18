@@ -92,6 +92,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         public long size() {
             return this._nextCounter.get();
         }
+
+        @Override
+        public void free() {
+            //noop
+        }
     }
 
     public HeapChunkSpace(int initialCapacity, int saveBatchSize) {
