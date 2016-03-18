@@ -3,7 +3,7 @@ package graph;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.chunk.offheap.OffHeapChunkSpace;
+import org.mwdb.chunk.offheap.*;
 import org.mwdb.task.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 
@@ -16,7 +16,17 @@ public class IndexTest {
 
     @Test
     public void offHeapTest() {
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10000, 20)).buildGraph());
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
     private void test(KGraph graph) {
@@ -160,6 +170,13 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                    }
+                });
+
+                graph.disconnect(new KCallback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //end of the test
                     }
                 });
 
