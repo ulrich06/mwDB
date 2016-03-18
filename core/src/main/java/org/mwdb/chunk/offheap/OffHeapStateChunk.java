@@ -415,7 +415,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
                 }
             }
         } finally {
-            while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) ; // unlock
+            if (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
     }
 
@@ -868,7 +870,9 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         try {
             internal_set(index, elemType, elem, true);
         } finally {
-            while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) ; // unlock
+            if (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
     }
 
