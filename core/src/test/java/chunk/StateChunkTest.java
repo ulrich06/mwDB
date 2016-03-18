@@ -386,6 +386,11 @@ public class StateChunkTest implements KChunkListener {
         Assert.assertTrue(((KStringLongMap) chunk2.get(10)).getValue("100") == 200);
         Assert.assertTrue(((KStringLongMap) chunk.get(10)).getValue("100") == 100);
 
+        // add something new instead of replacing something -> triggers the shallow copy of the clone
+        chunk2.set(11, KType.STRING, "newString");
+        Assert.assertTrue(chunk2.get(11).equals("newString"));
+
+
         free(chunk);
         free(chunk2);
 
