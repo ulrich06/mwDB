@@ -8,6 +8,10 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMap;
 import org.mwdb.chunk.KLongLongMapCallBack;
 import org.mwdb.chunk.heap.ArrayLongLongMap;
+import org.mwdb.chunk.offheap.OffHeapByteArray;
+import org.mwdb.chunk.offheap.OffHeapDoubleArray;
+import org.mwdb.chunk.offheap.OffHeapLongArray;
+import org.mwdb.chunk.offheap.OffHeapStringArray;
 
 public class LongLongMapTest implements KChunkListener {
 
@@ -20,7 +24,20 @@ public class LongLongMapTest implements KChunkListener {
 
     @Test
     public void arrayOffHeapTest() {
-        test(new org.mwdb.chunk.offheap.ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY,-1));
+        OffHeapByteArray.alloc_counter = 0;
+        OffHeapDoubleArray.alloc_counter = 0;
+        OffHeapLongArray.alloc_counter = 0;
+        OffHeapStringArray.alloc_counter = 0;
+
+        org.mwdb.chunk.offheap.ArrayLongLongMap map = new org.mwdb.chunk.offheap.ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY,-1);
+        org.mwdb.chunk.offheap.ArrayLongLongMap.incrementCopyOnWriteCounter(map.rootAddress());
+        test(map);
+        org.mwdb.chunk.offheap.ArrayLongLongMap.free(map.rootAddress());
+
+        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
     private void test(KLongLongMap map) {
