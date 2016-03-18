@@ -1,5 +1,6 @@
 package graph;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.heap.HeapChunkSpace;
@@ -100,10 +101,10 @@ public class BenchmarkTest {
                             public void on(Boolean result) {
                                 System.out.println("Graph disconnected");
 
-                                System.out.println(OffHeapByteArray.alloc_counter);
-                                System.out.println(OffHeapDoubleArray.alloc_counter);
-                                System.out.println(OffHeapLongArray.alloc_counter);
-                                System.out.println(OffHeapStringArray.alloc_counter);
+                                Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+                                Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+                                Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+                                Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
                             }
                         });
 
