@@ -20,7 +20,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
      */
     private final long _capacity;
     private final long _saveBatchSize;
-    private final KStack _lru;
+    private final OffHeapFixedStack _lru;
 
     private KGraph _graph;
 
@@ -525,6 +525,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         OffHeapLongArray.free(_elementHash);
         OffHeapLongArray.free(_elementValues);
         OffHeapLongArray.free(_elementHashLock);
+        _lru.free();
     }
 
     @Override
