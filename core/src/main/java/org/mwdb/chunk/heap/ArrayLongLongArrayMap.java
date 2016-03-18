@@ -186,6 +186,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             if (!aligned) {
                 //clone the state
                 state.set(state.get().clone());
+                internalState = state.get();
                 aligned = true;
             }
 

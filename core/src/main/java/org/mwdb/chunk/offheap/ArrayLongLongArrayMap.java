@@ -25,6 +25,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
     private static final int INDEX_THRESHOLD = 5;
     private static final int INDEX_ELEMENT_COUNT = 6;
     private static final int INDEX_CAPACITY = 7;
+    private static final int INDEX_ELEMENT_DELETED = 8;
 
     //long[]
     private long elementK_ptr;
@@ -35,7 +36,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
     public ArrayLongLongArrayMap(KChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
-            this.root_array_ptr = OffHeapLongArray.allocate(8);
+            this.root_array_ptr = OffHeapLongArray.allocate(9);
             /** Init long variables */
             //init lock
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_LOCK, 0);
@@ -45,6 +46,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_COUNT, 0);
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_DELETED, 0);
 
             /** Init Long[] variables */
             //init elementK
@@ -90,7 +92,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         int resultIndex = 0;
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         while (m != -1) {
-            if (key == OffHeapLongArray.get(elementK_ptr, m)) {
+            if (key == OffHeapLongArray.get(elementK_ptr, m) && OffHeapLongArray.get(elementV_ptr + 8, m) != Constants.NULL_LONG) {
                 if (resultIndex == capacity) {
                     if (capacity == 0) {
                         result = new long[1];
@@ -117,7 +119,14 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         if (resultIndex == 0) {
             return new long[0];
         } else {
-            return result;
+            if (resultIndex == capacity) {
+                return result;
+            } else {
+                //shrink result
+                long[] shrinkedResult = new long[resultIndex];
+                System.arraycopy(result, 0, shrinkedResult, 0, resultIndex);
+                return shrinkedResult;
+            }
         }
     }
 
@@ -143,12 +152,42 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
     @Override
     public long size() {
-        return OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT);
+        return OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_COUNT) - OffHeapLongArray.get(this.root_array_ptr, INDEX_ELEMENT_DELETED);
     }
 
     @Override
     public void remove(long key, long value) {
-        throw new RuntimeException("Not implemented yet!!!");
+        //cas to put a lock flag
+        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
+        consistencyCheck();
+        try {
+            long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
+            long hashIndex = PrimitiveHelper.longHash(key, capacity);
+            long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+            long previousM = Constants.OFFHEAP_NULL_PTR;
+            while (m != Constants.OFFHEAP_NULL_PTR) {
+                if (key == OffHeapLongArray.get(elementK_ptr, m) && value == OffHeapLongArray.get(elementV_ptr + 8, m)) {
+                    OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DELETED, OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DELETED) + 1);
+                    OffHeapLongArray.set(elementK_ptr, m, Constants.NULL_LONG);
+                    OffHeapLongArray.set(elementV_ptr + 8, m, Constants.NULL_LONG);
+                    if (previousM == -1) {
+                        //we are in the top of hashFunction
+                        OffHeapLongArray.set(elementHash_ptr, hashIndex, OffHeapLongArray.get(elementNext_ptr, m));
+                    } else {
+                        OffHeapLongArray.set(elementNext_ptr, previousM, OffHeapLongArray.get(elementNext_ptr, m));
+                    }
+                    OffHeapLongArray.set(elementNext_ptr, m, Constants.OFFHEAP_NULL_PTR);
+                    break;
+                }
+                previousM = m;
+                m = OffHeapLongArray.get(elementNext_ptr, m);
+            }
+
+        } finally {
+            if (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS error !!!");
+            }
+        }
     }
 
     public static void free(long addr) {
