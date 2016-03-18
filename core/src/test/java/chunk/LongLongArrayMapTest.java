@@ -69,6 +69,24 @@ public class LongLongArrayMapTest implements KChunkListener {
             Assert.assertTrue(getRes[i] == (Constants.MAP_INITIAL_CAPACITY - i - 1));
         }
 
+        //test previous to reHash
+        Assert.assertTrue(map.get(10).length == 2);
+        Assert.assertTrue(map.get(10)[0] == 100);
+        Assert.assertTrue(map.get(10)[1] == 10);
+
+        //make a remove call
+        map.remove(10, 10);
+        Assert.assertTrue(map.size() == Constants.MAP_INITIAL_CAPACITY + 2 - 1);
+        Assert.assertTrue(map.get(10).length == 1);
+
+        map.remove(Constants.BEGINNING_OF_TIME, 0);
+        Assert.assertTrue(map.size() == Constants.MAP_INITIAL_CAPACITY + 2 - 2);
+        getRes = map.get(Constants.BEGINNING_OF_TIME);
+        Assert.assertTrue(getRes.length == Constants.MAP_INITIAL_CAPACITY - 1);
+        for (int i = 1; i < Constants.MAP_INITIAL_CAPACITY; i++) {
+            Assert.assertTrue(getRes[i - 1] == (Constants.MAP_INITIAL_CAPACITY - i));
+        }
+
         Assert.assertTrue(dirtyCount == 18);
 
     }

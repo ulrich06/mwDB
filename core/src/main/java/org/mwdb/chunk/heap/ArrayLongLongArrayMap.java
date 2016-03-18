@@ -21,11 +21,10 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         this._listener = p_listener;
         this.state = new AtomicReference<InternalState>();
         if (p_origin == null) {
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
-                newstate._columnSize[i] = 0;
             }
             this.state.set(newstate);
             aligned = true;
@@ -40,30 +39,29 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
      */
     final class InternalState {
 
-        public final int _stateSize;
+        final int _stateSize;
 
-        public final long[] _elementK;
+        final long[] _elementK;
 
-        public final long[] _elementV;
+        final long[] _elementV;
 
-        public final int[] _elementNext;
+        final int[] _elementNext;
 
-        public final int[] _elementHash;
+        final int[] _elementHash;
 
-        public final int[] _columnSize;
+        final int _threshold;
 
-        public final int _threshold;
+        volatile int _elementCount;
 
-        protected volatile int _elementCount;
+        volatile int _elementDeleted;
 
-        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int[] p_columnSize, int p_elementCount) {
+        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount) {
             this._stateSize = p_stateSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementCount = p_elementCount;
-            this._columnSize = p_columnSize;
             this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
         }
 
@@ -76,9 +74,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             System.arraycopy(_elementNext, 0, cloned_elementNext, 0, _stateSize);
             int[] cloned_elementHash = new int[_stateSize];
             System.arraycopy(_elementHash, 0, cloned_elementHash, 0, _stateSize);
-            int[] cloned_columnSize = new int[_stateSize];
-            System.arraycopy(_columnSize, 0, cloned_columnSize, 0, _stateSize);
-            return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, cloned_columnSize, _elementCount);
+            return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, _elementCount);
         }
     }
 
@@ -89,23 +85,36 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             return new long[0];
         }
         int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
-        int hashColumnSize = internalState._columnSize[hashIndex];
-        long[] result = new long[hashColumnSize];
-        int columnIndex = 0;
+        long[] result = new long[0];
+        int capacity = 0;
+        int resultIndex = 0;
+
         int m = internalState._elementHash[hashIndex];
         while (m >= 0) {
             if (key == internalState._elementK[m]) {
-                result[columnIndex] = internalState._elementV[m];
-                columnIndex++;
+                if (resultIndex == capacity) {
+                    int newCapacity;
+                    if (capacity == 0) {
+                        newCapacity = 1;
+                    } else {
+                        newCapacity = capacity << 1;
+                    }
+                    long[] tempResult = new long[newCapacity];
+                    System.arraycopy(result, 0, tempResult, 0, result.length);
+                    result = tempResult;
+                    capacity = newCapacity;
+                }
+                result[resultIndex] = internalState._elementV[m];
+                resultIndex++;
             }
             m = internalState._elementNext[m];
         }
-        if (hashColumnSize == columnIndex) {
+        if (resultIndex == capacity) {
             return result;
         } else {
             //shrink result
-            long[] shrinkedResult = new long[columnIndex];
-            System.arraycopy(result, 0, shrinkedResult, 0, columnIndex);
+            long[] shrinkedResult = new long[resultIndex];
+            System.arraycopy(result, 0, shrinkedResult, 0, resultIndex);
             return shrinkedResult;
         }
     }
@@ -122,77 +131,104 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
     @Override
     public long size() {
-        return state.get()._elementCount;
+        InternalState internalState = state.get();
+        return internalState._elementCount - internalState._elementDeleted;
     }
 
     @Override
     public final synchronized void put(long key, long value) {
+        internal_modify_map(key, value, true);
+    }
 
-        if (!aligned) {
-            //clone the state
-            state.set(state.get().clone());
-            aligned = true;
-        }
-
+    private synchronized void internal_modify_map(long key, long value, boolean toInsert) {
         //first test if reHash is necessary
         InternalState internalState = state.get();
-        if ((internalState._elementCount + 1) > internalState._threshold) {
-            int newCapacity = internalState._stateSize << 1;
-            long[] newElementK = new long[newCapacity];
-            long[] newElementV = new long[newCapacity];
-            System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._stateSize);
-            System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._stateSize);
-            int[] newElementNext = new int[newCapacity];
-            int[] newElementHash = new int[newCapacity];
-            int[] newHashSize = new int[newCapacity];
-            for (int i = 0; i < newCapacity; i++) {
-                newElementNext[i] = -1;
-                newElementHash[i] = -1;
-                newHashSize[i] = 0;
-            }
-            //rehashEveryThing
-            for (int i = 0; i < internalState._elementCount; i++) {
-                if (internalState._elementNext[i] != -1) { //there is a real value
-                    int newHashIndex = (int) PrimitiveHelper.longHash(internalState._elementK[i], newCapacity);
-                    int currentHashedIndex = newElementHash[newHashIndex];
-                    if (currentHashedIndex != -1) {
-                        newElementNext[i] = currentHashedIndex;
-                    } else {
-                        newElementNext[i] = -2;
-                    }
-                    newHashSize[newHashIndex] = newHashSize[newHashIndex] + 1;
-                    newElementHash[newHashIndex] = i;
+        if (toInsert) {
+            //no reHash in case of remove
+            if ((internalState._elementCount + 1) > internalState._threshold) {
+                int newCapacity = internalState._stateSize << 1;
+                long[] newElementK = new long[newCapacity];
+                long[] newElementV = new long[newCapacity];
+                System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._stateSize);
+                System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._stateSize);
+                int[] newElementNext = new int[newCapacity];
+                int[] newElementHash = new int[newCapacity];
+                for (int i = 0; i < newCapacity; i++) {
+                    newElementNext[i] = -1;
+                    newElementHash[i] = -1;
                 }
+                //rehashEveryThing
+                for (int i = 0; i < internalState._elementCount; i++) {
+                    if (internalState._elementNext[i] != -1) { //there is a real value
+                        int newHashIndex = (int) PrimitiveHelper.longHash(internalState._elementK[i], newCapacity);
+                        int currentHashedIndex = newElementHash[newHashIndex];
+                        if (currentHashedIndex != -1) {
+                            newElementNext[i] = currentHashedIndex;
+                        } else {
+                            newElementNext[i] = -2;
+                        }
+                        newElementHash[newHashIndex] = i;
+                    }
+                }
+                internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount);
+                state.set(internalState);
             }
-            internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, newHashSize, internalState._elementCount);
-            state.set(internalState);
-        }
-        int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
-        int m = internalState._elementHash[hashIndex];
-        while (m >= 0) {
-            if (key == internalState._elementK[m] && value == internalState._elementV[m]) {
-                return;
+            int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
+            int m = internalState._elementHash[hashIndex];
+            while (m >= 0) {
+                if (key == internalState._elementK[m] && value == internalState._elementV[m]) {
+                    return;
+                }
+                m = internalState._elementNext[m];
             }
-            m = internalState._elementNext[m];
-        }
-        int newIndex = internalState._elementCount;
-        internalState._elementK[newIndex] = key;
-        internalState._elementV[newIndex] = value;
-        int currentHashedElemIndex = internalState._elementHash[hashIndex];
-        if (currentHashedElemIndex != -1) {
-            internalState._elementNext[newIndex] = currentHashedElemIndex;
+
+            //now we are sure that the current state have to be altered, so we realigne it if necesserary
+            if (!aligned) {
+                //clone the state
+                state.set(state.get().clone());
+                aligned = true;
+            }
+
+            int newIndex = internalState._elementCount;
+            internalState._elementK[newIndex] = key;
+            internalState._elementV[newIndex] = value;
+            int currentHashedElemIndex = internalState._elementHash[hashIndex];
+            if (currentHashedElemIndex != -1) {
+                internalState._elementNext[newIndex] = currentHashedElemIndex;
+            } else {
+                internalState._elementNext[newIndex] = -2;
+            }
+            internalState._elementHash[hashIndex] = newIndex;
+            internalState._elementCount = internalState._elementCount + 1;
+            _listener.declareDirty(null);
         } else {
-            internalState._elementNext[newIndex] = -2;
+            int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
+            int m = internalState._elementHash[hashIndex];
+            int previousM = -1;
+            while (m >= 0) {
+                if (key == internalState._elementK[m] && value == internalState._elementV[m]) {
+                    internalState._elementDeleted++;
+                    internalState._elementK[m] = Constants.NULL_LONG;
+                    internalState._elementV[m] = Constants.NULL_LONG;
+                    if (previousM == -1) {
+                        //we are in the top of hashFunction
+                        internalState._elementHash[hashIndex] = internalState._elementNext[m];
+                    } else {
+                        internalState._elementNext[previousM] = internalState._elementNext[m];
+                    }
+                    internalState._elementNext[m] = -1;
+                    return;
+                }
+                previousM = m;
+                m = internalState._elementNext[m];
+            }
         }
-        internalState._columnSize[hashIndex] = internalState._columnSize[hashIndex] + 1;
-        internalState._elementHash[hashIndex] = newIndex;
-        internalState._elementCount = internalState._elementCount + 1;
-        _listener.declareDirty(null);
+
     }
 
     @Override
     public void remove(long key, long value) {
-        throw new RuntimeException("Not implemented yet!!!");
+        internal_modify_map(key, value, false);
     }
 
 }

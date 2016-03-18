@@ -89,7 +89,6 @@ public class Node implements KNode {
         attSet(attributeName, KType.INT, null);
     }
 
-
     @Override
     public void rel(String relationName, KCallback<KNode[]> callback) {
         if (!PrimitiveHelper.isDefined(callback)) {
@@ -230,6 +229,34 @@ public class Node implements KNode {
         flatQuery.compute();
         //TODO AUTOMATIC UPDATE
         indexMap.put(flatQuery.hash(), nodeToIndex.id());
+        if (PrimitiveHelper.isDefined(callback)) {
+            callback.on(true);
+        }
+    }
+
+    @Override
+    public void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+        KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, true);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        if (indexMap != null) {
+            Query flatQuery = new Query();
+            KResolver.KNodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
+            for (int i = 0; i < keyAttributes.length; i++) {
+                long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
+                Object attValue = toIndexNodeState.get(attKey);
+                if (attValue != null) {
+                    flatQuery.add(attKey, attValue.toString());
+                } else {
+                    flatQuery.add(attKey, null);
+                }
+            }
+            flatQuery.compute();
+            //TODO AUTOMATIC UPDATE
+            indexMap.remove(flatQuery.hash(), nodeToIndex.id());
+        }
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }

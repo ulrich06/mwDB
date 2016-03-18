@@ -296,6 +296,18 @@ public class Graph implements KGraph {
     }
 
     @Override
+    public void unindex(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback) {
+        getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KNode>() {
+            @Override
+            public void on(KNode result) {
+                if (result != null) {
+                    result.unindex(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, callback);
+                }
+            }
+        }, false);
+    }
+
+    @Override
     public void find(long world, long time, String indexName, String query, KCallback<KNode> callback) {
         getIndexOrCreate(world, time, indexName, new KCallback<KNode>() {
             @Override

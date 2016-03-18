@@ -72,6 +72,17 @@ public interface KGraph {
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
+     * Removes the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, KCallback)} using the same attributes.
+     *
+     * @param indexName     A string uniquely identifying the index in the {@link KGraph}.
+     * @param nodeToIndex   The node to add in the index.
+     * @param keyAttributes The set of attributes used as keys to index the node. The order does not matter.
+     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing has succeeded.
+     */
+    void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
+
+    /**
      * Retrieves the node from an index that satisfies the query.<br>
      * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
      * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>

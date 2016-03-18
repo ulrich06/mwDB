@@ -121,6 +121,18 @@ public interface KNode {
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
+     * Removes an element from an index of nodes.<br>
+     * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
+     * Index names must be unique within a given node.
+     *
+     * @param indexName     The name of the index (should be unique per node).
+     * @param nodeToIndex   The new node to index.
+     * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
+     * @param callback      Called when the index has been created/updated. The boolean value specifies the success of the operation.
+     */
+    void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
+
+    /**
      * Retrieves a node from an index that satisfies a query.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
