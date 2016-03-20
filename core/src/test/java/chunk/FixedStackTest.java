@@ -14,6 +14,7 @@ public class FixedStackTest {
     @Test
     public void heapFixedStackTest() {
         test(new FixedStack(CAPACITY));
+        //circularTest(new FixedStack(CAPACITY));
     }
 
     @Test
@@ -32,6 +33,21 @@ public class FixedStackTest {
         Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
+
+    /*
+    public void circularTest(KStack stack) {
+        stack.dequeueTail();
+        stack.dequeueTail();
+        while (true) {
+            long d1 = stack.dequeueTail();
+            long d2 = stack.dequeueTail();
+            long d3 = stack.dequeueTail();
+            stack.enqueue(d2);
+            stack.enqueue(d1);
+            stack.enqueue(d3);
+        }
+    }*/
+
 
     public void test(KStack stack) {
         // stack is initially full, dequeue until empty

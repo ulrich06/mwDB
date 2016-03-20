@@ -3,19 +3,28 @@ package org.mwdb.chunk.heap;
 import org.mwdb.chunk.KStack;
 
 import java.util.Arrays;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FixedStack implements KStack {
 
+    /*
     private final AtomicBoolean _lock;
-
     private final int[] _previous;
     private final int[] _next;
-
     private volatile int _head; //youngest
     private volatile int _tail; //youngest
+*/
+    private LinkedBlockingDeque<Long> q;
 
     public FixedStack(int max) {
+
+        q = new LinkedBlockingDeque<Long>();
+        for(long i=0;i<max;i++){
+            q.add(i);
+        }
+
+        /*
         //init variables
         this._previous = new int[max];
         this._next = new int[max];
@@ -35,10 +44,12 @@ public class FixedStack implements KStack {
             }
         }
         this._tail = max - 1;
+        */
     }
 
     @Override
     public boolean enqueue(long index) {
+        /*
         int castedIndex = (int) index;
         //lock
         while (!_lock.compareAndSet(false, true)) ;
@@ -51,16 +62,24 @@ public class FixedStack implements KStack {
         }
 
         //head is now the index
+        int previousOfHead = this._previous[this._head];
         this._previous[this._head] = castedIndex;
         this._next[castedIndex] = this._head;
         this._head = castedIndex;
+        this._previous[this._head] = previousOfHead;
 
         _lock.compareAndSet(true, false);
+        return true;*/
+
+        q.add(index);
         return true;
     }
 
     @Override
     public long dequeueTail() {
+
+        return q.poll();
+        /*
         //lock
         while (!_lock.compareAndSet(false, true)) ;
 
@@ -87,10 +106,15 @@ public class FixedStack implements KStack {
             _lock.compareAndSet(true, false);
             return currentTail;
         }
+        */
     }
 
     @Override
     public boolean dequeue(long index) {
+
+        return q.remove(index);
+
+        /*
         int castedIndex = (int) index;
 
         //lock
@@ -126,13 +150,8 @@ public class FixedStack implements KStack {
         //unlock
         _lock.compareAndSet(true, false);
         return true;
+        */
     }
 
-    @Override
-    public String toString() {
-        return "_head=" + _head + "\n" +
-                "_next=" + Arrays.toString(_next) + "\n" +
-                "_prev=" + Arrays.toString(_previous);
-    }
 
 }

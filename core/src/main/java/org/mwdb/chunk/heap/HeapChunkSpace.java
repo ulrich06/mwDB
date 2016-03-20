@@ -107,7 +107,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
         this._maxEntries = initialCapacity;
         this._saveBatchSize = saveBatchSize;
-        this._lru = new FixedStack(initialCapacity);
+        this._lru = new FixedStack2(initialCapacity);
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(saveBatchSize, this));
 
@@ -230,6 +230,9 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         if (entry == -1) {
             //we look for nextIndex
             int currentVictimIndex = (int) this._lru.dequeueTail();
+
+            System.out.println(currentVictimIndex);
+
             if (currentVictimIndex == -1) {
                 //TODO cache is full :(
                 System.gc();
@@ -311,7 +314,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             if (currentM != null && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
                 if (currentM.setFlags(Constants.DIRTY_BIT, 0)) {
                     //add an additional mark
-                    heapChunk.mark();
+                    currentM.mark();
                     //now enqueue in the dirtyList to be saved later
                     boolean success = false;
                     while (!success) {
