@@ -10,8 +10,7 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
     private static final String MAX_KEY = "max";
     private static final String VALUE_KEY = "value";
     private static final String MEAN_KEY = "mean";
-
-
+    
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_TOTAL_KEY = "_total";
     private static final String INTERNAL_MIN_KEY = "_min";

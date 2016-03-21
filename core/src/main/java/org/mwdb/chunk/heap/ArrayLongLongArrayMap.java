@@ -21,7 +21,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
         this._listener = p_listener;
         this.state = new AtomicReference<InternalState>();
         if (p_origin == null) {
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0, 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
@@ -55,13 +55,14 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
         volatile int _elementDeleted;
 
-        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount) {
+        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount, int p_elementDeleted) {
             this._stateSize = p_stateSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementCount = p_elementCount;
+            this._elementDeleted = p_elementDeleted;
             this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
         }
 
@@ -74,7 +75,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
             System.arraycopy(_elementNext, 0, cloned_elementNext, 0, _stateSize);
             int[] cloned_elementHash = new int[_stateSize];
             System.arraycopy(_elementHash, 0, cloned_elementHash, 0, _stateSize);
-            return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, _elementCount);
+            return new InternalState(_stateSize, cloned_elementK, cloned_elementV, cloned_elementNext, cloned_elementHash, _elementCount, _elementDeleted);
         }
     }
 
@@ -170,7 +171,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                         newElementHash[newHashIndex] = i;
                     }
                 }
-                internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount);
+                internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount, internalState._elementDeleted);
                 state.set(internalState);
             }
             int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);

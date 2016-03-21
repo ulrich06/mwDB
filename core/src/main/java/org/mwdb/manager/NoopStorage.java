@@ -23,7 +23,7 @@ public class NoopStorage implements KStorage {
     @Override
     public void put(long[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener) {
         if (PrimitiveHelper.isDefined(callback)) {
-            callback.on(null);
+            callback.on(true);
         }
     }
 

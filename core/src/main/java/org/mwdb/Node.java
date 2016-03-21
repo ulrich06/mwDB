@@ -340,8 +340,9 @@ public class Node implements KNode {
         KLongLongArrayMap indexMap = (KLongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
         if (indexMap != null) {
             final Node selfPointer = this;
-            final KNode[] resolved = new KNode[(int) indexMap.size()];
-            DeferCounter waiter = new DeferCounter((int) indexMap.size());
+            int mapSize = (int) indexMap.size();
+            final KNode[] resolved = new KNode[mapSize];
+            DeferCounter waiter = new DeferCounter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
             indexMap.each(new KLongLongArrayMapCallBack() {
