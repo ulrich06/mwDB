@@ -13,7 +13,7 @@ public class MeanTest {
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                KMeanNode meanNode = KML.meanNode(graph.newNode(0, 0));
+                KStatNode meanNode = KML.meanNode(graph.newNode(0, 0));
 
                 meanNode.learn(0.3);
                 meanNode.learn(0.7);
