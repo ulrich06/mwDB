@@ -36,7 +36,7 @@ abstract class AbstractMLNode implements KNode {
     }
 
     @Override
-    public int attType(String attributeName) {
+    public byte attType(String attributeName) {
         return _rootNode.attType(attributeName);
     }
 

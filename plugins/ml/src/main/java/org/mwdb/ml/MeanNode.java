@@ -6,8 +6,6 @@ import org.mwdb.KType;
 
 public class MeanNode extends AbstractMLNode implements KMeanNode {
 
-    private static final String SUM_KEY = "sum";
-    private static final String TOTAL_KEY = "total";
     private static final String MIN_KEY = "min";
     private static final String MAX_KEY = "max";
     private static final String VALUE_KEY = "value";
@@ -33,13 +31,9 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
     }
 
     @Override
-    public int attType(String attributeName) {
+    public byte attType(String attributeName) {
         if (attributeName.equals(MEAN_KEY)) {
             return KType.DOUBLE;
-        } else if (attributeName.equals(SUM_KEY)) {
-            return KType.DOUBLE;
-        } else if (attributeName.equals(TOTAL_KEY)) {
-            return KType.LONG;
         } else if (attributeName.equals(MIN_KEY)) {
             return KType.DOUBLE;
         } else if (attributeName.equals(MAX_KEY)) {
@@ -51,10 +45,8 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public Object att(String attributeName) {
-        if (attributeName.equals(SUM_KEY)) {
+        if (attributeName.equals(MEAN_KEY)) {
             return mean();
-        } else if (attributeName.equals(TOTAL_KEY)) {
-            return total();
         } else if (attributeName.equals(MIN_KEY)) {
             return min();
         } else if (attributeName.equals(MAX_KEY)) {
@@ -66,17 +58,29 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public void learn(double value) {
-        Double currentTotal = (Double) att(INTERNAL_TOTAL_KEY);
+        //manage total
+        Double currentTotal = (Double) rootNode().att(INTERNAL_TOTAL_KEY);
         if (currentTotal == null) {
-            attSet(INTERNAL_TOTAL_KEY, KType.DOUBLE, value);
+            rootNode().attSet(INTERNAL_TOTAL_KEY, KType.DOUBLE, 1.0);
         } else {
-            attSet(INTERNAL_TOTAL_KEY, KType.DOUBLE, currentTotal + 1);
+            rootNode().attSet(INTERNAL_TOTAL_KEY, KType.DOUBLE, currentTotal + 1);
         }
-        Double currentSum = (Double) att(INTERNAL_SUM_KEY);
+        //manage sum
+        Double currentSum = (Double) rootNode().att(INTERNAL_SUM_KEY);
         if (currentSum == null) {
-            attSet(INTERNAL_SUM_KEY, KType.DOUBLE, value);
+            rootNode().attSet(INTERNAL_SUM_KEY, KType.DOUBLE, value);
         } else {
-            attSet(INTERNAL_SUM_KEY, KType.DOUBLE, value + currentSum);
+            rootNode().attSet(INTERNAL_SUM_KEY, KType.DOUBLE, value + currentSum);
+        }
+        //manage min
+        Double currentMin = (Double) rootNode().att(INTERNAL_MIN_KEY);
+        if (currentMin == null || value < currentMin) {
+            rootNode().attSet(INTERNAL_MIN_KEY, KType.DOUBLE, value);
+        }
+        //manage max
+        Double currentMax = (Double) rootNode().att(INTERNAL_MAX_KEY);
+        if (currentMax == null || value > currentMax) {
+            rootNode().attSet(INTERNAL_MAX_KEY, KType.DOUBLE, value);
         }
     }
 
@@ -111,13 +115,4 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
         }
     }
 
-    @Override
-    public double total() {
-        Double currentTotal = (Double) att(INTERNAL_TOTAL_KEY);
-        if (currentTotal == null) {
-            return 0;
-        } else {
-            return currentTotal;
-        }
-    }
 }

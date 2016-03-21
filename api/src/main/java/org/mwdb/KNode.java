@@ -45,7 +45,7 @@ public interface KNode {
      * @param attributeName The name of the attribute for which the type is asked.
      * @return The type of the attribute inform of an int belonging to {@link KType}.
      */
-    int attType(String attributeName);
+    byte attType(String attributeName);
 
     /**
      * Sets the value of an attribute of this node, for its current world and time.<br>

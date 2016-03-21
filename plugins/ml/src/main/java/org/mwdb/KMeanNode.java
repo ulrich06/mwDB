@@ -10,6 +10,4 @@ public interface KMeanNode extends KNode {
 
     double max();
 
-    double total();
-
 }

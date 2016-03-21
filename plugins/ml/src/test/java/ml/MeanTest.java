@@ -1,11 +1,32 @@
 package ml;
 
-import org.mwdb.KGraph;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mwdb.*;
+import org.mwdb.task.NoopScheduler;
 
 public class MeanTest {
 
+    @Test
     public void test() {
         KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        graph.connect(new KCallback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                KMeanNode meanNode = KML.meanNode(graph.newNode(0, 0));
+
+                meanNode.learn(0.3);
+                meanNode.learn(0.7);
+                Assert.assertTrue(0.5 == meanNode.mean());
+                Assert.assertTrue(0.3 == meanNode.min());
+                Assert.assertTrue(0.7 == meanNode.max());
+
+                meanNode.free();
+
+                graph.disconnect(null);
+            }
+        });
+
     }
 
 }

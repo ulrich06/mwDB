@@ -22,7 +22,7 @@ public class PolynomialNode extends AbstractMLNode implements KPolynomialNode {
     }
 
     @Override
-    public int attType(String attributeName) {
+    public byte attType(String attributeName) {
         if (attributeName.equals(VALUE_KEY)) {
             return KType.DOUBLE;
         } else {

@@ -76,7 +76,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public int attType(String attributeName) {
+    public byte attType(String attributeName) {
         KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
             return resolved.getType(this._resolver.stringToLongKey(attributeName));
