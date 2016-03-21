@@ -1,6 +1,7 @@
 package org.mwdb.plugin;
 
 import org.mwdb.KCallback;
+import org.mwdb.KGraph;
 import org.mwdb.KNode;
 
 public interface KResolver {
@@ -8,7 +9,12 @@ public interface KResolver {
     /**
      * Initializes the resolver.
      */
-    void init();
+
+    /**
+     * Initializes the resolver with the graph passed as parameter
+     * @param graph graph this resolver belongs to
+     */
+    void init(KGraph graph);
 
     /**
      * Initializes backend structures for the newly created node passed as parameter

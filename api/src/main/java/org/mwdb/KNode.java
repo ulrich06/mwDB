@@ -1,6 +1,8 @@
 package org.mwdb;
 
 
+import org.mwdb.plugin.KResolver;
+
 /**
  * KNode is the base element contained in the {@link KGraph}.<br>
  * They belong to a world and time, have attributes, relationships, and indexes.
@@ -133,14 +135,14 @@ public interface KNode {
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves a node from an index that satisfies a query.<br>
+     * Retrieves nodes from an index that satisfies a query.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per node)
      * @param query     The query (e.g.: "firstname=john,lastname=doe,age=30"
-     * @param callback  Called when the task is fully processed. The parameter is the requested node, null otherwise.
+     * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
-    void find(String indexName, String query, KCallback<KNode> callback);
+    void find(String indexName, String query, KCallback<KNode[]> callback);
 
     /**
      * Retrieves all nodes in a particular index
@@ -176,14 +178,17 @@ public interface KNode {
     void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
 
     /**
-     * Memory Management section
-     */
-
-    /**
      * Informs mwDB memory manager that this node object can be freed from the memory.<br>
      * <b>Warning: this MUST be the last method called on this node.</b><br>
      * To work with the node afterwards, a new lookup is mandatory.
      */
     void free();
+
+    /**
+     * Return the graph that have created this node.
+     *
+     * @return the graph this node belongs to
+     */
+    KGraph graph();
 
 }

@@ -18,6 +18,8 @@ public class MWGResolver implements KResolver {
 
     private static final String deadNodeError = "This Node has been tagged destroyed, please don't use it anymore!";
 
+    private KGraph _graph;
+
     public MWGResolver(KStorage p_storage, KChunkSpace p_space, KNodeTracker p_tracker, KScheduler p_scheduler) {
         this._storage = p_storage;
         this._space = p_space;
@@ -28,7 +30,8 @@ public class MWGResolver implements KResolver {
     private KStateChunk dictionary;
 
     @Override
-    public void init() {
+    public void init(KGraph graph) {
+        _graph = graph;
         dictionary = (KStateChunk) this._space.getAndMark(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
     }
 
@@ -128,7 +131,7 @@ public class MWGResolver implements KResolver {
                                                                     selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    Node newNode = new Node(world, time, id, selfPointer, closestUniverse, closestTime, ((KWorldOrderChunk) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
+                                                                    Node newNode = new Node(_graph, world, time, id, selfPointer, closestUniverse, closestTime, ((KWorldOrderChunk) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
                                                                     selfPointer._tracker.monitor(newNode);
                                                                     callback.on(newNode);
                                                                 }

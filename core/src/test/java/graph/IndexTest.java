@@ -61,12 +61,13 @@ public class IndexTest {
                     }
                 });
 
-                graph.find(0, 0, "nodes", "name=MyName", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "name=MyName", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode[0].toString()));
                     }
                 });
 
@@ -92,32 +93,35 @@ public class IndexTest {
                 });
 
                 //test the old indexed node
-                graph.find(0, 0, "nodes", "name=MyName", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "name=MyName", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode[0].toString()));
                     }
                 });
 
                 //test the new indexed node
-                graph.find(0, 0, "nodes", "name=MyName,version=1.0", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "name=MyName,version=1.0", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
                     }
                 });
 
                 //test potential inversion
-                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
                     }
                 });
 
@@ -129,11 +133,12 @@ public class IndexTest {
                     }
                 });
 
-                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
-                        Assert.assertTrue(kNode == null);
+                        Assert.assertTrue(kNode != null);
+                        Assert.assertTrue(kNode.length == 0);
                     }
                 });
 
@@ -146,12 +151,13 @@ public class IndexTest {
                 });
 
                 //should work again
-                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode>() {
+                graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
                     }
                 });
 
@@ -164,12 +170,13 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
-                node_index.find("children", "name=MyName,version=1.0", new KCallback<KNode>() {
+                node_index.find("children", "name=MyName,version=1.0", new KCallback<KNode[]>() {
                     @Override
-                    public void on(KNode kNode) {
+                    public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", node_t1.toString()));
+                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
                     }
                 });
 

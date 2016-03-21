@@ -1,6 +1,7 @@
 package org.mwdb;
 
 import org.mwdb.chunk.KBuffer;
+import org.mwdb.plugin.KResolver;
 
 /**
  * KGraph is the main structure of mwDB.
@@ -83,7 +84,7 @@ public interface KGraph {
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves the node from an index that satisfies the query.<br>
+     * Retrieves nodes from an index that satisfies the query.<br>
      * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
      * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>
      * e.g: "name=john,age=30"
@@ -92,9 +93,9 @@ public interface KGraph {
      * @param time      The timepoint at which the search must be performed.
      * @param indexName The name of the index in which to search.
      * @param query     The query the node must satisfy.
-     * @param callback  Called when the search is finished. The requested node is given in parameter, null otherwise.
+     * @param callback  Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
      */
-    void find(long world, long time, String indexName, String query, KCallback<KNode> callback);
+    void find(long world, long time, String indexName, String query, KCallback<KNode[]> callback);
 
     /**
      * Retrieves all nodes registered in a particular index.
@@ -114,8 +115,18 @@ public interface KGraph {
      */
     KDeferCounter counter(int expectedEventsCount);
 
+    /**
+     * Create a new buffer to save chunks
+     *
+     * @return newly created buffer
+     */
     KBuffer newBuffer();
 
-    /** Create a new lookup task */
+    /**
+     * Retrives the current state chunk resolver
+     *
+     * @return current running resolver
+     */
+    KResolver resolver();
 
 }

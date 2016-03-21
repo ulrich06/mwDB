@@ -1,6 +1,7 @@
 package org.mwdb.ml;
 
 import org.mwdb.KCallback;
+import org.mwdb.KGraph;
 import org.mwdb.KNode;
 
 abstract class AbstractMLNode implements KNode {
@@ -13,6 +14,11 @@ abstract class AbstractMLNode implements KNode {
 
     protected KNode rootNode() {
         return _rootNode;
+    }
+
+    @Override
+    public KGraph graph() {
+        return _rootNode.graph();
     }
 
     @Override
@@ -86,7 +92,7 @@ abstract class AbstractMLNode implements KNode {
     }
 
     @Override
-    public void find(String indexName, String query, KCallback<KNode> callback) {
+    public void find(String indexName, String query, KCallback<KNode[]> callback) {
         _rootNode.find(indexName, query, callback);
     }
 

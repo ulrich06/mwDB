@@ -18,17 +18,25 @@ public class Node implements KNode {
 
     private final long _id;
 
+    private final KGraph _graph;
+
     private final KResolver _resolver;
 
     public final AtomicReference<long[]> _previousResolveds;
 
-    public Node(long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
+    public Node(KGraph p_graph, long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
+        this._graph = p_graph;
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
         this._resolver = p_resolver;
         this._previousResolveds = new AtomicReference<long[]>();
         this._previousResolveds.set(new long[]{p_actualUniverse, p_actualTime, currentUniverseMagic, currentTimeMagic});
+    }
+
+    @Override
+    public KGraph graph() {
+        return _graph;
     }
 
     @Override
@@ -263,7 +271,7 @@ public class Node implements KNode {
     }
 
     @Override
-    public void find(String indexName, String query, KCallback<KNode> callback) {
+    public void find(String indexName, String query, KCallback<KNode[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -294,6 +302,9 @@ public class Node implements KNode {
                 @Override
                 public void on(Object o) {
                     //filter
+                    KNode[] resultSet = new KNode[foundId.length];
+                    int resultSetIndex = 0;
+
                     for (int i = 0; i < foundId.length; i++) {
                         KNode resolvedNode = resolved[i];
                         KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
@@ -318,12 +329,17 @@ public class Node implements KNode {
                             }
                         }
                         if (exact) {
-                            callback.on(resolvedNode);
-                            return;
+                            resultSet[resultSetIndex] = resolvedNode;
+                            resultSetIndex++;
                         }
                     }
-                    //not found :(
-                    callback.on(null);
+                    if (foundId.length == resultSetIndex) {
+                        callback.on(resultSet);
+                    } else {
+                        KNode[] trimmedResultSet = new KNode[resultSetIndex];
+                        System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
+                        callback.on(trimmedResultSet);
+                    }
                 }
             });
         } else {
