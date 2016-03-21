@@ -2,155 +2,149 @@ package org.mwdb.chunk.heap;
 
 import org.mwdb.chunk.KStack;
 
-import java.util.Arrays;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class FixedStack implements KStack {
 
-    /*
-    private final AtomicBoolean _lock;
-    private final int[] _previous;
-    private final int[] _next;
-    private volatile int _head; //youngest
-    private volatile int _tail; //youngest
-*/
-    private LinkedBlockingDeque<Long> q;
+    private int _first;
+    private int _last;
+    private int[] _next;
+    private int[] _prev;
+    private int _count;
+    final ReentrantLock lock = new ReentrantLock();
+    final int _capacity;
 
-    public FixedStack(int max) {
-
-        q = new LinkedBlockingDeque<Long>();
-        for(long i=0;i<max;i++){
-            q.add(i);
+    public FixedStack(int capacity) {
+        this._capacity = capacity;
+        this._next = new int[capacity];
+        this._prev = new int[capacity];
+        this._first = -1;
+        this._last = -1;
+        for (int i = 0; i < capacity; i++) {
+            _next[i] = -1;
+            _prev[i] = -1;
         }
-
-        /*
-        //init variables
-        this._previous = new int[max];
-        this._next = new int[max];
-        this._lock = new AtomicBoolean(false);
-        //fill the stack
-        this._head = 0;
-        for (int i = 0; i < max; i++) {
-            if (i != max - 1) {
-                this._next[i] = i + 1;
+        for (int i = 0; i < capacity; i++) {
+            int l = _last;
+            _prev[i] = l;
+            _last = i;
+            if (_first == -1) {
+                _first = i;
             } else {
-                this._next[i] = -1;
-            }
-            if (i == 0) {
-                this._previous[i] = -1;
-            } else {
-                this._previous[i] = i - 1;
+                _next[l] = i;
             }
         }
-        this._tail = max - 1;
-        */
+        _count = capacity;
     }
 
     @Override
     public boolean enqueue(long index) {
-        /*
-        int castedIndex = (int) index;
-        //lock
-        while (!_lock.compareAndSet(false, true)) ;
-
-        if (this._next[castedIndex] != -1) {
-            //unlock
-            _lock.compareAndSet(true, false);
-            //already enqueue, return false
-            return false;
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            if (_count >= _capacity) {
+                return false;
+            }
+            int castedIndex = (int) index;
+            if (_first == castedIndex || _last == castedIndex) {
+                return false;
+            }
+            if (_prev[castedIndex] != -1 || _next[castedIndex] != -1) { //test if was already in FIFO
+                return false;
+            }
+            int l = _last;
+            _prev[castedIndex] = l;
+            _last = castedIndex;
+            if (_first == -1) {
+                _first = castedIndex;
+            } else {
+                _next[l] = castedIndex;
+            }
+            ++_count;
+            return true;
+        } finally {
+            lock.unlock();
         }
-
-        //head is now the index
-        int previousOfHead = this._previous[this._head];
-        this._previous[this._head] = castedIndex;
-        this._next[castedIndex] = this._head;
-        this._head = castedIndex;
-        this._previous[this._head] = previousOfHead;
-
-        _lock.compareAndSet(true, false);
-        return true;*/
-
-        q.add(index);
-        return true;
     }
 
     @Override
     public long dequeueTail() {
-
-        return q.poll();
-        /*
-        //lock
-        while (!_lock.compareAndSet(false, true)) ;
-
-        int currentTail = this._tail;
-        if (currentTail == -1) {
-            //FIFO is now, unlock and quite
-            _lock.compareAndSet(true, false);
-            return -1;
-        } else {
-            int nextTail = this._previous[this._tail];
-            //tag index as unused
-            this._next[currentTail] = -1;
-            this._previous[currentTail] = -1;
-            if (nextTail == -1) {
-                //FIFO is now empty
-                this._tail = 0;
-                this._head = 0;
-            } else {
-                //FIFO contains at least one
-                this._next[nextTail] = -2; //tag as still used
-                this._tail = nextTail;
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            int f = _first;
+            if (f == -1) {
+                return -1;
             }
-            //unlock
-            _lock.compareAndSet(true, false);
-            return currentTail;
+            int n = _next[f];
+            //tag as unused
+            _next[f] = -1;
+            _prev[f] = -1;
+            _first = n;
+            if (n == -1) {
+                _last = -1;
+            } else {
+                _prev[n] = -1;
+            }
+            --_count;
+            return f;
+        } finally {
+            lock.unlock();
         }
-        */
     }
 
     @Override
     public boolean dequeue(long index) {
-
-        return q.remove(index);
-
-        /*
-        int castedIndex = (int) index;
-
-        //lock
-        while (!_lock.compareAndSet(false, true)) ;
-
-        if (_next[castedIndex] == -1 || this._tail == -1) {//the element has been detached or tail is empty
-            //unlock
-            _lock.compareAndSet(true, false);
-            return false;
-        }
-
-        int currentNext = this._next[castedIndex];
-        int currentPrevious = this._previous[castedIndex];
-        //tag index as unused
-        this._next[castedIndex] = -1;
-        this._previous[castedIndex] = -1;
-
-        if (this._tail == index) {
-            this._next[currentPrevious] = -2; //tag as used
-            this._tail = currentPrevious;
-            _lock.compareAndSet(true, false);
-        } else {
-            //reChain
-            if (currentNext != -1) {
-                this._previous[currentNext] = currentPrevious;
-
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            int castedIndex = (int) index;
+            int p = _prev[castedIndex];
+            int n = _next[castedIndex];
+            if (p == -1 && n == -1) {
+                return false;
             }
-            if (currentPrevious != -1) {
-                this._next[currentPrevious] = currentNext;
+            if (p == -1) {
+                int f = _first;
+                if (f == -1) {
+                    return false;
+                }
+                int n2 = _next[f];
+                _next[f] = -1;
+                _prev[f] = -1;
+                _first = n2;
+                if (n2 == -1) {
+                    _last = -1;
+                } else {
+                    _prev[n2] = -1;
+                }
+                --_count;
+            } else if (n == -1) {
+                int l = _last;
+                if (l == -1) {
+                    return false;
+                }
+                int p2 = _prev[l];
+                _prev[l] = -1;
+                _next[l] = -1;
+                _last = p2;
+                if (p2 == -1) {
+                    _first = -1;
+                } else {
+                    _next[p2] = -1;
+                }
+                --_count;
+            } else {
+                _next[p] = n;
+                _prev[n] = p;
+                _prev[castedIndex] = -1;
+                _next[castedIndex] = -1;
+                --_count;
             }
+            return true;
+        } finally {
+            lock.unlock();
         }
-
-        //unlock
-        _lock.compareAndSet(true, false);
-        return true;
-        */
     }
 
     @Override

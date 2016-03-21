@@ -2,19 +2,52 @@ package chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.Constants;
 import org.mwdb.chunk.KStack;
 import org.mwdb.chunk.heap.FixedStack;
 import org.mwdb.chunk.offheap.*;
 
+import java.util.concurrent.LinkedBlockingDeque;
+
 public class FixedStackTest {
     private static final int CAPACITY = 15;
+
+    class RefFixedStack implements KStack {
+
+        private LinkedBlockingDeque<Long> q;
+
+        public RefFixedStack(int max) {
+            q = new LinkedBlockingDeque<Long>();
+            for (long i = 0; i < max; i++) {
+                q.add(i);
+            }
+        }
+
+        @Override
+        public boolean enqueue(long index) {
+            q.add(index);
+            return true;
+        }
+
+        @Override
+        public long dequeueTail() {
+            return q.poll();
+        }
+
+        @Override
+        public boolean dequeue(long index) {
+            return q.remove(index);
+        }
+
+        @Override
+        public void free() {
+        }
+
+    }
 
 
     @Test
     public void heapFixedStackTest() {
         test(new FixedStack(CAPACITY));
-        //circularTest(new FixedStack(CAPACITY));
     }
 
     @Test
@@ -24,7 +57,7 @@ public class FixedStackTest {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        OffHeapFixedStack stack = new OffHeapFixedStack(CAPACITY, Constants.OFFHEAP_NULL_PTR);
+        OffHeapFixedStack stack = new OffHeapFixedStack(CAPACITY);
         test(stack);
         stack.free();
 
@@ -34,25 +67,10 @@ public class FixedStackTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    /*
-    public void circularTest(KStack stack) {
-        stack.dequeueTail();
-        stack.dequeueTail();
-        while (true) {
-            long d1 = stack.dequeueTail();
-            long d2 = stack.dequeueTail();
-            long d3 = stack.dequeueTail();
-            stack.enqueue(d2);
-            stack.enqueue(d1);
-            stack.enqueue(d3);
-        }
-    }*/
-
-
     public void test(KStack stack) {
         // stack is initially full, dequeue until empty
         for (int i = 0; i < CAPACITY; i++) {
-            Assert.assertTrue(stack.dequeueTail() == CAPACITY - (i + 1));
+            Assert.assertTrue(stack.dequeueTail() == i);
         }
         // insert some values again
         Assert.assertTrue(stack.enqueue(0));

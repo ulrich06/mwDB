@@ -107,7 +107,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
 
         this._maxEntries = initialCapacity;
         this._saveBatchSize = saveBatchSize;
-        this._lru = new FixedStack2(initialCapacity);
+        this._lru = new FixedStack(initialCapacity);
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(saveBatchSize, this));
 

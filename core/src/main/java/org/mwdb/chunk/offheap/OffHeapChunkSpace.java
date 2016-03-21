@@ -115,7 +115,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
         this._capacity = initialCapacity;
         this._saveBatchSize = saveBatchSize;
-        this._lru = new OffHeapFixedStack2(initialCapacity); //only one object
+        this._lru = new OffHeapFixedStack(initialCapacity); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
         this._dirtyState.set(new InternalDirtyStateList(this._saveBatchSize, this));
 

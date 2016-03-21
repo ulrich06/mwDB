@@ -9,12 +9,12 @@ import org.mwdb.task.NoopScheduler;
 
 public class Benchmark2Test {
 
-    @Test
+    //@Test
     public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100, 10)).buildGraph());
     }
 
-    @Test
+    //@Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
