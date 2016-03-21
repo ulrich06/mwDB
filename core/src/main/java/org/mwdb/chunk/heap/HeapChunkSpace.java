@@ -230,9 +230,6 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         if (entry == -1) {
             //we look for nextIndex
             int currentVictimIndex = (int) this._lru.dequeueTail();
-
-            System.out.println(currentVictimIndex);
-
             if (currentVictimIndex == -1) {
                 //TODO cache is full :(
                 System.gc();

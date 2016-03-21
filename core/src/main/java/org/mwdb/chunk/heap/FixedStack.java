@@ -153,5 +153,10 @@ public class FixedStack implements KStack {
         */
     }
 
+    @Override
+    public void free() {
+
+    }
+
 
 }

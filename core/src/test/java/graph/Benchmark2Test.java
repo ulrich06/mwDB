@@ -21,7 +21,7 @@ public class Benchmark2Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100, 10)).buildGraph());
     }
 
     //final int valuesToInsert = 10_000_000;
@@ -51,7 +51,7 @@ public class Benchmark2Test {
                         nodeID = temp_node.id();
                         temp_node.free();
 
-                        System.out.println(i+" node>"+nodeID);
+                        System.out.println(i + " node>" + nodeID);
                     }
 
                     if (i % 1_000_000 == 0) {

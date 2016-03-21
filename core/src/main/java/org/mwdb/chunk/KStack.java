@@ -8,4 +8,6 @@ public interface KStack {
 
     boolean dequeue(long index);
 
+    void free();
+
 }

@@ -25,7 +25,7 @@ public class BenchmarkTest {
     }
 
     //final int valuesToInsert = 10_000_000;
-    final int valuesToInsert = 1_000_000;
+    final int valuesToInsert = 10_000_000;
 
     final long timeOrigin = 1000;
 

@@ -1,33 +1,36 @@
-package org.mwdb.chunk.heap;
+package org.mwdb.chunk.offheap;
 
 import org.mwdb.chunk.KStack;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-public class FixedStack2 implements KStack {
+/**
+ * @ignore ts
+ */
+public class OffHeapFixedStack2 implements KStack {
 
-    private int _first;
-    private int _last;
-    private int[] _next;
-    private int[] _prev;
-    private int _count;
+    private long _first;
+    private long _last;
+    private long _next;
+    private long _prev;
+    private long _count;
     final ReentrantLock lock = new ReentrantLock();
-    final int _capacity;
+    final long _capacity;
 
-    public FixedStack2(int capacity) {
+    public OffHeapFixedStack2(long capacity) {
         this._capacity = capacity;
-        this._next = new int[capacity];
-        this._prev = new int[capacity];
+        this._next = OffHeapLongArray.allocate(capacity);
+        this._prev = OffHeapLongArray.allocate(capacity);
         this._first = -1;
         this._last = -1;
-        for (int i = 0; i < capacity; i++) {
-            int l = _last;
-            _prev[i] = l;
+        for (long i = 0; i < capacity; i++) {
+            long l = _last;
+            OffHeapLongArray.set(_prev, i, l);
             _last = i;
             if (_first == -1) {
                 _first = i;
             } else {
-                _next[l] = i;
+                OffHeapLongArray.set(_next, l, i);
             }
         }
         _count = capacity;
@@ -41,20 +44,19 @@ public class FixedStack2 implements KStack {
             if (_count >= _capacity) {
                 return false;
             }
-            int castedIndex = (int) index;
-            if (_first == castedIndex || _last == castedIndex) {
+            if (_first == index || _last == index) {
                 return false;
             }
-            if (_prev[castedIndex] != -1 || _next[castedIndex] != -1) { //test if was already in FIFO
+            if (OffHeapLongArray.get(_prev, index) != -1 || OffHeapLongArray.get(_next, index) != -1) { //test if was already in FIFO
                 return false;
             }
-            int l = _last;
-            _prev[castedIndex] = l;
-            _last = castedIndex;
+            long l = _last;
+            OffHeapLongArray.set(_prev, index, l);
+            _last = index;
             if (_first == -1) {
-                _first = castedIndex;
+                _first = index;
             } else {
-                _next[l] = castedIndex;
+                OffHeapLongArray.set(_next, l, index);
             }
             ++_count;
             return true;
@@ -68,19 +70,19 @@ public class FixedStack2 implements KStack {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            int f = _first;
+            long f = _first;
             if (f == -1) {
                 return -1;
             }
-            int n = _next[f];
+            long n = OffHeapLongArray.get(_next, f);
             //tag as unused
-            _next[f] = -1;
-            _prev[f] = -1;
+            OffHeapLongArray.set(_next, f, -1);
+            OffHeapLongArray.set(_prev, f, -1);
             _first = n;
             if (n == -1) {
                 _last = -1;
             } else {
-                _prev[n] = -1;
+                OffHeapLongArray.set(_prev, n, -1);
             }
             --_count;
             return f;
@@ -94,47 +96,46 @@ public class FixedStack2 implements KStack {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            int castedIndex = (int) index;
-            int p = _prev[castedIndex];
-            int n = _next[castedIndex];
+            long p = OffHeapLongArray.get(_prev, index);
+            long n = OffHeapLongArray.get(_next, index);
             if (p == -1 && n == -1) {
                 return false;
             }
             if (p == -1) {
-                int f = _first;
+                long f = _first;
                 if (f == -1) {
                     return false;
                 }
-                int n2 = _next[f];
-                _next[f] = -1;
-                _prev[f] = -1;
+                long n2 = OffHeapLongArray.get(_next, f);
+                OffHeapLongArray.set(_next, f, -1);
+                OffHeapLongArray.set(_prev, f, -1);
                 _first = n2;
                 if (n2 == -1) {
                     _last = -1;
                 } else {
-                    _prev[n2] = -1;
+                    OffHeapLongArray.set(_prev, n2, -1);
                 }
                 --_count;
             } else if (n == -1) {
-                int l = _last;
+                long l = _last;
                 if (l == -1) {
                     return false;
                 }
-                int p2 = _prev[l];
-                _prev[l] = -1;
-                _next[l] = -1;
+                long p2 = OffHeapLongArray.get(_prev, l);
+                OffHeapLongArray.set(_prev, l, -1);
+                OffHeapLongArray.set(_next, l, -1);
                 _last = p2;
                 if (p2 == -1) {
                     _first = -1;
                 } else {
-                    _next[p2] = -1;
+                    OffHeapLongArray.set(_next, p2, -1);
                 }
                 --_count;
             } else {
-                _next[p] = n;
-                _prev[n] = p;
-                _prev[castedIndex] = -1;
-                _next[castedIndex] = -1;
+                OffHeapLongArray.set(_next, p, n);
+                OffHeapLongArray.set(_prev, n, p);
+                OffHeapLongArray.set(_prev, index, -1);
+                OffHeapLongArray.set(_next, index, -1);
                 --_count;
             }
             return true;
@@ -143,10 +144,9 @@ public class FixedStack2 implements KStack {
         }
     }
 
-    @Override
     public void free() {
-
+        OffHeapLongArray.free(_next);
+        OffHeapLongArray.free(_prev);
     }
-
 
 }
