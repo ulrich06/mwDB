@@ -74,6 +74,8 @@
         <module>core</module>
 
         <module>plugins/ml</module>
+        <module>plugins/importer</module>
+
     </modules>
 
     <dependencies>

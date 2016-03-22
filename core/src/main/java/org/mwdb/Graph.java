@@ -291,8 +291,19 @@ public class Graph implements KGraph {
     public void index(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KNode>() {
             @Override
-            public void on(KNode result) {
-                result.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, callback);
+            public void on(KNode foundIndex) {
+                if(foundIndex== null){
+                    throw new RuntimeException("Index creation failed, cache is probably full !!!");
+                }
+                foundIndex.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new KCallback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        foundIndex.free();
+                        if (PrimitiveHelper.isDefined(callback)) {
+                            callback.on(result);
+                        }
+                    }
+                });
             }
         }, true);
     }
@@ -301,9 +312,17 @@ public class Graph implements KGraph {
     public void unindex(String indexName, KNode toIndexNode, String[] keyAttributes, KCallback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KNode>() {
             @Override
-            public void on(KNode result) {
-                if (result != null) {
-                    result.unindex(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, callback);
+            public void on(KNode foundIndex) {
+                if (foundIndex != null) {
+                    foundIndex.unindex(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new KCallback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+                            foundIndex.free();
+                            if (PrimitiveHelper.isDefined(callback)) {
+                                callback.on(result);
+                            }
+                        }
+                    });
                 }
             }
         }, false);
@@ -313,13 +332,21 @@ public class Graph implements KGraph {
     public void find(long world, long time, String indexName, String query, KCallback<KNode[]> callback) {
         getIndexOrCreate(world, time, indexName, new KCallback<KNode>() {
             @Override
-            public void on(KNode result) {
-                if (result == null) {
+            public void on(KNode foundIndex) {
+                if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(null);
                     }
                 } else {
-                    result.find(Constants.INDEX_ATTRIBUTE, query, callback);
+                    foundIndex.find(Constants.INDEX_ATTRIBUTE, query, new KCallback<KNode[]>() {
+                        @Override
+                        public void on(KNode[] collectedNodes) {
+                            foundIndex.free();
+                            if (PrimitiveHelper.isDefined(callback)) {
+                                callback.on(collectedNodes);
+                            }
+                        }
+                    });
                 }
             }
         }, false);
@@ -329,13 +356,21 @@ public class Graph implements KGraph {
     public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
         getIndexOrCreate(world, time, indexName, new KCallback<KNode>() {
             @Override
-            public void on(KNode result) {
-                if (result == null) {
+            public void on(KNode foundIndex) {
+                if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(new KNode[0]);
                     }
                 } else {
-                    result.all(Constants.INDEX_ATTRIBUTE, callback);
+                    foundIndex.all(Constants.INDEX_ATTRIBUTE, new KCallback<KNode[]>() {
+                        @Override
+                        public void on(KNode[] collectedNodes) {
+                            foundIndex.free();
+                            if (PrimitiveHelper.isDefined(callback)) {
+                                callback.on(collectedNodes);
+                            }
+                        }
+                    });
                 }
             }
         }, false);
