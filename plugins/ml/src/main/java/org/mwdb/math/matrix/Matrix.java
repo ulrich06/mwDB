@@ -1,5 +1,7 @@
 package org.mwdb.math.matrix;
 
+import org.mwdb.math.matrix.blas.BlasMatrixEngine;
+
 public class Matrix implements KMatrix {
 
     private final byte _matrixType;
