@@ -45,7 +45,7 @@ public class StatNode extends AbstractMLNode implements KStatNode {
     @Override
     public Object att(String attributeName) {
         if (attributeName.equals(AVG_KEY)) {
-            return mean();
+            return avg();
         } else if (attributeName.equals(MIN_KEY)) {
             return min();
         } else if (attributeName.equals(MAX_KEY)) {
@@ -84,7 +84,7 @@ public class StatNode extends AbstractMLNode implements KStatNode {
     }
 
     @Override
-    public double mean() {
+    public double avg() {
         Double currentTotal = (Double) rootNode().att(INTERNAL_TOTAL_KEY);
         Double currentSum = (Double) rootNode().att(INTERNAL_SUM_KEY);
         if (currentTotal == null || currentSum == null) {

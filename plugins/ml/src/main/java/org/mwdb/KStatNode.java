@@ -4,7 +4,7 @@ public interface KStatNode extends KNode {
 
     void learn(double value);
 
-    double mean();
+    double avg();
 
     double min();
 
