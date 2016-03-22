@@ -1,29 +1,29 @@
 package org.mwdb.ml;
 
-import org.mwdb.KMeanNode;
+import org.mwdb.KStatNode;
 import org.mwdb.KNode;
 import org.mwdb.KType;
 
-public class MeanNode extends AbstractMLNode implements KMeanNode {
+public class StatNode extends AbstractMLNode implements KStatNode {
 
     private static final String MIN_KEY = "min";
     private static final String MAX_KEY = "max";
     private static final String VALUE_KEY = "value";
-    private static final String MEAN_KEY = "mean";
-
+    private static final String AVG_KEY = "avg";
+    
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_TOTAL_KEY = "_total";
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
 
-    public MeanNode(KNode p_rootNode) {
+    public StatNode(KNode p_rootNode) {
         super(p_rootNode);
     }
 
     @Override
     public void attSet(String attributeName, byte attributeType, Object attributeValue) {
-        if (attributeName.equals(VALUE_KEY)) {
-            learn((double) attributeType);
+        if (attributeName.equals(VALUE_KEY) && attributeType==KType.DOUBLE) {
+            learn((double) attributeValue);
         } else {
             rootNode().attSet(attributeName, attributeType, attributeValue);
         }
@@ -31,7 +31,7 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public byte attType(String attributeName) {
-        if (attributeName.equals(MEAN_KEY)) {
+        if (attributeName.equals(AVG_KEY)) {
             return KType.DOUBLE;
         } else if (attributeName.equals(MIN_KEY)) {
             return KType.DOUBLE;
@@ -44,8 +44,8 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public Object att(String attributeName) {
-        if (attributeName.equals(MEAN_KEY)) {
-            return mean();
+        if (attributeName.equals(AVG_KEY)) {
+            return avg();
         } else if (attributeName.equals(MIN_KEY)) {
             return min();
         } else if (attributeName.equals(MAX_KEY)) {
@@ -84,9 +84,9 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
     }
 
     @Override
-    public double mean() {
-        Double currentTotal = (Double) att(INTERNAL_TOTAL_KEY);
-        Double currentSum = (Double) att(INTERNAL_SUM_KEY);
+    public double avg() {
+        Double currentTotal = (Double) rootNode().att(INTERNAL_TOTAL_KEY);
+        Double currentSum = (Double) rootNode().att(INTERNAL_SUM_KEY);
         if (currentTotal == null || currentSum == null) {
             return 0;
         } else {
@@ -96,7 +96,7 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public double min() {
-        Double currentMin = (Double) att(INTERNAL_MIN_KEY);
+        Double currentMin = (Double) rootNode().att(INTERNAL_MIN_KEY);
         if (currentMin == null) {
             return 0;
         } else {
@@ -106,7 +106,7 @@ public class MeanNode extends AbstractMLNode implements KMeanNode {
 
     @Override
     public double max() {
-        Double currentMax = (Double) att(INTERNAL_MAX_KEY);
+        Double currentMax = (Double) rootNode().att(INTERNAL_MAX_KEY);
         if (currentMax == null) {
             return 0;
         } else {

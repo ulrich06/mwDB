@@ -1,6 +1,6 @@
 package org.mwdb;
 
-import org.mwdb.ml.MeanNode;
+import org.mwdb.ml.StatNode;
 import org.mwdb.ml.PolynomialNode;
 
 public class KML {
@@ -9,8 +9,8 @@ public class KML {
         return new PolynomialNode(node);
     }
 
-    public static KMeanNode meanNode(KNode node) {
-        return new MeanNode(node);
+    public static KStatNode meanNode(KNode node) {
+        return new StatNode(node);
     }
 
 }
