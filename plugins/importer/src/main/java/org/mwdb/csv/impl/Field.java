@@ -19,7 +19,7 @@ public class Field implements KField {
 
     @Override
     public KField rename(String newName) {
-        rename = name;
+        rename = newName;
         return this;
     }
 

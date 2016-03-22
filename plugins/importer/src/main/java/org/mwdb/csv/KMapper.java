@@ -4,6 +4,10 @@ public interface KMapper {
 
     KField field(String name);
 
-    void timestamp(String[] fields, String[] pattern);
+    void extractTime(String fields, String pattern);
+
+    KMapper globallyIgnoreIfValueEquals(String value);
+
+    void nodeResolver(KNodeResolver resolver);
 
 }
