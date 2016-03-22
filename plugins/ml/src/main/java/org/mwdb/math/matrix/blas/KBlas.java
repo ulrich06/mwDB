@@ -2,6 +2,8 @@ package org.mwdb.math.matrix.blas;
 
 public interface KBlas {
 
+    byte matrixType();
+
     /**
      * Matrix multiplications
      * matC = alpha*matA*matB + beta*matC
