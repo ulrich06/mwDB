@@ -1,7 +1,14 @@
 package org.mwdb.math.matrix.blas;
 
+import org.mwdb.math.matrix.KMatrixType;
+
 public class NetlibBlas implements KBlas {
 
+
+    @Override
+    public byte matrixType() {
+        return KMatrixType.COLUMN_BASED;
+    }
 
     @Override
     public void dgemm(KBlasTransposeType transA, KBlasTransposeType transB, int m, int n, int k, double alpha, double[] matA, int offsetA, int ldA, double[] matB, int offsetB, int ldB, double beta, double[] matC, int offsetC, int ldC) {

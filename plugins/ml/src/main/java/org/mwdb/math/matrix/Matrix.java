@@ -1,9 +1,11 @@
 package org.mwdb.math.matrix;
 
-import org.mwdb.math.matrix.blas.BlasMatrixEngine;
+
+import org.mwdb.math.matrix.blas.KBlasTransposeType;
+
+import java.util.Random;
 
 public class Matrix implements KMatrix {
-
     private final byte _matrixType;
 
     private double[] _data;
@@ -110,10 +112,128 @@ public class Matrix implements KMatrix {
     /**
      * @native ts
      */
-    private static KMatrixEngine _defaultEngine = new BlasMatrixEngine();
+    private static KMatrixEngine _defaultEngine = new org.mwdb.math.matrix.blas.BlasMatrixEngine();
 
     public static KMatrixEngine defaultEngine() {
         return _defaultEngine;
+    }
+
+
+    public static KMatrix multiply(KMatrix matA, KMatrix matB) {
+        return _defaultEngine.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE,1,matA,KBlasTransposeType.NOTRANSPOSE,1,matB);
+    }
+    public static KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA,  KBlasTransposeType transB, double beta, KMatrix matB) {
+        return _defaultEngine.multiplyTransposeAlphaBeta(transA,alpha,matA,transB,beta,matB);
+    }
+    public static KMatrix invert(KMatrix mat, boolean invertInPlace) {
+        return _defaultEngine.invert(mat,invertInPlace);
+    }
+    public static KMatrix solve(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB){
+        return _defaultEngine.solve(matA,matB,workInPlace,transB);
+    }
+    public static int leadingDimension(KMatrix matA){
+        return Math.max(matA.columns(),matA.rows());
+    }
+    public static KMatrix random(int rows, int columns, byte matrixType, double min, double max){
+        KMatrix res= new Matrix(null,rows,columns, matrixType);
+        Random rand = new Random();
+        for(int i=0;i<rows*columns;i++){
+            res.setAtIndex(i,rand.nextDouble()*(max-min)+min);
+        }
+        return res;
+    }
+    public static void scale(double alpha, KMatrix matA) {
+        if (alpha == 0) {
+            matA.setAll(0);
+            return;
+        }
+        for (int i = 0; i < matA.rows() * matA.columns(); i++) {
+            matA.setAtIndex(i, alpha * matA.getAtIndex(i));
+        }
+    }
+    public static KMatrix transpose(KMatrix matA) {
+        KMatrix result=new Matrix(null, matA.columns(),matA.rows(),matA.matrixType());
+        int TRANSPOSE_SWITCH = 375;
+        if (matA.columns() == matA.rows()) {
+            transposeSquare(matA, result);
+        } else if (matA.columns() > TRANSPOSE_SWITCH && matA.rows() > TRANSPOSE_SWITCH) {
+            transposeBlock(matA, result);
+        } else {
+            transposeStandard(matA, result);
+        }
+        return result;
+    }
+    private static void transposeSquare(KMatrix matA, KMatrix result) {
+        int index = 1;
+        int indexEnd = matA.columns();
+        for (int i = 0; i < matA.rows(); i++) {
+            int indexOther = (i + 1) * matA.columns() + i;
+            int n = i * (matA.columns() + 1);
+            result.setAtIndex(n, matA.getAtIndex(n));
+            for (; index < indexEnd; index++) {
+                result.setAtIndex(index, matA.getAtIndex(indexOther));
+                result.setAtIndex(indexOther, matA.getAtIndex(index));
+                indexOther += matA.columns();
+            }
+            index += i + 2;
+            indexEnd += matA.columns();
+        }
+    }
+    private static void transposeStandard(KMatrix matA, KMatrix result) {
+        int index = 0;
+        for (int i = 0; i < result.columns(); i++) {
+            int index2 = i;
+            int end = index + result.rows();
+            while (index < end) {
+                result.setAtIndex(index++, matA.getAtIndex(index2));
+                index2 += matA.rows();
+            }
+        }
+    }
+    private static void transposeBlock(KMatrix matA, KMatrix result) {
+        int BLOCK_WIDTH = 60;
+        for (int j = 0; j < matA.columns(); j += BLOCK_WIDTH) {
+            int blockWidth = Math.min(BLOCK_WIDTH, matA.columns() - j);
+            int indexSrc = j * matA.rows();
+            int indexDst = j;
+
+            for (int i = 0; i < matA.rows(); i += BLOCK_WIDTH) {
+                int blockHeight = Math.min(BLOCK_WIDTH, matA.rows() - i);
+                int indexSrcEnd = indexSrc + blockHeight;
+
+                for (; indexSrc < indexSrcEnd; indexSrc++) {
+                    int colSrc = indexSrc;
+                    int colDst = indexDst;
+                    int end = colDst + blockWidth;
+                    for (; colDst < end; colDst ++) {
+                        result.setAtIndex(colDst, matA.getAtIndex(colSrc));
+                        colSrc+=matA.rows();
+                    }
+                    indexDst += result.rows();
+                }
+            }
+        }
+    }
+    public static KMatrix createIdentity(int width, byte matrixType) {
+        KMatrix ret = new Matrix(null, width, width,matrixType);
+        for (int i = 0; i < width; i++) {
+            ret.set(i, i, 1);
+        }
+        return ret;
+    }
+    public static double compareMatrix(KMatrix matA, KMatrix matB){
+        double err=0;
+
+        for (int i = 0; i < matA.rows(); i++) {
+            for (int j = 0; j < matA.columns(); j++) {
+                if(err< Math.abs(matA.get(i,j)-matB.get(i,j))) {
+                    err = Math.abs(matA.get(i, j) - matB.get(i, j));
+                    // System.out.println(i+" , "+ j+" , "+ err);
+                }
+
+            }
+        }
+        return err;
     }
 
 }
