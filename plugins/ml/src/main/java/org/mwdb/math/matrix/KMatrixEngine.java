@@ -2,7 +2,7 @@ package org.mwdb.math.matrix;
 
 public interface KMatrixEngine {
 
-    void multiply();
+    public KMatrix multiply(KMatrix matA, KMatrix matB);
 
     void solve();
 

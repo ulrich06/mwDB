@@ -1,28 +1,37 @@
 package org.mwdb.math.matrix;
 
+import org.mwdb.math.matrix.blas.BlasMatrixEngine;
+
 public class Matrix implements KMatrix {
 
     private final byte _matrixType;
 
-    private final double[] _back;
+    private double[] _data;
 
     private final int _nbRows;
     private final int _nbColumns;
 
     public Matrix(double[] backend, int p_nbRows, int p_nbColumns, byte p_matrixType) {
         this._matrixType = p_matrixType;
-        this._back = backend;
         this._nbRows = p_nbRows;
         this._nbColumns = p_nbColumns;
-        if (this._back == null) {
-            //TODO init
+        if(backend!=null){
+            this._data=backend;
+        }
+        else {
+            this._data=new double[_nbRows*_nbColumns];
         }
     }
 
 
     @Override
     public double[] data() {
-        return _back;
+        return _data;
+    }
+
+    @Override
+    public void setData(double[] data) {
+        System.arraycopy(data,0,this._data,0,data.length);
     }
 
     @Override
@@ -31,16 +40,68 @@ public class Matrix implements KMatrix {
     }
 
     @Override
-    public double get(int p_rowIndex, int p_columnIndex) {
-        //TODO add a if according to  the type
-        return this._segment.getDoubleArrayElem(this._segmentIndex, getIndex(p_rowIndex, p_columnIndex), this._metaClass);
+    public int rows() {
+        return _nbRows;
     }
 
     @Override
-    public double set(int p_rowIndex, int p_columnIndex, double value) {
-        //TODO add a if according to  the type
-        this._segment.setDoubleArrayElem(this._segmentIndex, getIndex(p_rowIndex, p_columnIndex), value, this._metaClass);
+    public int columns() {
+        return _nbColumns;
+    }
+
+    @Override
+    public double get(int rowIndex, int columnIndex) {
+        if(_matrixType==KMatrixType.ROW_BASED){
+            return _data[rowIndex+columnIndex*_nbRows];
+        }
+        else {
+            return _data[columnIndex+rowIndex*_nbColumns];
+        }
+    }
+
+    @Override
+    public double set(int rowIndex, int columnIndex, double value) {
+        if(_matrixType==KMatrixType.ROW_BASED){
+            _data[rowIndex+columnIndex*_nbRows]=value;
+        }
+        else {
+            _data[columnIndex+rowIndex*_nbColumns]=value;
+        }
         return value;
+    }
+
+    @Override
+    public double add(int rowIndex, int columnIndex, double value) {
+        return set(rowIndex, columnIndex, get(rowIndex, columnIndex) + value);
+    }
+
+    @Override
+    public void setAll(double value) {
+        for (int i = 0; i < _nbColumns * _nbRows; i++) {
+            this._data[i]=value;
+        }
+    }
+
+    @Override
+    public double getAtIndex(int index) {
+        return this._data[index];
+    }
+
+    @Override
+    public double setAtIndex(int index, double value) {
+        this._data[index]=value;
+        return value;
+    }
+
+    @Override
+    public double addAtIndex(int index, double value) {
+        this._data[index]+=value;
+        return this._data[index];
+    }
+
+    @Override
+    public KMatrix clone() {
+        return null;
     }
 
     /**
