@@ -23,6 +23,8 @@ public class CSVImporter {
     private int groupSize = 1;
     private Mapper mapper;
 
+    private boolean verbose;
+
     public CSVImporter() {
         SEP = COMMA;
         mapper = new Mapper();
@@ -30,6 +32,10 @@ public class CSVImporter {
 
     public void setSeparator(String newSeparator) {
         SEP = newSeparator;
+    }
+
+    public void setVerbose() {
+        verbose = true;
     }
 
     public void groupBy(int p_groupSize) {
@@ -43,14 +49,14 @@ public class CSVImporter {
     public void importToNode(File csvFile, KNode targetNode, KCallback<Boolean> callback) throws IOException {
         mapper.nodeResolver(new KNodeResolver() {
             @Override
-            public void resolve(KGraph graph, Map<String, Integer> headers, String[] values, long toResolveTime, KCallback<KNode> callback) {
+            public void resolve(KGraph graph, Map<String, Integer> headers, String[] values, long toResolveWorld, long toResolveTime, KCallback<KNode> callback) {
                 graph.lookup(targetNode.world(), toResolveTime, targetNode.id(), callback);
             }
         });
-        importToGraph(csvFile, targetNode.graph(), callback);
+        importToGraph(csvFile, targetNode.graph(), targetNode.world(), callback);
     }
 
-    public void importToGraph(File csvFile, KGraph targetGraph, KCallback<Boolean> callback) throws IOException {
+    public void importToGraph(File csvFile, KGraph targetGraph, long targetWorld, KCallback<Boolean> callback) throws IOException {
 
         BufferedReader reader = new BufferedReader(new FileReader(csvFile));
 
@@ -82,10 +88,22 @@ public class CSVImporter {
             StringTokenizer st = new StringTokenizer(header, SEP);
             String[] headers = new String[st.countTokens()];
             Map<String, Integer> headersMap = new HashMap<String, Integer>();
+
+            if (verbose) {
+                System.out.println("<Headers>");
+            }
+
             for (int i = 0; i < headers.length; i++) {
                 headers[i] = st.nextToken();
                 headersMap.put(headers[i], i);
+                if (verbose) {
+                    System.out.println("\t#" + i + ":<" + headers[i] + ">");
+                }
             }
+            if (verbose) {
+                System.out.println("</Headers>");
+            }
+
             String[][] values = new String[groupSize][];
             int valueIndex = 0;
             String valueLine = reader.readLine();
@@ -93,7 +111,7 @@ public class CSVImporter {
                 if (valueIndex == values.length) {
                     //process result
                     waiter.incrementAndGet();
-                    inject(targetGraph, headersMap, values, transform(headersMap, values), injectCallback);
+                    inject(targetGraph, targetWorld, headersMap, values, transform(headersMap, values), injectCallback);
 
                     values = new String[groupSize][];
                     valueIndex = 0;
@@ -112,19 +130,19 @@ public class CSVImporter {
             //process old result
             if (valueIndex != 0) {
                 waiter.incrementAndGet();
-                inject(targetGraph, headersMap, values, transform(headersMap, values), injectCallback);
+                inject(targetGraph, targetWorld, headersMap, values, transform(headersMap, values), injectCallback);
             }
         }
     }
 
-    private void inject(KGraph graph, Map<String, Integer> headers, String[][] lineElements, CSVElement[] elements, KCallback callback) {
+    private void inject(KGraph graph, long toResolveWorld, Map<String, Integer> headers, String[][] lineElements, CSVElement[] elements, KCallback callback) {
         for (int i = 0; i < elements.length; i++) {
             final CSVElement current = elements[i];
-            mapper.nodeResolver.resolve(graph, headers, lineElements[i], elements[i].time, new KCallback<KNode>() {
+            mapper.nodeResolver.resolve(graph, headers, lineElements[i], toResolveWorld, elements[i].time, new KCallback<KNode>() {
                 @Override
                 public void on(KNode result) {
                     if (result != null) {
-                        current.inject(result);
+                        current.inject(result, verbose);
                         result.free();
                         callback.on(null);
                     } else {
@@ -186,6 +204,20 @@ public class CSVImporter {
                     }
                 }
             });
+
+            if (verbose) {
+                System.out.print("<RawLine>");
+                for (int j = 0; j < lineElements.length; j++) {
+                    if (j != 0) {
+                        System.out.print("|");
+                    }
+                    System.out.print(lineElements[j]);
+                }
+                System.out.println("</RawLine>");
+                if (result[i] != null) {
+                    result[i].verbosePrint();
+                }
+            }
         }
         return result;
     }

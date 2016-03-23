@@ -8,3 +8,6 @@ Finally the plugin is extensible, by allowing users to define their own method t
 
 ## Usage
 
+More to come...
+Right now tests are implemented in a way to illustrate the various usage of the API on publicly available datasets.
+Have a look to start using CSV Importer

@@ -8,6 +8,6 @@ import java.util.Map;
 
 public interface KNodeResolver {
 
-    void resolve(KGraph graph, Map<String, Integer> headers, String[] values, long toResolveTime, KCallback<KNode> callback);
+    void resolve(KGraph graph, Map<String, Integer> headers, String[] values, long toResolveWorld, long toResolveTime, KCallback<KNode> callback);
 
 }

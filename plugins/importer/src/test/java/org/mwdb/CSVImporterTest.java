@@ -2,6 +2,7 @@ package org.mwdb;
 
 import org.junit.Test;
 import org.mwdb.csv.CSVImporter;
+import org.mwdb.csv.KField;
 import org.mwdb.csv.KNodeResolver;
 import org.mwdb.task.NoopScheduler;
 
@@ -75,6 +76,75 @@ public class CSVImporterTest {
                 try {
                     File toImport = new File(CSVImporter.class.getClassLoader().getResource("smarthome/smarthome_1.T15.txt").getPath());
                     importer.importToNode(toImport, house, new KCallback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+                            System.out.println("Import Finished");
+                        }
+                    });
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                graph.disconnect(null);
+            }
+        });
+    }
+
+    @Test
+    public void multiNodeTest2() {
+
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        graph.connect(new KCallback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+
+                //create an empty
+                KNode house = graph.newNode(0, 0);
+                house.attSet("ID", KType.STRING, "ABC123");
+                graph.index("houses", house, new String[]{"ID"}, null);
+
+                CSVImporter importer = new CSVImporter();
+                importer.setVerbose();
+                importer.setSeparator("\t");
+                importer.mapper().extractTime("{Start time          }", "yyyy-MM-d HH:mm:ss");
+                importer.mapper().field("Type").isInt().rename("active").transformFunction(new KField.KTransformFunction() {
+                    @Override
+                    public Object transform(String value) {
+                        return 1;
+                    }
+                });
+                importer.mapper().nodeResolver(new KNodeResolver() {
+                    @Override
+                    public void resolve(KGraph graph, Map<String, Integer> headers, String[] values, long toResolveworld, long toResolveTime, KCallback<KNode> callback) {
+                        final String roomName = values[headers.get("Place")];
+                        final String locationName = values[headers.get("Location")];
+                        house.find("sensors", "room=" + roomName + ",sensor=" + locationName, previouslyDefinedSensors -> {
+                            if (previouslyDefinedSensors.length == 1) {
+                                callback.on(previouslyDefinedSensors[0]);
+                            } else {
+                                KNode sensorNode = graph.newNode(toResolveworld, toResolveTime);
+                                sensorNode.attSet("room", KType.STRING, roomName);
+                                sensorNode.attSet("sensor", KType.STRING, locationName);
+                                house.index("rooms", sensorNode, new String[]{"room", "sensor"}, new KCallback<Boolean>() {
+                                    @Override
+                                    public void on(Boolean result) {
+                                        if (result) {
+                                            callback.on(sensorNode);
+                                        } else {
+                                            callback.on(null);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+
+                try {
+                    File toImport = new File(CSVImporter.class.getClassLoader().getResource("activity/OrdonezB_Sensors.txt").getPath());
+                    importer.importToGraph(toImport, graph,0, new KCallback<Boolean>() {
                         @Override
                         public void on(Boolean result) {
                             System.out.println("Import Finished");

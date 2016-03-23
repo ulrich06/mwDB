@@ -282,7 +282,7 @@ public class Node implements KNode {
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
             final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
-                callback.on(null);
+                callback.on(new KNode[0]);
                 return;
             }
             final KNode[] resolved = new KNode[foundId.length];
@@ -343,7 +343,7 @@ public class Node implements KNode {
                 }
             });
         } else {
-            callback.on(null);
+            callback.on(new KNode[0]);
         }
     }
 

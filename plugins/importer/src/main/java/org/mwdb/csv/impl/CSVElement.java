@@ -1,6 +1,7 @@
 package org.mwdb.csv.impl;
 
 import org.mwdb.KNode;
+import org.mwdb.KType;
 
 public class CSVElement {
 
@@ -35,10 +36,35 @@ public class CSVElement {
         valuesIndex++;
     }
 
-    public void inject(KNode target) {
+    public void inject(KNode target, boolean verbose) {
+        if (verbose) {
+            System.out.print("<Inject(" + target.world() + "," + target.time() + "," + target.id() + ")>");
+        }
         for (int i = 0; i < valuesIndex; i++) {
+            if (i != 0) {
+                if (verbose) {
+                    System.out.print("|");
+                }
+            }
+            if (verbose) {
+                System.out.print(names[i] + ":" + KType.typeName(types[i]) + "->" + values[i]);
+            }
             target.attSet(names[i], types[i], values[i]);
         }
+        if (verbose) {
+            System.out.println("</Inject>");
+        }
+    }
+
+    public void verbosePrint() {
+        System.out.print("<TransLine>");
+        for (int i = 0; i < valuesIndex; i++) {
+            if (i != 0) {
+                System.out.print("|");
+            }
+            System.out.print(names[i] + ":" + KType.typeName(types[i]) + "->" + values[i]);
+        }
+        System.out.println("</TransLine>");
     }
 
 }
