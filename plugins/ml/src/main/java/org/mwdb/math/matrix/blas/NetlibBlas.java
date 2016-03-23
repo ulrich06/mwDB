@@ -18,6 +18,8 @@ public class NetlibBlas implements KBlas {
 
 
     public NetlibBlas() {
+        connect();
+
     }
 
     @Override

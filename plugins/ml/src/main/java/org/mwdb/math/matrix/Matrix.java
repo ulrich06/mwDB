@@ -53,7 +53,7 @@ public class Matrix implements KMatrix {
 
     @Override
     public double get(int rowIndex, int columnIndex) {
-        if(_matrixType==KMatrixType.ROW_BASED){
+        if(_matrixType==KMatrixType.COLUMN_BASED){
             return _data[rowIndex+columnIndex*_nbRows];
         }
         else {
@@ -63,7 +63,7 @@ public class Matrix implements KMatrix {
 
     @Override
     public double set(int rowIndex, int columnIndex, double value) {
-        if(_matrixType==KMatrixType.ROW_BASED){
+        if(_matrixType==KMatrixType.COLUMN_BASED){
             _data[rowIndex+columnIndex*_nbRows]=value;
         }
         else {
