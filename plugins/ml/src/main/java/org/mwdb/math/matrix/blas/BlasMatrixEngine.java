@@ -106,7 +106,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
 
             LU dlu = new LU(A_temp.rows(), A_temp.columns(),_blas);
-            dlu.factor(A_temp);
+            dlu.factor(A_temp,true);
 
             if(dlu.isSingular()){
                 return null;
@@ -118,7 +118,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
         }
         else {
             LU dlu = new LU(matA.rows(), matA.columns(),_blas);
-            dlu.factor(matA);
+            dlu.factor(matA,true);
             if(dlu.isSingular()){
                 return null;
             }

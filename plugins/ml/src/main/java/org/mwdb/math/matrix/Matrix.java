@@ -3,8 +3,10 @@ package org.mwdb.math.matrix;
 
 import org.mwdb.math.matrix.blas.KBlasTransposeType;
 
+import java.util.BitSet;
 import java.util.Random;
 
+//Most of the time we will be using column based matrix due to blas.
 public class Matrix implements KMatrix {
     private final byte _matrixType;
 
@@ -103,7 +105,12 @@ public class Matrix implements KMatrix {
 
     @Override
     public KMatrix clone() {
-        return null;
+        double[] newback = new double[_data.length];
+        System.arraycopy(_data,0,newback,0,_data.length);
+
+        Matrix res = new Matrix(newback,this._nbRows,this._nbColumns,this._matrixType);
+        return res;
+
     }
 
     /**
@@ -236,4 +243,42 @@ public class Matrix implements KMatrix {
         return err;
     }
 
+    public static KMatrix fromPartialPivots(int[] pivots, byte type, boolean transposed) {
+        int[] permutations = new int[pivots.length];
+        for (int i = 0; i < pivots.length; i++) {
+            permutations[i] = i;
+        }
+
+        for (int i = 0; i < pivots.length; i++) {
+            int j = pivots[i] - 1;
+            if (j == i)
+                continue;
+            int tmp = permutations[i];
+            permutations[i] = permutations[j];
+            permutations[j] = tmp;
+        }
+
+        BitSet bitset = new BitSet();
+        for (int i : permutations) {
+            if (bitset.get(i))
+                throw new IllegalArgumentException("non-unique permutations: " + i);
+            bitset.set(i);
+        }
+
+        Matrix m= new Matrix(null,permutations.length, permutations.length, type);
+
+        double x;
+        for(int i=0;i<permutations.length;i++){
+            for(int j=0;j<permutations.length;j++){
+                if ((!transposed && permutations[i] == j) || (transposed && permutations[j] == i)){
+                    x=1;
+                }
+                else {
+                    x=0;
+                }
+                m.set(i,j,x);
+            }
+        }
+        return m;
+    }
 }
