@@ -50,7 +50,7 @@ public class LU {
      * @return The current decomposition
      */
     public static LU factorize(KMatrix A, KBlas blas) {
-        return new LU(A.rows(), A.columns(),blas).factor(A);
+        return new LU(A.rows(), A.columns(),blas).factor(A,false);
     }
 
     /**
@@ -60,21 +60,39 @@ public class LU {
      *            Matrix to decompose. Overwritten with the decomposition
      * @return The current decomposition
      */
-    public LU factor(KMatrix A) {
-        singular = false;
+    public LU factor(KMatrix A, boolean factorInPlace) {
+        if(factorInPlace){
+            singular = false;
 
-        int[] info = new int[1];
-        info[0]=0;
-        _blas.dgetrf(A.rows(), A.columns(), A.data(), 0,A.rows(), piv,0, info);
+            int[] info = new int[1];
+            info[0]=0;
+            _blas.dgetrf(A.rows(), A.columns(), A.data(), 0,A.rows(), piv,0, info);
 
-        if (info[0] > 0)
-            singular = true;
-        else if (info[0] < 0)
-            throw new RuntimeException();
+            if (info[0] > 0)
+                singular = true;
+            else if (info[0] < 0)
+                throw new RuntimeException();
 
-        LU.setData(A.data());
+            LU.setData(A.data());
+            return this;
+        }
+        else{
+            singular = false;
+            KMatrix B=A.clone();
 
-        return this;
+            int[] info = new int[1];
+            info[0]=0;
+            _blas.dgetrf(B.rows(), B.columns(), B.data(), 0,B.rows(), piv,0, info);
+
+            if (info[0] > 0)
+                singular = true;
+            else if (info[0] < 0)
+                throw new RuntimeException();
+
+            LU.setData(B.data());
+            return this;
+        }
+
     }
 
 
@@ -101,6 +119,10 @@ public class LU {
             }
         }
         return lower;
+    }
+
+    public KMatrix getP() {
+        return Matrix.fromPartialPivots(piv,_blas.matrixType(),true);
     }
 
 
