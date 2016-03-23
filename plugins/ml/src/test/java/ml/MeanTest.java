@@ -17,7 +17,7 @@ public class MeanTest {
 
                 meanNode.learn(0.3);
                 meanNode.learn(0.7);
-                Assert.assertTrue(0.5 == meanNode.mean());
+                Assert.assertTrue(0.5 == meanNode.avg());
                 Assert.assertTrue(0.3 == meanNode.min());
                 Assert.assertTrue(0.7 == meanNode.max());
 
