@@ -7,12 +7,12 @@ public interface KChunkSpace {
     /**
      * Create KChunk, out of the space, not marked, used as a factory
      */
-    KChunk create(long world, long time, long id, byte type, KBuffer initialPayload, KChunk origin);
+    KChunk create(byte type, long world, long time, long id, KBuffer initialPayload, KChunk origin);
 
     /**
      * Get and mark chunk for the association of keys
      */
-    KChunk getAndMark(long world, long time, long id);
+    KChunk getAndMark(byte type, long world, long time, long id);
 
     /**
      * Insert the chunk into the space and mark it before as used
@@ -22,7 +22,7 @@ public interface KChunkSpace {
     /**
      * UnMark chunk for the association of keys
      */
-    void unmark(long world, long time, long id);
+    void unmark(byte type, long world, long time, long id);
 
     /**
      * UnMark chunk
@@ -48,7 +48,7 @@ public interface KChunkSpace {
 
     void free();
 
-    int size();
+    long size();
 
     KChunkIterator detachDirties();
 

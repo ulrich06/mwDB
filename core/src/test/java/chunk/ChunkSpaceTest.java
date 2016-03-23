@@ -35,13 +35,13 @@ public class ChunkSpaceTest {
 
 
     public void test(KChunkSpace space) {
-        KStateChunk stateChunk = (KStateChunk) space.create(0, 0, 0, Constants.STATE_CHUNK, null, null);
+        KStateChunk stateChunk = (KStateChunk) space.create(Constants.STATE_CHUNK, 0, 0, 0, null, null);
         space.putAndMark(stateChunk);
 
-        KWorldOrderChunk worldOrderChunk = (KWorldOrderChunk) space.create(0, 0, 1, Constants.WORLD_ORDER_CHUNK, null, null);
+        KWorldOrderChunk worldOrderChunk = (KWorldOrderChunk) space.create(Constants.WORLD_ORDER_CHUNK, 0, 0, 1, null, null);
         space.putAndMark(worldOrderChunk);
 
-        KTimeTreeChunk timeTreeChunk = (KTimeTreeChunk) space.create(0, 0, 2, Constants.TIME_TREE_CHUNK, null, null);
+        KTimeTreeChunk timeTreeChunk = (KTimeTreeChunk) space.create(Constants.TIME_TREE_CHUNK, 0, 0, 2, null, null);
         space.putAndMark(timeTreeChunk);
 
         space.free();

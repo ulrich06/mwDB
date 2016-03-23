@@ -123,11 +123,11 @@ public class Graph implements KGraph {
                                                     Boolean noError = true;
                                                     try {
                                                         //init the global universe tree (mandatory for synchronious create)
-                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, Constants.WORLD_ORDER_CHUNK, payloads[GLO_TREE_INDEX], null);
+                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
                                                         selfPointer._space.putAndMark(globalWorldOrder);
 
                                                         //init the global dictionary chunk
-                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], Constants.STATE_CHUNK, payloads[GLO_DIC_INDEX], null);
+                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                                         if (payloads[UNIVERSE_INDEX] != null) {

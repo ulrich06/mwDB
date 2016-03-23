@@ -107,7 +107,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
 
     }
 
-    public OffHeapChunkSpace(long initialCapacity, int saveBatchSize) {
+    public OffHeapChunkSpace(long initialCapacity, long saveBatchSize) {
 
         if (saveBatchSize > initialCapacity) {
             throw new RuntimeException("Save Batch Size can't be bigger than cache size");
@@ -128,12 +128,13 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public final KChunk getAndMark(long world, long time, long id) {
-        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+    public final KChunk getAndMark(byte type, long world, long time, long id) {
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -186,13 +187,13 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public void unmark(long world, long time, long id) {
-
-        int index = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+    public void unmark(byte type, long world, long time, long id) {
+        long index = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, index);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -236,11 +237,13 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
             long world = chunk.world();
             long time = chunk.time();
             long id = chunk.id();
-            int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+            byte type = chunk.chunkType();
+            long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
             long m = OffHeapLongArray.get(_elementHash, hashIndex);
             while (m != Constants.OFFHEAP_NULL_PTR) {
                 long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
                 if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                         && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                         && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                         && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -256,7 +259,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(long p_world, long p_time, long p_id, byte p_type, KBuffer initialPayload, KChunk previousChunk) {
+    public KChunk create(byte p_type, long p_world, long p_time, long p_id, KBuffer initialPayload, KChunk previousChunk) {
         KOffHeapChunk newChunk = null;
         switch (p_type) {
             case Constants.STATE_CHUNK:
@@ -303,13 +306,15 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         final long world = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD);
         final long time = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME);
         final long id = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
+        final byte type = (byte) OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
 
         long entry = -1;
-        long hashIndex = PrimitiveHelper.tripleHash(p_elem.world(), p_elem.time(), p_elem.id(), this._capacity);
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != -1) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -340,7 +345,9 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 long victimWorld = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD);
                 long victimTime = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME);
                 long victimObj = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
-                int indexVictim = PrimitiveHelper.tripleHash(victimWorld, victimTime, victimObj, this._capacity);
+                byte victimType = (byte) OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+
+                long indexVictim = PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._capacity);
 
                 //negociate a lock on the indexVictim hash
                 while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, -1, 0)) ;
@@ -350,6 +357,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 while (m != Constants.OFFHEAP_NULL_PTR) {
                     long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
                     if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                            && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == victimType
                             && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == victimWorld
                             && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == victimTime
                             && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == victimObj
@@ -415,11 +423,13 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
-        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+        byte type = dirtyChunk.chunkType();
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -463,11 +473,13 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         long world = cleanChunk.world();
         long time = cleanChunk.time();
         long id = cleanChunk.id();
-        int hashIndex = PrimitiveHelper.tripleHash(world, time, id, this._capacity);
+        byte type = cleanChunk.chunkType();
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
             if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
                     && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
@@ -532,7 +544,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public final int size() {
+    public final long size() {
         return this._elementCount.get();
     }
 
