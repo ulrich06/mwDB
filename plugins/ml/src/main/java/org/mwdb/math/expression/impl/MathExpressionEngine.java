@@ -1,6 +1,7 @@
 package org.mwdb.math.expression.impl;
 
 
+import org.mwdb.KNode;
 import org.mwdb.math.expression.KMathExpressionEngine;
 import org.mwdb.math.expression.KMathVariableResolver;
 
@@ -158,8 +159,10 @@ public class MathExpressionEngine implements KMathExpressionEngine {
     }
 
 
+
+    //Todo check if it's correct
     @Override
-    public double eval(KObject context) {
+    public double eval(KNode context) {
         if (this._cacheAST == null) {
             throw new RuntimeException("Call parse before");
         }
@@ -192,13 +195,10 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                     } else {
                         if (context != null) {
                             if (PrimitiveHelper.equals("TIME", castedFreeToken.content())) {
-                                stack.push((double) context.now());
+                                stack.push((double) context.time());
                             } else {
-                                Object resolved = context.getByName(castedFreeToken.content());
+                                Object resolved = context.att(castedFreeToken.content());
                                 if (resolved != null) {
-                                    if (resolved instanceof MetaLiteral) {
-                                        stack.push((double) ((MetaLiteral) resolved).index());
-                                    } else {
                                         String valueString = resolved.toString();
                                         if (PrimitiveHelper.equals(valueString, "true")) {
                                             stack.push(1.0);
@@ -211,7 +211,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                                                 //noop
                                             }
                                         }
-                                    }
+
                                 } else {
                                     throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
                                 }

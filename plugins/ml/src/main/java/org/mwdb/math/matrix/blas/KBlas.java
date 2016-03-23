@@ -116,11 +116,52 @@ public interface KBlas {
      */
     void dgeqrf(int m, int n, double[] matA, int offsetA, int ldA, double[] taw, int offsetTaw, double[] work, int offsetwork, int lWork, int[] info);
 
+
+    /**
+     * DGESDD computes the singular value decomposition (SVD) of a real
+     *  M-by-N matrix A, optionally computing the left and right singular
+     *  vectors.  If singular vectors are desired, it uses a
+     *  divide-and-conquer algorithm.
+     * @param  jobz    (input) CHARACTER*1
+     *          Specifies options for computing all or part of the matrix U:
+     *          = 'A':  all M columns of U and all N rows of V**T are
+     *                  returned in the arrays U and VT;
+     *          = 'S':  the first min(M,N) columns of U and the first
+     *                  min(M,N) rows of V**T are returned in the arrays U
+     *                  and VT;
+     *          = 'O':  If M >= N, the first N columns of U are overwritten
+     *                  on the array A and all rows of V**T are returned in
+     *                  the array VT;
+     *                  otherwise, all columns of U are returned in the
+     *                  array U and the first M rows of V**T are overwritten
+     *                  in the array A;
+     *          = 'N':  no columns of U or rows of V**T are computed.
+     *
+     * @param m         The number of rows of the input matrix A.  M >= 0.     *
+     * @param n         The number of columns of the input matrix A.  N >= 0.
+     * @param data      (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+     * @param lda       The leading dimension of the array A.  LDA >= max(1,M).
+     * @param s         (output) DOUBLE PRECISION array, dimension (min(M,N))
+     *                  The singular values of A, sorted so that S(i) >= S(i+1).
+     * @param u         (output) DOUBLE PRECISION array, dimension (LDU,UCOL)
+     * @param ldu       The leading dimension of the array U.
+     * @param vt        (output) DOUBLE PRECISION array, dimension (LDVT,N)
+     * @param ldvt      The leading dimension of the array VT.
+     * @param work      (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
+     * @param length    The dimension of the array WORK. LWORK >= 1.
+     * @param iwork     (workspace) INTEGER array, dimension (8*min(M,N))
+     * @param info      (output) INTEGER
+     */
+
+    void dgesdd(String jobz, int m, int n, double[] data, int lda, double[] s, double[] u, int ldu, double[] vt, int ldvt, double[] work, int length, int[] iwork, int[] info);
+
     /**
      * BLAS Plugin Life-cycle
      */
     void connect();
 
     void disconnect();
+
+
 
 }
