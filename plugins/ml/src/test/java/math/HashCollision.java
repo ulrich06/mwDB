@@ -11,7 +11,6 @@ import java.util.TreeMap;
  * Created by assaad on 23/03/16.
  */
 public class HashCollision {
-    @Test
     public void hashing(){
         byte x;
         long p1,p2,p3;

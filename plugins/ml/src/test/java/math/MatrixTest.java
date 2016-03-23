@@ -8,6 +8,7 @@ import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.blas.KBlas;
 import org.mwdb.math.matrix.blas.NetlibBlas;
 import org.mwdb.math.matrix.solver.LU;
+import org.mwdb.math.matrix.solver.QR;
 
 /**
  * Created by assaad on 23/03/16.
@@ -93,12 +94,12 @@ public class MatrixTest {
 
     @Test
     public void MatrixInvert() {
-        int r = 1000;
+        int m = 1000;
         int times = 1;
-        int[] dimA = {r, r};
+        int[] dimA = {m, m};
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(r, r, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(m, m, KMatrixType.COLUMN_BASED, 0, 100);
 
         KMatrix res = null;
 
@@ -114,8 +115,8 @@ public class MatrixTest {
 
         KMatrix id = Matrix.multiply(matA, res);
 
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < r; j++) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < m; j++) {
                 double x;
                 if (i == j) {
                     x = 1;
@@ -129,24 +130,24 @@ public class MatrixTest {
 
     @Test
     public void MatrixLU() {
-        int r = 300;
-        int p = 500;
+        int m = 300;
+        int n = 500;
         double eps = 1e-7;
         KBlas blas = new NetlibBlas();
 
-        KMatrix matA = Matrix.random(r, p, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(m, n, KMatrixType.COLUMN_BASED, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
-        //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
+        //KMatrix matA = new Matrix(xx,m,n,KMatrixType.COLUMN_BASED);
 
 
-        LU dlu = new LU(r, p, blas);
+        LU dlu = new LU(m, n, blas);
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
         dlu.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        System.out.println("Netlib LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix P = dlu.getP();
         KMatrix L = dlu.getLower();
@@ -154,8 +155,40 @@ public class MatrixTest {
         KMatrix res1 = Matrix.multiply(P, L);
         KMatrix res = Matrix.multiply(res1, U);
 
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < p; j++) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                Assert.assertTrue(Math.abs(res.get(i, j) - matA.get(i, j)) < eps);
+            }
+        }
+    }
+
+    @Test
+    public void MatrixQR() {
+        int m = 500;
+        int n = 300;
+        double eps = 1e-7;
+        KBlas blas = new NetlibBlas();
+
+        KMatrix matA = Matrix.random(m, n, KMatrixType.COLUMN_BASED, 0, 100);
+
+        //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
+        //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
+
+
+        QR qr= new QR(m,n,blas);
+        long timestart, timeend;
+
+        timestart = System.currentTimeMillis();
+        qr.factor(matA,false);
+        timeend = System.currentTimeMillis();
+        System.out.println("Netlib QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+
+        KMatrix Q= qr.getQ();
+        KMatrix R= qr.getR();
+        KMatrix res = Matrix.multiply(Q, R);
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
                 Assert.assertTrue(Math.abs(res.get(i, j) - matA.get(i, j)) < eps);
             }
         }

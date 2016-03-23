@@ -48,7 +48,7 @@ public class QR{
         this.n = columns;
         this.k = Math.min(m, n);
         tau = new double[k];
-        R = new Matrix(null,m, n,_blas.matrixType());
+        R = new Matrix(null,n, n,_blas.matrixType());
 
     }
 
