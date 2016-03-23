@@ -62,7 +62,7 @@ public class Graph implements KGraph {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
-        KNode newNode = new Node(this, world, time, this._nodeKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
+        KNode newNode = new Node(this, world, time, this._nodeKeyCalculator.nextKey(), this._resolver, world, time, time, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         this._resolver.initNode(newNode);
         return newNode;
     }
@@ -406,7 +406,7 @@ public class Graph implements KGraph {
                 } else {
                     KLongLongMap globalIndexContent;
                     if (globalIndexNodeUnsafe == null) {
-                        KNode globalIndexNode = new Node(selfPointer, world, time, Constants.END_OF_TIME, selfPointer._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
+                        KNode globalIndexNode = new Node(selfPointer, world, time, Constants.END_OF_TIME, selfPointer._resolver, world, time, time, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                         selfPointer._resolver.initNode(globalIndexNode);
                         globalIndexContent = (KLongLongMap) globalIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
                     } else {

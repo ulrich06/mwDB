@@ -44,8 +44,13 @@ public class MWGResolver implements KResolver {
         //declare dirty now because potentially no insert could be done
         this._space.declareDirty(cacheEntry);
 
+        //initiate superTime management
+        KTimeTreeChunk superTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
+        superTimeTree = (KTimeTreeChunk) this._space.putAndMark(superTimeTree);
+        superTimeTree.insert(node.time());
+
         //initiate time management
-        KTimeTreeChunk timeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
+        KTimeTreeChunk timeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), node.time(), node.id(), null, null);
         timeTree = (KTimeTreeChunk) this._space.putAndMark(timeTree);
         timeTree.insert(node.time());
 
@@ -109,32 +114,54 @@ public class MWGResolver implements KResolver {
                                             final long closestUniverse = resolve_world((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
                                             selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                                 @Override
-                                                public void on(KChunk theObjectTimeTreeElement) {
-                                                    if (theObjectTimeTreeElement == null) {
+                                                public void on(KChunk theObjectSuperTimeTreeElement) {
+                                                    if (theObjectSuperTimeTreeElement == null) {
                                                         selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
                                                         selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                                         callback.on(null);
                                                     } else {
-                                                        long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
-                                                        if (closestTime == Constants.NULL_LONG) {
-                                                            selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                        final long closestSuperTime = ((KLongTree) theObjectSuperTimeTreeElement).previousOrEqual(time);
+                                                        if (closestSuperTime == Constants.NULL_LONG) {
+                                                            selfPointer._space.unmarkChunk(theObjectSuperTimeTreeElement);
                                                             selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
                                                             selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                                             callback.on(null);
                                                             return;
                                                         }
-                                                        selfPointer.getOrLoadAndMark(Constants.STATE_CHUNK, closestUniverse, closestTime, id, new KCallback<KChunk>() {
+                                                        selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestUniverse, closestSuperTime, id, new KCallback<KChunk>() {
                                                             @Override
-                                                            public void on(KChunk theObjectChunk) {
-                                                                if (theObjectChunk == null) {
-                                                                    selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                            public void on(KChunk theObjectTimeTreeElement) {
+                                                                if (theObjectTimeTreeElement == null) {
+                                                                    selfPointer._space.unmarkChunk(theObjectSuperTimeTreeElement);
                                                                     selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
                                                                     selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    Node newNode = new Node(_graph, world, time, id, selfPointer, closestUniverse, closestTime, ((KWorldOrderChunk) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
-                                                                    selfPointer._tracker.monitor(newNode);
-                                                                    callback.on(newNode);
+                                                                    long closestTime = ((KLongTree) theObjectTimeTreeElement).previousOrEqual(time);
+                                                                    if (closestTime == Constants.NULL_LONG) {
+                                                                        selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                                        selfPointer._space.unmarkChunk(theObjectSuperTimeTreeElement);
+                                                                        selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
+                                                                        selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                                        callback.on(null);
+                                                                        return;
+                                                                    }
+                                                                    selfPointer.getOrLoadAndMark(Constants.STATE_CHUNK, closestUniverse, closestTime, id, new KCallback<KChunk>() {
+                                                                        @Override
+                                                                        public void on(KChunk theObjectChunk) {
+                                                                            if (theObjectChunk == null) {
+                                                                                selfPointer._space.unmarkChunk(theObjectTimeTreeElement);
+                                                                                selfPointer._space.unmarkChunk(theObjectSuperTimeTreeElement);
+                                                                                selfPointer._space.unmarkChunk(theObjectUniverseOrderElement);
+                                                                                selfPointer._space.unmarkChunk(theGlobalUniverseOrderElement);
+                                                                                callback.on(null);
+                                                                            } else {
+                                                                                Node newNode = new Node(_graph, world, time, id, selfPointer, closestUniverse, closestSuperTime, closestTime, ((KWorldOrderChunk) theObjectUniverseOrderElement).magic(), ((KLongTree) theObjectSuperTimeTreeElement).magic(), ((KLongTree) theObjectTimeTreeElement).magic());
+                                                                                selfPointer._tracker.monitor(newNode);
+                                                                                callback.on(newNode);
+                                                                            }
+                                                                        }
+                                                                    });
                                                                 }
                                                             }
                                                         });
@@ -296,22 +323,31 @@ public class MWGResolver implements KResolver {
         }
 
         //Retrieve Node needed chunks
-        KWorldOrderChunk objectUniverseMap = (KWorldOrderChunk) this._space.getAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, nodeId);
-        if (objectUniverseMap == null) {
+        KWorldOrderChunk objectWorldMap = (KWorldOrderChunk) this._space.getAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, nodeId);
+        if (objectWorldMap == null) {
             return null;
         }
-        KTimeTreeChunk objectTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+        KTimeTreeChunk objectSuperTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+        if (objectSuperTimeTree == null) {
+            this._space.unmarkChunk(objectWorldMap);
+            return null;
+        }
+        KTimeTreeChunk objectTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
         if (objectTimeTree == null) {
-            this._space.unmarkChunk(objectUniverseMap);
+            this._space.unmarkChunk(objectSuperTimeTree);
+            this._space.unmarkChunk(objectWorldMap);
             return null;
         }
-        long objectUniverseMapMagic = objectUniverseMap.magic();
+
+        long objectWorldMapMagic = objectWorldMap.magic();
+        long objectSuperTimeTreeMagic = objectSuperTimeTree.magic();
         long objectTimeTreeMagic = objectTimeTree.magic();
 
         //OPTIMIZATION #2: SAME DEPHASING
-        if (allowDephasing && previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == objectUniverseMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == objectTimeTreeMagic) {
+        if (allowDephasing && previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == objectWorldMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == objectSuperTimeTreeMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == objectTimeTreeMagic) {
             KStateChunk currentEntry = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
-            this._space.unmarkChunk(objectUniverseMap);
+            this._space.unmarkChunk(objectWorldMap);
+            this._space.unmarkChunk(objectSuperTimeTree);
             this._space.unmarkChunk(objectTimeTree);
             if (currentEntry != null) {
                 //ERROR case protection, chunk has been removed from cache
@@ -321,43 +357,69 @@ public class MWGResolver implements KResolver {
         }
 
         //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
-        KWorldOrderChunk globalUniverseTree = (KWorldOrderChunk) this._space.getAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
-        if (globalUniverseTree == null) {
-            this._space.unmarkChunk(objectUniverseMap);
+        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) this._space.getAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        if (globalWorldOrder == null) {
+            this._space.unmarkChunk(objectWorldMap);
+            this._space.unmarkChunk(objectSuperTimeTree);
             this._space.unmarkChunk(objectTimeTree);
             return null;
         }
 
         //SOMETHING WILL MOVE HERE ANYWAY SO WE SYNC THE OBJECT
 
-        objectUniverseMap.lock();
+        objectWorldMap.lock();
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
-        //REFRESH magics
-        objectUniverseMapMagic = objectUniverseMap.magic();
+        //REFRESH all magics
+        objectWorldMapMagic = objectWorldMap.magic();
+        objectSuperTimeTreeMagic = objectSuperTimeTree.magic();
         objectTimeTreeMagic = objectTimeTree.magic();
+
         try {
             long resolvedWorld;
+            long resolvedSuperTime;
             long resolvedTime;
             // OPTIMIZATION #3: SAME DEPHASING THAN BEFORE, DIRECTLY CLONE THE PREVIOUSLY RESOLVED TUPLE
-            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == objectUniverseMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == objectTimeTreeMagic) {
+            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == objectWorldMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == objectSuperTimeTreeMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == objectTimeTreeMagic) {
                 resolvedWorld = previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX];
+                resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
                 resolvedTime = previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX];
             } else {
-                resolvedWorld = resolve_world(globalUniverseTree, objectUniverseMap, nodeTime, nodeWorld);
+                resolvedWorld = resolve_world(globalWorldOrder, objectWorldMap, nodeTime, nodeWorld);
+                if (resolvedWorld != previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX]) {
+                    //we have to update the superTree
+                    KTimeTreeChunk tempObjectTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, resolvedWorld, Constants.NULL_LONG, nodeId);
+                    _space.unmarkChunk(objectSuperTimeTree);
+                    objectSuperTimeTree = tempObjectTimeTree;
+                }
+                //TODO detect potentially cache miss
+                resolvedSuperTime = objectSuperTimeTree.previousOrEqual(nodeTime);
+                if (previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] != resolvedSuperTime) {
+                    //we have to update the timeTree
+                    KTimeTreeChunk tempObjectTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], resolvedSuperTime, nodeId);
+                    _space.unmarkChunk(objectTimeTree);
+                    objectTimeTree = tempObjectTimeTree;
+                }
+                //TODO detect potentially cache miss
                 resolvedTime = objectTimeTree.previousOrEqual(nodeTime);
-                System.err.println("WTF");
             }
-
-            if (resolvedWorld != Constants.NULL_LONG && resolvedTime != Constants.NULL_LONG) {
+            if (resolvedWorld != Constants.NULL_LONG && resolvedSuperTime != Constants.NULL_LONG && resolvedTime != Constants.NULL_LONG) {
                 if (allowDephasing) {
                     KStateChunk newObjectEntry = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
                     long[] current;
                     boolean diff = false;
                     do {
                         previousResolveds = castedNode._previousResolveds.get();
-                        if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] != resolvedWorld || previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] != resolvedTime) {
-                            current = new long[]{resolvedWorld, resolvedTime, objectUniverseMapMagic, objectTimeTreeMagic};
+                        if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] != resolvedWorld || previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] != resolvedSuperTime || previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] != resolvedTime) {
+                            current = new long[6];
+                            //previously resolved
+                            current[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = resolvedWorld;
+                            current[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
+                            current[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = resolvedTime;
+                            //previously magics
+                            current[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = objectWorldMapMagic;
+                            current[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = objectSuperTimeTreeMagic;
+                            current[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = objectTimeTreeMagic;
                             diff = true;
                         } else {
                             current = previousResolveds;
@@ -365,6 +427,10 @@ public class MWGResolver implements KResolver {
                     } while (!castedNode._previousResolveds.compareAndSet(previousResolveds, current));
                     if (diff) {
                         //unmark previous
+                        //TODO unmark previous super time tree
+
+                        //TODO unmark previous time tree
+
                         this._space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
                     } else {
                         //concurrent usage of the same Node object, somebody else has already aligned the object, nothing to do, remove unnecessary mark
@@ -372,10 +438,11 @@ public class MWGResolver implements KResolver {
                     }
                     //in all the case free tree and map
                     this._space.unmarkChunk(objectTimeTree);
-                    this._space.unmarkChunk(globalUniverseTree);
-                    this._space.unmarkChunk(objectUniverseMap);
+                    this._space.unmarkChunk(objectSuperTimeTree);
+                    this._space.unmarkChunk(objectWorldMap);
+                    this._space.unmarkChunk(globalWorldOrder);
                     //free lock
-                    objectUniverseMap.unlock();
+                    objectWorldMap.unlock();
                     return newObjectEntry;
                 } else {
                     long[] current;
@@ -384,16 +451,28 @@ public class MWGResolver implements KResolver {
                         previousResolveds = castedNode._previousResolveds.get();
                         if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] != nodeWorld || previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] != nodeTime) {
                             //universeMap and objectTree magic numbers are set to null
-                            current = new long[]{nodeWorld, nodeTime, Constants.NULL_LONG, Constants.NULL_LONG};
+                            current = new long[6];
+                            //previously resolved
+                            current[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
+                            current[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
+                            current[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
+                            //previously magics
+                            current[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+                            current[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+                            current[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
                             diff = true;
                         } else {
                             current = previousResolveds;
                         }
                     } while (!castedNode._previousResolveds.compareAndSet(previousResolveds, current));
                     if (diff) {
-                        KStateChunk currentEntry = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+                        KStateChunk currentEntry = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
                         //clone the chunk
                         KStateChunk clonedChunk = (KStateChunk) this._space.create(Constants.STATE_CHUNK, nodeWorld, nodeTime, nodeId, null, currentEntry);
+
+                        //TODO unmark previous super time tree
+
+                        //TODO unmark preivous time tree
 
                         this._space.putAndMark(clonedChunk);
                         this._space.declareDirty(clonedChunk);
@@ -406,43 +485,46 @@ public class MWGResolver implements KResolver {
                             newTemporalTree.insert(nodeTime);
                             //unmark the previous time tree, now we have switched to the new one
                             this._space.unmarkChunk(objectTimeTree);
-                            objectUniverseMap.put(nodeWorld, nodeTime);
+                            objectWorldMap.put(nodeWorld, nodeTime);
                         }
                         //double unMarking, because, we should not use anymore this object
                         this._space.unmarkChunk(currentEntry);
                         this._space.unmarkChunk(currentEntry);
                         //free the rest of used object
                         this._space.unmarkChunk(objectTimeTree);
-                        this._space.unmarkChunk(objectUniverseMap);
-                        this._space.unmarkChunk(globalUniverseTree);
+                        this._space.unmarkChunk(objectSuperTimeTree);
+                        this._space.unmarkChunk(objectWorldMap);
+                        this._space.unmarkChunk(globalWorldOrder);
                         //free lock
-                        objectUniverseMap.unlock();
+                        objectWorldMap.unlock();
                         return clonedChunk;
                     } else {
                         //somebody as clone for us, now waiting for the chunk to be available
                         this._space.unmarkChunk(objectTimeTree);
-                        this._space.unmarkChunk(objectUniverseMap);
-                        this._space.unmarkChunk(globalUniverseTree);
+                        this._space.unmarkChunk(objectSuperTimeTree);
+                        this._space.unmarkChunk(objectWorldMap);
+                        this._space.unmarkChunk(globalWorldOrder);
                         KStateChunk waitingChunk = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
                         this._space.unmarkChunk(waitingChunk);
                         //free lock
-                        objectUniverseMap.unlock();
+                        objectWorldMap.unlock();
                         return waitingChunk;
                     }
                 }
             } else {
                 this._space.unmarkChunk(objectTimeTree);
-                this._space.unmarkChunk(globalUniverseTree);
-                this._space.unmarkChunk(objectUniverseMap);
+                this._space.unmarkChunk(objectSuperTimeTree);
+                this._space.unmarkChunk(objectWorldMap);
+                this._space.unmarkChunk(globalWorldOrder);
                 //free lock
-                objectUniverseMap.unlock();
+                objectWorldMap.unlock();
                 return null;
             }
 
         } catch (Throwable r) {
             //free lock
             r.printStackTrace();
-            objectUniverseMap.unlock();
+            objectWorldMap.unlock();
             return null;
         }
     }

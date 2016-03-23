@@ -39,17 +39,19 @@ public class Constants extends KConstants {
 
     public static final byte WORLD_ORDER_CHUNK = 2;
 
-    public static final byte KEY_GEN_CHUNK = 1;
+    public static final byte KEY_GEN_CHUNK = 3;
 
 
     /**
      * Node constants
      **/
     public static final int PREVIOUS_RESOLVED_WORLD_INDEX = 0;
-    public static final int PREVIOUS_RESOLVED_TIME_INDEX = 1;
+    public static final int PREVIOUS_RESOLVED_SUPER_TIME_INDEX = 1;
+    public static final int PREVIOUS_RESOLVED_TIME_INDEX = 2;
 
-    public static final int PREVIOUS_RESOLVED_WORLD_MAGIC = 2;
-    public static final int PREVIOUS_RESOLVED_TIME_MAGIC = 3;
+    public static final int PREVIOUS_RESOLVED_WORLD_MAGIC = 3;
+    public static final int PREVIOUS_RESOLVED_SUPER_TIME_MAGIC = 4;
+    public static final int PREVIOUS_RESOLVED_TIME_MAGIC = 5;
 
     /**
      * Keys constants
@@ -61,7 +63,6 @@ public class Constants extends KConstants {
     public static final long[] PREFIX_KEY = new long[]{Constants.END_OF_TIME, Constants.NULL_LONG, Constants.NULL_LONG};
 
     public static final long[] NULL_KEY = new long[]{END_OF_TIME, END_OF_TIME, END_OF_TIME};
-
 
     public static final long[] GLOBAL_UNIVERSE_KEY = new long[]{NULL_LONG, NULL_LONG, NULL_LONG};
 
@@ -103,5 +104,14 @@ public class Constants extends KConstants {
     public static final int OFFHEAP_CHUNK_INDEX_TYPE = 3;
     public static final int OFFHEAP_CHUNK_INDEX_FLAGS = 4;
     public static final int OFFHEAP_CHUNK_INDEX_MARKS = 5;
+
+
+    /**
+     * SuperTimeTree
+     */
+    public static final long SCALE_1 = 10_000;
+    public static final long SCALE_2 = 100_000;
+    public static final long SCALE_3 = 1_000_000;
+
 
 }

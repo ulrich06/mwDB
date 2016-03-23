@@ -24,14 +24,25 @@ public class Node implements KNode {
 
     public final AtomicReference<long[]> _previousResolveds;
 
-    public Node(KGraph p_graph, long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualTime, long currentUniverseMagic, long currentTimeMagic) {
+    public Node(KGraph p_graph, long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualUniverse, long p_actualSuperTime, long p_actualTime, long currentWorldMagic, long currentSuperTimeMagic, long currentTimeMagic) {
         this._graph = p_graph;
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
         this._resolver = p_resolver;
         this._previousResolveds = new AtomicReference<long[]>();
-        this._previousResolveds.set(new long[]{p_actualUniverse, p_actualTime, currentUniverseMagic, currentTimeMagic});
+
+        long[] initPreviouslyResolved = new long[6];
+        //init previously resolved values
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = p_actualUniverse;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = p_actualSuperTime;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = p_actualTime;
+        //init previous magics
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = currentWorldMagic;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = currentSuperTimeMagic;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = currentTimeMagic;
+
+        this._previousResolveds.set(initPreviouslyResolved);
     }
 
     @Override
