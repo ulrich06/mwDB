@@ -7,6 +7,7 @@ import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.blas.KBlas;
 import org.mwdb.math.matrix.blas.KBlasTransposeType;
 import org.mwdb.math.matrix.blas.NetlibBlas;
+import org.mwdb.math.matrix.solver.LU;
 
 import java.util.Random;
 
@@ -71,19 +72,25 @@ public class BlasMatrixEngine implements KMatrixEngine {
         }
 
         if(invertInPlace){
-            LU alg = new LU(mat.rows(),mat.columns());
+            LU alg = new LU(mat.rows(),mat.columns(),_blas);
             KMatrix result = new Matrix(null, mat.rows(),mat.columns(),_blas.matrixType());
-            LU dlu = new LU(mat.rows(),mat.columns());
-            return dlu.invert(mat,_blas);
+            LU dlu = new LU(mat.rows(),mat.columns(),_blas);
+            if(dlu.invert(mat)){
+                return mat;
+            }
+            else {
+                return null;
+            }
+
         }
         else {
-            LU alg = new LU(mat.rows(), mat.columns());
+            LU alg = new LU(mat.rows(), mat.columns(),_blas);
             KMatrix result = new Matrix(null, mat.rows(), mat.columns(), _blas.matrixType());
             Matrix A_temp = new Matrix(null, mat.rows(), mat.columns(), _blas.matrixType());
             System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
 
-            LU dlu = new LU(A_temp.rows(), A_temp.columns());
-            if (dlu.invert(A_temp, _blas)) {
+            LU dlu = new LU(A_temp.rows(), A_temp.columns(),_blas);
+            if (dlu.invert(A_temp)) {
                 result.setData(A_temp.data());
                 return result;
             } else {
@@ -98,24 +105,24 @@ public class BlasMatrixEngine implements KMatrixEngine {
             Matrix A_temp = new Matrix(null,matA.rows(), matA.columns(),_blas.matrixType());
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
 
-            LU dlu = new LU(A_temp.rows(), A_temp.columns());
-            dlu.factor(A_temp, _blas);
+            LU dlu = new LU(A_temp.rows(), A_temp.columns(),_blas);
+            dlu.factor(A_temp);
 
             if(dlu.isSingular()){
                 return null;
             }
             Matrix B_temp = new Matrix(null, matB.rows(), matB.columns(),_blas.matrixType());
             System.arraycopy(matB.data(), 0, B_temp.data(), 0, matB.columns() * matB.rows());
-            dlu.transSolve(B_temp,transB,_blas);
+            dlu.transSolve(B_temp,transB);
             return B_temp;
         }
         else {
-            LU dlu = new LU(matA.rows(), matA.columns());
-            dlu.factor(matA, _blas);
+            LU dlu = new LU(matA.rows(), matA.columns(),_blas);
+            dlu.factor(matA);
             if(dlu.isSingular()){
                 return null;
             }
-            dlu.transSolve(matB, transB, _blas);
+            dlu.transSolve(matB, transB);
             return matB;
         }
     }
