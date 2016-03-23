@@ -1,7 +1,11 @@
 package org.mwdb.math.expression;
 
-/**
- * Created by assaad on 23/03/16.
- */
-public class KMathExpressionEngine {
+public interface KMathExpressionEngine {
+
+    KMathExpressionEngine parse(String p_expression);
+
+    void setVarResolver(KMathVariableResolver resolver);
+
+    double eval(KObject context);
+
 }

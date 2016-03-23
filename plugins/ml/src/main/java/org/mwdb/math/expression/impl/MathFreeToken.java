@@ -1,7 +1,20 @@
 package org.mwdb.math.expression.impl;
 
-/**
- * Created by assaad on 23/03/16.
- */
-public class MathFreeToken {
+public class MathFreeToken implements MathToken {
+
+    private String _content;
+
+    public MathFreeToken(String content) {
+        this._content = content;
+    }
+
+    public String content() {
+        return this._content;
+    }
+
+    @Override
+    public int type() {
+        return 3;
+    }
+
 }

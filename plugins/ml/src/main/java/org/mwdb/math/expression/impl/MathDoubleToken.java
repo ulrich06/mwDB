@@ -1,7 +1,19 @@
 package org.mwdb.math.expression.impl;
 
-/**
- * Created by assaad on 23/03/16.
- */
-public class MathDoubleToken {
+public class MathDoubleToken implements MathToken {
+    @Override
+    public int type() {
+        return 2;
+    }
+
+    private double _content;
+
+    public MathDoubleToken(double _content) {
+        this._content = _content;
+    }
+
+    public double content() {
+        return this._content;
+    }
+
 }
