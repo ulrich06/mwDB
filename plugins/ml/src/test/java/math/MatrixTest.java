@@ -122,48 +122,44 @@ public class MatrixTest {
                 } else {
                     x = 0;
                 }
-                else {
-                    x=0;
-                }
                 Assert.assertTrue(Math.abs(id.get(i, j) - x) < eps);
             }
         }
     }
 
     @Test
-    public void MatrixLU(){
+    public void MatrixLU() {
         int r = 300;
-        int p=500;
+        int p = 500;
         double eps = 1e-7;
         KBlas blas = new NetlibBlas();
 
-        KMatrix matA = Matrix.random(r,p,KMatrixType.COLUMN_BASED,0,100);
+        KMatrix matA = Matrix.random(r, p, KMatrixType.COLUMN_BASED, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
         //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
 
 
-        LU dlu = new LU(r,p,blas);
+        LU dlu = new LU(r, p, blas);
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
-        dlu.factor(matA,false);
+        dlu.factor(matA, false);
         timeend = System.currentTimeMillis();
         System.out.println("Netlib Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
-        KMatrix P= dlu.getP();
-        KMatrix L= dlu.getLower();
+        KMatrix P = dlu.getP();
+        KMatrix L = dlu.getLower();
         KMatrix U = dlu.getUpper();
-        KMatrix res1= Matrix.multiply(P,L);
-        KMatrix res= Matrix.multiply(res1,U);
+        KMatrix res1 = Matrix.multiply(P, L);
+        KMatrix res = Matrix.multiply(res1, U);
 
-        for(int i=0;i<r;i++){
-            for(int j=0;j<p;j++){
-                Assert.assertTrue(Math.abs(res.get(i,j)-matA.get(i,j))<eps);
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < p; j++) {
+                Assert.assertTrue(Math.abs(res.get(i, j) - matA.get(i, j)) < eps);
             }
         }
     }
-
 
 
 }
