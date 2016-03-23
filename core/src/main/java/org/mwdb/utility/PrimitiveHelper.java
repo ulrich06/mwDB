@@ -63,7 +63,7 @@ public class PrimitiveHelper {
         return crc;
     }
 
-    public static int tripleHash(long p1, long p2, long p3, long max) {
+    public static long tripleHash(byte p0, long p1, long p2, long p3, long max) {
 
         long v1 = PRIME5;
         long v2 = v1 * PRIME2 + len;
@@ -71,8 +71,7 @@ public class PrimitiveHelper {
         long v4 = v3 * PRIME4;
 
         long crc;
-
-
+        
         v1 = ((v1 << 13) | (v1 >>> 51)) + p1;
         v2 = ((v2 << 11) | (v2 >>> 53)) + p2;
         v3 = ((v3 << 17) | (v3 >>> 47)) + p3;
@@ -119,7 +118,7 @@ public class PrimitiveHelper {
         crc = crc & 0x7FFFFFFF; //convert positive
         crc = crc % max;           // return between 0 and max
 
-        return (int) crc;
+        return crc;
     }
 
     /*
@@ -313,7 +312,7 @@ public class PrimitiveHelper {
      * @native ts
      * return param != undefined && param != null;
      */
-    public static boolean isDefined(Object param){
+    public static boolean isDefined(Object param) {
         return param != null;
     }
 

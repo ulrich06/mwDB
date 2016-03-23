@@ -1,17 +1,15 @@
 package org.mwdb.manager;
 
-import org.mwdb.Constants;
 import org.mwdb.KCallback;
 import org.mwdb.chunk.KBuffer;
 import org.mwdb.plugin.KStorage;
-import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
 
 public class NoopStorage implements KStorage {
 
     @Override
-    public void get(long[] keys, KCallback<KBuffer[]> callback) {
-        KBuffer[] result = new KBuffer[keys.length / Constants.KEYS_SIZE];
+    public void get(KBuffer[] keys, KCallback<KBuffer[]> callback) {
+        KBuffer[] result = new KBuffer[keys.length];
         callback.on(result);
     }
 
@@ -21,14 +19,14 @@ public class NoopStorage implements KStorage {
     }
 
     @Override
-    public void put(long[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener) {
+    public void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener) {
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }
     }
 
     @Override
-    public void remove(long[] keys, KCallback<Boolean> callback) {
+    public void remove(KBuffer[] keys, KCallback<Boolean> callback) {
         callback.on(true);
     }
 
@@ -41,5 +39,5 @@ public class NoopStorage implements KStorage {
     public void disconnect(KCallback<Boolean> callback) {
         callback.on(true);
     }
-    
+
 }

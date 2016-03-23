@@ -144,7 +144,7 @@ public class CSVImporterTest {
 
                 try {
                     File toImport = new File(CSVImporter.class.getClassLoader().getResource("activity/OrdonezB_Sensors.txt").getPath());
-                    importer.importToGraph(toImport, graph,0, new KCallback<Boolean>() {
+                    importer.importToGraph(toImport, graph, 0, new KCallback<Boolean>() {
                         @Override
                         public void on(Boolean result) {
                             System.out.println("Import Finished");

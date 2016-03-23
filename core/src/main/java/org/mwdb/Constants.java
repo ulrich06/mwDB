@@ -10,6 +10,8 @@ public class Constants extends KConstants {
     /**
      * Chunk Save/Load special chars
      */
+    public static final byte KEY_SEP = ';';
+
     public static final byte CHUNK_SEP = '|';
 
     public static final byte CHUNK_SUB_SEP = ',';
@@ -37,6 +39,9 @@ public class Constants extends KConstants {
 
     public static final byte WORLD_ORDER_CHUNK = 2;
 
+    public static final byte KEY_GEN_CHUNK = 1;
+
+
     /**
      * Node constants
      **/
@@ -49,7 +54,7 @@ public class Constants extends KConstants {
     /**
      * Keys constants
      */
-    public static final int KEYS_SIZE = 3;
+    //public static final int KEYS_SIZE = 3;
 
     public static final int PREFIX_TO_SAVE_SIZE = 2;
 

@@ -5,6 +5,7 @@ import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
+import org.mwdb.utility.Buffer;
 
 public class MWGResolver implements KResolver {
 
@@ -94,11 +95,11 @@ public class MWGResolver implements KResolver {
             @Override
             public void on(Object o) {
                 try {
-                    selfPointer.getOrLoadAndMark(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new KCallback<KChunk>() {
+                    selfPointer.getOrLoadAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new KCallback<KChunk>() {
                         @Override
                         public void on(KChunk theGlobalUniverseOrderElement) {
                             if (theGlobalUniverseOrderElement != null) {
-                                selfPointer.getOrLoadAndMark(Constants.NULL_LONG, Constants.NULL_LONG, id, new KCallback<KChunk>() {
+                                selfPointer.getOrLoadAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                     @Override
                                     public void on(KChunk theObjectUniverseOrderElement) {
                                         if (theObjectUniverseOrderElement == null) {
@@ -106,7 +107,7 @@ public class MWGResolver implements KResolver {
                                             callback.on(null);
                                         } else {
                                             final long closestUniverse = resolve_world((KLongLongMap) theGlobalUniverseOrderElement, (KLongLongMap) theObjectUniverseOrderElement, time, world);
-                                            selfPointer.getOrLoadAndMark(closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
+                                            selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                                 @Override
                                                 public void on(KChunk theObjectTimeTreeElement) {
                                                     if (theObjectTimeTreeElement == null) {
@@ -122,7 +123,7 @@ public class MWGResolver implements KResolver {
                                                             callback.on(null);
                                                             return;
                                                         }
-                                                        selfPointer.getOrLoadAndMark(closestUniverse, closestTime, id, new KCallback<KChunk>() {
+                                                        selfPointer.getOrLoadAndMark(Constants.STATE_CHUNK, closestUniverse, closestTime, id, new KCallback<KChunk>() {
                                                             @Override
                                                             public void on(KChunk theObjectChunk) {
                                                                 if (theObjectChunk == null) {
@@ -175,7 +176,7 @@ public class MWGResolver implements KResolver {
         return originWorld;
     }
 
-    private void getOrLoadAndMark(final long world, final long time, final long id, final KCallback<KChunk> callback) {
+    private void getOrLoadAndMark(final byte type, final long world, final long time, final long id, final KCallback<KChunk> callback) {
         if (world == Constants.NULL_KEY[0] && time == Constants.NULL_KEY[1] && id == Constants.NULL_KEY[2]) {
             callback.on(null);
             return;
@@ -184,7 +185,9 @@ public class MWGResolver implements KResolver {
         if (cached != null) {
             callback.on(cached);
         } else {
-            load(new long[]{world, time, id}, new KCallback<KChunk[]>() {
+            KBuffer buffer = _graph.newBuffer();
+            Buffer.keyToBuffer(buffer, type, world, time, id);
+            load(new byte[]{type}, new long[]{world, time, id}, new KBuffer[]{buffer}, new KCallback<KChunk[]>() {
                 @Override
                 public void on(KChunk[] loadedElements) {
                     callback.on(loadedElements[0]);
@@ -193,17 +196,19 @@ public class MWGResolver implements KResolver {
         }
     }
 
-    private void getOrLoadAndMarkAll(long[] keys, final KCallback<KChunk[]> callback) {
-        int nbKeys = keys.length / Constants.KEYS_SIZE;
+    private static int KEY_SIZE = 3;
+
+    private void getOrLoadAndMarkAll(byte[] types, long[] keys, final KCallback<KChunk[]> callback) {
+        int nbKeys = keys.length / KEY_SIZE;
         final boolean[] toLoadIndexes = new boolean[nbKeys];
         int nbElem = 0;
         final KChunk[] result = new KChunk[nbKeys];
         for (int i = 0; i < nbKeys; i++) {
-            if (keys[i * Constants.KEYS_SIZE] == Constants.NULL_KEY[0] && keys[i * Constants.KEYS_SIZE + 1] == Constants.NULL_KEY[1] && keys[i * Constants.KEYS_SIZE + 2] == Constants.NULL_KEY[2]) {
+            if (keys[i * KEY_SIZE] == Constants.NULL_KEY[0] && keys[i * KEY_SIZE + 1] == Constants.NULL_KEY[1] && keys[i * KEY_SIZE + 2] == Constants.NULL_KEY[2]) {
                 toLoadIndexes[i] = false;
                 result[i] = null;
             } else {
-                result[i] = this._space.getAndMark(keys[i * Constants.KEYS_SIZE], keys[i * Constants.KEYS_SIZE + 1], keys[i * Constants.KEYS_SIZE + 2]);
+                result[i] = this._space.getAndMark(keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
                 if (result[i] == null) {
                     toLoadIndexes[i] = true;
                     nbElem++;
@@ -215,19 +220,22 @@ public class MWGResolver implements KResolver {
         if (nbElem == 0) {
             callback.on(result);
         } else {
-            long[] keysToLoad = new long[nbElem * 3];
+            final long[] keysToLoadFlat = new long[nbElem * KEY_SIZE];
+            final KBuffer[] keysToLoad = new KBuffer[nbElem];
+            final byte[] typesToLoad = new byte[nbElem];
             int lastInsertedIndex = 0;
             for (int i = 0; i < nbKeys; i++) {
                 if (toLoadIndexes[i]) {
-                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE];
-                    lastInsertedIndex++;
-                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE + 1];
-                    lastInsertedIndex++;
-                    keysToLoad[lastInsertedIndex] = keys[i * Constants.KEYS_SIZE + 2];
-                    lastInsertedIndex++;
+                    keysToLoadFlat[lastInsertedIndex] = keys[i * KEY_SIZE];
+                    keysToLoadFlat[lastInsertedIndex + 1] = keys[i * KEY_SIZE + 1];
+                    keysToLoadFlat[lastInsertedIndex + 2] = keys[i * KEY_SIZE + 2];
+                    typesToLoad[lastInsertedIndex] = types[i];
+                    keysToLoad[lastInsertedIndex] = _graph.newBuffer();
+                    Buffer.keyToBuffer(keysToLoad[lastInsertedIndex], types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
+                    lastInsertedIndex = lastInsertedIndex + 3;
                 }
             }
-            load(keysToLoad, new KCallback<KChunk[]>() {
+            load(typesToLoad, keysToLoadFlat, keysToLoad, new KCallback<KChunk[]>() {
                 @Override
                 public void on(KChunk[] loadedElements) {
                     int currentIndexToMerge = 0;
@@ -243,30 +251,18 @@ public class MWGResolver implements KResolver {
         }
     }
 
-    private void load(long[] keys, KCallback<KChunk[]> callback) {
+    private void load(byte[] types, long[] flatKeys, KBuffer[] keys, KCallback<KChunk[]> callback) {
         MWGResolver selfPointer = this;
         this._storage.get(keys, new KCallback<KBuffer[]>() {
             @Override
             public void on(KBuffer[] payloads) {
-                KChunk[] results = new KChunk[keys.length / 3];
+                KChunk[] results = new KChunk[keys.length];
                 for (int i = 0; i < payloads.length; i++) {
-                    long loopWorld = keys[i * 3];
-                    long loopTime = keys[i * 3 + 1];
-                    long loopUuid = keys[i * 3 + 2];
-                    byte elemType;
-                    if (loopWorld == Constants.NULL_LONG) {
-                        elemType = Constants.WORLD_ORDER_CHUNK;
-                    } else {
-                        if (loopTime == Constants.NULL_LONG) {
-                            elemType = Constants.TIME_TREE_CHUNK;
-                        } else {
-                            if (payloads[i] == null || payloads[i].size() < 1) {
-                                elemType = Constants.STATE_CHUNK;
-                            } else {
-                                elemType = Constants.STATE_CHUNK;
-                            }
-                        }
-                    }
+                    keys[i].free(); //free the temp KBuffer
+                    long loopWorld = flatKeys[i * KEY_SIZE];
+                    long loopTime = flatKeys[i * KEY_SIZE + 1];
+                    long loopUuid = flatKeys[i * KEY_SIZE + 2];
+                    byte elemType = types[i];
                     if (payloads[i] != null) {
                         results[i] = selfPointer._space.create(loopWorld, loopTime, loopUuid, elemType, payloads[i], null);
                         selfPointer._space.putAndMark(results[i]);
@@ -276,7 +272,6 @@ public class MWGResolver implements KResolver {
             }
         });
     }
-
 
     @Override
     public KNodeState resolveState(KNode node, boolean allowDephasing) {
@@ -459,7 +454,7 @@ public class MWGResolver implements KResolver {
                 Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG,
                 Constants.NULL_LONG, Constants.NULL_LONG, node.id()
         };
-        getOrLoadAndMarkAll(keys, new KCallback<KChunk[]>() {
+        getOrLoadAndMarkAll(new byte[]{Constants.WORLD_ORDER_CHUNK, Constants.WORLD_ORDER_CHUNK}, keys, new KCallback<KChunk[]>() {
             @Override
             public void on(KChunk[] orders) {
                 if (orders == null || orders.length != 2) {
@@ -504,14 +499,16 @@ public class MWGResolver implements KResolver {
                 //create request concat keys
                 int nbKeys = collectedIndex * 3;
                 final long[] timeTreeKeys = new long[nbKeys];
+                final byte[] types = new byte[collectedIndex];
                 for (int i = 0; i < collectedIndex; i++) {
                     timeTreeKeys[i * 3] = collectedWorlds[0][i];
                     timeTreeKeys[i * 3 + 1] = Constants.NULL_LONG;
                     timeTreeKeys[i * 3 + 2] = node.id();
+                    types[i] = Constants.TIME_TREE_CHUNK;
                 }
                 final int finalCollectedIndex = collectedIndex;
                 final long[] finalCollectedWorlds = collectedWorlds[0];
-                getOrLoadAndMarkAll(timeTreeKeys, new KCallback<KChunk[]>() {
+                getOrLoadAndMarkAll(types, timeTreeKeys, new KCallback<KChunk[]>() {
                     @Override
                     public void on(final KChunk[] timeTrees) {
                         if (timeTrees == null) {

@@ -18,7 +18,7 @@ public interface KStorage {
      *                 The size of the array in parameter is always 1/3 of the keys array size.
      *                 Objects in the result array are in the same order as the keys.
      */
-    void get(long[] keys, KCallback<KBuffer[]> callback);
+    void get(KBuffer[] keys, KCallback<KBuffer[]> callback);
 
     void atomicGetIncrement(long[] key, KCallback<Short> callback);
 
@@ -32,7 +32,7 @@ public interface KStorage {
      * @param callback        Called when the operation is complete. The parameter will be true if the operation succeeded, false otherwise.
      * @param excludeListener Specifies whether or not the listeners must be notified.
      */
-    void put(long[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener);
+    void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener);
 
     /**
      * Called to remove objects from the storage.
@@ -42,7 +42,7 @@ public interface KStorage {
      * @param keys     The array of keys as specified above.
      * @param callback Is called when all keys are deleted.
      */
-    void remove(long[] keys, KCallback<Boolean> callback);
+    void remove(KBuffer[] keys, KCallback<Boolean> callback);
 
     /**
      * Connects the storage
@@ -57,5 +57,5 @@ public interface KStorage {
      * @param callback Called when the disconnection process is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
     void disconnect(KCallback<Boolean> callback);
-    
+
 }

@@ -24,8 +24,8 @@ public class Graph implements KGraph {
 
     //TODO rest of elements
 
-    private KeyCalculator _objectKeyCalculator = null;
-    private KeyCalculator _universeKeyCalculator = null;
+    private KeyCalculator _nodeKeyCalculator = null;
+    private KeyCalculator _worldKeyCalculator = null;
 
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
@@ -52,7 +52,7 @@ public class Graph implements KGraph {
 
     @Override
     public long diverge(long world) {
-        long childWorld = this._universeKeyCalculator.nextKey();
+        long childWorld = this._worldKeyCalculator.nextKey();
         this._resolver.initWorld(world, childWorld);
         return childWorld;
     }
@@ -62,7 +62,7 @@ public class Graph implements KGraph {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
-        KNode newNode = new Node(this, world, time, this._objectKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
+        KNode newNode = new Node(this, world, time, this._nodeKeyCalculator.nextKey(), this._resolver, world, time, Constants.NULL_LONG, Constants.NULL_LONG);
         this._resolver.initNode(newNode);
         return newNode;
     }
@@ -98,15 +98,27 @@ public class Graph implements KGraph {
                                 new KCallback<Short>() {
                                     @Override
                                     public void on(final Short graphPrefix) {
-                                        long[] connectionKeys = new long[]{
-                                                Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, //LastUniverseIndexFromPrefix
-                                                Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, //LastObjectIndexFromPrefix
-                                                Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, //GlobalUniverseTree
-                                                Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2] //Global dictionary
-                                        };
+                                        final KBuffer[] connectionKeys = new KBuffer[4];
+                                        //preload ObjKeyGenerator
+                                        connectionKeys[0] = newBuffer();
+                                        Buffer.keyToBuffer(connectionKeys[0], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                                        //preload WorldKeyGenerator
+                                        connectionKeys[1] = newBuffer();
+                                        Buffer.keyToBuffer(connectionKeys[1], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                                        //preload GlobalWorldOrder
+                                        connectionKeys[2] = newBuffer();
+                                        Buffer.keyToBuffer(connectionKeys[2], Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                                        //preload GlobalDictionary
+                                        connectionKeys[3] = newBuffer();
+                                        Buffer.keyToBuffer(connectionKeys[3], Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
                                         selfPointer._storage.get(connectionKeys, new KCallback<KBuffer[]>() {
                                             @Override
                                             public void on(KBuffer[] payloads) {
+
+                                                for (int i = 0; i < connectionKeys.length; i++) {
+                                                    connectionKeys[i].free();
+                                                }
+
                                                 if (payloads.length == 4) {
                                                     Boolean noError = true;
                                                     try {
@@ -119,15 +131,15 @@ public class Graph implements KGraph {
                                                         selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                                         if (payloads[UNIVERSE_INDEX] != null) {
-                                                            selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
+                                                            selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
                                                         } else {
-                                                            selfPointer._universeKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                                            selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, 0);
                                                         }
 
                                                         if (payloads[OBJ_INDEX] != null) {
-                                                            selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
+                                                            selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
                                                         } else {
-                                                            selfPointer._objectKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                                            selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, 0);
                                                         }
 
                                                         //init the resolver
@@ -225,17 +237,18 @@ public class Graph implements KGraph {
                 callback.on(null);
             }
         } else {
-            long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE) * Constants.KEYS_SIZE;
-            long[] toSaveKeys = new long[(int) sizeToSaveKeys];
+            long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE);
+            KBuffer[] toSaveKeys = new KBuffer[(int) sizeToSaveKeys];
             long sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
             KBuffer[] toSaveValues = new KBuffer[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
                 KChunk loopChunk = dirtyIterator.next();
                 if (loopChunk != null && (loopChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
-                    toSaveKeys[i * Constants.KEYS_SIZE] = loopChunk.world();
-                    toSaveKeys[i * Constants.KEYS_SIZE + 1] = loopChunk.time();
-                    toSaveKeys[i * Constants.KEYS_SIZE + 2] = loopChunk.id();
+                    //Save chunk Key
+                    toSaveKeys[i] = newBuffer();
+                    Buffer.keyToBuffer(toSaveKeys[i], loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
+                    //Save chunk payload
                     try {
                         KBuffer newBuffer = newBuffer();
                         toSaveValues[i] = newBuffer;
@@ -247,36 +260,42 @@ public class Graph implements KGraph {
                     }
                 }
             }
-            toSaveKeys[i * Constants.KEYS_SIZE] = Constants.BEGINNING_OF_TIME;
-            toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
-            toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._objectKeyCalculator.prefix();
+
+            //save obj key gen key
+            toSaveKeys[i] = newBuffer();
+            Buffer.keyToBuffer(toSaveKeys[i], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
+            //save obj key gen payload
             toSaveValues[i] = newBuffer();
-            Base64.encodeLongToBuffer(this._objectKeyCalculator.lastComputedIndex(), toSaveValues[i]);
+            Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
             i++;
-            toSaveKeys[i * Constants.KEYS_SIZE] = Constants.END_OF_TIME;
-            toSaveKeys[i * Constants.KEYS_SIZE + 1] = Constants.NULL_LONG;
-            toSaveKeys[i * Constants.KEYS_SIZE + 2] = this._universeKeyCalculator.prefix();
+            //save world key gen key
+            toSaveKeys[i] = newBuffer();
+            Buffer.keyToBuffer(toSaveKeys[i], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
+            //save world key gen payload
             toSaveValues[i] = newBuffer();
-            Base64.encodeLongToBuffer(this._universeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
+            Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), toSaveValues[i]);
+            i++;
 
             //shrink in case of i != full size
-            if (i != sizeToSaveValues - 1) {
+            if (i != sizeToSaveValues) {
                 //shrinkValue
-                KBuffer[] toSaveValuesShrinked = new KBuffer[i + 1];
-                System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i + 1);
+                KBuffer[] toSaveValuesShrinked = new KBuffer[i];
+                System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i);
                 toSaveValues = toSaveValuesShrinked;
 
-                long[] toSaveKeysShrinked = new long[(i + 1) * Constants.KEYS_SIZE];
-                System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, (i + 1) * Constants.KEYS_SIZE);
+                KBuffer[] toSaveKeysShrinked = new KBuffer[i];
+                System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, i);
                 toSaveKeys = toSaveKeysShrinked;
             }
             final KBuffer[] finalToSaveValues = toSaveValues;
+            final KBuffer[] finalToSaveKeys = toSaveKeys;
             this._storage.put(toSaveKeys, toSaveValues, new KCallback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
                     //free all value
                     for (int i = 0; i < finalToSaveValues.length; i++) {
                         finalToSaveValues[i].free();
+                        finalToSaveKeys[i].free();
                     }
                     dirtyIterator.free();
                     if (PrimitiveHelper.isDefined(callback)) {
@@ -292,7 +311,7 @@ public class Graph implements KGraph {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new KCallback<KNode>() {
             @Override
             public void on(KNode foundIndex) {
-                if(foundIndex== null){
+                if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
                 foundIndex.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new KCallback<Boolean>() {

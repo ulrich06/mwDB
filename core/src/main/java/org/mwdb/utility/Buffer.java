@@ -5,7 +5,17 @@ import org.mwdb.chunk.KBuffer;
 import org.mwdb.chunk.offheap.OffHeapByteArray;
 
 public class Buffer {
-    
+
+    public static void keyToBuffer(KBuffer buffer, byte chunkType, long world, long time, long id) {
+        buffer.write(chunkType);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(world, buffer);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(time, buffer);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(id, buffer);
+    }
+
     public static KBuffer newOffHeapBuffer() {
         return new KBuffer() {
 
