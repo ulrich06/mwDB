@@ -175,16 +175,16 @@ public class MatrixTest {
         //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
 
 
-        QR qr= new QR(m,n,blas);
+        QR qr = new QR(m, n, blas);
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
-        qr.factor(matA,false);
+        qr.factor(matA, false);
         timeend = System.currentTimeMillis();
         System.out.println("Netlib QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
-        KMatrix Q= qr.getQ();
-        KMatrix R= qr.getR();
+        KMatrix Q = qr.getQ();
+        KMatrix R = qr.getR();
         KMatrix res = Matrix.multiply(Q, R);
 
         for (int i = 0; i < m; i++) {
@@ -193,6 +193,5 @@ public class MatrixTest {
             }
         }
     }
-
 
 }
