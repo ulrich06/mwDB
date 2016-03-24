@@ -8,15 +8,13 @@ import java.util.Random;
 
 //Most of the time we will be using column based matrix due to blas.
 public class Matrix implements KMatrix {
-    private final byte _matrixType;
 
     private double[] _data;
 
     private final int _nbRows;
     private final int _nbColumns;
 
-    public Matrix(double[] backend, int p_nbRows, int p_nbColumns, byte p_matrixType) {
-        this._matrixType = p_matrixType;
+    public Matrix(double[] backend, int p_nbRows, int p_nbColumns) {
         this._nbRows = p_nbRows;
         this._nbColumns = p_nbColumns;
         if (backend != null) {
@@ -33,13 +31,35 @@ public class Matrix implements KMatrix {
     }
 
     @Override
-    public void setData(double[] data) {
-        System.arraycopy(data, 0, this._data, 0, data.length);
+    public double[] exportRowMatrix() {
+        double[] res = new double[_data.length];
+        int k = 0;
+        for (int i = 0; i < _nbRows; i++) {
+            for (int j = 0; j < _nbColumns; j++) {
+                res[k] = get(i, j);
+                k++;
+            }
+        }
+        return res;
     }
 
     @Override
-    public byte matrixType() {
-        return _matrixType;
+    public KMatrix importRowMatrix(double[] rowdata, int rows, int columns) {
+        Matrix res = new Matrix(null, rows, columns);
+
+        int k = 0;
+        for (int i = 0; i < _nbRows; i++) {
+            for (int j = 0; j < _nbColumns; j++) {
+                res.set(i, j, rowdata[k]);
+                k++;
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public void setData(double[] data) {
+        System.arraycopy(data, 0, this._data, 0, data.length);
     }
 
     @Override
@@ -54,20 +74,13 @@ public class Matrix implements KMatrix {
 
     @Override
     public double get(int rowIndex, int columnIndex) {
-        if (_matrixType == KMatrixType.COLUMN_BASED) {
-            return _data[rowIndex + columnIndex * _nbRows];
-        } else {
-            return _data[columnIndex + rowIndex * _nbColumns];
-        }
+        return _data[rowIndex + columnIndex * _nbRows];
     }
 
     @Override
     public double set(int rowIndex, int columnIndex, double value) {
-        if (_matrixType == KMatrixType.COLUMN_BASED) {
-            _data[rowIndex + columnIndex * _nbRows] = value;
-        } else {
-            _data[columnIndex + rowIndex * _nbColumns] = value;
-        }
+        _data[rowIndex + columnIndex * _nbRows] = value;
+
         return value;
     }
 
@@ -105,7 +118,7 @@ public class Matrix implements KMatrix {
         double[] newback = new double[_data.length];
         System.arraycopy(_data, 0, newback, 0, _data.length);
 
-        Matrix res = new Matrix(newback, this._nbRows, this._nbColumns, this._matrixType);
+        Matrix res = new Matrix(newback, this._nbRows, this._nbColumns);
         return res;
 
     }
@@ -135,16 +148,12 @@ public class Matrix implements KMatrix {
         return _defaultEngine.invert(mat, invertInPlace);
     }
 
-    public static KMatrix solve(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
-        return _defaultEngine.solve(matA, matB, workInPlace, transB);
-    }
-
     public static int leadingDimension(KMatrix matA) {
         return Math.max(matA.columns(), matA.rows());
     }
 
-    public static KMatrix random(int rows, int columns, byte matrixType, double min, double max) {
-        KMatrix res = new Matrix(null, rows, columns, matrixType);
+    public static KMatrix random(int rows, int columns, double min, double max) {
+        KMatrix res = new Matrix(null, rows, columns);
         Random rand = new Random();
         for (int i = 0; i < rows * columns; i++) {
             res.setAtIndex(i, rand.nextDouble() * (max - min) + min);
@@ -163,7 +172,7 @@ public class Matrix implements KMatrix {
     }
 
     public static KMatrix transpose(KMatrix matA) {
-        KMatrix result = new Matrix(null, matA.columns(), matA.rows(), matA.matrixType());
+        KMatrix result = new Matrix(null, matA.columns(), matA.rows());
         int TRANSPOSE_SWITCH = 375;
         if (matA.columns() == matA.rows()) {
             transposeSquare(matA, result);
@@ -230,7 +239,7 @@ public class Matrix implements KMatrix {
     }
 
     public static KMatrix createIdentity(int width, byte matrixType) {
-        KMatrix ret = new Matrix(null, width, width, matrixType);
+        KMatrix ret = new Matrix(null, width, width);
         for (int i = 0; i < width; i++) {
             ret.set(i, i, 1);
         }
@@ -252,7 +261,8 @@ public class Matrix implements KMatrix {
         return err;
     }
 
-    public static KMatrix fromPartialPivots(int[] pivots, byte type, boolean transposed) {
+
+    public static KMatrix fromPartialPivots(int[] pivots, boolean transposed) {
         int[] permutations = new int[pivots.length];
         for (int i = 0; i < pivots.length; i++) {
             permutations[i] = i;
@@ -274,7 +284,7 @@ public class Matrix implements KMatrix {
             bitset.set(i);
         }
 
-        Matrix m = new Matrix(null, permutations.length, permutations.length, type);
+        Matrix m = new Matrix(null, permutations.length, permutations.length);
 
         double x;
         for (int i = 0; i < permutations.length; i++) {

@@ -50,8 +50,8 @@ public class SVD {
     /**
      * Creates an empty SVD
      *
-     * @param m       Number of rows
-     * @param n       Number of columns
+     * @param m Number of rows
+     * @param n Number of columns
      */
     public SVD(int m, int n, KBlas blas) {
         this.m = m;
@@ -62,8 +62,8 @@ public class SVD {
         // Allocate space for the decomposition
         S = new double[Math.min(m, n)];
         if (vectors) {
-            U = new Matrix(null, m, m, _blas.matrixType());
-            Vt = new Matrix(null, n, n, _blas.matrixType());
+            U = new Matrix(null, m, m);
+            Vt = new Matrix(null, n, n);
         } else
             U = Vt = null;
 
@@ -76,8 +76,8 @@ public class SVD {
         double[] worksize = new double[1];
         int[] info = new int[1];
         _blas.dgesdd(job.netlib(), m, n, new double[0],
-                Math.max(1,m), new double[0], new double[0],  Math.max(1,m),
-                new double[0],  Math.max(1,n), worksize, -1, iwork, info);
+                Math.max(1, m), new double[0], new double[0], Math.max(1, m),
+                new double[0], Math.max(1, n), worksize, -1, iwork, info);
 
         // Allocate workspace
         int lwork = -1;
@@ -111,7 +111,7 @@ public class SVD {
      * @param A Matrix to decompose, not modified
      * @return Newly allocated factorization
      */
-    public static SVD factorize(Matrix A, KBlas blas){
+    public static SVD factorize(Matrix A, KBlas blas) {
         return new SVD(A.rows(), A.columns(), blas).factor(A.clone());
     }
 
@@ -129,11 +129,11 @@ public class SVD {
             throw new IllegalArgumentException("A.numColumns() != n");
 
         int[] info = new int[1];
-        info[0]=0;
+        info[0] = 0;
         _blas.dgesdd(job.netlib(), m, n, A.data(),
-                Math.max(1,m), S, vectors ? U.data() : new double[0],
-                Math.max(1,m), vectors ? Vt.data() : new double[0],
-                Math.max(1,n), work, work.length, iwork, info);
+                Math.max(1, m), S, vectors ? U.data() : new double[0],
+                Math.max(1, m), vectors ? Vt.data() : new double[0],
+                Math.max(1, n), work, work.length, iwork, info);
 
         if (info[0] > 0)
             throw new RuntimeException("NotConvergedException.Reason.Iterations");
@@ -177,5 +177,13 @@ public class SVD {
      */
     public double[] getS() {
         return S;
+    }
+
+    public KMatrix getSMatrix() {
+        Matrix matS = new Matrix(null, m, n);
+        for (int i = 0; i < S.length; i++) {
+            matS.set(i, i, S[i]);
+        }
+        return matS;
     }
 }

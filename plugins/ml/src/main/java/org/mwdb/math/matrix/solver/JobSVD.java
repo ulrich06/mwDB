@@ -6,10 +6,14 @@ package org.mwdb.math.matrix.solver;
  * vectors are computed, all the singular values are always computed
  */
 enum JobSVD {
-    /** Compute all of the singular vectors */
+    /**
+     * Compute all of the singular vectors
+     */
     All,
 
-    /** Do not compute any singular vectors */
+    /**
+     * Do not compute any singular vectors
+     */
     None,
 
     /**
@@ -27,17 +31,17 @@ enum JobSVD {
 
     /**
      * @return the netlib character version of this designation, for use with
-     *         F2J.
+     * F2J.
      */
     public String netlib() {
         switch (this) {
-            case All :
+            case All:
                 return "A";
-            case Part :
+            case Part:
                 return "S";
-            case Overwrite :
+            case Overwrite:
                 return "O";
-            default :
+            default:
                 return "N";
         }
     }

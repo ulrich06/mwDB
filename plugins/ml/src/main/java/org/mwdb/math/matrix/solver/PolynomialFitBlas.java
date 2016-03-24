@@ -1,21 +1,20 @@
 package org.mwdb.math.matrix.solver;
 
 
+import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.blas.KBlas;
+import org.mwdb.math.matrix.blas.KBlasTransposeType;
 
 /**
  * Created by assaad on 16/12/15.
  */
 public class PolynomialFitBlas {
-    private Matrix coef;
+    private KMatrix coef;
     private int degree = 0;
 
-    private KBlas blas;
-
-    public PolynomialFitBlas(int degree, KBlas blas) {
+    public PolynomialFitBlas(int degree) {
         this.degree = degree;
-        this.blas = blas;
     }
 
     public double[] getCoef() {
@@ -24,9 +23,9 @@ public class PolynomialFitBlas {
 
     public void fit(double samplePoints[], double[] observations) {
 
-        Matrix y = new Matrix(observations, observations.length, 1, blas.matrixType());
+        Matrix y = new Matrix(observations, observations.length, 1);
 
-        Matrix a = new Matrix(null, y.rows(), degree + 1, blas.matrixType());
+        Matrix a = new Matrix(null, y.rows(), degree + 1);
 
         // cset up the A matrix
         for (int i = 0; i < observations.length; i++) {
@@ -37,9 +36,10 @@ public class PolynomialFitBlas {
             }
         }
         // processValues the A matrix and see if it failed
-        QR solver = QR.factorize(a, true, blas);
-        coef = new Matrix(null, degree + 1, 1, blas.matrixType());
-        solver.solve(y, coef);
+
+        coef = Matrix.defaultEngine().solveQR(a, y, true, KBlasTransposeType.NOTRANSPOSE);
+
+
     }
 
     public static double extrapolate(double time, double[] weights) {

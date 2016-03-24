@@ -46,7 +46,7 @@ public class QR {
         this.n = columns;
         this.k = Math.min(m, n);
         tau = new double[k];
-        R = new Matrix(null, n, n, _blas.matrixType());
+        R = new Matrix(null, n, n);
 
     }
 
@@ -134,7 +134,7 @@ public class QR {
 
     public void solve(KMatrix B, KMatrix X) {
         int BnumCols = B.columns();
-        KMatrix Y = new Matrix(null, m, 1, _blas.matrixType());
+        KMatrix Y = new Matrix(null, m, 1);
         KMatrix Z;
 
         // solve each column one by one

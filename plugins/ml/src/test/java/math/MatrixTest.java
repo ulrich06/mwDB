@@ -3,20 +3,33 @@ package math;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.KMatrixType;
 import org.mwdb.math.matrix.Matrix;
+import org.mwdb.math.matrix.blas.BlasMatrixEngine;
+import org.mwdb.math.matrix.blas.F2JBlas;
 import org.mwdb.math.matrix.blas.KBlas;
 import org.mwdb.math.matrix.blas.NetlibBlas;
 import org.mwdb.math.matrix.solver.LU;
 import org.mwdb.math.matrix.solver.QR;
+import org.mwdb.math.matrix.solver.SVD;
 
 /**
  * Created by assaad on 23/03/16.
  */
 public class MatrixTest {
 
+    private String blas = "F2JBlas";
+
+    public MatrixTest() {
+        BlasMatrixEngine be = (BlasMatrixEngine) Matrix.defaultEngine();
+        if (blas.equals("Netlib")) {
+            be.setBlas(new NetlibBlas());
+        } else {
+            be.setBlas(new F2JBlas());
+        }
+    }
+
     public KMatrix manualMultpily(KMatrix matA, KMatrix matB) {
-        KMatrix matC = new Matrix(null, matA.rows(), matB.columns(), matA.matrixType());
+        KMatrix matC = new Matrix(null, matA.rows(), matB.columns());
 
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matB.columns(); j++) {
@@ -30,33 +43,6 @@ public class MatrixTest {
 
     }
 
-    @Test
-    public void MatrixType() {
-        //test row major, column major
-        Matrix m = new Matrix(null, 3, 5, KMatrixType.ROW_BASED);
-        for (int i = 0; i < 15; i++) {
-            m.setAtIndex(i, i);
-        }
-
-        int k = 0;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 5; j++) {
-                Assert.assertTrue(m.get(i, j) == k);
-                k++;
-            }
-        }
-        m = new Matrix(null, 3, 5, KMatrixType.COLUMN_BASED);
-        for (int i = 0; i < 15; i++) {
-            m.setAtIndex(i, i);
-        }
-        k = 0;
-        for (int j = 0; j < 5; j++) {
-            for (int i = 0; i < 3; i++) {
-                Assert.assertTrue(m.get(i, j) == k);
-                k++;
-            }
-        }
-    }
 
     @Test
     public void MatrixMult() {
@@ -64,8 +50,8 @@ public class MatrixTest {
         int r = 500;
         int o = 300;
         int p = 700;
-        KMatrix matA = Matrix.random(r, o, KMatrixType.COLUMN_BASED, 0, 100);
-        KMatrix matB = Matrix.random(o, p, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(r, o, 0, 100);
+        KMatrix matB = Matrix.random(o, p, 0, 100);
         long startTime, endTime;
         double d;
 
@@ -74,7 +60,7 @@ public class MatrixTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Netlib mult: " + d + " ms");
+        System.out.println(blas + " mult: " + d + " ms");
 
         startTime = System.nanoTime();
         KMatrix matD = manualMultpily(matA, matB);
@@ -99,7 +85,7 @@ public class MatrixTest {
         int[] dimA = {m, m};
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, m, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(m, m, 0, 100);
 
         KMatrix res = null;
 
@@ -111,7 +97,7 @@ public class MatrixTest {
             res = Matrix.invert(matA, false);
         }
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib blas invert " + ((double) (timeend - timestart)) / (1000 * times) + " s");
+        System.out.println(blas + " invert " + ((double) (timeend - timestart)) / (1000 * times) + " s");
 
         KMatrix id = Matrix.multiply(matA, res);
 
@@ -133,21 +119,20 @@ public class MatrixTest {
         int m = 300;
         int n = 500;
         double eps = 1e-7;
-        KBlas blas = new NetlibBlas();
 
-        KMatrix matA = Matrix.random(m, n, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(m, n, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
         //KMatrix matA = new Matrix(xx,m,n,KMatrixType.COLUMN_BASED);
 
 
-        LU dlu = new LU(m, n, blas);
+        LU dlu = new LU(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
         dlu.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        System.out.println(blas + " LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix P = dlu.getP();
         KMatrix L = dlu.getLower();
@@ -167,25 +152,61 @@ public class MatrixTest {
         int m = 500;
         int n = 300;
         double eps = 1e-7;
-        KBlas blas = new NetlibBlas();
 
-        KMatrix matA = Matrix.random(m, n, KMatrixType.COLUMN_BASED, 0, 100);
+        KMatrix matA = Matrix.random(m, n, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
         //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
 
 
-        QR qr = new QR(m, n, blas);
+        QR qr = new QR(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
         qr.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println("Netlib QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        System.out.println(blas + " QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix Q = qr.getQ();
         KMatrix R = qr.getR();
         KMatrix res = Matrix.multiply(Q, R);
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                Assert.assertTrue(Math.abs(res.get(i, j) - matA.get(i, j)) < eps);
+            }
+        }
+    }
+
+    @Test
+    public void MatrixSVD() {
+        int m = 400;
+        int n = 500;
+        double eps = 1e-7;
+
+        KMatrix matA = Matrix.random(m, n, 0, 100);
+
+        // double[] xx = {1,0,0,0,   0,0,0,2,   0,3,0,0,    0,0,0,0   ,2,0,0,0};
+        // KMatrix matA = new Matrix(xx,m,n,KMatrixType.COLUMN_BASED);
+
+
+        SVD svd = new SVD(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
+
+
+        long timestart, timeend;
+
+        timestart = System.currentTimeMillis();
+        svd.factor(matA.clone());
+        timeend = System.currentTimeMillis();
+        System.out.println(blas + " SVD Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+
+
+        KMatrix U = svd.getU();
+        KMatrix S = svd.getSMatrix();
+        KMatrix Vt = svd.getVt();
+
+        KMatrix res = Matrix.multiply(U, S);
+        res = Matrix.multiply(res, Vt);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {

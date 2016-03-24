@@ -34,6 +34,13 @@
             <type>pom</type>
         </dependency>
 
+        <dependency>
+            <groupId>net.sourceforge.f2j</groupId>
+            <artifactId>arpack_combined_all</artifactId>
+            <version>0.1</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
