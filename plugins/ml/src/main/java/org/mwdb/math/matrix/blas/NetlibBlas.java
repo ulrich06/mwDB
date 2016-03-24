@@ -65,6 +65,14 @@ public class NetlibBlas implements KBlas {
     }
 
     @Override
+    public void dgesdd(String jobz, int m, int n, double[] data, int lda, double[] s, double[] u, int ldu, double[] vt, int ldvt, double[] work, int length, int[] iwork, int[] info) {
+        intW newint = new intW(info[0]);
+        lapack.dgesdd(jobz,m,n,data,lda,s,u,ldu,vt,ldvt,work,length,iwork,newint);
+        info[0] = newint.val;
+
+    }
+
+    @Override
     public void connect() {
         blas = BLAS.getInstance();
         lapack=LAPACK.getInstance();
