@@ -27,10 +27,8 @@ public class TimelineTest {
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
-
     }
-
-
+    
     private void test(KGraph graph) {
         final int[] counter = {0};
         graph.connect(new KCallback<Boolean>() {

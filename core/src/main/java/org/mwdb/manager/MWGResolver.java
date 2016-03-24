@@ -478,14 +478,61 @@ public class MWGResolver implements KResolver {
                         this._space.declareDirty(clonedChunk);
 
                         if (resolvedWorld == nodeWorld) {
+                            //manage super tree here
+                            long superTreeSize = objectSuperTimeTree.size();
+                            long threshold = Constants.SCALE_1;
+                            if (superTreeSize > threshold) {
+                                threshold = Constants.SCALE_2;
+                            }
+                            if (superTreeSize > threshold) {
+                                threshold = Constants.SCALE_3;
+                            }
+                            if (superTreeSize > threshold) {
+                                threshold = Constants.SCALE_4;
+                            }
                             objectTimeTree.insert(nodeTime);
+                            if (objectTimeTree.size() == threshold) {
+                                //split in two
+                                //extract the two
+
+                                final long[] medianPoint = {-1};
+                                //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                                objectTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, objectTimeTree.size() / 2, new KTreeWalker() {
+                                    @Override
+                                    public void elem(long t) {
+                                        medianPoint[0] = t;
+                                    }
+                                });
+
+                                KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
+                                this._space.putAndMark(rightTree);
+                                //TODO second iterate that can be avoided, however we need the median point to create the right tree
+                                //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                                objectTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, objectTimeTree.size() / 2, new KTreeWalker() {
+                                    @Override
+                                    public void elem(long t) {
+                                        rightTree.insert(t);
+                                    }
+                                });
+                                objectSuperTimeTree.insert(medianPoint[0]);
+                                objectTimeTree.clearAt(medianPoint[0]);
+                            }
                         } else {
-                            KTimeTreeChunk newTemporalTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
-                            this._space.putAndMark(newTemporalTree);
-                            newTemporalTree.insert(nodeTime);
+                            //create a new super timeTree
+                            KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
+                            this._space.putAndMark(newSuperTimeTree);
+                            newSuperTimeTree.insert(nodeTime);
+
+                            KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
+                            this._space.putAndMark(newTimeTree);
+                            newTimeTree.insert(nodeTime);
+
                             //unmark the previous time tree, now we have switched to the new one
                             this._space.unmarkChunk(objectTimeTree);
+
+                            //TODO what about subTree unmarking :-)
                             objectWorldMap.put(nodeWorld, nodeTime);
+
                         }
                         //double unMarking, because, we should not use anymore this object
                         this._space.unmarkChunk(currentEntry);
@@ -531,7 +578,6 @@ public class MWGResolver implements KResolver {
 
     @Override
     public void resolveTimepoints(final KNode node, final long beginningOfSearch, final long endOfSearch, final KCallback<long[]> callback) {
-        final MWGResolver selfPointer = this;
         long[] keys = new long[]{
                 Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG,
                 Constants.NULL_LONG, Constants.NULL_LONG, node.id()
@@ -579,67 +625,140 @@ public class MWGResolver implements KResolver {
                     }
                 }
                 //create request concat keys
-                int nbKeys = collectedIndex * 3;
-                final long[] timeTreeKeys = new long[nbKeys];
-                final byte[] types = new byte[collectedIndex];
-                for (int i = 0; i < collectedIndex; i++) {
-                    timeTreeKeys[i * 3] = collectedWorlds[0][i];
-                    timeTreeKeys[i * 3 + 1] = Constants.NULL_LONG;
-                    timeTreeKeys[i * 3 + 2] = node.id();
-                    types[i] = Constants.TIME_TREE_CHUNK;
-                }
-                final int finalCollectedIndex = collectedIndex;
-                final long[] finalCollectedWorlds = collectedWorlds[0];
-                getOrLoadAndMarkAll(types, timeTreeKeys, new KCallback<KChunk[]>() {
-                    @Override
-                    public void on(final KChunk[] timeTrees) {
-                        if (timeTrees == null) {
-                            selfPointer._space.unmarkChunk(objectWorldOrder);
-                            selfPointer._space.unmarkChunk(globalWorldOrder);
-                            callback.on(new long[0]);
-                        } else {
-                            //time collector
-                            final int[] timelineSize = {Constants.MAP_INITIAL_CAPACITY};
-                            final long[][] timeline = {new long[timelineSize[0]]};
-                            final int[] timeline_index = {0};
-                            long previousDivergenceTime = endOfSearch;
-                            for (int i = 0; i < finalCollectedIndex; i++) {
-                                KTimeTreeChunk timeTree = (KTimeTreeChunk) timeTrees[i];
-                                if (timeTree != null) {
-                                    long currentDivergenceTime = objectWorldOrder.get(finalCollectedWorlds[i]);
-                                    if (currentDivergenceTime < beginningOfSearch) {
-                                        currentDivergenceTime = beginningOfSearch;
-                                    }
-                                    final long finalPreviousDivergenceTime = previousDivergenceTime;
-                                    timeTree.range(currentDivergenceTime, previousDivergenceTime, new KTreeWalker() {
-                                        @Override
-                                        public void elem(long t) {
-                                            timeline[0][timeline_index[0]] = t;
-                                            timeline_index[0]++;
-                                            if (timelineSize[0] == timeline_index[0]) {
-                                                //reallocate
-                                                long[] temp_timeline = new long[timelineSize[0] * 2];
-                                                System.arraycopy(timeline[0], 0, temp_timeline, 0, timelineSize[0]);
-                                                timeline[0] = temp_timeline;
-                                                timelineSize[0] = timelineSize[0] * 2;
-                                            }
+                resolveTimepointsFromWorlds(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds[0], collectedIndex, callback);
+            }
+        });
+    }
+
+    private void resolveTimepointsFromWorlds(final KWorldOrderChunk globalWorldOrder, final KWorldOrderChunk objectWorldOrder, final KNode node, final long beginningOfSearch, final long endOfSearch, final long[] collectedWorlds, final int collectedWorldsSize, final KCallback<long[]> callback) {
+        final MWGResolver selfPointer = this;
+
+        final long[] timeTreeKeys = new long[collectedWorldsSize * 3];
+        final byte[] types = new byte[collectedWorldsSize];
+        for (int i = 0; i < collectedWorldsSize; i++) {
+            timeTreeKeys[i * 3] = collectedWorlds[i];
+            timeTreeKeys[i * 3 + 1] = Constants.NULL_LONG;
+            timeTreeKeys[i * 3 + 2] = node.id();
+            types[i] = Constants.TIME_TREE_CHUNK;
+        }
+        getOrLoadAndMarkAll(types, timeTreeKeys, new KCallback<KChunk[]>() {
+            @Override
+            public void on(final KChunk[] superTimeTrees) {
+                if (superTimeTrees == null) {
+                    selfPointer._space.unmarkChunk(objectWorldOrder);
+                    selfPointer._space.unmarkChunk(globalWorldOrder);
+                    callback.on(new long[0]);
+                } else {
+                    //time collector
+                    final int[] collectedSize = {Constants.MAP_INITIAL_CAPACITY};
+                    final long[][] collectedSuperTimes = {new long[collectedSize[0]]};
+                    final long[][] collectedSuperTimesAssociatedWorlds = {new long[collectedSize[0]]};
+                    final int[] insert_index = {0};
+
+                    long previousDivergenceTime = endOfSearch;
+                    for (int i = 0; i < collectedWorldsSize; i++) {
+                        final KTimeTreeChunk timeTree = (KTimeTreeChunk) superTimeTrees[i];
+                        if (timeTree != null) {
+                            long currentDivergenceTime = objectWorldOrder.get(collectedWorlds[i]);
+                            if (currentDivergenceTime < beginningOfSearch) {
+                                currentDivergenceTime = beginningOfSearch;
+                            }
+                            final long finalPreviousDivergenceTime = previousDivergenceTime;
+                            timeTree.range(currentDivergenceTime, previousDivergenceTime, Constants.END_OF_TIME, new KTreeWalker() {
+                                @Override
+                                public void elem(long t) {
+                                    if (t != finalPreviousDivergenceTime) {
+                                        collectedSuperTimes[0][insert_index[0]] = t;
+                                        collectedSuperTimesAssociatedWorlds[0][insert_index[0]] = timeTree.world();
+                                        insert_index[0]++;
+                                        if (collectedSize[0] == insert_index[0]) {
+                                            //reallocate
+                                            long[] temp_collectedSuperTimes = new long[collectedSize[0] * 2];
+                                            long[] temp_collectedSuperTimesAssociatedWorlds = new long[collectedSize[0] * 2];
+                                            System.arraycopy(collectedSuperTimes[0], 0, temp_collectedSuperTimes, 0, collectedSize[0]);
+                                            System.arraycopy(collectedSuperTimesAssociatedWorlds[0], 0, temp_collectedSuperTimesAssociatedWorlds, 0, collectedSize[0]);
+
+                                            collectedSuperTimes[0] = temp_collectedSuperTimes;
+                                            collectedSuperTimesAssociatedWorlds[0] = temp_collectedSuperTimesAssociatedWorlds;
+
+                                            collectedSize[0] = collectedSize[0] * 2;
                                         }
-                                    });
-                                    previousDivergenceTime = currentDivergenceTime;
+                                    }
                                 }
-                                selfPointer._space.unmarkChunk(timeTree);
-                            }
-                            if (timeline_index[0] != timelineSize[0]) {
-                                long[] tempTimeline = new long[timeline_index[0]];
-                                System.arraycopy(timeline[0], 0, tempTimeline, 0, timeline_index[0]);
-                                timeline[0] = tempTimeline;
-                            }
-                            selfPointer._space.unmarkChunk(objectWorldOrder);
-                            selfPointer._space.unmarkChunk(globalWorldOrder);
-                            callback.on(timeline[0]);
+                            });
+                            previousDivergenceTime = currentDivergenceTime;
                         }
+                        selfPointer._space.unmarkChunk(timeTree);
                     }
-                });
+                    //now we have superTimes, lets convert them to all times
+                    resolveTimepointsFromSuperTimes(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedSuperTimesAssociatedWorlds[0], collectedSuperTimes[0], insert_index[0], callback);
+                }
+            }
+        });
+    }
+
+    private void resolveTimepointsFromSuperTimes(final KWorldOrderChunk globalWorldOrder, final KWorldOrderChunk objectWorldOrder, final KNode node, final long beginningOfSearch, final long endOfSearch, final long[] collectedWorlds, final long[] collectedSuperTimes, final int collectedSize, final KCallback<long[]> callback) {
+        final MWGResolver selfPointer = this;
+
+        final long[] timeTreeKeys = new long[collectedSize * 3];
+        final byte[] types = new byte[collectedSize];
+        for (int i = 0; i < collectedSize; i++) {
+            timeTreeKeys[i * 3] = collectedWorlds[i];
+            timeTreeKeys[i * 3 + 1] = collectedSuperTimes[i];
+            timeTreeKeys[i * 3 + 2] = node.id();
+            types[i] = Constants.TIME_TREE_CHUNK;
+        }
+        getOrLoadAndMarkAll(types, timeTreeKeys, new KCallback<KChunk[]>() {
+            @Override
+            public void on(KChunk[] timeTrees) {
+                if (timeTrees == null) {
+                    selfPointer._space.unmarkChunk(objectWorldOrder);
+                    selfPointer._space.unmarkChunk(globalWorldOrder);
+                    callback.on(new long[0]);
+                } else {
+                    //time collector
+                    final int[] collectedTimesSize = {Constants.MAP_INITIAL_CAPACITY};
+                    final long[][] collectedTimes = {new long[collectedTimesSize[0]]};
+                    final int[] insert_index = {0};
+                    long previousDivergenceTime = endOfSearch;
+                    for (int i = 0; i < collectedSize; i++) {
+                        final KTimeTreeChunk timeTree = (KTimeTreeChunk) timeTrees[i];
+                        if (timeTree != null) {
+                            long currentDivergenceTime = objectWorldOrder.get(collectedWorlds[i]);
+                            if (currentDivergenceTime < beginningOfSearch) {
+                                currentDivergenceTime = beginningOfSearch;
+                            }
+                            final long finalPreviousDivergenceTime = previousDivergenceTime;
+                            timeTree.range(currentDivergenceTime, previousDivergenceTime, Constants.END_OF_TIME, new KTreeWalker() {
+                                @Override
+                                public void elem(long t) {
+                                    if (t != finalPreviousDivergenceTime) {
+                                        collectedTimes[0][insert_index[0]] = t;
+                                        insert_index[0]++;
+                                        if (collectedTimesSize[0] == insert_index[0]) {
+                                            //reallocate
+                                            long[] temp_collectedTimes = new long[collectedTimesSize[0] * 2];
+                                            System.arraycopy(collectedTimes[0], 0, temp_collectedTimes, 0, collectedTimesSize[0]);
+                                            collectedTimes[0] = temp_collectedTimes;
+                                            collectedTimesSize[0] = collectedTimesSize[0] * 2;
+                                        }
+                                    }
+                                }
+                            });
+                            previousDivergenceTime = currentDivergenceTime;
+                        }
+                        selfPointer._space.unmarkChunk(timeTree);
+                    }
+                    //now we have times
+                    if (insert_index[0] != collectedTimesSize[0]) {
+                        long[] tempTimeline = new long[insert_index[0]];
+                        System.arraycopy(collectedTimes[0], 0, tempTimeline, 0, insert_index[0]);
+                        collectedTimes[0] = tempTimeline;
+                    }
+                    selfPointer._space.unmarkChunk(objectWorldOrder);
+                    selfPointer._space.unmarkChunk(globalWorldOrder);
+                    callback.on(collectedTimes[0]);
+                }
             }
         });
     }

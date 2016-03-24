@@ -7,6 +7,7 @@ import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
+
 /**
  * @ignore ts
  */
@@ -81,6 +82,50 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     }
 
+    @Override
+    public void clearAt(long max) {
+        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
+        ptrConsistency();
+
+        long previousKeys = OffHeapLongArray.get(addr, INDEX_K);
+        long previousMetas = OffHeapLongArray.get(addr, INDEX_META);
+        long previousColors = OffHeapLongArray.get(addr, INDEX_COLORS);
+        long previousSize = OffHeapLongArray.get(addr, INDEX_SIZE);
+
+        //reset
+        long capacity = Constants.MAP_INITIAL_CAPACITY;
+        //init k array
+        kPtr = OffHeapLongArray.allocate(capacity);
+        OffHeapLongArray.set(addr, INDEX_K, kPtr);
+        //init meta array
+        metaPtr = OffHeapLongArray.allocate(capacity * META_SIZE);
+        OffHeapLongArray.set(addr, INDEX_META, metaPtr);
+        //init colors array
+        colorsPtr = OffHeapByteArray.allocate(capacity);
+        OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
+
+        OffHeapLongArray.set(addr, INDEX_SIZE, 0);
+        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
+        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+        OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
+
+        for (long i = 0; i < previousSize; i++) {
+            long currentVal = OffHeapLongArray.get(previousKeys, i);
+            if(currentVal < max){
+                internal_insert(OffHeapLongArray.get(previousKeys, i));
+            }
+        }
+
+        OffHeapLongArray.free(previousKeys);
+        OffHeapLongArray.free(previousMetas);
+        OffHeapByteArray.free(previousColors);
+
+        //Free OffHeap lock
+        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
     public static void free(long addr) {
         OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_K));
         OffHeapLongArray.free(OffHeapLongArray.get(addr, INDEX_META));
@@ -134,22 +179,43 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void range(long startKey, long endKey, KTreeWalker walker) {
+    public final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
+
+        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
+        ptrConsistency();
+
+        long nbElements = 0;
         long indexEnd = internal_previousOrEqual_index(endKey);
-        while (indexEnd != -1 && key(indexEnd) >= startKey) {
+        while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
             walker.elem(key(indexEnd));
+            nbElements++;
             indexEnd = previous(indexEnd);
+        }
+
+        //Free OffHeap lock
+        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
         }
     }
 
     @Override
     public long previousOrEqual(long key) {
+        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
+        ptrConsistency();
+
         long result = internal_previousOrEqual_index(key);
+        long resultKey;
         if (result != -1) {
-            return key(result);
+            resultKey = key(result);
         } else {
-            return Constants.NULL_LONG;
+            resultKey = Constants.NULL_LONG;
         }
+
+        //Free OffHeap lock
+        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+        return resultKey;
     }
 
     @Override
@@ -216,10 +282,19 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     @Override
     public void insert(long p_key) {
-
         //OffHeap lock
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         ptrConsistency();
+
+        internal_insert(p_key);
+
+        //Free OffHeap lock
+        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
+    public void internal_insert(long p_key) {
 
         long size = OffHeapLongArray.get(addr, INDEX_SIZE);
         if ((size + 1) > OffHeapLongArray.get(addr, INDEX_THRESHOLD)) {
@@ -248,10 +323,6 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             long n = OffHeapLongArray.get(addr, INDEX_ROOT_ELEM);
             while (true) {
                 if (p_key == key(n)) {
-                    //Free OffHeap lock
-                    if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                        throw new RuntimeException("CAS Error !!!");
-                    }
                     return;
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
@@ -284,48 +355,27 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             setParent(size, n);
         }
         insertCase1(size);
+        //TODO make homogenous dirty calls
         internal_set_dirty();
-
         OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
 
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
-        }
     }
 
     private long internal_previousOrEqual_index(long p_key) {
 
-        //OffHeap lock
-        //TODO move this lock above
-        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
-
         long p = OffHeapLongArray.get(addr, INDEX_ROOT_ELEM);
         if (p == -1) {
-            //Free OffHeap lock
-            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                throw new RuntimeException("CAS Error !!!");
-            }
             return p;
         }
 
         while (p != -1) {
             if (p_key == key(p)) {
-                //Free OffHeap lock
-                if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                    throw new RuntimeException("CAS Error !!!");
-                }
                 return p;
             }
             if (p_key > key(p)) {
                 if (right(p) != -1) {
                     p = right(p);
                 } else {
-                    //Free OffHeap lock
-                    if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                        throw new RuntimeException("CAS Error !!!");
-                    }
                     return p;
                 }
             } else {
@@ -338,19 +388,11 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
                         ch = parent;
                         parent = parent(parent);
                     }
-                    //Free OffHeap lock
-                    if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                        throw new RuntimeException("CAS Error !!!");
-                    }
                     return parent;
                 }
             }
         }
 
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
-        }
         return -1;
     }
 

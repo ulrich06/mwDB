@@ -109,9 +109,10 @@ public class Constants extends KConstants {
     /**
      * SuperTimeTree
      */
-    public static final long SCALE_1 = 10_000;
-    public static final long SCALE_2 = 100_000;
-    public static final long SCALE_3 = 1_000_000;
+    public static final long SCALE_1 = 1_000;
+    public static final long SCALE_2 = 10_000;
+    public static final long SCALE_3 = 100_000;
+    public static final long SCALE_4 = 1_000_000;
 
 
 }

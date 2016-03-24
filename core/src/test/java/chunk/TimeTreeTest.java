@@ -4,10 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.KConstants;
-import org.mwdb.chunk.KBuffer;
-import org.mwdb.chunk.KChunk;
-import org.mwdb.chunk.KChunkListener;
-import org.mwdb.chunk.KTimeTreeChunk;
+import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.HeapTimeTreeChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.*;
@@ -33,6 +30,7 @@ public class TimeTreeTest implements KChunkListener {
         previousOrEqualsTest(factory);
         saveLoad(factory);
         massiveTest(factory);
+        emptyHalf(factory);
     }
 
     @Test
@@ -53,12 +51,59 @@ public class TimeTreeTest implements KChunkListener {
         previousOrEqualsTest(factory);
         saveLoad(factory);
         massiveTest(factory);
+        emptyHalf(factory);
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
 
+    }
+
+    private void emptyHalf(KTimeTreeChunkFactory factory) {
+        nbCount = 0;
+        KTimeTreeChunk tree = factory.create(null);
+
+        int nbElements = 10;
+
+        for (int i = 0; i < nbElements; i++) {
+            tree.insert(i);
+        }
+
+        final long[] nbCall = {0};
+        tree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, tree.size() / 2, new KTreeWalker() {
+            @Override
+            public void elem(long t) {
+                nbCall[0]++;
+            }
+        });
+        Assert.assertTrue((nbElements / 2) == nbCall[0]);
+
+        final long[] median = new long[1];
+        nbCall[0] = 0;
+        tree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, tree.size() / 2, new KTreeWalker() {
+            @Override
+            public void elem(long t) {
+                median[0] = 5;
+                nbCall[0]++;
+            }
+        });
+
+        Assert.assertTrue(median[0] == 5);
+        Assert.assertTrue(nbCall[0] == 5);
+
+        tree.clearAt(median[0]);
+        nbCall[0] = 0;
+        tree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, Constants.END_OF_TIME, new KTreeWalker() {
+            @Override
+            public void elem(long t) {
+                nbCall[0]++;
+            }
+        });
+        Assert.assertTrue(nbCall[0] == 5);
+
+        free(tree);
+        Assert.assertTrue(nbCount == 1);
     }
 
     private void previousOrEqualsTest(KTimeTreeChunkFactory factory) {

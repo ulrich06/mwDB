@@ -54,7 +54,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         this._magicToken = new AtomicBoolean(false);
 
         load(initialPayload);
-
     }
 
     @Override
@@ -309,18 +308,24 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         return n;
     }
 
-    public final void range(long startKey, long endKey, KTreeWalker walker) {
-        int indexEnd = internal_previousOrEqual_index(endKey);
-        while (indexEnd != -1 && key(indexEnd) >= startKey) {
-            walker.elem(key(indexEnd));
-            indexEnd = previous(indexEnd);
-        }
-    }
-
-    protected final int internal_previousOrEqual_index(long p_key) {
-
+    @Override
+    public final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
         //negociate a magic
         while (!this._magicToken.compareAndSet(false, true)) ;
+
+        int nbElements = 0;
+        int indexEnd = internal_previousOrEqual_index(endKey);
+        while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
+            walker.elem(key(indexEnd));
+            nbElements++;
+            indexEnd = previous(indexEnd);
+        }
+
+        //free magic
+        this._magicToken.set(false);
+    }
+
+    private int internal_previousOrEqual_index(long p_key) {
 
         int p = _root_index;
         if (p == -1) {
@@ -359,8 +364,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
                 }
             }
         }
-        //free magic
-        this._magicToken.set(false);
         return -1;
     }
 
@@ -573,11 +576,33 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    protected final void internal_insert(long p_key, long p_value) {
-
+    @Override
+    public void clearAt(long max) {
         //negociate a magic
         while (!this._magicToken.compareAndSet(false, true)) ;
 
+        long[] previousValue = _back_kv;
+        //reset the state
+        _back_kv = new long[_back_kv.length];
+        _back_meta = new int[_back_kv.length * META_SIZE];
+        _back_colors = new boolean[_back_kv.length];
+        _root_index = -1;
+        _size = 0;
+
+        for (int i = 0; i < previousValue.length; i++) {
+            if (previousValue[i] != Constants.NULL_LONG && previousValue[i] < max) {
+                internal_insert(previousValue[i]);
+            }
+        }
+        //dirty
+        internal_set_dirty();
+        this._magic = PrimitiveHelper.rand();
+
+        //free magic
+        this._magicToken.set(false);
+    }
+
+    private void internal_insert(long p_key) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
@@ -633,9 +658,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         insertCase1(newIndex);
         internal_set_dirty();
         this._magic = PrimitiveHelper.rand();
-
-        //free magic
-        this._magicToken.set(false);
     }
 
     private void internal_set_dirty() {
@@ -647,12 +669,18 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     }
 
     public long previousOrEqual(long key) {
+        //negociate a magic
+        while (!this._magicToken.compareAndSet(false, true)) ;
         int result = internal_previousOrEqual_index(key);
+        long resultKey;
         if (result != -1) {
-            return key(result);
+            resultKey = key(result);
         } else {
-            return Constants.NULL_LONG;
+            resultKey = Constants.NULL_LONG;
         }
+        //free magic
+        this._magicToken.set(false);
+        return resultKey;
     }
 
     @Override
@@ -660,8 +688,11 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         return this._magic;
     }
 
+    @Override
     public void insert(long p_key) {
-        internal_insert(p_key, p_key);
+        while (!this._magicToken.compareAndSet(false, true)) ;
+        internal_insert(p_key);
+        this._magicToken.set(false);
     }
 
     @Override

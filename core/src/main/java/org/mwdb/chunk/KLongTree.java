@@ -6,7 +6,9 @@ public interface KLongTree {
 
     long previousOrEqual(long key);
 
-    void range(long startKey, long endKey, KTreeWalker walker);
+    void clearAt(long max);
+
+    void range(long startKey, long endKey, long maxElements, KTreeWalker walker);
 
     long magic();
 
