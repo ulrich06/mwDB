@@ -21,7 +21,7 @@ public class Buffer {
 
             private long bufferPtr = Constants.OFFHEAP_NULL_PTR;
 
-            private int writeCursor = 0;
+            private long writeCursor = 0;
 
             private long capacity = 0;
 
@@ -50,6 +50,15 @@ public class Buffer {
                     return OffHeapByteArray.get(bufferPtr, position);
                 }
                 return -1;
+            }
+
+            @Override
+            public byte[] data() {
+                byte[] result = new byte[(int) writeCursor];
+                for (long i = 0; i < writeCursor; i++) {
+                    result[(int) i] = OffHeapByteArray.get(bufferPtr, i);
+                }
+                return result;
             }
 
             @Override
@@ -95,6 +104,13 @@ public class Buffer {
             @Override
             public byte read(long position) {
                 return buffer[(int) position];
+            }
+
+            @Override
+            public byte[] data() {
+                byte[] copy = new byte[buffer.length];
+                System.arraycopy(buffer, 0, copy, 0, writeCursor);
+                return copy;
             }
 
             @Override

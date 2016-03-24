@@ -1,6 +1,7 @@
 package org.mwdb.manager;
 
 import org.mwdb.KCallback;
+import org.mwdb.KGraph;
 import org.mwdb.chunk.KBuffer;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.utility.PrimitiveHelper;
@@ -14,12 +15,7 @@ public class NoopStorage implements KStorage {
     }
 
     @Override
-    public void atomicGetIncrement(long[] key, KCallback<Short> callback) {
-        callback.on(new Short("0"));
-    }
-
-    @Override
-    public void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener) {
+    public void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback) {
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }
@@ -31,12 +27,12 @@ public class NoopStorage implements KStorage {
     }
 
     @Override
-    public void connect(KCallback<Boolean> callback) {
-        callback.on(true);
+    public void connect(KGraph graph, KCallback<Short> callback) {
+        callback.on(new Short("0"));
     }
 
     @Override
-    public void disconnect(KCallback<Boolean> callback) {
+    public void disconnect(Short prefix, KCallback<Boolean> callback) {
         callback.on(true);
     }
 

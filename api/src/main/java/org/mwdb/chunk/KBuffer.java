@@ -21,6 +21,13 @@ public interface KBuffer {
     byte read(long position);
 
     /**
+     * Extract data as byte[]
+     *
+     * @return content as native byte[]
+     */
+    byte[] data();
+
+    /**
      * Size of the buffer
      *
      * @return length of the buffer

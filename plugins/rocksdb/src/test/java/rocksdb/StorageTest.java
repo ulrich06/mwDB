@@ -1,18 +1,13 @@
-package graph;
+package rocksdb;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.chunk.heap.HeapChunkSpace;
 import org.mwdb.chunk.offheap.*;
 import org.mwdb.task.NoopScheduler;
 
-public class Benchmark3Test {
+public class StorageTest {
 
-    //@Test
-    public void heapTest() {
-        test("heap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
-    }
 
     //@Test
     public void offHeapTest() {
@@ -21,12 +16,12 @@ public class Benchmark3Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test("offheap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+
+
+        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
-    //final int valuesToInsert = 10_000_000;
-    final int valuesToInsert = 1_000_000_000;
-
+    final int valuesToInsert = 1_000_000;
     final long timeOrigin = 1000;
 
     private void test(String name, KGraph graph) {
@@ -81,5 +76,4 @@ public class Benchmark3Test {
             }
         });
     }
-
 }

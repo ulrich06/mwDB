@@ -24,6 +24,7 @@ public class Graph implements KGraph {
 
     //TODO rest of elements
 
+    private Short _prefix = null;
     private KeyCalculator _nodeKeyCalculator = null;
     private KeyCalculator _worldKeyCalculator = null;
 
@@ -90,87 +91,81 @@ public class Graph implements KGraph {
             //first connect the scheduler
             this._scheduler.start();
             final Graph selfPointer = this;
-            this._storage.connect(new KCallback<Boolean>() {
+            this._storage.connect(this, new KCallback<Short>() {
                 @Override
-                public void on(Boolean connectResult) {
-                    if (connectResult) {
-                        selfPointer._storage.atomicGetIncrement(Constants.PREFIX_KEY,
-                                new KCallback<Short>() {
-                                    @Override
-                                    public void on(final Short graphPrefix) {
-                                        final KBuffer[] connectionKeys = new KBuffer[4];
-                                        //preload ObjKeyGenerator
-                                        connectionKeys[0] = newBuffer();
-                                        Buffer.keyToBuffer(connectionKeys[0], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
-                                        //preload WorldKeyGenerator
-                                        connectionKeys[1] = newBuffer();
-                                        Buffer.keyToBuffer(connectionKeys[1], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
-                                        //preload GlobalWorldOrder
-                                        connectionKeys[2] = newBuffer();
-                                        Buffer.keyToBuffer(connectionKeys[2], Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
-                                        //preload GlobalDictionary
-                                        connectionKeys[3] = newBuffer();
-                                        Buffer.keyToBuffer(connectionKeys[3], Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
-                                        selfPointer._storage.get(connectionKeys, new KCallback<KBuffer[]>() {
-                                            @Override
-                                            public void on(KBuffer[] payloads) {
-
-                                                for (int i = 0; i < connectionKeys.length; i++) {
-                                                    connectionKeys[i].free();
-                                                }
-
-                                                if (payloads.length == 4) {
-                                                    Boolean noError = true;
-                                                    try {
-                                                        //init the global universe tree (mandatory for synchronious create)
-                                                        KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
-                                                        selfPointer._space.putAndMark(globalWorldOrder);
-
-                                                        //init the global dictionary chunk
-                                                        KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
-                                                        selfPointer._space.putAndMark(globalDictionaryChunk);
-
-                                                        if (payloads[UNIVERSE_INDEX] != null) {
-                                                            selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
-                                                        } else {
-                                                            selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, 0);
-                                                        }
-
-                                                        if (payloads[OBJ_INDEX] != null) {
-                                                            selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
-                                                        } else {
-                                                            selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, 0);
-                                                        }
-
-                                                        //init the resolver
-                                                        selfPointer._resolver.init(selfPointer);
-
-                                                    } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                        noError = false;
-                                                    }
-                                                    selfPointer._lock.set(true);
-                                                    if (PrimitiveHelper.isDefined(callback)) {
-                                                        callback.on(noError);
-                                                    }
-                                                } else {
-                                                    selfPointer._lock.set(true);
-                                                    if (PrimitiveHelper.isDefined(callback)) {
-                                                        callback.on(false);
-                                                    }
-                                                }
-
-                                            }
-                                        });
-
-                                    }
-                                });
-                    } else {
-                        selfPointer._lock.set(true);
+                public void on(Short graphPrefix) {
+                    _prefix = graphPrefix;
+                    if (_prefix == null) {
                         if (PrimitiveHelper.isDefined(callback)) {
-                            callback.on(null);
+                            callback.on(false);
+                            return;
                         }
                     }
+                    
+                    final KBuffer[] connectionKeys = new KBuffer[4];
+                    //preload ObjKeyGenerator
+                    connectionKeys[0] = newBuffer();
+                    Buffer.keyToBuffer(connectionKeys[0], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    //preload WorldKeyGenerator
+                    connectionKeys[1] = newBuffer();
+                    Buffer.keyToBuffer(connectionKeys[1], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    //preload GlobalWorldOrder
+                    connectionKeys[2] = newBuffer();
+                    Buffer.keyToBuffer(connectionKeys[2], Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    //preload GlobalDictionary
+                    connectionKeys[3] = newBuffer();
+                    Buffer.keyToBuffer(connectionKeys[3], Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
+                    selfPointer._storage.get(connectionKeys, new KCallback<KBuffer[]>() {
+                        @Override
+                        public void on(KBuffer[] payloads) {
+
+                            for (int i = 0; i < connectionKeys.length; i++) {
+                                connectionKeys[i].free();
+                            }
+
+                            if (payloads.length == 4) {
+                                Boolean noError = true;
+                                try {
+                                    //init the global universe tree (mandatory for synchronious create)
+                                    KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
+                                    selfPointer._space.putAndMark(globalWorldOrder);
+
+                                    //init the global dictionary chunk
+                                    KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
+                                    selfPointer._space.putAndMark(globalDictionaryChunk);
+
+                                    if (payloads[UNIVERSE_INDEX] != null) {
+                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
+                                    } else {
+                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                    }
+
+                                    if (payloads[OBJ_INDEX] != null) {
+                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
+                                    } else {
+                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                    }
+
+                                    //init the resolver
+                                    selfPointer._resolver.init(selfPointer);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    noError = false;
+                                }
+                                selfPointer._lock.set(true);
+                                if (PrimitiveHelper.isDefined(callback)) {
+                                    callback.on(noError);
+                                }
+                            } else {
+                                selfPointer._lock.set(true);
+                                if (PrimitiveHelper.isDefined(callback)) {
+                                    callback.on(false);
+                                }
+                            }
+
+                        }
+                    });
                 }
             });
         } else {
@@ -198,7 +193,7 @@ public class Graph implements KGraph {
                     selfPointer._space.free();
                     //_blas.disconnect();
                     if (selfPointer._storage != null) {
-                        selfPointer._storage.disconnect(new KCallback<Boolean>() {
+                        selfPointer._storage.disconnect(selfPointer._prefix, new KCallback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
                                 selfPointer._lock.set(true);
@@ -302,7 +297,7 @@ public class Graph implements KGraph {
                         callback.on(result);
                     }
                 }
-            }, -1);
+            });
         }
     }
 

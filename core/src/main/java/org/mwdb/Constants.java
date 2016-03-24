@@ -40,8 +40,7 @@ public class Constants extends KConstants {
     public static final byte WORLD_ORDER_CHUNK = 2;
 
     public static final byte KEY_GEN_CHUNK = 3;
-
-
+    
     /**
      * Node constants
      **/
@@ -59,8 +58,6 @@ public class Constants extends KConstants {
     //public static final int KEYS_SIZE = 3;
 
     public static final int PREFIX_TO_SAVE_SIZE = 2;
-
-    public static final long[] PREFIX_KEY = new long[]{Constants.END_OF_TIME, Constants.NULL_LONG, Constants.NULL_LONG};
 
     public static final long[] NULL_KEY = new long[]{END_OF_TIME, END_OF_TIME, END_OF_TIME};
 

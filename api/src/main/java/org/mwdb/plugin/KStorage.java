@@ -1,6 +1,7 @@
 package org.mwdb.plugin;
 
 import org.mwdb.KCallback;
+import org.mwdb.KGraph;
 import org.mwdb.chunk.KBuffer;
 
 /**
@@ -20,19 +21,16 @@ public interface KStorage {
      */
     void get(KBuffer[] keys, KCallback<KBuffer[]> callback);
 
-    void atomicGetIncrement(long[] key, KCallback<Short> callback);
-
     /**
      * Used to push objects to the storage.<br>
      * The {@code keys} array is a sequential list of &lt;world, timepoint, id&gt; tuples organized as follows:<br>
      * Say you wanna save objects &lt;1, 2, 3&gt; and &lt;1, 5, 6&gt;, the array will be: [1,2,3,1,5,6]
      *
-     * @param keys            The array of keys as specified above.
-     * @param values          The objects to store in a String format, and in the same order as the keys.
-     * @param callback        Called when the operation is complete. The parameter will be true if the operation succeeded, false otherwise.
-     * @param excludeListener Specifies whether or not the listeners must be notified.
+     * @param keys     The array of keys as specified above.
+     * @param values   The objects to store in a String format, and in the same order as the keys.
+     * @param callback Called when the operation is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
-    void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback, int excludeListener);
+    void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback);
 
     /**
      * Called to remove objects from the storage.
@@ -47,15 +45,17 @@ public interface KStorage {
     /**
      * Connects the storage
      *
-     * @param callback Called when the connection process is complete. The parameter will be true if the operation succeeded, false otherwise.
+     * @param graph    KGraph this storage is attached to
+     * @param callback Called when the connection process is complete. The parameter will be a short a prefix if the operation succeeded, null otherwise.
      */
-    void connect(KCallback<Boolean> callback);
+    void connect(KGraph graph, KCallback<Short> callback);
 
     /**
      * Disconnects the storage
      *
+     * @param prefix   previously used prefix, associated during the connexion phase.
      * @param callback Called when the disconnection process is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
-    void disconnect(KCallback<Boolean> callback);
+    void disconnect(Short prefix, KCallback<Boolean> callback);
 
 }
