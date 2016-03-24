@@ -8,14 +8,12 @@ import org.mwdb.task.NoopScheduler;
 
 public class StorageTest {
 
-
-    //@Test
+    @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
-
 
 
         test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
