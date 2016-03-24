@@ -16,6 +16,11 @@ public class JSMatrixEngine implements KMatrixEngine {
     }
 
     @Override
+    public KMatrix pinv(KMatrix mat, boolean invertInPlace) {
+        return null;
+    }
+
+    @Override
     public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
         return null;
     }

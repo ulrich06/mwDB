@@ -29,4 +29,5 @@ public interface KMatrix {
     KMatrix importRowMatrix(double[] rowdata, int rows, int columns);
 
     void setData(double[] data);
+
 }

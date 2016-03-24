@@ -7,6 +7,8 @@ public interface KMatrixEngine {
 
     KMatrix invert(KMatrix mat, boolean invertInPlace);
 
+    KMatrix pinv(KMatrix mat, boolean invertInPlace);
+
     //Solve AX=B -> return X as a result
     KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB);
 
