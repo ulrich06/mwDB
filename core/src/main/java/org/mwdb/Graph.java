@@ -441,4 +441,9 @@ public class Graph implements KGraph {
     public KResolver resolver() {
         return _resolver;
     }
+
+    public KChunkSpace space() {
+        return _space;
+    }
+
 }

@@ -587,9 +587,10 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         _back_meta = new int[_back_kv.length * META_SIZE];
         _back_colors = new boolean[_back_kv.length];
         _root_index = -1;
+        int _previousSize = _size;
         _size = 0;
 
-        for (int i = 0; i < previousValue.length; i++) {
+        for (int i = 0; i < _previousSize; i++) {
             if (previousValue[i] != Constants.NULL_LONG && previousValue[i] < max) {
                 internal_insert(previousValue[i]);
             }

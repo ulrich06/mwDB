@@ -480,15 +480,15 @@ public class MWGResolver implements KResolver {
                         if (resolvedWorld == nodeWorld) {
                             //manage super tree here
                             long superTreeSize = objectSuperTimeTree.size();
-                            long threshold = Constants.SCALE_1;
+                            long threshold = Constants.SCALE_1 * 2;
                             if (superTreeSize > threshold) {
-                                threshold = Constants.SCALE_2;
+                                threshold = Constants.SCALE_2 * 2;
                             }
                             if (superTreeSize > threshold) {
-                                threshold = Constants.SCALE_3;
+                                threshold = Constants.SCALE_3 * 2;
                             }
                             if (superTreeSize > threshold) {
-                                threshold = Constants.SCALE_4;
+                                threshold = Constants.SCALE_4 * 2;
                             }
                             objectTimeTree.insert(nodeTime);
                             if (objectTimeTree.size() == threshold) {
@@ -745,7 +745,12 @@ public class MWGResolver implements KResolver {
                                     }
                                 }
                             });
-                            previousDivergenceTime = currentDivergenceTime;
+                            if (i < collectedSize - 1) {
+                                if (collectedWorlds[i + 1] != collectedWorlds[i]) {
+                                    //world overriding semantic
+                                    previousDivergenceTime = currentDivergenceTime;
+                                }
+                            }
                         }
                         selfPointer._space.unmarkChunk(timeTree);
                     }
