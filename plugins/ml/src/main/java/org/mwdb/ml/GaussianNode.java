@@ -29,7 +29,7 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
 
     @Override
     public void attSet(String attributeName, byte attributeType, Object attributeValue) {
-        if (attributeName.equals(VALUE_KEY) && attributeType== KType.DOUBLE_ARRAY) {
+        if (attributeName.equals(VALUE_KEY) && attributeType == KType.DOUBLE_ARRAY) {
             learn((double[]) attributeValue);
         } else {
             rootNode().attSet(attributeName, attributeType, attributeValue);
@@ -44,10 +44,9 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
             return KType.DOUBLE_ARRAY;
         } else if (attributeName.equals(MAX_KEY)) {
             return KType.DOUBLE_ARRAY;
-        }
-        else if (attributeName.equals(COV_KEY)) {
+        } else if (attributeName.equals(COV_KEY)) {
             return KType.DOUBLE_ARRAY;
-        }else {
+        } else {
             return rootNode().attType(attributeName);
         }
     }
@@ -60,14 +59,11 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
             return min();
         } else if (attributeName.equals(MAX_KEY)) {
             return max();
-        }
-        else if (attributeName.equals(MAX_KEY)) {
+        } else if (attributeName.equals(MAX_KEY)) {
             return max();
-        }
-        else if (attributeName.equals(COV_KEY)) {
+        } else if (attributeName.equals(COV_KEY)) {
             return cov(avg());
-        }
-        else {
+        } else {
             return rootNode().att(attributeName);
         }
     }

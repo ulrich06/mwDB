@@ -2,9 +2,6 @@ package org.mwdb.math.matrix;
 
 public interface KMatrix {
 
-    byte matrixType();
-
-
     int rows();
 
     int columns();
@@ -27,8 +24,9 @@ public interface KMatrix {
 
     double[] data();
 
+    double[] exportRowMatrix();
+
+    KMatrix importRowMatrix(double[] rowdata, int rows, int columns);
+
     void setData(double[] data);
-
-
-
 }

@@ -2,14 +2,10 @@ package org.mwdb.math.matrix.blas;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
-import org.mwdb.math.matrix.KMatrixType;
 import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
-import org.mwdb.math.matrix.blas.NetlibBlas;
 import org.mwdb.math.matrix.solver.LU;
-
-import java.util.Random;
+import org.mwdb.math.matrix.solver.QR;
+import org.mwdb.math.matrix.solver.SVD;
 
 /**
  * @ignore ts
@@ -26,11 +22,14 @@ public class BlasMatrixEngine implements KMatrixEngine {
         this._blas = p_blas;
     }
 
+    public KBlas getBlas() {
+        return _blas;
+    }
 
 
     //C=alpha*A + beta * B (with possible transpose for A or B)
     @Override
-    public  KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA,  KBlasTransposeType transB, double beta, KMatrix matB) {
+    public KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA, KBlasTransposeType transB, double beta, KMatrix matB) {
 
         if (testDimensionsAB(transA, transB, matA, matB)) {
             int k = 0;
@@ -56,40 +55,37 @@ public class BlasMatrixEngine implements KMatrixEngine {
             }
 
 
-            Matrix matC = new Matrix(null,dimC[0], dimC[1], _blas.matrixType());
+            Matrix matC = new Matrix(null, dimC[0], dimC[1]);
             _blas.dgemm(transA, transB, matC.rows(), matC.columns(), k, alpha, matA.data(), 0, matA.rows(), matB.data(), 0, matB.rows(), beta, matC.data(), 0, matC.rows());
             return matC;
-        }
-        else {
+        } else {
             throw new RuntimeException("Dimensions mismatch between A,B and C");
         }
     }
 
     @Override
-    public  KMatrix invert(KMatrix mat, boolean invertInPlace) {
-        if(mat.rows()!=mat.columns()){
+    public KMatrix invert(KMatrix mat, boolean invertInPlace) {
+        if (mat.rows() != mat.columns()) {
             return null;
         }
 
-        if(invertInPlace){
-            LU alg = new LU(mat.rows(),mat.columns(),_blas);
-            KMatrix result = new Matrix(null, mat.rows(),mat.columns(),_blas.matrixType());
-            LU dlu = new LU(mat.rows(),mat.columns(),_blas);
-            if(dlu.invert(mat)){
+        if (invertInPlace) {
+            LU alg = new LU(mat.rows(), mat.columns(), _blas);
+            KMatrix result = new Matrix(null, mat.rows(), mat.columns());
+            LU dlu = new LU(mat.rows(), mat.columns(), _blas);
+            if (dlu.invert(mat)) {
                 return mat;
-            }
-            else {
+            } else {
                 return null;
             }
 
-        }
-        else {
-            LU alg = new LU(mat.rows(), mat.columns(),_blas);
-            KMatrix result = new Matrix(null, mat.rows(), mat.columns(), _blas.matrixType());
-            Matrix A_temp = new Matrix(null, mat.rows(), mat.columns(), _blas.matrixType());
+        } else {
+            LU alg = new LU(mat.rows(), mat.columns(), _blas);
+            KMatrix result = new Matrix(null, mat.rows(), mat.columns());
+            Matrix A_temp = new Matrix(null, mat.rows(), mat.columns());
             System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
 
-            LU dlu = new LU(A_temp.rows(), A_temp.columns(),_blas);
+            LU dlu = new LU(A_temp.rows(), A_temp.columns(), _blas);
             if (dlu.invert(A_temp)) {
                 result.setData(A_temp.data());
                 return result;
@@ -100,26 +96,63 @@ public class BlasMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public  KMatrix solve(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB){
-        if(!workInPlace) {
-            Matrix A_temp = new Matrix(null,matA.rows(), matA.columns(),_blas.matrixType());
+    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+        if (workInPlace) {
+            QR solver = QR.factorize(matA, true, _blas);
+            KMatrix coef = new Matrix(null, matA.columns(), matB.columns());
+            if (transB != KBlasTransposeType.NOTRANSPOSE) {
+                matB = Matrix.transpose(matB);
+            }
+            solver.solve(matB, coef);
+            return coef;
+        } else {
+            QR solver = QR.factorize(matA.clone(), true, _blas);
+            KMatrix coef = new Matrix(null, matA.columns(), matB.columns());
+            if (transB != KBlasTransposeType.NOTRANSPOSE) {
+                matB = Matrix.transpose(matB);
+            }
+            solver.solve(matB.clone(), coef);
+            return coef;
+        }
+    }
+
+    @Override
+    public KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace) {
+        SVD svd = new SVD(matA.rows(), matA.columns(), _blas);
+        if (workInPlace) {
+            svd.factor(matA);
+        } else {
+            svd.factor(matA.clone());
+        }
+
+        KMatrix[] result = new Matrix[3];
+        result[0] = svd.getU();
+        result[1] = svd.getSMatrix();
+        result[2] = svd.getVt();
+        return result;
+    }
+
+
+    @Override
+    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+        if (!workInPlace) {
+            Matrix A_temp = new Matrix(null, matA.rows(), matA.columns());
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());
 
-            LU dlu = new LU(A_temp.rows(), A_temp.columns(),_blas);
-            dlu.factor(A_temp,true);
+            LU dlu = new LU(A_temp.rows(), A_temp.columns(), _blas);
+            dlu.factor(A_temp, true);
 
-            if(dlu.isSingular()){
+            if (dlu.isSingular()) {
                 return null;
             }
-            Matrix B_temp = new Matrix(null, matB.rows(), matB.columns(),_blas.matrixType());
+            Matrix B_temp = new Matrix(null, matB.rows(), matB.columns());
             System.arraycopy(matB.data(), 0, B_temp.data(), 0, matB.columns() * matB.rows());
-            dlu.transSolve(B_temp,transB);
+            dlu.transSolve(B_temp, transB);
             return B_temp;
-        }
-        else {
-            LU dlu = new LU(matA.rows(), matA.columns(),_blas);
-            dlu.factor(matA,true);
-            if(dlu.isSingular()){
+        } else {
+            LU dlu = new LU(matA.rows(), matA.columns(), _blas);
+            dlu.factor(matA, true);
+            if (dlu.isSingular()) {
                 return null;
             }
             dlu.transSolve(matB, transB);
@@ -128,22 +161,18 @@ public class BlasMatrixEngine implements KMatrixEngine {
     }
 
 
-
     private static boolean testDimensionsAB(KBlasTransposeType transA, KBlasTransposeType transB, KMatrix matA, KMatrix matB) {
-        if(transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
-            if(transB.equals(KBlasTransposeType.NOTRANSPOSE)){
-                return (matA.columns()==matB.rows());
+        if (transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
+            if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                return (matA.columns() == matB.rows());
+            } else {
+                return (matA.columns() == matB.columns());
             }
-            else{
-                return (matA.columns()==matB.columns());
-            }
-        }
-        else {
-            if(transB.equals(KBlasTransposeType.NOTRANSPOSE)){
-                return (matA.rows()==matB.rows());
-            }
-            else{
-                return (matA.rows()==matB.columns());
+        } else {
+            if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                return (matA.rows() == matB.rows());
+            } else {
+                return (matA.rows() == matB.columns());
             }
         }
     }

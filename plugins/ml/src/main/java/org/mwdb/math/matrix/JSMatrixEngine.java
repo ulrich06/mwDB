@@ -16,7 +16,18 @@ public class JSMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix solve(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
         return null;
     }
+
+    @Override
+    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+        return null;
+    }
+
+    @Override
+    public KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace) {
+        return new KMatrix[0];
+    }
+
 }
