@@ -102,6 +102,8 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         double[] sumsquares;
 
         if(total==null){
+            total=0;
+            weight=0.0;
             sum = new double[features];
             min = new double[features];
             max = new double[features];
@@ -181,14 +183,14 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
                 sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
                 min = new double[features];
                 max = new double[features];
-                System.arraycopy(values, 0, min, 0, features);
-                System.arraycopy(values, 0, max, 0, features);
+                System.arraycopy(sum, 0, min, 0, features);
+                System.arraycopy(sum, 0, max, 0, features);
 
                 sumsquares = new double[features*(features+1)/2];
                 int count=0;
                 for(int i=0;i<features;i++){
                     for(int j=i;j<features;j++){
-                        sumsquares[count]=min[i]*min[j];
+                        sumsquares[count]=sum[i]*sum[j];
                         count++;
                     }
                 }

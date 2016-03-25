@@ -10,6 +10,24 @@ import org.mwdb.task.NoopScheduler;
  */
 public class GaussianNodeTest {
 
+    public static boolean compare(double[] a, double[] b, double eps){
+        for(int i=0;i<a.length;i++){
+            if(Math.abs(a[i]-b[i])>eps){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean compareArray(double[][] a, double[][] b, double eps){
+        for(int i=0;i<a.length;i++){
+            if(!compare(a[i], b[i], eps)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected final double[] longleyData = new double[] {
             60323,83.0,234289,2356,1590,107608,1947,
             61122,88.5,259426,2325,1456,108632,1948,
@@ -60,6 +78,8 @@ public class GaussianNodeTest {
                 KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
                 KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
 
+                double eps=1e-7;
+
 
                 double[][] train = new double[16][7];
 
@@ -72,14 +92,28 @@ public class GaussianNodeTest {
                     gaussianNodeLive.learn(train[i]);
                 }
 
+                double[][] rcovData=new double[7][7];
+                k=0;
+                for(int i=0;i<7;i++){
+                    for(int j=0;j<7;j++){
+                        rcovData[i][j]=rData[k];
+                        k++;
+                    }
+                }
+
                 gaussianNodeBatch.learnBatch(train);
 
                 double[] avgBatch= gaussianNodeBatch.getAvg();
                 double[][] covBatch= gaussianNodeBatch.getCovariance(avgBatch);
 
+                Assert.assertTrue(compare(avgBatch,ravg,eps));
+                Assert.assertTrue(compareArray(covBatch,rcovData,eps));
+
                 double[] avgLive= gaussianNodeLive.getAvg();
                 double[][] covLive= gaussianNodeLive.getCovariance(avgLive);
 
+                Assert.assertTrue(compare(avgLive,ravg,eps));
+                Assert.assertTrue(compareArray(covLive,rcovData,eps));
 
 
 
