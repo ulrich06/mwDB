@@ -328,14 +328,39 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
         int hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
         int m = internalState._elementHash[hashIndex];
+
+        Object result = null;
         while (m >= 0) {
             if (p_elementIndex == internalState._elementK[m] /* getKey */) {
-                return internalState._elementV[m]; /* getValue */
+                result = internalState._elementV[m]; /* getValue */
+                break;
             } else {
                 m = internalState._elementNext[m];
             }
         }
-        return null;
+
+        if (result == null) {
+            return null;
+        }
+        switch (internalState._elementType[m]) {
+            case KType.DOUBLE_ARRAY:
+                long[] castedResultD = (long[]) result;
+                long[] copyD = new long[castedResultD.length];
+                System.arraycopy(castedResultD, 0, copyD, 0, castedResultD.length);
+                return copyD;
+            case KType.LONG_ARRAY:
+                long[] castedResultL = (long[]) result;
+                long[] copyL = new long[castedResultL.length];
+                System.arraycopy(castedResultL, 0, copyL, 0, castedResultL.length);
+                return copyL;
+            case KType.INT_ARRAY:
+                int[] castedResultI = (int[]) result;
+                int[] copyI = new int[castedResultI.length];
+                System.arraycopy(castedResultI, 0, copyI, 0, castedResultI.length);
+                return copyI;
+            default:
+                return result;
+        }
     }
 
     @Override

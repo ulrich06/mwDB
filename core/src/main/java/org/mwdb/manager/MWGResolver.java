@@ -340,12 +340,12 @@ public class MWGResolver implements KResolver {
             return null;
         }
 
-        long nodeWorldMapMagic = nodeWorldOrder.magic();
+        long nodeWorldOrderMagic = nodeWorldOrder.magic();
         long nodeSuperTimeTreeMagic = nodeSuperTimeTree.magic();
         long nodeTimeTreeMagic = nodeTimeTree.magic();
 
         //OPTIMIZATION #2: SAME DEPHASING
-        if (allowDephasing && previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == nodeWorldMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == nodeSuperTimeTreeMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == nodeTimeTreeMagic) {
+        if (allowDephasing && (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == nodeWorldOrderMagic) && (previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == nodeSuperTimeTreeMagic) && (previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == nodeTimeTreeMagic)) {
             KStateChunk currentNodeState = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
             this._space.unmarkChunk(nodeWorldOrder);
             this._space.unmarkChunk(nodeSuperTimeTree);
@@ -370,18 +370,30 @@ public class MWGResolver implements KResolver {
         nodeWorldOrder.lock();
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
+        //OPTIMIZATION #1: NO DEPHASING
+        if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == nodeWorld && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] == nodeTime) {
+            KStateChunk currentEntry = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
+            if (currentEntry != null) {
+                this._space.unmarkChunk(globalWorldOrder);
+                this._space.unmarkChunk(nodeWorldOrder);
+                this._space.unmarkChunk(nodeSuperTimeTree);
+                this._space.unmarkChunk(nodeTimeTree);
+                this._space.unmarkChunk(currentEntry);
+                return currentEntry;
+            }
+        }
+
         //REFRESH
         previousResolveds = castedNode._previousResolveds.get();
         if (previousResolveds == null) {
             throw new RuntimeException(deadNodeError);
         }
 
-        nodeWorldMapMagic = nodeWorldOrder.magic();
+        nodeWorldOrderMagic = nodeWorldOrder.magic();
         nodeSuperTimeTreeMagic = nodeSuperTimeTree.magic();
         nodeTimeTreeMagic = nodeTimeTree.magic();
 
         KStateChunk resultStateChunk = null;
-
         boolean hasToCleanSuperTimeTree = false;
         boolean hasToCleanTimeTree = false;
 
@@ -390,10 +402,12 @@ public class MWGResolver implements KResolver {
             long resolvedSuperTime;
             long resolvedTime;
             // OPTIMIZATION #3: SAME DEPHASING THAN BEFORE, DIRECTLY CLONE THE PREVIOUSLY RESOLVED TUPLE
-            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == nodeWorldMapMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == nodeSuperTimeTreeMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == nodeTimeTreeMagic) {
+            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] == nodeWorldOrderMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == nodeSuperTimeTreeMagic && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] == nodeTimeTreeMagic) {
                 resolvedWorld = previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX];
                 resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
                 resolvedTime = previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX];
+                hasToCleanSuperTimeTree = true;
+                hasToCleanTimeTree = true;
             } else {
                 //Common case, we have to traverse World Order and Time chunks
                 resolvedWorld = resolve_world(globalWorldOrder, nodeWorldOrder, nodeTime, nodeWorld);
@@ -428,153 +442,154 @@ public class MWGResolver implements KResolver {
                     hasToCleanSuperTimeTree = true;
                 }
                 //we only unMark timeTree in case of superTime phasing, otherwise we keep the mark (as new lookup mark)
-                if (previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] != resolvedSuperTime) {
+                if (resolvedSuperTime == previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX]) {
                     hasToCleanTimeTree = true;
                 }
             }
+            boolean worldMoved = resolvedWorld != previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX];
+            boolean superTimeTreeMoved = resolvedSuperTime != previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
+            boolean timeTreeMoved = resolvedTime != previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX];
 
-            //if finally we are still in phase
-            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] != resolvedWorld || previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] != resolvedTime) {
+            //so we are dePhase
+            if (allowDephasing) {
                 resultStateChunk = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
-                _space.unmarkChunk(resultStateChunk);
-            } else {
-                //so we are dePhase
-                if (allowDephasing) {
-                    resultStateChunk = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
-                    if (resultStateChunk == null) {
-                        throw new RuntimeException("Simultaneous rePhasing leading to cache miss!!!");
+                if (resultStateChunk == null) {
+                    throw new RuntimeException("Simultaneous rePhasing leading to cache miss!!!");
+                }
+                boolean refreshNodeCache = false;
+                if (worldMoved || timeTreeMoved) {
+                    _space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+                    refreshNodeCache = true;
+                } else {
+                    if (superTimeTreeMoved) {
+                        refreshNodeCache = true;
                     }
-                    if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] != resolvedWorld || previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] != resolvedTime) {
-                        //unMark previous lookup state chunk
-                        _space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
-                        //we keep the method mark
-                    } else {
-                        //remove the method mark
-                        _space.unmarkChunk(resultStateChunk);
-                    }
-                    //we still to update the local state
+                    _space.unmarkChunk(resultStateChunk);
+                }
+                if (refreshNodeCache) {
                     long[] newResolveds = new long[6];
-                    //previously resolved
                     newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = resolvedWorld;
-                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedTime;
-                    newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeId;
-                    //previously magics
-                    newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldMapMagic;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = resolvedTime;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrderMagic;
                     newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTreeMagic;
                     newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTreeMagic;
                     castedNode._previousResolveds.set(newResolveds);
-                } else {
-                    KStateChunk previousNodeState = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
-                    //clone the chunk
-                    resultStateChunk = (KStateChunk) this._space.create(Constants.STATE_CHUNK, nodeWorld, nodeTime, nodeId, null, previousNodeState);
-                    this._space.putAndMark(resultStateChunk);
-                    this._space.declareDirty(resultStateChunk);
-                    //free the method mark
-                    this._space.unmarkChunk(previousNodeState);
-                    //free the previous lookup lock
-                    this._space.unmarkChunk(previousNodeState);
+                }
+            } else {
+                KStateChunk previousNodeState = (KStateChunk) this._space.getAndMark(Constants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
+                //clone the chunk
+                resultStateChunk = (KStateChunk) this._space.create(Constants.STATE_CHUNK, nodeWorld, nodeTime, nodeId, null, previousNodeState);
+                this._space.putAndMark(resultStateChunk);
+                this._space.declareDirty(resultStateChunk);
+                //free the method mark
+                this._space.unmarkChunk(previousNodeState);
+                //free the previous lookup lock
+                this._space.unmarkChunk(previousNodeState);
 
-                    if (resolvedWorld == nodeWorld) {
-                        //manage super tree here
-                        long superTreeSize = nodeSuperTimeTree.size();
-                        long threshold = Constants.SCALE_1 * 2;
-                        if (superTreeSize > threshold) {
-                            threshold = Constants.SCALE_2 * 2;
-                        }
-                        if (superTreeSize > threshold) {
-                            threshold = Constants.SCALE_3 * 2;
-                        }
-                        if (superTreeSize > threshold) {
-                            threshold = Constants.SCALE_4 * 2;
-                        }
-                        nodeTimeTree.insert(nodeTime);
-                        if (nodeTimeTree.size() == threshold) {
-                            final long[] medianPoint = {-1};
-                            //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
-                            nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
-                                @Override
-                                public void elem(long t) {
-                                    medianPoint[0] = t;
-                                }
-                            });
-
-                            KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
-                            rightTree = (KTimeTreeChunk) this._space.putAndMark(rightTree);
-                            //TODO second iterate that can be avoided, however we need the median point to create the right tree
-                            //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
-                            final KTimeTreeChunk finalRightTree = rightTree;
-                            nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
-                                @Override
-                                public void elem(long t) {
-                                    finalRightTree.insert(t);
-                                }
-                            });
-                            nodeSuperTimeTree.insert(medianPoint[0]);
-                            //remove times insert in the right tree
-                            nodeTimeTree.clearAt(medianPoint[0]);
-
-                            //ok ,now manage marks
-                            if (nodeTime < medianPoint[0]) {
-                                _space.unmarkChunk(rightTree);
-                                //let's store the new state if necessary
-                                long[] newResolveds = new long[6];
-                                newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldMapMagic;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTree.magic();
-                                newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
-                                castedNode._previousResolveds.set(newResolveds);
-                            } else {
-                                hasToCleanSuperTimeTree = true;
-
-                                //let's store the new state if necessary
-                                long[] newResolveds = new long[6];
-                                newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = medianPoint[0];
-                                newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldMapMagic;
-                                newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = rightTree.magic();
-                                newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
-                                castedNode._previousResolveds.set(newResolveds);
+                if (resolvedWorld == nodeWorld) {
+                    //manage super tree here
+                    long superTreeSize = nodeSuperTimeTree.size();
+                    long threshold = Constants.SCALE_1 * 2;
+                    if (superTreeSize > threshold) {
+                        threshold = Constants.SCALE_2 * 2;
+                    }
+                    if (superTreeSize > threshold) {
+                        threshold = Constants.SCALE_3 * 2;
+                    }
+                    if (superTreeSize > threshold) {
+                        threshold = Constants.SCALE_4 * 2;
+                    }
+                    nodeTimeTree.insert(nodeTime);
+                    if (nodeTimeTree.size() == threshold) {
+                        final long[] medianPoint = {-1};
+                        //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                        nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
+                            @Override
+                            public void elem(long t) {
+                                medianPoint[0] = t;
                             }
-                        } else {
-                            //update the state cache without superTree modification
+                        });
+
+                        KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
+                        rightTree = (KTimeTreeChunk) this._space.putAndMark(rightTree);
+                        //TODO second iterate that can be avoided, however we need the median point to create the right tree
+                        //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                        final KTimeTreeChunk finalRightTree = rightTree;
+                        //rang iterate from the end of the tree
+                        nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
+                            @Override
+                            public void elem(long t) {
+                                finalRightTree.insert(t);
+                            }
+                        });
+                        nodeSuperTimeTree.insert(medianPoint[0]);
+                        //remove times insert in the right tree
+                        nodeTimeTree.clearAt(medianPoint[0]);
+
+                        //ok ,now manage marks
+                        if (nodeTime < medianPoint[0]) {
+                            _space.unmarkChunk(rightTree);
                             long[] newResolveds = new long[6];
-                            //previously resolved
                             newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
                             newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
                             newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
-                            //previously magics
-                            newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldMapMagic;
-                            newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTreeMagic;
+                            newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrderMagic;
+                            newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTree.magic();
+                            newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
+                            castedNode._previousResolveds.set(newResolveds);
+                        } else {
+                            hasToCleanSuperTimeTree = true;
+
+                            //let's store the new state if necessary
+                            long[] newResolveds = new long[6];
+                            newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
+                            newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = medianPoint[0];
+                            newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
+                            newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrderMagic;
+                            newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = rightTree.magic();
                             newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                             castedNode._previousResolveds.set(newResolveds);
                         }
                     } else {
-                        //create a new node superTimeTree
-                        KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
-                        newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree);
-                        newSuperTimeTree.insert(nodeTime);
-                        //create a new node timeTree
-                        KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
-                        newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree);
-                        newTimeTree.insert(nodeTime);
-                        //insert into node world order
-                        nodeWorldOrder.put(nodeWorld, nodeTime);
-
-                        //let's store the new state if necessary
+                        //update the state cache without superTree modification
                         long[] newResolveds = new long[6];
                         //previously resolved
                         newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
-                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = nodeTime;
+                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
                         newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
                         //previously magics
-                        newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrder.magic();
-                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = newSuperTimeTree.magic();
-                        newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = newTimeTree.magic();
+                        newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrderMagic;
+                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTreeMagic;
+                        newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                         castedNode._previousResolveds.set(newResolveds);
                     }
+                } else {
+
+                    //TODO change by getOrCreate
+
+                    //create a new node superTimeTree
+                    KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
+                    newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree);
+                    newSuperTimeTree.insert(nodeTime);
+                    //create a new node timeTree
+                    KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
+                    newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree);
+                    newTimeTree.insert(nodeTime);
+                    //insert into node world order
+                    nodeWorldOrder.put(nodeWorld, nodeTime);
+
+                    //let's store the new state if necessary
+                    long[] newResolveds = new long[6];
+                    //previously resolved
+                    newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = nodeTime;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = nodeTime;
+                    //previously magics
+                    newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrder.magic();
+                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = newSuperTimeTree.magic();
+                    newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = newTimeTree.magic();
+                    castedNode._previousResolveds.set(newResolveds);
                 }
             }
         } catch (Throwable t) {
