@@ -1,6 +1,7 @@
 package org.mwdb.math.matrix.solver;
 
 import org.mwdb.math.matrix.KMatrix;
+import org.mwdb.math.matrix.KSVDDecompose;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.blas.KBlas;
 import org.mwdb.math.matrix.blas.KBlasTransposeType;
@@ -10,7 +11,7 @@ import org.mwdb.math.matrix.blas.KBlasTransposeType;
  */
 public class PInvSVD {
 
-    private SVD _svd;
+    private KSVDDecompose _svd;
     private KMatrix pinv;
     private KMatrix S;
     private int rank;
@@ -24,8 +25,8 @@ public class PInvSVD {
         return det;
     }
 
-    public PInvSVD(int m, int n, KBlas blas){
-        _svd=new SVD(m,n,blas);
+    public PInvSVD(int m, int n, KSVDDecompose svd){
+        this._svd=svd;
     }
 
     public PInvSVD factor(KMatrix A, boolean invertInPlace){
@@ -64,8 +65,7 @@ public class PInvSVD {
                 if (s < tau)
                     S.set(i,i,0);
                 else {
-                    s=1/s;
-                    S.set(i, i, s);
+                    S.set(i, i, 1/s);
                     det=det*s;
                     rank++;
                 }
@@ -82,7 +82,7 @@ public class PInvSVD {
         return this;
     }
 
-    public SVD getSvd(){
+    public KSVDDecompose getSvd(){
         return _svd;
     }
 

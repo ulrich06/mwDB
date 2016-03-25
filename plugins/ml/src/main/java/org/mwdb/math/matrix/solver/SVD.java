@@ -1,13 +1,14 @@
 package org.mwdb.math.matrix.solver;
 
 import org.mwdb.math.matrix.KMatrix;
+import org.mwdb.math.matrix.KSVDDecompose;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.blas.KBlas;
 
 /**
  * Computes singular value decompositions
  */
-public class SVD {
+public class SVD implements KSVDDecompose {
 
     /**
      * Work array
@@ -112,6 +113,7 @@ public class SVD {
      *          overwritten on return. Pass a copy to avoid this
      * @return The current decomposition
      */
+    @Override
     public SVD factor(KMatrix A, boolean workInPlace) {
         if (A.rows() != m)
             throw new IllegalArgumentException("A.numRows() != m");
@@ -154,6 +156,7 @@ public class SVD {
      *
      * @return Matrix of size m*m
      */
+    @Override
     public KMatrix getU() {
         return U;
     }
@@ -164,6 +167,7 @@ public class SVD {
      *
      * @return Matrix of size n*n
      */
+    @Override
     public KMatrix getVt() {
         return Vt;
     }
@@ -173,10 +177,12 @@ public class SVD {
      *
      * @return Array of size min(m,n)
      */
+    @Override
     public double[] getS() {
         return S;
     }
 
+    @Override
     public KMatrix getSMatrix() {
         Matrix matS = new Matrix(null, m, n);
         for (int i = 0; i < S.length; i++) {

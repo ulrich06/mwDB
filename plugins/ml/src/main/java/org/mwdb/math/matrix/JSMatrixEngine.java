@@ -31,8 +31,9 @@ public class JSMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace) {
-        return new KMatrix[0];
+    public KSVDDecompose decomposeSVD(KMatrix matA, boolean workInPlace) {
+        return null;
     }
+
 
 }

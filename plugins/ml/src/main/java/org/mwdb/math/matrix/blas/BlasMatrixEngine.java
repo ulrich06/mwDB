@@ -2,6 +2,7 @@ package org.mwdb.math.matrix.blas;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
+import org.mwdb.math.matrix.KSVDDecompose;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.solver.LU;
 import org.mwdb.math.matrix.solver.PInvSVD;
@@ -98,7 +99,8 @@ public class BlasMatrixEngine implements KMatrixEngine {
 
     @Override
     public KMatrix pinv(KMatrix mat, boolean invertInPlace) {
-        PInvSVD pinvsvd = new PInvSVD(mat.rows(), mat.columns(), _blas);
+        SVD svd= new SVD(mat.rows(),mat.columns(),_blas);
+        PInvSVD pinvsvd = new PInvSVD(mat.rows(), mat.columns(), svd);
         pinvsvd.factor(mat, invertInPlace);
         return pinvsvd.getPInv();
 
@@ -126,15 +128,10 @@ public class BlasMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace) {
+    public KSVDDecompose decomposeSVD(KMatrix matA, boolean workInPlace) {
         SVD svd = new SVD(matA.rows(), matA.columns(), _blas);
         svd.factor(matA,workInPlace);
-
-        KMatrix[] result = new Matrix[3];
-        result[0] = svd.getU();
-        result[1] = svd.getSMatrix();
-        result[2] = svd.getVt();
-        return result;
+        return svd;
     }
 
 

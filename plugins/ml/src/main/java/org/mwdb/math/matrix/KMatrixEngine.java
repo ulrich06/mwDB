@@ -14,5 +14,5 @@ public interface KMatrixEngine {
 
     KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB);
 
-    KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace);
+    KSVDDecompose decomposeSVD(KMatrix matA, boolean workInPlace);
 }
