@@ -4,6 +4,7 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.math.matrix.Matrix;
 import org.mwdb.task.NoopScheduler;
 
 /**
@@ -11,29 +12,7 @@ import org.mwdb.task.NoopScheduler;
  */
 public class GaussianNodeTest {
 
-    public static boolean compare(double[] a, double[] b, double eps) {
-        if (a == null || b == null) {
-            return false;
-        }
-        for (int i = 0; i < a.length; i++) {
-            if (Math.abs(a[i] - b[i]) > eps) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-    public static boolean compareArray(double[][] a, double[][] b, double eps) {
-        if (a == null || b == null) {
-            return false;
-        }
-        for (int i = 0; i < a.length; i++) {
-            if (!compare(a[i], b[i], eps)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     protected final double[] longleyData = new double[]{
             60323, 83.0, 234289, 2356, 1590, 107608, 1947,
@@ -129,8 +108,8 @@ public class GaussianNodeTest {
                 double[] avgBatch = gaussianNodeBatch.getAvg();
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
-                Assert.assertTrue(compare(avgBatch, ravg, eps));
-                Assert.assertTrue(compareArray(covBatch, rcovData, eps));
+                Assert.assertTrue(Matrix.compare(avgBatch, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covBatch, rcovData, eps));
 
 
                 final double[] avgLive = new double[7];
@@ -155,8 +134,8 @@ public class GaussianNodeTest {
                 });
 
 
-                Assert.assertTrue(compare(avgLive, ravg, eps));
-                Assert.assertTrue(compareArray(covLive, rcovData, eps));
+                Assert.assertTrue(Matrix.compare(avgLive, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
 
 
 

@@ -24,6 +24,30 @@ public class Matrix implements KMatrix {
         }
     }
 
+    public static boolean compare(double[] a, double[] b, double eps) {
+        if (a == null || b == null) {
+            return false;
+        }
+        for (int i = 0; i < a.length; i++) {
+            if (Math.abs(a[i] - b[i]) > eps) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean compareArray(double[][] a, double[][] b, double eps) {
+        if (a == null || b == null) {
+            return false;
+        }
+        for (int i = 0; i < a.length; i++) {
+            if (!compare(a[i], b[i], eps)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     @Override
     public double[] data() {
