@@ -5,6 +5,7 @@ import org.mwdb.KNode;
 import org.mwdb.KType;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.Matrix;
+import org.mwdb.math.matrix.solver.MultivariateNormalDistribution;
 
 /**
  * Created by assaad on 21/03/16.
@@ -16,10 +17,10 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         super(p_rootNode);
     }
 
-    private static final String MIN_KEY = "min";
-    private static final String MAX_KEY = "max";
+    private static final String MIN_KEY = "getMin";
+    private static final String MAX_KEY = "getMax";
     private static final String VALUE_KEY = "value";
-    private static final String AVG_KEY = "avg";
+    private static final String AVG_KEY = "getAvg";
     private static final String COV_KEY = "cov";
 
     private static final String INTERNAL_SUM_KEY = "_sum";
@@ -57,15 +58,15 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
     @Override
     public Object att(String attributeName) {
         if (attributeName.equals(AVG_KEY)) {
-            return avg();
+            return getAvg();
         } else if (attributeName.equals(MIN_KEY)) {
-            return min();
+            return getMin();
         } else if (attributeName.equals(MAX_KEY)) {
-            return max();
+            return getMax();
         } else if (attributeName.equals(MAX_KEY)) {
-            return max();
+            return getMax();
         } else if (attributeName.equals(COV_KEY)) {
-            return getCovariance(avg());
+            return getCovariance(getAvg());
         } else {
             return rootNode().att(attributeName);
         }
@@ -73,6 +74,78 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
 
     public double incWeight(double weight){
         return weight +1;
+    }
+
+
+    @Override
+    public void learnBatch(double[][] values){
+        if (values.length==0){
+            return;
+        }
+        if(values.length==1){
+            learn(values[0]);
+            return;
+        }
+
+        //here values are more than 2
+
+
+        int features = values[0].length;
+
+        //manage total
+        Integer total = getTotal();
+        Double weight = getWeight();
+
+        double[] sum;
+        double[] min;
+        double[] max;
+        double[] sumsquares;
+
+        if(total==null){
+            sum = new double[features];
+            min = new double[features];
+            max = new double[features];
+            sumsquares = new double[features*(features+1)/2];
+        }
+        else{
+            //get everything from saved
+            sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
+            max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
+            sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+        }
+
+        for(int k=0;k<values.length;k++){
+            //Update the values
+            for(int i=0;i<features;i++){
+                if(values[k][i]<min[i]){
+                    min[i]=values[k][i];
+                }
+
+                if(values[k][i]>max[i]){
+                    max[i]=values[k][i];
+                }
+                sum[i]+=values[k][i];
+            }
+
+            int count=0;
+            for(int i=0;i<features;i++){
+                for(int j=i;j<features;j++){
+                    sumsquares[count]+=values[k][i]*values[k][j];
+                    count++;
+                }
+            }
+            total++;
+            weight=incWeight(weight);
+        }
+
+        //Store everything
+        attSet(INTERNAL_TOTAL_KEY, KType.INT,total);
+        attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE,weight);
+        attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY,sum);
+        attSet(INTERNAL_MIN_KEY, KType.DOUBLE_ARRAY,min);
+        attSet(INTERNAL_MAX_KEY, KType.DOUBLE_ARRAY,max);
+        attSet(INTERNAL_SUMSQUARE_KEY, KType.DOUBLE_ARRAY,sumsquares);
     }
 
     @Override
@@ -104,7 +177,7 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
 
             //Upgrade dirac to gaussian
             if(total==1){
-                //Create min, max, sumsquares
+                //Create getMin, getMax, sumsquares
                 sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
                 min = new double[features];
                 max = new double[features];
@@ -161,16 +234,71 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
 
     }
 
+    @Override
+    public int getNumberOfFeatures(){
+        Integer total = getTotal();
+        if (total == null) {
+            return 0;
+        }
+        else {
+            double[] sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            return sum.length;
+        }
+    }
+
+    @Override
+    public double getProbability(double[] featArray, double[] err){
+        double[] res=new double[featArray.length];
+        double[] avg= getAvg();
+        if(avg==null){
+            return 0;
+        }
+        KMatrix cov= getCovarianceMatrix(avg);
+        if(cov==null){
+            cov=new Matrix(null,featArray.length,featArray.length);
+            for (int i=0;i<featArray.length;i++){
+                cov.set(i,i,err[i]*err[i]);
+            }
+        }
+
+        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg,cov);
+        return mnd.density(featArray);
+    }
+
+    @Override
+    public double[] getProbabilityArray(double[][] featArray, double[] err) {
+        double[] res=new double[featArray.length];
+        double[] avg= getAvg();
+        if(avg==null){
+            return null;
+        }
+        KMatrix cov= getCovarianceMatrix(avg);
+        if(cov==null){
+            cov=new Matrix(null,featArray.length,featArray.length);
+            for (int i=0;i<featArray.length;i++){
+                cov.set(i,i,err[i]*err[i]);
+            }
+        }
+        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg,cov);
+
+        for(int i=0;i<res.length;i++){
+            res[i] = mnd.density(featArray[i]);
+        }
+        return res;
+    }
+
+    @Override
     public Integer getTotal(){
         return (Integer) rootNode().att(INTERNAL_TOTAL_KEY);
     }
 
+    @Override
     public Double getWeight(){
         return (Double) rootNode().att(INTERNAL_WEIGHT_KEY);
     }
 
     @Override
-    public double[] avg() {
+    public double[] getAvg() {
         Integer total = getTotal();
         if (total == null) {
             return null;
@@ -249,7 +377,7 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
     }
 
     @Override
-    public double[] min() {
+    public double[] getMin() {
         Integer total = getTotal();
         if (total == null) {
             return null;
@@ -265,7 +393,7 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
     }
 
     @Override
-    public double[] max() {
+    public double[] getMax() {
         Integer total = getTotal();
         if (total == null) {
             return null;

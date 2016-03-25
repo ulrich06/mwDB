@@ -100,7 +100,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
     @Override
     public KMatrix pinv(KMatrix mat, boolean invertInPlace) {
         SVD svd= new SVD(mat.rows(),mat.columns(),_blas);
-        PInvSVD pinvsvd = new PInvSVD(mat.rows(), mat.columns(), svd);
+        PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(mat, invertInPlace);
         return pinvsvd.getPInv();
 

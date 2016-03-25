@@ -6,10 +6,10 @@ import org.mwdb.KType;
 
 public class StatNode extends AbstractMLNode implements KStatNode {
 
-    private static final String MIN_KEY = "min";
-    private static final String MAX_KEY = "max";
+    private static final String MIN_KEY = "getMin";
+    private static final String MAX_KEY = "getMax";
     private static final String VALUE_KEY = "value";
-    private static final String AVG_KEY = "avg";
+    private static final String AVG_KEY = "getAvg";
     
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_TOTAL_KEY = "_total";
@@ -71,12 +71,12 @@ public class StatNode extends AbstractMLNode implements KStatNode {
         } else {
             rootNode().attSet(INTERNAL_SUM_KEY, KType.DOUBLE, value + currentSum);
         }
-        //manage min
+        //manage getMin
         Double currentMin = (Double) rootNode().att(INTERNAL_MIN_KEY);
         if (currentMin == null || value < currentMin) {
             rootNode().attSet(INTERNAL_MIN_KEY, KType.DOUBLE, value);
         }
-        //manage max
+        //manage getMax
         Double currentMax = (Double) rootNode().att(INTERNAL_MAX_KEY);
         if (currentMax == null || value > currentMax) {
             rootNode().attSet(INTERNAL_MAX_KEY, KType.DOUBLE, value);

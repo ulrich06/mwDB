@@ -125,8 +125,8 @@ public interface KBlas {
      *               Specifies options for computing all or part of the matrix U:
      *               = 'A':  all M columns of U and all N rows of V**T are
      *               returned in the arrays U and VT;
-     *               = 'S':  the first min(M,N) columns of U and the first
-     *               min(M,N) rows of V**T are returned in the arrays U
+     *               = 'S':  the first getMin(M,N) columns of U and the first
+     *               getMin(M,N) rows of V**T are returned in the arrays U
      *               and VT;
      *               = 'O':  If M >= N, the first N columns of U are overwritten
      *               on the array A and all rows of V**T are returned in
@@ -138,8 +138,8 @@ public interface KBlas {
      * @param m      The number of rows of the input matrix A.  M >= 0.     *
      * @param n      The number of columns of the input matrix A.  N >= 0.
      * @param data   (input/output) DOUBLE PRECISION array, dimension (LDA,N)
-     * @param lda    The leading dimension of the array A.  LDA >= max(1,M).
-     * @param s      (output) DOUBLE PRECISION array, dimension (min(M,N))
+     * @param lda    The leading dimension of the array A.  LDA >= getMax(1,M).
+     * @param s      (output) DOUBLE PRECISION array, dimension (getMin(M,N))
      *               The singular values of A, sorted so that S(i) >= S(i+1).
      * @param u      (output) DOUBLE PRECISION array, dimension (LDU,UCOL)
      * @param ldu    The leading dimension of the array U.
@@ -147,7 +147,7 @@ public interface KBlas {
      * @param ldvt   The leading dimension of the array VT.
      * @param work   (workspace/output) DOUBLE PRECISION array, dimension (MAX(1,LWORK))
      * @param length The dimension of the array WORK. LWORK >= 1.
-     * @param iwork  (workspace) INTEGER array, dimension (8*min(M,N))
+     * @param iwork  (workspace) INTEGER array, dimension (8*getMin(M,N))
      * @param info   (output) INTEGER
      */
 

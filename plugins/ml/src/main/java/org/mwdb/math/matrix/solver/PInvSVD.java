@@ -25,12 +25,12 @@ public class PInvSVD {
         return det;
     }
 
-    public PInvSVD(int m, int n, KSVDDecompose svd){
-        this._svd=svd;
+    public PInvSVD()
+    {
     }
 
     public PInvSVD factor(KMatrix A, boolean invertInPlace){
-        _svd.factor(A,invertInPlace);
+        _svd = Matrix.defaultEngine().decomposeSVD(A,invertInPlace);
 
         //We get UxSxVt
         KMatrix[] svd= new KMatrix[3];

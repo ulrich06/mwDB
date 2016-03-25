@@ -32,7 +32,7 @@ public class PseudoInverseTest {
 
 
         KMatrix matA= new Matrix(matrix,dim,dim);
-        PInvSVD pinv = new PInvSVD(dim,dim,new SVD(dim,dim,blas));
+        PInvSVD pinv = new PInvSVD();
         pinv.factor(matA,false);
         KMatrix matInv= pinv.getPInv();
         double d1= pinv.getDeterminant();
@@ -63,7 +63,7 @@ public class PseudoInverseTest {
 
 
         KMatrix matA2= new Matrix(matrix2,dim+1,dim+1);
-        PInvSVD pinv2 = new PInvSVD(dim+1,dim+1,new SVD(dim+1,dim+1,blas));
+        PInvSVD pinv2 = new PInvSVD();
         pinv2.factor(matA2,false);
         KMatrix matInv2= pinv2.getPInv();
         double d12= pinv2.getDeterminant();

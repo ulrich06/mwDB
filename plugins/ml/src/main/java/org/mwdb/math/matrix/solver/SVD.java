@@ -175,7 +175,7 @@ public class SVD implements KSVDDecompose {
     /**
      * Returns the singular values (stored in descending order)
      *
-     * @return Array of size min(m,n)
+     * @return Array of size getMin(m,n)
      */
     @Override
     public double[] getS() {

@@ -25,7 +25,7 @@ enum JobSVD {
 
     /**
      * Compute parts of the singular vectors. For an <code>M*N</code> matrix,
-     * this computes <code>min(M,N)</code> singular vectors
+     * this computes <code>getMin(M,N)</code> singular vectors
      */
     Part;
 

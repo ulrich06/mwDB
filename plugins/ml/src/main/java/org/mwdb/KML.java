@@ -1,5 +1,6 @@
 package org.mwdb;
 
+import org.mwdb.ml.GaussianNode;
 import org.mwdb.ml.StatNode;
 import org.mwdb.ml.PolynomialNode;
 
@@ -13,4 +14,6 @@ public class KML {
         return new StatNode(node);
     }
 
+    public static KGaussianNode gaussianNode(KNode node) { return new GaussianNode(node);
+    }
 }
