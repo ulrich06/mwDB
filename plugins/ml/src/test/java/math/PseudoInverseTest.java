@@ -14,7 +14,7 @@ import org.mwdb.math.matrix.solver.SVD;
 /**
  * Created by assaad on 25/03/16.
  */
-public class GaussianTest {
+public class PseudoInverseTest {
     @Test
     public void gaussian(){
 
@@ -28,7 +28,7 @@ public class GaussianTest {
         KMatrix mit=pt.getPInv();
         double d0= pt.getDeterminant();*/
 
-    /*    double[] matrix ={504,360,180,360,360,0,180,0,720};
+        double[] matrix ={504,360,180,360,360,0,180,0,720};
 
 
         KMatrix matA= new Matrix(matrix,dim,dim);
@@ -56,7 +56,7 @@ public class GaussianTest {
         // Compute and store the determinant.
         double covarianceMatrixDeterminant = covMatDec.getDeterminant();
 
-*/
+
 
 
         double[] matrix2 ={504,360,180,0,360,360,0,0,180,0,720,0,0,0,0,0};
@@ -69,7 +69,7 @@ public class GaussianTest {
         double d12= pinv2.getDeterminant();
 
 
-        double[][]covariance2 = new double[dim+1][dim+1];
+     /*   double[][]covariance2 = new double[dim+1][dim+1];
         for(int i=0; i<dim+1;i++){
             for (int j=0;j<dim+1;j++){
                 covariance2[i][j]=matA2.get(i,j);
@@ -86,7 +86,7 @@ public class GaussianTest {
         // Compute and store the determinant.
         double covarianceMatrixDeterminant2 = covMatDec2.getDeterminant();
 
-
+*/
         int x=0;
 
 
