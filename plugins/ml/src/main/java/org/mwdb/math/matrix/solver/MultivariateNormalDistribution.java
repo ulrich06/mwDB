@@ -29,12 +29,16 @@ public class MultivariateNormalDistribution {
     }
 
     private double getExponentTerm(double[] features) {
-        Matrix ft = new Matrix(features,1,features.length);
-        Matrix ftt = new Matrix(features,features.length,1);
+        double[] f= features.clone();
 
         for(int i=0;i<features.length;i++){
-            ft.set(0,i,features[i]-avg[i]);
+          f[i]=f[i]-avg[i];
         }
+
+        Matrix ft = new Matrix(f,1,f.length);
+        Matrix ftt = new Matrix(f,f.length,1);
+
+
 
         KMatrix res= Matrix.multiply(ft,inv);
         KMatrix res2= Matrix.multiply(res,ftt);

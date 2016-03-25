@@ -247,6 +247,42 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     }
 
     @Override
+    public double[] getSum(){
+        Integer total = getTotal();
+        if (total == null) {
+            return null;
+        }
+        else  {
+            return (double[]) rootNode().att(INTERNAL_SUM_KEY);
+        }
+    }
+
+    @Override
+    public double[] getSumSquares(){
+        Integer total = getTotal();
+        if (total == null) {
+            return null;
+        }
+        if(total ==1)  {
+            double[] sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+
+            int features=sum.length;
+            double[] sumsquares = new double[features * (features + 1) / 2];
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                for (int j = i; j < features; j++) {
+                    sumsquares[count] = sum[i] * sum[j];
+                    count++;
+                }
+            }
+            return sumsquares;
+        }
+        else {
+            return  (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+        }
+    }
+
+    @Override
     public double getProbability(double[] featArray, double[] err) {
         double[] res = new double[featArray.length];
         double[] avg = getAvg();
@@ -317,6 +353,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     @Override
     public double[][] getCovariance(double[] avg) {
+        if(avg==null){
+            return null;
+        }
         int features = avg.length;
 
         Integer total = getTotal();

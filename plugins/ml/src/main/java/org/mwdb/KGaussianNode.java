@@ -10,6 +10,10 @@ public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
     int getNumberOfFeatures();
 
+    double[] getSum();
+
+    double[] getSumSquares();
+
     double getProbability(double[] featArray, double[] err);
 
     double[] getProbabilityArray(double[][] featArray, double[] err);

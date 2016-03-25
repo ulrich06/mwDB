@@ -1,8 +1,10 @@
 package ml;
 
+import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.math.matrix.Matrix;
 import org.mwdb.task.NoopScheduler;
 
 /**
@@ -10,23 +12,7 @@ import org.mwdb.task.NoopScheduler;
  */
 public class GaussianNodeTest {
 
-    public static boolean compare(double[] a, double[] b, double eps) {
-        for (int i = 0; i < a.length; i++) {
-            if (Math.abs(a[i] - b[i]) > eps) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-    public static boolean compareArray(double[][] a, double[][] b, double eps) {
-        for (int i = 0; i < a.length; i++) {
-            if (!compare(a[i], b[i], eps)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     protected final double[] longleyData = new double[]{
             60323, 83.0, 234289, 2356, 1590, 107608, 1947,
@@ -51,6 +37,10 @@ public class GaussianNodeTest {
             65317, 101.68125, 387698.4375, 3193.3125, 2606.6875, 117424, 1954.5
     };
 
+    protected final double[] testVector = new double[]{
+            65317, 101.68125, 387698.4375, 3193.3125, 2606.6875, 117424, 1954.5
+    };
+
     protected final double[] rData = new double[]{
             12333921.73333333246, 3.679666000000000e+04, 343330206.333333313,
             1649102.666666666744, 1117681.066666666651, 23461965.733333334, 16240.93333333333248,
@@ -69,6 +59,8 @@ public class GaussianNodeTest {
     };
 
 
+
+
     @Test
     public void test() {
         KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
@@ -84,6 +76,7 @@ public class GaussianNodeTest {
 
                 double[][] train = new double[16][7];
 
+                int time = 0;
                 int k = 0;
                 for (int i = 0; i < 16; i++) {
                     for (int j = 0; j < 7; j++) {
@@ -92,12 +85,13 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(0, k, new KCallback<KGaussianNode>() {
+                    gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
                         @Override
                         public void on(KGaussianNode result) {
                             result.learn(trains);
                         }
                     });
+                    time++;
                 }
 
                 double[][] rcovData = new double[7][7];
@@ -114,14 +108,35 @@ public class GaussianNodeTest {
                 double[] avgBatch = gaussianNodeBatch.getAvg();
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
-                Assert.assertTrue(compare(avgBatch, ravg, eps));
-                Assert.assertTrue(compareArray(covBatch, rcovData, eps));
+                Assert.assertTrue(Matrix.compare(avgBatch, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covBatch, rcovData, eps));
 
-                double[] avgLive = gaussianNodeLive.getAvg();
-                double[][] covLive = gaussianNodeLive.getCovariance(avgLive);
 
-                Assert.assertTrue(compare(avgLive, ravg, eps));
-                Assert.assertTrue(compareArray(covLive, rcovData, eps));
+                final double[] avgLive = new double[7];
+                final double[][] covLive = new double[7][7];
+
+
+                gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
+                    @Override
+                    public void on(KGaussianNode result) {
+                        double[] a = result.getAvg();
+                        double[][] c = result.getCovariance(a);
+                        if (c != null) {
+                            for (int i = 0; i < a.length; i++) {
+                                avgLive[i] = a[i];
+                                for (int j = 0; j < a.length; j++) {
+                                    covLive[i][j] = c[i][j];
+                                }
+                            }
+                        }
+
+                    }
+                });
+
+
+                Assert.assertTrue(Matrix.compare(avgLive, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
+
 
 
                 gaussianNodeBatch.free();
