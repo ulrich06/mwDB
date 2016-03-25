@@ -11,6 +11,9 @@ import org.mwdb.task.NoopScheduler;
 public class GaussianNodeTest {
 
     public static boolean compare(double[] a, double[] b, double eps) {
+        if(a==null||b==null){
+            return false;
+        }
         for (int i = 0; i < a.length; i++) {
             if (Math.abs(a[i] - b[i]) > eps) {
                 return false;
@@ -20,6 +23,9 @@ public class GaussianNodeTest {
     }
 
     public static boolean compareArray(double[][] a, double[][] b, double eps) {
+        if(a==null||b==null){
+            return false;
+        }
         for (int i = 0; i < a.length; i++) {
             if (!compare(a[i], b[i], eps)) {
                 return false;
@@ -84,6 +90,7 @@ public class GaussianNodeTest {
 
                 double[][] train = new double[16][7];
 
+                int time = 0;
                 int k = 0;
                 for (int i = 0; i < 16; i++) {
                     for (int j = 0; j < 7; j++) {
@@ -92,12 +99,13 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(0, k, new KCallback<KGaussianNode>() {
+                    gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
                         @Override
                         public void on(KGaussianNode result) {
                             result.learn(trains);
                         }
                     });
+                    time++;
                 }
 
                 double[][] rcovData = new double[7][7];
@@ -117,8 +125,27 @@ public class GaussianNodeTest {
                 Assert.assertTrue(compare(avgBatch, ravg, eps));
                 Assert.assertTrue(compareArray(covBatch, rcovData, eps));
 
-                double[] avgLive = gaussianNodeLive.getAvg();
-                double[][] covLive = gaussianNodeLive.getCovariance(avgLive);
+
+                final double[] avgLive = new double[7];
+                final double[][] covLive = new double[7][7];
+
+                gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
+                    @Override
+                    public void on(KGaussianNode result) {
+                        double[] a = result.getAvg();
+                        double[][] c = result.getCovariance(a);
+
+                        if(c!=null) {
+                            for (int i = 0; i < a.length; i++) {
+                                avgLive[i] = a[i];
+                                for (int j = 0; j < a.length; j++) {
+                                    covLive[i][j] = c[i][j];
+                                }
+                            }
+                        }
+
+                    }
+                });
 
                 Assert.assertTrue(compare(avgLive, ravg, eps));
                 Assert.assertTrue(compareArray(covLive, rcovData, eps));

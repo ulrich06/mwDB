@@ -317,6 +317,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     @Override
     public double[][] getCovariance(double[] avg) {
+        if(avg==null){
+            return null;
+        }
         int features = avg.length;
 
         Integer total = getTotal();
