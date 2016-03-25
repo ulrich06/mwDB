@@ -28,7 +28,7 @@ public class GaussianTest {
         KMatrix mit=pt.getPInv();
         double d0= pt.getDeterminant();*/
 
-        double[] matrix ={504,360,180,360,360,0,180,0,720};
+    /*    double[] matrix ={504,360,180,360,360,0,180,0,720};
 
 
         KMatrix matA= new Matrix(matrix,dim,dim);
@@ -36,6 +36,7 @@ public class GaussianTest {
         pinv.factor(matA,false);
         KMatrix matInv= pinv.getPInv();
         double d1= pinv.getDeterminant();
+
 
 
         double[][]covariance = new double[dim][dim];
@@ -54,6 +55,37 @@ public class GaussianTest {
         RealMatrix covarianceMatrixInverse = covMatDec.getSolver().getInverse();
         // Compute and store the determinant.
         double covarianceMatrixDeterminant = covMatDec.getDeterminant();
+
+*/
+
+
+        double[] matrix2 ={504,360,180,0,360,360,0,0,180,0,720,0,0,0,0,0};
+
+
+        KMatrix matA2= new Matrix(matrix2,dim+1,dim+1);
+        PInvSVD pinv2 = new PInvSVD(dim+1,dim+1,new SVD(dim+1,dim+1,blas));
+        pinv2.factor(matA2,false);
+        KMatrix matInv2= pinv2.getPInv();
+        double d12= pinv2.getDeterminant();
+
+
+        double[][]covariance2 = new double[dim+1][dim+1];
+        for(int i=0; i<dim+1;i++){
+            for (int j=0;j<dim+1;j++){
+                covariance2[i][j]=matA2.get(i,j);
+            }
+        }
+
+        Array2DRowRealMatrix covarianceMatrix2 = new Array2DRowRealMatrix(covariance2);
+
+        // Covariance matrix eigen decomposition.
+        final EigenDecomposition covMatDec2 = new EigenDecomposition(covarianceMatrix2);
+
+        // Compute and store the inverse.
+        RealMatrix covarianceMatrixInverse2 = covMatDec2.getSolver().getInverse();
+        // Compute and store the determinant.
+        double covarianceMatrixDeterminant2 = covMatDec2.getDeterminant();
+
 
         int x=0;
 
