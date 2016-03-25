@@ -223,10 +223,11 @@ public class MatrixTest {
         int[] dimA = {m, m};
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, n, 0, 100);
+        //KMatrix matA = Matrix.random(m, n, 0, 100);
 
-     //   double[] dataA={4,3,3,2};
-      //  KMatrix matA= new Matrix(dataA,m,n);
+        //double[] dataA={4,3,3,2};
+        double[] dataA={4,3,6,3,2,4};
+        KMatrix matA= new Matrix(dataA,m,n);
 
         KMatrix res = null;
 
@@ -240,8 +241,8 @@ public class MatrixTest {
 
         KMatrix id = Matrix.multiply(res, matA);
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < m; j++) {
+        for (int i = 0; i < id.rows(); i++) {
+            for (int j = 0; j < id.columns(); j++) {
                 double x;
                 if (i == j) {
                     x = 1;

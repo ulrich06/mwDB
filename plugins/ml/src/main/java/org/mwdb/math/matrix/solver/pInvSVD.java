@@ -12,7 +12,17 @@ public class PInvSVD {
 
     private SVD _svd;
     private KMatrix pinv;
-    private double[] S;
+    private KMatrix S;
+    private int rank;
+    private double det;
+
+    public int getRank(){
+        return rank;
+    }
+
+    public double getDeterminant(){
+        return det;
+    }
 
     public PInvSVD(int m, int n, KBlas blas){
         _svd=new SVD(m,n,blas);
@@ -32,48 +42,43 @@ public class PInvSVD {
         //  KMatrix t2= Matrix.multiply(t1,svd[2]);
 
 
-        KMatrix V=Matrix.transpose(_svd.getVt());
+        KMatrix V=_svd.getVt();
 
-        S= _svd.getS().clone();
+        S= _svd.getSMatrix().clone();
 
         // copy pasted from EJML
         double maxSingular = 0;
-        for( int i = 0; i < S.length; i++ ) {
-            if( S[i] > maxSingular )
-                maxSingular = S[i];
+        int dim=Math.min(S.columns(),S.rows());
+        for( int i = 0; i < dim; i++ ) {
+            if( S.get(i,i) > maxSingular )
+                maxSingular = S.get(i,i);
         }
         double tau = Math.pow(2,-52)*Math.max(A.columns(),A.rows())*maxSingular;
 
+        rank=0;
+        det=1;
         // computer the pseudo inverse of A
         if( maxSingular != 0.0 ) {
-            for (int i = 0; i < S.length; i++) {
-                double s = S[i];
+            for (int i = 0; i < dim; i++) {
+                double s = S.get(i,i);
                 if (s < tau)
-                    S[i] = 0;
-                else
-                    S[i] = 1.0 / S[i];
+                    S.set(i,i,0);
+                else {
+                    s=1/s;
+                    S.set(i, i, s);
+                    det=det*s;
+                    rank++;
+                }
             }
         }
 
         // V*W
-        double Sj;
-        for(int j=0;j<V.columns();j++){
-            int index=j*V.rows();
-            if(j<S.length){
-                Sj=S[j];
-            }
-            else {
-                Sj=0;
-            }
-            for(int i=0;i<V.rows();i++){
-                V.setAtIndex(index,V.getAtIndex(index)*Sj);
-                index++;
-            }
-        }
+        KMatrix temp = Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.TRANSPOSE,1,V,KBlasTransposeType.TRANSPOSE,1,S);
+
 
         //V*W*Ut
 
-        pinv= Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE,1,V,KBlasTransposeType.TRANSPOSE,1,_svd.getU());
+        pinv= Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE,1,temp,KBlasTransposeType.TRANSPOSE,1,_svd.getU());
         return this;
     }
 
@@ -81,7 +86,7 @@ public class PInvSVD {
         return _svd;
     }
 
-    public double[] getInvDeterminant(){
+    public KMatrix getInvDeterminant(){
         return S;
     }
 
