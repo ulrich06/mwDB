@@ -106,23 +106,13 @@ public class SVD {
     }
 
     /**
-     * Convenience method for computing a full SVD
-     *
-     * @param A Matrix to decompose, not modified
-     * @return Newly allocated factorization
-     */
-    public static SVD factorize(Matrix A, KBlas blas) {
-        return new SVD(A.rows(), A.columns(), blas).factor(A.clone());
-    }
-
-    /**
      * Computes an SVD
      *
      * @param A Matrix to decompose. Size must conform, and it will be
      *          overwritten on return. Pass a copy to avoid this
      * @return The current decomposition
      */
-    public SVD factor(KMatrix A) {
+    public SVD factor(KMatrix A, boolean workInPlace) {
         if (A.rows() != m)
             throw new IllegalArgumentException("A.numRows() != m");
         else if (A.columns() != n)
@@ -130,10 +120,18 @@ public class SVD {
 
         int[] info = new int[1];
         info[0] = 0;
-        _blas.dgesdd(job.netlib(), m, n, A.data(),
-                Math.max(1, m), S, vectors ? U.data() : new double[0],
-                Math.max(1, m), vectors ? Vt.data() : new double[0],
-                Math.max(1, n), work, work.length, iwork, info);
+        if(workInPlace) {
+            _blas.dgesdd(job.netlib(), m, n, A.data(),
+                    Math.max(1, m), S, vectors ? U.data() : new double[0],
+                    Math.max(1, m), vectors ? Vt.data() : new double[0],
+                    Math.max(1, n), work, work.length, iwork, info);
+        }
+        else {
+            _blas.dgesdd(job.netlib(), m, n, A.data().clone(),
+                    Math.max(1, m), S, vectors ? U.data() : new double[0],
+                    Math.max(1, m), vectors ? Vt.data() : new double[0],
+                    Math.max(1, n), work, work.length, iwork, info);
+        }
 
         if (info[0] > 0)
             throw new RuntimeException("NotConvergedException.Reason.Iterations");

@@ -4,6 +4,7 @@ import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.solver.LU;
+import org.mwdb.math.matrix.solver.PInvSVD;
 import org.mwdb.math.matrix.solver.QR;
 import org.mwdb.math.matrix.solver.SVD;
 
@@ -96,6 +97,14 @@ public class BlasMatrixEngine implements KMatrixEngine {
     }
 
     @Override
+    public KMatrix pinv(KMatrix mat, boolean invertInPlace) {
+        PInvSVD pinvsvd = new PInvSVD(mat.rows(), mat.columns(), _blas);
+        pinvsvd.factor(mat, invertInPlace);
+        return pinvsvd.getPInv();
+
+    }
+
+    @Override
     public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
         if (workInPlace) {
             QR solver = QR.factorize(matA, true, _blas);
@@ -119,11 +128,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
     @Override
     public KMatrix[] decomposeSVD(KMatrix matA, boolean workInPlace) {
         SVD svd = new SVD(matA.rows(), matA.columns(), _blas);
-        if (workInPlace) {
-            svd.factor(matA);
-        } else {
-            svd.factor(matA.clone());
-        }
+        svd.factor(matA,workInPlace);
 
         KMatrix[] result = new Matrix[3];
         result[0] = svd.getU();

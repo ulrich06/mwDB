@@ -17,6 +17,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
      */
     private final int _maxEntries;
     private final int _saveBatchSize;
+    // TODO here I think the AtomicInteger is needed -> ok
     private final AtomicInteger _elementCount;
     private final KStack _lru;
     private KGraph _graph;

@@ -17,7 +17,7 @@ import org.mwdb.math.matrix.solver.SVD;
  */
 public class MatrixTest {
 
-    private String blas = "F2JBlas";
+    private String blas = "Netlib";
 
     public MatrixTest() {
         BlasMatrixEngine be = (BlasMatrixEngine) Matrix.defaultEngine();
@@ -42,6 +42,7 @@ public class MatrixTest {
         return matC;
 
     }
+
 
 
     @Test
@@ -196,7 +197,7 @@ public class MatrixTest {
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
-        svd.factor(matA.clone());
+        svd.factor(matA,false);
         timeend = System.currentTimeMillis();
         System.out.println(blas + " SVD Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
@@ -213,6 +214,45 @@ public class MatrixTest {
                 Assert.assertTrue(Math.abs(res.get(i, j) - matA.get(i, j)) < eps);
             }
         }
+    }
+
+    @Test
+    public void MatrixPseudoInv(){
+        int m = 3;
+        int n= 2;
+        int[] dimA = {m, m};
+        double eps = 1e-7;
+
+        //KMatrix matA = Matrix.random(m, n, 0, 100);
+
+        //double[] dataA={4,3,3,2};
+        double[] dataA={4,3,6,3,2,4};
+        KMatrix matA= new Matrix(dataA,m,n);
+
+        KMatrix res = null;
+
+        long timestart, timeend;
+        // SimpleMatrix resEjml =new SimpleMatrix(1,1);
+
+        timestart = System.currentTimeMillis();
+            res = Matrix.pinv(matA, false);
+        timeend = System.currentTimeMillis();
+        System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000 ) + " s");
+
+        KMatrix id = Matrix.multiply(res, matA);
+
+        for (int i = 0; i < id.rows(); i++) {
+            for (int j = 0; j < id.columns(); j++) {
+                double x;
+                if (i == j) {
+                    x = 1;
+                } else {
+                    x = 0;
+                }
+                Assert.assertTrue(Math.abs(id.get(i, j) - x) < eps);
+            }
+        }
+
     }
 
 }

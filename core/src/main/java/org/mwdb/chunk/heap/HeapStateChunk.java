@@ -25,8 +25,10 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     /**
      * Dirty management
      */
+    // TODO here I think we need the AtomicLong -> ok
     private final AtomicLong _flags;
 
+    // TODO here I think we need the AtomicInteger -> ok
     private final AtomicInteger _counter;
 
     private final KChunkListener _listener;
@@ -34,6 +36,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     /**
      * Internal management
      */
+    // TODO only modified in internal_set which is synchronized -> normal ref is enough
     private final AtomicReference<InternalState> state;
 
     private boolean inLoadMode;

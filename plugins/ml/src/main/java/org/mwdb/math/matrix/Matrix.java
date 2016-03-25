@@ -123,6 +123,8 @@ public class Matrix implements KMatrix {
 
     }
 
+
+
     /**
      * Matrix engine
      */
@@ -147,6 +149,11 @@ public class Matrix implements KMatrix {
     public static KMatrix invert(KMatrix mat, boolean invertInPlace) {
         return _defaultEngine.invert(mat, invertInPlace);
     }
+
+    public static KMatrix pinv(KMatrix mat, boolean invertInPlace) {
+        return _defaultEngine.pinv(mat, invertInPlace);
+    }
+
 
     public static int leadingDimension(KMatrix matA) {
         return Math.max(matA.columns(), matA.rows());
