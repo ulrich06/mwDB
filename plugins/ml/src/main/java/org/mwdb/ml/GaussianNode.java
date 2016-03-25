@@ -11,7 +11,7 @@ import org.mwdb.math.matrix.solver.MultivariateNormalDistribution;
 /**
  * Created by assaad on 21/03/16.
  */
-public class GaussianNode extends AbstractMLNode implements KGaussianNode {
+public class GaussianNode extends AbstractMLNode<GaussianNode> implements KGaussianNode {
 
 
     public GaussianNode(KNode p_rootNode) {
@@ -73,17 +73,17 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         }
     }
 
-    public double incWeight(double weight){
-        return weight +1;
+    public double incWeight(double weight) {
+        return weight + 1;
     }
 
 
     @Override
-    public void learnBatch(double[][] values){
-        if (values.length==0){
+    public void learnBatch(double[][] values) {
+        if (values.length == 0) {
             return;
         }
-        if(values.length==1){
+        if (values.length == 1) {
             learn(values[0]);
             return;
         }
@@ -102,15 +102,14 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         double[] max;
         double[] sumsquares;
 
-        if(total==null){
-            total=0;
-            weight=0.0;
+        if (total == null) {
+            total = 0;
+            weight = 0.0;
             sum = new double[features];
             min = new double[features];
             max = new double[features];
-            sumsquares = new double[features*(features+1)/2];
-        }
-        else{
+            sumsquares = new double[features * (features + 1) / 2];
+        } else {
             //get everything from saved
             sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
             min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
@@ -118,37 +117,37 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
             sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
         }
 
-        for(int k=0;k<values.length;k++){
+        for (int k = 0; k < values.length; k++) {
             //Update the values
-            for(int i=0;i<features;i++){
-                if(values[k][i]<min[i]){
-                    min[i]=values[k][i];
+            for (int i = 0; i < features; i++) {
+                if (values[k][i] < min[i]) {
+                    min[i] = values[k][i];
                 }
 
-                if(values[k][i]>max[i]){
-                    max[i]=values[k][i];
+                if (values[k][i] > max[i]) {
+                    max[i] = values[k][i];
                 }
-                sum[i]+=values[k][i];
+                sum[i] += values[k][i];
             }
 
-            int count=0;
-            for(int i=0;i<features;i++){
-                for(int j=i;j<features;j++){
-                    sumsquares[count]+=values[k][i]*values[k][j];
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                for (int j = i; j < features; j++) {
+                    sumsquares[count] += values[k][i] * values[k][j];
                     count++;
                 }
             }
             total++;
-            weight=incWeight(weight);
+            weight = incWeight(weight);
         }
 
         //Store everything
-        attSet(INTERNAL_TOTAL_KEY, KType.INT,total);
-        attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE,weight);
-        attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY,sum);
-        attSet(INTERNAL_MIN_KEY, KType.DOUBLE_ARRAY,min);
-        attSet(INTERNAL_MAX_KEY, KType.DOUBLE_ARRAY,max);
-        attSet(INTERNAL_SUMSQUARE_KEY, KType.DOUBLE_ARRAY,sumsquares);
+        attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
+        attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE, weight);
+        attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
+        attSet(INTERNAL_MIN_KEY, KType.DOUBLE_ARRAY, min);
+        attSet(INTERNAL_MAX_KEY, KType.DOUBLE_ARRAY, max);
+        attSet(INTERNAL_SUMSQUARE_KEY, KType.DOUBLE_ARRAY, sumsquares);
     }
 
     @Override
@@ -163,23 +162,22 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         if (total == null) {
             double[] sum = new double[features];
             System.arraycopy(values, 0, sum, 0, features);
-            total=1;
-            weight=incWeight(0);
+            total = 1;
+            weight = incWeight(0);
 
             //set total, weight, sum, return
-            attSet(INTERNAL_TOTAL_KEY, KType.INT,total);
-            attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE,weight);
-            attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY,sum);
+            attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
+            attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE, weight);
+            attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
 
-        }
-        else {
+        } else {
             double[] sum;
             double[] min;
             double[] max;
             double[] sumsquares;
 
             //Upgrade dirac to gaussian
-            if(total==1){
+            if (total == 1) {
                 //Create getMin, getMax, sumsquares
                 sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
                 min = new double[features];
@@ -187,11 +185,11 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
                 System.arraycopy(sum, 0, min, 0, features);
                 System.arraycopy(sum, 0, max, 0, features);
 
-                sumsquares = new double[features*(features+1)/2];
-                int count=0;
-                for(int i=0;i<features;i++){
-                    for(int j=i;j<features;j++){
-                        sumsquares[count]=sum[i]*sum[j];
+                sumsquares = new double[features * (features + 1) / 2];
+                int count = 0;
+                for (int i = 0; i < features; i++) {
+                    for (int j = i; j < features; j++) {
+                        sumsquares[count] = sum[i] * sum[j];
                         count++;
                     }
                 }
@@ -205,98 +203,97 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
             }
 
             //Update the values
-            for(int i=0;i<features;i++){
-                if(values[i]<min[i]){
-                    min[i]=values[i];
+            for (int i = 0; i < features; i++) {
+                if (values[i] < min[i]) {
+                    min[i] = values[i];
                 }
 
-                if(values[i]>max[i]){
-                    max[i]=values[i];
+                if (values[i] > max[i]) {
+                    max[i] = values[i];
                 }
-                sum[i]+=values[i];
+                sum[i] += values[i];
             }
 
-            int count=0;
-            for(int i=0;i<features;i++){
-                for(int j=i;j<features;j++){
-                    sumsquares[count]+=values[i]*values[j];
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                for (int j = i; j < features; j++) {
+                    sumsquares[count] += values[i] * values[j];
                     count++;
                 }
             }
             total++;
-            weight=incWeight(weight);
+            weight = incWeight(weight);
 
             //Store everything
-            attSet(INTERNAL_TOTAL_KEY, KType.INT,total);
-            attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE,weight);
-            attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY,sum);
-            attSet(INTERNAL_MIN_KEY, KType.DOUBLE_ARRAY,min);
-            attSet(INTERNAL_MAX_KEY, KType.DOUBLE_ARRAY,max);
-            attSet(INTERNAL_SUMSQUARE_KEY, KType.DOUBLE_ARRAY,sumsquares);
+            attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
+            attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE, weight);
+            attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
+            attSet(INTERNAL_MIN_KEY, KType.DOUBLE_ARRAY, min);
+            attSet(INTERNAL_MAX_KEY, KType.DOUBLE_ARRAY, max);
+            attSet(INTERNAL_SUMSQUARE_KEY, KType.DOUBLE_ARRAY, sumsquares);
         }
 
     }
 
     @Override
-    public int getNumberOfFeatures(){
+    public int getNumberOfFeatures() {
         Integer total = getTotal();
         if (total == null) {
             return 0;
-        }
-        else {
+        } else {
             double[] sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
             return sum.length;
         }
     }
 
     @Override
-    public double getProbability(double[] featArray, double[] err){
-        double[] res=new double[featArray.length];
-        double[] avg= getAvg();
-        if(avg==null){
+    public double getProbability(double[] featArray, double[] err) {
+        double[] res = new double[featArray.length];
+        double[] avg = getAvg();
+        if (avg == null) {
             return 0;
         }
-        KMatrix cov= getCovarianceMatrix(avg);
-        if(cov==null){
-            cov=new Matrix(null,featArray.length,featArray.length);
-            for (int i=0;i<featArray.length;i++){
-                cov.set(i,i,err[i]*err[i]);
+        KMatrix cov = getCovarianceMatrix(avg);
+        if (cov == null) {
+            cov = new Matrix(null, featArray.length, featArray.length);
+            for (int i = 0; i < featArray.length; i++) {
+                cov.set(i, i, err[i] * err[i]);
             }
         }
 
-        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg,cov);
+        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
         return mnd.density(featArray);
     }
 
     @Override
     public double[] getProbabilityArray(double[][] featArray, double[] err) {
-        double[] res=new double[featArray.length];
-        double[] avg= getAvg();
-        if(avg==null){
+        double[] res = new double[featArray.length];
+        double[] avg = getAvg();
+        if (avg == null) {
             return null;
         }
-        KMatrix cov= getCovarianceMatrix(avg);
-        if(cov==null){
-            cov=new Matrix(null,featArray.length,featArray.length);
-            for (int i=0;i<featArray.length;i++){
-                cov.set(i,i,err[i]*err[i]);
+        KMatrix cov = getCovarianceMatrix(avg);
+        if (cov == null) {
+            cov = new Matrix(null, featArray.length, featArray.length);
+            for (int i = 0; i < featArray.length; i++) {
+                cov.set(i, i, err[i] * err[i]);
             }
         }
-        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg,cov);
+        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
 
-        for(int i=0;i<res.length;i++){
+        for (int i = 0; i < res.length; i++) {
             res[i] = mnd.density(featArray[i]);
         }
         return res;
     }
 
     @Override
-    public Integer getTotal(){
+    public Integer getTotal() {
         return (Integer) rootNode().att(INTERNAL_TOTAL_KEY);
     }
 
     @Override
-    public Double getWeight(){
+    public Double getWeight() {
         return (Double) rootNode().att(INTERNAL_WEIGHT_KEY);
     }
 
@@ -306,13 +303,12 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         if (total == null) {
             return null;
         }
-        if(total==1){
+        if (total == 1) {
             return (double[]) rootNode().att(INTERNAL_SUM_KEY);
-        }
-        else {
+        } else {
             double[] avg = (double[]) rootNode().att(INTERNAL_SUM_KEY);
             for (int i = 0; i < avg.length; i++) {
-                avg[i] = avg[i]/total;
+                avg[i] = avg[i] / total;
             }
             return avg;
         }
@@ -321,60 +317,58 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
 
     @Override
     public double[][] getCovariance(double[] avg) {
-        int features=avg.length;
+        int features = avg.length;
 
         Integer total = getTotal();
         if (total == null) {
             return null;
         }
-        if(total>1){
+        if (total > 1) {
             double[][] covariances = new double[features][features];
             double[] sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
 
-            double correction=total;
-            correction=correction/(total-1);
+            double correction = total;
+            correction = correction / (total - 1);
 
-            int count=0;
+            int count = 0;
             for (int i = 0; i < features; i++) {
                 for (int j = i; j < features; j++) {
                     covariances[i][j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
-                    covariances[j][i]=covariances[i][j];
+                    covariances[j][i] = covariances[i][j];
                     count++;
                 }
             }
             return covariances;
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     @Override
     public KMatrix getCovarianceMatrix(double[] avg) {
-        int features=avg.length;
+        int features = avg.length;
 
         Integer total = getTotal();
         if (total == null) {
             return null;
         }
-        if(total>1){
-            double[] covariances = new double[features*features];
+        if (total > 1) {
+            double[] covariances = new double[features * features];
             double[] sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
 
-            double correction=total;
-            correction=correction/(total-1);
+            double correction = total;
+            correction = correction / (total - 1);
 
-            int count=0;
+            int count = 0;
             for (int i = 0; i < features; i++) {
                 for (int j = i; j < features; j++) {
-                    covariances[i*features+j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
-                    covariances[j*features+i]=covariances[i*features+j];
+                    covariances[i * features + j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
+                    covariances[j * features + i] = covariances[i * features + j];
                     count++;
                 }
             }
-            return new Matrix(covariances,features,features);
-        }
-        else {
+            return new Matrix(covariances, features, features);
+        } else {
             return null;
         }
     }
@@ -385,11 +379,10 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         if (total == null) {
             return null;
         }
-        if(total==1){
+        if (total == 1) {
             double[] min = (double[]) rootNode().att(INTERNAL_SUM_KEY);
             return min;
-        }
-        else {
+        } else {
             double[] min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
             return min;
         }
@@ -401,11 +394,10 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         if (total == null) {
             return null;
         }
-        if(total==1){
+        if (total == 1) {
             double[] max = (double[]) rootNode().att(INTERNAL_SUM_KEY);
             return max;
-        }
-        else {
+        } else {
             double[] max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
             return max;
         }
@@ -421,8 +413,4 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
         });
     }
 
-    @Override
-    public void jump(long world, long time, KCallback callback) {
-
-    }
 }

@@ -2,7 +2,7 @@ package org.mwdb;
 
 import org.mwdb.math.matrix.KMatrix;
 
-public interface KGaussianNode extends KNode {
+public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
     void learnBatch(double[][] values);
 

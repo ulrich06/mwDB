@@ -14,6 +14,8 @@ public class KML {
         return new StatNode(node);
     }
 
-    public static KGaussianNode gaussianNode(KNode node) { return new GaussianNode(node);
+    public static KGaussianNode gaussianNode(KNode node) {
+        return new GaussianNode(node);
+
     }
 }

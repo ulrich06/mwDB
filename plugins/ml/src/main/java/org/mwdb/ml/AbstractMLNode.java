@@ -2,11 +2,14 @@ package org.mwdb.ml;
 
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
+import org.mwdb.KMLNode;
 import org.mwdb.KNode;
 
-abstract class AbstractMLNode<A> implements KMLNode<A>{
+abstract class AbstractMLNode<A extends KNode> implements KMLNode<A> {
 
     private final KNode _rootNode;
+
+    public abstract void jump(long world, long time, KCallback<A> callback);
 
     public AbstractMLNode(KNode p_rootNode) {
         this._rootNode = p_rootNode;
