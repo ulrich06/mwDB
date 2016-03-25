@@ -4,7 +4,7 @@ import org.mwdb.KCallback;
 import org.mwdb.KGraph;
 import org.mwdb.KNode;
 
-abstract class AbstractMLNode implements KNode {
+abstract class AbstractMLNode<A> implements KMLNode<A>{
 
     private final KNode _rootNode;
 
@@ -120,4 +120,5 @@ abstract class AbstractMLNode implements KNode {
     public void free() {
         _rootNode.free();
     }
+
 }

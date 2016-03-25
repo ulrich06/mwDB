@@ -76,6 +76,7 @@ public class GaussianNodeTest {
             @Override
             public void on(Boolean result) {
                 KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
+
                 KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
 
                 double eps=1e-7;
@@ -89,7 +90,14 @@ public class GaussianNodeTest {
                         train[i][j]=longleyData[k];
                         k++;
                     }
-                    gaussianNodeLive.learn(train[i]);
+                    final double[] trains=train[i];
+                    gaussianNodeLive.graph().lookup(0, k, gaussianNodeLive.id(), new KCallback<KNode>() {
+                        @Override
+                        public void on(KNode result) {
+
+                            gaussianNodeLive.learn(trains);
+                        }
+                    });
                 }
 
                 double[][] rcovData=new double[7][7];

@@ -1,5 +1,6 @@
 package org.mwdb.ml;
 
+import org.mwdb.KCallback;
 import org.mwdb.KGaussianNode;
 import org.mwdb.KNode;
 import org.mwdb.KType;
@@ -408,5 +409,20 @@ public class GaussianNode extends AbstractMLNode implements KGaussianNode {
             double[] max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
             return max;
         }
+    }
+
+    @Override
+    public void jump(long world, long time, KCallback<GaussianNode> callback) {
+        rootNode().graph().lookup(world, time, rootNode().id(), new KCallback<KNode>() {
+            @Override
+            public void on(KNode result) {
+                callback.on(new GaussianNode(result));
+            }
+        });
+    }
+
+    @Override
+    public void jump(long world, long time, KCallback callback) {
+
     }
 }
