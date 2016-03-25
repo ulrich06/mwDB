@@ -33,7 +33,7 @@ public class Buffer {
                     OffHeapByteArray.set(bufferPtr, writeCursor, b);
                     writeCursor++;
                 } else if (writeCursor == capacity) {
-                    long newCapacity = capacity << 1;
+                    long newCapacity = capacity * 2;
                     bufferPtr = OffHeapByteArray.reallocate(bufferPtr, capacity, newCapacity);
                     capacity = newCapacity;
                     OffHeapByteArray.set(bufferPtr, writeCursor, b);
@@ -90,7 +90,7 @@ public class Buffer {
                     buffer[0] = b;
                     writeCursor = 1;
                 } else if (writeCursor == buffer.length) {
-                    byte[] temp = new byte[buffer.length << 1];
+                    byte[] temp = new byte[buffer.length * 2];
                     System.arraycopy(buffer, 0, temp, 0, buffer.length);
                     temp[writeCursor] = b;
                     writeCursor++;

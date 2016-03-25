@@ -105,7 +105,7 @@ public class CSVImporterTest {
                 graph.index("houses", house, new String[]{"ID"}, null);
 
                 CSVImporter importer = new CSVImporter();
-                importer.setVerbose();
+                //  importer.setVerbose();
                 importer.setSeparator("\t");
                 importer.mapper().extractTime("{Start time          }", "yyyy-MM-d HH:mm:ss");
                 importer.mapper().field("Type").isInt().rename("active").transformFunction(new KField.KTransformFunction() {
