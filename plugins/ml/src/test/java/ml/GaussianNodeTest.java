@@ -98,7 +98,6 @@ public class GaussianNodeTest {
                             result.learn(trains);
                         }
                     });
-                    
                 }
 
                 double[][] rcovData = new double[7][7];

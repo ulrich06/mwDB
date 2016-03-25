@@ -1,13 +1,23 @@
 package org.mwdb.ml;
 
+import org.mwdb.KCallback;
 import org.mwdb.KNode;
 import org.mwdb.KPolynomialNode;
 import org.mwdb.KType;
 
-public class PolynomialNode extends AbstractMLNode implements KPolynomialNode {
+public class PolynomialNode extends AbstractMLNode<PolynomialNode> implements KPolynomialNode {
 
     private static final String VALUE_KEY = "val";
 
+    @Override
+    public void jump(long world, long time, KCallback<PolynomialNode> callback) {
+        rootNode().graph().lookup(world, time, rootNode().id(), new KCallback<KNode>() {
+            @Override
+            public void on(KNode result) {
+                callback.on(new PolynomialNode(result));
+            }
+        });
+    }
     public PolynomialNode(KNode p_rootNode) {
         super(p_rootNode);
     }

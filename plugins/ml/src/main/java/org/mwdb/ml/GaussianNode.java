@@ -11,7 +11,7 @@ import org.mwdb.math.matrix.solver.MultivariateNormalDistribution;
 /**
  * Created by assaad on 21/03/16.
  */
-public class GaussianNode extends AbstractMLNode<GaussianNode> implements KGaussianNode {
+public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaussianNode {
 
 
     public GaussianNode(KNode p_rootNode) {
@@ -404,7 +404,7 @@ public class GaussianNode extends AbstractMLNode<GaussianNode> implements KGauss
     }
 
     @Override
-    public void jump(long world, long time, KCallback<GaussianNode> callback) {
+    public void jump(long world, long time, KCallback<KGaussianNode> callback) {
         rootNode().graph().lookup(world, time, rootNode().id(), new KCallback<KNode>() {
             @Override
             public void on(KNode result) {

@@ -1,10 +1,11 @@
 package org.mwdb.ml;
 
+import org.mwdb.KCallback;
 import org.mwdb.KStatNode;
 import org.mwdb.KNode;
 import org.mwdb.KType;
 
-public class StatNode extends AbstractMLNode implements KStatNode {
+public class StatNode extends AbstractMLNode<StatNode> implements KStatNode {
 
     private static final String MIN_KEY = "getMin";
     private static final String MAX_KEY = "getMax";
@@ -15,6 +16,16 @@ public class StatNode extends AbstractMLNode implements KStatNode {
     private static final String INTERNAL_TOTAL_KEY = "_total";
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
+
+    @Override
+    public void jump(long world, long time, KCallback<StatNode> callback) {
+        rootNode().graph().lookup(world, time, rootNode().id(), new KCallback<KNode>() {
+            @Override
+            public void on(KNode result) {
+                callback.on(new StatNode(result));
+            }
+        });
+    }
 
     public StatNode(KNode p_rootNode) {
         super(p_rootNode);
