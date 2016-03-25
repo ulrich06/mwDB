@@ -73,7 +73,10 @@
         <module>api</module>
         <module>core</module>
 
+        <!--
         <module>plugins/ml</module>
+        -->
+
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
 
