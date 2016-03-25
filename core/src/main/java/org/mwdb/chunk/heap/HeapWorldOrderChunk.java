@@ -23,8 +23,9 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     private final KChunkListener _listener;
     private final AtomicLong _lock;
 
-
+    // TODO not sure, it is used in constructor and load, I think we need it...
     private volatile int elementCount;
+    // TODO here I think we need it, because of rehash/load
     private AtomicReference<InternalState> state;
     private int threshold;
 

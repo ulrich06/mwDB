@@ -11,10 +11,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ArrayLongLongMap implements KLongLongMap {
 
+    // TODO get at many places but set only in constructor and modify method -> normal ref is enough
     private final AtomicReference<InternalState> state;
 
     private final KChunkListener _listener;
 
+    // TODO only used in constructor and synchronized methods -> no need for volatile
     private volatile boolean aligned;
 
     public ArrayLongLongMap(KChunkListener p_listener, int initialCapacity, ArrayLongLongMap p_origin) {
@@ -111,6 +113,7 @@ public class ArrayLongLongMap implements KLongLongMap {
         return state.get()._elementCount;
     }
 
+    // TODO maybe put the content of this method into an internal_modify_map an synchronize this one (symmetry to longLongArrayMap and if remove is implemented)
     @Override
     public final synchronized void put(long key, long value) {
 

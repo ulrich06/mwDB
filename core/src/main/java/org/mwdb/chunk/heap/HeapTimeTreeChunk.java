@@ -22,6 +22,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     private static final int META_SIZE = 3;
 
     private int _threshold = 0;
+    // TODO here I think we need the volatile + AtomicLong/Integer
     //volatile variables
     private volatile int _root_index = -1;
     private volatile int _size = 0;
