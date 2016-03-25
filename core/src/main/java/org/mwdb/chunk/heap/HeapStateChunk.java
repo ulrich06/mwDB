@@ -6,6 +6,7 @@ import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,65 +14,59 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
-    /**
-     * Identification Section
-     */
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
+
     private final long _world;
-
     private final long _time;
-
     private final long _id;
 
-    /**
-     * Dirty management
-     */
-    // TODO here I think we need the AtomicLong -> ok
-    private final AtomicLong _flags;
+    private volatile InternalState state;
+    private volatile long _flags;
+    private volatile long _marks;
 
-    // TODO here I think we need the AtomicInteger -> ok
-    private final AtomicInteger _counter;
+    private static final long _flagsOffset;
+    private static final long _marksOffset;
+
+    static {
+        try {
+            _flagsOffset = unsafe.objectFieldOffset(HeapStateChunk.class.getDeclaredField("_flags"));
+            _marksOffset = unsafe.objectFieldOffset(HeapStateChunk.class.getDeclaredField("_marks"));
+        } catch (Exception ex) {
+            throw new Error(ex);
+        }
+    }
 
     private final KChunkListener _listener;
-
-    /**
-     * Internal management
-     */
-    // TODO only modified in internal_set which is synchronized -> normal ref is enough
-    private final AtomicReference<InternalState> state;
-
     private boolean inLoadMode;
 
     @Override
-    public void declareDirty(KChunk chunk) {
+    public final void declareDirty(KChunk chunk) {
         if (!this.inLoadMode) {
             internal_set_dirty();
         }
     }
 
-    /**
-     * Internal state for atomic change
-     */
-    final class InternalState {
+    private final class InternalState {
 
-        public final int _elementDataSize;
+        final int _elementDataSize;
 
-        public final long[] _elementK;
+        final long[] _elementK;
 
-        public final Object[] _elementV;
+        final Object[] _elementV;
 
-        public final int[] _elementNext;
+        final int[] _elementNext;
 
-        public final int[] _elementHash;
+        final int[] _elementHash;
 
-        public final byte[] _elementType;
+        final byte[] _elementType;
 
-        public final int threshold;
+        final int threshold;
 
-        protected volatile int _elementCount;
+        volatile int _elementCount;
 
         private boolean hashReadOnly;
 
-        public InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount, boolean p_hashReadOnly) {
+        InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount, boolean p_hashReadOnly) {
             this.hashReadOnly = p_hashReadOnly;
             this._elementDataSize = elementDataSize;
             this._elementK = p_elementK;
@@ -83,7 +78,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             this.threshold = (int) (_elementDataSize * Constants.MAP_LOAD_FACTOR);
         }
 
-        public InternalState deepClone() {
+        InternalState deepClone() {
             long[] clonedElementK = new long[this._elementDataSize];
             System.arraycopy(_elementK, 0, clonedElementK, 0, this._elementDataSize);
             int[] clonedElementNext = new int[this._elementDataSize];
@@ -95,7 +90,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came from a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
         }
 
-        public InternalState softClone() {
+        InternalState softClone() {
             Object[] clonedElementV = new Object[this._elementDataSize];
             System.arraycopy(_elementV, 0, clonedElementV, 0, this._elementDataSize);
             return new InternalState(this._elementDataSize, _elementK, clonedElementV, _elementNext, _elementHash, _elementType, _elementCount, true);
@@ -107,17 +102,15 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
-        this._flags = new AtomicLong(0);
-        this._counter = new AtomicInteger(0);
+        this._flags = 0;
+        this._marks = 0;
         this._listener = p_listener;
-        state = new AtomicReference<InternalState>();
-
         if (initialPayload != null) {
             load(initialPayload);
         } else if (origin != null) {
             HeapStateChunk castedOrigin = (HeapStateChunk) origin;
-            InternalState clonedState = castedOrigin.state.get().softClone();
-            state.set(clonedState);
+            InternalState clonedState = castedOrigin.state.softClone();
+            state = clonedState;
             //deep clone for map
             for (int i = 0; i < clonedState._elementCount; i++) {
                 switch (clonedState._elementType[i]) {
@@ -147,53 +140,59 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
             }
-            state.set(newstate);
+            state = newstate;
         }
     }
 
-    /**
-     * Identification management
-     */
     @Override
-    public long world() {
+    public final long world() {
         return this._world;
     }
 
     @Override
-    public long time() {
+    public final long time() {
         return this._time;
     }
 
     @Override
-    public long id() {
+    public final long id() {
         return this._id;
     }
 
     @Override
-    public byte chunkType() {
+    public final byte chunkType() {
         return Constants.STATE_CHUNK;
     }
 
-    /**
-     * Marks management section
-     */
     @Override
     public final long marks() {
-        return this._counter.get();
+        return this._marks;
     }
 
     @Override
-    public final int mark() {
-        return this._counter.incrementAndGet();
+    public final long mark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before + 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
     @Override
-    public final int unmark() {
-        return this._counter.decrementAndGet();
+    public final long unmark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before - 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
     @Override
-    public void set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem) {
+    public final void set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem) {
         internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
     }
 
@@ -262,7 +261,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
 
         int entry = -1;
-        InternalState internalState = state.get();
+        InternalState internalState = state;
         int hashIndex = -1;
         if (internalState._elementDataSize > 0) {
             hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
@@ -303,12 +302,12 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 }
                 //setPrimitiveType value for all
                 internalState = new InternalState(newLength, newElementK, newElementV, newElementNext, newElementHash, newElementType, internalState._elementCount, false);
-                this.state.set(internalState);
+                this.state = internalState;
                 hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
             } else if (internalState.hashReadOnly) {
                 //deepClone state
                 internalState = internalState.deepClone();
-                state.set(internalState);
+                state = internalState;
             }
             int newIndex = internalState._elementCount;
             internalState._elementCount = internalState._elementCount + 1;
@@ -327,7 +326,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 if (internalState._elementType[entry] != p_elemType) {
                     //typeSwitch, we have to deep clone as well
                     internalState = internalState.deepClone();
-                    state.set(internalState);
+                    state = internalState;
                     internalState._elementType[entry] = p_elemType;
                 }
 
@@ -337,8 +336,8 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public Object get(long p_elementIndex) {
-        InternalState internalState = state.get();
+    public final Object get(long p_elementIndex) {
+        final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {
             return null;
         }
@@ -380,8 +379,8 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public byte getType(long p_elementIndex) {
-        InternalState internalState = state.get();
+    public final byte getType(long p_elementIndex) {
+        final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {
             return -1;
         }
@@ -399,7 +398,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
 
     @Override
-    public Object getOrCreate(long p_elementIndex, byte elemType) {
+    public final Object getOrCreate(long p_elementIndex, byte elemType) {
         Object previousObject = get(p_elementIndex);
         byte previousType = getType(p_elementIndex);
         if (previousObject != null && previousType == elemType) {
@@ -420,8 +419,8 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public void each(KStateChunkCallBack callBack, KResolver resolver) {
-        InternalState currentState = this.state.get();
+    public final void each(KStateChunkCallBack callBack, KResolver resolver) {
+        final InternalState currentState = this.state;
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {
                 callBack.on(resolver.longKeyToString(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
@@ -763,13 +762,13 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
         //set the state
         InternalState newState = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement, false);
-        this.state.set(newState);
+        this.state = newState;
         this.inLoadMode = false;
     }
 
     @Override
-    public void save(KBuffer buffer) {
-        final InternalState internalState = state.get();
+    public final void save(KBuffer buffer) {
+        final InternalState internalState = state;
         Base64.encodeIntToBuffer(internalState._elementCount, buffer);
         for (int i = 0; i < internalState._elementCount; i++) {
             if (internalState._elementV[i] != null) { //there is a real value
@@ -877,29 +876,26 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     private void internal_set_dirty() {
-        if (this._listener != null) {
-            if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                this._listener.declareDirty(this);
+        if (_listener != null) {
+            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                _listener.declareDirty(this);
             }
         }
     }
 
-    /**
-     * Flags management section
-     */
     @Override
-    public long flags() {
-        return _flags.get();
+    public final long flags() {
+        return _flags;
     }
 
     @Override
-    public boolean setFlags(long bitsToEnable, long bitsToDisable) {
+    public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
         long nval;
         do {
-            val = _flags.get();
+            val = _flags;
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (!_flags.compareAndSet(val, nval));
+        } while (!unsafe.compareAndSwapLong(this, _flagsOffset, val, nval));
         return val != nval;
     }
 }

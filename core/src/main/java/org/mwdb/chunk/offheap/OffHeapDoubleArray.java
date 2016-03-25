@@ -12,7 +12,9 @@ public class OffHeapDoubleArray {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     public static long allocate(final long capacity) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
@@ -36,15 +38,17 @@ public class OffHeapDoubleArray {
     }
 
     public static void set(final long addr, final long index, final double valueToInsert) {
-        unsafe.putDouble(addr + index * 8, valueToInsert);
+        unsafe.putDoubleVolatile(null, addr + index * 8, valueToInsert);
     }
 
     public static double get(final long addr, final long index) {
-        return unsafe.getDouble(addr + index * 8);
+        return unsafe.getDoubleVolatile(null, addr + index * 8);
     }
 
     public static void free(final long addr) {
-        alloc_counter--;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter--;
+        }
 
         unsafe.freeMemory(addr);
     }
@@ -58,7 +62,9 @@ public class OffHeapDoubleArray {
     }
 
     public static long cloneArray(final long srcAddr, final long length) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         long newAddr = unsafe.allocateMemory(length * 8);
         unsafe.copyMemory(srcAddr, newAddr, length * 8);

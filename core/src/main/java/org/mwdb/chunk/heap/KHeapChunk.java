@@ -4,9 +4,9 @@ import org.mwdb.chunk.KChunk;
 
 public interface KHeapChunk extends KChunk {
 
-    int mark();
+    long mark();
 
-    int unmark();
+    long unmark();
 
     boolean setFlags(long bitsToEnable, long bitsToDisable);
 

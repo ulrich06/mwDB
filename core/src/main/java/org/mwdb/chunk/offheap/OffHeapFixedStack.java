@@ -38,7 +38,7 @@ public class OffHeapFixedStack implements KStack {
     }
 
     @Override
-    public boolean enqueue(long index) {
+    public final boolean enqueue(long index) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -67,7 +67,7 @@ public class OffHeapFixedStack implements KStack {
     }
 
     @Override
-    public long dequeueTail() {
+    public final long dequeueTail() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -93,7 +93,7 @@ public class OffHeapFixedStack implements KStack {
     }
 
     @Override
-    public boolean dequeue(long index) {
+    public final boolean dequeue(long index) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -145,7 +145,8 @@ public class OffHeapFixedStack implements KStack {
         }
     }
 
-    public void free() {
+    @Override
+    public final void free() {
         OffHeapLongArray.free(_next);
         OffHeapLongArray.free(_prev);
     }

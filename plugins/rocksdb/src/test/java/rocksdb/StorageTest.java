@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.offheap.*;
 import org.mwdb.task.NoopScheduler;
+import org.mwdb.utility.Unsafe;
 
 public class StorageTest {
 
@@ -15,6 +16,7 @@ public class StorageTest {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
+        Unsafe.DEBUG_MODE = true;
 
         test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }

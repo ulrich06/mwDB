@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwdb.chunk.KStack;
 import org.mwdb.chunk.heap.FixedStack;
 import org.mwdb.chunk.offheap.*;
+import org.mwdb.utility.Unsafe;
 
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -56,6 +57,8 @@ public class FixedStackTest {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         OffHeapFixedStack stack = new OffHeapFixedStack(CAPACITY);
         test(stack);

@@ -39,7 +39,6 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private static final int INDEX_MAGIC = 14;
     private static final int INDEX_LOCK_EXT = 15;
 
-
     //long[]
     private long elementK_ptr;
     private long elementV_ptr;
@@ -91,19 +90,19 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     }
 
     @Override
-    public void lock() {
+    public final void lock() {
         while (!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, -1, 1)) ;
     }
 
     @Override
-    public void unlock() {
+    public final void unlock() {
         if (!OffHeapLongArray.compareAndSwap(this.rootPtr, INDEX_LOCK_EXT, 1, -1)) {
             throw new RuntimeException("CAS Error !!!");
         }
     }
 
     @Override
-    public long addr() {
+    public final long addr() {
         return rootPtr;
     }
 
@@ -118,37 +117,37 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     }
 
     @Override
-    public long magic() {
+    public final long magic() {
         return OffHeapLongArray.get(rootPtr, INDEX_MAGIC);
     }
 
     @Override
-    public long world() {
+    public final long world() {
         return OffHeapLongArray.get(rootPtr, INDEX_WORLD);
     }
 
     @Override
-    public long id() {
+    public final long id() {
         return OffHeapLongArray.get(rootPtr, INDEX_ID);
     }
 
     @Override
-    public long time() {
+    public final long time() {
         return OffHeapLongArray.get(rootPtr, INDEX_TIME);
     }
 
     @Override
-    public long marks() {
+    public final long marks() {
         return OffHeapLongArray.get(rootPtr, INDEX_MARKS);
     }
 
     @Override
-    public byte chunkType() {
+    public final byte chunkType() {
         return Constants.WORLD_ORDER_CHUNK;
     }
 
     @Override
-    public long flags() {
+    public final long flags() {
         return OffHeapLongArray.get(rootPtr, INDEX_FLAGS);
     }
 
@@ -165,54 +164,58 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     public final long get(long key) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
-        consistencyCheck();
-
-        long hashIndex = PrimitiveHelper.longHash(key, OffHeapLongArray.get(this.rootPtr, INDEX_CAPACITY));
-        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         long result = Constants.NULL_LONG;
-        while (m != -1) {
-            if (key == OffHeapLongArray.get(elementK_ptr, m)) {
-                result = OffHeapLongArray.get(elementV_ptr, m);
-                break;
+        try {
+            consistencyCheck();
+
+            long hashIndex = PrimitiveHelper.longHash(key, OffHeapLongArray.get(this.rootPtr, INDEX_CAPACITY));
+            long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+
+            while (m != -1) {
+                if (key == OffHeapLongArray.get(elementK_ptr, m)) {
+                    result = OffHeapLongArray.get(elementV_ptr, m);
+                    break;
+                }
+                m = OffHeapLongArray.get(elementNext_ptr, m);
             }
-            m = OffHeapLongArray.get(elementNext_ptr, m);
+        } finally {
+            //UNLOCK
+            if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS error !!!");
+            }
         }
-
-        //UNLOCK
-        if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS error !!!");
-        }
-
         return result;
     }
 
     @Override
-    public void each(KLongLongMapCallBack callback) {
+    public final void each(KLongLongMapCallBack callback) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
-        consistencyCheck();
+        try {
+            consistencyCheck();
 
-        long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
-        for (long i = 0; i < elementCount; i++) {
-            long loopValue = OffHeapLongArray.get(elementV_ptr, i);
-            if (loopValue != Constants.NULL_LONG) {
-                callback.on(OffHeapLongArray.get(elementK_ptr, i), loopValue);
+            long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
+            for (long i = 0; i < elementCount; i++) {
+                long loopValue = OffHeapLongArray.get(elementV_ptr, i);
+                if (loopValue != Constants.NULL_LONG) {
+                    callback.on(OffHeapLongArray.get(elementK_ptr, i), loopValue);
+                }
             }
-        }
-
-        //UNLOCK
-        if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS error !!!");
+        } finally {
+            //UNLOCK
+            if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS error !!!");
+            }
         }
     }
 
     @Override
-    public long size() {
+    public final long size() {
         return OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
     }
 
     @Override
-    public void remove(long key) {
+    public final void remove(long key) {
         throw new RuntimeException("Not implemented yet!!!");
     }
 
@@ -220,123 +223,124 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     public final void put(long key, long value) {
         //cas to put a lock flag
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
-        consistencyCheck();
-
-        long entry = -1;
-        long capacity = OffHeapLongArray.get(rootPtr, INDEX_CAPACITY);
-        long count = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
-        long hashIndex = PrimitiveHelper.longHash(key, capacity);
-        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
-            if (key == OffHeapLongArray.get(elementK_ptr, m)) {
-                entry = m;
-                break;
-            }
-            m = OffHeapLongArray.get(elementNext_ptr, m);
-        }
-        if (entry == -1) {
-            //if need to reHash (too small or too much collisions)
-            if ((count + 1) > OffHeapLongArray.get(rootPtr, INDEX_THRESHOLD)) {
-
-                long newCapacity = capacity << 1;
-                //reallocate the string[], indexes are not changed
-                elementK_ptr = OffHeapStringArray.reallocate(elementK_ptr, capacity, newCapacity);
-                OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_K, elementK_ptr);
-                //reallocate the long[] values
-                elementV_ptr = OffHeapLongArray.reallocate(elementV_ptr, capacity, newCapacity);
-                OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_V, elementV_ptr);
-
-                //Create two new Hash and Next structures
-                OffHeapLongArray.free(elementHash_ptr);
-                OffHeapLongArray.free(elementNext_ptr);
-                elementHash_ptr = OffHeapLongArray.allocate(newCapacity);
-                OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
-                elementNext_ptr = OffHeapLongArray.allocate(newCapacity);
-                OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_NEXT, elementNext_ptr);
-
-                //rehashEveryThing
-                for (long i = 0; i < count; i++) {
-                    long previousValue = OffHeapLongArray.get(elementV_ptr, i);
-                    long previousKey = OffHeapLongArray.get(elementK_ptr, i);
-                    if (previousValue != Constants.NULL_LONG) {
-                        long newHashIndex = PrimitiveHelper.longHash(previousKey, newCapacity);
-                        long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, newHashIndex);
-                        if (currentHashedIndex != Constants.OFFHEAP_NULL_PTR) {
-                            OffHeapLongArray.set(elementNext_ptr, i, currentHashedIndex);
-                        }
-                        OffHeapLongArray.set(elementHash_ptr, newHashIndex, i);
-                    }
+        try {
+            consistencyCheck();
+            long entry = -1;
+            long capacity = OffHeapLongArray.get(rootPtr, INDEX_CAPACITY);
+            long count = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
+            long hashIndex = PrimitiveHelper.longHash(key, capacity);
+            long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+            while (m != Constants.OFFHEAP_NULL_PTR) {
+                if (key == OffHeapLongArray.get(elementK_ptr, m)) {
+                    entry = m;
+                    break;
                 }
+                m = OffHeapLongArray.get(elementNext_ptr, m);
+            }
+            if (entry == -1) {
+                //if need to reHash (too small or too much collisions)
+                if ((count + 1) > OffHeapLongArray.get(rootPtr, INDEX_THRESHOLD)) {
 
-                capacity = newCapacity;
-                OffHeapLongArray.set(rootPtr, INDEX_CAPACITY, capacity);
-                OffHeapLongArray.set(rootPtr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
-                hashIndex = PrimitiveHelper.longHash(key, capacity);
-            }
-            //set K and associated K_H
-            OffHeapLongArray.set(elementK_ptr, count, key);
-            //set value or index if null
-            if (value == Constants.NULL_LONG) {
-                OffHeapLongArray.set(elementV_ptr, count, count);
-            } else {
-                OffHeapLongArray.set(elementV_ptr, count, value);
-            }
-            long currentHashedElemIndex = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-            if (currentHashedElemIndex != -1) {
-                OffHeapLongArray.set(elementNext_ptr, count, currentHashedElemIndex);
-            }
-            //now the object is reachable to other thread everything should be ready
-            OffHeapLongArray.set(elementHash_ptr, hashIndex, count);
-            //increase element count
-            OffHeapLongArray.set(rootPtr, INDEX_SIZE, count + 1);
-            internal_set_dirty();
-        } else {
-            if (OffHeapLongArray.get(elementV_ptr, entry) != value && value != Constants.NULL_LONG) {
-                //setValue
-                OffHeapLongArray.set(elementV_ptr, entry, value);
+                    long newCapacity = capacity << 1;
+                    //reallocate the string[], indexes are not changed
+                    elementK_ptr = OffHeapStringArray.reallocate(elementK_ptr, capacity, newCapacity);
+                    OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_K, elementK_ptr);
+                    //reallocate the long[] values
+                    elementV_ptr = OffHeapLongArray.reallocate(elementV_ptr, capacity, newCapacity);
+                    OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_V, elementV_ptr);
+
+                    //Create two new Hash and Next structures
+                    OffHeapLongArray.free(elementHash_ptr);
+                    OffHeapLongArray.free(elementNext_ptr);
+                    elementHash_ptr = OffHeapLongArray.allocate(newCapacity);
+                    OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
+                    elementNext_ptr = OffHeapLongArray.allocate(newCapacity);
+                    OffHeapLongArray.set(rootPtr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+
+                    //rehashEveryThing
+                    for (long i = 0; i < count; i++) {
+                        long previousValue = OffHeapLongArray.get(elementV_ptr, i);
+                        long previousKey = OffHeapLongArray.get(elementK_ptr, i);
+                        if (previousValue != Constants.NULL_LONG) {
+                            long newHashIndex = PrimitiveHelper.longHash(previousKey, newCapacity);
+                            long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, newHashIndex);
+                            if (currentHashedIndex != Constants.OFFHEAP_NULL_PTR) {
+                                OffHeapLongArray.set(elementNext_ptr, i, currentHashedIndex);
+                            }
+                            OffHeapLongArray.set(elementHash_ptr, newHashIndex, i);
+                        }
+                    }
+                    capacity = newCapacity;
+                    OffHeapLongArray.set(rootPtr, INDEX_CAPACITY, capacity);
+                    OffHeapLongArray.set(rootPtr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
+                    hashIndex = PrimitiveHelper.longHash(key, capacity);
+                }
+                //set K and associated K_H
+                OffHeapLongArray.set(elementK_ptr, count, key);
+                //set value or index if null
+                if (value == Constants.NULL_LONG) {
+                    OffHeapLongArray.set(elementV_ptr, count, count);
+                } else {
+                    OffHeapLongArray.set(elementV_ptr, count, value);
+                }
+                long currentHashedElemIndex = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+                if (currentHashedElemIndex != -1) {
+                    OffHeapLongArray.set(elementNext_ptr, count, currentHashedElemIndex);
+                }
+                //now the object is reachable to other thread everything should be ready
+                OffHeapLongArray.set(elementHash_ptr, hashIndex, count);
+                //increase element count
+                OffHeapLongArray.set(rootPtr, INDEX_SIZE, count + 1);
                 internal_set_dirty();
+            } else {
+                if (OffHeapLongArray.get(elementV_ptr, entry) != value && value != Constants.NULL_LONG) {
+                    //setValue
+                    OffHeapLongArray.set(elementV_ptr, entry, value);
+                    internal_set_dirty();
+                }
             }
-        }
-        if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS error !!!");
+        } finally {
+            if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS error !!!");
+            }
         }
     }
 
     @Override
-    public void save(KBuffer buffer) {
+    public final void save(KBuffer buffer) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
-        consistencyCheck();
+        try {
+            consistencyCheck();
 
-        long size = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
-        Base64.encodeLongToBuffer(size, buffer);
-        buffer.write(Constants.CHUNK_SEP);
-        boolean isFirst = true;
+            long size = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
+            Base64.encodeLongToBuffer(size, buffer);
+            buffer.write(Constants.CHUNK_SEP);
+            boolean isFirst = true;
 
-        long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
-        for (long i = 0; i < elementCount; i++) {
-            long loopValue = OffHeapLongArray.get(elementV_ptr, i);
-            if (loopValue != Constants.NULL_LONG) {
-                if (!isFirst) {
-                    buffer.write(Constants.CHUNK_SUB_SEP);
+            long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
+            for (long i = 0; i < elementCount; i++) {
+                long loopValue = OffHeapLongArray.get(elementV_ptr, i);
+                if (loopValue != Constants.NULL_LONG) {
+                    if (!isFirst) {
+                        buffer.write(Constants.CHUNK_SUB_SEP);
+                    }
+                    isFirst = false;
+                    Base64.encodeLongToBuffer(OffHeapLongArray.get(elementK_ptr, i), buffer);
+                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                    Base64.encodeLongToBuffer(loopValue, buffer);
                 }
-                isFirst = false;
-                Base64.encodeLongToBuffer(OffHeapLongArray.get(elementK_ptr, i), buffer);
-                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
-                Base64.encodeLongToBuffer(loopValue, buffer);
             }
-        }
-
-        //UNLOCK
-        if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS error !!!");
+        } finally {
+            //UNLOCK
+            if (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS error !!!");
+            }
         }
     }
 
     private void load(KBuffer buffer) {
-
         int cursor = 0;
-
         long loopKey = Constants.NULL_LONG;
         int previousStart = -1;
         long capacity = -1;
@@ -350,7 +354,6 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
                 } else {
                     capacity = size << 1;
                 }
-
                 //init lock
                 OffHeapLongArray.set(this.rootPtr, INDEX_LOCK, 0);
                 //init flags
@@ -415,11 +418,17 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             }
             OffHeapLongArray.set(elementHash_ptr, hashIndex, insertIndex);
         }
-
-
     }
 
     private void internal_set_dirty() {
+
+        long previousMagic;
+        long nextMagic;
+        do {
+            previousMagic = OffHeapLongArray.get(rootPtr, INDEX_MAGIC);
+            nextMagic = previousMagic + 1;
+        } while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_MAGIC, previousMagic, nextMagic));
+
         if (listener != null) {
             if ((OffHeapLongArray.get(rootPtr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 listener.declareDirty(this);

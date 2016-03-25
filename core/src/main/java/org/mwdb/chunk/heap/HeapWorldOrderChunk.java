@@ -8,28 +8,38 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KWorldOrderChunk;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import org.mwdb.utility.Unsafe;
 
 public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
 
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
     private final long _world;
     private final long _time;
     private final long _id;
-    private final AtomicLong _flags;
-    private final AtomicInteger _counter;
     private final KChunkListener _listener;
-    private final AtomicLong _lock;
 
-    // TODO not sure, it is used in constructor and load, I think we need it...
-    private volatile int elementCount;
-    // TODO here I think we need it, because of rehash/load
-    private AtomicReference<InternalState> state;
-    private int threshold;
-
+    private volatile int _lock;
+    private volatile long _marks;
     private volatile long _magic;
+    private volatile long _flags;
+
+    private static final long _flagsOffset;
+    private static final long _marksOffset;
+    private static final long _lockOffset;
+    private static final long _magicOffset;
+
+    static {
+        try {
+            _flagsOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_flags"));
+            _marksOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_marks"));
+            _lockOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_lock"));
+            _magicOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_magic"));
+        } catch (Exception ex) {
+            throw new Error(ex);
+        }
+    }
+
+    private volatile InternalState state;
 
     @Override
     public long world() {
@@ -50,82 +60,93 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;
-        this._flags = new AtomicLong(0);
-        this._counter = new AtomicInteger(0);
-
-        this._lock = new AtomicLong();
-        this._lock.set(0);
+        this._flags = 0;
+        this._marks = 0;
+        this._lock = 0;
+        this._magic = 0;
 
         this._listener = p_listener;
-        this.elementCount = 0;
-        this.state = new AtomicReference<InternalState>();
         if (initialPayload != null) {
             load(initialPayload);
         } else {
             int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
-            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity]);
+            InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity], 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
                 newstate.elementHash[i] = -1;
             }
-            this.state.set(newstate);
-            this.threshold = (int) (newstate.elementDataSize * Constants.MAP_LOAD_FACTOR);
+            this.state = newstate;
         }
-
-        this._magic = PrimitiveHelper.rand();
     }
 
     @Override
     public void lock() {
-        while (!this._lock.compareAndSet(0, 1)) ;
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
     }
 
     @Override
     public void unlock() {
-        if (!this._lock.compareAndSet(1, 0)) {
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
             throw new RuntimeException("CAS Error !!!");
         }
     }
 
-
     /**
      * Internal Map state, to be replace in a compare and swap manner
      */
-    final class InternalState {
+    private final class InternalState {
 
-        public final int elementDataSize;
+        final int threshold;
 
-        public final long[] elementKV;
+        final int elementDataSize;
 
-        public final int[] elementNext;
+        final long[] elementKV;
 
-        public final int[] elementHash;
+        final int[] elementNext;
 
-        public InternalState(int elementDataSize, long[] elementKV, int[] elementNext, int[] elementHash) {
+        final int[] elementHash;
+
+        volatile int elementCount;
+
+        InternalState(int elementDataSize, long[] elementKV, int[] elementNext, int[] elementHash, int elemCount) {
             this.elementDataSize = elementDataSize;
             this.elementKV = elementKV;
             this.elementNext = elementNext;
             this.elementHash = elementHash;
+            this.threshold = (int) (elementDataSize * Constants.MAP_LOAD_FACTOR);
+            this.elementCount = elemCount;
         }
     }
 
     @Override
     public final long marks() {
-        return this._counter.get();
+        return this._marks;
     }
 
     @Override
-    public final int mark() {
-        return this._counter.incrementAndGet();
+    public final long mark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before + 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
     @Override
-    public final int unmark() {
-        return this._counter.decrementAndGet();
+    public final long unmark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before - 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
     @Override
-    public long magic() {
+    public final long magic() {
         return this._magic;
     }
 
@@ -153,21 +174,20 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
             }
         }
         //setPrimitiveType value for all
-        state.set(new InternalState(length, newElementKV, newElementNext, newElementHash));
-        this.threshold = (int) (length * Constants.MAP_LOAD_FACTOR);
+        state = new InternalState(length, newElementKV, newElementNext, newElementHash, state.elementCount);
     }
 
     @Override
     public final void each(KLongLongMapCallBack callback) {
-        InternalState internalState = state.get();
-        for (int i = 0; i < elementCount; i++) {
+        final InternalState internalState = state;
+        for (int i = 0; i < internalState.elementCount; i++) {
             callback.on(internalState.elementKV[i * 2], internalState.elementKV[i * 2 + 1]);
         }
     }
 
     @Override
     public final long get(long key) {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         if (internalState.elementDataSize == 0) {
             return Constants.NULL_LONG;
         }
@@ -185,7 +205,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
 
     @Override
     public final synchronized void put(long key, long value) {
-        InternalState internalState = state.get();
+        InternalState internalState = state;
         int entry = -1;
         int index = -1;
         if (internalState.elementDataSize != 0) {
@@ -193,12 +213,12 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
             entry = findNonNullKeyEntry(key, index, internalState);
         }
         if (entry == -1) {
-            if (++elementCount > threshold) {
+            if (++internalState.elementCount > internalState.threshold) {
                 rehashCapacity(internalState.elementDataSize, internalState);
-                internalState = state.get();
+                internalState = state;
                 index = (int) PrimitiveHelper.longHash(key, internalState.elementDataSize);
             }
-            int newIndex = (this.elementCount - 1);
+            int newIndex = (internalState.elementCount - 1);
             internalState.elementKV[newIndex * 2] = key;
             internalState.elementKV[newIndex * 2 + 1] = value;
             int currentHashedIndex = internalState.elementHash[index];
@@ -210,13 +230,11 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
             //now the object is reachable to other thread everything should be ready
             internalState.elementHash[index] = newIndex;
             internal_set_dirty();
-            this._magic = PrimitiveHelper.rand();
         } else {
             if (internalState.elementKV[entry + 1] != value) {
                 //setValue
                 internalState.elementKV[entry + 1] = value;
                 internal_set_dirty();
-                this._magic = PrimitiveHelper.rand();
             }
         }
     }
@@ -235,51 +253,19 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     //TODO check intersection of remove and put
     @Override
     public synchronized final void remove(long key) {
-        /*
-        InternalState internalState = state;
-        if (state.elementDataSize == 0) {
-            return;
-        }
-        int index = ((int) (key) & 0x7FFFFFFF) % internalState.elementDataSize;
-        int m = state.elementHash[index];
-        int last = -1;
-        while (m >= 0) {
-            if (key == state.elementKV[m * 2]) {
-                break;
-            }
-            last = m;
-            m = state.elementNext[m];
-        }
-        if (m == -1) {
-            return;
-        }
-        if (last == -1) {
-            if (state.elementNext[m] > 0) {
-                state.elementHash[index] = m;
-            } else {
-                state.elementHash[index] = -1;
-            }
-        } else {
-            state.elementNext[last] = state.elementNext[m];
-        }
-        state.elementNext[m] = -1;//flag to dropped value
-        this.elementCount--;
-        this.droppedCount++;
-        */
+        throw new RuntimeException("Not implemented yet!!!");
     }
 
     @Override
     public final long size() {
-        return this.elementCount;
+        return state.elementCount;
     }
 
     private void load(KBuffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
         }
-
         int cursor = 0;
-
         long loopKey = Constants.NULL_LONG;
         int previousStart = -1;
         long capacity = -1;
@@ -303,11 +289,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
                     newElementHash[i] = -1;
                 }
                 //setPrimitiveType value for all
-                temp_state = new InternalState((int) capacity, newElementKV, newElementNext, newElementHash);
-
-                this.elementCount = (int) size;
-                this.threshold = (int) (capacity * Constants.MAP_LOAD_FACTOR);
-
+                temp_state = new InternalState((int) capacity, newElementKV, newElementNext, newElementHash, (int) size);
                 //reset for next round
                 previousStart = cursor + 1;
 
@@ -352,17 +334,17 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
             temp_state.elementHash[hashIndex] = insertIndex;
         }
         if (temp_state != null) {
-            this.state.set(temp_state);
+            this.state = temp_state;
         }
     }
 
     @Override
-    public void save(KBuffer buffer) {
-        InternalState internalState = state.get();
-        Base64.encodeIntToBuffer(elementCount, buffer);
+    public final void save(KBuffer buffer) {
+        final InternalState internalState = state;
+        Base64.encodeIntToBuffer(internalState.elementCount, buffer);
         buffer.write(Constants.CHUNK_SEP);
         boolean isFirst = true;
-        for (int i = 0; i < elementCount; i++) {
+        for (int i = 0; i < internalState.elementCount; i++) {
             long loopKey = internalState.elementKV[i * 2];
             long loopValue = internalState.elementKV[i * 2 + 1];
             if (!isFirst) {
@@ -376,35 +358,39 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     }
 
     @Override
-    public byte chunkType() {
+    public final byte chunkType() {
         return Constants.WORLD_ORDER_CHUNK;
     }
 
     private void internal_set_dirty() {
-        this._magic = PrimitiveHelper.rand();
+        long magicBefore;
+        long magicAfter;
+        do {
+            magicBefore = _magic;
+            magicAfter = magicBefore + 1;
+        } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
         if (_listener != null) {
-            if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 _listener.declareDirty(this);
             }
         }
     }
 
     @Override
-    public long flags() {
-        return _flags.get();
+    public final long flags() {
+        return _flags;
     }
 
     @Override
-    public boolean setFlags(long bitsToEnable, long bitsToDisable) {
+    public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
         long nval;
         do {
-            val = _flags.get();
+            val = _flags;
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (!_flags.compareAndSet(val, nval));
+        } while (!unsafe.compareAndSwapLong(this, _flagsOffset, val, nval));
         return val != nval;
     }
-
 
 }
 

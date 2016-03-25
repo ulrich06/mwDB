@@ -9,6 +9,7 @@ import org.mwdb.chunk.heap.HeapTimeTreeChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.*;
 import org.mwdb.utility.Buffer;
+import org.mwdb.utility.Unsafe;
 
 public class TimeTreeTest implements KChunkListener {
 
@@ -40,6 +41,8 @@ public class TimeTreeTest implements KChunkListener {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         KChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {

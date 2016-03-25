@@ -9,6 +9,8 @@ public class Unsafe {
 
     private static sun.misc.Unsafe unsafe_instance = null;
 
+    public static boolean DEBUG_MODE = false;
+
     @SuppressWarnings("restriction")
     public static sun.misc.Unsafe getUnsafe() {
         if (unsafe_instance == null) {

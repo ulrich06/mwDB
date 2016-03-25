@@ -42,7 +42,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private static final int INDEX_LOCK = 12;
     private static final int INDEX_SIZE = 13;
 
-    private long addr;
+    private final long addr;
 
     private long metaPtr;
     private long kPtr;
@@ -77,52 +77,53 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_FLAGS, 0);
             OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-            OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
+            OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
         }
 
     }
 
     @Override
-    public void clearAt(long max) {
+    public final void clearAt(long max) {
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
+        try {
+            ptrConsistency();
+            long previousKeys = OffHeapLongArray.get(addr, INDEX_K);
+            long previousMetas = OffHeapLongArray.get(addr, INDEX_META);
+            long previousColors = OffHeapLongArray.get(addr, INDEX_COLORS);
+            long previousSize = OffHeapLongArray.get(addr, INDEX_SIZE);
 
-        long previousKeys = OffHeapLongArray.get(addr, INDEX_K);
-        long previousMetas = OffHeapLongArray.get(addr, INDEX_META);
-        long previousColors = OffHeapLongArray.get(addr, INDEX_COLORS);
-        long previousSize = OffHeapLongArray.get(addr, INDEX_SIZE);
+            //reset
+            long capacity = Constants.MAP_INITIAL_CAPACITY;
+            //init k array
+            kPtr = OffHeapLongArray.allocate(capacity);
+            OffHeapLongArray.set(addr, INDEX_K, kPtr);
+            //init meta array
+            metaPtr = OffHeapLongArray.allocate(capacity * META_SIZE);
+            OffHeapLongArray.set(addr, INDEX_META, metaPtr);
+            //init colors array
+            colorsPtr = OffHeapByteArray.allocate(capacity);
+            OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
 
-        //reset
-        long capacity = Constants.MAP_INITIAL_CAPACITY;
-        //init k array
-        kPtr = OffHeapLongArray.allocate(capacity);
-        OffHeapLongArray.set(addr, INDEX_K, kPtr);
-        //init meta array
-        metaPtr = OffHeapLongArray.allocate(capacity * META_SIZE);
-        OffHeapLongArray.set(addr, INDEX_META, metaPtr);
-        //init colors array
-        colorsPtr = OffHeapByteArray.allocate(capacity);
-        OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
+            OffHeapLongArray.set(addr, INDEX_SIZE, 0);
+            OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
+            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
 
-        OffHeapLongArray.set(addr, INDEX_SIZE, 0);
-        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
-        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-        OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
-
-        for (long i = 0; i < previousSize; i++) {
-            long currentVal = OffHeapLongArray.get(previousKeys, i);
-            if(currentVal < max){
-                internal_insert(OffHeapLongArray.get(previousKeys, i));
+            for (long i = 0; i < previousSize; i++) {
+                long currentVal = OffHeapLongArray.get(previousKeys, i);
+                if (currentVal < max) {
+                    internal_insert(OffHeapLongArray.get(previousKeys, i));
+                }
             }
-        }
 
-        OffHeapLongArray.free(previousKeys);
-        OffHeapLongArray.free(previousMetas);
-        OffHeapByteArray.free(previousColors);
-
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
+            OffHeapLongArray.free(previousKeys);
+            OffHeapLongArray.free(previousMetas);
+            OffHeapByteArray.free(previousColors);
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
     }
 
@@ -134,17 +135,17 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public long magic() {
+    public final long magic() {
         return OffHeapLongArray.get(addr, INDEX_MAGIC);
     }
 
     @Override
-    public byte chunkType() {
+    public final byte chunkType() {
         return Constants.TIME_TREE_CHUNK;
     }
 
     @Override
-    public long addr() {
+    public final long addr() {
         return this.addr;
     }
 
@@ -154,121 +155,126 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public long world() {
+    public final long world() {
         return OffHeapLongArray.get(addr, INDEX_WORLD);
     }
 
     @Override
-    public long time() {
+    public final long time() {
         return OffHeapLongArray.get(addr, INDEX_TIME);
     }
 
     @Override
-    public long id() {
+    public final long id() {
         return OffHeapLongArray.get(addr, INDEX_ID);
     }
 
     @Override
-    public long flags() {
+    public final long flags() {
         return OffHeapLongArray.get(addr, INDEX_FLAGS);
     }
 
     @Override
-    public long size() {
+    public final long size() {
         return OffHeapLongArray.get(addr, INDEX_SIZE);
     }
 
     @Override
     public final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
-
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
+        try {
+            ptrConsistency();
 
-        long nbElements = 0;
-        long indexEnd = internal_previousOrEqual_index(endKey);
-        while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
-            walker.elem(key(indexEnd));
-            nbElements++;
-            indexEnd = previous(indexEnd);
-        }
+            long nbElements = 0;
+            long indexEnd = internal_previousOrEqual_index(endKey);
+            while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
+                walker.elem(key(indexEnd));
+                nbElements++;
+                indexEnd = previous(indexEnd);
+            }
 
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
     }
 
     @Override
-    public long previousOrEqual(long key) {
+    public final long previousOrEqual(long key) {
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
-
-        long result = internal_previousOrEqual_index(key);
-        long resultKey;
-        if (result != -1) {
-            resultKey = key(result);
-        } else {
-            resultKey = Constants.NULL_LONG;
+        try {
+            ptrConsistency();
+            long result = internal_previousOrEqual_index(key);
+            long resultKey;
+            if (result != -1) {
+                resultKey = key(result);
+            } else {
+                resultKey = Constants.NULL_LONG;
+            }
+            return resultKey;
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
-
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
-        }
-        return resultKey;
     }
 
     @Override
     public final void save(KBuffer buffer) {
         //OffHeap lock
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
+        try {
+            ptrConsistency();
 
-        long rootElem = OffHeapLongArray.get(addr, INDEX_ROOT_ELEM);
-        if (rootElem == Constants.OFFHEAP_NULL_PTR) {
+            long rootElem = OffHeapLongArray.get(addr, INDEX_ROOT_ELEM);
+            if (rootElem == Constants.OFFHEAP_NULL_PTR) {
+                //Free OffHeap lock
+                if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                    throw new RuntimeException("CAS Error !!!");
+                }
+                buffer.write((byte) '0');
+                return;
+            }
+            long treeSize = OffHeapLongArray.get(addr, INDEX_SIZE);
+            Base64.encodeLongToBuffer(OffHeapLongArray.get(addr, INDEX_SIZE), buffer);
+            buffer.write(Constants.CHUNK_SUB_SEP);
+            Base64.encodeLongToBuffer(rootElem, buffer);
+
+            for (long i = 0; i < treeSize; i++) {
+                long parentIndex = OffHeapLongArray.get(metaPtr, (i * META_SIZE) + 2);
+                if (parentIndex != -1 || i == rootElem) {
+                    boolean isOnLeft = false;
+                    if (parentIndex != -1) {
+                        isOnLeft = OffHeapLongArray.get(metaPtr, parentIndex * META_SIZE) == i;
+                    }
+                    if (!color(i)) {
+                        if (isOnLeft) {
+                            buffer.write(BLACK_LEFT);
+                        } else {
+                            buffer.write(BLACK_RIGHT);
+                        }
+                    } else {//red
+                        if (isOnLeft) {
+                            buffer.write(RED_LEFT);
+                        } else {
+                            buffer.write(RED_RIGHT);
+                        }
+                    }
+                    Base64.encodeLongToBuffer(OffHeapLongArray.get(kPtr, i), buffer);
+                    buffer.write(Constants.CHUNK_SUB_SEP);
+                    if (parentIndex != -1) {
+                        Base64.encodeLongToBuffer(parentIndex, buffer);
+                    }
+                }
+            }
+        } finally {
             //Free OffHeap lock
             if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
                 throw new RuntimeException("CAS Error !!!");
             }
-            buffer.write((byte) '0');
-            return;
-        }
-        long treeSize = OffHeapLongArray.get(addr, INDEX_SIZE);
-        Base64.encodeLongToBuffer(OffHeapLongArray.get(addr, INDEX_SIZE), buffer);
-        buffer.write(Constants.CHUNK_SUB_SEP);
-        Base64.encodeLongToBuffer(rootElem, buffer);
-
-        for (long i = 0; i < treeSize; i++) {
-            long parentIndex = OffHeapLongArray.get(metaPtr, (i * META_SIZE) + 2);
-            if (parentIndex != -1 || i == rootElem) {
-                boolean isOnLeft = false;
-                if (parentIndex != -1) {
-                    isOnLeft = OffHeapLongArray.get(metaPtr, parentIndex * META_SIZE) == i;
-                }
-                if (!color(i)) {
-                    if (isOnLeft) {
-                        buffer.write(BLACK_LEFT);
-                    } else {
-                        buffer.write(BLACK_RIGHT);
-                    }
-                } else {//red
-                    if (isOnLeft) {
-                        buffer.write(RED_LEFT);
-                    } else {
-                        buffer.write(RED_RIGHT);
-                    }
-                }
-                Base64.encodeLongToBuffer(OffHeapLongArray.get(kPtr, i), buffer);
-                buffer.write(Constants.CHUNK_SUB_SEP);
-                if (parentIndex != -1) {
-                    Base64.encodeLongToBuffer(parentIndex, buffer);
-                }
-            }
-        }
-
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
         }
     }
 
@@ -281,20 +287,22 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public void insert(long p_key) {
+    public final void insert(long p_key) {
         //OffHeap lock
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
-        ptrConsistency();
+        try {
+            ptrConsistency();
 
-        internal_insert(p_key);
-
-        //Free OffHeap lock
-        if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
+            internal_insert(p_key);
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
     }
 
-    public void internal_insert(long p_key) {
+    private void internal_insert(long p_key) {
 
         long size = OffHeapLongArray.get(addr, INDEX_SIZE);
         if ((size + 1) > OffHeapLongArray.get(addr, INDEX_THRESHOLD)) {
@@ -355,10 +363,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             setParent(size, n);
         }
         insertCase1(size);
-        //TODO make homogenous dirty calls
         internal_set_dirty();
-        OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
-
     }
 
     private long internal_previousOrEqual_index(long p_key) {
@@ -397,6 +402,14 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     private void internal_set_dirty() {
+        long previousMagic;
+        long nextMagic;
+        do {
+            previousMagic = OffHeapLongArray.get(addr, INDEX_MAGIC);
+            nextMagic = previousMagic + 1;
+        } while (!OffHeapLongArray.compareAndSwap(addr, INDEX_MAGIC, previousMagic, nextMagic));
+
+
         if (_listener != null) {
             if ((OffHeapLongArray.get(addr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 _listener.declareDirty(this);
@@ -625,7 +638,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_SIZE, 0);
             OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-            OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
+            OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
 
             return;
         }

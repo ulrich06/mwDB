@@ -10,6 +10,7 @@ import org.mwdb.chunk.heap.KHeapChunk;
 import org.mwdb.chunk.offheap.*;
 import org.mwdb.utility.Buffer;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 public class StateChunkTest implements KChunkListener {
 
@@ -50,6 +51,8 @@ public class StateChunkTest implements KChunkListener {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         saveLoadTest(factory);
         protectionTest(factory);

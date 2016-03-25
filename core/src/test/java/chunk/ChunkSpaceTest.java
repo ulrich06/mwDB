@@ -10,6 +10,7 @@ import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KWorldOrderChunk;
 import org.mwdb.chunk.heap.HeapChunkSpace;
 import org.mwdb.chunk.offheap.*;
+import org.mwdb.utility.Unsafe;
 
 public class ChunkSpaceTest {
     @Test
@@ -23,6 +24,8 @@ public class ChunkSpaceTest {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         OffHeapChunkSpace space = new OffHeapChunkSpace(10, 10);
         test(space);

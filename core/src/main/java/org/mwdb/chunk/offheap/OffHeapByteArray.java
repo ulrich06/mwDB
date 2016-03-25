@@ -12,7 +12,9 @@ public class OffHeapByteArray {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     public static long allocate(final long capacity) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity);
@@ -44,13 +46,17 @@ public class OffHeapByteArray {
     }
 
     public static void free(final long addr) {
-        alloc_counter--;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter--;
+        }
 
         unsafe.freeMemory(addr);
     }
 
     public static long cloneArray(final long srcAddr, final long length) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         long newAddr = unsafe.allocateMemory(length);
         unsafe.copyMemory(srcAddr, newAddr, length);

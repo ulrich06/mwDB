@@ -11,27 +11,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
-    // TODO get at many places but set only in constructor and modify method -> normal ref is enough
-    private final AtomicReference<InternalState> state;
-
-    private final KChunkListener _listener;
-
-    // TODO only used in constructor and synchronized method -> volatile not needed
+    private volatile InternalState state;
     private volatile boolean aligned;
+    private final KChunkListener _listener;
 
     public ArrayLongLongArrayMap(KChunkListener p_listener, int initialCapacity, ArrayLongLongArrayMap p_origin) {
         this._listener = p_listener;
-        this.state = new AtomicReference<InternalState>();
         if (p_origin == null) {
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0, 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
             }
-            this.state.set(newstate);
+            this.state = newstate;
             aligned = true;
         } else {
-            this.state.set(p_origin.state.get());
+            this.state = p_origin.state;
             aligned = false;
         }
     }
@@ -39,7 +34,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
     /**
      * Internal Map state, to be replace in a compare and swap manner
      */
-    final class InternalState {
+    private final class InternalState {
 
         final int _stateSize;
 
@@ -57,7 +52,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
         volatile int _elementDeleted;
 
-        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount, int p_elementDeleted) {
+        InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount, int p_elementDeleted) {
             this._stateSize = p_stateSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
@@ -83,7 +78,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
     @Override
     public final long[] get(long key) {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         if (internalState._stateSize == 0) {
             return new long[0];
         }
@@ -124,7 +119,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
     @Override
     public final void each(KLongLongArrayMapCallBack callback) {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         for (int i = 0; i < internalState._elementCount; i++) {
             if (internalState._elementNext[i] != -1) { //there is a real value
                 callback.on(internalState._elementK[i], internalState._elementV[i]);
@@ -134,19 +129,18 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
 
     @Override
     public long size() {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         return internalState._elementCount - internalState._elementDeleted;
     }
 
-    // TODO no need to synchronize this method, internal_modify_map is already synchronized
     @Override
-    public final synchronized void put(long key, long value) {
+    public final void put(long key, long value) {
         internal_modify_map(key, value, true);
     }
 
     private synchronized void internal_modify_map(long key, long value, boolean toInsert) {
         //first test if reHash is necessary
-        InternalState internalState = state.get();
+        InternalState internalState = state;
         if (toInsert) {
             //no reHash in case of remove
             if ((internalState._elementCount + 1) > internalState._threshold) {
@@ -175,7 +169,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                     }
                 }
                 internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount, internalState._elementDeleted);
-                state.set(internalState);
+                state = internalState;
             }
             int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
             int m = internalState._elementHash[hashIndex];
@@ -185,15 +179,13 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                 }
                 m = internalState._elementNext[m];
             }
-
             //now we are sure that the current state have to be altered, so we realigne it if necesserary
             if (!aligned) {
                 //clone the state
-                state.set(state.get().clone());
-                internalState = state.get();
+                state = state.clone();
+                internalState = state;
                 aligned = true;
             }
-
             int newIndex = internalState._elementCount;
             internalState._elementK[newIndex] = key;
             internalState._elementV[newIndex] = value;
@@ -228,11 +220,10 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                 m = internalState._elementNext[m];
             }
         }
-
     }
 
     @Override
-    public void remove(long key, long value) {
+    public final void remove(long key, long value) {
         internal_modify_map(key, value, false);
     }
 

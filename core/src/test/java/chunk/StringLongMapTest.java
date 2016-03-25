@@ -13,6 +13,7 @@ import org.mwdb.chunk.offheap.OffHeapDoubleArray;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapStringArray;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 public class StringLongMapTest implements KChunkListener {
 
@@ -29,6 +30,8 @@ public class StringLongMapTest implements KChunkListener {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         org.mwdb.chunk.offheap.ArrayStringLongMap map = new org.mwdb.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1);
         org.mwdb.chunk.offheap.ArrayStringLongMap.incrementCopyOnWriteCounter(map.rootAddress());

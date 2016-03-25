@@ -11,8 +11,8 @@ public class FixedStack implements KStack {
     private int[] _next;
     private int[] _prev;
     private int _count;
-    final ReentrantLock lock = new ReentrantLock();
-    final int _capacity;
+    private final ReentrantLock lock = new ReentrantLock();
+    private final int _capacity;
 
     public FixedStack(int capacity) {
         this._capacity = capacity;
@@ -38,7 +38,7 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public boolean enqueue(long index) {
+    public final boolean enqueue(long index) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -68,7 +68,7 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public long dequeueTail() {
+    public final long dequeueTail() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -94,7 +94,7 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public boolean dequeue(long index) {
+    public final boolean dequeue(long index) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
@@ -148,9 +148,8 @@ public class FixedStack implements KStack {
     }
 
     @Override
-    public void free() {
-
+    public final void free() {
+        //noop
     }
-
-
+    
 }

@@ -12,7 +12,9 @@ public class OffHeapLongArray {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     public static long allocate(final long capacity) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
@@ -44,7 +46,9 @@ public class OffHeapLongArray {
     }
 
     public static void free(final long addr) {
-        alloc_counter--;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter--;
+        }
 
         unsafe.freeMemory(addr);
     }

@@ -11,28 +11,22 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ArrayLongLongMap implements KLongLongMap {
 
-    // TODO get at many places but set only in constructor and modify method -> normal ref is enough
-    private final AtomicReference<InternalState> state;
-
-    private final KChunkListener _listener;
-
-    // TODO only used in constructor and synchronized methods -> no need for volatile
+    private volatile InternalState state;
     private volatile boolean aligned;
+    private final KChunkListener _listener;
 
     public ArrayLongLongMap(KChunkListener p_listener, int initialCapacity, ArrayLongLongMap p_origin) {
         this._listener = p_listener;
-        this.state = new AtomicReference<InternalState>();
-
         if (p_origin == null) {
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
                 newstate._elementHash[i] = -1;
             }
-            this.state.set(newstate);
+            this.state = newstate;
             aligned = true;
         } else {
-            this.state.set(p_origin.state.get());
+            this.state = p_origin.state;
             aligned = false;
         }
     }
@@ -40,23 +34,23 @@ public class ArrayLongLongMap implements KLongLongMap {
     /**
      * Internal Map state, to be replace in a compare and swap manner
      */
-    final class InternalState {
+    private final class InternalState {
 
-        public final int _stateSize;
+        final int _stateSize;
 
-        public final long[] _elementK;
+        final long[] _elementK;
 
-        public final long[] _elementV;
+        final long[] _elementV;
 
-        public final int[] _elementNext;
+        final int[] _elementNext;
 
-        public final int[] _elementHash;
+        final int[] _elementHash;
 
-        public final int _threshold;
+        final int _threshold;
 
-        protected volatile int _elementCount;
+        volatile int _elementCount;
 
-        public InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount) {
+        InternalState(int p_stateSize, long[] p_elementK, long[] p_elementV, int[] p_elementNext, int[] p_elementHash, int p_elementCount) {
             this._stateSize = p_stateSize;
             this._elementK = p_elementK;
             this._elementV = p_elementV;
@@ -82,7 +76,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final long get(long key) {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         if (internalState._stateSize == 0) {
             return Constants.NULL_LONG;
         }
@@ -100,7 +94,7 @@ public class ArrayLongLongMap implements KLongLongMap {
 
     @Override
     public final void each(KLongLongMapCallBack callback) {
-        InternalState internalState = state.get();
+        final InternalState internalState = state;
         for (int i = 0; i < internalState._elementCount; i++) {
             if (internalState._elementNext[i] != -1) { //there is a real value
                 callback.on(internalState._elementK[i], internalState._elementV[i]);
@@ -109,23 +103,24 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public long size() {
-        return state.get()._elementCount;
+    public final long size() {
+        return state._elementCount;
     }
 
-    // TODO maybe put the content of this method into an internal_modify_map an synchronize this one (symmetry to longLongArrayMap and if remove is implemented)
     @Override
-    public final synchronized void put(long key, long value) {
+    public final void put(long key, long value) {
+        internal_modify_map(key, value);
+    }
 
+    private synchronized void internal_modify_map(long key, long value) {
         if (!aligned) {
             //clone the state
-            state.set(state.get().clone());
+            state = state.clone();
             aligned = true;
         }
-
         int entry = -1;
         int hashIndex = -1;
-        InternalState internalState = state.get();
+        InternalState internalState = state;
         if (internalState._stateSize > 0) {
             hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
             int m = internalState._elementHash[hashIndex];
@@ -167,7 +162,7 @@ public class ArrayLongLongMap implements KLongLongMap {
                 }
                 //setPrimitiveType value for all
                 internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount);
-                state.set(internalState);
+                state = internalState;
                 hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
             }
             int newIndex = internalState._elementCount;
@@ -198,7 +193,7 @@ public class ArrayLongLongMap implements KLongLongMap {
     }
 
     @Override
-    public void remove(long key) {
+    public final void remove(long key) {
         throw new RuntimeException("Not implemented yet!!!");
     }
 

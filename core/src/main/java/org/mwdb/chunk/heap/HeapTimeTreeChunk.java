@@ -6,13 +6,11 @@ import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.KTreeWalker;
 import org.mwdb.utility.Base64;
-import org.mwdb.utility.PrimitiveHelper;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import org.mwdb.utility.Unsafe;
 
 public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
+
+    private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     //constants definition
     private static final byte BLACK_LEFT = '{';
@@ -21,27 +19,42 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     private static final byte RED_RIGHT = ']';
     private static final int META_SIZE = 3;
 
-    private int _threshold = 0;
-    // TODO here I think we need the volatile + AtomicLong/Integer
-    //volatile variables
-    private volatile int _root_index = -1;
-    private volatile int _size = 0;
-    //final local variables
-    private final AtomicLong _flags;
-    private final AtomicInteger _counter;
-
-    protected volatile long _magic;
+    private final long _world;
+    private final long _time;
+    private final long _id;
 
     private final KChunkListener _listener;
 
-    private int[] _back_meta;
-    private long[] _back_kv;
-    private boolean[] _back_colors;
+    private volatile int _threshold;
+    private volatile int _root_index = -1;
+    private volatile int _size = 0;
 
-    //multi-thread sync
-    private AtomicBoolean _magicToken;
+    private volatile int[] _back_meta;
+    private volatile long[] _back_kv;
+    private volatile boolean[] _back_colors;
 
-    public HeapTimeTreeChunk(long p_world, long p_time, long p_obj, KChunkListener p_listener, KBuffer initialPayload) {
+    private volatile int _lock;
+    private volatile long _flags;
+    private volatile long _marks;
+    private volatile long _magic;
+
+    private static final long _lockOffset;
+    private static final long _flagsOffset;
+    private static final long _marksOffset;
+    private static final long _magicOffset;
+
+    static {
+        try {
+            _lockOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_lock"));
+            _flagsOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_flags"));
+            _marksOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_marks"));
+            _magicOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_magic"));
+        } catch (Exception ex) {
+            throw new Error(ex);
+        }
+    }
+
+    public HeapTimeTreeChunk(final long p_world, final long p_time, final long p_obj, final KChunkListener p_listener, final KBuffer initialPayload) {
         //listener
         this._listener = p_listener;
         //identifier
@@ -49,62 +62,206 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         this._time = p_time;
         this._id = p_obj;
         //multi-thread management
-        this._flags = new AtomicLong(0);
-        this._counter = new AtomicInteger(0);
-        this._magic = PrimitiveHelper.rand();
-        this._magicToken = new AtomicBoolean(false);
-
+        this._threshold = 0;
+        this._flags = 0;
+        this._marks = 0;
+        this._magic = 0;
+        this._lock = 0;
         load(initialPayload);
     }
 
     @Override
     public final long marks() {
-        return this._counter.get();
+        return this._marks;
     }
 
     @Override
-    public final int mark() {
-        return this._counter.incrementAndGet();
+    public final long mark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before + 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
     @Override
-    public final int unmark() {
-        return this._counter.decrementAndGet();
+    public final long unmark() {
+        long before;
+        long after;
+        do {
+            before = _marks;
+            after = before - 1;
+        } while (!unsafe.compareAndSwapLong(this, _marksOffset, before, after));
+        return after;
     }
 
-    private final long _world;
-
-    private final long _time;
-
-    private final long _id;
-
     @Override
-    public long world() {
+    public final long world() {
         return this._world;
     }
 
     @Override
-    public long time() {
+    public final long time() {
         return this._time;
     }
 
     @Override
-    public long id() {
+    public final long id() {
         return this._id;
     }
 
-    public long flags() {
-        return _flags.get();
+    @Override
+    public final long flags() {
+        return _flags;
     }
 
-    public boolean setFlags(long bitsToEnable, long bitsToDisable) {
+    @Override
+    public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
         long nval;
         do {
-            val = _flags.get();
+            val = _flags;
             nval = val & ~bitsToDisable | bitsToEnable;
-        } while (!_flags.compareAndSet(val, nval));
+        } while (!unsafe.compareAndSwapLong(this, _flagsOffset, val, nval));
         return val != nval;
+    }
+
+    @Override
+    public final long size() {
+        return _size;
+    }
+
+    @Override
+    public synchronized final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
+        //lock and load from main memory
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+
+        int nbElements = 0;
+        int indexEnd = internal_previousOrEqual_index(endKey);
+        while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
+            walker.elem(key(indexEnd));
+            nbElements++;
+            indexEnd = previous(indexEnd);
+        }
+
+        //free the lock
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
+    @Override
+    public synchronized final void save(KBuffer buffer) {
+        //lock and load from main memory
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+
+        if (_root_index == -1) {
+            buffer.write((byte) '0');
+        }
+        Base64.encodeLongToBuffer((long) _size, buffer);
+        buffer.write(Constants.CHUNK_SUB_SEP);
+        Base64.encodeLongToBuffer((long) _root_index, buffer);
+        for (int i = 0; i < _back_meta.length / META_SIZE; i++) {
+            int parentIndex = _back_meta[(i * META_SIZE) + 2];
+            if (parentIndex != -1 || i == _root_index) {
+                boolean isOnLeft = false;
+                if (parentIndex != -1) {
+                    isOnLeft = _back_meta[parentIndex * META_SIZE] == i;
+                }
+                if (!color(i)) {
+                    if (isOnLeft) {
+                        buffer.write(BLACK_LEFT);
+                    } else {
+                        buffer.write(BLACK_RIGHT);
+                    }
+                } else {//red
+                    if (isOnLeft) {
+                        buffer.write(RED_LEFT);
+                    } else {
+                        buffer.write(RED_RIGHT);
+                    }
+                }
+                Base64.encodeLongToBuffer(_back_kv[i], buffer);
+                buffer.write(Constants.CHUNK_SUB_SEP);
+                if (parentIndex != -1) {
+                    Base64.encodeIntToBuffer(parentIndex, buffer);
+                }
+            }
+        }
+        //free the lock
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
+    @Override
+    public synchronized final long previousOrEqual(long key) {
+        //lock and load from main memory
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+
+        int result = internal_previousOrEqual_index(key);
+        long resultKey;
+        if (result != -1) {
+            resultKey = key(result);
+        } else {
+            resultKey = Constants.NULL_LONG;
+        }
+        //free the lock
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+        return resultKey;
+    }
+
+    @Override
+    public final long magic() {
+        return this._magic;
+    }
+
+    @Override
+    public synchronized final void insert(long p_key) {
+        //lock and load from main memory
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+        internal_insert(p_key);
+        //free the lock and write to main memory
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
+    }
+
+    @Override
+    public final byte chunkType() {
+        return Constants.TIME_TREE_CHUNK;
+    }
+
+    @Override
+    public synchronized final void clearAt(long max) {
+        //lock and load from main memory
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+
+        long[] previousValue = _back_kv;
+        //reset the state
+        _back_kv = new long[_back_kv.length];
+        _back_meta = new int[_back_kv.length * META_SIZE];
+        _back_colors = new boolean[_back_kv.length];
+        _root_index = -1;
+        int _previousSize = _size;
+        _size = 0;
+
+        for (int i = 0; i < _previousSize; i++) {
+            if (previousValue[i] != Constants.NULL_LONG && previousValue[i] < max) {
+                internal_insert(previousValue[i]);
+            }
+        }
+        //dirty
+        internal_set_dirty();
+
+        //free the lock and write to main memory
+        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+            throw new RuntimeException("CAS Error !!!");
+        }
     }
 
     private void allocate(int capacity) {
@@ -139,11 +296,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         _back_colors = new_back_colors;
     }
 
-    public long size() {
-        return _size;
-    }
-
-    protected final long key(int p_currentIndex) {
+    private long key(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
@@ -264,6 +417,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
+    /*
     private int next(int p_index) {
         int p = p_index;
         if (right(p) != -1) {
@@ -289,8 +443,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    /* Time never use direct lookup, sadly for performance, anyway this method is private to ensure the correctness of caching mechanism */
-    public final long lookup(long p_key) {
+    private long lookup(long p_key) {
         int n = _root_index;
         if (n == -1) {
             return Constants.NULL_LONG;
@@ -308,45 +461,22 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
         return n;
     }
+    */
 
-    @Override
-    public final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
-        //negociate a magic
-        while (!this._magicToken.compareAndSet(false, true)) ;
-
-        int nbElements = 0;
-        int indexEnd = internal_previousOrEqual_index(endKey);
-        while (indexEnd != -1 && key(indexEnd) >= startKey && nbElements < maxElements) {
-            walker.elem(key(indexEnd));
-            nbElements++;
-            indexEnd = previous(indexEnd);
-        }
-
-        //free magic
-        this._magicToken.set(false);
-    }
 
     private int internal_previousOrEqual_index(long p_key) {
-
         int p = _root_index;
         if (p == -1) {
-            //free magic
-            this._magicToken.set(false);
             return p;
         }
-
         while (p != -1) {
             if (p_key == key(p)) {
-                //free magic
-                this._magicToken.set(false);
                 return p;
             }
             if (p_key > key(p)) {
                 if (right(p) != -1) {
                     p = right(p);
                 } else {
-                    //free magic
-                    this._magicToken.set(false);
                     return p;
                 }
             } else {
@@ -359,8 +489,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
                         ch = parent;
                         parent = parent(parent);
                     }
-                    //free magic
-                    this._magicToken.set(false);
                     return parent;
                 }
             }
@@ -368,7 +496,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         return -1;
     }
 
-    /* TODO manage with compare and swap here */
     private void rotateLeft(int n) {
         int r = right(n);
         replaceNode(n, r);
@@ -455,50 +582,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    @Override
-    public final void save(KBuffer buffer) {
-        //negociate a magic
-        while (!this._magicToken.compareAndSet(false, true)) ;
-
-        if (_root_index == -1) {
-            //free magic
-            this._magicToken.set(false);
-            buffer.write((byte) '0');
-        }
-        Base64.encodeLongToBuffer((long) _size, buffer);
-        buffer.write(Constants.CHUNK_SUB_SEP);
-        Base64.encodeLongToBuffer((long) _root_index, buffer);
-        for (int i = 0; i < _back_meta.length / META_SIZE; i++) {
-            int parentIndex = _back_meta[(i * META_SIZE) + 2];
-            if (parentIndex != -1 || i == _root_index) {
-                boolean isOnLeft = false;
-                if (parentIndex != -1) {
-                    isOnLeft = _back_meta[parentIndex * META_SIZE] == i;
-                }
-                if (!color(i)) {
-                    if (isOnLeft) {
-                        buffer.write(BLACK_LEFT);
-                    } else {
-                        buffer.write(BLACK_RIGHT);
-                    }
-                } else {//red
-                    if (isOnLeft) {
-                        buffer.write(RED_LEFT);
-                    } else {
-                        buffer.write(RED_RIGHT);
-                    }
-                }
-                Base64.encodeLongToBuffer(_back_kv[i], buffer);
-                buffer.write(Constants.CHUNK_SUB_SEP);
-                if (parentIndex != -1) {
-                    Base64.encodeIntToBuffer(parentIndex, buffer);
-                }
-            }
-        }
-        //free magic
-        this._magicToken.set(false);
-    }
-
     private void load(KBuffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
@@ -577,33 +660,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    @Override
-    public void clearAt(long max) {
-        //negociate a magic
-        while (!this._magicToken.compareAndSet(false, true)) ;
-
-        long[] previousValue = _back_kv;
-        //reset the state
-        _back_kv = new long[_back_kv.length];
-        _back_meta = new int[_back_kv.length * META_SIZE];
-        _back_colors = new boolean[_back_kv.length];
-        _root_index = -1;
-        int _previousSize = _size;
-        _size = 0;
-
-        for (int i = 0; i < _previousSize; i++) {
-            if (previousValue[i] != Constants.NULL_LONG && previousValue[i] < max) {
-                internal_insert(previousValue[i]);
-            }
-        }
-        //dirty
-        internal_set_dirty();
-        this._magic = PrimitiveHelper.rand();
-
-        //free magic
-        this._magicToken.set(false);
-    }
-
     private void internal_insert(long p_key) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
@@ -623,9 +679,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
             while (true) {
                 if (p_key == key(n)) {
                     //nop _size
-
-                    //free magic
-                    this._magicToken.set(false);
                     return;
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
@@ -659,47 +712,20 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
         insertCase1(newIndex);
         internal_set_dirty();
-        this._magic = PrimitiveHelper.rand();
     }
 
     private void internal_set_dirty() {
+        long magicBefore;
+        long magicAfter;
+        do {
+            magicBefore = _magic;
+            magicAfter = magicBefore + 1;
+        } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
         if (_listener != null) {
-            if ((_flags.get() & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
                 _listener.declareDirty(this);
             }
         }
-    }
-
-    public long previousOrEqual(long key) {
-        //negociate a magic
-        while (!this._magicToken.compareAndSet(false, true)) ;
-        int result = internal_previousOrEqual_index(key);
-        long resultKey;
-        if (result != -1) {
-            resultKey = key(result);
-        } else {
-            resultKey = Constants.NULL_LONG;
-        }
-        //free magic
-        this._magicToken.set(false);
-        return resultKey;
-    }
-
-    @Override
-    public long magic() {
-        return this._magic;
-    }
-
-    @Override
-    public void insert(long p_key) {
-        while (!this._magicToken.compareAndSet(false, true)) ;
-        internal_insert(p_key);
-        this._magicToken.set(false);
-    }
-
-    @Override
-    public byte chunkType() {
-        return Constants.TIME_TREE_CHUNK;
     }
 
      /*

@@ -7,12 +7,15 @@ import org.mwdb.utility.Unsafe;
  * @ignore ts
  */
 public class OffHeapStringArray {
+
     public static long alloc_counter = 0;
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     public static long allocate(final long capacity) {
-        alloc_counter++;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter++;
+        }
 
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
@@ -40,13 +43,13 @@ public class OffHeapStringArray {
         byte[] valueAsByte = valueToInsert.getBytes();
         long newStringPtr = unsafe.allocateMemory(4 + valueAsByte.length);
         //copy size of the string
-        unsafe.putInt(newStringPtr, valueAsByte.length);
+        unsafe.putIntVolatile(null, newStringPtr, valueAsByte.length);
         //copy string content
         for (int i = 0; i < valueAsByte.length; i++) {
-            unsafe.putByte(4 + newStringPtr + i, valueAsByte[i]);
+            unsafe.putByteVolatile(null, 4 + newStringPtr + i, valueAsByte[i]);
         }
         //register the new stringPtr
-        unsafe.putLong(addr + index * 8, newStringPtr);
+        unsafe.putLongVolatile(null, addr + index * 8, newStringPtr);
         //freeMemory if notNull
         if (temp_stringPtr != -1) {
             unsafe.freeMemory(temp_stringPtr);
@@ -58,16 +61,18 @@ public class OffHeapStringArray {
         if (stringPtr == Constants.OFFHEAP_NULL_PTR) {
             return null;
         }
-        int length = unsafe.getInt(stringPtr);
+        int length = unsafe.getIntVolatile(null, stringPtr);
         byte[] bytes = new byte[length];
         for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = unsafe.getByte(stringPtr + 4 + i);
+            bytes[i] = unsafe.getByteVolatile(null, stringPtr + 4 + i);
         }
         return new String(bytes);
     }
 
     public static void free(final long addr, final long capacity) {
-        alloc_counter--;
+        if (Unsafe.DEBUG_MODE) {
+            alloc_counter--;
+        }
 
         for (long i = 0; i < capacity; i++) {
             long stringPtr = unsafe.getLong(addr + i * 8);
@@ -86,12 +91,12 @@ public class OffHeapStringArray {
         unsafe.copyMemory(srcAddr, newAddr, length * 8);
         // copy the strings
         for (int i = 0; i < length; i++) {
-            long stringPtr = unsafe.getLong(newAddr + i * 8);
+            long stringPtr = unsafe.getLongVolatile(null, newAddr + i * 8);
             if (stringPtr != Constants.OFFHEAP_NULL_PTR) {
-                long len = unsafe.getInt(stringPtr);
+                long len = unsafe.getIntVolatile(null, stringPtr);
                 long newStringPtr = unsafe.allocateMemory(4 + len);
                 unsafe.copyMemory(stringPtr, newStringPtr, 4 + len);
-                unsafe.putLong(newAddr + i * 8, newStringPtr);
+                unsafe.putLongVolatile(null, newAddr + i * 8, newStringPtr);
             }
         }
         return newAddr;

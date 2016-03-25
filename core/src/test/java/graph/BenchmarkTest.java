@@ -11,7 +11,7 @@ public class BenchmarkTest {
 
    // @Test
     public void heapTest() {
-        test("heap ",GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
+        test("heap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
     //@Test
@@ -21,7 +21,7 @@ public class BenchmarkTest {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test("offheap ",GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+        test("offheap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
     }
 
     //final int valuesToInsert = 10_000_000;
@@ -29,7 +29,7 @@ public class BenchmarkTest {
 
     final long timeOrigin = 1000;
 
-    private void test(String name,KGraph graph) {
+    private void test(String name, KGraph graph) {
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -68,7 +68,7 @@ public class BenchmarkTest {
                         long beforeRead = System.currentTimeMillis();
 
                         System.out.println("<end insert phase>" + " " + (System.currentTimeMillis() - before) / 1000 + "s");
-                        System.out.println(name+" result: " + (valuesToInsert / ((System.currentTimeMillis() - before) / 1000) / 1000) + "kv/s");
+                        System.out.println(name + " result: " + (valuesToInsert / ((System.currentTimeMillis() - before) / 1000) / 1000) + "kv/s");
 
                         /*
                         final KDeferCounter counterRead = graph.counter(valuesToInsert);
