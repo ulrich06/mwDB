@@ -284,7 +284,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     @Override
     public double getProbability(double[] featArray, double[] err) {
-        double[] res = new double[featArray.length];
+
         double[] avg = getAvg();
         if (avg == null) {
             return 0;
