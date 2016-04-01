@@ -39,4 +39,6 @@ public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
     double[] getMax();
 
+    boolean checkInside(double[] feature, int level);
+
 }
