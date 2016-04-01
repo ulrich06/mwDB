@@ -1,11 +1,11 @@
-package org.mwdb.ml;
+package org.mwdb;
 
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
 import org.mwdb.KMLNode;
 import org.mwdb.KNode;
 
-abstract class AbstractMLNode<A extends KNode> implements KMLNode<A> {
+public abstract class AbstractMLNode<A extends KNode> implements KMLNode<A> {
 
     private final KNode _rootNode;
 

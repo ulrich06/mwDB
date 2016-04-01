@@ -1,12 +1,13 @@
-package org.mwdb.ml;
+package org.mwdb.gmm;
 
 import org.mwdb.KCallback;
-import org.mwdb.KGaussianNode;
 import org.mwdb.KNode;
 import org.mwdb.KType;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.Matrix;
 import org.mwdb.math.matrix.solver.MultivariateNormalDistribution;
+import org.mwdb.AbstractMLNode;
+
 
 /**
  * Created by assaad on 21/03/16.
@@ -24,6 +25,13 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     private static final String AVG_KEY = "getAvg";
     private static final String COV_KEY = "cov";
 
+
+    //Mixture model keys
+    private static final String INTERNAL_LEVEL_KEY="_level";
+    private static final String INTERNAL_WIDTH_KEY="_width";
+    private static final String INTERNAL_SUBGAUSSIAN_KEY="_subGaussian";
+
+    //Gaussian keys
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_SUMSQUARE_KEY = "_sumSquare";
     private static final String INTERNAL_TOTAL_KEY = "_total";
@@ -38,7 +46,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             learn((double[]) attributeValue);
         } else {
             rootNode().attSet(attributeName, attributeType, attributeValue);
-        }
+            }
     }
 
     @Override
@@ -73,8 +81,51 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
     }
 
+
+
     public double incWeight(double weight) {
         return weight + 1;
+    }
+
+
+    @Override
+    public void setSubLevels(int levels) {
+        rootNode().attSet(INTERNAL_LEVEL_KEY,KType.INT,levels);
+    }
+
+    @Override
+    public void setMaxPerLevel(int maxPerLevel) {
+        rootNode().attSet(INTERNAL_WIDTH_KEY,KType.INT,maxPerLevel);
+    }
+
+    @Override
+    public int getSubLevels(){
+        Integer g= (Integer) rootNode().att(INTERNAL_LEVEL_KEY);
+        if(g!=null){
+            return g;
+        }
+        else return 0;
+    }
+
+    @Override
+    public int getMaxPerLevel(){
+        Integer g= (Integer) rootNode().att(INTERNAL_WIDTH_KEY);
+        if(g!=null){
+            return g;
+        }
+        else return 0;
+    }
+
+
+
+    private void createLevel(double[] values, int level, int width){
+        KNode node= graph().newNode(this.world(),this.time());
+        GaussianNode g = new GaussianNode(node);
+        g.setMaxPerLevel(level);
+        g.setMaxPerLevel(width);
+        g.learn(values);
+
+        rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,node);
     }
 
 
@@ -92,6 +143,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
 
         int features = values[0].length;
+        int level=getSubLevels();
+        int width=getMaxPerLevel();
+
 
         //manage total
         Integer total = getTotal();
@@ -128,6 +182,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
                     max[i] = values[k][i];
                 }
                 sum[i] += values[k][i];
+                if(level>0){
+                    createLevel(values[k],level-1,width);
+                }
             }
 
             int count = 0;
@@ -157,6 +214,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         //manage total
         Integer total = getTotal();
         Double weight = getWeight();
+        int level=getSubLevels();
+        int width=getMaxPerLevel();
 
         //Create dirac
         if (total == null) {
@@ -169,6 +228,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
             attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE, weight);
             attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
+            if(level>0){
+                createLevel(values,level-1,width);
+            }
 
         } else {
             double[] sum;
@@ -223,6 +285,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             }
             total++;
             weight = incWeight(weight);
+            if(level>0){
+                createLevel(values,level-1,width);
+            }
 
             //Store everything
             attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
@@ -283,7 +348,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     }
 
     @Override
-    public double getProbability(double[] featArray, double[] err) {
+    public double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg) {
 
         double[] avg = getAvg();
         if (avg == null) {
@@ -298,11 +363,11 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
 
         MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
-        return mnd.density(featArray);
+        return mnd.density(featArray, normalizeOnAvg);
     }
 
     @Override
-    public double[] getProbabilityArray(double[][] featArray, double[] err) {
+    public double[] getProbabilityArray(double[][] featArray, double[] err, boolean normalizeOnAvg) {
         double[] res = new double[featArray.length];
         double[] avg = getAvg();
         if (avg == null) {
@@ -318,7 +383,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
 
         for (int i = 0; i < res.length; i++) {
-            res[i] = mnd.density(featArray[i]);
+            res[i] = mnd.density(featArray[i],normalizeOnAvg);
         }
         return res;
     }
@@ -441,6 +506,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             return max;
         }
     }
+
 
     @Override
     public void jump(long world, long time, KCallback<KGaussianNode> callback) {

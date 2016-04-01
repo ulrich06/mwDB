@@ -2,6 +2,7 @@ package ml;
 
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
 
 import java.util.Random;
@@ -32,7 +33,7 @@ public class GaussianNonInvertTest {
                     datan[0] = data[0];
                     datan[1] = data[1];
                     datan[2] = data[2];
-                    datan[3] = 0;
+                    datan[3] = 0*data[0]+0*data[1]+0*data[2];
 
                     node1.learn(data);
                     node2.learn(datan);
@@ -51,10 +52,10 @@ public class GaussianNonInvertTest {
                 datan[0] = data[0];
                 datan[1] = data[1];
                 datan[2] = data[2];
-                datan[3] = 0;
+                datan[3] =  0*data[0]+0*data[1]+0*data[2];
 
-                double p=node1.getProbability(data,null);
-                double p2= node2.getProbability(datan,null);
+                double p=node1.getProbability(avg,null,false);
+                double p2= node2.getProbability(avg2,null,false);
                 System.out.println("p1: "+p);
                 System.out.println("p2: "+p2);
 

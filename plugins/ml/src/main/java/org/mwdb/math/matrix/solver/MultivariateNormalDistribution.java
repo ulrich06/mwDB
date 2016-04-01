@@ -25,15 +25,17 @@ public class MultivariateNormalDistribution {
 
     }
 
-    public double density(double[] features) {
-        double d= getExponentTerm(features);
+    public double density(double[] features, boolean normalizeOnAvg) {
 
-        double p=Math.pow(2 * Math.PI, -0.5 * rank) *
-                Math.pow(det, -0.5);
-        System.out.println("coef: "+p);
+        if(normalizeOnAvg){
+            return getExponentTerm(features);
+        }
+        else{
+            return Math.pow(2 * Math.PI, -0.5 * rank) *
+                    Math.pow(det, -0.5) * getExponentTerm(features);
+        }
 
 
-        return p*d;
     }
 
     private double getExponentTerm(double[] features) {
@@ -52,7 +54,6 @@ public class MultivariateNormalDistribution {
         KMatrix res2= Matrix.multiply(res,ftt);
 
         double d=Math.exp(-0.5 *res2.get(0,0));
-        System.out.println("exponent "+ d);
 
         return d;
     }

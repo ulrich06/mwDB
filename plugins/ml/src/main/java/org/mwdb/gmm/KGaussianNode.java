@@ -1,8 +1,16 @@
-package org.mwdb;
+package org.mwdb.gmm;
 
+import org.mwdb.KMLNode;
 import org.mwdb.math.matrix.KMatrix;
 
 public interface KGaussianNode extends KMLNode<KGaussianNode> {
+
+    void setSubLevels( int levels);
+    void setMaxPerLevel(int maxPerLevel);
+
+    int getSubLevels();
+
+    int getMaxPerLevel();
 
     void learnBatch(double[][] values);
 
@@ -14,9 +22,9 @@ public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
     double[] getSumSquares();
 
-    double getProbability(double[] featArray, double[] err);
+    double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg);
 
-    double[] getProbabilityArray(double[][] featArray, double[] err);
+    double[] getProbabilityArray(double[][] featArray, double[] err, boolean normalizeOnAvg);
 
     Integer getTotal();
 

@@ -1,8 +1,11 @@
 package ml;
 
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.gmm.KGaussianNode;
+import org.mwdb.math.matrix.Matrix;
 import org.mwdb.task.NoopScheduler;
 
 import java.util.Random;
@@ -44,26 +47,21 @@ public class GaussianProbaTest {
 
                 //Test probability calculation.
                 MultivariateNormalDistribution apache = new MultivariateNormalDistribution(ravg, rcovData);
+
+                double eps=1e-8;
                 double d = apache.density(v);
                 System.out.println("apache: " + d);
 
-                double y = gaussianNodeLive.getProbability(v, null);
+                double y = gaussianNodeLive.getProbability(v, null,false);
                 System.out.println("live: " + y);
 
-                double z = gaussianNodeBatch.getProbability(v, null);
+                double z = gaussianNodeBatch.getProbability(v, null,false);
                 System.out.println("batch: " + z);
 
 
+                Assert.assertTrue(Math.abs(d-y)<eps);
+                Assert.assertTrue(Math.abs(d-z)<eps);
 
-
-
-                double[] sumLive= gaussianNodeLive.getSum();
-                double[] sumsqLive = gaussianNodeLive.getSumSquares();
-
-                double[] sumBatch = gaussianNodeBatch.getSum();
-                double[] sumSqBatch = gaussianNodeBatch.getSumSquares();
-
-                int x=0;
 
 
             }

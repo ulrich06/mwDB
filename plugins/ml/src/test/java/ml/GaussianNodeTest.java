@@ -1,10 +1,10 @@
 package ml;
 
-import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.math.matrix.Matrix;
+import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
 
 /**
