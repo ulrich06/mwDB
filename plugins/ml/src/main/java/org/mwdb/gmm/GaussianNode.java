@@ -119,7 +119,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         KNode node= graph().newNode(this.world(),this.time());
         GaussianNode g = new GaussianNode(node);
         g.configMixture(level,width);
-        g.learn(values);
+        g.learn(values); //dirac
 
         rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,node);
     }
@@ -127,11 +127,22 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     private void checkAndCompress(){
         int width=getMaxPerLevel();
         long[] subgaussians= rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
-        if(subgaussians==null|| subgaussians.length<width){
+        if(subgaussians==null|| subgaussians.length<2*width){
             return;
         }
         else{
             //Compress here
+            rootNode().rel(INTERNAL_SUBGAUSSIAN_KEY,new KCallback<KNode[]>(){
+                @Override
+                public void on(KNode[] result) {
+                    int total=0;
+                    for(int i=0;i<result.length;i++){
+                        GaussianNode x= new GaussianNode(result[i]);
+                        total+=x.getTotal();
+                    }
+                    System.out.println(total);
+                }
+            });
         }
     }
 

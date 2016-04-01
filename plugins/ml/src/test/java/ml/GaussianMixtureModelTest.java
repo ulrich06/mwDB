@@ -24,9 +24,9 @@ public class GaussianMixtureModelTest {
                 Random rand = new Random();
 
                 KGaussianNode node1 = KML.gaussianNode(graph.newNode(0, 0));
-                node1.configMixture(1,10);
+                node1.configMixture(1,100);
 
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < 220; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]
                     data[1] = 90 + rand.nextDouble() * 20; //avg=100 [90,110]
                     data[2] = -60 + rand.nextDouble() * 20; //avg=-50 [-60,-40]
