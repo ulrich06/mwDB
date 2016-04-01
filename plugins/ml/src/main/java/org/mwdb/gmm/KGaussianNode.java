@@ -5,8 +5,7 @@ import org.mwdb.math.matrix.KMatrix;
 
 public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
-    void setSubLevels( int levels);
-    void setMaxPerLevel(int maxPerLevel);
+    void configMixture(int levels,int maxPerLevel);
 
     int getSubLevels();
 

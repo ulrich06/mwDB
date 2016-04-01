@@ -88,16 +88,13 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     }
 
 
+
     @Override
-    public void setSubLevels(int levels) {
+    public void configMixture(int levels,int maxPerLevel){
         rootNode().attSet(INTERNAL_LEVEL_KEY,KType.INT,levels);
-    }
-
-    @Override
-    public void setMaxPerLevel(int maxPerLevel) {
         rootNode().attSet(INTERNAL_WIDTH_KEY,KType.INT,maxPerLevel);
-    }
 
+    }
     @Override
     public int getSubLevels(){
         Integer g= (Integer) rootNode().att(INTERNAL_LEVEL_KEY);
@@ -121,11 +118,21 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     private void createLevel(double[] values, int level, int width){
         KNode node= graph().newNode(this.world(),this.time());
         GaussianNode g = new GaussianNode(node);
-        g.setMaxPerLevel(level);
-        g.setMaxPerLevel(width);
+        g.configMixture(level,width);
         g.learn(values);
 
         rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,node);
+    }
+
+    private void checkAndCompress(){
+        int width=getMaxPerLevel();
+        long[] subgaussians= rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
+        if(subgaussians==null|| subgaussians.length<width){
+            return;
+        }
+        else{
+            //Compress here
+        }
     }
 
 
@@ -197,6 +204,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             total++;
             weight = incWeight(weight);
         }
+        checkAndCompress();
 
         //Store everything
         attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
@@ -230,6 +238,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
             if(level>0){
                 createLevel(values,level-1,width);
+                checkAndCompress();
             }
 
         } else {
@@ -287,6 +296,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             weight = incWeight(weight);
             if(level>0){
                 createLevel(values,level-1,width);
+                checkAndCompress();
             }
 
             //Store everything
