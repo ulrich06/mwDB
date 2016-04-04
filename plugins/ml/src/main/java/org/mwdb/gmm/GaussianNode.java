@@ -182,7 +182,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         KNode node= graph().newNode(this.world(),this.time());
         GaussianNode g = new GaussianNode(node);
         g.configMixture(level,width);
-        g.learn(values); //dirac
+        g.internallearn(values,false); //dirac
 
         rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,node);
     }
