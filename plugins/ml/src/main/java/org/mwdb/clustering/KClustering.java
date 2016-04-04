@@ -5,6 +5,6 @@ package org.mwdb.clustering;
  */
 public interface KClustering {
 
-    int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations);
+    int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations,  double[] minD, double[] maxD, double[] err);
 
 }

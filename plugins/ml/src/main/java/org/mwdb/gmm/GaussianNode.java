@@ -23,6 +23,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     public static final int _CAPACITYFACTOR=3;
     public static final int _COMPRESSIONITER=10;
+    public static double[] err;
 
     private static final String MIN_KEY = "getMin";
     private static final String MAX_KEY = "getMax";
@@ -101,7 +102,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     }
     @Override
-    public int getSubLevels(){
+    public int getLevel(){
         Integer g= (Integer) rootNode().att(INTERNAL_LEVEL_KEY);
         if(g!=null){
             return g;
@@ -135,13 +136,14 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             internallearn(value,true);
         }
         else {
+            final int level=getLevel();
             rootNode().rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
                 @Override
                 public void on(KNode[] result) {
                     boolean inside=false;
                     for(int i=0;i<result.length;i++) {
                         GaussianNode subgaussian= new GaussianNode(result[i]);
-                        if(subgaussian.checkInside(value)){
+                        if(subgaussian.checkInside(value,level-1)){
                             subgaussian.learn(value);
                             inside=true;
                             break;
@@ -210,7 +212,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
                     //Cluster the different gaussians
                     KMeans clusteringEngine = new KMeans();
-                    int[][] clusters= clusteringEngine.getClusterIds(data,width,_COMPRESSIONITER);
+                    int[][] clusters= clusteringEngine.getClusterIds(data,width,_COMPRESSIONITER,getMin(),getMax(),err);
 
                     //Select the ones which will remain as head by the maximum weight
                     GaussianNode[] mainClusters = new GaussianNode[width];
@@ -233,8 +235,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
                     //move the nodes
                     for(int i=0;i<width;i++) {
                         //if the main cluster node contains only 1 sample, it needs to clone itself in itself
-                        if(clusters[i].length>1&&mainClusters[i].getTotal()==1 && mainClusters[i].getSubLevels()>0) {
-                            mainClusters[i].createLevel(mainClusters[i].getAvg(),mainClusters[i].getSubLevels()-1,mainClusters[i].getMaxPerLevel());
+                        if(clusters[i].length>1&&mainClusters[i].getTotal()==1 && mainClusters[i].getLevel()>0) {
+                            mainClusters[i].createLevel(mainClusters[i].getAvg(),mainClusters[i].getLevel()-1,mainClusters[i].getMaxPerLevel());
                         }
 
                         if (clusters[i] != null && clusters[i].length > 0) {
@@ -258,7 +260,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         //manage total
         Integer total = getTotal();
         Double weight = getWeight();
-        int level=getSubLevels();
+        int level= getLevel();
 
 
         double[] sum=getSum();
@@ -334,7 +336,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
 
         int features = values[0].length;
-        int level=getSubLevels();
+        int level= getLevel();
         int width=getMaxPerLevel();
 
 
@@ -406,7 +408,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         //manage total
         Integer total = getTotal();
         Double weight = getWeight();
-        int level=getSubLevels();
+        int level= getLevel();
         int width=getMaxPerLevel();
 
         //Create dirac
@@ -699,6 +701,11 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             double[] max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
             return max;
         }
+    }
+
+    @Override
+    public long[] getSubGraph() {
+        return rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
     }
 
     @Override

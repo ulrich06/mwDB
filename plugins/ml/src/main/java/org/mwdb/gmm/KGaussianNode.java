@@ -7,7 +7,7 @@ public interface KGaussianNode extends KMLNode<KGaussianNode> {
 
     void configMixture(int levels,int maxPerLevel);
 
-    int getSubLevels();
+    int getLevel();
 
     int getMaxPerLevel();
 
@@ -38,6 +38,8 @@ public interface KGaussianNode extends KMLNode<KGaussianNode> {
     double[] getMin();
 
     double[] getMax();
+
+    long[] getSubGraph();
 
     boolean checkInside(double[] feature, int level);
 
