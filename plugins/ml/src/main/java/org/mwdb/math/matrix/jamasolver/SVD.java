@@ -517,7 +517,7 @@ public class SVD implements KSVDDecompose {
 
    @Override
    public KMatrix getSMatrix () {
-      KMatrix X = new KMatrix(null,n,n);
+      KMatrix X = new KMatrix(null,m,n);
       for (int i = 0; i < n; i++) {
          X.set(i,i, this.s[i]);
       }

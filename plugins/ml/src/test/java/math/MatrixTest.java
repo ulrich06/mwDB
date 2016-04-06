@@ -134,8 +134,8 @@ public class MatrixTest {
         System.out.println(blas + " LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix P = dlu.getP();
-        KMatrix L = dlu.getLower();
-        KMatrix U = dlu.getUpper();
+        KMatrix L = dlu.getL();
+        KMatrix U = dlu.getU();
         KMatrix res1 = KMatrix.multiply(P, L);
         KMatrix res = KMatrix.multiply(res1, U);
 

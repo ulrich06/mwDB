@@ -90,7 +90,7 @@ public class LU {
     }
 
 
-    public KMatrix getLower() {
+    public KMatrix getL() {
         int numRows = LU.rows();
         int numCols = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
         KMatrix lower = new KMatrix(null, numRows, numCols);
@@ -119,7 +119,7 @@ public class LU {
     }
 
 
-    public KMatrix getUpper() {
+    public KMatrix getU() {
         int numRows = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
         int numCols = LU.columns();
 
