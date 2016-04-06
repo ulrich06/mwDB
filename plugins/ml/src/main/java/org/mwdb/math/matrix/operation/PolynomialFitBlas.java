@@ -1,10 +1,8 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.operation;
 
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 16/12/15.
@@ -23,9 +21,9 @@ public class PolynomialFitBlas {
 
     public void fit(double samplePoints[], double[] observations) {
 
-        Matrix y = new Matrix(observations, observations.length, 1);
+        KMatrix y = new KMatrix(observations, observations.length, 1);
 
-        Matrix a = new Matrix(null, y.rows(), degree + 1);
+        KMatrix a = new KMatrix(null, y.rows(), degree + 1);
 
         // cset up the A matrix
         for (int i = 0; i < observations.length; i++) {
@@ -37,7 +35,7 @@ public class PolynomialFitBlas {
         }
         // processValues the A matrix and see if it failed
 
-        coef = Matrix.defaultEngine().solveQR(a, y, true, KBlasTransposeType.NOTRANSPOSE);
+        coef = KMatrix.defaultEngine().solveQR(a, y, true, KTransposeType.NOTRANSPOSE);
 
 
     }

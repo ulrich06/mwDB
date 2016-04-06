@@ -5,11 +5,9 @@ import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Test;
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.NetlibBlas;
-import org.mwdb.math.matrix.solver.PInvSVD;
-import org.mwdb.math.matrix.solver.SVD;
+import org.mwdb.math.matrix.blassolver.blas.KBlas;
+import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwdb.math.matrix.operation.PInvSVD;
 
 /**
  * Created by assaad on 25/03/16.
@@ -31,7 +29,7 @@ public class PseudoInverseTest {
         double[] matrix ={504,360,180,360,360,0,180,0,720};
 
 
-        KMatrix matA= new Matrix(matrix,dim,dim);
+        KMatrix matA= new KMatrix(matrix,dim,dim);
         PInvSVD pinv = new PInvSVD();
         pinv.factor(matA,false);
         KMatrix matInv= pinv.getPInv();
@@ -62,7 +60,7 @@ public class PseudoInverseTest {
         double[] matrix2 ={504,360,180,0,360,360,0,0,180,0,720,0,0,0,0,0};
 
 
-        KMatrix matA2= new Matrix(matrix2,dim+1,dim+1);
+        KMatrix matA2= new KMatrix(matrix2,dim+1,dim+1);
         PInvSVD pinv2 = new PInvSVD();
         pinv2.factor(matA2,false);
         KMatrix matInv2= pinv2.getPInv();

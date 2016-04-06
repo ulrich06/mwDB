@@ -1,4 +1,6 @@
-package org.mwdb.math.matrix.blas;
+package org.mwdb.math.matrix.blassolver.blas;
+
+import org.mwdb.math.matrix.KTransposeType;
 
 public interface KBlas {
 
@@ -23,7 +25,7 @@ public interface KBlas {
      * @param offsetC: offset in the array of matC, usually 0
      * @param ldC:     number of rows in matC to jump to reach the second column
      */
-    void dgemm(KBlasTransposeType transA, KBlasTransposeType transB, int m, int n, int k, double alpha, double[] matA, int offsetA, int ldA, double[] matB, int offsetB, int ldB, double beta, double[] matC, int offsetC, int ldC);
+    void dgemm(KTransposeType transA, KTransposeType transB, int m, int n, int k, double alpha, double[] matA, int offsetA, int ldA, double[] matB, int offsetB, int ldB, double beta, double[] matC, int offsetC, int ldC);
 
     /**
      * To solve AX=B
@@ -41,7 +43,7 @@ public interface KBlas {
      * @param ldB:        number of rows in matB to jump to reach the second column
      * @param info:       info[0]=0 -> successful exit
      */
-    void dgetrs(KBlasTransposeType transA, int dim, int nrhs, double[] matA, int offsetA, int ldA, int[] ipiv, int offsetIpiv, double[] matB, int offsetB, int ldB, int[] info);
+    void dgetrs(KTransposeType transA, int dim, int nrhs, double[] matA, int offsetA, int ldA, int[] ipiv, int offsetIpiv, double[] matB, int offsetB, int ldB, int[] info);
 
     /**
      * To invert a matrix

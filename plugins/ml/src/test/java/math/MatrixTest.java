@@ -3,14 +3,12 @@ package math;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.BlasMatrixEngine;
-import org.mwdb.math.matrix.blas.F2JBlas;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.NetlibBlas;
-import org.mwdb.math.matrix.solver.LU;
-import org.mwdb.math.matrix.solver.QR;
-import org.mwdb.math.matrix.solver.SVD;
+import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwdb.math.matrix.blassolver.LU;
+import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
+import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwdb.math.matrix.blassolver.QR;
+import org.mwdb.math.matrix.blassolver.SVD;
 
 /**
  * Created by assaad on 23/03/16.
@@ -20,7 +18,7 @@ public class MatrixTest {
     private String blas = "Netlib";
 
     public MatrixTest() {
-        BlasMatrixEngine be = (BlasMatrixEngine) Matrix.defaultEngine();
+        BlasMatrixEngine be = (BlasMatrixEngine) KMatrix.defaultEngine();
         if (blas.equals("Netlib")) {
             be.setBlas(new NetlibBlas());
         } else {
@@ -29,7 +27,7 @@ public class MatrixTest {
     }
 
     public KMatrix manualMultpily(KMatrix matA, KMatrix matB) {
-        KMatrix matC = new Matrix(null, matA.rows(), matB.columns());
+        KMatrix matC = new KMatrix(null, matA.rows(), matB.columns());
 
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matB.columns(); j++) {
@@ -51,13 +49,13 @@ public class MatrixTest {
         int r = 500;
         int o = 300;
         int p = 700;
-        KMatrix matA = Matrix.random(r, o, 0, 100);
-        KMatrix matB = Matrix.random(o, p, 0, 100);
+        KMatrix matA = KMatrix.random(r, o, 0, 100);
+        KMatrix matB = KMatrix.random(o, p, 0, 100);
         long startTime, endTime;
         double d;
 
         startTime = System.nanoTime();
-        KMatrix matC = Matrix.multiply(matA, matB);
+        KMatrix matC = KMatrix.multiply(matA, matB);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -86,7 +84,7 @@ public class MatrixTest {
         int[] dimA = {m, m};
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, m, 0, 100);
+        KMatrix matA = KMatrix.random(m, m, 0, 100);
 
         KMatrix res = null;
 
@@ -95,12 +93,12 @@ public class MatrixTest {
 
         timestart = System.currentTimeMillis();
         for (int k = 0; k < times; k++) {
-            res = Matrix.invert(matA, false);
+            res = KMatrix.invert(matA, false);
         }
         timeend = System.currentTimeMillis();
         System.out.println(blas + " invert " + ((double) (timeend - timestart)) / (1000 * times) + " s");
 
-        KMatrix id = Matrix.multiply(matA, res);
+        KMatrix id = KMatrix.multiply(matA, res);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
@@ -121,13 +119,13 @@ public class MatrixTest {
         int n = 500;
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, n, 0, 100);
+        KMatrix matA = KMatrix.random(m, n, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
         //KMatrix matA = new Matrix(xx,m,n,KMatrixType.COLUMN_BASED);
 
 
-        LU dlu = new LU(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
+        LU dlu = new LU(m, n, ((BlasMatrixEngine) KMatrix.defaultEngine()).getBlas());
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
@@ -136,10 +134,10 @@ public class MatrixTest {
         System.out.println(blas + " LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix P = dlu.getP();
-        KMatrix L = dlu.getLower();
-        KMatrix U = dlu.getUpper();
-        KMatrix res1 = Matrix.multiply(P, L);
-        KMatrix res = Matrix.multiply(res1, U);
+        KMatrix L = dlu.getL();
+        KMatrix U = dlu.getU();
+        KMatrix res1 = KMatrix.multiply(P, L);
+        KMatrix res = KMatrix.multiply(res1, U);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -154,13 +152,13 @@ public class MatrixTest {
         int n = 300;
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, n, 0, 100);
+        KMatrix matA = KMatrix.random(m, n, 0, 100);
 
         //double[] xx = {1,2,3,2,-4,-9,3,6,-3};
         //KMatrix matA = new Matrix(xx,r,p,KMatrixType.COLUMN_BASED);
 
 
-        QR qr = new QR(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
+        QR qr = new QR(m, n, ((BlasMatrixEngine) KMatrix.defaultEngine()).getBlas());
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
@@ -170,7 +168,7 @@ public class MatrixTest {
 
         KMatrix Q = qr.getQ();
         KMatrix R = qr.getR();
-        KMatrix res = Matrix.multiply(Q, R);
+        KMatrix res = KMatrix.multiply(Q, R);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -185,13 +183,13 @@ public class MatrixTest {
         int n = 500;
         double eps = 1e-7;
 
-        KMatrix matA = Matrix.random(m, n, 0, 100);
+        KMatrix matA = KMatrix.random(m, n, 0, 100);
 
         // double[] xx = {1,0,0,0,   0,0,0,2,   0,3,0,0,    0,0,0,0   ,2,0,0,0};
         // KMatrix matA = new Matrix(xx,m,n,KMatrixType.COLUMN_BASED);
 
 
-        SVD svd = new SVD(m, n, ((BlasMatrixEngine) Matrix.defaultEngine()).getBlas());
+        SVD svd = new SVD(m, n, ((BlasMatrixEngine) KMatrix.defaultEngine()).getBlas());
 
 
         long timestart, timeend;
@@ -206,8 +204,8 @@ public class MatrixTest {
         KMatrix S = svd.getSMatrix();
         KMatrix Vt = svd.getVt();
 
-        KMatrix res = Matrix.multiply(U, S);
-        res = Matrix.multiply(res, Vt);
+        KMatrix res = KMatrix.multiply(U, S);
+        res = KMatrix.multiply(res, Vt);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -227,7 +225,7 @@ public class MatrixTest {
 
         //double[] dataA={4,3,3,2};
         double[] dataA={4,3,6,3,2,4};
-        KMatrix matA= new Matrix(dataA,m,n);
+        KMatrix matA= new KMatrix(dataA,m,n);
 
         KMatrix res = null;
 
@@ -235,11 +233,11 @@ public class MatrixTest {
         // SimpleMatrix resEjml =new SimpleMatrix(1,1);
 
         timestart = System.currentTimeMillis();
-            res = Matrix.pinv(matA, false);
+            res = KMatrix.pinv(matA, false);
         timeend = System.currentTimeMillis();
         System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000 ) + " s");
 
-        KMatrix id = Matrix.multiply(res, matA);
+        KMatrix id = KMatrix.multiply(res, matA);
 
         for (int i = 0; i < id.rows(); i++) {
             for (int j = 0; j < id.columns(); j++) {

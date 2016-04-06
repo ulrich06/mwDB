@@ -1,10 +1,8 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.operation;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KSVDDecompose;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 24/03/16.
@@ -30,7 +28,7 @@ public class PInvSVD {
     }
 
     public PInvSVD factor(KMatrix A, boolean invertInPlace){
-        _svd = Matrix.defaultEngine().decomposeSVD(A,invertInPlace);
+        _svd = KMatrix.defaultEngine().decomposeSVD(A,invertInPlace);
 
         //We get UxSxVt
         KMatrix[] svd= new KMatrix[3];
@@ -54,7 +52,7 @@ public class PInvSVD {
             if( S.get(i,i) > maxSingular )
                 maxSingular = S.get(i,i);
         }
-        double tau = Math.pow(2,-52)*Math.max(A.columns(),A.rows())*maxSingular;
+        double tau = Math.pow(2,-40)*Math.max(A.columns(),A.rows())*maxSingular;
 
         rank=0;
         det=1;
@@ -73,12 +71,12 @@ public class PInvSVD {
         }
 
         // V*W
-        KMatrix temp = Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.TRANSPOSE,1,V,KBlasTransposeType.TRANSPOSE,1,S);
+        KMatrix temp = KMatrix.multiplyTransposeAlphaBeta(KTransposeType.TRANSPOSE,1,V, KTransposeType.TRANSPOSE,1,S);
 
 
         //V*W*Ut
 
-        pinv= Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE,1,temp,KBlasTransposeType.TRANSPOSE,1,_svd.getU());
+        pinv= KMatrix.multiplyTransposeAlphaBeta(KTransposeType.NOTRANSPOSE,1,temp, KTransposeType.TRANSPOSE,1,_svd.getU());
         return this;
     }
 

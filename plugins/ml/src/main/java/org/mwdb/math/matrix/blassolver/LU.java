@@ -1,10 +1,9 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.blassolver;
 
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.blassolver.blas.KBlas;
+import org.mwdb.math.matrix.KTransposeType;
 
 public class LU {
 
@@ -36,7 +35,7 @@ public class LU {
      */
     public LU(int m, int n, KBlas blas) {
         this._blas = blas;
-        LU = new Matrix(null, m, n);
+        LU = new KMatrix(null, m, n);
         piv = new int[Math.min(m, n)];
     }
 
@@ -91,10 +90,10 @@ public class LU {
     }
 
 
-    public KMatrix getLower() {
+    public KMatrix getL() {
         int numRows = LU.rows();
         int numCols = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
-        Matrix lower = new Matrix(null, numRows, numCols);
+        KMatrix lower = new KMatrix(null, numRows, numCols);
 
 
         for (int i = 0; i < numCols; i++) {
@@ -116,15 +115,15 @@ public class LU {
     }
 
     public KMatrix getP() {
-        return Matrix.fromPartialPivots(piv, true);
+        return KMatrix.fromPartialPivots(piv, true);
     }
 
 
-    public KMatrix getUpper() {
+    public KMatrix getU() {
         int numRows = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
         int numCols = LU.columns();
 
-        KMatrix upper = new Matrix(null, numRows, numCols);
+        KMatrix upper = new KMatrix(null, numRows, numCols);
 
 
         for (int i = 0; i < numRows; i++) {
@@ -155,11 +154,11 @@ public class LU {
      * Computes <code>A\B</code>, overwriting <code>B</code>
      */
     public KMatrix solve(KMatrix B) {
-        return transSolve(B, KBlasTransposeType.NOTRANSPOSE);
+        return transSolve(B, KTransposeType.NOTRANSPOSE);
     }
 
 
-    public KMatrix transSolve(KMatrix B, KBlasTransposeType trans) {
+    public KMatrix transSolve(KMatrix B, KTransposeType trans) {
         /*
         if (singular) {
          //   throw new MatrixSingularException();

@@ -1,9 +1,4 @@
-package org.mwdb.ml;
-
-import org.mwdb.KCallback;
-import org.mwdb.KNode;
-import org.mwdb.KPolynomialNode;
-import org.mwdb.KType;
+package org.mwdb;
 
 public class PolynomialNode extends AbstractMLNode<PolynomialNode> implements KPolynomialNode {
 

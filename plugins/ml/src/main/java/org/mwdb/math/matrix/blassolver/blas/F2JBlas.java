@@ -1,5 +1,6 @@
-package org.mwdb.math.matrix.blas;
+package org.mwdb.math.matrix.blassolver.blas;
 
+import org.mwdb.math.matrix.KTransposeType;
 import org.netlib.blas.*;
 import org.netlib.lapack.*;
 import org.netlib.util.intW;
@@ -7,12 +8,12 @@ import org.netlib.util.intW;
 //Fortran code converted to java class, slower but good for debug
 public class F2JBlas implements KBlas {
     @Override
-    public void dgemm(KBlasTransposeType paramString1, KBlasTransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
+    public void dgemm(KTransposeType paramString1, KTransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
         Dgemm.dgemm(transTypeToChar(paramString1), transTypeToChar(paramString2), paramInt1, paramInt2, paramInt3, paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
     }
 
     @Override
-    public void dgetrs(KBlasTransposeType paramString, int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, int[] paramintW) {
+    public void dgetrs(KTransposeType paramString, int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, int[] paramintW) {
         intW newint = new intW(paramintW[0]);
         Dgetrs.dgetrs(transTypeToChar(paramString), paramInt1, paramInt2, paramArrayOfDouble1, paramInt3, paramInt4, paramArrayOfInt, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, newint);
         paramintW[0] = newint.val;
@@ -75,12 +76,10 @@ public class F2JBlas implements KBlas {
 
     private static final String TRANSPOSE_TYPE_TRANSPOSE = "t";
 
-    private static String transTypeToChar(KBlasTransposeType type) {
-        if (type.equals(KBlasTransposeType.CONJUGATE)) {
-            return TRANSPOSE_TYPE_CONJUCATE;
-        } else if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
+    private static String transTypeToChar(KTransposeType type) {
+        if (type.equals(KTransposeType.NOTRANSPOSE)) {
             return TRANSPOSE_TYPE_NOTRANSPOSE;
-        } else if (type.equals(KBlasTransposeType.TRANSPOSE)) {
+        } else if (type.equals(KTransposeType.TRANSPOSE)) {
             return TRANSPOSE_TYPE_TRANSPOSE;
         }
         return null;

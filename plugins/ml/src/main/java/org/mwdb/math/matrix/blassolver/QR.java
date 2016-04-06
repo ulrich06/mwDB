@@ -1,10 +1,9 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.blassolver;
 
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.blassolver.blas.KBlas;
+import org.mwdb.math.matrix.KTransposeType;
 
 public class QR {
 
@@ -46,7 +45,7 @@ public class QR {
         this.n = columns;
         this.k = Math.min(m, n);
         tau = new double[k];
-        R = new Matrix(null, n, n);
+        R = new KMatrix(null, n, n);
 
     }
 
@@ -134,7 +133,7 @@ public class QR {
 
     public void solve(KMatrix B, KMatrix X) {
         int BnumCols = B.columns();
-        KMatrix Y = new Matrix(null, m, 1);
+        KMatrix Y = new KMatrix(null, m, 1);
         KMatrix Z;
 
         // solve each column one by one
@@ -145,9 +144,9 @@ public class QR {
             }
             // Solve Qa=b
             // a = Q'b
-            Z = Matrix.multiplyTransposeAlphaBeta(KBlasTransposeType.TRANSPOSE, 1.0, Q, KBlasTransposeType.NOTRANSPOSE, 1.0, Y);
+            Z = KMatrix.multiplyTransposeAlphaBeta(KTransposeType.TRANSPOSE, 1.0, Q, KTransposeType.NOTRANSPOSE, 1.0, Y);
 
-            // solve for Rx = b using the standard upper triangular solver
+            // solve for Rx = b using the standard upper triangular blassolver
             solveU(R, Z.data(), n, m);
             // save the results
             for (int i = 0; i < n; i++) {
