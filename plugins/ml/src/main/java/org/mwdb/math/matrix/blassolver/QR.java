@@ -3,7 +3,7 @@ package org.mwdb.math.matrix.blassolver;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 public class QR {
 
@@ -144,7 +144,7 @@ public class QR {
             }
             // Solve Qa=b
             // a = Q'b
-            Z = KMatrix.multiplyTransposeAlphaBeta(KBlasTransposeType.TRANSPOSE, 1.0, Q, KBlasTransposeType.NOTRANSPOSE, 1.0, Y);
+            Z = KMatrix.multiplyTransposeAlphaBeta(KTransposeType.TRANSPOSE, 1.0, Q, KTransposeType.NOTRANSPOSE, 1.0, Y);
 
             // solve for Rx = b using the standard upper triangular blassolver
             solveU(R, Z.data(), n, m);

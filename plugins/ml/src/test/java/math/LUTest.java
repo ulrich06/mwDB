@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
 import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 24/03/16.
@@ -24,7 +24,7 @@ public class LUTest {
         BlasMatrixEngine blasengine = (BlasMatrixEngine) KMatrix.defaultEngine();
         blasengine.setBlas(new F2JBlas());
 
-        KMatrix C = KMatrix.defaultEngine().solveLU(A, B, true, KBlasTransposeType.NOTRANSPOSE);
+        KMatrix C = KMatrix.defaultEngine().solveLU(A, B, true, KTransposeType.NOTRANSPOSE);
 
         int x = 0;
 

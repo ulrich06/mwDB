@@ -1,7 +1,5 @@
 package org.mwdb.math.matrix;
 
-import org.mwdb.math.matrix.blassolver.SVD;
-
 /**
  * Created by assaad on 25/03/16.
  */

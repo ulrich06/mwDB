@@ -2,7 +2,7 @@ package org.mwdb.math.matrix.operation;
 
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 16/12/15.
@@ -35,7 +35,7 @@ public class PolynomialFitBlas {
         }
         // processValues the A matrix and see if it failed
 
-        coef = KMatrix.defaultEngine().solveQR(a, y, true, KBlasTransposeType.NOTRANSPOSE);
+        coef = KMatrix.defaultEngine().solveQR(a, y, true, KTransposeType.NOTRANSPOSE);
 
 
     }

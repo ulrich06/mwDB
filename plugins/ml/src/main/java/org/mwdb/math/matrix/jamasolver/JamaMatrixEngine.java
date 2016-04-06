@@ -4,16 +4,16 @@ package org.mwdb.math.matrix.jamasolver;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
 import org.mwdb.math.matrix.KSVDDecompose;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 public class JamaMatrixEngine implements KMatrixEngine {
 
     @Override
-    public KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA, KBlasTransposeType transB, double beta, KMatrix matB) {
+    public KMatrix multiplyTransposeAlphaBeta(KTransposeType transA, double alpha, KMatrix matA, KTransposeType transB, double beta, KMatrix matB) {
         if (KMatrix.testDimensionsAB(transA, transB, matA, matB)) {
             int[] dimC = new int[3];
-            if (transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
-                if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+            if (transA.equals(KTransposeType.NOTRANSPOSE)) {
+                if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                     dimC[0] = matA.rows();
                     dimC[1] = matB.columns();
                     dimC[2]= matA.columns();
@@ -23,7 +23,7 @@ public class JamaMatrixEngine implements KMatrixEngine {
                     dimC[2]= matA.columns();
                 }
             } else {
-                if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                     dimC[0] = matA.columns();
                     dimC[1] = matB.columns();
                     dimC[2]= matA.rows();
@@ -36,7 +36,7 @@ public class JamaMatrixEngine implements KMatrixEngine {
             KMatrix matC = new KMatrix(null, dimC[0], dimC[1]);
             //perform mult here
 
-            if(transA==KBlasTransposeType.NOTRANSPOSE && transB==KBlasTransposeType.NOTRANSPOSE){
+            if(transA== KTransposeType.NOTRANSPOSE && transB== KTransposeType.NOTRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
                         for(int k=0;k<dimC[2];k++){
@@ -46,7 +46,7 @@ public class JamaMatrixEngine implements KMatrixEngine {
                 }
 
             }
-            else if(transA==KBlasTransposeType.NOTRANSPOSE && transB==KBlasTransposeType.TRANSPOSE){
+            else if(transA== KTransposeType.NOTRANSPOSE && transB== KTransposeType.TRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
                         for(int k=0;k<dimC[2];k++){
@@ -55,7 +55,7 @@ public class JamaMatrixEngine implements KMatrixEngine {
                     }
                 }
             }
-            else if(transA==KBlasTransposeType.TRANSPOSE && transB==KBlasTransposeType.NOTRANSPOSE){
+            else if(transA== KTransposeType.TRANSPOSE && transB== KTransposeType.NOTRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
                         for(int k=0;k<dimC[2];k++){
@@ -64,7 +64,7 @@ public class JamaMatrixEngine implements KMatrixEngine {
                     }
                 }
             }
-            else if(transA==KBlasTransposeType.TRANSPOSE && transB==KBlasTransposeType.TRANSPOSE){
+            else if(transA== KTransposeType.TRANSPOSE && transB== KTransposeType.TRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
                         for(int k=0;k<dimC[2];k++){
@@ -91,9 +91,9 @@ public class JamaMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KTransposeType transB) {
         KMatrix btem;
-        if(transB==KBlasTransposeType.TRANSPOSE){
+        if(transB== KTransposeType.TRANSPOSE){
             btem=KMatrix.transpose(matB);
         }
         else {
@@ -104,9 +104,9 @@ public class JamaMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KTransposeType transB) {
         KMatrix btem;
-        if(transB==KBlasTransposeType.TRANSPOSE){
+        if(transB== KTransposeType.TRANSPOSE){
             btem=KMatrix.transpose(matB);
         }
         else {

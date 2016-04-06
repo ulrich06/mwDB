@@ -1,8 +1,6 @@
 package org.mwdb.math.matrix;
 
 
-import org.mwdb.math.expression.impl.MathDoubleToken;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
 import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
 
 import java.util.BitSet;
@@ -165,10 +163,10 @@ public class KMatrix {
 
 
     public static KMatrix multiply(KMatrix matA, KMatrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE, 1, matA, KBlasTransposeType.NOTRANSPOSE, 1, matB);
+        return _defaultEngine.multiplyTransposeAlphaBeta(KTransposeType.NOTRANSPOSE, 1, matA, KTransposeType.NOTRANSPOSE, 1, matB);
     }
 
-    public static KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA, KBlasTransposeType transB, double beta, KMatrix matB) {
+    public static KMatrix multiplyTransposeAlphaBeta(KTransposeType transA, double alpha, KMatrix matA, KTransposeType transB, double beta, KMatrix matB) {
         return _defaultEngine.multiplyTransposeAlphaBeta(transA, alpha, matA, transB, beta, matB);
     }
 
@@ -333,15 +331,15 @@ public class KMatrix {
         return m;
     }
 
-    public static boolean testDimensionsAB(KBlasTransposeType transA, KBlasTransposeType transB, KMatrix matA, KMatrix matB) {
-        if (transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
-            if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+    public static boolean testDimensionsAB(KTransposeType transA, KTransposeType transB, KMatrix matA, KMatrix matB) {
+        if (transA.equals(KTransposeType.NOTRANSPOSE)) {
+            if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                 return (matA.columns() == matB.rows());
             } else {
                 return (matA.columns() == matB.columns());
             }
         } else {
-            if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+            if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                 return (matA.rows() == matB.rows());
             } else {
                 return (matA.rows() == matB.columns());

@@ -4,7 +4,7 @@ import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
 import org.mwdb.math.matrix.KSVDDecompose;
 import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
 import org.mwdb.math.matrix.operation.PInvSVD;
 
@@ -30,14 +30,14 @@ public class BlasMatrixEngine implements KMatrixEngine {
 
     //C=alpha*A + beta * B (with possible transpose for A or B)
     @Override
-    public KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA, KBlasTransposeType transB, double beta, KMatrix matB) {
+    public KMatrix multiplyTransposeAlphaBeta(KTransposeType transA, double alpha, KMatrix matA, KTransposeType transB, double beta, KMatrix matB) {
 
         if (KMatrix.testDimensionsAB(transA, transB, matA, matB)) {
             int k = 0;
             int[] dimC = new int[2];
-            if (transA.equals(KBlasTransposeType.NOTRANSPOSE)) {
+            if (transA.equals(KTransposeType.NOTRANSPOSE)) {
                 k = matA.columns();
-                if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                     dimC[0] = matA.rows();
                     dimC[1] = matB.columns();
                 } else {
@@ -46,7 +46,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
                 }
             } else {
                 k = matA.rows();
-                if (transB.equals(KBlasTransposeType.NOTRANSPOSE)) {
+                if (transB.equals(KTransposeType.NOTRANSPOSE)) {
                     dimC[0] = matA.columns();
                     dimC[1] = matB.columns();
                 } else {
@@ -106,11 +106,11 @@ public class BlasMatrixEngine implements KMatrixEngine {
     }
 
     @Override
-    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+    public KMatrix solveQR(KMatrix matA, KMatrix matB, boolean workInPlace, KTransposeType transB) {
         if (workInPlace) {
             QR solver = QR.factorize(matA, true, _blas);
             KMatrix coef = new KMatrix(null, matA.columns(), matB.columns());
-            if (transB != KBlasTransposeType.NOTRANSPOSE) {
+            if (transB != KTransposeType.NOTRANSPOSE) {
                 matB = KMatrix.transpose(matB);
             }
             solver.solve(matB, coef);
@@ -118,7 +118,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
         } else {
             QR solver = QR.factorize(matA.clone(), true, _blas);
             KMatrix coef = new KMatrix(null, matA.columns(), matB.columns());
-            if (transB != KBlasTransposeType.NOTRANSPOSE) {
+            if (transB != KTransposeType.NOTRANSPOSE) {
                 matB = KMatrix.transpose(matB);
             }
             solver.solve(matB.clone(), coef);
@@ -135,7 +135,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
 
 
     @Override
-    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KBlasTransposeType transB) {
+    public KMatrix solveLU(KMatrix matA, KMatrix matB, boolean workInPlace, KTransposeType transB) {
         if (!workInPlace) {
             KMatrix A_temp = new KMatrix(null, matA.rows(), matA.columns());
             System.arraycopy(matA.data(), 0, A_temp.data(), 0, matA.columns() * matA.rows());

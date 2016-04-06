@@ -2,7 +2,7 @@ package org.mwdb.math.matrix.operation;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KSVDDecompose;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 24/03/16.
@@ -71,12 +71,12 @@ public class PInvSVD {
         }
 
         // V*W
-        KMatrix temp = KMatrix.multiplyTransposeAlphaBeta(KBlasTransposeType.TRANSPOSE,1,V,KBlasTransposeType.TRANSPOSE,1,S);
+        KMatrix temp = KMatrix.multiplyTransposeAlphaBeta(KTransposeType.TRANSPOSE,1,V, KTransposeType.TRANSPOSE,1,S);
 
 
         //V*W*Ut
 
-        pinv= KMatrix.multiplyTransposeAlphaBeta(KBlasTransposeType.NOTRANSPOSE,1,temp,KBlasTransposeType.TRANSPOSE,1,_svd.getU());
+        pinv= KMatrix.multiplyTransposeAlphaBeta(KTransposeType.NOTRANSPOSE,1,temp, KTransposeType.TRANSPOSE,1,_svd.getU());
         return this;
     }
 

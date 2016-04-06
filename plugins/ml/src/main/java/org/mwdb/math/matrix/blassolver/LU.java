@@ -3,7 +3,7 @@ package org.mwdb.math.matrix.blassolver;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.KTransposeType;
 
 public class LU {
 
@@ -154,11 +154,11 @@ public class LU {
      * Computes <code>A\B</code>, overwriting <code>B</code>
      */
     public KMatrix solve(KMatrix B) {
-        return transSolve(B, KBlasTransposeType.NOTRANSPOSE);
+        return transSolve(B, KTransposeType.NOTRANSPOSE);
     }
 
 
-    public KMatrix transSolve(KMatrix B, KBlasTransposeType trans) {
+    public KMatrix transSolve(KMatrix B, KTransposeType trans) {
         /*
         if (singular) {
          //   throw new MatrixSingularException();
