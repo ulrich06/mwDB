@@ -1,8 +1,5 @@
 package org.mwdb;
 
-
-import org.mwdb.plugin.KResolver;
-
 /**
  * KNode is the base element contained in the {@link KGraph}.<br>
  * They belong to a world and time, have attributes, relationships, and indexes.
