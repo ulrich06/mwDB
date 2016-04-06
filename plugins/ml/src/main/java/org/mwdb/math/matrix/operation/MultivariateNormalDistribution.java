@@ -1,7 +1,6 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.operation;
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
 
 /**
  * Created by assaad on 25/03/16.
@@ -45,13 +44,13 @@ public class MultivariateNormalDistribution {
           f[i]=f[i]-avg[i];
         }
 
-        Matrix ft = new Matrix(f,1,f.length);
-        Matrix ftt = new Matrix(f,f.length,1);
+        KMatrix ft = new KMatrix(f,1,f.length);
+        KMatrix ftt = new KMatrix(f,f.length,1);
 
 
 
-        KMatrix res= Matrix.multiply(ft,inv);
-        KMatrix res2= Matrix.multiply(res,ftt);
+        KMatrix res= KMatrix.multiply(ft,inv);
+        KMatrix res2= KMatrix.multiply(res,ftt);
 
         double d=Math.exp(-0.5 *res2.get(0,0));
 

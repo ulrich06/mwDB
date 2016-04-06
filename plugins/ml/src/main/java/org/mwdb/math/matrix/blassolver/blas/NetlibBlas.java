@@ -1,4 +1,4 @@
-package org.mwdb.math.matrix.blas;
+package org.mwdb.math.matrix.blassolver.blas;
 
 import com.github.fommil.netlib.LAPACK;
 import com.github.fommil.netlib.BLAS;
@@ -85,9 +85,7 @@ public class NetlibBlas implements KBlas {
     private static final String TRANSPOSE_TYPE_TRANSPOSE = "t";
 
     private static String transTypeToChar(KBlasTransposeType type) {
-        if (type.equals(KBlasTransposeType.CONJUGATE)) {
-            return TRANSPOSE_TYPE_CONJUCATE;
-        } else if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
+        if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
             return TRANSPOSE_TYPE_NOTRANSPOSE;
         } else if (type.equals(KBlasTransposeType.TRANSPOSE)) {
             return TRANSPOSE_TYPE_TRANSPOSE;

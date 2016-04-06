@@ -3,7 +3,7 @@ package ml;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.math.matrix.Matrix;
+import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
 
@@ -108,8 +108,8 @@ public class GaussianNodeTest {
                 double[] avgBatch = gaussianNodeBatch.getAvg();
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
-                Assert.assertTrue(Matrix.compare(avgBatch, ravg, eps));
-                Assert.assertTrue(Matrix.compareArray(covBatch, rcovData, eps));
+                Assert.assertTrue(KMatrix.compare(avgBatch, ravg, eps));
+                Assert.assertTrue(KMatrix.compareArray(covBatch, rcovData, eps));
 
 
                 final double[] avgLive = new double[7];
@@ -134,8 +134,8 @@ public class GaussianNodeTest {
                 });
 
 
-                Assert.assertTrue(Matrix.compare(avgLive, ravg, eps));
-                Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
+                Assert.assertTrue(KMatrix.compare(avgLive, ravg, eps));
+                Assert.assertTrue(KMatrix.compareArray(covLive, rcovData, eps));
 
 
 

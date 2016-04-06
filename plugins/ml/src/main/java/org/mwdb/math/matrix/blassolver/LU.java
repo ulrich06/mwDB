@@ -1,10 +1,9 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.blassolver;
 
 
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.blassolver.blas.KBlas;
+import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
 
 public class LU {
 
@@ -36,7 +35,7 @@ public class LU {
      */
     public LU(int m, int n, KBlas blas) {
         this._blas = blas;
-        LU = new Matrix(null, m, n);
+        LU = new KMatrix(null, m, n);
         piv = new int[Math.min(m, n)];
     }
 
@@ -94,7 +93,7 @@ public class LU {
     public KMatrix getLower() {
         int numRows = LU.rows();
         int numCols = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
-        Matrix lower = new Matrix(null, numRows, numCols);
+        KMatrix lower = new KMatrix(null, numRows, numCols);
 
 
         for (int i = 0; i < numCols; i++) {
@@ -116,7 +115,7 @@ public class LU {
     }
 
     public KMatrix getP() {
-        return Matrix.fromPartialPivots(piv, true);
+        return KMatrix.fromPartialPivots(piv, true);
     }
 
 
@@ -124,7 +123,7 @@ public class LU {
         int numRows = LU.rows() < LU.columns() ? LU.rows() : LU.columns();
         int numCols = LU.columns();
 
-        KMatrix upper = new Matrix(null, numRows, numCols);
+        KMatrix upper = new KMatrix(null, numRows, numCols);
 
 
         for (int i = 0; i < numRows; i++) {

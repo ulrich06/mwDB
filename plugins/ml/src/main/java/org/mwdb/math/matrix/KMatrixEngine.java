@@ -1,6 +1,6 @@
 package org.mwdb.math.matrix;
 
-import org.mwdb.math.matrix.blas.KBlasTransposeType;
+import org.mwdb.math.matrix.blassolver.blas.KBlasTransposeType;
 
 public interface KMatrixEngine {
     public KMatrix multiplyTransposeAlphaBeta(KBlasTransposeType transA, double alpha, KMatrix matA, KBlasTransposeType transB, double beta, KMatrix matB);

@@ -1,4 +1,4 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.blassolver;
 
 
 /**

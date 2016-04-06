@@ -9,7 +9,7 @@ import org.mwdb.utility.Unsafe;
 
 public class StorageTest {
 
-    @Test
+ //   @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;

@@ -1,4 +1,4 @@
-package org.mwdb.math.matrix.blas;
+package org.mwdb.math.matrix.blassolver.blas;
 
 import org.netlib.blas.*;
 import org.netlib.lapack.*;
@@ -76,9 +76,7 @@ public class F2JBlas implements KBlas {
     private static final String TRANSPOSE_TYPE_TRANSPOSE = "t";
 
     private static String transTypeToChar(KBlasTransposeType type) {
-        if (type.equals(KBlasTransposeType.CONJUGATE)) {
-            return TRANSPOSE_TYPE_CONJUCATE;
-        } else if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
+        if (type.equals(KBlasTransposeType.NOTRANSPOSE)) {
             return TRANSPOSE_TYPE_NOTRANSPOSE;
         } else if (type.equals(KBlasTransposeType.TRANSPOSE)) {
             return TRANSPOSE_TYPE_TRANSPOSE;

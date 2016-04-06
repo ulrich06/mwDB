@@ -1,4 +1,4 @@
-package org.mwdb.math.matrix.blas;
+package org.mwdb.math.matrix.blassolver.blas;
 
 public interface KBlas {
 

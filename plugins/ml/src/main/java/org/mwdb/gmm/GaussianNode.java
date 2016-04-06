@@ -5,8 +5,7 @@ import org.mwdb.KNode;
 import org.mwdb.KType;
 import org.mwdb.clustering.KMeans;
 import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.solver.MultivariateNormalDistribution;
+import org.mwdb.math.matrix.operation.MultivariateNormalDistribution;
 import org.mwdb.AbstractMLNode;
 
 
@@ -552,7 +551,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
         KMatrix cov = getCovarianceMatrix(avg);
         if (cov == null) {
-            cov = new Matrix(null, featArray.length, featArray.length);
+            cov = new KMatrix(null, featArray.length, featArray.length);
             for (int i = 0; i < featArray.length; i++) {
                 cov.set(i, i, err[i] * err[i]);
             }
@@ -571,7 +570,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
         KMatrix cov = getCovarianceMatrix(avg);
         if (cov == null) {
-            cov = new Matrix(null, featArray.length, featArray.length);
+            cov = new KMatrix(null, featArray.length, featArray.length);
             for (int i = 0; i < featArray.length; i++) {
                 cov.set(i, i, err[i] * err[i]);
             }
@@ -667,7 +666,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
                     count++;
                 }
             }
-            return new Matrix(covariances, features, features);
+            return new KMatrix(covariances, features, features);
         } else {
             return null;
         }

@@ -1,9 +1,8 @@
-package org.mwdb.math.matrix.solver;
+package org.mwdb.math.matrix.blassolver;
 
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KSVDDecompose;
-import org.mwdb.math.matrix.Matrix;
-import org.mwdb.math.matrix.blas.KBlas;
+import org.mwdb.math.matrix.blassolver.blas.KBlas;
 
 /**
  * Computes singular value decompositions
@@ -43,7 +42,7 @@ public class SVD implements KSVDDecompose {
     /**
      * Singular vectors
      */
-    private final Matrix U, Vt;
+    private final KMatrix U, Vt;
 
     private KBlas _blas;
 
@@ -63,8 +62,8 @@ public class SVD implements KSVDDecompose {
         // Allocate space for the decomposition
         S = new double[Math.min(m, n)];
         if (vectors) {
-            U = new Matrix(null, m, m);
-            Vt = new Matrix(null, n, n);
+            U = new KMatrix(null, m, m);
+            Vt = new KMatrix(null, n, n);
         } else
             U = Vt = null;
 
@@ -184,7 +183,7 @@ public class SVD implements KSVDDecompose {
 
     @Override
     public KMatrix getSMatrix() {
-        Matrix matS = new Matrix(null, m, n);
+        KMatrix matS = new KMatrix(null, m, n);
         for (int i = 0; i < S.length; i++) {
             matS.set(i, i, S[i]);
         }
