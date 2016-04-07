@@ -7,9 +7,6 @@ import org.mwdb.task.NoopScheduler;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 31/03/16.
- */
 public class GaussianNonInvertTest {
     @Test
     public void Singularity() {

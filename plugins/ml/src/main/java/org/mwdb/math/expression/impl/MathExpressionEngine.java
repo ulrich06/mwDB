@@ -32,6 +32,14 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         };
     }
 
+    @Override
+    public KMathExpressionEngine parse(String p_expression) {
+        List<String> rpn = shuntingYard(p_expression);
+        _cacheAST = buildAST(rpn);
+        return this;
+    }
+
+
     /**
      * @native ts
      * return !isNaN(+st);
@@ -159,7 +167,6 @@ public class MathExpressionEngine implements KMathExpressionEngine {
     }
 
 
-
     //Todo check if it's correct
     @Override
     public double eval(KNode context) {
@@ -199,18 +206,18 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                             } else {
                                 Object resolved = context.att(castedFreeToken.content());
                                 if (resolved != null) {
-                                        String valueString = resolved.toString();
-                                        if (PrimitiveHelper.equals(valueString, "true")) {
-                                            stack.push(1.0);
-                                        } else if (PrimitiveHelper.equals(valueString, "false")) {
-                                            stack.push(0.0);
-                                        } else {
-                                            try {
-                                                stack.push(PrimitiveHelper.parseDouble(resolved.toString()));
-                                            } catch (Exception e) {
-                                                //noop
-                                            }
+                                    String valueString = resolved.toString();
+                                    if (PrimitiveHelper.equals(valueString, "true")) {
+                                        stack.push(1.0);
+                                    } else if (PrimitiveHelper.equals(valueString, "false")) {
+                                        stack.push(0.0);
+                                    } else {
+                                        try {
+                                            stack.push(PrimitiveHelper.parseDouble(resolved.toString()));
+                                        } catch (Exception e) {
+                                            //noop
                                         }
+                                    }
 
                                 } else {
                                     throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
@@ -256,13 +263,6 @@ public class MathExpressionEngine implements KMathExpressionEngine {
             }
         }
         return result;
-    }
-
-    @Override
-    public KMathExpressionEngine parse(String p_expression) {
-        List<String> rpn = shuntingYard(p_expression);
-        _cacheAST = buildAST(rpn);
-        return this;
     }
 
     @Override

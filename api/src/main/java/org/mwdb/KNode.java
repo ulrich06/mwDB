@@ -188,4 +188,6 @@ public interface KNode {
      */
     KGraph graph();
 
+    void jump(long targetTime, KCallback<KNode> timedNode);
+
 }
