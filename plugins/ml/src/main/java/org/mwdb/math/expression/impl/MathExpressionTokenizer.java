@@ -41,8 +41,8 @@ public class MathExpressionTokenizer {
             token.append(MathExpressionEngine.minusSign);
             pos++;
             token.append(next());
-        } else if (MathExpressionEngine.isLetter(ch) || (ch == '_')) {
-            while ((MathExpressionEngine.isLetter(ch) || MathExpressionEngine.isDigit(ch) || (ch == '_')) && (pos < input.length())) {
+        } else if (MathExpressionEngine.isLetter(ch) || (ch == '_') || (ch == '{') || (ch == '}')) {
+            while ((MathExpressionEngine.isLetter(ch) || MathExpressionEngine.isDigit(ch) || (ch == '_') || (ch == '{') || (ch == '}')) && (pos < input.length())) {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }

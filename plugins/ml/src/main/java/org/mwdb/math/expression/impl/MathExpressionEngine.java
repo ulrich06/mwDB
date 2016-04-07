@@ -5,10 +5,7 @@ import org.mwdb.KNode;
 import org.mwdb.math.expression.KMathExpressionEngine;
 import org.mwdb.math.expression.KMathVariableResolver;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class MathExpressionEngine implements KMathExpressionEngine {
 
@@ -16,8 +13,9 @@ public class MathExpressionEngine implements KMathExpressionEngine {
 
     public static final char decimalSeparator = '.';
     public static final char minusSign = '-';
+    private final MathToken[] _cacheAST;
 
-    public MathExpressionEngine() {
+    private MathExpressionEngine(String expression) {
 
         HashMap<String, Double> vars = new HashMap<String, Double>();
         vars.put("PI", Math.PI);
@@ -30,13 +28,38 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                 return vars.get(potentialVarName);
             }
         };
+
+        _cacheAST = buildAST(shuntingYard(expression));
     }
 
-    @Override
-    public KMathExpressionEngine parse(String p_expression) {
-        List<String> rpn = shuntingYard(p_expression);
-        _cacheAST = buildAST(rpn);
-        return this;
+
+    static class LRUCache extends LinkedHashMap<String, KMathExpressionEngine> {
+
+        int cacheSize;
+
+        public LRUCache(int cacheSize) {
+            super(16, 0.75f, true);
+            this.cacheSize = cacheSize;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, KMathExpressionEngine> eldest) {
+            return size() >= cacheSize;
+        }
+
+    }
+
+    private static LinkedHashMap<String, KMathExpressionEngine> cached = new LRUCache(100);
+
+
+    public static synchronized KMathExpressionEngine parse(String p_expression) {
+        KMathExpressionEngine cachedEngine = cached.get(p_expression);
+        if (cachedEngine != null) {
+            return cachedEngine;
+        }
+        KMathExpressionEngine newEngine = new MathExpressionEngine(p_expression);
+        cached.put(p_expression, newEngine);
+        return newEngine;
     }
 
 
@@ -44,7 +67,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
      * @native ts
      * return !isNaN(+st);
      */
-    public static boolean isNumber(String st) {
+    static boolean isNumber(String st) {
         if (st.charAt(0) == minusSign && st.length() == 1)
             return false;
         for (int i = 0; i < st.length(); i++) {
@@ -64,7 +87,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
      * }
      * return false ;
      */
-    public static boolean isDigit(char c) {
+    static boolean isDigit(char c) {
         return Character.isDigit(c);
     }
 
@@ -76,7 +99,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
      * }
      * return false ;
      */
-    public static boolean isLetter(char c) {
+    static boolean isLetter(char c) {
         return Character.isLetter(c);
     }
 
@@ -88,7 +111,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
      * }
      * return false ;
      */
-    public static boolean isWhitespace(char c) {
+    static boolean isWhitespace(char c) {
         return Character.isWhitespace(c);
     }
 
@@ -166,10 +189,8 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         return outputQueue;
     }
 
-
-    //Todo check if it's correct
     @Override
-    public double eval(KNode context) {
+    public final double eval(KNode context) {
         if (this._cacheAST == null) {
             throw new RuntimeException("Call parse before");
         }
@@ -204,7 +225,13 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                             if (PrimitiveHelper.equals("TIME", castedFreeToken.content())) {
                                 stack.push((double) context.time());
                             } else {
-                                Object resolved = context.att(castedFreeToken.content());
+                                String tokenName = castedFreeToken.content().trim();
+                                Object resolved;
+                                if (tokenName.startsWith("{") && tokenName.endsWith("}")) {
+                                    resolved = context.att(castedFreeToken.content().substring(1, tokenName.length() - 1));
+                                } else {
+                                    resolved = context.att(castedFreeToken.content());
+                                }
                                 if (resolved != null) {
                                     String valueString = resolved.toString();
                                     if (PrimitiveHelper.equals(valueString, "true")) {
@@ -237,8 +264,6 @@ public class MathExpressionEngine implements KMathExpressionEngine {
             return result;
         }
     }
-
-    private MathToken[] _cacheAST = null;
 
     public MathToken[] buildAST(List<String> rpn) {
         MathToken[] result = new MathToken[rpn.size()];
