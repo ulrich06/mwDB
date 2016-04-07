@@ -1,27 +1,18 @@
 package org.mwdb.gmm;
 
-import org.mwdb.KCallback;
-import org.mwdb.KNode;
-import org.mwdb.KType;
+import org.mwdb.*;
 import org.mwdb.clustering.KMeans;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.operation.MultivariateNormalDistribution;
-import org.mwdb.AbstractMLNode;
 
+public class GaussianNode extends AbstractNode implements KGaussianNode {
 
-/**
- * Created by assaad on 21/03/16.
- */
-public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaussianNode {
-
-
-    public GaussianNode(KNode p_rootNode) {
-        super(p_rootNode);
+    public GaussianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution) {
+        super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-
-    public static final int _CAPACITYFACTOR=3;
-    public static final int _COMPRESSIONITER=10;
+    public static final int _CAPACITYFACTOR = 3;
+    public static final int _COMPRESSIONITER = 10;
     public static double[] err;
 
     private static final String MIN_KEY = "getMin";
@@ -32,9 +23,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
 
     //Mixture model keys
-    private static final String INTERNAL_LEVEL_KEY="_level";
-    private static final String INTERNAL_WIDTH_KEY="_width";
-    private static final String INTERNAL_SUBGAUSSIAN_KEY="_subGaussian";
+    private static final String INTERNAL_LEVEL_KEY = "_level";
+    private static final String INTERNAL_WIDTH_KEY = "_width";
+    private static final String INTERNAL_SUBGAUSSIAN_KEY = "_subGaussian";
 
     //Gaussian keys
     private static final String INTERNAL_SUM_KEY = "_sum";
@@ -50,8 +41,28 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         if (attributeName.equals(VALUE_KEY) && attributeType == KType.DOUBLE_ARRAY) {
             learn((double[]) attributeValue);
         } else {
-            rootNode().attSet(attributeName, attributeType, attributeValue);
-            }
+            super.attSet(attributeName, attributeType, attributeValue);
+        }
+    }
+
+    @Override
+    public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+        
+    }
+
+    @Override
+    public void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+
+    }
+
+    @Override
+    public void find(String indexName, String query, KCallback<KNode[]> callback) {
+
+    }
+
+    @Override
+    public void all(String indexName, KCallback<KNode[]> callback) {
+
     }
 
     @Override
@@ -65,7 +76,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         } else if (attributeName.equals(COV_KEY)) {
             return KType.DOUBLE_ARRAY;
         } else {
-            return rootNode().attType(attributeName);
+            return super.attType(attributeName);
         }
     }
 
@@ -82,10 +93,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         } else if (attributeName.equals(COV_KEY)) {
             return getCovariance(getAvg());
         } else {
-            return rootNode().att(attributeName);
+            return super.att(attributeName);
         }
     }
-
 
 
     public double incWeight(double weight) {
@@ -93,35 +103,32 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     }
 
 
-
     @Override
-    public void configMixture(int levels,int maxPerLevel){
-        rootNode().attSet(INTERNAL_LEVEL_KEY,KType.INT,levels);
-        rootNode().attSet(INTERNAL_WIDTH_KEY,KType.INT,maxPerLevel);
-
-    }
-    @Override
-    public int getLevel(){
-        Integer g= (Integer) rootNode().att(INTERNAL_LEVEL_KEY);
-        if(g!=null){
-            return g;
-        }
-        else return 0;
+    public void configMixture(int levels, int maxPerLevel) {
+        super.attSet(INTERNAL_LEVEL_KEY, KType.INT, levels);
+        super.attSet(INTERNAL_WIDTH_KEY, KType.INT, maxPerLevel);
     }
 
     @Override
-    public int getMaxPerLevel(){
-        Integer g= (Integer) rootNode().att(INTERNAL_WIDTH_KEY);
-        if(g!=null){
+    public int getLevel() {
+        Integer g = (Integer) super.att(INTERNAL_LEVEL_KEY);
+        if (g != null) {
             return g;
-        }
-        else return 0;
+        } else return 0;
+    }
+
+    @Override
+    public int getMaxPerLevel() {
+        Integer g = (Integer) super.att(INTERNAL_WIDTH_KEY);
+        if (g != null) {
+            return g;
+        } else return 0;
     }
 
     @Override
     public void learnBatch(double[][] values) {
         //todo can be optimized later, but for now:
-        for(int i=0;i<values.length;i++){
+        for (int i = 0; i < values.length; i++) {
             learn(values[i]);
         }
 
@@ -130,27 +137,26 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     @Override
     public void learn(final double[] value) {
-        long[] subgaussians= rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
-        if(subgaussians==null|| subgaussians.length==0){
-            internallearn(value,true);
-        }
-        else {
-            final int level=getLevel();
-            rootNode().rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
+        long[] subgaussians = super.relValues(INTERNAL_SUBGAUSSIAN_KEY);
+        if (subgaussians == null || subgaussians.length == 0) {
+            internallearn(value, true);
+        } else {
+            final int level = getLevel();
+            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
                 @Override
                 public void on(KNode[] result) {
-                    boolean inside=false;
-                    for(int i=0;i<result.length;i++) {
-                        GaussianNode subgaussian= new GaussianNode(result[i]);
-                        if(subgaussian.checkInside(value,level-1)){
+                    boolean inside = false;
+                    for (int i = 0; i < result.length; i++) {
+                        GaussianNode subgaussian = (GaussianNode) result[i];
+                        if (subgaussian.checkInside(value, level - 1)) {
                             subgaussian.learn(value);
-                            inside=true;
+                            inside = true;
                             break;
                         }
                     }
                     //if inside a sub, not add it to root
                     //if not insider a sub, add it to root
-                    internallearn(value,!inside);
+                    internallearn(value, !inside);
                 }
             });
         }
@@ -158,92 +164,91 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
     }
 
 
-    private void updateLevel(final int newLevel){
-        rootNode().attSet(INTERNAL_LEVEL_KEY,KType.INT,newLevel);
-        if(newLevel==0){
-            rootNode().attSet(INTERNAL_SUBGAUSSIAN_KEY,KType.LONG_ARRAY, null);
-        }
-        else {
-            rootNode().rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
+    private void updateLevel(final int newLevel) {
+        super.attSet(INTERNAL_LEVEL_KEY, KType.INT, newLevel);
+        if (newLevel == 0) {
+            super.attSet(INTERNAL_SUBGAUSSIAN_KEY, KType.LONG_ARRAY, null);
+        } else {
+            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
                 @Override
                 public void on(KNode[] result) {
-                    for(int i=0;i<result.length;i++){
-                        GaussianNode g = new GaussianNode(result[i]);
-                        g.updateLevel(newLevel-1);
+                    for (int i = 0; i < result.length; i++) {
+                        KGaussianNode g = (KGaussianNode) result[i];
+                        ((GaussianNode) g).updateLevel(newLevel - 1);
                     }
                 }
             });
         }
     }
 
+    private void createLevel(double[] values, int level, int width) {
+        KGaussianNode g = (KGaussianNode) graph().newNode(this.world(), this.time(), "GaussianNode");
+        g.configMixture(level, width);
+        ((GaussianNode) g).internallearn(values, false); //dirac
 
-    private void createLevel(double[] values, int level, int width){
-        KNode node= graph().newNode(this.world(),this.time());
-        GaussianNode g = new GaussianNode(node);
-        g.configMixture(level,width);
-        g.internallearn(values,false); //dirac
-
-        rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,node);
+        super.relAdd(INTERNAL_SUBGAUSSIAN_KEY, g);
     }
 
-    private void checkAndCompress(){
-        final int width=getMaxPerLevel();
-        long[] subgaussians= rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
-        if(subgaussians==null|| subgaussians.length<_CAPACITYFACTOR*width){
+    private void checkAndCompress() {
+
+        final KNode selfPointer = this;
+
+        final int width = getMaxPerLevel();
+        long[] subgaussians = super.relValues(INTERNAL_SUBGAUSSIAN_KEY);
+        if (subgaussians == null || subgaussians.length < _CAPACITYFACTOR * width) {
             return;
-        }
-        else{
+        } else {
             //Compress here
-            rootNode().rel(INTERNAL_SUBGAUSSIAN_KEY,new KCallback<KNode[]>(){
+            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new KCallback<KNode[]>() {
                 @Override
                 //result.length hold the original subgaussian number, and width is after compression
                 public void on(KNode[] result) {
-                    int features=getNumberOfFeatures();
+                    int features = getNumberOfFeatures();
 
-                    int[] totals= new int[width];
+                    int[] totals = new int[width];
 
-                    GaussianNode[] subgauss= new GaussianNode[result.length];
-                    double[][] data =new double[result.length][];
-                    for(int i=0;i<result.length;i++){
-                        subgauss[i]=new GaussianNode(result[i]);
-                        data[i]=subgauss[i].getAvg();
+                    GaussianNode[] subgauss = new GaussianNode[result.length];
+                    double[][] data = new double[result.length][];
+                    for (int i = 0; i < result.length; i++) {
+                        subgauss[i] = (GaussianNode) result[i];
+                        data[i] = subgauss[i].getAvg();
                     }
 
                     //Cluster the different gaussians
                     KMeans clusteringEngine = new KMeans();
-                    int[][] clusters= clusteringEngine.getClusterIds(data,width,_COMPRESSIONITER,getMin(),getMax(),err);
+                    int[][] clusters = clusteringEngine.getClusterIds(data, width, _COMPRESSIONITER, getMin(), getMax(), err);
 
                     //Select the ones which will remain as head by the maximum weight
                     GaussianNode[] mainClusters = new GaussianNode[width];
-                    for(int i=0;i<width;i++){
-                        if(clusters[i]!=null&&clusters[i].length>0){
-                            int max=0;
-                            int maxpos=0;
-                            for(int j=0; j<clusters[i].length;j++){
-                                int x=subgauss[clusters[i][j]].getTotal();
-                                if(x>max){
-                                    max=x;
-                                    maxpos=clusters[i][j];
+                    for (int i = 0; i < width; i++) {
+                        if (clusters[i] != null && clusters[i].length > 0) {
+                            int max = 0;
+                            int maxpos = 0;
+                            for (int j = 0; j < clusters[i].length; j++) {
+                                int x = subgauss[clusters[i][j]].getTotal();
+                                if (x > max) {
+                                    max = x;
+                                    maxpos = clusters[i][j];
                                 }
                             }
-                            mainClusters[i]=subgauss[maxpos];
+                            mainClusters[i] = subgauss[maxpos];
                         }
                     }
 
 
                     //move the nodes
-                    for(int i=0;i<width;i++) {
+                    for (int i = 0; i < width; i++) {
                         //if the main cluster node contains only 1 sample, it needs to clone itself in itself
-                        if(clusters[i].length>1&&mainClusters[i].getTotal()==1 && mainClusters[i].getLevel()>0) {
-                            mainClusters[i].createLevel(mainClusters[i].getAvg(),mainClusters[i].getLevel()-1,mainClusters[i].getMaxPerLevel());
+                        if (clusters[i].length > 1 && mainClusters[i].getTotal() == 1 && mainClusters[i].getLevel() > 0) {
+                            mainClusters[i].createLevel(mainClusters[i].getAvg(), mainClusters[i].getLevel() - 1, mainClusters[i].getMaxPerLevel());
                         }
 
                         if (clusters[i] != null && clusters[i].length > 0) {
                             for (int j = 0; j < clusters[i].length; j++) {
-                                GaussianNode g= subgauss[clusters[i][j]];
-                                if(g!=mainClusters[i]){
+                                GaussianNode g = subgauss[clusters[i][j]];
+                                if (g != mainClusters[i]) {
                                     mainClusters[i].move(g);
-                                    rootNode().relRemove(INTERNAL_SUBGAUSSIAN_KEY,g.rootNode());
+                                    selfPointer.relRemove(INTERNAL_SUBGAUSSIAN_KEY, g);
                                 }
                             }
                             mainClusters[i].checkAndCompress();
@@ -259,37 +264,37 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         //manage total
         Integer total = getTotal();
         Double weight = getWeight();
-        int level= getLevel();
+        int level = getLevel();
 
 
-        double[] sum=getSum();
-        double[] min=getMin();
-        double[] max=getMax();
-        double[] sumsquares=getSumSquares();
+        double[] sum = getSum();
+        double[] min = getMin();
+        double[] max = getMax();
+        double[] sumsquares = getSumSquares();
 
 
         //Start the merging phase
 
-        total=total+subgaus.getTotal();
-        weight=weight+subgaus.getWeight();
+        total = total + subgaus.getTotal();
+        weight = weight + subgaus.getWeight();
 
-        double[] sum2=subgaus.getSum();
-        double[] min2=subgaus.getMin();
-        double[] max2=subgaus.getMax();
-        double[] sumsquares2=subgaus.getSumSquares();
+        double[] sum2 = subgaus.getSum();
+        double[] min2 = subgaus.getMin();
+        double[] max2 = subgaus.getMax();
+        double[] sumsquares2 = subgaus.getSumSquares();
 
-        for(int i=0;i<sum.length;i++){
-            sum[i]=sum[i]+sum2[i];
-            if(min2[i]<min[i]){
-                min[i]=min2[i];
+        for (int i = 0; i < sum.length; i++) {
+            sum[i] = sum[i] + sum2[i];
+            if (min2[i] < min[i]) {
+                min[i] = min2[i];
             }
-            if(max2[i]>max[i]){
-                max[i]=max2[i];
+            if (max2[i] > max[i]) {
+                max[i] = max2[i];
             }
         }
 
-        for(int i=0;i<sumsquares.length;i++){
-            sumsquares[i]=sumsquares[i]+sumsquares2[i];
+        for (int i = 0; i < sumsquares.length; i++) {
+            sumsquares[i] = sumsquares[i] + sumsquares2[i];
         }
 
         //Store everything
@@ -302,24 +307,22 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
         //Add the subGaussian to the relationship
         // TODO: to debug here to validate
-        if(level>0){
-            long[] subrelations= subgaus.relValues(INTERNAL_SUBGAUSSIAN_KEY);
-            if(subrelations==null){
-                subgaus.updateLevel(level-1);
-                rootNode().relAdd(INTERNAL_SUBGAUSSIAN_KEY,subgaus.rootNode());
-            }
-            else{
-                long[] oldrel=this.relValues(INTERNAL_SUBGAUSSIAN_KEY);
-                long[] newrelations=new long[oldrel.length+subrelations.length];
-                System.arraycopy(oldrel,0,newrelations,0,oldrel.length);
-                System.arraycopy(subrelations,0,newrelations,oldrel.length,subrelations.length);
-                attSet(INTERNAL_SUBGAUSSIAN_KEY,KType.LONG_ARRAY,newrelations);
+        if (level > 0) {
+            long[] subrelations = subgaus.relValues(INTERNAL_SUBGAUSSIAN_KEY);
+            if (subrelations == null) {
+                subgaus.updateLevel(level - 1);
+                super.relAdd(INTERNAL_SUBGAUSSIAN_KEY, subgaus);
+            } else {
+                long[] oldrel = this.relValues(INTERNAL_SUBGAUSSIAN_KEY);
+                long[] newrelations = new long[oldrel.length + subrelations.length];
+                System.arraycopy(oldrel, 0, newrelations, 0, oldrel.length);
+                System.arraycopy(subrelations, 0, newrelations, oldrel.length, subrelations.length);
+                attSet(INTERNAL_SUBGAUSSIAN_KEY, KType.LONG_ARRAY, newrelations);
             }
 
 
         }
     }
-
 
 
     public void internallearnBatch(double[][] values) {
@@ -335,8 +338,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
 
         int features = values[0].length;
-        int level= getLevel();
-        int width=getMaxPerLevel();
+        int level = getLevel();
+        int width = getMaxPerLevel();
 
 
         //manage total
@@ -357,10 +360,10 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             sumsquares = new double[features * (features + 1) / 2];
         } else {
             //get everything from saved
-            sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
-            min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
-            max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
-            sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+            sum = (double[]) super.att(INTERNAL_SUM_KEY);
+            min = (double[]) super.att(INTERNAL_MIN_KEY);
+            max = (double[]) super.att(INTERNAL_MAX_KEY);
+            sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
         }
 
         for (int k = 0; k < values.length; k++) {
@@ -374,8 +377,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
                     max[i] = values[k][i];
                 }
                 sum[i] += values[k][i];
-                if(level>0){
-                    createLevel(values[k],level-1,width);
+                if (level > 0) {
+                    createLevel(values[k], level - 1, width);
                 }
             }
 
@@ -407,8 +410,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         //manage total
         Integer total = getTotal();
         Double weight = getWeight();
-        int level= getLevel();
-        int width=getMaxPerLevel();
+        int level = getLevel();
+        int width = getMaxPerLevel();
 
         //Create dirac
         if (total == null) {
@@ -421,8 +424,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             attSet(INTERNAL_TOTAL_KEY, KType.INT, total);
             attSet(INTERNAL_WEIGHT_KEY, KType.DOUBLE, weight);
             attSet(INTERNAL_SUM_KEY, KType.DOUBLE_ARRAY, sum);
-            if(createNode&&level>0){
-                createLevel(values,level-1,width);
+            if (createNode && level > 0) {
+                createLevel(values, level - 1, width);
                 checkAndCompress();
             }
 
@@ -435,7 +438,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             //Upgrade dirac to gaussian
             if (total == 1) {
                 //Create getMin, getMax, sumsquares
-                sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+                sum = (double[]) super.att(INTERNAL_SUM_KEY);
                 min = new double[features];
                 max = new double[features];
                 System.arraycopy(sum, 0, min, 0, features);
@@ -452,10 +455,10 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             }
             //Otherwise, get previously stored values
             else {
-                sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
-                min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
-                max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
-                sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+                sum = (double[]) super.att(INTERNAL_SUM_KEY);
+                min = (double[]) super.att(INTERNAL_MIN_KEY);
+                max = (double[]) super.att(INTERNAL_MAX_KEY);
+                sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
             }
 
             //Update the values
@@ -479,8 +482,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             }
             total++;
             weight = incWeight(weight);
-            if(createNode&&level>0){
-                createLevel(values,level-1,width);
+            if (createNode && level > 0) {
+                createLevel(values, level - 1, width);
                 checkAndCompress();
             }
 
@@ -501,32 +504,31 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         if (total == null) {
             return 0;
         } else {
-            double[] sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            double[] sum = (double[]) super.att(INTERNAL_SUM_KEY);
             return sum.length;
         }
     }
 
     @Override
-    public double[] getSum(){
+    public double[] getSum() {
         Integer total = getTotal();
         if (total == null) {
             return null;
-        }
-        else  {
-            return (double[]) rootNode().att(INTERNAL_SUM_KEY);
+        } else {
+            return (double[]) super.att(INTERNAL_SUM_KEY);
         }
     }
 
     @Override
-    public double[] getSumSquares(){
+    public double[] getSumSquares() {
         Integer total = getTotal();
         if (total == null) {
             return null;
         }
-        if(total ==1)  {
-            double[] sum = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+        if (total == 1) {
+            double[] sum = (double[]) super.att(INTERNAL_SUM_KEY);
 
-            int features=sum.length;
+            int features = sum.length;
             double[] sumsquares = new double[features * (features + 1) / 2];
             int count = 0;
             for (int i = 0; i < features; i++) {
@@ -536,9 +538,8 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
                 }
             }
             return sumsquares;
-        }
-        else {
-            return  (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+        } else {
+            return (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
         }
     }
 
@@ -578,19 +579,19 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
 
         for (int i = 0; i < res.length; i++) {
-            res[i] = mnd.density(featArray[i],normalizeOnAvg);
+            res[i] = mnd.density(featArray[i], normalizeOnAvg);
         }
         return res;
     }
 
     @Override
     public Integer getTotal() {
-        return (Integer) rootNode().att(INTERNAL_TOTAL_KEY);
+        return (Integer) super.att(INTERNAL_TOTAL_KEY);
     }
 
     @Override
     public Double getWeight() {
-        return (Double) rootNode().att(INTERNAL_WEIGHT_KEY);
+        return (Double) super.att(INTERNAL_WEIGHT_KEY);
     }
 
     @Override
@@ -600,9 +601,9 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             return null;
         }
         if (total == 1) {
-            return (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            return (double[]) super.att(INTERNAL_SUM_KEY);
         } else {
-            double[] avg = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            double[] avg = (double[]) super.att(INTERNAL_SUM_KEY);
             for (int i = 0; i < avg.length; i++) {
                 avg[i] = avg[i] / total;
             }
@@ -613,7 +614,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
 
     @Override
     public double[][] getCovariance(double[] avg) {
-        if(avg==null){
+        if (avg == null) {
             return null;
         }
         int features = avg.length;
@@ -624,7 +625,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
         if (total > 1) {
             double[][] covariances = new double[features][features];
-            double[] sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+            double[] sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
 
             double correction = total;
             correction = correction / (total - 1);
@@ -653,7 +654,7 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
         }
         if (total > 1) {
             double[] covariances = new double[features * features];
-            double[] sumsquares = (double[]) rootNode().att(INTERNAL_SUMSQUARE_KEY);
+            double[] sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
 
             double correction = total;
             correction = correction / (total - 1);
@@ -679,10 +680,10 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             return null;
         }
         if (total == 1) {
-            double[] min = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            double[] min = (double[]) super.att(INTERNAL_SUM_KEY);
             return min;
         } else {
-            double[] min = (double[]) rootNode().att(INTERNAL_MIN_KEY);
+            double[] min = (double[]) super.att(INTERNAL_MIN_KEY);
             return min;
         }
     }
@@ -694,33 +695,22 @@ public class GaussianNode extends AbstractMLNode<KGaussianNode> implements KGaus
             return null;
         }
         if (total == 1) {
-            double[] max = (double[]) rootNode().att(INTERNAL_SUM_KEY);
+            double[] max = (double[]) super.att(INTERNAL_SUM_KEY);
             return max;
         } else {
-            double[] max = (double[]) rootNode().att(INTERNAL_MAX_KEY);
+            double[] max = (double[]) super.att(INTERNAL_MAX_KEY);
             return max;
         }
     }
 
     @Override
     public long[] getSubGraph() {
-        return rootNode().relValues(INTERNAL_SUBGAUSSIAN_KEY);
+        return super.relValues(INTERNAL_SUBGAUSSIAN_KEY);
     }
 
     @Override
     public boolean checkInside(double[] feature, int level) {
         return false; //to reimplement
-    }
-
-
-    @Override
-    public void jump(long world, long time, KCallback<KGaussianNode> callback) {
-        rootNode().graph().lookup(world, time, rootNode().id(), new KCallback<KNode>() {
-            @Override
-            public void on(KNode result) {
-                callback.on(new GaussianNode(result));
-            }
-        });
     }
 
 }

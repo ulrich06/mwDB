@@ -182,7 +182,9 @@ public class ArrayLongLongMap implements KLongLongMap {
             //now the object is reachable to other thread everything should be ready
             internalState._elementHash[hashIndex] = newIndex;
             internalState._elementCount = internalState._elementCount + 1;
-            _listener.declareDirty(null);
+            if(_listener != null){
+                _listener.declareDirty(null);
+            }
         } else {
             if (internalState._elementV[entry] != value && value != Constants.NULL_LONG) {
                 //setValue

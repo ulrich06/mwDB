@@ -9,13 +9,23 @@ import org.mwdb.plugin.KResolver;
 public interface KGraph {
 
     /**
-     * Creates a new {@link KNode Node} in the KGraph and returns the new KNode.
+     * Creates a new {@link KNode Node} (generic) in the KGraph and returns the new KNode.
      *
      * @param world initial world of the node
      * @param time  initial time of the node
      * @return newly created node
      */
     KNode newNode(long world, long time);
+
+    /**
+     * Creates a new {@link KNode Node} with a specified behavior name (related to KFactory plugins) in the KGraph and returns the new KNode.
+     *
+     * @param world    initial world of the node
+     * @param time     initial time of the node
+     * @param nodeType name of the special KFactory plugin
+     * @return newly created node
+     */
+    KNode newNode(long world, long time, String nodeType);
 
     /**
      * Asynchronous lookup of a particular node.<br>
@@ -123,10 +133,11 @@ public interface KGraph {
     KBuffer newBuffer();
 
     /**
-     * Retrives the current state chunk resolver
+     * Retrieves the current state chunk resolver
      *
      * @return current running resolver
      */
     KResolver resolver();
+
 
 }

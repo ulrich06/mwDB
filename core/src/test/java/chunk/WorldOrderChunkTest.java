@@ -86,7 +86,10 @@ public class WorldOrderChunkTest implements KChunkListener {
         for (long i = 0; i < 10_000; i++) {
             map.put(i, i * 3);
         }
+        Assert.assertTrue(map.extra() == Constants.NULL_LONG);
+        map.setExtra(1_000_000);
         Assert.assertTrue(map.size() == 10_000);
+        Assert.assertTrue(map.extra() == 1_000_000);
 
         KBuffer buffer = Buffer.newHeapBuffer();
         map.save(buffer);
@@ -94,6 +97,8 @@ public class WorldOrderChunkTest implements KChunkListener {
         for (long i = 0; i < 10_000; i++) {
             Assert.assertTrue(map2.get(i) == i * 3);
         }
+        Assert.assertTrue(map2.extra() == 1_000_000);
+
         KBuffer buffer2 = Buffer.newHeapBuffer();
         map2.save(buffer2);
         Assert.assertTrue(compareBuffers(buffer, buffer2));

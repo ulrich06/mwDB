@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.mwdb.GraphBuilder;
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
-import org.mwdb.KML;
 import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
 

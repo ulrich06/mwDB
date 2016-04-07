@@ -17,6 +17,7 @@ public class KConstants {
     // Limit limit local index to LONG limit - prefix size
     public static final long KEY_PREFIX_MASK = 0x0000001FFFFFFFFFl;
 
+    public static final String CACHE_MISS_ERROR = "Cache miss error";
 
 }
 

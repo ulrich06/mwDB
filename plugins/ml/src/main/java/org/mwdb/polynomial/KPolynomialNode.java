@@ -1,4 +1,6 @@
-package org.mwdb;
+package org.mwdb.polynomial;
+
+import org.mwdb.KNode;
 
 public interface KPolynomialNode extends KNode {
 

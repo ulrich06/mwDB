@@ -75,7 +75,9 @@
         <module>plugins/ml</module>
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
-
+        <!--
+        <module>plugins/debug</module>
+-->
     </modules>
 
     <dependencies>

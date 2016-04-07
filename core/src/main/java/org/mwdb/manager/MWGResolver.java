@@ -1,6 +1,7 @@
 package org.mwdb.manager;
 
 import org.mwdb.*;
+import org.mwdb.plugin.KFactory;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -37,7 +38,7 @@ public class MWGResolver implements KResolver {
     }
 
     @Override
-    public void initNode(KNode node) {
+    public void initNode(KNode node, long codeType) {
         KStateChunk cacheEntry = (KStateChunk) this._space.create(Constants.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
         //put and mark
         this._space.putAndMark(cacheEntry);
@@ -58,6 +59,7 @@ public class MWGResolver implements KResolver {
         KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id(), null, null);
         objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder);
         objectWorldOrder.put(node.world(), node.time());
+        objectWorldOrder.setExtra(codeType);
         //mark the global
 
         this._space.getAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
@@ -112,8 +114,8 @@ public class MWGResolver implements KResolver {
                                             selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                             callback.on(null);
                                         } else {
-                                            final long closestUniverse = resolve_world((KLongLongMap) theGlobalWorldOrder, (KLongLongMap) theNodeWorldOrder, time, world);
-                                            selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestUniverse, Constants.NULL_LONG, id, new KCallback<KChunk>() {
+                                            final long closestWorld = resolve_world((KLongLongMap) theGlobalWorldOrder, (KLongLongMap) theNodeWorldOrder, time, world);
+                                            selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new KCallback<KChunk>() {
                                                 @Override
                                                 public void on(KChunk theNodeSuperTimeTree) {
                                                     if (theNodeSuperTimeTree == null) {
@@ -129,7 +131,7 @@ public class MWGResolver implements KResolver {
                                                             callback.on(null);
                                                             return;
                                                         }
-                                                        selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestUniverse, closestSuperTime, id, new KCallback<KChunk>() {
+                                                        selfPointer.getOrLoadAndMark(Constants.TIME_TREE_CHUNK, closestWorld, closestSuperTime, id, new KCallback<KChunk>() {
                                                             @Override
                                                             public void on(KChunk theNodeTimeTree) {
                                                                 if (theNodeTimeTree == null) {
@@ -147,7 +149,7 @@ public class MWGResolver implements KResolver {
                                                                         callback.on(null);
                                                                         return;
                                                                     }
-                                                                    selfPointer.getOrLoadAndMark(Constants.STATE_CHUNK, closestUniverse, closestTime, id, new KCallback<KChunk>() {
+                                                                    selfPointer.getOrLoadAndMark(Constants.STATE_CHUNK, closestWorld, closestTime, id, new KCallback<KChunk>() {
                                                                         @Override
                                                                         public void on(KChunk theObjectChunk) {
                                                                             if (theObjectChunk == null) {
@@ -157,9 +159,31 @@ public class MWGResolver implements KResolver {
                                                                                 selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                                                                 callback.on(null);
                                                                             } else {
-                                                                                Node newNode = new Node(_graph, world, time, id, selfPointer, closestUniverse, closestSuperTime, closestTime, ((KWorldOrderChunk) theNodeWorldOrder).magic(), ((KLongTree) theNodeSuperTimeTree).magic(), ((KLongTree) theNodeTimeTree).magic());
-                                                                                selfPointer._tracker.monitor(newNode);
-                                                                                callback.on(newNode);
+                                                                                KWorldOrderChunk castedNodeWorldOrder = (KWorldOrderChunk) theNodeWorldOrder;
+                                                                                long extraCode = castedNodeWorldOrder.extra();
+                                                                                KFactory resolvedFactory = null;
+                                                                                if (extraCode == Constants.NULL_LONG) {
+                                                                                    resolvedFactory = ((Graph) _graph).factoryByCode(extraCode);
+                                                                                }
+
+                                                                                long[] initPreviouslyResolved = new long[6];
+                                                                                //init previously resolved values
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = closestWorld;
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = closestSuperTime;
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = closestTime;
+                                                                                //init previous magics
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = ((KWorldOrderChunk) theNodeWorldOrder).magic();
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = ((KLongTree) theNodeSuperTimeTree).magic();
+                                                                                initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = ((KLongTree) theNodeTimeTree).magic();
+
+                                                                                KNode resolvedNode;
+                                                                                if (resolvedFactory == null) {
+                                                                                    resolvedNode = new Node(world, time, id, _graph, initPreviouslyResolved);
+                                                                                } else {
+                                                                                    resolvedNode = resolvedFactory.create(world, time, id, _graph, initPreviouslyResolved);
+                                                                                }
+                                                                                selfPointer._tracker.monitor(resolvedNode);
+                                                                                callback.on(resolvedNode);
                                                                             }
                                                                         }
                                                                     });

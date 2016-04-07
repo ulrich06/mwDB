@@ -7,7 +7,6 @@ import org.mwdb.KCallback;
  */
 public interface KScheduler {
 
-
     /**
      * Registers a task for execution.
      *
@@ -25,7 +24,5 @@ public interface KScheduler {
      * Terminates the scheduler (i.e.: the execution of tasks).
      */
     void stop();
-
-    void detach();
-
+    
 }

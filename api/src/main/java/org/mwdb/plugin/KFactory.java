@@ -10,26 +10,20 @@ import org.mwdb.KNode;
 public interface KFactory {
 
     /**
-     * @return unique identifier for the factory plugin
+     * @return unique identifier for the factory plugin (usually the fully qualified name of the extended KNode)
      */
-    long hash();
+    String name();
 
     /**
      * Create a new KNode
      *
-     * @param world                 current world
-     * @param time                  current time
-     * @param id                    current node id
-     * @param graph                 current graph
-     * @param resolver              current resolver
-     * @param actualWorld           current resolved world
-     * @param actualSuperTime       current resolved super time
-     * @param actualTime            current resolved time
-     * @param currentWorldMagic     current world magic
-     * @param currentSuperTimeMagic current super time magic
-     * @param currentTimeMagic      current time magic
+     * @param world             current world
+     * @param time              current time
+     * @param id                current node id
+     * @param graph             current graph
+     * @param initialResolution current resolved world/superTime/time and associated magics
      * @return newly created KNode object
      */
-    KNode create(long world, long time, long id, KGraph graph, KResolver resolver, long actualWorld, long actualSuperTime, long actualTime, long currentWorldMagic, long currentSuperTimeMagic, long currentTimeMagic);
+    KNode create(long world, long time, long id, KGraph graph, long[] initialResolution);
 
 }

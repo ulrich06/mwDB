@@ -81,8 +81,6 @@ public class Constants extends KConstants {
      */
     public static final String DISCONNECTED_ERROR = "Please connect your graph, prior to any usage of it";
 
-    public static final String CACHE_MISS_ERROR = "Cache miss error";
-
 
     /**
      * Queries

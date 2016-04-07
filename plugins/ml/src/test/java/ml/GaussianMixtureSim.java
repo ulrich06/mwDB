@@ -1,17 +1,14 @@
 package ml;
 
-import org.junit.Test;
 import org.mwdb.GraphBuilder;
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
-import org.mwdb.KML;
 import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Scanner;
-import java.util.StringJoiner;
 
 /**
  * Created by assaad on 04/04/16.

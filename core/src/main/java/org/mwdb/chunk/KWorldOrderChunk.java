@@ -8,4 +8,8 @@ public interface KWorldOrderChunk extends KChunk, KLongLongMap {
 
     void unlock();
 
+    long extra();
+
+    void setExtra(long extraValue);
+
 }

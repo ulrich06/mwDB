@@ -44,6 +44,6 @@ class Builder implements GraphBuilder.InternalBuilder {
         } else {
             space = new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
         }
-        return new Graph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler));
+        return new Graph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler), p_factories);
     }
 }

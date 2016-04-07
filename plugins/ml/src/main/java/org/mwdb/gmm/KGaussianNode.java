@@ -1,9 +1,9 @@
 package org.mwdb.gmm;
 
-import org.mwdb.KMLNode;
+import org.mwdb.KNode;
 import org.mwdb.math.matrix.KMatrix;
 
-public interface KGaussianNode extends KMLNode<KGaussianNode> {
+public interface KGaussianNode extends KNode {
 
     void configMixture(int levels,int maxPerLevel);
 

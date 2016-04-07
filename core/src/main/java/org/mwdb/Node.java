@@ -1,230 +1,17 @@
 package org.mwdb;
 
 import org.mwdb.chunk.*;
-import org.mwdb.plugin.KResolver.KNodeState;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Query;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class Node implements KNode {
+public class Node extends AbstractNode {
 
-    private final long _world;
-
-    private final long _time;
-
-    private final long _id;
-
-    private final KGraph _graph;
-
-    private final KResolver _resolver;
-
-    public final AtomicReference<long[]> _previousResolveds;
-
-    public Node(KGraph p_graph, long p_world, long p_time, long p_id, KResolver p_resolver, long p_actualWorld, long p_actualSuperTime, long p_actualTime, long currentWorldMagic, long currentSuperTimeMagic, long currentTimeMagic) {
-        this._graph = p_graph;
-        this._world = p_world;
-        this._time = p_time;
-        this._id = p_id;
-        this._resolver = p_resolver;
-        this._previousResolveds = new AtomicReference<long[]>();
-
-        long[] initPreviouslyResolved = new long[6];
-        //init previously resolved values
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = p_actualWorld;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = p_actualSuperTime;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = p_actualTime;
-        //init previous magics
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = currentWorldMagic;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = currentSuperTimeMagic;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = currentTimeMagic;
-
-        this._previousResolveds.set(initPreviouslyResolved);
-    }
-
-    @Override
-    public KGraph graph() {
-        return _graph;
-    }
-
-    @Override
-    public long world() {
-        return this._world;
-    }
-
-    @Override
-    public long time() {
-        return this._time;
-    }
-
-    @Override
-    public long id() {
-        return this._id;
-    }
-
-    @Override
-    public Object att(String attributeName) {
-        KNodeState resolved = this._resolver.resolveState(this, true);
-        if (resolved != null) {
-            return resolved.get(this._resolver.stringToLongKey(attributeName));
-        }
-        return null;
-    }
-
-    @Override
-    public void attSet(String attributeName, byte attributeType, Object attributeValue) {
-        KNodeState preciseState = this._resolver.resolveState(this, false);
-        if (preciseState != null) {
-            preciseState.set(this._resolver.stringToLongKey(attributeName), attributeType, attributeValue);
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public Object attMap(String attributeName, byte attributeType) {
-        KNodeState preciseState = this._resolver.resolveState(this, false);
-        if (preciseState != null) {
-            return preciseState.getOrCreate(this._resolver.stringToLongKey(attributeName), attributeType);
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public byte attType(String attributeName) {
-        KNodeState resolved = this._resolver.resolveState(this, true);
-        if (resolved != null) {
-            return resolved.getType(this._resolver.stringToLongKey(attributeName));
-        }
-        return -1;
-    }
-
-    @Override
-    public void attRemove(String attributeName) {
-        attSet(attributeName, KType.INT, null);
-    }
-
-    @Override
-    public void rel(String relationName, KCallback<KNode[]> callback) {
-        if (!PrimitiveHelper.isDefined(callback)) {
-            return;
-        }
-        final KNodeState resolved = this._resolver.resolveState(this, true);
-        if (resolved != null) {
-            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
-            if (flatRefs == null || flatRefs.length == 0) {
-                callback.on(new KNode[0]);
-            } else {
-                final KNode[] result = new KNode[flatRefs.length];
-                final DeferCounter counter = new DeferCounter(flatRefs.length);
-                for (int i = 0; i < flatRefs.length; i++) {
-                    final int fi = i;
-                    this._resolver.lookup(_world, _time, flatRefs[i], new KCallback<KNode>() {
-                        @Override
-                        public void on(KNode kNode) {
-                            result[fi] = kNode;
-                            counter.count();
-                        }
-                    });
-                }
-                counter.then(new KCallback() {
-                    @Override
-                    public void on(Object o) {
-                        callback.on(result);
-                    }
-                });
-            }
-        }
-    }
-
-    @Override
-    public long[] relValues(String relationName) {
-        KNodeState resolved = this._resolver.resolveState(this, true);
-        if (resolved != null) {
-            return (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public void relAdd(String relationName, KNode relatedNode) {
-        KNodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName);
-        if (preciseState != null) {
-            long[] previous = (long[]) preciseState.get(relationKey);
-            if (previous == null) {
-                previous = new long[1];
-                previous[0] = relatedNode.id();
-            } else {
-                long[] incArray = new long[previous.length + 1];
-                System.arraycopy(previous, 0, incArray, 0, previous.length);
-                incArray[previous.length] = relatedNode.id();
-                previous = incArray;
-            }
-            preciseState.set(relationKey, KType.LONG_ARRAY, previous);
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public void relRemove(String relationName, KNode relatedNode) {
-        KNodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName);
-        if (preciseState != null) {
-            long[] previous = (long[]) preciseState.get(relationKey);
-            if (previous != null) {
-                int indexToRemove = -1;
-                for (int i = 0; i < previous.length; i++) {
-                    if (previous[i] == relatedNode.id()) {
-                        indexToRemove = i;
-                        break;
-                    }
-                }
-                if (indexToRemove != -1) {
-                    if ((previous.length - 1) == 0) {
-                        preciseState.set(relationKey, KType.LONG_ARRAY, null);
-                    } else {
-                        long[] newArray = new long[previous.length - 1];
-                        System.arraycopy(previous, 0, newArray, 0, indexToRemove);
-                        System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
-                        preciseState.set(relationKey, KType.LONG_ARRAY, newArray);
-                    }
-                }
-            }
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public void free() {
-        this._resolver.freeNode(this);
-    }
-
-    @Override
-    public long timeDephasing() {
-        KStateChunk state = (KStateChunk) this._resolver.resolveState(this, true);
-        if (state != null) {
-            return (this._time - state.time());
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-        }
-    }
-
-    @Override
-    public void forcePhase() {
-        this._resolver.resolveState(this, false);
-    }
-
-    @Override
-    public void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback) {
-        this._resolver.resolveTimepoints(this, beginningOfSearch, endOfSearch, callback);
+    public Node(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution) {
+        super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
     @Override
@@ -301,7 +88,7 @@ public class Node implements KNode {
             //TODO replace by a par lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(selfPointer._world, selfPointer._time, foundId[i], new KCallback<KNode>() {
+                selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
                         resolved[loopInteger.incrementAndGet()] = resolvedNode;
@@ -375,7 +162,7 @@ public class Node implements KNode {
             indexMap.each(new KLongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
-                    selfPointer._resolver.lookup(selfPointer._world, selfPointer._time, nodeId, new KCallback<KNode>() {
+                    selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
                             resolved[loopInteger.incrementAndGet()] = resolvedNode;
@@ -399,11 +186,11 @@ public class Node implements KNode {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("{\"world\":");
-        builder.append(_world);
+        builder.append(world());
         builder.append(",\"time\":");
-        builder.append(_time);
+        builder.append(time());
         builder.append(",\"id\":");
-        builder.append(_id);
+        builder.append(id());
         KStateChunk state = (KStateChunk) this._resolver.resolveState(this, true);
         if (state != null) {
             builder.append(",\"data\": {");

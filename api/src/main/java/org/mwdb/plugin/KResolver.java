@@ -12,6 +12,7 @@ public interface KResolver {
 
     /**
      * Initializes the resolver with the graph passed as parameter
+     *
      * @param graph graph this resolver belongs to
      */
     void init(KGraph graph);
@@ -19,9 +20,10 @@ public interface KResolver {
     /**
      * Initializes backend structures for the newly created node passed as parameter
      *
-     * @param node The node to initialize.
+     * @param node     The node to initialize.
+     * @param typeCode The coded type param to initialize
      */
-    void initNode(KNode node);
+    void initNode(KNode node, long typeCode);
 
     /**
      * Initializes a newly created world, and sets the parent relationship.
@@ -100,6 +102,20 @@ public interface KResolver {
      * Node state
      */
     interface KNodeState {
+
+        /**
+         * Access to the world whom this state is attached to
+         *
+         * @return current resolved world
+         */
+        long world();
+
+        /**
+         * Access to the time whom this state is attached to
+         *
+         * @return current resolved time
+         */
+        long time();
 
         /**
          * Set the named state element

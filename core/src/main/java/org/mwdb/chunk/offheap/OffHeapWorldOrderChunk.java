@@ -38,6 +38,9 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private static final int INDEX_CAPACITY = 13;
     private static final int INDEX_MAGIC = 14;
     private static final int INDEX_LOCK_EXT = 15;
+    private static final int INDEX_EXTRA = 16;
+
+    private static final int ROOT_SIZE = 17;
 
     //long[]
     private long elementK_ptr;
@@ -55,10 +58,10 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             elementHash_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_HASH);
             elementNext_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_NEXT);
         } else if (initialString != null) {
-            this.rootPtr = OffHeapLongArray.allocate(16);
+            this.rootPtr = OffHeapLongArray.allocate(ROOT_SIZE);
             load(initialString);
         } else {
-            this.rootPtr = OffHeapLongArray.allocate(16);
+            this.rootPtr = OffHeapLongArray.allocate(ROOT_SIZE);
             long initialCapacity = Constants.MAP_INITIAL_CAPACITY;
             /** Init long variables */
             //init lock
@@ -71,6 +74,8 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.rootPtr, INDEX_SIZE, 0);
+
+            OffHeapLongArray.set(this.rootPtr, INDEX_EXTRA, Constants.NULL_LONG);
 
             /** Init Long[] variables */
             //init elementK
@@ -87,6 +92,16 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
         }
 
+    }
+
+    @Override
+    public long extra() {
+        return OffHeapLongArray.get(this.rootPtr, INDEX_EXTRA);
+    }
+
+    @Override
+    public void setExtra(long extraValue) {
+        OffHeapLongArray.set(this.rootPtr, INDEX_EXTRA, extraValue);
     }
 
     @Override
@@ -316,6 +331,12 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
             long size = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
             Base64.encodeLongToBuffer(size, buffer);
             buffer.write(Constants.CHUNK_SEP);
+            long extra = OffHeapLongArray.get(rootPtr, INDEX_EXTRA);
+            if (extra != Constants.NULL_LONG) {
+                Base64.encodeLongToBuffer(extra, buffer);
+                buffer.write(Constants.CHUNK_SEP);
+            }
+
             boolean isFirst = true;
 
             long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
@@ -345,37 +366,47 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
         int previousStart = -1;
         long capacity = -1;
         int insertIndex = 0;
+
+        boolean initDone = false;
+
         while (cursor < buffer.size()) {
 
             if (buffer.read(cursor) == Constants.CHUNK_SEP) {
-                long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
-                if (size == 0) {
-                    capacity = 1;
+
+                if (!initDone) {
+                    long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
+                    if (size == 0) {
+                        capacity = 1;
+                    } else {
+                        capacity = size << 1;
+                    }
+                    //init lock
+                    OffHeapLongArray.set(this.rootPtr, INDEX_LOCK, 0);
+                    //init flags
+                    OffHeapLongArray.set(this.rootPtr, INDEX_FLAGS, 0);
+                    //init capacity
+                    OffHeapLongArray.set(this.rootPtr, INDEX_CAPACITY, capacity);
+                    //init threshold
+                    OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+                    //init elementCount
+                    OffHeapLongArray.set(this.rootPtr, INDEX_SIZE, size);
+                    //init elementK
+                    elementK_ptr = OffHeapLongArray.allocate(capacity);
+                    OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_K, elementK_ptr);
+                    //init elementV
+                    elementV_ptr = OffHeapLongArray.allocate(capacity);
+                    OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_V, elementV_ptr);
+                    //init elementNext
+                    elementNext_ptr = OffHeapLongArray.allocate(capacity);
+                    OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+                    //init elementHash
+                    elementHash_ptr = OffHeapLongArray.allocate(capacity);
+                    OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
+                    initDone = true;
                 } else {
-                    capacity = size << 1;
+                    long extra = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
+                    OffHeapLongArray.set(rootPtr, INDEX_EXTRA, extra);
                 }
-                //init lock
-                OffHeapLongArray.set(this.rootPtr, INDEX_LOCK, 0);
-                //init flags
-                OffHeapLongArray.set(this.rootPtr, INDEX_FLAGS, 0);
-                //init capacity
-                OffHeapLongArray.set(this.rootPtr, INDEX_CAPACITY, capacity);
-                //init threshold
-                OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-                //init elementCount
-                OffHeapLongArray.set(this.rootPtr, INDEX_SIZE, size);
-                //init elementK
-                elementK_ptr = OffHeapLongArray.allocate(capacity);
-                OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_K, elementK_ptr);
-                //init elementV
-                elementV_ptr = OffHeapLongArray.allocate(capacity);
-                OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_V, elementV_ptr);
-                //init elementNext
-                elementNext_ptr = OffHeapLongArray.allocate(capacity);
-                OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_NEXT, elementNext_ptr);
-                //init elementHash
-                elementHash_ptr = OffHeapLongArray.allocate(capacity);
-                OffHeapLongArray.set(this.rootPtr, INDEX_ELEMENT_HASH, elementHash_ptr);
 
                 //reset for next round
                 previousStart = cursor + 1;

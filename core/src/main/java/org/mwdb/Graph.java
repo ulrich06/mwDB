@@ -1,6 +1,8 @@
 package org.mwdb;
 
+import org.mwdb.chunk.heap.ArrayLongLongMap;
 import org.mwdb.manager.KeyCalculator;
+import org.mwdb.plugin.KFactory;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
@@ -22,6 +24,10 @@ public class Graph implements KGraph {
 
     private final KResolver _resolver;
 
+    private final KFactory[] _factories;
+
+    private final KLongLongMap _factoryNames;
+
     //TODO rest of elements
 
     private Short _prefix = null;
@@ -39,13 +45,22 @@ public class Graph implements KGraph {
     private static final int GLO_TREE_INDEX = 2;
     private static final int GLO_DIC_INDEX = 3;
 
-    protected Graph(KStorage p_storage, KChunkSpace p_space, KScheduler p_scheduler, KResolver p_resolver) {
+    Graph(KStorage p_storage, KChunkSpace p_space, KScheduler p_scheduler, KResolver p_resolver, KFactory[] p_factories) {
         //subElements set
         this._storage = p_storage;
         this._space = p_space;
         this._space.setGraph(this);
         this._scheduler = p_scheduler;
         this._resolver = p_resolver;
+
+        this._factories = p_factories;
+        //will be initialise at the connection
+        if (this._factories != null) {
+            this._factoryNames = new ArrayLongLongMap(null, this._factories.length, null);
+        } else {
+            this._factoryNames = null;
+        }
+
         //variables init
         this._isConnected = new AtomicBoolean(false);
         this._lock = new AtomicBoolean(false);
@@ -63,9 +78,62 @@ public class Graph implements KGraph {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
-        KNode newNode = new Node(this, world, time, this._nodeKeyCalculator.nextKey(), this._resolver, world, time, time, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
-        this._resolver.initNode(newNode);
+
+        long[] initPreviouslyResolved = new long[6];
+        //init previously resolved values
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+        //init previous magics
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+
+        KNode newNode = new Node(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+        this._resolver.initNode(newNode, Constants.NULL_LONG);
         return newNode;
+    }
+
+    @Override
+    public KNode newNode(long world, long time, String nodeType) {
+        if (!_isConnected.get()) {
+            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
+        }
+
+        long[] initPreviouslyResolved = new long[6];
+        //init previously resolved values
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+        //init previous magics
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+
+        long extraCode = _resolver.stringToLongKey(nodeType);
+        KFactory resolvedFactory = factoryByCode(extraCode);
+        KNode newNode;
+        if (resolvedFactory == null) {
+            System.out.println("WARNING: UnKnow NodeType " + nodeType + ", missing plugin configuration in the builder ? Using generic node as a fallback");
+            newNode = new Node(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+        } else {
+            newNode = resolvedFactory.create(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+        }
+        this._resolver.initNode(newNode, extraCode);
+        return newNode;
+    }
+
+    public final KFactory factoryByCode(long code) {
+        if (_factoryNames != null) {
+            long resolvedFactoryIndex = _factoryNames.get(code);
+            if (resolvedFactoryIndex != Constants.NULL_LONG) {
+                return _factories[(int) resolvedFactoryIndex];
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -148,6 +216,14 @@ public class Graph implements KGraph {
 
                                     //init the resolver
                                     selfPointer._resolver.init(selfPointer);
+
+                                    final KFactory[] localFactories = selfPointer._factories;
+                                    if (localFactories != null) {
+                                        for (int i = 0; i < localFactories.length; i++) {
+                                            final long encodedFactoryKey = selfPointer._resolver.stringToLongKey(localFactories[i].name());
+                                            selfPointer._factoryNames.put(encodedFactoryKey, i);
+                                        }
+                                    }
 
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -401,8 +477,19 @@ public class Graph implements KGraph {
                 } else {
                     KLongLongMap globalIndexContent;
                     if (globalIndexNodeUnsafe == null) {
-                        KNode globalIndexNode = new Node(selfPointer, world, time, Constants.END_OF_TIME, selfPointer._resolver, world, time, time, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
-                        selfPointer._resolver.initNode(globalIndexNode);
+
+                        long[] initPreviouslyResolved = new long[6];
+                        //init previously resolved values
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+                        //init previous magics
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+
+                        KNode globalIndexNode = new Node(world, time, Constants.END_OF_TIME, selfPointer, initPreviouslyResolved);
+                        selfPointer._resolver.initNode(globalIndexNode, Constants.NULL_LONG);
                         globalIndexContent = (KLongLongMap) globalIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
                     } else {
                         globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.att(Constants.INDEX_ATTRIBUTE);

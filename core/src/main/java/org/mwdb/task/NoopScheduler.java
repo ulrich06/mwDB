@@ -20,8 +20,4 @@ public class NoopScheduler implements KScheduler {
         //noop
     }
 
-    @Override
-    public void detach() {
-        //noop
-    }
 }

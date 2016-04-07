@@ -22,6 +22,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     private volatile long _marks;
     private volatile long _magic;
     private volatile long _flags;
+    private volatile long _extra;
 
     private static final long _flagsOffset;
     private static final long _marksOffset;
@@ -56,6 +57,16 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         return this._id;
     }
 
+    @Override
+    public long extra() {
+        return this._extra;
+    }
+
+    @Override
+    public void setExtra(long extraValue) {
+        this._extra = extraValue;
+    }
+
     public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, KBuffer initialPayload) {
         this._world = p_universe;
         this._time = p_time;
@@ -64,6 +75,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         this._marks = 0;
         this._lock = 0;
         this._magic = 0;
+        this._extra = Constants.NULL_LONG;
 
         this._listener = p_listener;
         if (initialPayload != null) {
@@ -272,27 +284,32 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         int insertIndex = 0;
         InternalState temp_state = null;
         long bufferSize = buffer.size();
+        boolean initDone = false;
         while (cursor < bufferSize) {
             if (buffer.read(cursor) == Constants.CHUNK_SEP) {
-                long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
-                if (size == 0) {
-                    capacity = 1;
+                if (!initDone) {
+                    long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
+                    if (size == 0) {
+                        capacity = 1;
+                    } else {
+                        capacity = size << 1;
+                    }
+                    long[] newElementKV = new long[(int) (capacity * 2)];
+                    int[] newElementNext = new int[(int) capacity];
+                    int[] newElementHash = new int[(int) capacity];
+                    for (int i = 0; i < capacity; i++) {
+                        newElementNext[i] = -1;
+                        newElementHash[i] = -1;
+                    }
+                    //setPrimitiveType value for all
+                    temp_state = new InternalState((int) capacity, newElementKV, newElementNext, newElementHash, (int) size);
+                    //reset for next round
+                    initDone = true;
                 } else {
-                    capacity = size << 1;
+                    //extra char read
+                    _extra = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                 }
-
-                long[] newElementKV = new long[(int) (capacity * 2)];
-                int[] newElementNext = new int[(int) capacity];
-                int[] newElementHash = new int[(int) capacity];
-                for (int i = 0; i < capacity; i++) {
-                    newElementNext[i] = -1;
-                    newElementHash[i] = -1;
-                }
-                //setPrimitiveType value for all
-                temp_state = new InternalState((int) capacity, newElementKV, newElementNext, newElementHash, (int) size);
-                //reset for next round
                 previousStart = cursor + 1;
-
             } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP && temp_state != null) {
                 if (loopKey != Constants.NULL_LONG) {
                     long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
@@ -341,8 +358,12 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
     @Override
     public final void save(KBuffer buffer) {
         final InternalState internalState = state;
-        Base64.encodeIntToBuffer(internalState.elementCount, buffer);
+        Base64.encodeLongToBuffer(internalState.elementCount, buffer);
         buffer.write(Constants.CHUNK_SEP);
+        if (_extra != Constants.NULL_LONG) {
+            Base64.encodeLongToBuffer(_extra, buffer);
+            buffer.write(Constants.CHUNK_SEP);
+        }
         boolean isFirst = true;
         for (int i = 0; i < internalState.elementCount; i++) {
             long loopKey = internalState.elementKV[i * 2];
