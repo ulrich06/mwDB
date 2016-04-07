@@ -21,8 +21,8 @@ public class GaussianProbaTest {
             @Override
             public void on(Boolean result) {
 
-                KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
-                KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                KGaussianNode gaussianNodeBatch =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 int test=100;
                 int feat=2;

@@ -22,7 +22,7 @@ public class GaussianMixtureSim {
                boolean exit=false;
                String command;
 
-               KGaussianNode node1 = KML.gaussianNode(graph.newNode(0, 0));
+               KGaussianNode node1 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
                node1.configMixture(2,3);
 
                while(!exit){

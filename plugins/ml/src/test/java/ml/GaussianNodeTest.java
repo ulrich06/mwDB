@@ -67,9 +67,8 @@ public class GaussianNodeTest {
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
-
-                KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode gaussianNodeBatch = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 double eps = 1e-7;
 
