@@ -16,7 +16,7 @@ public class GaussianProbaTest {
 
     @Test
     public void test1() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
