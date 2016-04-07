@@ -18,7 +18,7 @@ import java.util.StringJoiner;
  */
 public class GaussianMixtureSim {
    public static void main(String[] arg){
-       KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+       KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
        graph.connect(new KCallback<Boolean>() {
            @Override
            public void on(Boolean result) {

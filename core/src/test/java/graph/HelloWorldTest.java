@@ -11,7 +11,7 @@ public class HelloWorldTest {
 
     @Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
     }
 
     @Test
@@ -21,7 +21,7 @@ public class HelloWorldTest {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(10_000, 20)).buildGraph());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10_000).withAutoSave(20).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);

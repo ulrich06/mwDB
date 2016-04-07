@@ -17,10 +17,10 @@ public interface KFactory {
     /**
      * Create a new KNode
      *
-     * @param graph                 current graph
      * @param world                 current world
      * @param time                  current time
      * @param id                    current node id
+     * @param graph                 current graph
      * @param resolver              current resolver
      * @param actualWorld           current resolved world
      * @param actualSuperTime       current resolved super time
@@ -30,6 +30,6 @@ public interface KFactory {
      * @param currentTimeMagic      current time magic
      * @return newly created KNode object
      */
-    KNode create(KGraph graph, long world, long time, long id, KResolver resolver, long actualWorld, long actualSuperTime, long actualTime, long currentWorldMagic, long currentSuperTimeMagic, long currentTimeMagic);
+    KNode create(long world, long time, long id, KGraph graph, KResolver resolver, long actualWorld, long actualSuperTime, long actualTime, long currentWorldMagic, long currentSuperTimeMagic, long currentTimeMagic);
 
 }

@@ -9,7 +9,7 @@ import org.mwdb.utility.Unsafe;
 
 public class StorageTest {
 
-   // @Test
+    // @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
@@ -18,7 +18,7 @@ public class StorageTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).withAutoSave(10_000).build());
     }
 
     final int valuesToInsert = 1_000_000;

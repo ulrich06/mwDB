@@ -101,7 +101,7 @@ public class Graph implements KGraph {
                             return;
                         }
                     }
-                    
+
                     final KBuffer[] connectionKeys = new KBuffer[4];
                     //preload ObjKeyGenerator
                     connectionKeys[0] = newBuffer();

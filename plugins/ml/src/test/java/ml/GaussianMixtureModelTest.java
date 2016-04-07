@@ -16,7 +16,7 @@ import java.util.Random;
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {

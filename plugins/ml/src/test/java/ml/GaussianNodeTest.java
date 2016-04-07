@@ -63,7 +63,7 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {

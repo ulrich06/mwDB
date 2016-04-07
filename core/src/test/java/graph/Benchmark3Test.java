@@ -11,7 +11,7 @@ public class Benchmark3Test {
 
     //@Test
     public void heapTest() {
-        test("heap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new HeapChunkSpace(100_000, 10_000)).buildGraph());
+        test("heap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100_000).withAutoSave(10_000).build());
     }
 
     //@Test
@@ -21,7 +21,7 @@ public class Benchmark3Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test("offheap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withSpace(new OffHeapChunkSpace(100_000, 10_000)).buildGraph());
+        test("offheap ", GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).withAutoSave(10_000).build());
     }
 
     //final int valuesToInsert = 10_000_000;

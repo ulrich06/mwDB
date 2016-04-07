@@ -14,7 +14,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest() {
 
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withAutoSave(1000).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -55,7 +55,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest2() {
 
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withAutoSave(1000).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -94,7 +94,7 @@ public class CSVImporterTest {
     @Test
     public void multiNodeTest2() {
 
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).buildGraph();
+        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
