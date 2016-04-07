@@ -220,4 +220,15 @@ public abstract class AbstractNode implements KNode {
     public <A extends KNode> void jump(long targetTime, KCallback<A> callback) {
         _resolver.lookup(_world, targetTime, _id, callback);
     }
+
+    @Override
+    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+    @Override
+    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
+        throw new RuntimeException("Not Implemented");
+    }
+
 }
