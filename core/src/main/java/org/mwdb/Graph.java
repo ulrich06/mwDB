@@ -137,7 +137,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void lookup(long world, long time, long id, KCallback<KNode> callback) {
+    public <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback) {
         if (!_isConnected.get()) {
             throw new RuntimeException(Constants.DISCONNECTED_ERROR);
         }
@@ -419,7 +419,7 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void find(long world, long time, String indexName, String query, KCallback<KNode[]> callback) {
+    public <A extends KNode> void find(long world, long time, String indexName, String query, KCallback<A[]> callback) {
         getIndexOrCreate(world, time, indexName, new KCallback<KNode>() {
             @Override
             public void on(KNode foundIndex) {
@@ -428,9 +428,9 @@ public class Graph implements KGraph {
                         callback.on(null);
                     }
                 } else {
-                    foundIndex.find(Constants.INDEX_ATTRIBUTE, query, new KCallback<KNode[]>() {
+                    foundIndex.find(Constants.INDEX_ATTRIBUTE, query, new KCallback<A[]>() {
                         @Override
-                        public void on(KNode[] collectedNodes) {
+                        public void on(A[] collectedNodes) {
                             foundIndex.free();
                             if (PrimitiveHelper.isDefined(callback)) {
                                 callback.on(collectedNodes);
@@ -443,18 +443,18 @@ public class Graph implements KGraph {
     }
 
     @Override
-    public void all(long world, long time, String indexName, KCallback<KNode[]> callback) {
+    public <A extends KNode> void all(long world, long time, String indexName, KCallback<A[]> callback) {
         getIndexOrCreate(world, time, indexName, new KCallback<KNode>() {
             @Override
             public void on(KNode foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(new KNode[0]);
+                        callback.on((A[]) new KNode[0]);
                     }
                 } else {
-                    foundIndex.all(Constants.INDEX_ATTRIBUTE, new KCallback<KNode[]>() {
+                    foundIndex.all(Constants.INDEX_ATTRIBUTE, new KCallback<A[]>() {
                         @Override
-                        public void on(KNode[] collectedNodes) {
+                        public void on(A[] collectedNodes) {
                             foundIndex.free();
                             if (PrimitiveHelper.isDefined(callback)) {
                                 callback.on(collectedNodes);

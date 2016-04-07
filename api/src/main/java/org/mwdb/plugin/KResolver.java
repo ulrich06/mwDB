@@ -49,7 +49,7 @@ public interface KResolver {
      * @param callback Called when the node is retrieved.
      * @return The created lookup task to be given to the scheduler.
      */
-    KCallback lookupTask(long world, long time, long id, KCallback<KNode> callback);
+    <A extends KNode> KCallback lookupTask(long world, long time, long id, KCallback<A> callback);
 
     /**
      * Creates and schedules a lookup task.
@@ -59,7 +59,7 @@ public interface KResolver {
      * @param id       The id of the node to retrieve.
      * @param callback Called when the node is retrieved.
      */
-    void lookup(long world, long time, long id, KCallback<KNode> callback);
+    <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback);
 
     /**
      * Resolves the state of a node, to access attributes, relations, and indexes.

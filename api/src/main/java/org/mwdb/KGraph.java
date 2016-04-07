@@ -36,7 +36,7 @@ public interface KGraph {
      * @param id       The unique identifier of the {@link KNode} researched.
      * @param callback The task to be called when the {@link KNode} is retrieved.
      */
-    void lookup(long world, long time, long id, KCallback<KNode> callback);
+    <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback);
 
     /**
      * Creates a spin-off world from the world given as parameter.<br>
@@ -105,7 +105,7 @@ public interface KGraph {
      * @param query     The query the node must satisfy.
      * @param callback  Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
      */
-    void find(long world, long time, String indexName, String query, KCallback<KNode[]> callback);
+    <A extends KNode> void find(long world, long time, String indexName, String query, KCallback<A[]> callback);
 
     /**
      * Retrieves all nodes registered in a particular index.
@@ -115,7 +115,7 @@ public interface KGraph {
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
      */
-    void all(long world, long time, String indexName, KCallback<KNode[]> callback);
+    <A extends KNode> void all(long world, long time, String indexName, KCallback<A[]> callback);
 
     /**
      * Utility method to create a waiter based on a counter

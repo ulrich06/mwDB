@@ -69,7 +69,7 @@ public class Node extends AbstractNode {
     }
 
     @Override
-    public void find(String indexName, String query, KCallback<KNode[]> callback) {
+    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -80,7 +80,7 @@ public class Node extends AbstractNode {
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
             final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
-                callback.on(new KNode[0]);
+                callback.on((A[]) new KNode[0]);
                 return;
             }
             final KNode[] resolved = new KNode[foundId.length];
@@ -100,7 +100,7 @@ public class Node extends AbstractNode {
                 @Override
                 public void on(Object o) {
                     //filter
-                    KNode[] resultSet = new KNode[foundId.length];
+                    A[] resultSet = (A[]) new KNode[foundId.length];
                     int resultSetIndex = 0;
 
                     for (int i = 0; i < foundId.length; i++) {
@@ -127,26 +127,26 @@ public class Node extends AbstractNode {
                             }
                         }
                         if (exact) {
-                            resultSet[resultSetIndex] = resolvedNode;
+                            resultSet[resultSetIndex] = (A) resolvedNode;
                             resultSetIndex++;
                         }
                     }
                     if (foundId.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
-                        KNode[] trimmedResultSet = new KNode[resultSetIndex];
+                        A[] trimmedResultSet = (A[]) new KNode[resultSetIndex];
                         System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
                         callback.on(trimmedResultSet);
                     }
                 }
             });
         } else {
-            callback.on(new KNode[0]);
+            callback.on((A[]) new KNode[0]);
         }
     }
 
     @Override
-    public void all(String indexName, KCallback<KNode[]> callback) {
+    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -155,7 +155,7 @@ public class Node extends AbstractNode {
         if (indexMap != null) {
             final Node selfPointer = this;
             int mapSize = (int) indexMap.size();
-            final KNode[] resolved = new KNode[mapSize];
+            final A[] resolved = (A[]) new KNode[mapSize];
             DeferCounter waiter = new DeferCounter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
@@ -165,7 +165,7 @@ public class Node extends AbstractNode {
                     selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
-                            resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                            resolved[loopInteger.incrementAndGet()] = (A) resolvedNode;
                             waiter.count();
                         }
                     });
@@ -178,7 +178,7 @@ public class Node extends AbstractNode {
                 }
             });
         } else {
-            callback.on(new KNode[0]);
+            callback.on((A[]) new KNode[0]);
         }
     }
 

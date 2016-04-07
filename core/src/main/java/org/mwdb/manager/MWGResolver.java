@@ -92,12 +92,12 @@ public class MWGResolver implements KResolver {
     }
 
     @Override
-    public void lookup(long world, long time, long id, KCallback<KNode> callback) {
+    public <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback) {
         this._scheduler.dispatch(lookupTask(world, time, id, callback));
     }
 
     @Override
-    public KCallback lookupTask(final long world, final long time, final long id, final KCallback<KNode> callback) {
+    public <A extends KNode> KCallback lookupTask(final long world, final long time, final long id, final KCallback<A> callback) {
         final MWGResolver selfPointer = this;
         return new KCallback() {
             @Override
@@ -183,7 +183,7 @@ public class MWGResolver implements KResolver {
                                                                                     resolvedNode = resolvedFactory.create(world, time, id, _graph, initPreviouslyResolved);
                                                                                 }
                                                                                 selfPointer._tracker.monitor(resolvedNode);
-                                                                                callback.on(resolvedNode);
+                                                                                callback.on((A) resolvedNode);
                                                                             }
                                                                         }
                                                                     });

@@ -92,7 +92,7 @@ public abstract class AbstractNode implements KNode {
     }
 
     @Override
-    public void rel(String relationName, KCallback<KNode[]> callback) {
+    public <A extends KNode> void rel(String relationName, KCallback<A[]> callback) {
         if (callback == null) {
             return;
         }
@@ -100,16 +100,16 @@ public abstract class AbstractNode implements KNode {
         if (resolved != null) {
             final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
             if (flatRefs == null || flatRefs.length == 0) {
-                callback.on(new KNode[0]);
+                callback.on((A[]) new KNode[0]);
             } else {
-                final KNode[] result = new KNode[flatRefs.length];
+                final A[] result = (A[]) new KNode[flatRefs.length];
                 final KDeferCounter counter = _graph.counter(flatRefs.length);
                 for (int i = 0; i < flatRefs.length; i++) {
                     final int fi = i;
                     this._resolver.lookup(_world, _time, flatRefs[i], new KCallback<KNode>() {
                         @Override
                         public void on(KNode kNode) {
-                            result[fi] = kNode;
+                            result[fi] = (A) kNode;
                             counter.count();
                         }
                     });
@@ -210,8 +210,14 @@ public abstract class AbstractNode implements KNode {
         this._resolver.resolveTimepoints(this, beginningOfSearch, endOfSearch, callback);
     }
 
+    /*
     @Override
-    public void jump(long targetTime, KCallback<KNode> timedNode) {
+    <A extends KNode> public void jump(long targetTime, KCallback<A> timedNode) {
         _resolver.lookup(_world, targetTime, _id, timedNode);
+    }*/
+
+    @Override
+    public <A extends KNode> void jump(long targetTime, KCallback<A> callback) {
+        _resolver.lookup(_world, targetTime, _id, callback);
     }
 }

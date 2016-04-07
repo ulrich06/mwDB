@@ -79,7 +79,7 @@ public interface KNode {
      * @param relationName The name of the relation to retrieve.
      * @param callback     Callback to be called when the nodes of the relationship have been connected.
      */
-    void rel(String relationName, KCallback<KNode[]> callback);
+    <A extends KNode> void rel(String relationName, KCallback<A[]> callback);
 
     /**
      * Retrieves synchronously the nodes contained in a relation.
@@ -139,7 +139,7 @@ public interface KNode {
      * @param query     The query (e.g.: "firstname=john,lastname=doe,age=30"
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
-    void find(String indexName, String query, KCallback<KNode[]> callback);
+    <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback);
 
     /**
      * Retrieves all nodes in a particular index
@@ -147,7 +147,7 @@ public interface KNode {
      * @param indexName The name of the index
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      */
-    void all(String indexName, KCallback<KNode[]> callback);
+    <A extends KNode> void all(String indexName, KCallback<A[]> callback);
 
     /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.
@@ -188,6 +188,11 @@ public interface KNode {
      */
     KGraph graph();
 
-    void jump(long targetTime, KCallback<KNode> timedNode);
+    /**
+     * @param targetTime
+     * @param callback
+     * @param <A>
+     */
+    <A extends KNode> void jump(long targetTime, KCallback<A> callback);
 
 }
