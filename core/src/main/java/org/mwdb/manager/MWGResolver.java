@@ -162,7 +162,7 @@ public class MWGResolver implements KResolver {
                                                                                 KWorldOrderChunk castedNodeWorldOrder = (KWorldOrderChunk) theNodeWorldOrder;
                                                                                 long extraCode = castedNodeWorldOrder.extra();
                                                                                 KFactory resolvedFactory = null;
-                                                                                if (extraCode == Constants.NULL_LONG) {
+                                                                                if (extraCode != Constants.NULL_LONG) {
                                                                                     resolvedFactory = ((Graph) _graph).factoryByCode(extraCode);
                                                                                 }
 
