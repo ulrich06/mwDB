@@ -76,7 +76,7 @@ public class MWGResolver implements KResolver {
 
     @Override
     public void freeNode(KNode node) {
-        Node casted = (Node) node;
+        AbstractNode casted = (AbstractNode) node;
         long nodeId = node.id();
         long[] previous;
         do {
@@ -327,7 +327,7 @@ public class MWGResolver implements KResolver {
 
     @Override
     public KNodeState resolveState(KNode node, boolean allowDephasing) {
-        Node castedNode = (Node) node;
+        AbstractNode castedNode = (AbstractNode) node;
         //protection against deleted KNode
         long[] previousResolveds = castedNode._previousResolveds.get();
         if (previousResolveds == null) {
