@@ -1,6 +1,7 @@
 package ml;
 
 import org.junit.Test;
+import org.mwdb.GaussianNodeFactory;
 import org.mwdb.GraphBuilder;
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
@@ -15,14 +16,14 @@ import java.util.Random;
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 double[] data = new double[3];
                 Random rand = new Random();
 
-                KGaussianNode node1 = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode node1 = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
                 node1.configMixture(1, 100);
 
                 for (int i = 0; i < 220; i++) {

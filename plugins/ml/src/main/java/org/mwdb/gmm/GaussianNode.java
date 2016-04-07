@@ -55,15 +55,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     }
 
-    @Override
-    public void find(String indexName, String query, KCallback<KNode[]> callback) {
-
-    }
-
-    @Override
-    public void all(String indexName, KCallback<KNode[]> callback) {
-
-    }
 
     @Override
     public byte attType(String attributeName) {

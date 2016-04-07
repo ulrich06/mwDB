@@ -1,5 +1,6 @@
 package ml;
 
+import org.mwdb.GaussianNodeFactory;
 import org.mwdb.GraphBuilder;
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
@@ -15,14 +16,14 @@ import java.util.Scanner;
  */
 public class GaussianMixtureSim {
    public static void main(String[] arg){
-       KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+       KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
        graph.connect(new KCallback<Boolean>() {
            @Override
            public void on(Boolean result) {
                boolean exit=false;
                String command;
 
-               KGaussianNode node1 = KML.gaussianNode(graph.newNode(0, 0));
+               KGaussianNode node1 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
                node1.configMixture(2,3);
 
                while(!exit){

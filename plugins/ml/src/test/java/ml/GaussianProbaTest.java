@@ -16,13 +16,13 @@ public class GaussianProbaTest {
 
     @Test
     public void test1() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
-                KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                KGaussianNode gaussianNodeBatch =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 int test=100;
                 int feat=2;

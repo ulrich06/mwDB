@@ -10,7 +10,7 @@ import java.util.Random;
 public class GaussianNonInvertTest {
     @Test
     public void Singularity() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -19,8 +19,8 @@ public class GaussianNonInvertTest {
 
                 Random rand = new Random();
 
-                KGaussianNode node1 = KML.gaussianNode(graph.newNode(0, 0));
-                KGaussianNode node2 = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode node1 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                KGaussianNode node2 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]

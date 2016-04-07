@@ -37,14 +37,6 @@ public class MathNode extends AbstractNode {
 
     }
 
-    @Override
-    public void find(String indexName, String query, KCallback<KNode[]> callback) {
 
-    }
-
-    @Override
-    public void all(String indexName, KCallback<KNode[]> callback) {
-
-    }
 
 }

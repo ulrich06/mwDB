@@ -3,6 +3,7 @@ package ml;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
+import org.mwdb.gmm.GaussianNode;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.task.NoopScheduler;
@@ -63,13 +64,12 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        KGraph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                KGaussianNode gaussianNodeBatch = KML.gaussianNode(graph.newNode(0, 0));
-
-                KGaussianNode gaussianNodeLive = KML.gaussianNode(graph.newNode(0, 0));
+                KGaussianNode gaussianNodeBatch = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 double eps = 1e-7;
 
@@ -85,12 +85,12 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
+                    gaussianNodeLive.jump(time, new KCallback<KGaussianNode>() {
                         @Override
                         public void on(KGaussianNode result) {
                             result.learn(trains);
                         }
-                    });
+                            });
                     time++;
                 }
 
@@ -116,7 +116,7 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(0, time, new KCallback<KGaussianNode>() {
+                gaussianNodeLive.jump(time, new KCallback<KGaussianNode>(){
                     @Override
                     public void on(KGaussianNode result) {
                         double[] a = result.getAvg();
