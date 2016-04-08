@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
 import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.math.matrix.operation.PolynomialFitBlas;
+import org.mwdb.math.matrix.operation.PolynomialFit;
 
 /**
  * Created by assaad on 23/03/16.
@@ -19,14 +19,14 @@ public class PolynomialSolveTest {
         double[] res = new double[t.length];
 
         for (int i = 0; i < t.length; i++) {
-            res[i] = PolynomialFitBlas.extrapolate(t[i], coef);
+            res[i] = PolynomialFit.extrapolate(t[i], coef);
         }
 
         BlasMatrixEngine blasengine = (BlasMatrixEngine) KMatrix.defaultEngine();
         blasengine.setBlas(new F2JBlas());
 
 
-        PolynomialFitBlas pf = new PolynomialFitBlas(coef.length - 1);
+        PolynomialFit pf = new PolynomialFit(coef.length - 1);
         long timestart, timeend;
 
         timestart = System.nanoTime();

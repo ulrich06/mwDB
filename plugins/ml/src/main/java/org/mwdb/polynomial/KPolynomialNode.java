@@ -4,8 +4,13 @@ import org.mwdb.KNode;
 
 public interface KPolynomialNode extends KNode {
 
-    void learn(double value);
+    void setPrecision (double precision);
+    double getPrecision();
+    double[] getWeight();
 
-    double infer();
+    void set(double value);
+    double get();
+
+    int getDegree();
 
 }

@@ -7,11 +7,11 @@ import org.mwdb.math.matrix.KTransposeType;
 /**
  * Created by assaad on 16/12/15.
  */
-public class PolynomialFitBlas {
+public class PolynomialFit {
     private KMatrix coef;
     private int degree = 0;
 
-    public PolynomialFitBlas(int degree) {
+    public PolynomialFit(int degree) {
         this.degree = degree;
     }
 
