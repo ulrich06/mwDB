@@ -18,7 +18,7 @@ import java.util.Date;
 public class TestDb {
     public static void main(String[] arg) {
 
-        String loc = "/Users/assaad/work/github/eurusd/";
+        String loc = "/Users/duke/Downloads/eurusd-master/";
 
        /* Date d=new Date();
         d.setTime(Long.parseLong("991949460000"));*/
@@ -62,7 +62,14 @@ public class TestDb {
         System.out.println("Loaded :" + timestamps.size() + " values in " + res + " s!");
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
 
-        final KGraph graph = GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withAutoSave(10000).withFactory(new PolynomialNodeFactory()).withScheduler(new NoopScheduler()).build();
+        final KGraph graph = GraphBuilder.builder()
+                .withOffHeapMemory()
+                .withMemorySize(20_000_000)
+                .withAutoSave(10000)
+                .withStorage(new RocksDBStorage("data"))
+                .withFactory(new PolynomialNodeFactory())
+                .withScheduler(new NoopScheduler()).
+                        build();
         graph.connect(new KCallback<Boolean>() {
                           @Override
                           public void on(Boolean result) {
