@@ -346,8 +346,6 @@ public class MWGResolver implements KResolver {
         //let's go for the resolution now
         long nodeId = node.id();
 
-        boolean hasToCleanSuperTimeTree = false;
-        boolean hasToCleanTimeTree = false;
         KChunk resultState = null;
         try {
             KTimeTreeChunk nodeSuperTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
@@ -362,9 +360,9 @@ public class MWGResolver implements KResolver {
                 return null;
             }
 
+            //first we create and insert the empty state
             long resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
-
-            resultState = (KStateChunk) this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
+            resultState = this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
             resultState = _space.putAndMark(resultState);
 
             if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world) {
@@ -412,7 +410,6 @@ public class MWGResolver implements KResolver {
                     if (time < medianPoint[0]) {
 
                         _space.unmarkChunk(rightTree);
-                        hasToCleanSuperTimeTree = true;
 
                         long[] newResolveds = new long[6];
                         newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
@@ -423,8 +420,9 @@ public class MWGResolver implements KResolver {
                         newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                         castedNode._previousResolveds.set(newResolveds);
                     } else {
-                        hasToCleanTimeTree = true;
-                        hasToCleanSuperTimeTree = true;
+
+                        //we unMark
+                        _space.unmarkChunk(nodeTimeTree);
 
                         //let's store the new state if necessary
                         long[] newResolveds = new long[6];
@@ -449,8 +447,6 @@ public class MWGResolver implements KResolver {
                     newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                     castedNode._previousResolveds.set(newResolveds);
 
-                    hasToCleanSuperTimeTree = true;
-                    hasToCleanTimeTree = true;
                 }
             } else {
 
@@ -479,20 +475,16 @@ public class MWGResolver implements KResolver {
                 newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = newTimeTree.magic();
                 castedNode._previousResolveds.set(newResolveds);
 
-                hasToCleanSuperTimeTree = true;
-                hasToCleanTimeTree = true;
-
+                //we unMark
+                _space.unmarkChunk(nodeSuperTimeTree);
+                _space.unmarkChunk(nodeTimeTree);
             }
 
             //unMark previous state, for the newly created one
-            _space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], node.id());
+            _space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+            _space.unmarkChunk(nodeSuperTimeTree);
+            _space.unmarkChunk(nodeTimeTree);
 
-            if (hasToCleanSuperTimeTree) {
-                _space.unmarkChunk(nodeSuperTimeTree);
-            }
-            if (hasToCleanTimeTree) {
-                _space.unmarkChunk(nodeTimeTree);
-            }
 
         } catch (Throwable e) {
             e.printStackTrace();
