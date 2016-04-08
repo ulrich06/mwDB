@@ -20,7 +20,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
     private static final String NB_PAST_NAME = "_nb";
     private final long NB_PAST_KEY;
 
-    private static final String LAST_TIME_NAME = "_nb";
+    private static final String LAST_TIME_NAME = "_lastTime";
     private final long LAST_TIME_KEY;
 
     private static final int _maxDegree = 20;
@@ -153,20 +153,19 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            int ss = num;
-            double[] times = new double[ss + 1];
-            double[] values = new double[ss + 1];
+            double[] times = new double[num + 1];
+            double[] values = new double[num + 1];
             double inc = 0;
-            if (ss > 1) {
+            if (num > 1) {
                 inc = ((long) previousState.get(LAST_TIME_KEY));
-                inc = inc / (stp * (ss - 1));
+                inc = inc / (stp * (num - 1));
             }
-            for (int i = 0; i < ss; i++) {
+            for (int i = 0; i < num; i++) {
                 times[i] = i * inc;
                 values[i] = PolynomialFit.extrapolate(times[i],weight);
             }
-            times[ss] = (time - timeOrigin) / stp;
-            values[ss] = value;
+            times[num] = (time - timeOrigin) / stp;
+            values[num] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
@@ -178,10 +177,48 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
             }
         }
 
+
+        long previousTime=timeOrigin+(long)previousState.get(LAST_TIME_KEY);
+        long newstep=time-previousTime;
         //It does not fit, create a new state
-        KResolver.KNodeState phasedState = graph().resolver().resolveState(this, false); //force clone
+        KResolver.KNodeState phasedState = graph().resolver().newState(this,world(),previousTime); //force clone
         //put inside
-        //TODO Update the phased State by a line
+        double[] times= new double[2];
+        double[] values = new double[2];
+        times[0]=0;
+        times[1]=1;
+        double pt=previousTime-timeOrigin;
+        pt=pt/stp;
+        values[0]=PolynomialFit.extrapolate(pt,weight);
+        values[1]=value;
+
+        maxError = maxErr(precision, 0);
+        if(Math.abs(values[1]-values[0])<=maxError){
+            // degree 0
+
+            weight=new double[1];
+            weight[0]=values[0];
+
+
+            previousState.set(PRECISION_KEY,KType.DOUBLE,precision);
+            previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
+            previousState.set(NB_PAST_KEY, KType.INT, 2);
+            previousState.set(STEP_KEY, KType.LONG, newstep);
+            previousState.set(LAST_TIME_KEY, KType.LONG, newstep);
+
+            return;
+        }
+
+
+        //Save degree 1
+        PolynomialFit pf = new PolynomialFit(1);
+        pf.fit(times, values);
+        weight=pf.getCoef();
+        previousState.set(PRECISION_KEY,KType.DOUBLE,precision);
+        previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
+        previousState.set(NB_PAST_KEY, KType.INT, 2);
+        previousState.set(STEP_KEY, KType.LONG, newstep);
+        previousState.set(LAST_TIME_KEY, KType.LONG, newstep);
     }
 
     @Override
