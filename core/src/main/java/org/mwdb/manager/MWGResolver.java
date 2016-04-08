@@ -364,7 +364,11 @@ public class MWGResolver implements KResolver {
 
             long resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
 
+            resultState = (KStateChunk) this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
+
             if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world) {
+
+
                 //manage super tree here
                 long superTreeSize = nodeSuperTimeTree.size();
                 long threshold = Constants.SCALE_1 * 2;
@@ -449,9 +453,7 @@ public class MWGResolver implements KResolver {
                     hasToCleanTimeTree = true;
                 }
             } else {
-
-                resultState = (KStateChunk) this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
-
+                
                 //TODO potential memory leak here
                 //create a new node superTimeTree
                 KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, Constants.NULL_LONG, nodeId, null, null);
