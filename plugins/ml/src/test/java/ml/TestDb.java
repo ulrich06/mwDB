@@ -38,7 +38,7 @@ public class TestDb {
         String cvsSplitBy = ",";
 
         try {
-            for (int year = 2000; year < 2016; year++) {
+            for (int year = 2000; year < 2004; year++) {
 
                 br = new BufferedReader(new FileReader(csvFile + year + ".csv"));
                 while ((line = br.readLine()) != null) {
