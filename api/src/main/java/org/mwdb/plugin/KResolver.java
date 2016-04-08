@@ -66,11 +66,19 @@ public interface KResolver {
      * In case dephasing is allowed the latest state available is returned.
      * In case dephasing is not allowed (false), the state is phased, i.e.: cloned at the timePoint of the node.
      *
-     * @param node           The node for which the state mush be collected.
+     * @param node           The node for which the state must be collected.
      * @param allowDephasing Specifies if the requested state can be dephased. If not, it will be cloned at the timepoint of the node.
      * @return The resolved state of the node.
      */
     KNodeState resolveState(KNode node, boolean allowDephasing);
+
+    /**
+     * @param node  The node for which the state must be collected.
+     * @param world The world for which the new state must be created.
+     * @param time  The time for which the new state must be created.
+     * @return The newly empoty created state of the node.
+     */
+    KNodeState newState(KNode node, long world, long time);
 
     /**
      * Resolves the timePoints of a node.
