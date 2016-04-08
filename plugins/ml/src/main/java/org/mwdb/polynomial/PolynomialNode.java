@@ -23,7 +23,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
     private static final String LAST_TIME_NAME = "_lastTime";
     private final long LAST_TIME_KEY;
 
-    private static final int _maxDegree = 20;
+    private static final int _maxDegree = 18;
 
     public PolynomialNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -153,19 +153,20 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            double[] times = new double[num + 1];
-            double[] values = new double[num + 1];
+            int factor=2;
+            double[] times = new double[factor*num + 1];
+            double[] values = new double[factor*num + 1];
             double inc = 0;
             if (num > 1) {
                 inc = ((long) previousState.get(LAST_TIME_KEY));
-                inc = inc / (stp * (num - 1));
+                inc = inc / (stp * (factor*num - 1));
             }
-            for (int i = 0; i < num; i++) {
+            for (int i = 0; i < factor*num; i++) {
                 times[i] = i * inc;
                 values[i] = PolynomialFit.extrapolate(times[i],weight);
             }
-            times[num] = (time - timeOrigin) / stp;
-            values[num] = value;
+            times[factor*num] = (time - timeOrigin) / stp;
+            values[factor*num] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
@@ -248,7 +249,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree + 3);
+        return precision / Math.pow(2, degree +2);
     }
 
 

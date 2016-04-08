@@ -2,6 +2,7 @@ package org.mwdb.math.matrix;
 
 
 import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwdb.math.matrix.jamasolver.JamaMatrixEngine;
 
 import java.util.BitSet;
 import java.util.Random;

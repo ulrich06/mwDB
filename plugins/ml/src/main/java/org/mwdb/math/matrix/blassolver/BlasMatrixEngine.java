@@ -3,6 +3,7 @@ package org.mwdb.math.matrix.blassolver;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.KMatrixEngine;
 import org.mwdb.math.matrix.KSVDDecompose;
+import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
 import org.mwdb.math.matrix.blassolver.blas.KBlas;
 import org.mwdb.math.matrix.KTransposeType;
 import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
@@ -16,7 +17,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
     private KBlas _blas;
 
     public BlasMatrixEngine() {
-        _blas = new NetlibBlas();
+        _blas = new F2JBlas();
     }
 
     public void setBlas(KBlas p_blas) {

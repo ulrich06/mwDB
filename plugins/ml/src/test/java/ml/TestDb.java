@@ -11,6 +11,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.TreeMap;
 
 /**
  * Created by assaad on 08/04/16.
@@ -18,7 +20,8 @@ import java.util.Date;
 public class TestDb {
     public static void main(String[] arg) {
 
-        String loc = "/Users/duke/Downloads/eurusd-master/";
+        //String loc = "/Users/duke/Downloads/eurusd-master/";
+        String loc="/Users/assaad/work/github/eurusd/";
 
        /* Date d=new Date();
         d.setTime(Long.parseLong("991949460000"));*/
@@ -26,9 +29,9 @@ public class TestDb {
         long starttime;
         long endtime;
         double res;
-        // final TreeMap<Long, Double> eurUsd = new TreeMap<Long, Double>();
-        final ArrayList<Long> timestamps = new ArrayList<>();
-        final ArrayList<Double> euros = new ArrayList<>();
+        final TreeMap<Long, Double> eurUsd = new TreeMap<Long, Double>();
+        //final ArrayList<Long> timestamps = new ArrayList<>();
+        //final ArrayList<Double> euros = new ArrayList<>();
 
 
         starttime = System.nanoTime();
@@ -38,7 +41,7 @@ public class TestDb {
         String cvsSplitBy = ",";
 
         try {
-            for (int year = 2000; year < 2004; year++) {
+            for (int year = 2000; year < 2015; year++) {
 
                 br = new BufferedReader(new FileReader(csvFile + year + ".csv"));
                 while ((line = br.readLine()) != null) {
@@ -46,9 +49,9 @@ public class TestDb {
                     String[] values = line.split(cvsSplitBy);
                     Long timestamp = getTimeStamp(values[0]);
                     Double val = Double.parseDouble(values[1]);
-                    //    eurUsd.put(timestamp, val);
-                    timestamps.add(timestamp);
-                    euros.add(val);
+                    eurUsd.put(timestamp, val);
+                    //timestamps.add(timestamp);
+                    //euros.add(val);
                 }
             }
 
@@ -59,7 +62,7 @@ public class TestDb {
 
         endtime = System.nanoTime();
         res = ((double) (endtime - starttime)) / (1000000000);
-        System.out.println("Loaded :" + timestamps.size() + " values in " + res + " s!");
+        System.out.println("Loaded :" + eurUsd.size() + " values in " + res + " s!");
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
 
         final KGraph graph = GraphBuilder.builder()
@@ -80,17 +83,18 @@ public class TestDb {
                               starttime = System.nanoTime();
                               // KNode normalNode = graph.newNode(0, timestamps.get(0));
                               KNode normalNode = graph.newNode(0, 0);
-                              for (int i = 0; i < timestamps.size(); i++) {
+                              Iterator<Long> iter = eurUsd.keySet().iterator();
+
+                              for (int i = 0; i < eurUsd.size(); i++) {
                  /*   if(i%1000000==0){
                         System.out.println(i);
                     }*/
-                                  final int i1 = i;
-                                  final long t = timestamps.get(i);
+                                  final long t = iter.next();
                                   normalNode.jump(t, new KCallback<KNode>() {
                                       @Override
                                       public void on(KNode result) {
                                           try {
-                                              result.attSet("euroUsd", KType.DOUBLE, euros.get(i1));
+                                              result.attSet("euroUsd", KType.DOUBLE, eurUsd.get(t));
                                           } catch (Exception ex) {
                                               ex.printStackTrace();
                                           }
@@ -101,7 +105,7 @@ public class TestDb {
                               endtime = System.nanoTime();
                               d = (endtime - starttime);
                               d = d / 1000000000;
-                              d = timestamps.size() / d;
+                              d = eurUsd.size() / d;
                               System.out.println("KNode insert speed: " + d + " values/s");
 
                               normalNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
@@ -112,16 +116,17 @@ public class TestDb {
                               });
 
                               starttime = System.nanoTime();
-                              PolynomialNode polyNode = (PolynomialNode) graph.newNode(0, timestamps.get(0), "PolynomialNode");
-                              final double precision = 0.05;
+                              PolynomialNode polyNode = (PolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
+                              final double precision = 0.01;
                               polyNode.setPrecision(precision);
-                              for (int i = 0; i < timestamps.size(); i++) {
-                                  final int i1 = i;
-                                  final long t = timestamps.get(i);
+                              iter = eurUsd.keySet().iterator();
+                              for (int i = 0; i < eurUsd.size(); i++) {
+
+                                  final long t = iter.next();
                                   polyNode.jump(t, new KCallback<PolynomialNode>() {
                                       @Override
                                       public void on(PolynomialNode result) {
-                                          result.set(euros.get(i1));
+                                          result.set(eurUsd.get(t));
                                           result.free();
                                       }
                                   });
@@ -129,8 +134,8 @@ public class TestDb {
                               endtime = System.nanoTime();
                               d = (endtime - starttime);
                               d = d / 1000000000;
-                              d = timestamps.size() / d;
-                              System.out.println("Polynomial insert speed: " + d + " ms");
+                              d = eurUsd.size() / d;
+                              System.out.println("Polynomial insert speed: " + d + " value/sec");
 
                               polyNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
                                   @Override
@@ -142,18 +147,18 @@ public class TestDb {
                               final int[] error2=new int[1];
                               error2[0]=0;
                               starttime = System.nanoTime();
-                              for (int i = 0; i < timestamps.size(); i++) {
+                              iter = eurUsd.keySet().iterator();
+                              for (int i = 0; i < eurUsd.size(); i++) {
                  /*   if(i%1000000==0){
                         System.out.println(i);
                     }*/
-                                  final int i1 = i;
-                                  final long t = timestamps.get(i);
+                                  final long t = iter.next();
                                   normalNode.jump(t, new KCallback<KNode>() {
                                       @Override
                                       public void on(KNode result) {
                                           try {
                                               double d = (double) result.att("euroUsd");
-                                              if (Math.abs(d - euros.get(i1)) > precision) {
+                                              if (Math.abs(d - eurUsd.get(t)) > precision) {
                                                   error2[0]++;
                                                   //System.out.println("Error " + d + " " + euros.get(i1));
                                               }
@@ -167,28 +172,25 @@ public class TestDb {
                               endtime = System.nanoTime();
                               d = (endtime - starttime);
                               d = d / 1000000000;
-                              d = timestamps.size() / d;
+                              d = eurUsd.size() / d;
                               System.out.println("Normal read speed: " + d + " ms");
-                              System.out.println(error2[0]);
-                              System.out.println();
+                             // System.out.println(error2[0]);
+                            ///  System.out.println();
 
 
 
                               final int[] error=new int[1];
+                              iter = eurUsd.keySet().iterator();
                               starttime = System.nanoTime();
-                              for (int i = 0; i < timestamps.size(); i++) {
-                                  final int i1 = i;
-                                  final long t = timestamps.get(i);
-                                  if(i1==2632074 ){
-                                      int x=0;
-                                  }
-                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
+                              for (int i = 0; i < eurUsd.size(); i++) {
+                                  final long t = iter.next();
+                                   polyNode.jump(t, new KCallback<KPolynomialNode>() {
                                       @Override
                                       public void on(KPolynomialNode result) {
                                           try {
 
                                               double d = result.get();
-                                              if (Math.abs(d - euros.get(i1)) > precision) {
+                                              if (Math.abs(d - eurUsd.get(t)) > precision) {
                                                   error[0]++;
                                               }
                                           } catch (Exception ex) {
@@ -201,9 +203,9 @@ public class TestDb {
                               endtime = System.nanoTime();
                               d = (endtime - starttime);
                               d = d / 1000000000;
-                              d = timestamps.size() / d;
+                              d = eurUsd.size() / d;
                               System.out.println("Polynomial read speed: " + d + " ms");
-                              System.out.println(error[0]);
+                             // System.out.println(error[0]);
 
 
                               graph.disconnect(new KCallback<Boolean>() {
