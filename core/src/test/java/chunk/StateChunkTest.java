@@ -207,6 +207,7 @@ public class StateChunkTest implements KChunkListener {
 
         protectionMethod(chunk, KType.LONG, null, true);
         protectionMethod(chunk, KType.LONG, 100000000l, false);
+        protectionMethod(chunk, KType.LONG, 100000000, false);
         protectionMethod(chunk, KType.LONG, "Hello", true);
 
         protectionMethod(chunk, KType.INT, null, true);

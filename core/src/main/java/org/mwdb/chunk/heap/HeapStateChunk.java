@@ -209,7 +209,12 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                     param_elem = (double) p_unsafe_elem;
                     break;
                 case KType.LONG:
-                    param_elem = (long) p_unsafe_elem;
+                    if (p_unsafe_elem instanceof Integer) {
+                        int preCasting = (int) p_unsafe_elem;
+                        param_elem = (long) preCasting;
+                    } else {
+                        param_elem = (long) p_unsafe_elem;
+                    }
                     break;
                 case KType.INT:
                     param_elem = (int) p_unsafe_elem;
