@@ -108,8 +108,8 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
             weight[0] = value;
             previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
             previousState.set(NB_PAST_KEY, KType.INT, 1);
-            previousState.set(STEP_KEY, KType.LONG, 0);
-            previousState.set(LAST_TIME_KEY, KType.LONG, 0);
+            previousState.set(STEP_KEY, KType.LONG, 0l);
+            previousState.set(LAST_TIME_KEY, KType.LONG, 0l);
             return;
         }
 
@@ -199,12 +199,11 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
             weight=new double[1];
             weight[0]=values[0];
 
-
-            previousState.set(PRECISION_KEY,KType.DOUBLE,precision);
-            previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
-            previousState.set(NB_PAST_KEY, KType.INT, 2);
-            previousState.set(STEP_KEY, KType.LONG, newstep);
-            previousState.set(LAST_TIME_KEY, KType.LONG, newstep);
+            phasedState.set(PRECISION_KEY,KType.DOUBLE,precision);
+            phasedState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
+            phasedState.set(NB_PAST_KEY, KType.INT, 2);
+            phasedState.set(STEP_KEY, KType.LONG, newstep);
+            phasedState.set(LAST_TIME_KEY, KType.LONG, newstep);
 
             return;
         }
@@ -214,11 +213,11 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         PolynomialFit pf = new PolynomialFit(1);
         pf.fit(times, values);
         weight=pf.getCoef();
-        previousState.set(PRECISION_KEY,KType.DOUBLE,precision);
-        previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
-        previousState.set(NB_PAST_KEY, KType.INT, 2);
-        previousState.set(STEP_KEY, KType.LONG, newstep);
-        previousState.set(LAST_TIME_KEY, KType.LONG, newstep);
+        phasedState.set(PRECISION_KEY,KType.DOUBLE,precision);
+        phasedState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
+        phasedState.set(NB_PAST_KEY, KType.INT, 2);
+        phasedState.set(STEP_KEY, KType.LONG, newstep);
+        phasedState.set(LAST_TIME_KEY, KType.LONG, newstep);
     }
 
     @Override
