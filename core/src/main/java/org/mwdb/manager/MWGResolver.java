@@ -348,7 +348,7 @@ public class MWGResolver implements KResolver {
 
         boolean hasToCleanSuperTimeTree = false;
         boolean hasToCleanTimeTree = false;
-        KNodeState resultState = null;
+        KChunk resultState = null;
         try {
             KTimeTreeChunk nodeSuperTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
             if (nodeSuperTimeTree == null) {
@@ -365,9 +365,9 @@ public class MWGResolver implements KResolver {
             long resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
 
             resultState = (KStateChunk) this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
+            resultState = _space.putAndMark(resultState);
 
             if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world) {
-
 
                 //manage super tree here
                 long superTreeSize = nodeSuperTimeTree.size();
@@ -453,7 +453,7 @@ public class MWGResolver implements KResolver {
                     hasToCleanTimeTree = true;
                 }
             } else {
-                
+
                 //TODO potential memory leak here
                 //create a new node superTimeTree
                 KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, Constants.NULL_LONG, nodeId, null, null);
@@ -504,7 +504,7 @@ public class MWGResolver implements KResolver {
 
         //unMark World order chunks
         _space.unmarkChunk(nodeWorldOrder);
-        return resultState;
+        return (KNodeState) resultState;
     }
 
     @Override
