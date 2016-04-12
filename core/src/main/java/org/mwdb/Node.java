@@ -1,6 +1,9 @@
 package org.mwdb;
 
-import org.mwdb.chunk.*;
+import org.mwdb.chunk.KLongLongArrayMap;
+import org.mwdb.chunk.KLongLongArrayMapCallBack;
+import org.mwdb.chunk.KStateChunk;
+import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
@@ -86,12 +89,15 @@ public class Node extends AbstractNode {
             final KNode[] resolved = new KNode[foundId.length];
             final DeferCounter waiter = new DeferCounter(foundId.length);
             //TODO replace by a par lookup
-            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
+
             for (int i = 0; i < foundId.length; i++) {
                 selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
-                        resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                        if(resolvedNode != null) {
+                            resolved[nextResolvedTabIndex.getAndIncrement()] = resolvedNode;
+                        }
                         waiter.count();
                     }
                 });
@@ -100,10 +106,10 @@ public class Node extends AbstractNode {
                 @Override
                 public void on(Object o) {
                     //filter
-                    A[] resultSet = (A[]) new KNode[foundId.length];
+                    A[] resultSet = (A[]) new KNode[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 
-                    for (int i = 0; i < foundId.length; i++) {
+                    for (int i = 0; i < resultSet.length; i++) {
                         KNode resolvedNode = resolved[i];
                         KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
                         boolean exact = true;
@@ -131,7 +137,7 @@ public class Node extends AbstractNode {
                             resultSetIndex++;
                         }
                     }
-                    if (foundId.length == resultSetIndex) {
+                    if (resultSet.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
                         A[] trimmedResultSet = (A[]) new KNode[resultSetIndex];

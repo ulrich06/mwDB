@@ -66,7 +66,7 @@ public class IndexTest {
                     public void on(KNode[] kNode) {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
-                        Assert.assertTrue(kNode.length == 1);
+                        Assert.assertEquals(1, kNode.length);
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode[0].toString()));
                     }
                 });
