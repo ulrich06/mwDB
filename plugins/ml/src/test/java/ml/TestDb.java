@@ -20,8 +20,8 @@ import java.util.TreeMap;
 public class TestDb {
     public static void main(String[] arg) {
 
-        //String loc = "/Users/duke/Downloads/eurusd-master/";
-        String loc="/Users/assaad/work/github/eurusd/";
+        String loc = "/Users/duke/Downloads/eurusd-master/";
+        //String loc="/Users/assaad/work/github/eurusd/";
 
        /* Date d=new Date();
         d.setTime(Long.parseLong("991949460000"));*/
@@ -69,7 +69,7 @@ public class TestDb {
                 .withOffHeapMemory()
                 .withMemorySize(20_000_000)
                 .withAutoSave(10000)
-                .withStorage(new RocksDBStorage("data"))
+               // .withStorage(new RocksDBStorage("data"))
                 .withFactory(new PolynomialNodeFactory())
                 .withScheduler(new NoopScheduler()).
                         build();
