@@ -90,6 +90,18 @@ public interface KNode {
     long[] relValues(String relationName);
 
     /**
+     * SUGGESTION - Could be deleted
+     * Retrieves synchronously the nodes contained in a relation at a specified time and world
+     *
+     * @param relationName The name of the relation to retrieve.
+     * @param world The world id in which the search must be performed.
+     * @param time The timepoint at which the search must be performed.
+     * @return An array of node ids contained in the relation at a specified time and world
+     */
+    @Deprecated
+    long[] relValues(String relationName, long world, long time);
+
+    /**
      * Adds a node to a relation.<br>
      * If the relationship doesn't exist, it is created on the fly.<br>
      * The relation name must be unique in the node.
@@ -132,7 +144,7 @@ public interface KNode {
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves nodes from an index that satisfies a query.<br>
+     * Retrieves nodes from an index that satisfies a query at the current node world and the current node time<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per node)
@@ -154,7 +166,7 @@ public interface KNode {
     <A extends KNode> void find(String indexName, long world, long time, String query, KCallback<A[]> callback);
 
     /**
-     * Retrieves all nodes in a particular index
+     * Retrieves all nodes in a particular index at the current node world and the current node time
      *
      * @param indexName The name of the index
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.

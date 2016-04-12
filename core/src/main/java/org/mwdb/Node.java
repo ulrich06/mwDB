@@ -169,14 +169,14 @@ public class Node extends AbstractNode {
             final A[] resolved = (A[]) new KNode[mapSize];
             DeferCounter waiter = new DeferCounter(mapSize);
             //TODO replace by a parralel lookup
-            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            final AtomicInteger loopInteger = new AtomicInteger(0);
             indexMap.each(new KLongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
                     selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
-                            resolved[loopInteger.incrementAndGet()] = (A) resolvedNode;
+                            resolved[loopInteger.getAndIncrement()] = (A) resolvedNode;
                             waiter.count();
                         }
                     });
@@ -185,7 +185,13 @@ public class Node extends AbstractNode {
             waiter.then(new KCallback() {
                 @Override
                 public void on(Object o) {
-                    callback.on(resolved);
+                    if(loopInteger.get() == resolved.length) {
+                        callback.on(resolved);
+                    } else {
+                        A[] toSend = (A[]) new KNode[loopInteger.get()];
+                        System.arraycopy(resolved,0,toSend,0,toSend.length);
+                        callback.on(toSend);
+                    }
                 }
             });
         } else {
