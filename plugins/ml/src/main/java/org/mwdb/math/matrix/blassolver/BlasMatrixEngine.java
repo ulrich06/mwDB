@@ -17,7 +17,9 @@ public class BlasMatrixEngine implements KMatrixEngine {
     private KBlas _blas;
 
     public BlasMatrixEngine() {
-        _blas = new F2JBlas();
+       // _blas = new F2JBlas();
+         _blas = new NetlibBlas();
+
     }
 
     public void setBlas(KBlas p_blas) {

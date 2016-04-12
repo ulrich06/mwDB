@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "node_modules/.bin/browserify -s ngraph index.js > ../resources/bundle2.js"
+  },
+  "dependencies": {
+    "ngraph.ngraph": "0.0.12",
+    "ngraph.forcelayout": "0.0.23",
+    "ngraph.generators": "0.0.16",
+    "ngraph.physics.simulator": "0.0.12"
+  },
+  "devDependencies": {
+    "browserify": "*"
+  }
+}

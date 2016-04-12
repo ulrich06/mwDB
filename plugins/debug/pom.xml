@@ -7,11 +7,20 @@
     <version>1.0-SNAPSHOT</version>
     <name>mwDB :: Plugins :: Debug</name>
 
+    <properties>
+        <undertow.version>1.3.21.Final</undertow.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.kevoree.mwdb</groupId>
             <artifactId>api</artifactId>
             <version>1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+            <version>${undertow.version}</version>
         </dependency>
 
         <!-- Test -->
@@ -43,23 +52,6 @@
                         <profile>compact1</profile>
                     </compilerArguments>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.1.4</version>
-                <configuration>
-                    <mainClass></mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>create-jfxjar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
