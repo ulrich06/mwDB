@@ -49,7 +49,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <compilerArguments>
-                        <profile>compact2</profile>
+                        <profile>compact1</profile>
                     </compilerArguments>
                 </configuration>
             </plugin>

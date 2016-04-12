@@ -94,7 +94,7 @@ public interface KNode {
      * If the relationship doesn't exist, it is created on the fly.<br>
      * The relation name must be unique in the node.
      *
-     * @param relationName The name of thgit diff e relation in which to add the node.
+     * @param relationName The name of the relation in which to add the node.
      * @param relatedNode  The node to insert in the relation.
      */
     void relAdd(String relationName, KNode relatedNode);
