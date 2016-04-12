@@ -69,7 +69,7 @@ public class Node extends AbstractNode {
     }
 
     @Override
-    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
+    public <A extends KNode> void find(String indexName, long world, long time, String query, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -88,7 +88,7 @@ public class Node extends AbstractNode {
             //TODO replace by a par lookup
             final AtomicInteger loopInteger = new AtomicInteger(-1);
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), foundId[i], new KCallback<KNode>() {
+                selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
                         resolved[loopInteger.incrementAndGet()] = resolvedNode;
@@ -146,7 +146,12 @@ public class Node extends AbstractNode {
     }
 
     @Override
-    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
+    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
+        find(indexName,time(), world(),query,callback);
+    }
+
+    @Override
+    public <A extends KNode> void all(String indexName, long world, long time, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -162,7 +167,7 @@ public class Node extends AbstractNode {
             indexMap.each(new KLongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
-                    selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), nodeId, new KCallback<KNode>() {
+                    selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
                             resolved[loopInteger.incrementAndGet()] = (A) resolvedNode;
@@ -180,6 +185,11 @@ public class Node extends AbstractNode {
         } else {
             callback.on((A[]) new KNode[0]);
         }
+    }
+
+    @Override
+    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
+        all(indexName,world(),time(),callback);
     }
 
     @Override
