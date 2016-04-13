@@ -153,7 +153,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            int factor=2;
+            int factor=1;
             double[] times = new double[factor*num + 1];
             double[] values = new double[factor*num + 1];
             double inc = 0;
