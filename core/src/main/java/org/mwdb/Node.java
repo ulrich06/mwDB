@@ -1,6 +1,9 @@
 package org.mwdb;
 
-import org.mwdb.chunk.*;
+import org.mwdb.chunk.KLongLongArrayMap;
+import org.mwdb.chunk.KLongLongArrayMapCallBack;
+import org.mwdb.chunk.KStateChunk;
+import org.mwdb.chunk.KStateChunkCallBack;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.DeferCounter;
 import org.mwdb.utility.PrimitiveHelper;
@@ -69,7 +72,7 @@ public class Node extends AbstractNode {
     }
 
     @Override
-    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
+    public <A extends KNode> void find(String indexName, long world, long time, String query, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -86,12 +89,15 @@ public class Node extends AbstractNode {
             final KNode[] resolved = new KNode[foundId.length];
             final DeferCounter waiter = new DeferCounter(foundId.length);
             //TODO replace by a par lookup
-            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
+
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), foundId[i], new KCallback<KNode>() {
+                selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
-                        resolved[loopInteger.incrementAndGet()] = resolvedNode;
+                        if(resolvedNode != null) {
+                            resolved[nextResolvedTabIndex.getAndIncrement()] = resolvedNode;
+                        }
                         waiter.count();
                     }
                 });
@@ -100,10 +106,10 @@ public class Node extends AbstractNode {
                 @Override
                 public void on(Object o) {
                     //filter
-                    A[] resultSet = (A[]) new KNode[foundId.length];
+                    A[] resultSet = (A[]) new KNode[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 
-                    for (int i = 0; i < foundId.length; i++) {
+                    for (int i = 0; i < resultSet.length; i++) {
                         KNode resolvedNode = resolved[i];
                         KResolver.KNodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
                         boolean exact = true;
@@ -131,7 +137,7 @@ public class Node extends AbstractNode {
                             resultSetIndex++;
                         }
                     }
-                    if (foundId.length == resultSetIndex) {
+                    if (resultSet.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
                         A[] trimmedResultSet = (A[]) new KNode[resultSetIndex];
@@ -146,7 +152,12 @@ public class Node extends AbstractNode {
     }
 
     @Override
-    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
+    public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
+        find(indexName,time(), world(),query,callback);
+    }
+
+    @Override
+    public <A extends KNode> void all(String indexName, long world, long time, KCallback<A[]> callback) {
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -158,14 +169,14 @@ public class Node extends AbstractNode {
             final A[] resolved = (A[]) new KNode[mapSize];
             DeferCounter waiter = new DeferCounter(mapSize);
             //TODO replace by a parralel lookup
-            final AtomicInteger loopInteger = new AtomicInteger(-1);
+            final AtomicInteger loopInteger = new AtomicInteger(0);
             indexMap.each(new KLongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
-                    selfPointer._resolver.lookup(selfPointer.world(), selfPointer.time(), nodeId, new KCallback<KNode>() {
+                    selfPointer._resolver.lookup(world, time, nodeId, new KCallback<KNode>() {
                         @Override
                         public void on(KNode resolvedNode) {
-                            resolved[loopInteger.incrementAndGet()] = (A) resolvedNode;
+                            resolved[loopInteger.getAndIncrement()] = (A) resolvedNode;
                             waiter.count();
                         }
                     });
@@ -174,12 +185,23 @@ public class Node extends AbstractNode {
             waiter.then(new KCallback() {
                 @Override
                 public void on(Object o) {
-                    callback.on(resolved);
+                    if(loopInteger.get() == resolved.length) {
+                        callback.on(resolved);
+                    } else {
+                        A[] toSend = (A[]) new KNode[loopInteger.get()];
+                        System.arraycopy(resolved,0,toSend,0,toSend.length);
+                        callback.on(toSend);
+                    }
                 }
             });
         } else {
             callback.on((A[]) new KNode[0]);
         }
+    }
+
+    @Override
+    public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
+        all(indexName,world(),time(),callback);
     }
 
     @Override

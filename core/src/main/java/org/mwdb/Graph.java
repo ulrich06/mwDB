@@ -425,10 +425,10 @@ public class Graph implements KGraph {
             public void on(KNode foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(null);
+                        callback.on((A[]) new KNode[0]);
                     }
                 } else {
-                    foundIndex.find(Constants.INDEX_ATTRIBUTE, query, new KCallback<A[]>() {
+                    foundIndex.find(Constants.INDEX_ATTRIBUTE, world,time,query, new KCallback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();
@@ -452,7 +452,7 @@ public class Graph implements KGraph {
                         callback.on((A[]) new KNode[0]);
                     }
                 } else {
-                    foundIndex.all(Constants.INDEX_ATTRIBUTE, new KCallback<A[]>() {
+                    foundIndex.all(Constants.INDEX_ATTRIBUTE, world,time,new KCallback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();
@@ -498,7 +498,7 @@ public class Graph implements KGraph {
                     if (indexId == Constants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
-                            KNode newIndexNode = newNode(0, 0);
+                            KNode newIndexNode = newNode(world, time);
                             newIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);
