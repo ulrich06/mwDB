@@ -385,7 +385,6 @@ public class Graph implements KGraph {
                 if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
-                System.out.println(foundIndex);
                 foundIndex.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new KCallback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
