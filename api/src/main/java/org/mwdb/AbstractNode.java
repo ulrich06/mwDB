@@ -110,7 +110,7 @@ public abstract class AbstractNode implements KNode {
                     this._resolver.lookup(_world, _time, flatRefs[i], new KCallback<KNode>() {
                         @Override
                         public void on(KNode kNode) {
-                            if(kNode != null) {
+                            if (kNode != null) {
                                 result[resultIndex[0]] = (A) kNode;
                                 resultIndex[0]++;
                             }
@@ -121,11 +121,11 @@ public abstract class AbstractNode implements KNode {
                 counter.then(new KCallback() {
                     @Override
                     public void on(Object o) {
-                        if(resultIndex[0] == result.length) {
+                        if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
                             A[] toSend = (A[]) new KNode[resultIndex[0]];
-                            System.arraycopy(result,0,toSend,0,toSend.length);
+                            System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
                     }
@@ -139,34 +139,10 @@ public abstract class AbstractNode implements KNode {
         KResolver.KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
             long[] result = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
-            return (result == null)? new long[0] : result;
+            return (result == null) ? new long[0] : result;
         } else {
             throw new RuntimeException(KConstants.CACHE_MISS_ERROR);
         }
-    }
-
-    @Override
-    public long[] relValues(String relationName, long world, long time) {
-        final long[] result = relValues(relationName);
-        long tmpToSend[] = new long[result.length];
-
-        final int[] indexToSend = new int[1];
-        for(int i=0;i<result.length;i++) {
-            final int ii = i;
-            this._resolver.lookup(world, time, result[i], new KCallback<KNode>() {
-                @Override
-                public void on(KNode knode) {
-                    if(knode != null) {
-                        tmpToSend[indexToSend[0]++] = result[ii];
-                    }
-                }
-            });
-        }
-
-        long[] toSend = new long[indexToSend[0]];
-        System.arraycopy(tmpToSend,0,toSend,0,toSend.length);
-
-        return toSend;
     }
 
     @Override

@@ -90,18 +90,6 @@ public interface KNode {
     long[] relValues(String relationName);
 
     /**
-     * SUGGESTION - Could be deleted
-     * Retrieves synchronously the nodes contained in a relation at a specified time and world
-     *
-     * @param relationName The name of the relation to retrieve.
-     * @param world The world id in which the search must be performed.
-     * @param time The timepoint at which the search must be performed.
-     * @return An array of node ids contained in the relation at a specified time and world
-     */
-    @Deprecated
-    long[] relValues(String relationName, long world, long time);
-
-    /**
      * Adds a node to a relation.<br>
      * If the relationship doesn't exist, it is created on the fly.<br>
      * The relation name must be unique in the node.

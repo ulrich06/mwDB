@@ -10,4 +10,6 @@ buildNumber.properties
 .DS_Store
 */.DS_Store
 *.iml
-
+.settings/
+.classpath
+.project
