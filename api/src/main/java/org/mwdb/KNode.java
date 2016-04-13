@@ -148,8 +148,8 @@ public interface KNode {
      * @param indexName The name of the index (should be unique per node)
      * @param query     The query (e.g.: "firstname=john,lastname=doe,age=30"
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
-     * @param world The world id in which the search must be performed.
-     * @param time The timepoint at which the search must be performed.
+     * @param world     The world id in which the search must be performed.
+     * @param time      The timepoint at which the search must be performed.
      */
     <A extends KNode> void find(String indexName, long world, long time, String query, KCallback<A[]> callback);
 
@@ -166,8 +166,8 @@ public interface KNode {
      *
      * @param indexName The name of the index
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
-     * @param world The world id in which the search must be performed.
-     * @param time The timepoint at which the search must be performed.
+     * @param world     The world id in which the search must be performed.
+     * @param time      The timepoint at which the search must be performed.
      */
     <A extends KNode> void all(String indexName, long world, long time, KCallback<A[]> callback);
 
@@ -211,9 +211,11 @@ public interface KNode {
     KGraph graph();
 
     /**
-     * @param targetTime
-     * @param callback
-     * @param <A>
+     * Jump over the time for this object. This method is equivalent to a call to lookup with the same ID than the current KNode.
+     *
+     * @param targetTime target time where this node has to be resolved.
+     * @param callback Called whe the jump is complete. Gives the new timed node in parameter.
+     * @param <A> Generic parameter that define the type of the result, should be a sub-type of KNode
      */
     <A extends KNode> void jump(long targetTime, KCallback<A> callback);
 

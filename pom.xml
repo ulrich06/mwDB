@@ -5,7 +5,7 @@
     <artifactId>root</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mwDB :: Root</name>
+    <name>mwDB</name>
     <url>https://github.com/kevoree-modeling/mwDB</url>
     <description>Many-World Database</description>
 
@@ -72,13 +72,11 @@
     <modules>
         <module>api</module>
         <module>core</module>
-        <module>plugins/ml</module>
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
         <module>plugins/leveldb</module>
-
         <module>plugins/debug</module>
-
+        <module>plugins/ml</module>
     </modules>
 
     <dependencies>
