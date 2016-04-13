@@ -1,5 +1,15 @@
 package rocksdb;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
@@ -9,7 +19,7 @@ import org.mwdb.utility.Unsafe;
 
 public class StorageTest {
 
-    // @Test
+     @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
@@ -76,4 +86,28 @@ public class StorageTest {
             }
         });
     }
+    
+    @AfterClass
+    public static void oneTimeTearDown() throws IOException {
+        File data = new File("data");
+        if(data.exists()){
+        	System.out.println("Cleanup data directory");
+        	Path directory = Paths.get("data");
+        	   Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+        		   @Override
+        		   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        			   Files.delete(file);
+        			   return FileVisitResult.CONTINUE;
+        		   }
+
+        		   @Override
+        		   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        			   Files.delete(dir);
+        			   return FileVisitResult.CONTINUE;
+        		   }
+
+        	   });
+        }
+    }
+    
 }
