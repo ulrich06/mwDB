@@ -108,7 +108,7 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
 
                 long[] refValuesNull = node1.relValues("children");
-                Assert.assertTrue(refValuesNull == null);
+                Assert.assertEquals(0,refValuesNull.length);
 
                 //destroy the node explicitly without waiting GC
                 node0.free();

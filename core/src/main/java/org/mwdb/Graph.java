@@ -385,6 +385,7 @@ public class Graph implements KGraph {
                 if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
+                System.out.println(foundIndex);
                 foundIndex.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new KCallback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
@@ -498,7 +499,7 @@ public class Graph implements KGraph {
                     if (indexId == Constants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
-                            KNode newIndexNode = newNode(0, 0);
+                            KNode newIndexNode = newNode(world, time);
                             newIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);

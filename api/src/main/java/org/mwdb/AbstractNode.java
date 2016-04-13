@@ -138,7 +138,8 @@ public abstract class AbstractNode implements KNode {
     public long[] relValues(String relationName) {
         KResolver.KNodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
+            long[] result = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
+            return (result == null)? new long[0] : result;
         } else {
             throw new RuntimeException(KConstants.CACHE_MISS_ERROR);
         }
