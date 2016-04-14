@@ -253,7 +253,7 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     private void move(GaussianNode subgaus) {
         //manage total
-        Integer total = getTotal();
+        int total = getTotal();
         Double weight = getWeight();
         int level = getLevel();
 
@@ -334,7 +334,7 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
 
         //manage total
-        Integer total = getTotal();
+        int total = getTotal();
         Double weight = getWeight();
 
         double[] sum;
@@ -342,8 +342,7 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         double[] max;
         double[] sumsquares;
 
-        if (total == null) {
-            total = 0;
+        if (total == 0) {
             weight = 0.0;
             sum = new double[features];
             min = new double[features];
@@ -399,13 +398,13 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         int features = values.length;
 
         //manage total
-        Integer total = getTotal();
+        int total = getTotal();
         Double weight = getWeight();
         int level = getLevel();
         int width = getMaxPerLevel();
 
         //Create dirac
-        if (total == null) {
+        if (total == 0) {
             double[] sum = new double[features];
             System.arraycopy(values, 0, sum, 0, features);
             total = 1;
@@ -491,8 +490,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public int getNumberOfFeatures() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return 0;
         } else {
             double[] sum = (double[]) super.att(INTERNAL_SUM_KEY);
@@ -502,8 +501,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double[] getSum() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         } else {
             return (double[]) super.att(INTERNAL_SUM_KEY);
@@ -512,8 +511,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double[] getSumSquares() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total == 1) {
@@ -536,48 +535,49 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg) {
-
-        double[] avg = getAvg();
-        if (avg == null) {
+        double[] sum = (double[]) super.att(INTERNAL_SUM_KEY);
+        double[] sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum,sumsquares,getTotal());
+        if(mnd==null){
+            //todo handle dirac to be replaced later
             return 0;
         }
-        KMatrix cov = getCovarianceMatrix(avg);
-        if (cov == null) {
-            cov = new KMatrix(null, featArray.length, featArray.length);
-            for (int i = 0; i < featArray.length; i++) {
-                cov.set(i, i, err[i] * err[i]);
-            }
+        else {
+            return mnd.density(featArray, normalizeOnAvg);
         }
-
-        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
-        return mnd.density(featArray, normalizeOnAvg);
     }
 
     @Override
     public double[] getProbabilityArray(double[][] featArray, double[] err, boolean normalizeOnAvg) {
         double[] res = new double[featArray.length];
-        double[] avg = getAvg();
-        if (avg == null) {
-            return null;
-        }
-        KMatrix cov = getCovarianceMatrix(avg);
-        if (cov == null) {
-            cov = new KMatrix(null, featArray.length, featArray.length);
-            for (int i = 0; i < featArray.length; i++) {
-                cov.set(i, i, err[i] * err[i]);
-            }
-        }
-        MultivariateNormalDistribution mnd = new MultivariateNormalDistribution(avg, cov);
 
-        for (int i = 0; i < res.length; i++) {
-            res[i] = mnd.density(featArray[i], normalizeOnAvg);
+        double[] sum = (double[]) super.att(INTERNAL_SUM_KEY);
+        double[] sumsquares = (double[]) super.att(INTERNAL_SUMSQUARE_KEY);
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum,sumsquares,getTotal());
+
+        if(mnd==null){
+            //todo handle dirac to be replaced later
+            return res;
         }
-        return res;
+        else {
+            for (int i = 0; i < res.length; i++) {
+                res[i] = mnd.density(featArray[i], normalizeOnAvg);
+            }
+            return res;
+        }
+
     }
 
     @Override
-    public Integer getTotal() {
-        return (Integer) super.att(INTERNAL_TOTAL_KEY);
+    public int getTotal()
+    {
+        Integer x= (Integer) super.att(INTERNAL_TOTAL_KEY);
+        if (x==null){
+            return 0;
+        }
+        else {
+            return x;
+        }
     }
 
     @Override
@@ -587,8 +587,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double[] getAvg() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total == 1) {
@@ -610,8 +610,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
         int features = avg.length;
 
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total > 1) {
@@ -639,8 +639,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
     public KMatrix getCovarianceMatrix(double[] avg) {
         int features = avg.length;
 
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total > 1) {
@@ -666,8 +666,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double[] getMin() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total == 1) {
@@ -681,8 +681,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public double[] getMax() {
-        Integer total = getTotal();
-        if (total == null) {
+        int total = getTotal();
+        if (total == 0) {
             return null;
         }
         if (total == 1) {

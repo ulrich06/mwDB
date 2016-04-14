@@ -25,7 +25,7 @@ public interface KGaussianNode extends KNode {
 
     double[] getProbabilityArray(double[][] featArray, double[] err, boolean normalizeOnAvg);
 
-    Integer getTotal();
+    int getTotal();
 
     Double getWeight();
 

@@ -58,6 +58,7 @@ public class GaussianProbaTest {
                 System.out.println("batch: " + z);
 
 
+
                 Assert.assertTrue(Math.abs(d-y)<eps);
                 Assert.assertTrue(Math.abs(d-z)<eps);
 
