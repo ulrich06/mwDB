@@ -544,6 +544,23 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
+    public void freeChunk(KChunk chunk) {
+        KOffHeapChunk casted = (KOffHeapChunk) chunk;
+        switch (casted.chunkType()) {
+            case Constants.STATE_CHUNK:
+                OffHeapStateChunk.free(casted.addr());
+                break;
+            case Constants.TIME_TREE_CHUNK:
+                OffHeapTimeTreeChunk.free(casted.addr());
+                break;
+            case Constants.WORLD_ORDER_CHUNK:
+                OffHeapWorldOrderChunk.free(casted.addr());
+                break;
+        }
+    }
+
+
+    @Override
     public final long size() {
         return this._elementCount.get();
     }

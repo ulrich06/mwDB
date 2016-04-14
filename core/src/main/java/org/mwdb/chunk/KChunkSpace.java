@@ -29,6 +29,8 @@ public interface KChunkSpace {
      */
     void unmarkChunk(KChunk chunk);
 
+    void freeChunk(KChunk chunk);
+
     /**
      * Declare the chunk as dirty
      */
@@ -51,5 +53,6 @@ public interface KChunkSpace {
     long size();
 
     KChunkIterator detachDirties();
+
 
 }

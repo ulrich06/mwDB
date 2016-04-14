@@ -3,9 +3,13 @@ package graph;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.chunk.offheap.*;
+import org.mwdb.chunk.offheap.OffHeapByteArray;
+import org.mwdb.chunk.offheap.OffHeapDoubleArray;
+import org.mwdb.chunk.offheap.OffHeapLongArray;
+import org.mwdb.chunk.offheap.OffHeapStringArray;
 import org.mwdb.task.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 public class TimelineTest {
 
@@ -20,6 +24,8 @@ public class TimelineTest {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(20).build());
 
@@ -123,13 +129,7 @@ public class TimelineTest {
                                 });
 
 
-                                //end of the test
-                                graph.disconnect(new KCallback<Boolean>() {
-                                    @Override
-                                    public void on(Boolean result) {
-                                        //test end
-                                    }
-                                });
+
 
                             }
                         });
@@ -138,6 +138,14 @@ public class TimelineTest {
                     }
                 });
 
+
+                //end of the test
+                graph.disconnect(new KCallback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //test end
+                    }
+                });
 
             }
         });

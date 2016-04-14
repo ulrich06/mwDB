@@ -17,9 +17,8 @@ public class BlasMatrixEngine implements KMatrixEngine {
     private KBlas _blas;
 
     public BlasMatrixEngine() {
-       // _blas = new F2JBlas();
-         _blas = new NetlibBlas();
-
+        // _blas = new F2JBlas();
+        _blas = new NetlibBlas();
     }
 
     public void setBlas(KBlas p_blas) {
@@ -101,7 +100,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
 
     @Override
     public KMatrix pinv(KMatrix mat, boolean invertInPlace) {
-        SVD svd= new SVD(mat.rows(),mat.columns(),_blas);
+        SVD svd = new SVD(mat.rows(), mat.columns(), _blas);
         PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(mat, invertInPlace);
         return pinvsvd.getPInv();
@@ -132,7 +131,7 @@ public class BlasMatrixEngine implements KMatrixEngine {
     @Override
     public KSVDDecompose decomposeSVD(KMatrix matA, boolean workInPlace) {
         SVD svd = new SVD(matA.rows(), matA.columns(), _blas);
-        svd.factor(matA,workInPlace);
+        svd.factor(matA, workInPlace);
         return svd;
     }
 
@@ -163,8 +162,6 @@ public class BlasMatrixEngine implements KMatrixEngine {
             return matB;
         }
     }
-
-
 
 
 }

@@ -9,6 +9,7 @@ import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapStringArray;
 import org.mwdb.plugin.KFactory;
 import org.mwdb.task.NoopScheduler;
+import org.mwdb.utility.Unsafe;
 
 public class NodeFactoryTest implements KFactory {
 
@@ -41,6 +42,8 @@ public class NodeFactoryTest implements KFactory {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10_000).withAutoSave(20).withFactory(this).build());
 

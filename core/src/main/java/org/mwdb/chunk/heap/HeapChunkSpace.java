@@ -199,6 +199,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
+    public void freeChunk(KChunk chunk) {
+        //NOOP
+    }
+
+    @Override
     public KChunk create(byte p_type, long p_world, long p_time, long p_id, KBuffer p_initialPayload, KChunk origin) {
         switch (p_type) {
             case Constants.STATE_CHUNK:

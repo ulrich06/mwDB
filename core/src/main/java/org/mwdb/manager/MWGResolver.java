@@ -337,35 +337,43 @@ public class MWGResolver implements KResolver {
         nodeWorldOrder.lock();
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
-        AbstractNode castedNode = (AbstractNode) node;
-        //protection against deleted KNode
-        long[] previousResolveds = castedNode._previousResolveds.get();
-        if (previousResolveds == null) {
-            throw new RuntimeException(deadNodeError);
-        }
-        //let's go for the resolution now
-        long nodeId = node.id();
-
         KChunk resultState = null;
         try {
-            KTimeTreeChunk nodeSuperTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
-            if (nodeSuperTimeTree == null) {
-                this._space.unmarkChunk(nodeWorldOrder);
-                return null;
+            AbstractNode castedNode = (AbstractNode) node;
+            //protection against deleted KNode
+            long[] previousResolveds = castedNode._previousResolveds.get();
+            if (previousResolveds == null) {
+                throw new RuntimeException(deadNodeError);
             }
-            KTimeTreeChunk nodeTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
-            if (nodeTimeTree == null) {
-                this._space.unmarkChunk(nodeSuperTimeTree);
+            long nodeId = node.id();
+
+            //check if anything as moved
+            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world && previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] == time) {
+                //no new state to create
+                resultState = this._space.getAndMark(Constants.STATE_CHUNK, world, time, nodeId);
+                this._space.unmarkChunk(resultState);
                 this._space.unmarkChunk(nodeWorldOrder);
-                return null;
+                return (KNodeState) resultState;
             }
 
             //first we create and insert the empty state
-            long resolvedSuperTime = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
             resultState = this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
             resultState = _space.putAndMark(resultState);
 
-            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world) {
+            if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world || nodeWorldOrder.get(world) != Constants.NULL_LONG) {
+
+                //let's go for the resolution now
+                KTimeTreeChunk nodeSuperTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+                if (nodeSuperTimeTree == null) {
+                    this._space.unmarkChunk(nodeWorldOrder);
+                    return null;
+                }
+                KTimeTreeChunk nodeTimeTree = (KTimeTreeChunk) this._space.getAndMark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
+                if (nodeTimeTree == null) {
+                    this._space.unmarkChunk(nodeSuperTimeTree);
+                    this._space.unmarkChunk(nodeWorldOrder);
+                    return null;
+                }
 
                 //manage super tree here
                 long superTreeSize = nodeSuperTimeTree.size();
@@ -390,8 +398,12 @@ public class MWGResolver implements KResolver {
                         }
                     });
 
-                    KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, medianPoint[0], nodeId, null, null);
-                    rightTree = (KTimeTreeChunk) this._space.putAndMark(rightTree);
+                    KTimeTreeChunk rightTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, medianPoint[0], nodeId, null, null);
+                    KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.putAndMark(rightTree_0);
+                    if (rightTree_0 != rightTree) {
+                        this._space.freeChunk(rightTree_0);
+                    }
+
                     //TODO second iterate that can be avoided, however we need the median point to create the right tree
                     //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
                     final KTimeTreeChunk finalRightTree = rightTree;
@@ -409,11 +421,14 @@ public class MWGResolver implements KResolver {
                     //ok ,now manage marks
                     if (time < medianPoint[0]) {
 
-                        _space.unmarkChunk(rightTree);
+                        this._space.unmarkChunk(rightTree);
+                        this._space.unmarkChunk(nodeSuperTimeTree);
+                        this._space.unmarkChunk(nodeTimeTree);
 
                         long[] newResolveds = new long[6];
                         newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
-                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
+
+                        newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
                         newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
                         newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrder.magic();
                         newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = nodeSuperTimeTree.magic();
@@ -421,8 +436,11 @@ public class MWGResolver implements KResolver {
                         castedNode._previousResolveds.set(newResolveds);
                     } else {
 
-                        //we unMark
-                        _space.unmarkChunk(nodeTimeTree);
+                        //double unMark current nodeTimeTree
+                        this._space.unmarkChunk(nodeTimeTree);
+                        this._space.unmarkChunk(nodeTimeTree);
+                        //unmark node superTimeTree
+                        this._space.unmarkChunk(nodeSuperTimeTree);
 
                         //let's store the new state if necessary
                         long[] newResolveds = new long[6];
@@ -439,7 +457,7 @@ public class MWGResolver implements KResolver {
                     long[] newResolveds = new long[6];
                     //previously resolved
                     newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
-                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = resolvedSuperTime;
+                    newResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX];
                     newResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
                     //previously magics
                     newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = nodeWorldOrder.magic();
@@ -447,19 +465,27 @@ public class MWGResolver implements KResolver {
                     newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                     castedNode._previousResolveds.set(newResolveds);
 
+                    this._space.unmarkChunk(nodeSuperTimeTree);
+                    this._space.unmarkChunk(nodeTimeTree);
                 }
             } else {
 
-                //TODO potential memory leak here
                 //create a new node superTimeTree
-                KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, Constants.NULL_LONG, nodeId, null, null);
-                newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree);
+                KTimeTreeChunk newSuperTimeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, Constants.NULL_LONG, nodeId, null, null);
+                KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree_0);
+                if (newSuperTimeTree != newSuperTimeTree_0) {
+                    this._space.freeChunk(newSuperTimeTree_0);
+                }
                 newSuperTimeTree.insert(time);
+
                 //create a new node timeTree
-                //TODO potential memory leak here
-                KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, time, nodeId, null, null);
-                newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree);
+                KTimeTreeChunk newTimeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, world, time, nodeId, null, null);
+                KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree_0);
+                if (newTimeTree != newTimeTree_0) {
+                    this._space.freeChunk(newTimeTree_0);
+                }
                 newTimeTree.insert(time);
+
                 //insert into node world order
                 nodeWorldOrder.put(world, time);
 
@@ -475,27 +501,22 @@ public class MWGResolver implements KResolver {
                 newResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = newTimeTree.magic();
                 castedNode._previousResolveds.set(newResolveds);
 
-                //we unMark
-                _space.unmarkChunk(nodeSuperTimeTree);
-                _space.unmarkChunk(nodeTimeTree);
+                //unMark previous super Tree
+                _space.unmark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+                //unMark previous time Tree
+                _space.unmark(Constants.TIME_TREE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
+
             }
 
             //unMark previous state, for the newly created one
             _space.unmark(Constants.STATE_CHUNK, previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
-            _space.unmarkChunk(nodeSuperTimeTree);
-            _space.unmarkChunk(nodeTimeTree);
-
+            _space.unmarkChunk(nodeWorldOrder);
 
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
             nodeWorldOrder.unlock();
         }
-
-        //we should unMark previous state
-
-        //unMark World order chunks
-        _space.unmarkChunk(nodeWorldOrder);
         return (KNodeState) resultState;
     }
 
@@ -685,7 +706,7 @@ public class MWGResolver implements KResolver {
                 //free the previous lookup lock
                 this._space.unmarkChunk(previousNodeState);
 
-                if (resolvedWorld == nodeWorld) {
+                if (resolvedWorld == nodeWorld || nodeWorldOrder.get(nodeWorld) != Constants.NULL_LONG) {
                     //manage super tree here
                     long superTreeSize = nodeSuperTimeTree.size();
                     long threshold = Constants.SCALE_1 * 2;
@@ -764,16 +785,23 @@ public class MWGResolver implements KResolver {
                         castedNode._previousResolveds.set(newResolveds);
                     }
                 } else {
-                    //TODO potential memory leak here
+
                     //create a new node superTimeTree
-                    KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
-                    newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree);
+                    KTimeTreeChunk newSuperTimeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, Constants.NULL_LONG, nodeId, null, null);
+                    KTimeTreeChunk newSuperTimeTree = (KTimeTreeChunk) this._space.putAndMark(newSuperTimeTree_0);
+                    if (newSuperTimeTree_0 != newSuperTimeTree) {
+                        this._space.freeChunk(newSuperTimeTree_0);
+                    }
                     newSuperTimeTree.insert(nodeTime);
+
                     //create a new node timeTree
-                    //TODO potential memory leak here
-                    KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
-                    newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree);
+                    KTimeTreeChunk newTimeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
+                    KTimeTreeChunk newTimeTree = (KTimeTreeChunk) this._space.putAndMark(newTimeTree_0);
+                    if (newTimeTree_0 != newTimeTree) {
+                        this._space.freeChunk(newTimeTree_0);
+                    }
                     newTimeTree.insert(nodeTime);
+
                     //insert into node world order
                     nodeWorldOrder.put(nodeWorld, nodeTime);
 

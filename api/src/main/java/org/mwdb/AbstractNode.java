@@ -221,12 +221,6 @@ public abstract class AbstractNode implements KNode {
         this._resolver.resolveTimepoints(this, beginningOfSearch, endOfSearch, callback);
     }
 
-    /*
-    @Override
-    <A extends KNode> public void jump(long targetTime, KCallback<A> timedNode) {
-        _resolver.lookup(_world, targetTime, _id, timedNode);
-    }*/
-
     @Override
     public <A extends KNode> void jump(long targetTime, KCallback<A> callback) {
         _resolver.lookup(_world, targetTime, _id, callback);

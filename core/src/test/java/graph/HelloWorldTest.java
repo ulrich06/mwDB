@@ -6,6 +6,7 @@ import org.mwdb.*;
 import org.mwdb.chunk.offheap.*;
 import org.mwdb.task.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.utility.Unsafe;
 
 public class HelloWorldTest {
 
@@ -20,6 +21,8 @@ public class HelloWorldTest {
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
+
+        Unsafe.DEBUG_MODE = true;
 
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10_000).withAutoSave(20).build());
 
