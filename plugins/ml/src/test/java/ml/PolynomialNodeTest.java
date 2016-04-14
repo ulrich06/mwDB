@@ -4,6 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.gmm.KGaussianNode;
+import org.mwdb.math.matrix.KMatrix;
+import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
 import org.mwdb.polynomial.KPolynomialNode;
 import org.mwdb.polynomial.PolynomialNode;
 import org.mwdb.task.NoopScheduler;
@@ -21,6 +24,15 @@ public class PolynomialNodeTest {
         graph.connect(new KCallback<Boolean>() {
             @Override
             public void on(Boolean result) {
+
+                try {
+                    BlasMatrixEngine bme = (BlasMatrixEngine) KMatrix.defaultEngine();
+                    bme.setBlas(new F2JBlas());
+                }
+                catch (Exception ignored){
+
+                }
+
 
                 long[] times = new long[size];
                 double[] values = new double[size];
@@ -45,10 +57,10 @@ public class PolynomialNodeTest {
                 testPoly(times, values, 1, graph);
 
                 //test degree 5
-              /*  for (int i = 0; i < size; i++) {
+                for (int i = 0; i < size; i++) {
                     values[i] = 2 * i * i * i * i * i - 1000 * i - 100000;
                 }
-                testPoly(times, values, 7, graph);*/
+                testPoly(times, values, 7, graph);
 
             }
         });

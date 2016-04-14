@@ -1,6 +1,9 @@
 package ml;
 
 import org.mwdb.*;
+import org.mwdb.math.matrix.KMatrix;
+import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
 import org.mwdb.polynomial.KPolynomialNode;
 import org.mwdb.polynomial.PolynomialNode;
 import org.mwdb.task.NoopScheduler;
@@ -25,6 +28,7 @@ public class TestDb {
 
        /* Date d=new Date();
         d.setTime(Long.parseLong("991949460000"));*/
+
 
         long starttime;
         long endtime;
@@ -76,6 +80,13 @@ public class TestDb {
         graph.connect(new KCallback<Boolean>() {
                           @Override
                           public void on(Boolean result) {
+                              try {
+                                  BlasMatrixEngine bme = (BlasMatrixEngine) KMatrix.defaultEngine();
+                                  bme.setBlas(new F2JBlas());
+                              }
+                              catch (Exception ignored){
+
+                              }
 
                               long starttime, endtime;
                               double d;
