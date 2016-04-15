@@ -88,41 +88,6 @@ public class TestDbReverse {
                               Iterator<Long> iter = eurUsd.keySet().iterator();
 
 
-                              starttime = System.nanoTime();
-
-
-                              // KNode normalNode = graph.newNode(0, timestamps.get(0));
-                              KNode normalNode = graph.newNode(0, 0);
-
-                              for (int i = 0; i < eurUsd.size(); i++) {
-                                  if (i % 1000000 == 0) {
-                                      System.out.println(i);
-                                  }
-                                  final long t = iter.next();
-                                  normalNode.jump(t, new KCallback<KNode>() {
-                                      @Override
-                                      public void on(KNode result) {
-                                          try {
-                                              result.attSet("euroUsd", KType.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
-                                          } catch (Exception ex) {
-                                              ex.printStackTrace();
-                                          }
-                                          result.free();
-                                      }
-                                  });
-                              }
-                              endtime = System.nanoTime();
-                              d = (endtime - starttime);
-                              d = d / 1000000000;
-                              d = eurUsd.size() / d;
-                              System.out.println("KNode insert speed: " + d + " values/s");
-
-                              normalNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
-                                  @Override
-                                  public void on(long[] result) {
-                                      System.out.println("KNode number of timepoints: " + result.length);
-                                  }
-                              });
 
 
                               final double precision = 0.01;
@@ -156,6 +121,70 @@ public class TestDbReverse {
                                   @Override
                                   public void on(long[] result) {
                                       System.out.println("Polynomial number of timepoints: " + result.length);
+                                  }
+                              });
+
+                              final int[] error = new int[1];
+                              iter = eurUsd.keySet().iterator();
+                              starttime = System.nanoTime();
+                              for (int i = 0; i < eurUsd.size(); i++) {
+                                  final long t = iter.next();
+                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
+                                      @Override
+                                      public void on(KPolynomialNode result) {
+                                          try {
+
+                                              double d = result.get();
+                                              if (Math.abs(d - eurUsd.get(t)) > precision) {
+                                                  error[0]++;
+                                              }
+                                          } catch (Exception ex) {
+                                              ex.printStackTrace();
+                                          }
+                                          result.free();
+                                      }
+                                  });
+                              }
+                              endtime = System.nanoTime();
+                              d = (endtime - starttime);
+                              d = d / 1000000000;
+                              d = eurUsd.size() / d;
+                              System.out.println("Polynomial read speed: " + d + " ms");
+
+
+                              // System.out.println(error[0]);
+
+                              starttime = System.nanoTime();
+                              // KNode normalNode = graph.newNode(0, timestamps.get(0));
+                              KNode normalNode = graph.newNode(0, 0);
+
+                              for (int i = 0; i < eurUsd.size(); i++) {
+                                  if (i % 1000000 == 0) {
+                                      System.out.println(i);
+                                  }
+                                  final long t = iter.next();
+                                  normalNode.jump(t, new KCallback<KNode>() {
+                                      @Override
+                                      public void on(KNode result) {
+                                          try {
+                                              result.attSet("euroUsd", KType.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
+                                          } catch (Exception ex) {
+                                              ex.printStackTrace();
+                                          }
+                                          result.free();
+                                      }
+                                  });
+                              }
+                              endtime = System.nanoTime();
+                              d = (endtime - starttime);
+                              d = d / 1000000000;
+                              d = eurUsd.size() / d;
+                              System.out.println("KNode insert speed: " + d + " values/s");
+
+                              normalNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
+                                  @Override
+                                  public void on(long[] result) {
+                                      System.out.println("KNode number of timepoints: " + result.length);
                                   }
                               });
 
@@ -193,37 +222,7 @@ public class TestDbReverse {
                               // System.out.println(error2[0]);
                               ///  System.out.println();
 
-
-                              final int[] error = new int[1];
-                              iter = eurUsd.keySet().iterator();
-                              starttime = System.nanoTime();
-                              for (int i = 0; i < eurUsd.size(); i++) {
-                                  final long t = iter.next();
-                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
-                                      @Override
-                                      public void on(KPolynomialNode result) {
-                                          try {
-
-                                              double d = result.get();
-                                              if (Math.abs(d - eurUsd.get(t)) > precision) {
-                                                  error[0]++;
-                                              }
-                                          } catch (Exception ex) {
-                                              ex.printStackTrace();
-                                          }
-                                          result.free();
-                                      }
-                                  });
-                              }
-                              endtime = System.nanoTime();
-                              d = (endtime - starttime);
-                              d = d / 1000000000;
-                              d = eurUsd.size() / d;
-                              System.out.println("Polynomial read speed: " + d + " ms");
-
-
-                              // System.out.println(error[0]);
-
+                              
 
                               graph.disconnect(new KCallback<Boolean>() {
                                   @Override
