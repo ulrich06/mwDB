@@ -159,26 +159,26 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     @Override
     public synchronized final void save(KBuffer buffer) {
         //lock and load from main memory
-        //    while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
-        //  try {
-        if (_root_index == -1) {
-            return;
-        }
-        boolean isFirst = true;
-        for (int i = 0; i < _size; i++) {
-            if (!isFirst) {
-                buffer.write(Constants.CHUNK_SUB_SEP);
-            } else {
-                isFirst = false;
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+        try {
+            if (_root_index == -1) {
+                return;
             }
-            Base64.encodeLongToBuffer(this._back_k[i], buffer);
+            boolean isFirst = true;
+            for (int i = 0; i < _size; i++) {
+                if (!isFirst) {
+                    buffer.write(Constants.CHUNK_SUB_SEP);
+                } else {
+                    isFirst = false;
+                }
+                Base64.encodeLongToBuffer(this._back_k[i], buffer);
+            }
+        } finally {
+            //free the lock
+            if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
         }
-        //   } finally {
-        //free the lock
-        //    if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
-        //        throw new RuntimeException("CAS Error !!!");
-        //   }
-        //  }
     }
 
     private boolean inLoad = false;
