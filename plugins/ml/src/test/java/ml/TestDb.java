@@ -126,7 +126,7 @@ public class TestDb {
                               });
 
 
-                              final double precision = 0.01;
+                              final double precision = 0.1;
 
 
                               starttime = System.nanoTime();
