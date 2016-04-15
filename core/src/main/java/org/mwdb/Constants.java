@@ -40,7 +40,7 @@ public class Constants extends KConstants {
     public static final byte WORLD_ORDER_CHUNK = 2;
 
     public static final byte KEY_GEN_CHUNK = 3;
-    
+
     /**
      * Node constants
      **/

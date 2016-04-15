@@ -307,28 +307,6 @@ public class MWGResolver implements KResolver {
         }
     }
 
-    private void load(byte[] types, long[] flatKeys, KBuffer[] keys, KCallback<KChunk[]> callback) {
-        MWGResolver selfPointer = this;
-        this._storage.get(keys, new KCallback<KBuffer[]>() {
-            @Override
-            public void on(KBuffer[] payloads) {
-                KChunk[] results = new KChunk[keys.length];
-                for (int i = 0; i < payloads.length; i++) {
-                    keys[i].free(); //free the temp KBuffer
-                    long loopWorld = flatKeys[i * KEY_SIZE];
-                    long loopTime = flatKeys[i * KEY_SIZE + 1];
-                    long loopUuid = flatKeys[i * KEY_SIZE + 2];
-                    byte elemType = types[i];
-                    if (payloads[i] != null) {
-                        results[i] = selfPointer._space.create(elemType, loopWorld, loopTime, loopUuid, payloads[i], null);
-                        selfPointer._space.putAndMark(results[i]);
-                    }
-                }
-                callback.on(results);
-            }
-        });
-    }
-
     @Override
     public KNodeState newState(KNode node, long world, long time) {
 
