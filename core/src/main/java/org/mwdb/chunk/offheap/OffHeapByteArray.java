@@ -53,6 +53,7 @@ public class OffHeapByteArray {
         unsafe.freeMemory(addr);
     }
 
+    /*
     public static long cloneArray(final long srcAddr, final long length) {
         if (Unsafe.DEBUG_MODE) {
             alloc_counter++;
@@ -61,6 +62,6 @@ public class OffHeapByteArray {
         long newAddr = unsafe.allocateMemory(length);
         unsafe.copyMemory(srcAddr, newAddr, length);
         return newAddr;
-    }
+    }*/
 
 }

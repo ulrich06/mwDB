@@ -39,25 +39,38 @@ public class MWGResolver implements KResolver {
 
     @Override
     public void initNode(KNode node, long codeType) {
-        KStateChunk cacheEntry = (KStateChunk) this._space.create(Constants.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
+        KStateChunk cacheEntry_0 = (KStateChunk) this._space.create(Constants.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
         //put and mark
-        this._space.putAndMark(cacheEntry);
+        KStateChunk cacheEntry = (KStateChunk) this._space.putAndMark(cacheEntry_0);
+        if (cacheEntry_0 != cacheEntry) {
+            this._space.freeChunk(cacheEntry_0);
+        }
         //declare dirty now because potentially no insert could be done
         this._space.declareDirty(cacheEntry);
 
         //initiate superTime management
-        KTimeTreeChunk superTimeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
-        superTimeTree = (KTimeTreeChunk) this._space.putAndMark(superTimeTree);
+        KTimeTreeChunk superTimeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
+        KTimeTreeChunk superTimeTree = (KTimeTreeChunk) this._space.putAndMark(superTimeTree_0);
+        if (superTimeTree != superTimeTree_0) {
+            this._space.freeChunk(superTimeTree_0);
+        }
         superTimeTree.insert(node.time());
 
         //initiate time management
-        KTimeTreeChunk timeTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), node.time(), node.id(), null, null);
-        timeTree = (KTimeTreeChunk) this._space.putAndMark(timeTree);
+        KTimeTreeChunk timeTree_0 = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, node.world(), node.time(), node.id(), null, null);
+        KTimeTreeChunk timeTree = (KTimeTreeChunk) this._space.putAndMark(timeTree_0);
+        if (timeTree_0 != timeTree) {
+            this._space.freeChunk(timeTree_0);
+        }
         timeTree.insert(node.time());
 
         //initiate universe management
-        KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id(), null, null);
-        objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder);
+        KWorldOrderChunk objectWorldOrder_0 = (KWorldOrderChunk) this._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id(), null, null);
+        KWorldOrderChunk objectWorldOrder = (KWorldOrderChunk) this._space.putAndMark(objectWorldOrder_0);
+        if (objectWorldOrder_0 != objectWorldOrder) {
+            this._space.freeChunk(objectWorldOrder_0);
+        }
+
         objectWorldOrder.put(node.world(), node.time());
         objectWorldOrder.setExtra(codeType);
         //mark the global
@@ -245,7 +258,7 @@ public class MWGResolver implements KResolver {
                 @Override
                 public void on(KBuffer[] payloads) {
                     KChunk result = null;
-                    if (payloads != null && payloads.length > 0) {
+                    if (payloads.length > 0 && payloads[0] != null) {
                         result = selfPointer._space.create(type, world, time, id, payloads[0], null);
                         selfPointer._space.putAndMark(result);
                     }

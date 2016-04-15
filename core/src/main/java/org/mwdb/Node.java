@@ -19,6 +19,7 @@ public class Node extends AbstractNode {
 
     @Override
     public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+
         KResolver.KNodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -38,6 +39,7 @@ public class Node extends AbstractNode {
         flatQuery.compute();
         //TODO AUTOMATIC UPDATE
         indexMap.put(flatQuery.hash(), nodeToIndex.id());
+
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }
@@ -95,7 +97,7 @@ public class Node extends AbstractNode {
                 selfPointer._resolver.lookup(world, time, foundId[i], new KCallback<KNode>() {
                     @Override
                     public void on(KNode resolvedNode) {
-                        if(resolvedNode != null) {
+                        if (resolvedNode != null) {
                             resolved[nextResolvedTabIndex.getAndIncrement()] = resolvedNode;
                         }
                         waiter.count();
@@ -153,7 +155,7 @@ public class Node extends AbstractNode {
 
     @Override
     public <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback) {
-        find(indexName,time(), world(),query,callback);
+        find(indexName, time(), world(), query, callback);
     }
 
     @Override
@@ -185,11 +187,11 @@ public class Node extends AbstractNode {
             waiter.then(new KCallback() {
                 @Override
                 public void on(Object o) {
-                    if(loopInteger.get() == resolved.length) {
+                    if (loopInteger.get() == resolved.length) {
                         callback.on(resolved);
                     } else {
                         A[] toSend = (A[]) new KNode[loopInteger.get()];
-                        System.arraycopy(resolved,0,toSend,0,toSend.length);
+                        System.arraycopy(resolved, 0, toSend, 0, toSend.length);
                         callback.on(toSend);
                     }
                 }
@@ -201,7 +203,7 @@ public class Node extends AbstractNode {
 
     @Override
     public <A extends KNode> void all(String indexName, KCallback<A[]> callback) {
-        all(indexName,world(),time(),callback);
+        all(indexName, world(), time(), callback);
     }
 
     @Override

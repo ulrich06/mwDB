@@ -297,7 +297,7 @@ public class Graph implements KGraph {
 
     @Override
     public KBuffer newBuffer() {
-         //return Buffer.newOffHeapBuffer();
+        //return Buffer.newOffHeapBuffer();
         return Buffer.newHeapBuffer();
     }
 
@@ -428,7 +428,7 @@ public class Graph implements KGraph {
                         callback.on((A[]) new KNode[0]);
                     }
                 } else {
-                    foundIndex.find(Constants.INDEX_ATTRIBUTE, world,time,query, new KCallback<A[]>() {
+                    foundIndex.find(Constants.INDEX_ATTRIBUTE, world, time, query, new KCallback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();
@@ -452,7 +452,7 @@ public class Graph implements KGraph {
                         callback.on((A[]) new KNode[0]);
                     }
                 } else {
-                    foundIndex.all(Constants.INDEX_ATTRIBUTE, world,time,new KCallback<A[]>() {
+                    foundIndex.all(Constants.INDEX_ATTRIBUTE, world, time, new KCallback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();
@@ -477,7 +477,6 @@ public class Graph implements KGraph {
                 } else {
                     KLongLongMap globalIndexContent;
                     if (globalIndexNodeUnsafe == null) {
-
                         long[] initPreviouslyResolved = new long[6];
                         //init previously resolved values
                         initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
@@ -488,13 +487,15 @@ public class Graph implements KGraph {
                         initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
                         initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
 
-                        KNode globalIndexNode = new Node(world, time, Constants.END_OF_TIME, selfPointer, initPreviouslyResolved);
-                        selfPointer._resolver.initNode(globalIndexNode, Constants.NULL_LONG);
-                        globalIndexContent = (KLongLongMap) globalIndexNode.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
+                        globalIndexNodeUnsafe = new Node(world, time, Constants.END_OF_TIME, selfPointer, initPreviouslyResolved);
+                        selfPointer._resolver.initNode(globalIndexNodeUnsafe, Constants.NULL_LONG);
+                        globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.attMap(Constants.INDEX_ATTRIBUTE, KType.LONG_LONG_MAP);
                     } else {
                         globalIndexContent = (KLongLongMap) globalIndexNodeUnsafe.att(Constants.INDEX_ATTRIBUTE);
                     }
+
                     long indexId = globalIndexContent.get(indexNameCoded);
+                    //globalIndexNodeUnsafe.free();
                     if (indexId == Constants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null

@@ -24,7 +24,7 @@ public class IndexTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(20).build());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(100).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -95,6 +95,7 @@ public class IndexTest {
                     }
                 });
 
+
                 //test the old indexed node
                 graph.find(0, 0, "nodes", "name=MyName", new KCallback<KNode[]>() {
                     @Override
@@ -117,6 +118,7 @@ public class IndexTest {
                     }
                 });
 
+
                 //test potential inversion
                 graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
                     @Override
@@ -128,6 +130,7 @@ public class IndexTest {
                     }
                 });
 
+
                 //unIndex the node @t1
                 graph.unindex("nodes", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
                     @Override
@@ -135,6 +138,7 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
+
 
                 graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
                     @Override
@@ -145,6 +149,7 @@ public class IndexTest {
                     }
                 });
 
+
                 //reIndex
                 graph.index("nodes", node_t1, new String[]{"name", "version"}, new KCallback<Boolean>() {
                     @Override
@@ -152,6 +157,7 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
+
 
                 //should work again
                 graph.find(0, 0, "nodes", "version=1.0,name=MyName", new KCallback<KNode[]>() {
@@ -173,6 +179,7 @@ public class IndexTest {
                         counter[0]++;
                     }
                 });
+
                 node_index.find("children", "name=MyName,version=1.0", new KCallback<KNode[]>() {
                     @Override
                     public void on(KNode[] kNode) {
@@ -189,7 +196,6 @@ public class IndexTest {
                         //end of the test
                     }
                 });
-
 
             }
         });
