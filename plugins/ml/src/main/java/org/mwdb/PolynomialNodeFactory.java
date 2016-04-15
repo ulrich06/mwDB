@@ -12,6 +12,6 @@ public class PolynomialNodeFactory implements KFactory {
 
     @Override
     public KNode create(long world, long time, long id, KGraph graph, long[] initialResolution) {
-        return new PolynomialNode2(world,time,id,graph,initialResolution);
+        return new PolynomialNode(world,time,id,graph,initialResolution);
     }
 }

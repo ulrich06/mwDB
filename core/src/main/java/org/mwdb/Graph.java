@@ -297,7 +297,7 @@ public class Graph implements KGraph {
 
     @Override
     public KBuffer newBuffer() {
-        // return Buffer.newOffHeapBuffer();
+         //return Buffer.newOffHeapBuffer();
         return Buffer.newHeapBuffer();
     }
 

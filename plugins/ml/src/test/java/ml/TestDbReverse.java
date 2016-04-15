@@ -59,10 +59,16 @@ public class TestDbReverse {
         }
 
 
+        System.out.println("Db size: "+eurUsd.size());
         endtime = System.nanoTime();
         res = ((double) (endtime - starttime)) / (1000000000);
         System.out.println("Loaded :" + eurUsd.size() + " values in " + res + " s!");
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
+
+
+        System.out.println(eurUsd.firstKey());
+        System.out.println(eurUsd.lastKey());
+
 
         final KGraph graph = GraphBuilder.builder()
             //    .withOffHeapMemory()
@@ -96,12 +102,8 @@ public class TestDbReverse {
                               polyNode.setPrecision(precision);
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
-                                  if (i % 100000 == 0 /*|| i > 1600000*/) {
+                                  if (i % 1000000 == 0 /*|| i > 1600000*/) {
                                       System.out.println(i);
-                                  }
-
-                                  if(i == 1667999){
-                                      System.out.println("brezak;");
                                   }
 
                                   final long t = iter.next();
@@ -131,6 +133,9 @@ public class TestDbReverse {
                               iter = eurUsd.keySet().iterator();
                               starttime = System.nanoTime();
                               for (int i = 0; i < eurUsd.size(); i++) {
+                                  if (i % 1000000 == 0 /*|| i > 1600000*/) {
+                                      System.out.println(i);
+                                  }
                                   final long t = iter.next();
                                   polyNode.jump(t, new KCallback<KPolynomialNode>() {
                                       @Override
@@ -159,7 +164,8 @@ public class TestDbReverse {
 
                               starttime = System.nanoTime();
                               // KNode normalNode = graph.newNode(0, timestamps.get(0));
-                              KNode normalNode = graph.newNode(0, 0);
+                              KNode normalNode = graph.newNode(0, eurUsd.firstKey());
+                              iter = eurUsd.keySet().iterator();
 
                               for (int i = 0; i < eurUsd.size(); i++) {
                                   if (i % 1000000 == 0) {

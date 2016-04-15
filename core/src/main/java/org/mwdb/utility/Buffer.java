@@ -108,7 +108,7 @@ public class Buffer {
 
             @Override
             public byte[] data() {
-                byte[] copy = new byte[buffer.length];
+                byte[] copy = new byte[writeCursor];
                 System.arraycopy(buffer, 0, copy, 0, writeCursor);
                 return copy;
             }
