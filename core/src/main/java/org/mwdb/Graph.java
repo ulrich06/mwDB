@@ -28,6 +28,8 @@ public class Graph implements KGraph {
 
     private final KLongLongMap _factoryNames;
 
+    public boolean offHeapBuffer = false;
+
     //TODO rest of elements
 
     private Short _prefix = null;
@@ -297,8 +299,11 @@ public class Graph implements KGraph {
 
     @Override
     public KBuffer newBuffer() {
-        //return Buffer.newOffHeapBuffer();
-        return Buffer.newHeapBuffer();
+        if (offHeapBuffer) {
+            return Buffer.newOffHeapBuffer();
+        } else {
+            return Buffer.newHeapBuffer();
+        }
     }
 
     private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Boolean> callback) {

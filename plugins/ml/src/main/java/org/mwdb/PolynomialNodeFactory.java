@@ -2,7 +2,6 @@ package org.mwdb;
 
 import org.mwdb.plugin.KFactory;
 import org.mwdb.polynomial.PolynomialNode;
-import org.mwdb.polynomial.PolynomialNode2;
 
 public class PolynomialNodeFactory implements KFactory {
     @Override

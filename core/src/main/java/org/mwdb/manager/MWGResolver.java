@@ -257,6 +257,7 @@ public class MWGResolver implements KResolver {
             this._storage.get(new KBuffer[]{buffer}, new KCallback<KBuffer[]>() {
                 @Override
                 public void on(KBuffer[] payloads) {
+                    buffer.free();
                     KChunk result = null;
                     if (payloads.length > 0 && payloads[0] != null) {
                         result = selfPointer._space.create(type, world, time, id, payloads[0], null);
@@ -308,6 +309,9 @@ public class MWGResolver implements KResolver {
             this._storage.get(keysToLoad, new KCallback<KBuffer[]>() {
                 @Override
                 public void on(KBuffer[] fromDbBuffers) {
+                    for (int i = 0; i < keysToLoad.length; i++) {
+                        keysToLoad[i].free();
+                    }
                     for (int i = 0; i < fromDbBuffers.length; i++) {
                         if (fromDbBuffers[i] != null) {
                             int reversedIndex = reverseIndex[i];
