@@ -67,7 +67,7 @@ public class TestDb {
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
 
         final KGraph graph = GraphBuilder.builder()
-                //.withOffHeapMemory()
+                .withOffHeapMemory()
                 .withMemorySize(100_000)
                 .withAutoSave(10000)
                 .withStorage(new LevelDBStorage("data"))
@@ -91,7 +91,7 @@ public class TestDb {
 
                               starttime = System.nanoTime();
 
-                              /*
+
                               // KNode normalNode = graph.newNode(0, timestamps.get(0));
                               KNode normalNode = graph.newNode(0, 0);
 
@@ -124,7 +124,7 @@ public class TestDb {
                                       System.out.println("KNode number of timepoints: " + result.length);
                                   }
                               });
-*/
+
 
                               final double precision = 0.01;
 
@@ -161,7 +161,6 @@ public class TestDb {
                               });
 
 
-                              /*
                               final int[] error2 = new int[1];
                               error2[0] = 0;
                               starttime = System.nanoTime();
@@ -194,9 +193,8 @@ public class TestDb {
                               System.out.println("Normal read speed: " + d + " v/s");
                               // System.out.println(error2[0]);
                               ///  System.out.println();
-*/
 
-                              /*
+
                               final int[] error = new int[1];
                               iter = eurUsd.keySet().iterator();
                               starttime = System.nanoTime();
@@ -223,7 +221,7 @@ public class TestDb {
                               d = d / 1000000000;
                               d = eurUsd.size() / d;
                               System.out.println("Polynomial read speed: " + d + " ms");
-*/
+
 
                               // System.out.println(error[0]);
 

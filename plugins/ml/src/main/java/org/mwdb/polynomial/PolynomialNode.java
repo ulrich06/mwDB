@@ -153,24 +153,24 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         int newMaxDegree = Math.min(num, _maxDegree);
         if (deg < newMaxDegree) {
             deg++;
-            int factor=1;
-            double[] times = new double[factor*num + 1];
-            double[] values = new double[factor*num + 1];
+            int factor = 1;
+            double[] times = new double[factor * num + 1];
+            double[] values = new double[factor * num + 1];
             double inc = 0;
             if (num > 1) {
                 inc = ((long) previousState.get(LAST_TIME_KEY));
-                inc = inc / (stp * (factor*num - 1));
+                inc = inc / (stp * (factor * num - 1));
             }
-            for (int i = 0; i < factor*num; i++) {
+            for (int i = 0; i < factor * num; i++) {
                 times[i] = i * inc;
-                values[i] = PolynomialFit.extrapolate(times[i],weight);
+                values[i] = PolynomialFit.extrapolate(times[i], weight);
             }
-            times[factor*num] = (time - timeOrigin) / stp;
-            values[factor*num] = value;
+            times[factor * num] = (time - timeOrigin) / stp;
+            values[factor * num] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
-                weight=pf.getCoef();
+                weight = pf.getCoef();
                 previousState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
                 previousState.set(NB_PAST_KEY, KType.INT, num + 1);
                 previousState.set(LAST_TIME_KEY, KType.LONG, lastTime);
@@ -179,28 +179,28 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         }
 
 
-        long previousTime=timeOrigin+(long)previousState.get(LAST_TIME_KEY);
-        long newstep=time-previousTime;
+        long previousTime = timeOrigin + (long) previousState.get(LAST_TIME_KEY);
+        long newstep = time - previousTime;
         //It does not fit, create a new state
-        KResolver.KNodeState phasedState = graph().resolver().newState(this,world(),previousTime); //force clone
+        KResolver.KNodeState phasedState = graph().resolver().newState(this, world(), previousTime); //force clone
         //put inside
-        double[] times= new double[2];
+        double[] times = new double[2];
         double[] values = new double[2];
-        times[0]=0;
-        times[1]=1;
-        double pt=previousTime-timeOrigin;
-        pt=pt/stp;
-        values[0]=PolynomialFit.extrapolate(pt,weight);
-        values[1]=value;
+        times[0] = 0;
+        times[1] = 1;
+        double pt = previousTime - timeOrigin;
+        pt = pt / stp;
+        values[0] = PolynomialFit.extrapolate(pt, weight);
+        values[1] = value;
 
         maxError = maxErr(precision, 0);
-        if(Math.abs(values[1]-values[0])<=maxError){
+        if (Math.abs(values[1] - values[0]) <= maxError) {
             // degree 0
 
-            weight=new double[1];
-            weight[0]=values[0];
+            weight = new double[1];
+            weight[0] = values[0];
 
-            phasedState.set(PRECISION_KEY,KType.DOUBLE,precision);
+            phasedState.set(PRECISION_KEY, KType.DOUBLE, precision);
             phasedState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
             phasedState.set(NB_PAST_KEY, KType.INT, 2);
             phasedState.set(STEP_KEY, KType.LONG, newstep);
@@ -213,8 +213,8 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
         //Save degree 1
         PolynomialFit pf = new PolynomialFit(1);
         pf.fit(times, values);
-        weight=pf.getCoef();
-        phasedState.set(PRECISION_KEY,KType.DOUBLE,precision);
+        weight = pf.getCoef();
+        phasedState.set(PRECISION_KEY, KType.DOUBLE, precision);
         phasedState.set(WEIGHT_KEY, KType.DOUBLE_ARRAY, weight);
         phasedState.set(NB_PAST_KEY, KType.INT, 2);
         phasedState.set(STEP_KEY, KType.LONG, newstep);
@@ -249,7 +249,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree +2);
+        return precision / Math.pow(2, degree + 2);
     }
 
 
@@ -288,6 +288,37 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
 
     @Override
     public String toString() {
-        return "PolynomialNode{}";
+        StringBuilder builder = new StringBuilder();
+        builder.append("{\"world\":");
+        builder.append(world());
+        builder.append(",\"time\":");
+        builder.append(time());
+        builder.append(",\"id\":");
+        builder.append(id());
+        KResolver.KNodeState state = this._resolver.resolveState(this, true);
+        if (state != null) {
+            builder.append(",\"data\": {");
+            double[] weight = (double[]) state.get(WEIGHT_KEY);
+            if (weight != null) {
+                builder.append("\"polynomial\": \"");
+                for (int i = 0; i < weight.length; i++) {
+                    if (i != 0) {
+                        builder.append("+(");
+                    }
+                    builder.append(weight[i]);
+                    if (i == 1) {
+                        builder.append("*t");
+                    } else if (i > 1) {
+                        builder.append("*t^" + i);
+                    }
+                    if (i != 0) {
+                        builder.append(")");
+                    }
+                }
+                builder.append("\"");
+            }
+            builder.append("}}");
+        }
+        return builder.toString();
     }
 }

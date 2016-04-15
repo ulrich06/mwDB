@@ -28,8 +28,7 @@ public class PolynomialNodeTest {
                 try {
                     BlasMatrixEngine bme = (BlasMatrixEngine) KMatrix.defaultEngine();
                     bme.setBlas(new F2JBlas());
-                }
-                catch (Exception ignored){
+                } catch (Exception ignored) {
 
                 }
 
