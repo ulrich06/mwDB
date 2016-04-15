@@ -17,14 +17,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-/**
- * Created by assaad on 08/04/16.
- */
 public class TestDb {
     public static void main(String[] arg) {
 
-        //String loc = "/Users/duke/Downloads/eurusd-master/";
-        String loc="/Users/assaad/work/github/eurusd/";
+        String loc = "/Users/duke/Downloads/eurusd-master/";
+        //String loc = "/Users/assaad/work/github/eurusd/";
 
        /* Date d=new Date();
         d.setTime(Long.parseLong("991949460000"));*/
@@ -70,10 +67,10 @@ public class TestDb {
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
 
         final KGraph graph = GraphBuilder.builder()
-                .withOffHeapMemory()
-                .withMemorySize(20_000_000)
+                //.withOffHeapMemory()
+                .withMemorySize(100_000)
                 .withAutoSave(10000)
-               // .withStorage(new RocksDBStorage("data"))
+                .withStorage(new LevelDBStorage("data"))
                 .withFactory(new PolynomialNodeFactory())
                 .withScheduler(new NoopScheduler()).
                         build();
@@ -83,29 +80,31 @@ public class TestDb {
                               try {
                                   BlasMatrixEngine bme = (BlasMatrixEngine) KMatrix.defaultEngine();
                                   bme.setBlas(new F2JBlas());
-                              }
-                              catch (Exception ignored){
+                              } catch (Exception ignored) {
 
                               }
 
                               long starttime, endtime;
                               double d;
-
-                              starttime = System.nanoTime();
-                              // KNode normalNode = graph.newNode(0, timestamps.get(0));
-                              KNode normalNode = graph.newNode(0, 0);
                               Iterator<Long> iter = eurUsd.keySet().iterator();
 
+
+                              starttime = System.nanoTime();
+
+                              /*
+                              // KNode normalNode = graph.newNode(0, timestamps.get(0));
+                              KNode normalNode = graph.newNode(0, 0);
+
                               for (int i = 0; i < eurUsd.size(); i++) {
-                 /*   if(i%1000000==0){
-                        System.out.println(i);
-                    }*/
+                                  if (i % 1000000 == 0) {
+                                      System.out.println(i);
+                                  }
                                   final long t = iter.next();
                                   normalNode.jump(t, new KCallback<KNode>() {
                                       @Override
                                       public void on(KNode result) {
                                           try {
-                                              result.attSet("euroUsd", KType.DOUBLE, eurUsd.get(t));
+                                              result.attSet("euroUsd", KType.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
                                           } catch (Exception ex) {
                                               ex.printStackTrace();
                                           }
@@ -125,14 +124,19 @@ public class TestDb {
                                       System.out.println("KNode number of timepoints: " + result.length);
                                   }
                               });
+*/
+
+                              final double precision = 0.01;
+
 
                               starttime = System.nanoTime();
                               PolynomialNode polyNode = (PolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
-                              final double precision = 0.01;
                               polyNode.setPrecision(precision);
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
-
+                                  if (i % 1000000 == 0) {
+                                      System.out.println(i);
+                                  }
                                   final long t = iter.next();
                                   polyNode.jump(t, new KCallback<PolynomialNode>() {
                                       @Override
@@ -148,6 +152,7 @@ public class TestDb {
                               d = eurUsd.size() / d;
                               System.out.println("Polynomial insert speed: " + d + " value/sec");
 
+
                               polyNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
                                   @Override
                                   public void on(long[] result) {
@@ -155,21 +160,23 @@ public class TestDb {
                                   }
                               });
 
-                              final int[] error2=new int[1];
-                              error2[0]=0;
+
+                              /*
+                              final int[] error2 = new int[1];
+                              error2[0] = 0;
                               starttime = System.nanoTime();
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
-                 /*   if(i%1000000==0){
-                        System.out.println(i);
-                    }*/
+                                  if (i % 1000000 == 0) {
+                                      System.out.println(i);
+                                  }
                                   final long t = iter.next();
                                   normalNode.jump(t, new KCallback<KNode>() {
                                       @Override
                                       public void on(KNode result) {
                                           try {
-                                              double d = (double) result.att("euroUsd");
-                                              if (Math.abs(d - eurUsd.get(t)) > precision) {
+                                              double[] d = (double[]) result.att("euroUsd");
+                                              if (Math.abs(d[0] - eurUsd.get(t)) > precision) {
                                                   error2[0]++;
                                                   //System.out.println("Error " + d + " " + euros.get(i1));
                                               }
@@ -184,18 +191,18 @@ public class TestDb {
                               d = (endtime - starttime);
                               d = d / 1000000000;
                               d = eurUsd.size() / d;
-                              System.out.println("Normal read speed: " + d + " ms");
-                             // System.out.println(error2[0]);
-                            ///  System.out.println();
+                              System.out.println("Normal read speed: " + d + " v/s");
+                              // System.out.println(error2[0]);
+                              ///  System.out.println();
+*/
 
-
-
-                              final int[] error=new int[1];
+                              /*
+                              final int[] error = new int[1];
                               iter = eurUsd.keySet().iterator();
                               starttime = System.nanoTime();
                               for (int i = 0; i < eurUsd.size(); i++) {
                                   final long t = iter.next();
-                                   polyNode.jump(t, new KCallback<KPolynomialNode>() {
+                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
                                       @Override
                                       public void on(KPolynomialNode result) {
                                           try {
@@ -216,7 +223,9 @@ public class TestDb {
                               d = d / 1000000000;
                               d = eurUsd.size() / d;
                               System.out.println("Polynomial read speed: " + d + " ms");
-                             // System.out.println(error[0]);
+*/
+
+                              // System.out.println(error[0]);
 
 
                               graph.disconnect(new KCallback<Boolean>() {

@@ -233,18 +233,26 @@ public class MWGResolver implements KResolver {
             callback.on(null);
             return;
         }
+        final MWGResolver selfPointer = this;
         KChunk cached = this._space.getAndMark(type, world, time, id);
         if (cached != null) {
             callback.on(cached);
         } else {
             KBuffer buffer = _graph.newBuffer();
             Buffer.keyToBuffer(buffer, type, world, time, id);
-            load(new byte[]{type}, new long[]{world, time, id}, new KBuffer[]{buffer}, new KCallback<KChunk[]>() {
+
+            this._storage.get(new KBuffer[]{buffer}, new KCallback<KBuffer[]>() {
                 @Override
-                public void on(KChunk[] loadedElements) {
-                    callback.on(loadedElements[0]);
+                public void on(KBuffer[] payloads) {
+                    KChunk result = null;
+                    if (payloads != null && payloads.length > 0) {
+                        result = selfPointer._space.create(type, world, time, id, payloads[0], null);
+                        selfPointer._space.putAndMark(result);
+                    }
+                    callback.on(result);
                 }
             });
+
         }
     }
 
@@ -272,29 +280,25 @@ public class MWGResolver implements KResolver {
         if (nbElem == 0) {
             callback.on(result);
         } else {
-            final long[] keysToLoadFlat = new long[nbElem * KEY_SIZE];
             final KBuffer[] keysToLoad = new KBuffer[nbElem];
-            final byte[] typesToLoad = new byte[nbElem];
+            final int[] reverseIndex = new int[nbElem];
             int lastInsertedIndex = 0;
             for (int i = 0; i < nbKeys; i++) {
                 if (toLoadIndexes[i]) {
-                    keysToLoadFlat[lastInsertedIndex] = keys[i * KEY_SIZE];
-                    keysToLoadFlat[lastInsertedIndex + 1] = keys[i * KEY_SIZE + 1];
-                    keysToLoadFlat[lastInsertedIndex + 2] = keys[i * KEY_SIZE + 2];
-                    typesToLoad[lastInsertedIndex] = types[i];
+                    reverseIndex[lastInsertedIndex] = i;
                     keysToLoad[lastInsertedIndex] = _graph.newBuffer();
                     Buffer.keyToBuffer(keysToLoad[lastInsertedIndex], types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
-                    lastInsertedIndex = lastInsertedIndex + 3;
+                    lastInsertedIndex = lastInsertedIndex + 1;
                 }
             }
-            load(typesToLoad, keysToLoadFlat, keysToLoad, new KCallback<KChunk[]>() {
+            final MWGResolver selfPointer = this;
+            this._storage.get(keysToLoad, new KCallback<KBuffer[]>() {
                 @Override
-                public void on(KChunk[] loadedElements) {
-                    int currentIndexToMerge = 0;
-                    for (int i = 0; i < nbKeys; i++) {
-                        if (toLoadIndexes[i]) {
-                            result[i] = loadedElements[currentIndexToMerge];
-                            currentIndexToMerge++;
+                public void on(KBuffer[] fromDbBuffers) {
+                    for (int i = 0; i < fromDbBuffers.length; i++) {
+                        if (fromDbBuffers[i] != null) {
+                            int reversedIndex = reverseIndex[i];
+                            result[reversedIndex] = selfPointer._space.create(types[reversedIndex], keys[reversedIndex * KEY_SIZE], keys[reversedIndex * KEY_SIZE + 1], keys[reversedIndex * KEY_SIZE + 2], fromDbBuffers[i], null);
                         }
                     }
                     callback.on(result);
@@ -345,6 +349,12 @@ public class MWGResolver implements KResolver {
             if (previousResolveds == null) {
                 throw new RuntimeException(deadNodeError);
             }
+
+
+            if (time < previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC]) {
+                throw new RuntimeException("New state cannot be used to create state before the previously resolved state");
+            }
+
             long nodeId = node.id();
 
             //check if anything as moved

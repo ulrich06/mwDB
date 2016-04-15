@@ -223,55 +223,28 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void save(KBuffer buffer) {
-        //OffHeap lock
+    public synchronized final void save(KBuffer buffer) {
+        //lock and load from main memory
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         try {
             ptrConsistency();
 
-            long rootElem = OffHeapLongArray.get(addr, INDEX_ROOT_ELEM);
-            if (rootElem == Constants.OFFHEAP_NULL_PTR) {
-                //Free OffHeap lock
-                if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
-                    throw new RuntimeException("CAS Error !!!");
-                }
-                buffer.write((byte) '0');
+            if (OffHeapLongArray.get(addr, INDEX_ROOT_ELEM) == Constants.OFFHEAP_NULL_PTR) {
                 return;
             }
-            long treeSize = OffHeapLongArray.get(addr, INDEX_SIZE);
-            Base64.encodeLongToBuffer(OffHeapLongArray.get(addr, INDEX_SIZE), buffer);
-            buffer.write(Constants.CHUNK_SUB_SEP);
-            Base64.encodeLongToBuffer(rootElem, buffer);
 
-            for (long i = 0; i < treeSize; i++) {
-                long parentIndex = OffHeapLongArray.get(metaPtr, (i * META_SIZE) + 2);
-                if (parentIndex != -1 || i == rootElem) {
-                    boolean isOnLeft = false;
-                    if (parentIndex != -1) {
-                        isOnLeft = OffHeapLongArray.get(metaPtr, parentIndex * META_SIZE) == i;
-                    }
-                    if (!color(i)) {
-                        if (isOnLeft) {
-                            buffer.write(BLACK_LEFT);
-                        } else {
-                            buffer.write(BLACK_RIGHT);
-                        }
-                    } else {//red
-                        if (isOnLeft) {
-                            buffer.write(RED_LEFT);
-                        } else {
-                            buffer.write(RED_RIGHT);
-                        }
-                    }
-                    Base64.encodeLongToBuffer(OffHeapLongArray.get(kPtr, i), buffer);
+            long treeSize = OffHeapLongArray.get(addr, INDEX_SIZE);
+            boolean isFirst = true;
+            for (int i = 0; i < treeSize; i++) {
+                if (!isFirst) {
                     buffer.write(Constants.CHUNK_SUB_SEP);
-                    if (parentIndex != -1) {
-                        Base64.encodeLongToBuffer(parentIndex, buffer);
-                    }
+                } else {
+                    isFirst = false;
                 }
+                Base64.encodeLongToBuffer(OffHeapLongArray.get(kPtr, i), buffer);
             }
+
         } finally {
-            //Free OffHeap lock
             if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
                 throw new RuntimeException("CAS Error !!!");
             }
@@ -402,17 +375,19 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     private void internal_set_dirty() {
-        long previousMagic;
-        long nextMagic;
-        do {
-            previousMagic = OffHeapLongArray.get(addr, INDEX_MAGIC);
-            nextMagic = previousMagic + 1;
-        } while (!OffHeapLongArray.compareAndSwap(addr, INDEX_MAGIC, previousMagic, nextMagic));
+        if (!inLoad) {
+            long previousMagic;
+            long nextMagic;
+            do {
+                previousMagic = OffHeapLongArray.get(addr, INDEX_MAGIC);
+                nextMagic = previousMagic + 1;
+            } while (!OffHeapLongArray.compareAndSwap(addr, INDEX_MAGIC, previousMagic, nextMagic));
 
 
-        if (_listener != null) {
-            if ((OffHeapLongArray.get(addr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                _listener.declareDirty(this);
+            if (_listener != null) {
+                if ((OffHeapLongArray.get(addr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                    _listener.declareDirty(this);
+                }
             }
         }
     }
@@ -617,107 +592,44 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
         }
     }
 
-    private void load(KBuffer buffer) {
+    private boolean inLoad = false;
 
-        if (buffer == null || buffer.size() == 0) {
+    private void load(final KBuffer buffer) {
 
-            long capacity = Constants.MAP_INITIAL_CAPACITY;
+        long capacity = Constants.MAP_INITIAL_CAPACITY;
 
-            //init k array
-            kPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY);
-            OffHeapLongArray.set(addr, INDEX_K, kPtr);
-            //init meta array
-            metaPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY * META_SIZE);
-            OffHeapLongArray.set(addr, INDEX_META, metaPtr);
-            //init colors array
-            colorsPtr = OffHeapByteArray.allocate(Constants.MAP_INITIAL_CAPACITY);
-            OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
-
-            OffHeapLongArray.set(addr, INDEX_LOCK, 0);
-            OffHeapLongArray.set(addr, INDEX_FLAGS, 0);
-            OffHeapLongArray.set(addr, INDEX_SIZE, 0);
-            OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
-            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-            OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
-
-            return;
-        }
-
-        int initPos = 0;
-        int cursor = 0;
-        while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-            cursor++;
-        }
-        long newSize = 0;
-        if (buffer.read(cursor) == ',') {
-            newSize = Base64.decodeToIntWithBounds(buffer, initPos, cursor);
-            cursor++;
-            initPos = cursor;
-        }
-        while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-            cursor++;
-        }
-        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, Base64.decodeToLongWithBounds(buffer, initPos, cursor));
-
-
-        long capacity = newSize * 2;
         //init k array
-        kPtr = OffHeapLongArray.allocate(capacity);
+        kPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY);
         OffHeapLongArray.set(addr, INDEX_K, kPtr);
         //init meta array
-        metaPtr = OffHeapLongArray.allocate(capacity * META_SIZE);
+        metaPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY * META_SIZE);
         OffHeapLongArray.set(addr, INDEX_META, metaPtr);
         //init colors array
-        colorsPtr = OffHeapByteArray.allocate(capacity);
+        colorsPtr = OffHeapByteArray.allocate(Constants.MAP_INITIAL_CAPACITY);
         OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
 
         OffHeapLongArray.set(addr, INDEX_LOCK, 0);
-        OffHeapLongArray.set(addr, INDEX_SIZE, newSize);
-        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
-        OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
         OffHeapLongArray.set(addr, INDEX_FLAGS, 0);
+        OffHeapLongArray.set(addr, INDEX_SIZE, 0);
+        OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
+        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+        OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
 
+        inLoad = true;
 
-        int currentLoopIndex = 0;
-        while (cursor < buffer.size()) {
-            while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-                cursor++;
+        long cursor = 0;
+        long previous = 0;
+        long payloadSize = buffer.size();
+        while (cursor < payloadSize) {
+            byte current = buffer.read(cursor);
+            if (current == Constants.CHUNK_SUB_SEP) {
+                internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                previous = cursor + 1;
             }
-            if (cursor < buffer.size()) {
-                byte elem = buffer.read(cursor);
-                boolean isOnLeft = false;
-                if (elem == BLACK_LEFT || elem == RED_LEFT) {
-                    isOnLeft = true;
-                }
-                if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
-                    setColor(currentLoopIndex, false);
-                } else {
-                    setColor(currentLoopIndex, true);
-                }
-                cursor++;
-                int beginChunk = cursor;
-                while (cursor < buffer.size() && buffer.read(cursor) != ',') {
-                    cursor++;
-                }
-                long loopKey = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
-                setKey(currentLoopIndex, loopKey);
-                cursor++;
-                beginChunk = cursor;
-                while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-                    cursor++;
-                }
-                if (cursor > beginChunk) {
-                    long parentRaw = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
-                    setParent(currentLoopIndex, parentRaw);
-                    if (isOnLeft) {
-                        setLeft(parentRaw, currentLoopIndex);
-                    } else {
-                        setRight(parentRaw, currentLoopIndex);
-                    }
-                }
-                currentLoopIndex++;
-            }
+            cursor++;
         }
+        internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        inLoad = false;
     }
 
 }

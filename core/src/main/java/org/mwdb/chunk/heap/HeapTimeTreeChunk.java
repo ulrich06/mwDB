@@ -30,7 +30,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     private volatile int _size = 0;
 
     private volatile int[] _back_meta;
-    private volatile long[] _back_kv;
+    private volatile long[] _back_k;
     private volatile boolean[] _back_colors;
 
     private volatile int _lock;
@@ -67,7 +67,11 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         this._marks = 0;
         this._magic = 0;
         this._lock = 0;
-        load(initialPayload);
+        try {
+            load(initialPayload);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -156,44 +160,48 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     public synchronized final void save(KBuffer buffer) {
         //lock and load from main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
-
-        if (_root_index == -1) {
-            buffer.write((byte) '0');
-        }
-        Base64.encodeLongToBuffer((long) _size, buffer);
-        buffer.write(Constants.CHUNK_SUB_SEP);
-        Base64.encodeLongToBuffer((long) _root_index, buffer);
-        for (int i = 0; i < _back_meta.length / META_SIZE; i++) {
-            int parentIndex = _back_meta[(i * META_SIZE) + 2];
-            if (parentIndex != -1 || i == _root_index) {
-                boolean isOnLeft = false;
-                if (parentIndex != -1) {
-                    isOnLeft = _back_meta[parentIndex * META_SIZE] == i;
+        try {
+            if (_root_index == -1) {
+                return;
+            }
+            boolean isFirst = true;
+            for (int i = 0; i < _size; i++) {
+                if (!isFirst) {
+                    buffer.write(Constants.CHUNK_SUB_SEP);
+                } else {
+                    isFirst = false;
                 }
-                if (!color(i)) {
-                    if (isOnLeft) {
-                        buffer.write(BLACK_LEFT);
-                    } else {
-                        buffer.write(BLACK_RIGHT);
-                    }
-                } else {//red
-                    if (isOnLeft) {
-                        buffer.write(RED_LEFT);
-                    } else {
-                        buffer.write(RED_RIGHT);
-                    }
-                }
-                Base64.encodeLongToBuffer(_back_kv[i], buffer);
-                buffer.write(Constants.CHUNK_SUB_SEP);
-                if (parentIndex != -1) {
-                    Base64.encodeIntToBuffer(parentIndex, buffer);
-                }
+                Base64.encodeLongToBuffer(this._back_k[i], buffer);
+            }
+        } finally {
+            //free the lock
+            if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
             }
         }
-        //free the lock
-        if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
-            throw new RuntimeException("CAS Error !!!");
+    }
+
+    private boolean inLoad = false;
+
+    private void load(final KBuffer buffer) {
+        if (buffer == null || buffer.size() == 0) {
+            return;
         }
+        _size = 0;
+        inLoad = true;
+        long cursor = 0;
+        long previous = 0;
+        long payloadSize = buffer.size();
+        while (cursor < payloadSize) {
+            byte current = buffer.read(cursor);
+            if (current == Constants.CHUNK_SUB_SEP) {
+                internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                previous = cursor + 1;
+            }
+            cursor++;
+        }
+        internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        inLoad = false;
     }
 
     @Override
@@ -241,11 +249,11 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         //lock and load from main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
 
-        long[] previousValue = _back_kv;
+        long[] previousValue = _back_k;
         //reset the state
-        _back_kv = new long[_back_kv.length];
-        _back_meta = new int[_back_kv.length * META_SIZE];
-        _back_colors = new boolean[_back_kv.length];
+        _back_k = new long[_back_k.length];
+        _back_meta = new int[_back_k.length * META_SIZE];
+        _back_colors = new boolean[_back_k.length];
         _root_index = -1;
         int _previousSize = _size;
         _size = 0;
@@ -266,7 +274,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     private void allocate(int capacity) {
         _back_meta = new int[capacity * META_SIZE];
-        _back_kv = new long[capacity];
+        _back_k = new long[capacity];
         _back_colors = new boolean[capacity];
         _threshold = (int) (capacity * Constants.MAP_LOAD_FACTOR);
     }
@@ -274,8 +282,8 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     private void reallocate(int newCapacity) {
         _threshold = (int) (newCapacity * Constants.MAP_LOAD_FACTOR);
         long[] new_back_kv = new long[newCapacity];
-        if (_back_kv != null) {
-            System.arraycopy(_back_kv, 0, new_back_kv, 0, _size);
+        if (_back_k != null) {
+            System.arraycopy(_back_k, 0, new_back_kv, 0, _size);
         }
         boolean[] new_back_colors = new boolean[newCapacity];
         if (_back_colors != null) {
@@ -292,7 +300,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
             }
         }
         _back_meta = new_back_meta;
-        _back_kv = new_back_kv;
+        _back_k = new_back_kv;
         _back_colors = new_back_colors;
     }
 
@@ -300,22 +308,22 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back_kv[p_currentIndex];
+        return _back_k[p_currentIndex];
     }
 
     private void setKey(int p_currentIndex, long p_paramIndex) {
-        _back_kv[p_currentIndex] = p_paramIndex;
+        _back_k[p_currentIndex] = p_paramIndex;
     }
 
     protected final long value(int p_currentIndex) {
         if (p_currentIndex == -1) {
             return -1;
         }
-        return _back_kv[(p_currentIndex) + 1];
+        return _back_k[(p_currentIndex) + 1];
     }
 
     private void setValue(int p_currentIndex, long p_paramIndex) {
-        _back_kv[(p_currentIndex) + 1] = p_paramIndex;
+        _back_k[(p_currentIndex) + 1] = p_paramIndex;
     }
 
     private int left(int p_currentIndex) {
@@ -582,84 +590,6 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    private void load(KBuffer buffer) {
-        if (buffer == null || buffer.size() == 0) {
-            return;
-        }
-        int initPos = 0;
-        int cursor = 0;
-        while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-            cursor++;
-        }
-        if (buffer.read(cursor) == ',') {//className to parse
-            _size = Base64.decodeToIntWithBounds(buffer, initPos, cursor);
-            cursor++;
-            initPos = cursor;
-        }
-        while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-            cursor++;
-        }
-        _root_index = Base64.decodeToIntWithBounds(buffer, initPos, cursor);
-        allocate(_size);
-        for (int i = 0; i < _size; i++) {
-            int offsetI = i * META_SIZE;
-            _back_meta[offsetI] = -1;
-            _back_meta[offsetI + 1] = -1;
-            _back_meta[offsetI + 2] = -1;
-        }
-        int currentLoopIndex = 0;
-        while (cursor < buffer.size()) {
-            while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-                cursor++;
-            }
-            if (cursor < buffer.size()) {
-                byte elem = buffer.read(cursor);
-                boolean isOnLeft = false;
-                if (elem == BLACK_LEFT || elem == RED_LEFT) {
-                    isOnLeft = true;
-                }
-                if (elem == BLACK_LEFT || elem == BLACK_RIGHT) {
-                    setColor(currentLoopIndex, false);
-                } else {
-                    setColor(currentLoopIndex, true);
-                }
-                cursor++;
-                int beginChunk = cursor;
-                while (cursor < buffer.size() && buffer.read(cursor) != ',') {
-                    cursor++;
-                }
-                long loopKey = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
-                setKey(currentLoopIndex, loopKey);
-                cursor++;
-                beginChunk = cursor;
-                while (cursor < buffer.size() && buffer.read(cursor) != ',' && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-                    cursor++;
-                }
-                if (cursor > beginChunk) {
-                    int parentRaw = Base64.decodeToIntWithBounds(buffer, beginChunk, cursor);
-                    setParent(currentLoopIndex, parentRaw);
-                    if (isOnLeft) {
-                        setLeft(parentRaw, currentLoopIndex);
-                    } else {
-                        setRight(parentRaw, currentLoopIndex);
-                    }
-                }
-                if (cursor < buffer.size() && buffer.read(cursor) == ',') {
-                    cursor++;
-                    beginChunk = cursor;
-                    while (cursor < buffer.size() && buffer.read(cursor) != BLACK_LEFT && buffer.read(cursor) != BLACK_RIGHT && buffer.read(cursor) != RED_LEFT && buffer.read(cursor) != RED_RIGHT) {
-                        cursor++;
-                    }
-                    if (cursor > beginChunk) {
-                        long currentValue = Base64.decodeToLongWithBounds(buffer, beginChunk, cursor);
-                        setValue(currentLoopIndex, currentValue);
-                    }
-                }
-                currentLoopIndex++;
-            }
-        }
-    }
-
     private void internal_insert(long p_key) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
@@ -715,15 +645,17 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     }
 
     private void internal_set_dirty() {
-        long magicBefore;
-        long magicAfter;
-        do {
-            magicBefore = _magic;
-            magicAfter = magicBefore + 1;
-        } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
-        if (_listener != null) {
-            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                _listener.declareDirty(this);
+        if (!inLoad) {
+            long magicBefore;
+            long magicAfter;
+            do {
+                magicBefore = _magic;
+                magicAfter = magicBefore + 1;
+            } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
+            if (_listener != null) {
+                if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                    _listener.declareDirty(this);
+                }
             }
         }
     }

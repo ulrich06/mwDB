@@ -32,6 +32,8 @@ public class TimeTreeTest implements KChunkListener {
         saveLoad(factory);
         massiveTest(factory);
         emptyHalf(factory);
+        //savePrint(factory);
+
     }
 
     @Test
@@ -62,6 +64,22 @@ public class TimeTreeTest implements KChunkListener {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
 
     }
+
+    /*
+    private void savePrint(KTimeTreeChunkFactory factory) {
+        KTimeTreeChunk tree = factory.create(null);
+        int nbElements = 10;
+        Random random = new Random();
+        for (int i = 0; i < nbElements; i++) {
+            tree.insert(random.nextLong());
+        }
+        KBuffer buffer = Buffer.newOffHeapBuffer();
+        tree.save(buffer);
+
+        System.out.println(new String(buffer.data()));
+
+    }*/
+
 
     private void emptyHalf(KTimeTreeChunkFactory factory) {
         nbCount = 0;
@@ -143,7 +161,7 @@ public class TimeTreeTest implements KChunkListener {
 
         KBuffer buffer = Buffer.newOffHeapBuffer();
         tree.save(buffer);
-        Assert.assertTrue(compareWithString(buffer, "G,C{A,C]C,}E,C"));
+        Assert.assertTrue(compareWithString(buffer, "A,C,E"));
         Assert.assertTrue(tree.size() == 3);
 
         KTimeTreeChunk tree2 = factory.create(buffer);

@@ -28,7 +28,7 @@ public interface KTraversal {
     KTraversal values(String name);
 
 
-    KTraversal map(String name);
+    KTraversal map();
 
     KTraversal flatMap(String name);
 
