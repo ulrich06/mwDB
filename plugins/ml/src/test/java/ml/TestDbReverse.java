@@ -5,7 +5,6 @@ import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
 import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
 import org.mwdb.polynomial.KPolynomialNode;
-import org.mwdb.polynomial.PolynomialNode;
 import org.mwdb.task.NoopScheduler;
 
 import java.io.BufferedReader;
@@ -66,13 +65,14 @@ public class TestDbReverse {
         // System.out.println("Loaded :" + size + " values in " + res + " s!");
 
         final KGraph graph = GraphBuilder.builder()
-                .withOffHeapMemory()
+            //    .withOffHeapMemory()
                 .withMemorySize(100_000)
                 .withAutoSave(10000)
                 .withStorage(new LevelDBStorage("data"))
                 .withFactory(new PolynomialNodeFactory())
                 .withScheduler(new NoopScheduler()).
                         build();
+
         graph.connect(new KCallback<Boolean>() {
                           @Override
                           public void on(Boolean result) {
@@ -88,23 +88,26 @@ public class TestDbReverse {
                               Iterator<Long> iter = eurUsd.keySet().iterator();
 
 
-
-
                               final double precision = 0.01;
 
 
                               starttime = System.nanoTime();
-                              PolynomialNode polyNode = (PolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
+                              KPolynomialNode polyNode = (KPolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
                               polyNode.setPrecision(precision);
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
-                                  if (i % 1000000 == 0) {
+                                  if (i % 100000 == 0 /*|| i > 1600000*/) {
                                       System.out.println(i);
                                   }
+
+                                  if(i == 1667999){
+                                      System.out.println("brezak;");
+                                  }
+
                                   final long t = iter.next();
-                                  polyNode.jump(t, new KCallback<PolynomialNode>() {
+                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
                                       @Override
-                                      public void on(PolynomialNode result) {
+                                      public void on(KPolynomialNode result) {
                                           result.set(eurUsd.get(t));
                                           result.free();
                                       }
@@ -222,7 +225,6 @@ public class TestDbReverse {
                               // System.out.println(error2[0]);
                               ///  System.out.println();
 
-                              
 
                               graph.disconnect(new KCallback<Boolean>() {
                                   @Override

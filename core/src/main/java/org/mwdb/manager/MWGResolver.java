@@ -328,7 +328,6 @@ public class MWGResolver implements KResolver {
                 throw new RuntimeException(deadNodeError);
             }
 
-
             if (time < previousResolveds[Constants.PREVIOUS_RESOLVED_TIME_MAGIC]) {
                 throw new RuntimeException("New state cannot be used to create state before the previously resolved state");
             }
@@ -345,8 +344,11 @@ public class MWGResolver implements KResolver {
             }
 
             //first we create and insert the empty state
-            resultState = this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
-            resultState = _space.putAndMark(resultState);
+            KChunk resultState_0 = this._space.create(Constants.STATE_CHUNK, world, time, nodeId, null, null);
+            resultState = _space.putAndMark(resultState_0);
+            if (resultState_0 != resultState) {
+                _space.freeChunk(resultState_0);
+            }
 
             if (previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] == world || nodeWorldOrder.get(world) != Constants.NULL_LONG) {
 
