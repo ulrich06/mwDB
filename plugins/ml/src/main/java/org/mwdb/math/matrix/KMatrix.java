@@ -164,7 +164,7 @@ public class KMatrix {
 
 
     public static KMatrix multiply(KMatrix matA, KMatrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(KTransposeType.NOTRANSPOSE, 1, matA, KTransposeType.NOTRANSPOSE, 1, matB);
+        return _defaultEngine.multiplyTransposeAlphaBeta(KTransposeType.NOTRANSPOSE, 1d, matA, KTransposeType.NOTRANSPOSE, 0d, matB);
     }
 
     public static KMatrix multiplyTransposeAlphaBeta(KTransposeType transA, double alpha, KMatrix matA, KTransposeType transB, double beta, KMatrix matB) {

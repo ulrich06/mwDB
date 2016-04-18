@@ -1,29 +1,24 @@
 package org.mwdb.math.matrix.blassolver.blas;
 
-import org.mwdb.math.matrix.KTransposeType;
-import static jcuda.jcublas.JCublas2.*;
-import static jcuda.runtime.JCuda.*;
-
-import jcuda.Sizeof;
-import jcuda.jcublas.*;
 import jcuda.Pointer;
+import jcuda.Sizeof;
+import jcuda.jcublas.JCublas;
+import org.mwdb.math.matrix.KTransposeType;
 
-
-/**
- * Created by assaad on 18/04/16.
- */
 public class CudaBlas implements KBlas {
-    private cublasHandle handle;
 
-    public CudaBlas(){
-        connect();
+    public CudaBlas() {
+        //connect();
     }
 
-    private static int transTypeToInt(KTransposeType type) {
+    private static final char TRANSPOSE_TYPE_NOTRANSPOSE = 'n';
+    private static final char TRANSPOSE_TYPE_TRANSPOSE = 't';
+
+    private static char transTypeToChar(KTransposeType type) {
         if (type.equals(KTransposeType.NOTRANSPOSE)) {
-            return cublasOperation.CUBLAS_OP_N;
+            return TRANSPOSE_TYPE_NOTRANSPOSE;
         } else if (type.equals(KTransposeType.TRANSPOSE)) {
-            return cublasOperation.CUBLAS_OP_T;
+            return TRANSPOSE_TYPE_TRANSPOSE;
         }
         return '0';
     }
@@ -31,33 +26,41 @@ public class CudaBlas implements KBlas {
     @Override
     public void dgemm(KTransposeType transA, KTransposeType transB, int m, int n, int k, double alpha, double[] matA, int offsetA, int ldA, double[] matB, int offsetB, int ldB, double beta, double[] matC, int offsetC, int ldC) {
         // Allocate memory on the device
+        JCublas.cublasInit();
+
+
         Pointer d_A = new Pointer();
         Pointer d_B = new Pointer();
         Pointer d_C = new Pointer();
-        cudaMalloc(d_A, matA.length * Sizeof.DOUBLE);
-        cudaMalloc(d_B, matB.length * Sizeof.DOUBLE);
-        cudaMalloc(d_C, matC.length * Sizeof.DOUBLE);
+        JCublas.cublasAlloc(matA.length, Sizeof.DOUBLE, d_A);
+        JCublas.cublasAlloc(matB.length, Sizeof.DOUBLE, d_B);
+        JCublas.cublasAlloc(matC.length, Sizeof.DOUBLE, d_C);
 
         // Copy the memory from the host to the device
-        JCublas2.cublasSetVector(matA.length, Sizeof.DOUBLE, Pointer.to(matA), 1, d_A, 1);
-        JCublas2.cublasSetVector(matB.length, Sizeof.DOUBLE, Pointer.to(matB), 1, d_B, 1);
-        JCublas2.cublasSetVector(matC.length, Sizeof.DOUBLE, Pointer.to(matC), 1, d_C, 1);
+        JCublas.cublasSetVector(matA.length, Sizeof.DOUBLE, Pointer.to(matA), 1, d_A, 1);
+        JCublas.cublasSetVector(matB.length, Sizeof.DOUBLE, Pointer.to(matB), 1, d_B, 1);
+        JCublas.cublasSetVector(matC.length, Sizeof.DOUBLE, Pointer.to(matC), 1, d_C, 1);
 
         // Execute sgemm
-        Pointer pAlpha = Pointer.to(new double[]{alpha});
-        Pointer pBeta = Pointer.to(new double[]{beta});
-        cublasDgemm(handle, transTypeToInt(transA), transTypeToInt(transB), m, n, k,
-                pAlpha, d_A, ldA, d_B, ldB, pBeta, d_C, ldC);
+        JCublas.cublasDgemm(transTypeToChar(transA), transTypeToChar(transB), m, n, k, alpha, d_A, ldA, d_B, ldB, beta, d_C, ldC);
+
 
         // Copy the result from the device to the host
-        JCublas2.cublasGetVector(matC.length, Sizeof.DOUBLE, d_C, 1, Pointer.to(matC), 1);
+        JCublas.cublasGetVector(matC.length, Sizeof.DOUBLE, d_C, 1, Pointer.to(matC), 1);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // Clean up
-        cudaFree(d_A);
-        cudaFree(d_B);
-        cudaFree(d_C);
-        cudaFree(pAlpha);
-        cudaFree(pBeta);
+        JCublas.cublasFree(d_A);
+        JCublas.cublasFree(d_B);
+        JCublas.cublasFree(d_C);
+
+        JCublas.cublasShutdown();
+
     }
 
     @Override
@@ -91,22 +94,13 @@ public class CudaBlas implements KBlas {
     }
 
 
-
     @Override
     public void connect() {
-        JCublas.initialize();
-        JCublas2.initialize();
-        JCublas.setExceptionsEnabled(true);
-        JCublas2.setExceptionsEnabled(true);
-        handle = new cublasHandle();
-        cublasCreate(handle);
-        jcuda.jcusolver.JCusolver.initialize();
-
-
+       // JCublas.cublasInit();
     }
 
     @Override
     public void disconnect() {
-
+      //  JCublas.cublasShutdown();
     }
 }
