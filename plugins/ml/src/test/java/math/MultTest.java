@@ -55,8 +55,7 @@ public class MultTest {
         System.out.println("Netlib mult: " + d + " ms");
 
 
-
-        blas=new F2JBlas();
+        blas = new F2JBlas();
         blasengine.setBlas(blas);
         startTime = System.nanoTime();
         KMatrix matF2J = KMatrix.multiply(matA, matB);
@@ -66,14 +65,14 @@ public class MultTest {
         System.out.println("F2J mult: " + d + " ms");
 
 
-       /* blas=new CudaBlas();
+        blas = new CudaBlas();
         blasengine.setBlas(blas);
         startTime = System.nanoTime();
         KMatrix matCuda = KMatrix.multiply(matA, matB);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Cuda mult: " + d + " ms");*/
+        System.out.println("Cuda mult: " + d + " ms");
 
 
         startTime = System.nanoTime();
@@ -89,7 +88,7 @@ public class MultTest {
             for (int j = 0; j < p; j++) {
                 Assert.assertTrue(Math.abs(matNetlib.get(i, j) - matD.get(i, j)) < eps);
                 Assert.assertTrue(Math.abs(matF2J.get(i, j) - matD.get(i, j)) < eps);
-               // Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
+                Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
             }
         }
     }

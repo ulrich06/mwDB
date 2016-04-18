@@ -1,25 +1,25 @@
 package org.mwdb.ml;
 
+import org.mwdb.AbstractNode;
+import org.mwdb.KCallback;
+import org.mwdb.KGraph;
 import org.mwdb.KNode;
 
 import java.util.Arrays;
 import java.util.Random;
 
-/**
- * Created by andre on 3/22/2016.
- */
-public class KMeansNode extends AbstractMLNode{
+public class KMeansNode extends AbstractNode {
 
-    public KMeansNode(KNode p_rootNode) {
-        super(p_rootNode);
+    public KMeansNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution) {
+        super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
     //TODO That should be configurable
-    private static double distance(double[] vector1, double[] vector2){
+    private static double distance(double[] vector1, double[] vector2) {
         //TODO Skip assertions for now
         double result = 0;
-        for (int i=0;i<vector1.length;i++){
-            result += (vector1[i]-vector2[i])*(vector1[i]-vector2[i]);
+        for (int i = 0; i < vector1.length; i++) {
+            result += (vector1[i] - vector2[i]) * (vector1[i] - vector2[i]);
         }
         return result;
     }
@@ -28,19 +28,18 @@ public class KMeansNode extends AbstractMLNode{
     // Or taken separately and better parallelized (if distance computations are heavy)
 
     /**
-     *
      * @param matrix
      * @param vectorList First index - vector number (i.e. cluster number), second = vector elemebts
      * @return
      */
-    private static double[][] distanceFromVectorToMatrixRows(double [][] matrix, double[][] vectorList){
+    private static double[][] distanceFromVectorToMatrixRows(double[][] matrix, double[][] vectorList) {
         //TODO This is blunt implementation. However, it should be very well parallelizeable
         //With CUDA 2D layout we can assign each distance calculation to separate thread
         //TODO Skip assertions for now
         double result[][] = new double[matrix.length][vectorList.length];
         //Parallelizeable on both loops
-        for (int i = 0; i < matrix.length;i++){
-            for (int j = 0; j < vectorList.length; j++){
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < vectorList.length; j++) {
                 result[i][j] = distance(matrix[i], vectorList[j]);
             }
         }
@@ -48,24 +47,25 @@ public class KMeansNode extends AbstractMLNode{
     }
 
     /**
-     *
      * @param distancesToCentroids First index - sanple, secod - distance to corresponding centroid.
      * @return
      */
-    private static int[] closestCentroids(double[][] distancesToCentroids){
+    private static int[] closestCentroids(double[][] distancesToCentroids) {
         //TODO Skip checks and assertions
         //TODO - again, it should be very well parallelizeable
         //Effectively, we just run argmin on each row.
         int[] result = new int[distancesToCentroids.length];
-        for (int i=0;i<distancesToCentroids.length;i++){ //Parallelizeable here
+        for (int i = 0; i < distancesToCentroids.length; i++) { //Parallelizeable here
             int currentArgMin = 0;
-            for (int j=1;j<distancesToCentroids[i].length;j++){
-                currentArgMin = (distancesToCentroids[i][j] < distancesToCentroids[i][currentArgMin])?j:currentArgMin;
+            for (int j = 1; j < distancesToCentroids[i].length; j++) {
+                currentArgMin = (distancesToCentroids[i][j] < distancesToCentroids[i][currentArgMin]) ? j : currentArgMin;
             }
             result[i] = currentArgMin;
         }
         return result;
-    };
+    }
+
+    ;
 
     /**
      * Initializes centroids between max and min of training set dimension.
@@ -74,54 +74,59 @@ public class KMeansNode extends AbstractMLNode{
      * @param trainingSet
      * @return
      */
-    private static double[][] initializeCentroids(int numClusters, double trainingSet[][]){
+    private static double[][] initializeCentroids(int numClusters, double trainingSet[][]) {
         Random rng = new Random();
         //TODO Skip checks for now. Assume training set with at least 1 element.
-        double [][] result = new double[numClusters][trainingSet[0].length];
-        for (int i=0;i<trainingSet[0].length;i++){ //Parallelizeable by dimensions
+        double[][] result = new double[numClusters][trainingSet[0].length];
+        for (int i = 0; i < trainingSet[0].length; i++) { //Parallelizeable by dimensions
             double dimensionMin = trainingSet[0][i];
             double dimensionMax = trainingSet[0][i];
-            for (int j=1;j<trainingSet.length;j++){
-                dimensionMin = Math.min(dimensionMin,trainingSet[j][i]);
+            for (int j = 1; j < trainingSet.length; j++) {
+                dimensionMin = Math.min(dimensionMin, trainingSet[j][i]);
                 dimensionMax = Math.max(dimensionMax, trainingSet[j][i]);
             }
-            for (int j=0;j<numClusters;j++){
-                result[j][i] = rng.nextDouble()*(dimensionMax-dimensionMin) + dimensionMin;
+            for (int j = 0; j < numClusters; j++) {
+                result[j][i] = rng.nextDouble() * (dimensionMax - dimensionMin) + dimensionMin;
             }
         }
         return result;
-    };
+    }
+
+    ;
 
 
-    private static double[][] recalculateCentroids(double[][] trainingSet, int[] centroidIndices, int k){
+    private static double[][] recalculateCentroids(double[][] trainingSet, int[] centroidIndices, int k) {
         //TODO Parallelizeable by dimensions
         //TODO skipping tests for now. Assuming at least 1 element in the training set.
         final int dimensions = trainingSet[0].length;
         double result[][] = new double[k][dimensions];
-        for (int i=0;i<dimensions;i++){ //Parallelizeable here
+        for (int i = 0; i < dimensions; i++) { //Parallelizeable here
             double dimensionSums[] = new double[k];
             int dimensionCount[] = new int[k];
-            for (int j=0;j<k;j++){
+            for (int j = 0; j < k; j++) {
                 dimensionSums[j] = 0;
                 dimensionCount[j] = 0;
             }
-            for (int j=0;j<trainingSet.length;j++){
+            for (int j = 0; j < trainingSet.length; j++) {
                 dimensionSums[centroidIndices[j]] += trainingSet[j][i];
                 dimensionCount[centroidIndices[j]]++;
             }
-            for (int j=0;j<k;j++){
+            for (int j = 0; j < k; j++) {
                 //0 count and NaN result? Whatever.
-                result[j][i] = dimensionSums[j]/dimensionCount[j];
+                result[j][i] = dimensionSums[j] / dimensionCount[j];
             }
         }
         return result;
-    };
+    }
+
+    ;
 
     //TODO Distance function?
+
     /**
      * @param trainingSet First index - number of training example; second index - dimension within training example ({@code null} disallowed)
      */
-    public void learn(double[][] trainingSet, int k){
+    public void learn(double[][] trainingSet, int k) {
         //TODO Skip checks for now. Assume training set with at least 1 element.
 
         final int dimensions = trainingSet[0].length;
@@ -134,7 +139,7 @@ public class KMeansNode extends AbstractMLNode{
         //Step 2.2 Recalculate centroids
         boolean converged = false;
         int lastCentroidIndices[] = new int[0]; //Initializing with whatever
-        while (!converged){
+        while (!converged) {
             double dist[][] = distanceFromVectorToMatrixRows(trainingSet, centroids);
             int centroidIndices[] = closestCentroids(dist);
             centroids = recalculateCentroids(trainingSet, centroidIndices, k);
@@ -144,22 +149,22 @@ public class KMeansNode extends AbstractMLNode{
 
         //TODO Need to output differently:
         System.out.println("Resulting centroid indices:");
-        for (int i=0;i<k;i++){
-            for (int j = 0; j<dimensions;j++) {
-                System.out.print(centroids[i][j]+" ");
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < dimensions; j++) {
+                System.out.print(centroids[i][j] + " ");
             }
             System.out.println();
         }
 
         System.out.println("Cluster assignments: ");
-        for (int i=0;i<trainingSet.length;i++){
-            System.out.print(lastCentroidIndices[i]+" ");
+        for (int i = 0; i < trainingSet.length; i++) {
+            System.out.print(lastCentroidIndices[i] + " ");
         }
     }
 
     //TODO To remove it later. Move to tests.
     public static void main(String[] args) {
-        KMeansNode kmeansNode = new KMeansNode(null);
+        KMeansNode kmeansNode = null;// new KMeansNode();
 
         final double sampleDataset[][] = new double[][]{
                 {10.2955108, 9.7138184},
@@ -171,7 +176,7 @@ public class KMeansNode extends AbstractMLNode{
                 {10.0020150, 10.0465306},
                 {9.8335771, 10.8155270},
                 {8.8843789, 9.5244977},
-                {9.5443927,  9.8229781},
+                {9.5443927, 9.8229781},
                 {-0.2584864, -0.5472838},
                 {-0.1011018, 0.2019459},
                 {-1.0685223, -0.2057401},
@@ -180,10 +185,20 @@ public class KMeansNode extends AbstractMLNode{
                 {-0.3699899, -0.6521432},
                 {-0.3315273, -0.3317106},
                 {-0.1973557, -0.1911614},
-                {0.6192540,  -0.7801700},
+                {0.6192540, -0.7801700},
                 {0.6920306, 0.3447206},
         };
 
         kmeansNode.learn(sampleDataset, 2);
+    }
+
+    @Override
+    public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+
+    }
+
+    @Override
+    public void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
+
     }
 }
