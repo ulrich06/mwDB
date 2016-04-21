@@ -106,15 +106,15 @@ public class MWGResolver implements KResolver {
 
     @Override
     public <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback) {
-        this._scheduler.dispatch(lookupTask(world, time, id, callback));
+        this._scheduler.dispatch(lookupJob(world, time, id, callback));
     }
 
     @Override
-    public <A extends KNode> KCallback lookupTask(final long world, final long time, final long id, final KCallback<A> callback) {
+    public <A extends KNode> KScheduler.KJob lookupJob(final long world, final long time, final long id, final KCallback<A> callback) {
         final MWGResolver selfPointer = this;
-        return new KCallback() {
+        return new KScheduler.KJob() {
             @Override
-            public void on(Object o) {
+            public void run() {
                 try {
                     selfPointer.getOrLoadAndMark(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new KCallback<KChunk>() {
                         @Override

@@ -199,71 +199,73 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
-        try {
-            switch (p_elemType) {
-                /** Primitives */
-                case KType.BOOL:
-                    param_elem = (boolean) p_unsafe_elem;
-                    break;
-                case KType.DOUBLE:
-                    param_elem = (double) p_unsafe_elem;
-                    break;
-                case KType.LONG:
-                    if (p_unsafe_elem instanceof Integer) {
-                        int preCasting = (int) p_unsafe_elem;
-                        param_elem = (long) preCasting;
-                    } else {
-                        param_elem = (long) p_unsafe_elem;
-                    }
-                    break;
-                case KType.INT:
-                    param_elem = (int) p_unsafe_elem;
-                    break;
-                case KType.STRING:
-                    param_elem = (String) p_unsafe_elem;
-                    break;
-                /** Arrays */
-                case KType.DOUBLE_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        double[] castedParamDouble = (double[]) p_unsafe_elem;
-                        double[] clonedDoubleArray = new double[castedParamDouble.length];
-                        System.arraycopy(castedParamDouble, 0, clonedDoubleArray, 0, castedParamDouble.length);
-                        param_elem = clonedDoubleArray;
-                    }
-                    break;
-                case KType.LONG_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        long[] castedParamLong = (long[]) p_unsafe_elem;
-                        long[] clonedLongArray = new long[castedParamLong.length];
-                        System.arraycopy(castedParamLong, 0, clonedLongArray, 0, castedParamLong.length);
-                        param_elem = clonedLongArray;
-                    }
-                    break;
-                case KType.INT_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        int[] castedParamInt = (int[]) p_unsafe_elem;
-                        int[] clonedIntArray = new int[castedParamInt.length];
-                        System.arraycopy(castedParamInt, 0, clonedIntArray, 0, castedParamInt.length);
-                        param_elem = clonedIntArray;
-                    }
-                    break;
-                /** Maps */
-                case KType.STRING_LONG_MAP:
-                    param_elem = (KStringLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_MAP:
-                    param_elem = (KLongLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_ARRAY_MAP:
-                    param_elem = (KLongLongArrayMap) p_unsafe_elem;
-                    break;
-                default:
-                    throw new RuntimeException("Internal Exception, unknown type");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("mwDB usage error, set method called with type " + KType.typeName(p_elemType) + " while param object is " + p_unsafe_elem);
-        }
 
+        if (p_unsafe_elem != null) {
+            try {
+                switch (p_elemType) {
+                    /** Primitives */
+                    case KType.BOOL:
+                        param_elem = (boolean) p_unsafe_elem;
+                        break;
+                    case KType.DOUBLE:
+                        param_elem = (double) p_unsafe_elem;
+                        break;
+                    case KType.LONG:
+                        if (p_unsafe_elem instanceof Integer) {
+                            int preCasting = (int) p_unsafe_elem;
+                            param_elem = (long) preCasting;
+                        } else {
+                            param_elem = (long) p_unsafe_elem;
+                        }
+                        break;
+                    case KType.INT:
+                        param_elem = (int) p_unsafe_elem;
+                        break;
+                    case KType.STRING:
+                        param_elem = (String) p_unsafe_elem;
+                        break;
+                    /** Arrays */
+                    case KType.DOUBLE_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            double[] castedParamDouble = (double[]) p_unsafe_elem;
+                            double[] clonedDoubleArray = new double[castedParamDouble.length];
+                            System.arraycopy(castedParamDouble, 0, clonedDoubleArray, 0, castedParamDouble.length);
+                            param_elem = clonedDoubleArray;
+                        }
+                        break;
+                    case KType.LONG_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            long[] castedParamLong = (long[]) p_unsafe_elem;
+                            long[] clonedLongArray = new long[castedParamLong.length];
+                            System.arraycopy(castedParamLong, 0, clonedLongArray, 0, castedParamLong.length);
+                            param_elem = clonedLongArray;
+                        }
+                        break;
+                    case KType.INT_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            int[] castedParamInt = (int[]) p_unsafe_elem;
+                            int[] clonedIntArray = new int[castedParamInt.length];
+                            System.arraycopy(castedParamInt, 0, clonedIntArray, 0, castedParamInt.length);
+                            param_elem = clonedIntArray;
+                        }
+                        break;
+                    /** Maps */
+                    case KType.STRING_LONG_MAP:
+                        param_elem = (KStringLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_MAP:
+                        param_elem = (KLongLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        param_elem = (KLongLongArrayMap) p_unsafe_elem;
+                        break;
+                    default:
+                        throw new RuntimeException("Internal Exception, unknown type");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("mwDB usage error, set method called with type " + KType.typeName(p_elemType) + " while param object is " + p_unsafe_elem);
+            }
+        }
 
         int entry = -1;
         InternalState internalState = state;

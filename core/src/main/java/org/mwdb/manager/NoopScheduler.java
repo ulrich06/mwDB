@@ -1,13 +1,12 @@
-package org.mwdb.task;
+package org.mwdb.manager;
 
-import org.mwdb.KCallback;
 import org.mwdb.plugin.KScheduler;
 
 public class NoopScheduler implements KScheduler {
 
     @Override
-    public void dispatch(KCallback task) {
-        task.on(null);
+    public void dispatch(KJob job) {
+        job.run();
     }
 
     @Override

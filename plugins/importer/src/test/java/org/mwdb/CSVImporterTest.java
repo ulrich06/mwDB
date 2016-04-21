@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mwdb.csv.CSVImporter;
 import org.mwdb.csv.KField;
 import org.mwdb.csv.KNodeResolver;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 import java.io.File;
 import java.util.Map;

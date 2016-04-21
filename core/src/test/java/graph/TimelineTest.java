@@ -7,7 +7,7 @@ import org.mwdb.chunk.offheap.OffHeapByteArray;
 import org.mwdb.chunk.offheap.OffHeapDoubleArray;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapStringArray;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 
