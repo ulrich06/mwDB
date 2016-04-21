@@ -17,16 +17,6 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     //TODO Try out changing parameters on the fly
 
     /**
-     * Public keys - node parameters, values, etc.
-     */
-    public static final String VALUE_KEY = "value";
-    public static final String CLASS_INDEX_KEY = "classIndex";
-    public static final String BUFFER_SIZE_KEY = "bufferSize";
-    public static final String INPUT_DIM_KEY = "inputDimensions";
-    public static final String LOW_ERROR_THRESH_KEY = "lowerErrorThreshold";
-    public static final String HIGH_ERROR_THRESH_KEY = "higherErrorThreshold";
-
-    /**
      * Internal keys - those attributes are only for internal use within the node.
      * They are not supposed to be accessed from outside (although it is not banned).
      */
@@ -93,6 +83,15 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
+    private int getBufferSize(){
+        Object objClassIndex = att(BUFFER_SIZE_KEY);
+        Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
+        return ((Integer)objClassIndex).intValue();
+    }
+
+    /**
+     * @return Class index - index in a value array, where class label is supposed to be
+     */
     private int getInputDimensions(){
         Object objClassIndex = att(INPUT_DIM_KEY);
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
@@ -112,6 +111,19 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             throw new IllegalArgumentException(errorMessage);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution){
+        super(p_world, p_time, p_id, p_graph, currentResolution);
+        //TODO Understand why those don't work
+        //attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
+        //attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
+        //setValueBuffer(new double[0]); //Value buffer, starts empty
+    }
+
+    //TODO This constructor needs to be removed
 
     /**
      * {@inheritDoc}
@@ -190,7 +202,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      */
     private void addValue(double value[]){
         illegalArgumentIfFalse(value != null, "Value must be not null");
-        illegalArgumentIfFalse(value.length != getInputDimensions(), "Class index is not included in the value");
+        illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
 
         if (isInBootstrapMode()){
             addValueBootstrap(value);
@@ -260,8 +272,14 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @param classNum Number of class
      */
     private void initializeClassIfNecessary(int classNum){
-        if (att(INTERNAL_TOTAL_KEY_PREFIX+classNum)!=null){
-            return;
+        Object oldSumsObj = att(INTERNAL_SUM_KEY_PREFIX+classNum);
+        if (oldSumsObj!=null){
+            //Is there, but could be deleted
+            double oldSums[] = (double[])oldSumsObj;
+            if (oldSums.length>0){ //Is the class deleted?
+                //Already initialized
+                return;
+            }
         }
 
         addToKnownClassesList(classNum);
@@ -307,7 +325,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             }
             k++;
         }
-        setSums(classNum, currentSumSquares);
+        setSumsSquared(classNum, currentSumSquares);
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
     }
 
@@ -343,13 +361,16 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      */
     private void addValueBootstrap(double value[]){
         addValueToBuffer(value); //In bootstrap - no need to account for length
-        updateModelParameters(value);
 
-        //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = calculateErrorInBuffer();
-        if (errorInBuffer < getLowerErrorThreshold()){
-            setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
+        if (getNumValuesInBuffer() >= getBufferSize()){
+            //Predict for each value in the buffer. Calculate percentage of errors.
+            double errorInBuffer = getBufferErrorFraction();
+            if (errorInBuffer <= getLowerErrorThreshold()){
+                setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
+            }
         }
+
+        updateModelParameters(value);
     }
 
     private int getNumValuesInBuffer(){
@@ -396,10 +417,8 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     }
 
 
-    /**
-     * @return Prediction accuracy for data in the buffer. {@code NaN} if not applicable.
-     */
-    private double calculateErrorInBuffer(){
+    @Override
+    public int[] getPredictedBufferClasses(){
         //For each value in value buffer
         int startIndex = 0;
         final int dims = getInputDimensions();
@@ -407,7 +426,60 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         double valueBuffer[] = getValueBuffer();
         final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
         if (numValues == 0){
-            return Double.NaN;
+            return new int[0];
+        }
+
+        int result[] = new int[numValues];
+
+        final int clIndex = getClassIndex();
+        int i = 0;
+        while (startIndex+dims < valueBuffer.length){
+            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
+            result[i] = predictValue(curValue);
+            //Continue the loop
+            startIndex += dims;
+            i++;
+        }
+        return result;
+    }
+
+    @Override
+    public int[] getRealBufferClasses(){
+        //For each value in value buffer
+        int startIndex = 0;
+        final int dims = getInputDimensions();
+
+        double valueBuffer[] = getValueBuffer();
+        final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
+        if (numValues == 0){
+            return new int[0];
+        }
+
+        int result[] = new int[numValues];
+
+        final int clIndex = getClassIndex();
+        int i = 0;
+        while (startIndex+dims < valueBuffer.length){
+            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
+            result[i] = (int)curValue[clIndex];
+
+            //Continue the loop
+            startIndex += dims;
+            i++;
+        }
+        return result;
+    }
+
+    @Override
+    public int getBufferErrorCount(){
+        //For each value in value buffer
+        int startIndex = 0;
+        final int dims = getInputDimensions();
+
+        double valueBuffer[] = getValueBuffer();
+        final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
+        if (numValues == 0){
+            return 0;
         }
 
         final int clIndex = getClassIndex();
@@ -416,20 +488,37 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
             int realClass = (int)curValue[clIndex];
             int predictedClass = predictValue(curValue);
-            errorCount += (realClass==predictedClass)?1:0;
+            errorCount += (realClass!=predictedClass)?1:0;
 
             //Continue the loop
             startIndex += dims;
         }
-        return ((double)errorCount)/numValues;
+        return errorCount;
+    }
+
+    @Override
+    public int getCurrentBufferLength(){
+        double valueBuffer[] = getValueBuffer();
+        final int dims = getInputDimensions();
+        return valueBuffer.length / dims;
+    }
+
+    /**
+     * @return Prediction accuracy for data in the buffer. {@code NaN} if not applicable.
+     */
+    @Override
+    public double getBufferErrorFraction(){
+        return ((double)getBufferErrorCount())/getCurrentBufferLength();
     }
 
     private void addValueNoBootstrap(double value[]){
         addValueToBuffer(value);
-        removeFirstValueFromBuffer();
+        while (getCurrentBufferLength() > getBufferSize()) {
+            removeFirstValueFromBuffer();
+        }
 
         //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = calculateErrorInBuffer();
+        double errorInBuffer = getBufferErrorFraction();
         if (errorInBuffer > getHigherErrorThreshold()){
             setBootstrapMode(true); //If number of errors is above higher threshold, get into the bootstrap
         }
@@ -464,9 +553,9 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     private void removeAllClasses(){
         int classes[] = getKnownClasses();
         for (int curClass : classes){
-            attSet(INTERNAL_TOTAL_KEY_PREFIX+curClass, KType.INT, null);
-            attSet(INTERNAL_SUM_KEY_PREFIX+curClass, KType.INT, null);
-            attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass, KType.INT, null);
+            attSet(INTERNAL_TOTAL_KEY_PREFIX+curClass, KType.INT, 0);
+            attSet(INTERNAL_SUM_KEY_PREFIX+curClass, KType.DOUBLE_ARRAY, new double[0]);
+            attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass, KType.DOUBLE_ARRAY, new double[0]);
         }
         attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
     }
