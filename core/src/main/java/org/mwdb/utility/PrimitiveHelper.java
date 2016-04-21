@@ -316,4 +316,43 @@ public class PrimitiveHelper {
         return param != null;
     }
 
+    public static boolean isArray(final Object obj) {
+        return obj instanceof Object[] || obj instanceof boolean[] ||
+                obj instanceof byte[] || obj instanceof short[] ||
+                obj instanceof char[] || obj instanceof int[] ||
+                obj instanceof long[] || obj instanceof float[] ||
+                obj instanceof double[];
+    }
+
+    public static int arraySize(final Object obj) {
+        if (obj instanceof Object[]) {
+            return ((Object[]) obj).length;
+        }
+        if (obj instanceof boolean[]) {
+            return ((boolean[]) obj).length;
+        }
+        if (obj instanceof byte[]) {
+            return ((byte[]) obj).length;
+        }
+        if (obj instanceof short[]) {
+            return ((short[]) obj).length;
+        }
+        if (obj instanceof char[]) {
+            return ((char[]) obj).length;
+        }
+        if (obj instanceof int[]) {
+            return ((int[]) obj).length;
+        }
+        if (obj instanceof long[]) {
+            return ((long[]) obj).length;
+        }
+        if (obj instanceof float[]) {
+            return ((float[]) obj).length;
+        }
+        if (obj instanceof double[]) {
+            return ((double[]) obj).length;
+        }
+        return 0;
+    }
+
 }

@@ -8,7 +8,7 @@ import org.mwdb.chunk.offheap.OffHeapDoubleArray;
 import org.mwdb.chunk.offheap.OffHeapLongArray;
 import org.mwdb.chunk.offheap.OffHeapStringArray;
 import org.mwdb.plugin.KFactory;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.Unsafe;
 
 public class NodeFactoryTest implements KFactory {

@@ -10,7 +10,7 @@ import org.mwdb.manager.NoopStorage;
 import org.mwdb.plugin.KFactory;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 class Builder implements GraphBuilder.InternalBuilder {
 

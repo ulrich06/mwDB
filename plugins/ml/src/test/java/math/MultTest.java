@@ -34,9 +34,9 @@ public class MultTest {
     @Test
     public void MatrixMult() {
         //Test matrix mult
-        int r = 500;
-        int o = 300;
-        int p = 700;
+        int r = 1500;
+        int o = 1500;
+        int p = 1500;
         KMatrix matA = KMatrix.random(r, o, 0, 100);
         KMatrix matB = KMatrix.random(o, p, 0, 100);
         long startTime, endTime;

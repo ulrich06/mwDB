@@ -7,6 +7,7 @@ import org.mwdb.plugin.KResolver;
 import org.mwdb.plugin.KScheduler;
 import org.mwdb.plugin.KStorage;
 import org.mwdb.chunk.*;
+import org.mwdb.task.Task;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.Buffer;
 import org.mwdb.utility.DeferCounter;
@@ -306,6 +307,11 @@ public class Graph implements KGraph {
         }
     }
 
+    @Override
+    public KTask newTask() {
+        return new Task(this);
+    }
+
     private void saveDirtyList(final KChunkIterator dirtyIterator, final KCallback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
             dirtyIterator.free();
@@ -528,6 +534,11 @@ public class Graph implements KGraph {
     @Override
     public KResolver resolver() {
         return _resolver;
+    }
+
+    @Override
+    public KScheduler scheduler() {
+        return _scheduler;
     }
 
     public KChunkSpace space() {

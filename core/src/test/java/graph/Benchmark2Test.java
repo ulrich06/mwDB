@@ -1,11 +1,9 @@
 package graph;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.chunk.heap.HeapChunkSpace;
 import org.mwdb.chunk.offheap.*;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 public class Benchmark2Test {
 

@@ -41,15 +41,15 @@ public interface KResolver {
     void freeNode(KNode node);
 
     /**
-     * Creates a lookup task to retrieve a particular node based on world/time/node_id
+     * Creates a lookup job to retrieve a particular node based on world/time/node_id
      *
      * @param world    The world identifier
      * @param time     The timepoint.
      * @param id       The id of the node to retrieve.
      * @param callback Called when the node is retrieved.
-     * @return The created lookup task to be given to the scheduler.
+     * @return The created lookup job to be given to the scheduler.
      */
-    <A extends KNode> KCallback lookupTask(long world, long time, long id, KCallback<A> callback);
+    <A extends KNode> KScheduler.KJob lookupJob(long world, long time, long id, KCallback<A> callback);
 
     /**
      * Creates and schedules a lookup task.

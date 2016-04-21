@@ -2,6 +2,7 @@ package org.mwdb;
 
 import org.mwdb.chunk.KBuffer;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KScheduler;
 
 /**
  * KGraph is the main structure of mwDB.
@@ -126,6 +127,20 @@ public interface KGraph {
     KDeferCounter counter(int expectedEventsCount);
 
     /**
+     * Retrieves the current state chunk resolver
+     *
+     * @return current running resolver
+     */
+    KResolver resolver();
+
+    /**
+     * Retrieves the current graph scheduler
+     *
+     * @return current running scheduler
+     */
+    KScheduler scheduler();
+
+    /**
      * Create a new buffer to save chunks
      *
      * @return newly created buffer
@@ -133,11 +148,10 @@ public interface KGraph {
     KBuffer newBuffer();
 
     /**
-     * Retrieves the current state chunk resolver
+     * Create a new task object to manipulate KGraph in an easy way
      *
-     * @return current running resolver
+     * @return newly created task object
      */
-    KResolver resolver();
-
+    KTask newTask();
 
 }
