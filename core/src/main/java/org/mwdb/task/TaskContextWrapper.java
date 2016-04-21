@@ -60,4 +60,9 @@ public class TaskContextWrapper implements KTaskContext {
     public void next() {
         //noop action here, because the next action will be automatically called
     }
+
+    @Override
+    public void clean() {
+        _wrapped.clean();
+    }
 }

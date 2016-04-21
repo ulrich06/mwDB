@@ -139,7 +139,8 @@ public class Task implements KTask {
 
     @Override
     public KTask pforeach(KTask subTask) {
-        return null;
+        addTask(new ActionParForeach(subTask));
+        return this;
     }
 
     @Override
@@ -165,8 +166,7 @@ public class Task implements KTask {
         final_actions[_actionCursor + 1] = new KTaskAction() {
             @Override
             public void eval(KTaskContext context) {
-                System.out.println(context);
-                //TODO clean everything....
+                context.clean();
             }
         };
         final KTaskContext context = new TaskContext(parent, initialResult, _graph, final_actions);

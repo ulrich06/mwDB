@@ -85,7 +85,7 @@ public class SimpleTraversalTest {
                 traversal
                         .input(new long[]{1, 2, 3})
                         .as("x")
-                        .foreach(graph.newTask().as("sub").from("x"))
+                        .pforeach(graph.newTask().as("sub").from("x"))
                         .execute();
 
                 graph.disconnect(new KCallback<Boolean>() {

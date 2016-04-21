@@ -22,4 +22,5 @@ public interface KTaskContext {
 
     void next();
 
+    void clean();
 }

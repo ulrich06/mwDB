@@ -1,6 +1,7 @@
 package org.mwdb.task;
 
 import org.mwdb.KGraph;
+import org.mwdb.KNode;
 import org.mwdb.KTaskAction;
 import org.mwdb.KTaskContext;
 
@@ -111,6 +112,31 @@ class TaskContext implements KTaskContext {
     public final void next() {
         KTaskAction nextAction = _actions[_currentTaskId.incrementAndGet()];
         nextAction.eval(this);
+    }
+
+    @Override
+    public final void clean() {
+        for (int i = 0; i < _results.length; i++) {
+            cleanObj(_results[i]);
+        }
+    }
+
+    private void cleanObj(Object o){
+        if (o instanceof KNode) {
+            ((KNode) o).free();
+        } else if (o instanceof KTaskContext) {
+            ((KTaskContext)o).clean();
+        } else if (o instanceof KTaskContext[]) {
+            KTaskContext[] loop = (KTaskContext[]) o;
+            for (int j = 0; j < loop.length; j++) {
+                loop[j].clean();
+            }
+        } else if (o instanceof Object[]) {
+            Object[] loop = (Object[]) o;
+            for (int j = 0; j < loop.length; j++) {
+                cleanObj(loop[j]);
+            }
+        }
     }
 
 }

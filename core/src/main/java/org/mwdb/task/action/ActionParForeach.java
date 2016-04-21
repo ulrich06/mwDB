@@ -1,42 +1,42 @@
 package org.mwdb.task.action;
 
-import org.mwdb.KTask;
-import org.mwdb.KTaskAction;
-import org.mwdb.KTaskContext;
+import org.mwdb.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ActionForeach implements KTaskAction {
+public class ActionParForeach implements KTaskAction {
 
     private final KTask _subTask;
 
-    public ActionForeach(final KTask p_subTask) {
+    public ActionParForeach(final KTask p_subTask) {
         _subTask = p_subTask;
     }
 
     @Override
     public void eval(KTaskContext context) {
         final Object[] castedResult = convert(context.getPreviousResult());
-        AtomicInteger cursor = new AtomicInteger(0);
         final KTaskContext[] results = new KTaskContext[castedResult.length];
-        _subTask.executeAsyncThen(context, castedResult[0], new KTaskAction() {
+        final KDeferCounter counter = context.graph().counter(castedResult.length);
+        counter.then(new KCallback() {
             @Override
-            public void eval(final KTaskContext subTaskFinalContext) {
-                int current = cursor.getAndIncrement();
-                results[current] = subTaskFinalContext;
-                int nextCursot = current + 1;
-                if (nextCursot == results.length) {
-                    context.setResult(results);
-                    context.next();
-                } else {
-                    //recursive call
-                    _subTask.executeAsyncThen(context, castedResult[nextCursot], this);
-                }
+            public void on(Object ignored) {
+                context.setResult(results);
+                context.next();
             }
         });
+        for (int i = 0; i < castedResult.length; i++) {
+            final int finalI = i;
+            _subTask.executeAsyncThen(context, castedResult[0], new KTaskAction() {
+                @Override
+                public void eval(final KTaskContext subTaskFinalContext) {
+                    results[finalI] = subTaskFinalContext;
+                    counter.count();
+                }
+            });
+        }
     }
 
     private Object[] convert(Object elem) {
