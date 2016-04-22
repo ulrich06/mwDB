@@ -112,22 +112,22 @@ public interface KNode {
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
      * Index names must be unique within a given node.
      *
-     * @param indexName     The name of the index (should be unique per node).
+     * @param indexName     The name of the index (should be unique per relation).
      * @param nodeToIndex   The new node to index.
-     * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
-     * @param callback      Called when the index hasField been created/updated. The boolean value specifies the success of the operation.
+     * @param keyAttributes The list of attribute names (of the node to index) to be used as keys for indexing (order does not matter)
+     * @param callback      Called when the index has been created/updated. The boolean value specifies the success of the operation.
      */
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
      * Removes an element fromVar an index of nodes.<br>
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
-     * Index names must be unique within a given node.
+     * Index names must be unique within the indexed relation names.
      *
-     * @param indexName     The name of the index (should be unique per node).
-     * @param nodeToIndex   The new node to index.
-     * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
-     * @param callback      Called when the index hasField been created/updated. The boolean value specifies the success of the operation.
+     * @param indexName     The name of the index (should be unique per relation).
+     * @param nodeToIndex   The node to de-index.
+     * @param keyAttributes The list of attribute names to be used as keys for de-indexing (order does not matter)
+     * @param callback      Called when the node has been de-index. The boolean value specifies the success of the operation.
      */
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
@@ -135,8 +135,8 @@ public interface KNode {
      * Retrieves nodes fromVar an index that satisfies a query at the current node world and the current node time<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
-     * @param indexName The name of the index (should be unique per node)
-     * @param query     The query (e.g.: "firstname=john,lastname=doe,age=30"
+     * @param indexName The name of the index (should be unique per relation)
+     * @param query     The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30")
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
     <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback);
@@ -145,8 +145,8 @@ public interface KNode {
      * Retrieves nodes fromVar an index that satisfies a queryin a particular world and time.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
-     * @param indexName The name of the index (should be unique per node)
-     * @param query     The query (e.g.: "firstname=john,lastname=doe,age=30"
+     * @param indexName The name of the index (should be unique per relation)
+     * @param query     The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
