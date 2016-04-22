@@ -22,7 +22,7 @@ public class ActionForeach implements KTaskAction {
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
         final KTaskContext[] results = new KTaskContext[castedResult.length];
-        _subTask.executeAsyncThen(context, castedResult[0], new KTaskAction() {
+        _subTask.executeThenAsync(context, castedResult[0], new KTaskAction() {
             @Override
             public void eval(final KTaskContext subTaskFinalContext) {
                 int current = cursor.getAndIncrement();
@@ -33,7 +33,7 @@ public class ActionForeach implements KTaskAction {
                     context.next();
                 } else {
                     //recursive call
-                    _subTask.executeAsyncThen(context, castedResult[nextCursot], this);
+                    _subTask.executeThenAsync(context, castedResult[nextCursot], this);
                 }
             }
         });

@@ -3,6 +3,7 @@ package chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.HeapStateChunk;
@@ -83,12 +84,15 @@ public class StateChunkTest implements KChunkListener {
 
         KStateChunk chunk = factory.create(this, null, null);
 
-        //init chunk with primitives
+        //init chunk selectWith primitives
         chunk.set(0, KType.BOOL, true);
         chunk.set(1, KType.STRING, "hello");
         chunk.set(2, KType.DOUBLE, 1.0);
         chunk.set(3, KType.LONG, 1000l);
         chunk.set(4, KType.INT, 100);
+
+        chunk.set(5,KType.INT,1);
+        chunk.set(5,KType.INT,null);
 
         KBuffer buffer = Buffer.newHeapBuffer();
         chunk.save(buffer);
@@ -106,7 +110,7 @@ public class StateChunkTest implements KChunkListener {
             }
         }
 
-        //init chunk with arrays
+        //init chunk selectWith arrays
         chunk.set(5, KType.LONG_ARRAY, new long[]{0, 1, 2, 3, 4});
         chunk.set(6, KType.DOUBLE_ARRAY, new double[]{0.1, 1.1, 2.1, 3.1, 4.1});
         chunk.set(7, KType.INT_ARRAY, new int[]{0, 1, 2, 3, 4});
@@ -124,7 +128,7 @@ public class StateChunkTest implements KChunkListener {
 
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
-        //init chunk with some maps
+        //init chunk selectWith some maps
         KLongLongMap long2longMap = (KLongLongMap) chunk.getOrCreate(8, KType.LONG_LONG_MAP);
         long2longMap.put(1, 1);
         long2longMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
@@ -197,24 +201,24 @@ public class StateChunkTest implements KChunkListener {
         KStateChunk chunk = factory.create(this, null, null);
 
         //boolean protection test
-        protectionMethod(chunk, KType.BOOL, null, true);
+        //protectionMethod(chunk, KType.BOOL, null, true);
         protectionMethod(chunk, KType.BOOL, true, false);
         protectionMethod(chunk, KType.BOOL, "Hello", true);
 
-        protectionMethod(chunk, KType.DOUBLE, null, true);
+        //protectionMethod(chunk, KType.DOUBLE, null, true);
         protectionMethod(chunk, KType.DOUBLE, 0.5d, false);
         protectionMethod(chunk, KType.DOUBLE, "Hello", true);
 
-        protectionMethod(chunk, KType.LONG, null, true);
+        //protectionMethod(chunk, KType.LONG, null, true);
         protectionMethod(chunk, KType.LONG, 100000000l, false);
         protectionMethod(chunk, KType.LONG, 100000000, false);
         protectionMethod(chunk, KType.LONG, "Hello", true);
 
-        protectionMethod(chunk, KType.INT, null, true);
+        //protectionMethod(chunk, KType.INT, null, true);
         protectionMethod(chunk, KType.INT, 10, false);
         protectionMethod(chunk, KType.INT, "Hello", true);
 
-        protectionMethod(chunk, KType.STRING, null, false);
+        //protectionMethod(chunk, KType.STRING, null, false);
         protectionMethod(chunk, KType.STRING, "Hello", false);
         protectionMethod(chunk, KType.STRING, true, true);
 
@@ -422,5 +426,10 @@ public class StateChunkTest implements KChunkListener {
             OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
         }
 
+    }
+
+    @Override
+    public KGraph graph() {
+        return null;
     }
 }

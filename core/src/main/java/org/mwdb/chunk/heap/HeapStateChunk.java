@@ -1,16 +1,13 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
@@ -36,7 +33,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    private final KChunkListener _listener;
+    private final KChunkListener _space;
     private boolean inLoadMode;
 
     @Override
@@ -44,6 +41,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         if (!this.inLoadMode) {
             internal_set_dirty();
         }
+    }
+
+    @Override
+    public final KGraph graph() {
+        return _space.graph();
     }
 
     private final class InternalState {
@@ -87,7 +89,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             System.arraycopy(_elementHash, 0, clonedElementHash, 0, this._elementDataSize);
             byte[] clonedElementType = new byte[this._elementDataSize];
             System.arraycopy(_elementType, 0, clonedElementType, 0, this._elementDataSize);
-            return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came from a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
+            return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came fromVar a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
         }
 
         InternalState softClone() {
@@ -97,14 +99,14 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, KBuffer initialPayload, KChunk origin) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_space, KBuffer initialPayload, KChunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
         this._flags = 0;
         this._marks = 0;
-        this._listener = p_listener;
+        this._space = p_space;
         if (initialPayload != null) {
             load(initialPayload);
         } else if (origin != null) {
@@ -194,6 +196,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     @Override
     public final void set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem) {
         internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
+    }
+
+    @Override
+    public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
+        internal_set(_space.graph().resolver().stringToLongKey(key), p_elemType, p_unsafe_elem, true);
     }
 
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
@@ -386,6 +393,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
+    public Object getFromKey(String key) {
+        return get(_space.graph().resolver().stringToLongKey(key));
+    }
+
+    @Override
     public final byte getType(long p_elementIndex) {
         final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {
@@ -403,6 +415,10 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         return -1;
     }
 
+    @Override
+    public byte getTypeFromKey(String key) {
+        return getType(_space.graph().resolver().stringToLongKey(key));
+    }
 
     @Override
     public final Object getOrCreate(long p_elementIndex, byte elemType) {
@@ -423,6 +439,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 break;
         }
         return get(p_elementIndex);
+    }
+
+    @Override
+    public Object getOrCreateFromKey(String key, byte elemType) {
+        return getOrCreate(_space.graph().resolver().stringToLongKey(key), elemType);
     }
 
     @Override
@@ -883,9 +904,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     private void internal_set_dirty() {
-        if (_listener != null) {
+        if (_space != null) {
             if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                _listener.declareDirty(this);
+                _space.declareDirty(this);
             }
         }
     }

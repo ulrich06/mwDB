@@ -139,7 +139,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     @Override
     public synchronized final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
 
         int nbElements = 0;
@@ -158,7 +158,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     @Override
     public synchronized final void save(KBuffer buffer) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
         try {
             if (_root_index == -1) {
@@ -206,7 +206,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     @Override
     public synchronized final long previousOrEqual(long key) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
 
         int result = internal_previousOrEqual_index(key);
@@ -230,7 +230,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     @Override
     public synchronized final void insert(long p_key) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
         internal_insert(p_key);
         //free the lock and write to main memory
@@ -246,7 +246,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
 
     @Override
     public synchronized final void clearAt(long max) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
 
         long[] previousValue = _back_k;
@@ -668,7 +668,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         } else {
             _size--;
             if (n.getLeft() != null && n.getRight() != null) {
-                // Copy domainKey/value from predecessor and done delete it instead
+                // Copy domainKey/value fromVar predecessor and done delete it instead
                 TreeNode pred = n.getLeft();
                 while (pred.getRight() != null) {
                     pred = pred.getRight();

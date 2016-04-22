@@ -1,6 +1,7 @@
 package org.mwdb.chunk.offheap;
 
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
@@ -41,7 +42,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     private static final int INDEX_HASH_READ_ONLY = 16;
 
     //pointer values
-    private final KChunkListener _listener;
+    private final KChunkListener _space;
     private long elementK_ptr;
     private long elementV_ptr;
     private long elementNext_ptr;
@@ -62,8 +63,8 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
-    public OffHeapStateChunk(KChunkListener listener, long previousAddr, KBuffer initialPayload, KChunk origin) {
-        _listener = listener;
+    public OffHeapStateChunk(KChunkListener space, long previousAddr, KBuffer initialPayload, KChunk origin) {
+        _space = space;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(17);
             OffHeapLongArray.set(root_array_ptr, INDEX_FLAGS, 0);
@@ -79,7 +80,6 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
             if (initialPayload != null) {
                 load(initialPayload);
-
             } else if (origin != null) {
                 OffHeapStateChunk castedOrigin = (OffHeapStateChunk) origin;
                 softClone(castedOrigin);
@@ -830,6 +830,11 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     @Override
+    public final KGraph graph() {
+        return _space.graph();
+    }
+
+    @Override
     public final void set(long index, byte elemType, Object elem) {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ; // lock
         try {
@@ -841,59 +846,67 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
+    @Override
+    public void setFromKey(String key, byte elemType, Object elem) {
+        set(_space.graph().resolver().stringToLongKey(key), elemType, elem);
+    }
+
     private void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
-        try {
-            switch (p_elemType) {
-                /** Primitives */
-                case KType.BOOL:
-                    param_elem = (boolean) p_unsafe_elem;
-                    break;
-                case KType.DOUBLE:
-                    param_elem = (double) p_unsafe_elem;
-                    break;
-                case KType.LONG:
-                    if (p_unsafe_elem instanceof Integer) {
-                        int preCasting = (int) p_unsafe_elem;
-                        param_elem = (long) preCasting;
-                    } else {
-                        param_elem = (long) p_unsafe_elem;
-                    }
-                    break;
-                case KType.INT:
-                    param_elem = (int) p_unsafe_elem;
-                    break;
-                case KType.STRING:
-                    param_elem = (String) p_unsafe_elem;
-                    break;
-                /** Arrays */
-                case KType.DOUBLE_ARRAY:
-                    param_elem = (double[]) p_unsafe_elem;
-                    break;
-                case KType.LONG_ARRAY:
-                    param_elem = (long[]) p_unsafe_elem;
-                    break;
-                case KType.INT_ARRAY:
-                    param_elem = (int[]) p_unsafe_elem;
-                    break;
-                /** Maps */
-                case KType.STRING_LONG_MAP:
-                    param_elem = (KStringLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_MAP:
-                    param_elem = (KLongLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_ARRAY_MAP:
-                    param_elem = (KLongLongArrayMap) p_unsafe_elem;
-                    break;
-                default:
-                    throw new RuntimeException("mwDB usage error, set method called with an unknown type " + p_elemType);
+        if (p_unsafe_elem != null) {
+            try {
+                switch (p_elemType) {
+                    /** Primitives */
+                    case KType.BOOL:
+                        param_elem = (boolean) p_unsafe_elem;
+                        break;
+                    case KType.DOUBLE:
+                        param_elem = (double) p_unsafe_elem;
+                        break;
+                    case KType.LONG:
+                        if (p_unsafe_elem instanceof Integer) {
+                            int preCasting = (int) p_unsafe_elem;
+                            param_elem = (long) preCasting;
+                        } else {
+                            param_elem = (long) p_unsafe_elem;
+                        }
+                        break;
+                    case KType.INT:
+                        param_elem = (int) p_unsafe_elem;
+                        break;
+                    case KType.STRING:
+                        param_elem = (String) p_unsafe_elem;
+                        break;
+                    /** Arrays */
+                    case KType.DOUBLE_ARRAY:
+                        param_elem = (double[]) p_unsafe_elem;
+                        break;
+                    case KType.LONG_ARRAY:
+                        param_elem = (long[]) p_unsafe_elem;
+                        break;
+                    case KType.INT_ARRAY:
+                        param_elem = (int[]) p_unsafe_elem;
+                        break;
+                    /** Maps */
+                    case KType.STRING_LONG_MAP:
+                        param_elem = (KStringLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_MAP:
+                        param_elem = (KLongLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        param_elem = (KLongLongArrayMap) p_unsafe_elem;
+                        break;
+                    default:
+                        throw new RuntimeException("mwDB usage error, set method called selectWith an unknown type " + p_elemType);
+                }
+            } catch (Exception e) {
+                //e.printStackTrace();
+                throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
             }
-        } catch (Exception e) {
-            //e.printStackTrace();
-            throw new RuntimeException("mwDB usage error, set method called with type " + p_elemType + " while param object is " + param_elem);
         }
+
         long entry = -1;
         long hashIndex = -1;
         long elementDataSize = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_DATA_SIZE);
@@ -990,112 +1003,122 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
     private void internal_setElementV(long addr, long index, long elementTypeAddr, byte elemType, Object elem) {
         long tempPtr = OffHeapLongArray.get(addr, index);
-        switch (elemType) {
-            /** Primitives */
-            case KType.BOOL:
-                OffHeapLongArray.set(addr, index, ((boolean) elem) ? 1 : 0);
-                break;
-            case KType.DOUBLE:
-                OffHeapDoubleArray.set(addr, index, ((double) elem));
-                break;
-            case KType.LONG:
-                OffHeapLongArray.set(addr, index, ((long) elem));
-                break;
-            case KType.INT:
-                OffHeapLongArray.set(addr, index, ((int) elem));
-                break;
-            /** String */
-            case KType.STRING:
-                String stringToInsert = (String) elem;
-                if (stringToInsert == null) {
-                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
-                } else {
-                    byte[] valueAsByte = stringToInsert.getBytes();
-                    long newStringPtr = unsafe.allocateMemory(8 + 4 + valueAsByte.length); //counter for copy on write, length, and string content
-                    //init counter for copy on write
-                    unsafe.putLong(newStringPtr, 1);
-                    //set size of the string
-                    unsafe.putInt(newStringPtr + 8, valueAsByte.length);
-                    //copy string content
-                    for (int i = 0; i < valueAsByte.length; i++) {
-                        unsafe.putByte(8 + 4 + newStringPtr + i, valueAsByte[i]);
+        byte tempType = (byte) OffHeapLongArray.get(elementTypeAddr, index);
+
+        if (elem != null) {
+            switch (elemType) {
+                /** Primitives */
+                case KType.BOOL:
+                    OffHeapLongArray.set(addr, index, ((boolean) elem) ? 1 : 0);
+                    break;
+                case KType.DOUBLE:
+                    OffHeapDoubleArray.set(addr, index, ((double) elem));
+                    break;
+                case KType.LONG:
+                    OffHeapLongArray.set(addr, index, ((long) elem));
+                    break;
+                case KType.INT:
+                    OffHeapLongArray.set(addr, index, ((int) elem));
+                    break;
+                /** String */
+                case KType.STRING:
+                    String stringToInsert = (String) elem;
+                    if (stringToInsert == null) {
+                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                    } else {
+                        byte[] valueAsByte = stringToInsert.getBytes();
+                        long newStringPtr = unsafe.allocateMemory(8 + 4 + valueAsByte.length); //counter for copy on write, length, and string content
+                        //init counter for copy on write
+                        unsafe.putLong(newStringPtr, 1);
+                        //set size of the string
+                        unsafe.putInt(newStringPtr + 8, valueAsByte.length);
+                        //copy string content
+                        for (int i = 0; i < valueAsByte.length; i++) {
+                            unsafe.putByte(8 + 4 + newStringPtr + i, valueAsByte[i]);
+                        }
+                        OffHeapLongArray.set(addr, index, newStringPtr);
                     }
-                    OffHeapLongArray.set(addr, index, newStringPtr);
-                }
-                break;
-            /** Arrays */
-            case KType.DOUBLE_ARRAY:
-                double[] doubleArrayToInsert = (double[]) elem;
-                if (doubleArrayToInsert != null) {
-                    long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(2 + doubleArrayToInsert.length); // cow counter + length + content of the array
-                    OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, 1);// set cow counter
-                    OffHeapLongArray.set(doubleArrayToInsert_ptr, 1, doubleArrayToInsert.length);// set length
-                    for (int i = 0; i < doubleArrayToInsert.length; i++) {
-                        OffHeapDoubleArray.set(doubleArrayToInsert_ptr, 2 + i, doubleArrayToInsert[i]);
+                    break;
+                /** Arrays */
+                case KType.DOUBLE_ARRAY:
+                    double[] doubleArrayToInsert = (double[]) elem;
+                    if (doubleArrayToInsert != null) {
+                        long doubleArrayToInsert_ptr = OffHeapDoubleArray.allocate(2 + doubleArrayToInsert.length); // cow counter + length + content of the array
+                        OffHeapLongArray.set(doubleArrayToInsert_ptr, 0, 1);// set cow counter
+                        OffHeapLongArray.set(doubleArrayToInsert_ptr, 1, doubleArrayToInsert.length);// set length
+                        for (int i = 0; i < doubleArrayToInsert.length; i++) {
+                            OffHeapDoubleArray.set(doubleArrayToInsert_ptr, 2 + i, doubleArrayToInsert[i]);
+                        }
+                        OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
+                    } else {
+                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                     }
-                    OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
-                } else {
-                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
-                }
-                break;
-            case KType.LONG_ARRAY:
-                long[] longArrayToInsert = (long[]) elem;
-                if (longArrayToInsert != null) {
-                    long longArrayToInsert_ptr = OffHeapLongArray.allocate(2 + longArrayToInsert.length); // cow counter + length + content of the array
-                    OffHeapLongArray.set(longArrayToInsert_ptr, 0, 1);// init cow counter
-                    OffHeapLongArray.set(longArrayToInsert_ptr, 1, longArrayToInsert.length);// set length
-                    for (int i = 0; i < longArrayToInsert.length; i++) {
-                        OffHeapLongArray.set(longArrayToInsert_ptr, 2 + i, longArrayToInsert[i]);
+                    break;
+                case KType.LONG_ARRAY:
+                    long[] longArrayToInsert = (long[]) elem;
+                    if (longArrayToInsert != null) {
+                        long longArrayToInsert_ptr = OffHeapLongArray.allocate(2 + longArrayToInsert.length); // cow counter + length + content of the array
+                        OffHeapLongArray.set(longArrayToInsert_ptr, 0, 1);// init cow counter
+                        OffHeapLongArray.set(longArrayToInsert_ptr, 1, longArrayToInsert.length);// set length
+                        for (int i = 0; i < longArrayToInsert.length; i++) {
+                            OffHeapLongArray.set(longArrayToInsert_ptr, 2 + i, longArrayToInsert[i]);
+                        }
+                        OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
+                    } else {
+                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                     }
-                    OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
-                } else {
-                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
-                }
-                break;
-            case KType.INT_ARRAY:
-                int[] intArrayToInsert = (int[]) elem;
-                if (intArrayToInsert != null) {
-                    long intArrayToInsert_ptr = OffHeapLongArray.allocate(2 + intArrayToInsert.length); // cow counter + length + content of the array
-                    OffHeapLongArray.set(intArrayToInsert_ptr, 0, 1);// init cow counter
-                    OffHeapLongArray.set(intArrayToInsert_ptr, 1, intArrayToInsert.length);// set length
-                    for (int i = 0; i < intArrayToInsert.length; i++) {
-                        OffHeapLongArray.set(intArrayToInsert_ptr, 2 + i, intArrayToInsert[i]);
+                    break;
+                case KType.INT_ARRAY:
+                    int[] intArrayToInsert = (int[]) elem;
+                    if (intArrayToInsert != null) {
+                        long intArrayToInsert_ptr = OffHeapLongArray.allocate(2 + intArrayToInsert.length); // cow counter + length + content of the array
+                        OffHeapLongArray.set(intArrayToInsert_ptr, 0, 1);// init cow counter
+                        OffHeapLongArray.set(intArrayToInsert_ptr, 1, intArrayToInsert.length);// set length
+                        for (int i = 0; i < intArrayToInsert.length; i++) {
+                            OffHeapLongArray.set(intArrayToInsert_ptr, 2 + i, intArrayToInsert[i]);
+                        }
+                        OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
+                    } else {
+                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
                     }
-                    OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
-                } else {
-                    OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
-                }
-                break;
-            /** Maps */
-            case KType.STRING_LONG_MAP:
-                long stringLongMap_ptr = ((ArrayStringLongMap) elem).rootAddress();
-                ArrayStringLongMap.incrementCopyOnWriteCounter(stringLongMap_ptr);
-                OffHeapLongArray.set(addr, index, stringLongMap_ptr);
-                break;
-            case KType.LONG_LONG_MAP:
-                long longLongMap_ptr = ((ArrayLongLongMap) elem).rootAddress();
-                ArrayLongLongMap.incrementCopyOnWriteCounter(longLongMap_ptr);
-                OffHeapLongArray.set(addr, index, longLongMap_ptr);
-                break;
-            case KType.LONG_LONG_ARRAY_MAP:
-                long longLongArrayMap_ptr = ((ArrayLongLongArrayMap) elem).rootAddress();
-                ArrayLongLongArrayMap.incrementCopyOnWriteCounter(longLongArrayMap_ptr);
-                OffHeapLongArray.set(addr, index, longLongArrayMap_ptr);
-                break;
-            default:
-                throw new RuntimeException("Should never happen...");
+                    break;
+                /** Maps */
+                case KType.STRING_LONG_MAP:
+                    long stringLongMap_ptr = ((ArrayStringLongMap) elem).rootAddress();
+                    ArrayStringLongMap.incrementCopyOnWriteCounter(stringLongMap_ptr);
+                    OffHeapLongArray.set(addr, index, stringLongMap_ptr);
+                    break;
+                case KType.LONG_LONG_MAP:
+                    long longLongMap_ptr = ((ArrayLongLongMap) elem).rootAddress();
+                    ArrayLongLongMap.incrementCopyOnWriteCounter(longLongMap_ptr);
+                    OffHeapLongArray.set(addr, index, longLongMap_ptr);
+                    break;
+                case KType.LONG_LONG_ARRAY_MAP:
+                    long longLongArrayMap_ptr = ((ArrayLongLongArrayMap) elem).rootAddress();
+                    ArrayLongLongArrayMap.incrementCopyOnWriteCounter(longLongArrayMap_ptr);
+                    OffHeapLongArray.set(addr, index, longLongArrayMap_ptr);
+                    break;
+                default:
+                    throw new RuntimeException("Should never happen...");
+            }
+        } else {
+            OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+            OffHeapLongArray.set(elementTypeAddr, index, Constants.OFFHEAP_NULL_PTR);
         }
+
         // free the previous elements
         if (tempPtr != Constants.OFFHEAP_NULL_PTR) {
-            freeElement(tempPtr, (byte) OffHeapLongArray.get(elementType_ptr, index));
+            freeElement(tempPtr, tempType);
         }
-        OffHeapLongArray.set(elementTypeAddr, index, elemType);
+        if(elem != null){
+            OffHeapLongArray.set(elementTypeAddr, index, elemType);
+        }
     }
 
     private void internal_set_dirty() {
-        if (this._listener != null) {
+        if (this._space != null) {
             if ((OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                this._listener.declareDirty(this);
+                this._space.declareDirty(this);
             }
         }
     }
@@ -1126,12 +1149,17 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
+    @Override
+    public Object getFromKey(String key) {
+        return get(_space.graph().resolver().stringToLongKey(key));
+    }
+
     private Object internal_getElementV(long index) {
         byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, index); // can be safely casted
         switch (elemType) {
             /** Primitives */
             case KType.BOOL:
-                return OffHeapLongArray.get(elementType_ptr, index) == 1 ? true : false;
+                return OffHeapLongArray.get(elementV_ptr, index) == 1 ? true : false;
             case KType.DOUBLE:
                 return OffHeapDoubleArray.get(elementV_ptr, index); // no indirection, value is directly inside
             case KType.LONG:
@@ -1194,6 +1222,8 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             case KType.LONG_LONG_ARRAY_MAP:
                 long elemLongLongArrayMapPtr = OffHeapLongArray.get(elementV_ptr, index);
                 return new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
+            case Constants.OFFHEAP_NULL_PTR:
+                return null;
             default:
                 throw new RuntimeException("Should never happen");
         }
@@ -1221,6 +1251,10 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
 
     }
 
+    @Override
+    public Object getOrCreateFromKey(String key, byte elemType) {
+        return getOrCreate(_space.graph().resolver().stringToLongKey(key), elemType);
+    }
 
     @Override
     public final byte getType(long index) {
@@ -1238,6 +1272,11 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
             }
         }
         return -1;
+    }
+
+    @Override
+    public byte getTypeFromKey(String key) {
+        return getType(_space.graph().resolver().stringToLongKey(key));
     }
 
     private static long incrementCopyOnWriteCounter(long root_addr) {

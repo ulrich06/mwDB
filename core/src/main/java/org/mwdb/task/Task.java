@@ -38,73 +38,81 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask globalFind(String indexName, String query) {
+    public KTask fromIndex(String indexName, String query) {
         addTask(new ActionGlobalFind(indexName, query));
         return this;
     }
 
     @Override
-    public KTask globalAll(String indexName) {
+    public KTask fromIndexAll(String indexName) {
         addTask(new ActionGlobalAll(indexName));
         return this;
     }
 
     @Override
-    public KTask with(String name, String pattern) {
+    public KTask selectWith(String name, String pattern) {
         addTask(new ActionWith(name, pattern));
         return this;
     }
 
     @Override
-    public KTask without(String name, String pattern) {
+    public KTask selectWithout(String name, String pattern) {
         addTask(new ActionWithout(name, pattern));
         return this;
     }
 
     @Override
-    public KTask has(String name) {
-        addTask(new ActionHas(name));
-        return this;
-    }
-
-    @Override
-    public KTask count() {
-        addTask(new ActionCount());
-        return this;
-    }
-
-    @Override
-    public KTask as(String variableName) {
+    public KTask asVar(String variableName) {
         addTask(new ActionAs(variableName));
         return this;
     }
 
     @Override
-    public KTask from(String variableName) {
+    public KTask fromVar(String variableName) {
         addTask(new ActionFrom(variableName));
         return this;
     }
 
     @Override
-    public KTask filter(KTaskFilter filter) {
+    public KTask select(KTaskFilter filter) {
         addTask(new ActionFilter(filter));
         return this;
     }
 
     @Override
-    public KTask relation(String relation) {
+    public KTask traverse(String relation) {
         addTask(new ActionRelation(relation));
         return this;
     }
 
     @Override
-    public KTask input(Object inputValue) {
+    public KTask map(KTaskMap mapFunction) {
+        return null;
+    }
+
+    @Override
+    public KTask flatMap(KTaskFlatMap flatMapFunction) {
+        return null;
+    }
+
+    @Override
+    public KTask group(KTaskGroup groupFunction) {
+        return null;
+    }
+
+    @Override
+    public KTask groupWhere(KTask groupSubTask) {
+        return null;
+    }
+
+    @Override
+    public KTask from(Object inputValue) {
         addTask(new ActionInput(inputValue));
         return this;
     }
 
     @Override
-    public KTask sub(KTask subTask) {
+    public KTask trigger(KTask subTask) {
         addTask(new ActionSub(subTask));
         return this;
     }
@@ -116,19 +124,19 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask asyncThen(KTaskAction p_action) {
+    public KTask thenAsync(KTaskAction p_action) {
         addTask(p_action);
         return this;
     }
 
     @Override
     public void execute() {
-        executeAsyncThen(null, null, null);
+        executeThenAsync(null, null, null);
     }
 
     @Override
     public void executeThen(KTaskAction p_action) {
-        executeAsyncThen(null, null, new ActionWrapper(p_action));
+        executeThenAsync(null, null, new ActionWrapper(p_action));
     }
 
     @Override
@@ -138,23 +146,18 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask pforeach(KTask subTask) {
+    public KTask foreachParallel(KTask subTask) {
         addTask(new ActionParForeach(subTask));
         return this;
     }
 
     @Override
-    public KTask where(KTask subTask) {
+    public KTask selectWhere(KTask subTask) {
         return null;
     }
 
     @Override
-    public KTask values(String name) {
-        return this;
-    }
-
-    @Override
-    public void executeAsyncThen(final KTaskContext parent, final Object initialResult, final KTaskAction p_finalAction) {
+    public void executeThenAsync(final KTaskContext parent, final Object initialResult, final KTaskAction p_finalAction) {
 
         final KTaskAction[] final_actions = new KTaskAction[_actionCursor + 2];
         System.arraycopy(_actions, 0, final_actions, 0, _actionCursor);
@@ -178,5 +181,8 @@ public class Task implements KTask {
             }
         });
     }
+
+
+
 
 }

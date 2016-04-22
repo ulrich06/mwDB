@@ -14,7 +14,7 @@ public class ActionSub implements KTaskAction {
 
     @Override
     public void eval(KTaskContext context) {
-        _subTask.executeAsyncThen(context, context.getPreviousResult(), new KTaskAction() {
+        _subTask.executeThenAsync(context, context.getPreviousResult(), new KTaskAction() {
             @Override
             public void eval(KTaskContext subTaskFinalContext) {
                 context.setResult(subTaskFinalContext);

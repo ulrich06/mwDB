@@ -29,7 +29,7 @@ public class ActionParForeach implements KTaskAction {
         });
         for (int i = 0; i < castedResult.length; i++) {
             final int finalI = i;
-            _subTask.executeAsyncThen(context, castedResult[0], new KTaskAction() {
+            _subTask.executeThenAsync(context, castedResult[0], new KTaskAction() {
                 @Override
                 public void eval(final KTaskContext subTaskFinalContext) {
                     results[finalI] = subTaskFinalContext;

@@ -36,6 +36,11 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
         this._graph = p_graph;
     }
 
+    @Override
+    public KGraph graph() {
+        return this._graph;
+    }
+
     final class InternalDirtyStateList implements KChunkIterator {
 
         private final AtomicInteger _nextCounter;
@@ -136,7 +141,7 @@ public class HeapChunkSpace implements KChunkSpace, KChunkListener {
             if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
                 //GET VALUE
                 if (foundChunk.mark() == 1) {
-                    //was at zero before, risky operation, check with LRU
+                    //was at zero before, risky operation, check selectWith LRU
                     if (this._lru.dequeue(m)) {
                         return foundChunk;
                     } else {

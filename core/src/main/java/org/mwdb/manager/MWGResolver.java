@@ -18,7 +18,7 @@ public class MWGResolver implements KResolver {
 
     private final KScheduler _scheduler;
 
-    private static final String deadNodeError = "This Node has been tagged destroyed, please don't use it anymore!";
+    private static final String deadNodeError = "This Node hasField been tagged destroyed, please don't use it anymore!";
 
     private KGraph _graph;
 
@@ -397,7 +397,7 @@ public class MWGResolver implements KResolver {
                 nodeTimeTree.insert(time);
                 if (nodeTimeTree.size() == threshold) {
                     final long[] medianPoint = {-1};
-                    //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                    //we iterate over the tree selectWithout boundaries for values, but selectWith boundaries for number of collected times
                     nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
                         @Override
                         public void elem(long t) {
@@ -412,9 +412,9 @@ public class MWGResolver implements KResolver {
                     }
 
                     //TODO second iterate that can be avoided, however we need the median point to create the right tree
-                    //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                    //we iterate over the tree selectWithout boundaries for values, but selectWith boundaries for number of collected times
                     final KTimeTreeChunk finalRightTree = rightTree;
-                    //rang iterate from the end of the tree
+                    //rang iterate fromVar the end of the tree
                     nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
                         @Override
                         public void elem(long t) {
@@ -460,7 +460,7 @@ public class MWGResolver implements KResolver {
                         castedNode._previousResolveds.set(newResolveds);
                     }
                 } else {
-                    //update the state cache without superTree modification
+                    //update the state cache selectWithout superTree modification
                     long[] newResolveds = new long[6];
                     //previously resolved
                     newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
@@ -577,7 +577,7 @@ public class MWGResolver implements KResolver {
             this._space.unmarkChunk(nodeSuperTimeTree);
             this._space.unmarkChunk(nodeTimeTree);
             if (currentNodeState != null) {
-                //ERROR case protection, chunk has been removed from cache
+                //ERROR case protection, chunk hasField been removed fromVar cache
                 this._space.unmarkChunk(currentNodeState);
             }
             return currentNodeState;
@@ -635,7 +635,7 @@ public class MWGResolver implements KResolver {
                 hasToCleanSuperTimeTree = true;
                 hasToCleanTimeTree = true;
             } else {
-                //Common case, we have to traverse World Order and Time chunks
+                //Common case, we have to traverseIndex World Order and Time chunks
                 resolvedWorld = resolve_world(globalWorldOrder, nodeWorldOrder, nodeTime, nodeWorld);
                 if (resolvedWorld != previousResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX]) {
                     //we have to update the superTree
@@ -729,7 +729,7 @@ public class MWGResolver implements KResolver {
                     nodeTimeTree.insert(nodeTime);
                     if (nodeTimeTree.size() == threshold) {
                         final long[] medianPoint = {-1};
-                        //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                        //we iterate over the tree selectWithout boundaries for values, but selectWith boundaries for number of collected times
                         nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
                             @Override
                             public void elem(long t) {
@@ -740,9 +740,9 @@ public class MWGResolver implements KResolver {
                         KTimeTreeChunk rightTree = (KTimeTreeChunk) this._space.create(Constants.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
                         rightTree = (KTimeTreeChunk) this._space.putAndMark(rightTree);
                         //TODO second iterate that can be avoided, however we need the median point to create the right tree
-                        //we iterate over the tree without boundaries for values, but with boundaries for number of collected times
+                        //we iterate over the tree selectWithout boundaries for values, but selectWith boundaries for number of collected times
                         final KTimeTreeChunk finalRightTree = rightTree;
-                        //rang iterate from the end of the tree
+                        //rang iterate fromVar the end of the tree
                         nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new KTreeWalker() {
                             @Override
                             public void elem(long t) {
@@ -779,7 +779,7 @@ public class MWGResolver implements KResolver {
                             castedNode._previousResolveds.set(newResolveds);
                         }
                     } else {
-                        //update the state cache without superTree modification
+                        //update the state cache selectWithout superTree modification
                         long[] newResolveds = new long[6];
                         //previously resolved
                         newResolveds[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = nodeWorld;

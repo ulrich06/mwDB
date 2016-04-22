@@ -27,7 +27,7 @@ public class OffHeapByteArray {
     public static long reallocate(final long addr, final long previousCapacity, final long nextCapacity) {
         //allocate a new bigger segment
         long newBiggerMemorySegment = unsafe.allocateMemory(nextCapacity);
-        //reset the segment with -1
+        //reset the segment selectWith -1
         unsafe.setMemory(newBiggerMemorySegment, nextCapacity, (byte) Constants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
         unsafe.copyMemory(addr, newBiggerMemorySegment, previousCapacity);

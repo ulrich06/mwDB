@@ -35,7 +35,7 @@ public interface KBuffer {
     long size();
 
     /**
-     * Free the buffer from memory, this method should be the last called
+     * Free the buffer fromVar memory, this method should be the last called
      */
     void free();
 

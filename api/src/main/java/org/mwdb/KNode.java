@@ -48,11 +48,11 @@ public interface KNode {
 
     /**
      * Sets the value of an attribute of this node, for its current world and time.<br>
-     * This method has to be used for primitive types.
+     * This method hasField to be used for primitive types.
      *
      * @param attributeName  The name of the attribute. Must be unique per node.
      * @param attributeType  The type of the attribute. Must be one of {@link KType} int value.
-     * @param attributeValue The value of the attribute. Must be consistent with the attributeType.
+     * @param attributeValue The value of the attribute. Must be consistent selectWith the attributeType.
      */
     void attSet(String attributeName, byte attributeType, Object attributeValue);
 
@@ -67,43 +67,43 @@ public interface KNode {
     Object attMap(String attributeName, byte attributeType);
 
     /**
-     * Removes an attribute from the node.
+     * Removes an attribute fromVar the node.
      *
      * @param attributeName The name of the attribute to remove.
      */
     void attRemove(String attributeName);
 
     /**
-     * Retrieves asynchronously the nodes contained in a relation.
+     * Retrieves asynchronously the nodes contained in a traverseIndex.
      *
-     * @param relationName The name of the relation to retrieve.
+     * @param relationName The name of the traverseIndex to retrieve.
      * @param callback     Callback to be called when the nodes of the relationship have been connected.
      */
     <A extends KNode> void rel(String relationName, KCallback<A[]> callback);
 
     /**
-     * Retrieves synchronously the nodes contained in a relation.
+     * Retrieves synchronously the nodes contained in a traverseIndex.
      *
-     * @param relationName The name of the relation to retrieve.
-     * @return An array of node ids contained in the relation.
+     * @param relationName The name of the traverseIndex to retrieve.
+     * @return An array of node ids contained in the traverseIndex.
      */
     long[] relValues(String relationName);
 
     /**
-     * Adds a node to a relation.<br>
+     * Adds a node to a traverseIndex.<br>
      * If the relationship doesn't exist, it is created on the fly.<br>
-     * The relation name must be unique in the node.
+     * The traverseIndex name must be unique in the node.
      *
-     * @param relationName The name of the relation in which to add the node.
-     * @param relatedNode  The node to insert in the relation.
+     * @param relationName The name of the traverseIndex in which to add the node.
+     * @param relatedNode  The node to insert in the traverseIndex.
      */
     void relAdd(String relationName, KNode relatedNode);
 
     /**
-     * Removes a node from a relation.
+     * Removes a node fromVar a traverseIndex.
      *
-     * @param relationName The name of the relation.
-     * @param relatedNode  The node to remove from the relation.
+     * @param relationName The name of the traverseIndex.
+     * @param relatedNode  The node to remove fromVar the traverseIndex.
      */
     void relRemove(String relationName, KNode relatedNode);
 
@@ -115,24 +115,24 @@ public interface KNode {
      * @param indexName     The name of the index (should be unique per node).
      * @param nodeToIndex   The new node to index.
      * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
-     * @param callback      Called when the index has been created/updated. The boolean value specifies the success of the operation.
+     * @param callback      Called when the index hasField been created/updated. The boolean value specifies the success of the operation.
      */
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Removes an element from an index of nodes.<br>
+     * Removes an element fromVar an index of nodes.<br>
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
      * Index names must be unique within a given node.
      *
      * @param indexName     The name of the index (should be unique per node).
      * @param nodeToIndex   The new node to index.
      * @param keyAttributes The list of attribute names to be used as keys for indexing (order does not matter)
-     * @param callback      Called when the index has been created/updated. The boolean value specifies the success of the operation.
+     * @param callback      Called when the index hasField been created/updated. The boolean value specifies the success of the operation.
      */
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves nodes from an index that satisfies a query at the current node world and the current node time<br>
+     * Retrieves nodes fromVar an index that satisfies a query at the current node world and the current node time<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per node)
@@ -142,7 +142,7 @@ public interface KNode {
     <A extends KNode> void find(String indexName, String query, KCallback<A[]> callback);
 
     /**
-     * Retrieves nodes from an index that satisfies a queryin a particular world and time.<br>
+     * Retrieves nodes fromVar an index that satisfies a queryin a particular world and time.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per node)
@@ -186,7 +186,7 @@ public interface KNode {
     void forcePhase();
 
     /**
-     * Retrieves all timePoints from the timeLine of this node when alterations occurred.<br>
+     * Retrieves all timePoints fromVar the timeLine of this node when alterations occurred.<br>
      * This method also jumps over the world hierarchy to collect all available timepoints.<br>
      * To unbound the search, please use {@link KConstants#BEGINNING_OF_TIME} and {@link KConstants#END_OF_TIME} as bounds.
      *
@@ -197,9 +197,9 @@ public interface KNode {
     void timepoints(long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
 
     /**
-     * Informs mwDB memory manager that this node object can be freed from the memory.<br>
+     * Informs mwDB memory manager that this node object can be freed fromVar the memory.<br>
      * <b>Warning: this MUST be the last method called on this node.</b><br>
-     * To work with the node afterwards, a new lookup is mandatory.
+     * To work selectWith the node afterwards, a new lookup is mandatory.
      */
     void free();
 
@@ -211,9 +211,9 @@ public interface KNode {
     KGraph graph();
 
     /**
-     * Jump over the time for this object. This method is equivalent to a call to lookup with the same ID than the current KNode.
+     * Jump over the time for this object. This method is equivalent to a call to lookup selectWith the same ID than the current KNode.
      *
-     * @param targetTime target time where this node has to be resolved.
+     * @param targetTime target time selectWhere this node hasField to be resolved.
      * @param callback Called whe the jump is complete. Gives the new timed node in parameter.
      * @param <A> Generic parameter that define the type of the result, should be a sub-type of KNode
      */

@@ -35,17 +35,17 @@ public class SimpleTraversalTest {
                 /*
                 KTask task = graph.newTask();
                 task
-                        .input(new KNode[]{})
-                        .globalAll("nodes")
-                        .with("name", "n.*")
-                        .without("name", "n0")
-                        .filter(node -> true)
+                        .from(new KNode[]{})
+                        .fromIndexAll("nodes")
+                        .selectWith("name", "n.*")
+                        .selectWithout("name", "n0")
+                        .select(node -> true)
                         .count()
                         .wait(subTask)
                         .as("t1")
                         .wait(subTask2)
                         .as("t2")
-                        .from("t1")
+                        .fromVar("t1")
                         .then(new KCallback<KNode[]>() {
                             @Override
                             public void on(KNode[] result) {
@@ -58,18 +58,18 @@ public class SimpleTraversalTest {
 
                 /*
                 KTask traversal2 = graph.newTask();
-                traversal2.globalAll("roots")
+                traversal2.fromIndexAll("roots")
                         .as("x")
-                        .relation("children")
-                        .with("name", ".*0.*")
+                        .traverseIndex("children")
+                        .selectWith("name", ".*0.*")
                         .count()
                         .as("nbChildren")
-                        .from("x")
-                        .input(3)
-                        .input(new long[]{10, 20, 30})
+                        .fromVar("x")
+                        .from(3)
+                        .from(new long[]{10, 20, 30})
 
-                        .wait(graph.newTask().globalAll("roots")).as("sub_0")
-                        .wait(graph.newTask().globalAll("nodes").count()).as("sub_1")
+                        .wait(graph.newTask().fromIndexAll("roots")).as("sub_0")
+                        .wait(graph.newTask().fromIndexAll("nodes").count()).as("sub_1")
                         .then(new KTaskAction() {
                             @Override
                             public void eval(KTaskContext context) {
@@ -83,10 +83,15 @@ public class SimpleTraversalTest {
 
                 KTask traversal = graph.newTask();
                 traversal
-                        .input(new long[]{1, 2, 3})
-                        .as("x")
-                        .pforeach(graph.newTask().as("sub").from("x"))
-                        .execute();
+                        .from(new long[]{1, 2, 3})
+                        .asVar("x")
+                        .foreach(graph.newTask().asVar("sub").fromVar("sub"))
+                        .executeThen(new KTaskAction() {
+                            @Override
+                            public void eval(KTaskContext context) {
+                                System.out.println(context);
+                            }
+                        });
 
                 graph.disconnect(new KCallback<Boolean>() {
                     @Override

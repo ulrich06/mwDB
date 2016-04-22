@@ -3,6 +3,7 @@ package chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.chunk.KChunk;
 import org.mwdb.chunk.KChunkListener;
 import org.mwdb.chunk.KLongLongMap;
@@ -94,5 +95,10 @@ public class LongLongMapTest implements KChunkListener {
     @Override
     public void declareDirty(KChunk chunk) {
         dirtyCount++;
+    }
+
+    @Override
+    public KGraph graph() {
+        return null;
     }
 }

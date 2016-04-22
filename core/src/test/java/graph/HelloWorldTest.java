@@ -40,7 +40,7 @@ public class HelloWorldTest {
 
                 KNode node0 = graph.newNode(0, 0);
 
-                //do something with the node
+                //do something selectWith the node
                 graph.lookup(0, 0, node0.id(), new KCallback<KNode>() {
                     @Override
                     public void on(KNode result) {
@@ -118,7 +118,7 @@ public class HelloWorldTest {
                 long[] refValuesNull = node1.relValues("children");
                 Assert.assertEquals(0, refValuesNull.length);
 
-                //destroy the node explicitly without waiting GC
+                //destroy the node explicitly selectWithout waiting GC
                 node0.free();
                 node1.free();
                 node2.free();
