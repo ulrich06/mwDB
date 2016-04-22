@@ -28,6 +28,23 @@ public interface KGaussianNaiveBayesianNode extends KNode {
      */
     double getBufferErrorFraction();
 
+    /**
+     * Adds new vector of values, recalculates if necessary.
+     * @param value New value vector
+     */
+    void addValue(double[] value);
+
+    /**
+     * Initialize should be called before using the node. Only once.
+     *
+     * @param inputDimension
+     * @param classIndex
+     * @param bufferSize
+     * @param highErrorThreshold
+     * @param lowErrorThreshold
+     */
+    void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold);
+
     //Methods below are for debugging mainly. Might be unmaiontained
     /**
      *

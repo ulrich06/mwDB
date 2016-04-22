@@ -99,12 +99,7 @@ public class GaussianNaiveBayesianNodeTest {
 
                 int errors = 0;
 
-                //Set the attributes
-                gaussianNBNode.attSet(KGaussianNaiveBayesianNode.CLASS_INDEX_KEY, KType.INT, 1);
-                gaussianNBNode.attSet(KGaussianNaiveBayesianNode.INPUT_DIM_KEY, KType.INT, 2);
-                gaussianNBNode.attSet(KGaussianNaiveBayesianNode.BUFFER_SIZE_KEY, KType.INT, 60);
-                gaussianNBNode.attSet(KGaussianNaiveBayesianNode.LOW_ERROR_THRESH_KEY, KType.DOUBLE, 0.2);
-                gaussianNBNode.attSet(KGaussianNaiveBayesianNode.HIGH_ERROR_THRESH_KEY, KType.DOUBLE, 0.3);
+                gaussianNBNode.initialize(2,1,60,0.3, 0.2);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     gaussianNBNode.attSet("value", KType.DOUBLE_ARRAY, dummyDataset1[i]);

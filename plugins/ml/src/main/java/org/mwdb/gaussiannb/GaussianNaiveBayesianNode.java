@@ -3,6 +3,7 @@ package org.mwdb.gaussiannb;
 import org.mwdb.*;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.operation.MultivariateNormalDistribution;
+import org.mwdb.plugin.KResolver;
 
 import java.util.*;
 
@@ -14,6 +15,9 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     //TODO Any synchronization?
 
     //TODO Try out changing parameters on the fly
+
+    //NOT final
+    private KResolver.KNodeState currentState = null;
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -74,7 +78,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @return Class index - index in a value array, where class label is supposed to be
      */
     private int getClassIndex(){
-        Object objClassIndex = att(CLASS_INDEX_KEY);
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(CLASS_INDEX_KEY));
         Objects.requireNonNull(objClassIndex, "Class index must be not null");
         return ((Integer)objClassIndex).intValue();
     }
@@ -83,7 +87,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @return Class index - index in a value array, where class label is supposed to be
      */
     private int getBufferSize(){
-        Object objClassIndex = att(BUFFER_SIZE_KEY);
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(BUFFER_SIZE_KEY));
         Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
         return ((Integer)objClassIndex).intValue();
     }
@@ -92,7 +96,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @return Class index - index in a value array, where class label is supposed to be
      */
     private int getInputDimensions(){
-        Object objClassIndex = att(INPUT_DIM_KEY);
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(INPUT_DIM_KEY));
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
         return ((Integer)objClassIndex).intValue();
     }
@@ -116,10 +120,6 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      */
     public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution){
         super(p_world, p_time, p_id, p_graph, currentResolution);
-        //TODO Understand why those don't work
-        //attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
-        //attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
-        //setValueBuffer(new double[0]); //Value buffer, starts empty
     }
 
     @Override
@@ -156,7 +156,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             newKnownClasses[i] = knownClasses[i];
         }
         newKnownClasses[knownClasses.length] = classLabel;
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, newKnownClasses);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, newKnownClasses);
     }
 
     /**
@@ -164,7 +164,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      *
      * @param value New value to add; {@code null} disallowed
      */
-    private void addValue(double value[]){
+    public void addValue(double value[]){
         illegalArgumentIfFalse(value != null, "Value must be not null");
         illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
 
@@ -175,62 +175,82 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         }
     }
 
+    @Override
+    public void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold){
+        illegalArgumentIfFalse(currentState == null, "Already initialized before");
+        illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
+        illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
+        illegalArgumentIfFalse((highErrorThreshold>=0)&&(highErrorThreshold<=1), "Higher error threshold should be within [0;1]");
+        illegalArgumentIfFalse((lowErrorThreshold>=0)&&(lowErrorThreshold<=1), "Lower error threshold should be within [0;1]");
+        illegalArgumentIfFalse(highErrorThreshold>=lowErrorThreshold, "High error threshold should be above or equal to lower");
+        illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
+
+        currentState = graph().resolver().resolveState(this, true);
+
+        //Set the attributes
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.CLASS_INDEX_KEY), KType.INT, classIndex);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.INPUT_DIM_KEY), KType.INT, inputDimension);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.BUFFER_SIZE_KEY), KType.INT, bufferSize);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.LOW_ERROR_THRESH_KEY), KType.DOUBLE, lowErrorThreshold);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.HIGH_ERROR_THRESH_KEY), KType.DOUBLE, highErrorThreshold);
+    }
+
     private final void setTotal(int classNum, int val){
         assert val >= 0;
-        attSet(INTERNAL_TOTAL_KEY_PREFIX+classNum, KType.INT, val);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+classNum), KType.INT, val);
     }
 
     private final void setSums(int classNum, double[] vals){
         assert vals != null;
-        attSet(INTERNAL_SUM_KEY_PREFIX+classNum, KType.DOUBLE_ARRAY, vals);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum), KType.DOUBLE_ARRAY, vals);
     }
 
     private final void setValueBuffer(double[] valueBuffer){
         assert valueBuffer != null;
-        attSet(INTERNAL_VALUE_BUFFER_KEY, KType.DOUBLE_ARRAY, valueBuffer);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), KType.DOUBLE_ARRAY, valueBuffer);
     }
 
     private final void setSumsSquared(int classNum, double[] vals){
         assert vals != null;
-        attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum, KType.DOUBLE_ARRAY, vals);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum), KType.DOUBLE_ARRAY, vals);
     }
 
     private final int getClassTotal(int classNum){
-        Object objClassTotal = att(INTERNAL_TOTAL_KEY_PREFIX+classNum);
+        Object objClassTotal = currentState.get(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+classNum));
         Objects.requireNonNull(objClassTotal, "Class total must be not null (class "+classNum+")");
         return ((Integer)objClassTotal).intValue();
     }
 
     private double[] getSums(int classNum){
-        Object objSum = att(INTERNAL_SUM_KEY_PREFIX+classNum);
+        Object objSum = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum));
         Objects.requireNonNull(objSum, "Sums must be not null (class "+classNum+")");
         return (double [])objSum;
     }
 
     private double getHigherErrorThreshold(){
-        Object objHET = att(HIGH_ERROR_THRESH_KEY);
+        Object objHET = currentState.get(_resolver.stringToLongKey(HIGH_ERROR_THRESH_KEY));
         Objects.requireNonNull(objHET, "Higher error threshold must be not null");
         return (double)objHET;
     }
 
     private double getLowerErrorThreshold(){
-        Object objLET = att(LOW_ERROR_THRESH_KEY);
+        Object objLET = currentState.get(_resolver.stringToLongKey(LOW_ERROR_THRESH_KEY));
         Objects.requireNonNull(objLET, "Lower error threshold must be not null");
         return (double)objLET;
     }
 
     private double[] getValueBuffer(){
-        Object objValueBuffer = att(INTERNAL_VALUE_BUFFER_KEY);
+        Object objValueBuffer = currentState.get(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY));
         if (objValueBuffer==null){
             double emptyValueBuffer[] = new double[0];
-            attSet("_valueBuffer", KType.DOUBLE_ARRAY, emptyValueBuffer); //Value buffer, starts empty
+            currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), KType.DOUBLE_ARRAY, emptyValueBuffer); //Value buffer, starts empty
             return emptyValueBuffer;
         }
         return (double [])objValueBuffer;
     }
 
     private double[] getSumSquares(int classNum){
-        Object objSumSq = att(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum);
+        Object objSumSq = currentState.get(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum));
         Objects.requireNonNull(objSumSq, "Sums of squares must be not null (class "+classNum+")");
         return (double [])objSumSq;
     }
@@ -240,7 +260,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @param classNum Number of class
      */
     private void initializeClassIfNecessary(int classNum){
-        Object oldSumsObj = att(INTERNAL_SUM_KEY_PREFIX+classNum);
+        Object oldSumsObj = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum));
         if (oldSumsObj!=null){
             //Is there, but could be deleted
             double oldSums[] = (double[])oldSumsObj;
@@ -379,12 +399,12 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     }
 
     private int[] getKnownClasses() {
-        Object objKnownClasses = att(INTERNAL_KNOWN_CLASSES_LIST);
+        Object objKnownClasses = currentState.get(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST));
         if (objKnownClasses!=null) {
             return (int[]) objKnownClasses;
         }
         int emptyClassList[] = new int[0];
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, emptyClassList);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, emptyClassList);
         return emptyClassList;
     }
 
@@ -498,18 +518,19 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     @Override
     public boolean isInBootstrapMode() {
-        Object objBootstrapMode = att(INTERNAL_BOOTSTRAP_MODE_KEY);
+        Object objBootstrapMode = currentState.get(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY));
         if (objBootstrapMode!=null){
             return ((Boolean)objBootstrapMode).booleanValue();
         }
-        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
+        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), KType.BOOL, true); //Start in bootstrap mode
         return true;
     }
 
     public void setBootstrapMode(boolean newBootstrapMode) {
-        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, newBootstrapMode);
-
         if (newBootstrapMode){
+            //New state starts now
+            currentState = graph().resolver().resolveState(this, true);
+
             //It would have been easy if not for keeping the buffers
             removeAllClasses();
 
@@ -523,16 +544,17 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
                 startIndex += dims;
             }
         }
+        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), KType.BOOL, newBootstrapMode);
     }
 
     private void removeAllClasses(){
         int classes[] = getKnownClasses();
         for (int curClass : classes){
-            attSet(INTERNAL_TOTAL_KEY_PREFIX+curClass, KType.INT, 0);
-            attSet(INTERNAL_SUM_KEY_PREFIX+curClass, KType.DOUBLE_ARRAY, new double[0]);
-            attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass, KType.DOUBLE_ARRAY, new double[0]);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+curClass), KType.INT, 0);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+curClass), KType.DOUBLE_ARRAY, new double[0]);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass), KType.DOUBLE_ARRAY, new double[0]);
         }
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, new int[0]);
     }
 
     public String allDistributionsToString(){
