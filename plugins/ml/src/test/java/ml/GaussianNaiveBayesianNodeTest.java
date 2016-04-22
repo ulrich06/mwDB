@@ -99,11 +99,6 @@ public class GaussianNaiveBayesianNodeTest {
 
                 int errors = 0;
 
-                //TODO Those should not be necessary
-                gaussianNBNode.attSet("_knownClassesList", KType.INT_ARRAY, new int[0]);
-                gaussianNBNode.attSet("_bootstrapMode", KType.BOOL, true); //Start in bootstrap mode
-                gaussianNBNode.attSet("_valueBuffer", KType.DOUBLE_ARRAY, new double[0]); //Value buffer, starts empty
-
                 //Set the attributes
                 gaussianNBNode.attSet(KGaussianNaiveBayesianNode.CLASS_INDEX_KEY, KType.INT, 1);
                 gaussianNBNode.attSet(KGaussianNaiveBayesianNode.INPUT_DIM_KEY, KType.INT, 2);

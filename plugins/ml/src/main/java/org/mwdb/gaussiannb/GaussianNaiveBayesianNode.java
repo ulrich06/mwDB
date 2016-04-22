@@ -13,8 +13,6 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     //TODO Any synchronization?
 
-    //TODO Drop class value to 0 before any prediction/learning?
-
     //TODO Try out changing parameters on the fly
 
     /**
@@ -124,41 +122,6 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         //setValueBuffer(new double[0]); //Value buffer, starts empty
     }
 
-    //TODO This constructor needs to be removed
-
-    /**
-     * {@inheritDoc}
-     * @param clIndex Index of class attribute. That attribute will not participate in Gaussian creation.
-     * @param bufSize Size of buffer is the minimum size for bootstrap and a size of sliding window for accuracy estimation
-     * @param dims Expected dimensionality of value vector
-     */
-    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution, int clIndex,
-                                     int bufSize, int dims, double lowerErrorThreshold, double higherErrorThreshold){
-        super(p_world, p_time, p_id, p_graph, currentResolution);
-        //TODO use assertions?
-        illegalArgumentIfFalse(clIndex >= 0, "Class index should be non-negative");
-        illegalArgumentIfFalse(dims > clIndex, "Class index should be less than number of dimensions");
-        illegalArgumentIfFalse(bufSize > 0, "Sliding window size should be positive");
-        illegalArgumentIfFalse( (lowerErrorThreshold >= 0)&&(lowerErrorThreshold <= 1),
-                "Lower error threshold must be within [0;1] interval");
-        illegalArgumentIfFalse( (higherErrorThreshold >= 0)&&(higherErrorThreshold <= 1),
-                "Higher error threshold must be within [0;1] interval");
-        illegalArgumentIfFalse(higherErrorThreshold>=lowerErrorThreshold,
-                "Higher error threshold must be above or equal to lower error threshold");
-
-        attSet(CLASS_INDEX_KEY, KType.INT, clIndex);
-        attSet(INPUT_DIM_KEY, KType.INT, dims);
-        attSet(BUFFER_SIZE_KEY, KType.INT, bufSize);
-        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
-        attSet(LOW_ERROR_THRESH_KEY, KType.DOUBLE, lowerErrorThreshold);
-        attSet(HIGH_ERROR_THRESH_KEY, KType.DOUBLE, higherErrorThreshold);
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
-
-        //TODO initialize attributes like sums, etc. ? For now - not necessary.
-
-        setValueBuffer(new double[0]); //Value buffer, starts empty
-    }
-
     @Override
     public void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback) {
         // Nothing for now
@@ -258,7 +221,11 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     private double[] getValueBuffer(){
         Object objValueBuffer = att(INTERNAL_VALUE_BUFFER_KEY);
-        Objects.requireNonNull(objValueBuffer, "Value buffer must be not null");
+        if (objValueBuffer==null){
+            double emptyValueBuffer[] = new double[0];
+            attSet("_valueBuffer", KType.DOUBLE_ARRAY, emptyValueBuffer); //Value buffer, starts empty
+            return emptyValueBuffer;
+        }
         return (double [])objValueBuffer;
     }
 
@@ -413,8 +380,12 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     private int[] getKnownClasses() {
         Object objKnownClasses = att(INTERNAL_KNOWN_CLASSES_LIST);
-        Objects.requireNonNull(objKnownClasses, "Known classes list must be not null");
-        return (int [])objKnownClasses;
+        if (objKnownClasses!=null) {
+            return (int[]) objKnownClasses;
+        }
+        int emptyClassList[] = new int[0];
+        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, emptyClassList);
+        return emptyClassList;
     }
 
 
@@ -528,8 +499,11 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     @Override
     public boolean isInBootstrapMode() {
         Object objBootstrapMode = att(INTERNAL_BOOTSTRAP_MODE_KEY);
-        Objects.requireNonNull(objBootstrapMode, "Class index must be not null");
-        return ((Boolean)objBootstrapMode).booleanValue();
+        if (objBootstrapMode!=null){
+            return ((Boolean)objBootstrapMode).booleanValue();
+        }
+        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
+        return true;
     }
 
     public void setBootstrapMode(boolean newBootstrapMode) {
