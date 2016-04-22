@@ -6,7 +6,7 @@ import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
 import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
 import org.mwdb.polynomial.KPolynomialNode;
 import org.mwdb.polynomial.PolynomialNode;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

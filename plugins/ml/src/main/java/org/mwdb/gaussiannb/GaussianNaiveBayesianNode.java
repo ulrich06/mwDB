@@ -1,7 +1,9 @@
 package org.mwdb.gaussiannb;
 
 import org.mwdb.*;
+import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.operation.MultivariateNormalDistribution;
+import org.mwdb.plugin.KResolver;
 
 import java.util.*;
 
@@ -12,19 +14,10 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     //TODO Any synchronization?
 
-    //TODO Drop class value to 0 before any prediction/learning?
-
     //TODO Try out changing parameters on the fly
 
-    /**
-     * Public keys - node parameters, values, etc.
-     */
-    public static final String VALUE_KEY = "value";
-    public static final String CLASS_INDEX_KEY = "classIndex";
-    public static final String BUFFER_SIZE_KEY = "bufferSize";
-    public static final String INPUT_DIM_KEY = "inputDimensions";
-    public static final String LOW_ERROR_THRESH_KEY = "lowerErrorThreshold";
-    public static final String HIGH_ERROR_THRESH_KEY = "higherErrorThreshold";
+    //NOT final
+    private KResolver.KNodeState currentState = null;
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -78,14 +71,14 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     //TODO Not allow setting?
 
     //TODO Remove these comments when completely done
-    private final Map<Integer, MultivariateNormalDistribution> distributions = new HashMap<>();
+    //private final Map<Integer, MultivariateNormalDistribution> distributions = new HashMap<>();
 
 
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
     private int getClassIndex(){
-        Object objClassIndex = att(CLASS_INDEX_KEY);
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(CLASS_INDEX_KEY));
         Objects.requireNonNull(objClassIndex, "Class index must be not null");
         return ((Integer)objClassIndex).intValue();
     }
@@ -93,8 +86,17 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
+    private int getBufferSize(){
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(BUFFER_SIZE_KEY));
+        Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
+        return ((Integer)objClassIndex).intValue();
+    }
+
+    /**
+     * @return Class index - index in a value array, where class label is supposed to be
+     */
     private int getInputDimensions(){
-        Object objClassIndex = att(INPUT_DIM_KEY);
+        Object objClassIndex = currentState.get(_resolver.stringToLongKey(INPUT_DIM_KEY));
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
         return ((Integer)objClassIndex).intValue();
     }
@@ -115,35 +117,9 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     /**
      * {@inheritDoc}
-     * @param clIndex Index of class attribute. That attribute will not participate in Gaussian creation.
-     * @param bufSize Size of buffer is the minimum size for bootstrap and a size of sliding window for accuracy estimation
-     * @param dims Expected dimensionality of value vector
      */
-    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution, int clIndex,
-                                     int bufSize, int dims, double lowerErrorThreshold, double higherErrorThreshold){
+    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, KGraph p_graph, long[] currentResolution){
         super(p_world, p_time, p_id, p_graph, currentResolution);
-        //TODO use assertions?
-        illegalArgumentIfFalse(clIndex >= 0, "Class index should be non-negative");
-        illegalArgumentIfFalse(dims > clIndex, "Class index should be less than number of dimensions");
-        illegalArgumentIfFalse(bufSize > 0, "Sliding window size should be positive");
-        illegalArgumentIfFalse( (lowerErrorThreshold >= 0)&&(lowerErrorThreshold <= 1),
-                "Lower error threshold must be within [0;1] interval");
-        illegalArgumentIfFalse( (higherErrorThreshold >= 0)&&(higherErrorThreshold <= 1),
-                "Higher error threshold must be within [0;1] interval");
-        illegalArgumentIfFalse(higherErrorThreshold>=lowerErrorThreshold,
-                "Higher error threshold must be above or equal to lower error threshold");
-
-        attSet(CLASS_INDEX_KEY, KType.INT, clIndex);
-        attSet(INPUT_DIM_KEY, KType.INT, dims);
-        attSet(BUFFER_SIZE_KEY, KType.INT, bufSize);
-        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, true); //Start in bootstrap mode
-        attSet(LOW_ERROR_THRESH_KEY, KType.DOUBLE, lowerErrorThreshold);
-        attSet(HIGH_ERROR_THRESH_KEY, KType.DOUBLE, higherErrorThreshold);
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
-
-        //TODO initialize attributes like sums, etc. ? For now - not necessary.
-
-        setValueBuffer(new double[0]); //Value buffer, starts empty
     }
 
     @Override
@@ -180,7 +156,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             newKnownClasses[i] = knownClasses[i];
         }
         newKnownClasses[knownClasses.length] = classLabel;
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, newKnownClasses);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, newKnownClasses);
     }
 
     /**
@@ -188,9 +164,9 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      *
      * @param value New value to add; {@code null} disallowed
      */
-    private void addValue(double value[]){
+    public void addValue(double value[]){
         illegalArgumentIfFalse(value != null, "Value must be not null");
-        illegalArgumentIfFalse(value.length != getInputDimensions(), "Class index is not included in the value");
+        illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
 
         if (isInBootstrapMode()){
             addValueBootstrap(value);
@@ -199,58 +175,82 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         }
     }
 
+    @Override
+    public void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold){
+        illegalArgumentIfFalse(currentState == null, "Already initialized before");
+        illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
+        illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
+        illegalArgumentIfFalse((highErrorThreshold>=0)&&(highErrorThreshold<=1), "Higher error threshold should be within [0;1]");
+        illegalArgumentIfFalse((lowErrorThreshold>=0)&&(lowErrorThreshold<=1), "Lower error threshold should be within [0;1]");
+        illegalArgumentIfFalse(highErrorThreshold>=lowErrorThreshold, "High error threshold should be above or equal to lower");
+        illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
+
+        currentState = graph().resolver().resolveState(this, true);
+
+        //Set the attributes
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.CLASS_INDEX_KEY), KType.INT, classIndex);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.INPUT_DIM_KEY), KType.INT, inputDimension);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.BUFFER_SIZE_KEY), KType.INT, bufferSize);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.LOW_ERROR_THRESH_KEY), KType.DOUBLE, lowErrorThreshold);
+        currentState.set(_resolver.stringToLongKey(KGaussianNaiveBayesianNode.HIGH_ERROR_THRESH_KEY), KType.DOUBLE, highErrorThreshold);
+    }
+
     private final void setTotal(int classNum, int val){
         assert val >= 0;
-        attSet(INTERNAL_TOTAL_KEY_PREFIX+classNum, KType.INT, val);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+classNum), KType.INT, val);
     }
 
     private final void setSums(int classNum, double[] vals){
         assert vals != null;
-        attSet(INTERNAL_SUM_KEY_PREFIX+classNum, KType.DOUBLE_ARRAY, vals);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum), KType.DOUBLE_ARRAY, vals);
     }
 
     private final void setValueBuffer(double[] valueBuffer){
         assert valueBuffer != null;
-        attSet(INTERNAL_VALUE_BUFFER_KEY, KType.DOUBLE_ARRAY, valueBuffer);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), KType.DOUBLE_ARRAY, valueBuffer);
     }
 
     private final void setSumsSquared(int classNum, double[] vals){
         assert vals != null;
-        attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum, KType.DOUBLE_ARRAY, vals);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum), KType.DOUBLE_ARRAY, vals);
     }
 
     private final int getClassTotal(int classNum){
-        Object objClassTotal = att(INTERNAL_TOTAL_KEY_PREFIX+classNum);
+        Object objClassTotal = currentState.get(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+classNum));
         Objects.requireNonNull(objClassTotal, "Class total must be not null (class "+classNum+")");
         return ((Integer)objClassTotal).intValue();
     }
 
     private double[] getSums(int classNum){
-        Object objSum = att(INTERNAL_SUM_KEY_PREFIX+classNum);
+        Object objSum = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum));
         Objects.requireNonNull(objSum, "Sums must be not null (class "+classNum+")");
         return (double [])objSum;
     }
 
     private double getHigherErrorThreshold(){
-        Object objHET = att(HIGH_ERROR_THRESH_KEY);
+        Object objHET = currentState.get(_resolver.stringToLongKey(HIGH_ERROR_THRESH_KEY));
         Objects.requireNonNull(objHET, "Higher error threshold must be not null");
         return (double)objHET;
     }
 
     private double getLowerErrorThreshold(){
-        Object objLET = att(LOW_ERROR_THRESH_KEY);
+        Object objLET = currentState.get(_resolver.stringToLongKey(LOW_ERROR_THRESH_KEY));
         Objects.requireNonNull(objLET, "Lower error threshold must be not null");
         return (double)objLET;
     }
 
     private double[] getValueBuffer(){
-        Object objValueBuffer = att(INTERNAL_VALUE_BUFFER_KEY);
-        Objects.requireNonNull(objValueBuffer, "Value buffer must be not null");
+        Object objValueBuffer = currentState.get(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY));
+        if (objValueBuffer==null){
+            double emptyValueBuffer[] = new double[0];
+            currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), KType.DOUBLE_ARRAY, emptyValueBuffer); //Value buffer, starts empty
+            return emptyValueBuffer;
+        }
         return (double [])objValueBuffer;
     }
 
     private double[] getSumSquares(int classNum){
-        Object objSumSq = att(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum);
+        Object objSumSq = currentState.get(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+classNum));
         Objects.requireNonNull(objSumSq, "Sums of squares must be not null (class "+classNum+")");
         return (double [])objSumSq;
     }
@@ -260,8 +260,14 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      * @param classNum Number of class
      */
     private void initializeClassIfNecessary(int classNum){
-        if (att(INTERNAL_TOTAL_KEY_PREFIX+classNum)!=null){
-            return;
+        Object oldSumsObj = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+classNum));
+        if (oldSumsObj!=null){
+            //Is there, but could be deleted
+            double oldSums[] = (double[])oldSumsObj;
+            if (oldSums.length>0){ //Is the class deleted?
+                //Already initialized
+                return;
+            }
         }
 
         addToKnownClassesList(classNum);
@@ -307,7 +313,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             }
             k++;
         }
-        setSums(classNum, currentSumSquares);
+        setSumsSquared(classNum, currentSumSquares);
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
     }
 
@@ -343,13 +349,16 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
      */
     private void addValueBootstrap(double value[]){
         addValueToBuffer(value); //In bootstrap - no need to account for length
-        updateModelParameters(value);
 
-        //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = calculateErrorInBuffer();
-        if (errorInBuffer < getLowerErrorThreshold()){
-            setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
+        if (getNumValuesInBuffer() >= getBufferSize()){
+            //Predict for each value in the buffer. Calculate percentage of errors.
+            double errorInBuffer = getBufferErrorFraction();
+            if (errorInBuffer <= getLowerErrorThreshold()){
+                setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
+            }
         }
+
+        updateModelParameters(value);
     }
 
     private int getNumValuesInBuffer(){
@@ -390,16 +399,18 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     }
 
     private int[] getKnownClasses() {
-        Object objKnownClasses = att(INTERNAL_KNOWN_CLASSES_LIST);
-        Objects.requireNonNull(objKnownClasses, "Known classes list must be not null");
-        return (int [])objKnownClasses;
+        Object objKnownClasses = currentState.get(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST));
+        if (objKnownClasses!=null) {
+            return (int[]) objKnownClasses;
+        }
+        int emptyClassList[] = new int[0];
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, emptyClassList);
+        return emptyClassList;
     }
 
 
-    /**
-     * @return Prediction accuracy for data in the buffer. {@code NaN} if not applicable.
-     */
-    private double calculateErrorInBuffer(){
+    @Override
+    public int[] getPredictedBufferClasses(){
         //For each value in value buffer
         int startIndex = 0;
         final int dims = getInputDimensions();
@@ -407,7 +418,60 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         double valueBuffer[] = getValueBuffer();
         final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
         if (numValues == 0){
-            return Double.NaN;
+            return new int[0];
+        }
+
+        int result[] = new int[numValues];
+
+        final int clIndex = getClassIndex();
+        int i = 0;
+        while (startIndex+dims < valueBuffer.length){
+            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
+            result[i] = predictValue(curValue);
+            //Continue the loop
+            startIndex += dims;
+            i++;
+        }
+        return result;
+    }
+
+    @Override
+    public int[] getRealBufferClasses(){
+        //For each value in value buffer
+        int startIndex = 0;
+        final int dims = getInputDimensions();
+
+        double valueBuffer[] = getValueBuffer();
+        final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
+        if (numValues == 0){
+            return new int[0];
+        }
+
+        int result[] = new int[numValues];
+
+        final int clIndex = getClassIndex();
+        int i = 0;
+        while (startIndex+dims < valueBuffer.length){
+            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
+            result[i] = (int)curValue[clIndex];
+
+            //Continue the loop
+            startIndex += dims;
+            i++;
+        }
+        return result;
+    }
+
+    @Override
+    public int getBufferErrorCount(){
+        //For each value in value buffer
+        int startIndex = 0;
+        final int dims = getInputDimensions();
+
+        double valueBuffer[] = getValueBuffer();
+        final int numValues =  valueBuffer.length / dims;//TODO What if there are not enough values?
+        if (numValues == 0){
+            return 0;
         }
 
         final int clIndex = getClassIndex();
@@ -416,20 +480,37 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex+dims);
             int realClass = (int)curValue[clIndex];
             int predictedClass = predictValue(curValue);
-            errorCount += (realClass==predictedClass)?1:0;
+            errorCount += (realClass!=predictedClass)?1:0;
 
             //Continue the loop
             startIndex += dims;
         }
-        return ((double)errorCount)/numValues;
+        return errorCount;
+    }
+
+    @Override
+    public int getCurrentBufferLength(){
+        double valueBuffer[] = getValueBuffer();
+        final int dims = getInputDimensions();
+        return valueBuffer.length / dims;
+    }
+
+    /**
+     * @return Prediction accuracy for data in the buffer. {@code NaN} if not applicable.
+     */
+    @Override
+    public double getBufferErrorFraction(){
+        return ((double)getBufferErrorCount())/getCurrentBufferLength();
     }
 
     private void addValueNoBootstrap(double value[]){
         addValueToBuffer(value);
-        removeFirstValueFromBuffer();
+        while (getCurrentBufferLength() > getBufferSize()) {
+            removeFirstValueFromBuffer();
+        }
 
         //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = calculateErrorInBuffer();
+        double errorInBuffer = getBufferErrorFraction();
         if (errorInBuffer > getHigherErrorThreshold()){
             setBootstrapMode(true); //If number of errors is above higher threshold, get into the bootstrap
         }
@@ -437,15 +518,19 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
 
     @Override
     public boolean isInBootstrapMode() {
-        Object objBootstrapMode = att(INTERNAL_BOOTSTRAP_MODE_KEY);
-        Objects.requireNonNull(objBootstrapMode, "Class index must be not null");
-        return ((Boolean)objBootstrapMode).booleanValue();
+        Object objBootstrapMode = currentState.get(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY));
+        if (objBootstrapMode!=null){
+            return ((Boolean)objBootstrapMode).booleanValue();
+        }
+        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), KType.BOOL, true); //Start in bootstrap mode
+        return true;
     }
 
     public void setBootstrapMode(boolean newBootstrapMode) {
-        attSet(INTERNAL_BOOTSTRAP_MODE_KEY, KType.BOOL, newBootstrapMode);
-
         if (newBootstrapMode){
+            //New state starts now
+            currentState = graph().resolver().resolveState(this, true);
+
             //It would have been easy if not for keeping the buffers
             removeAllClasses();
 
@@ -459,15 +544,54 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
                 startIndex += dims;
             }
         }
+        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), KType.BOOL, newBootstrapMode);
     }
 
     private void removeAllClasses(){
         int classes[] = getKnownClasses();
         for (int curClass : classes){
-            attSet(INTERNAL_TOTAL_KEY_PREFIX+curClass, KType.INT, null);
-            attSet(INTERNAL_SUM_KEY_PREFIX+curClass, KType.INT, null);
-            attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass, KType.INT, null);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX+curClass), KType.INT, 0);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX+curClass), KType.DOUBLE_ARRAY, new double[0]);
+            currentState.set(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass), KType.DOUBLE_ARRAY, new double[0]);
         }
-        attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
+        currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), KType.INT_ARRAY, new int[0]);
+    }
+
+    public String allDistributionsToString(){
+        String result = "";
+        int allClasses[] = getKnownClasses();
+        if (allClasses.length==0){
+            return "No classes";
+        }
+        for (int classNum : allClasses) {
+            initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
+            int total = getClassTotal(classNum);
+            if (total < 2){
+                //Not enough data to build model for that class.
+                result += classNum+": Not enough data("+total+")\n";
+            }else{
+                double sums[] = getSums(classNum);
+                double means[] = getSums(classNum);
+                for (int i=0;i<means.length;i++){
+                    means[i] = means[i]/total;
+                }
+                double sumSquares[] = getSumSquares(classNum);
+                KMatrix cov =
+                        MultivariateNormalDistribution.getCovariance(sums, sumSquares, total);
+                result += classNum+": mean = ["; //TODO For now - cannot report variance from distribution
+                for (int i=0;i<means.length;i++){
+                    result += means[i]+", ";
+                }
+                result += "]\nCovariance:\n";
+                for (int i=0;i<cov.rows();i++){
+                    result += "[";
+                    for (int j=0;j<cov.columns();j++){
+                        result += cov.get(i,j)+", ";
+                    }
+                    result += "]\n";
+                }
+            }
+        }
+        return result;//TODO Normalize on average?
     }
 }

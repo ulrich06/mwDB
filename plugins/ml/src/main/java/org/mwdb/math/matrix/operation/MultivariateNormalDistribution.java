@@ -24,6 +24,35 @@ public class MultivariateNormalDistribution {
 
     }
 
+    public static KMatrix getCovariance(double[] sum, double[] sumsquares, int total) {
+        if (total < 2) {
+            return null;
+        }
+
+        int features = sum.length;
+        double[] avg = new double[features];
+
+        for (int i = 0; i < features; i++) {
+            avg[i] = sum[i] / total;
+        }
+
+        double[] covariances = new double[features * features];
+
+        double correction = total;
+        correction = correction / (total - 1);
+
+        int count = 0;
+        for (int i = 0; i < features; i++) {
+            for (int j = i; j < features; j++) {
+                covariances[i * features + j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
+                covariances[j * features + i] = covariances[i * features + j];
+                count++;
+            }
+        }
+        KMatrix cov = new KMatrix(covariances, features, features);
+        return cov;
+    }
+
 
     //Sum is a n-vector sum of features
     //Sum squares is a n(n+1)/2 vector of sumsquares of features, in upper-triangle row shapes
@@ -57,6 +86,10 @@ public class MultivariateNormalDistribution {
         KMatrix cov= new KMatrix(covariances, features, features);
         return new MultivariateNormalDistribution(avg,cov);
     }
+
+
+
+
 
     public double density(double[] features, boolean normalizeOnAvg) {
 
