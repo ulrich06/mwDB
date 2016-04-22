@@ -2,7 +2,7 @@ package math;
 
 import org.junit.Test;
 import org.mwdb.*;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 public class MathNodeTest {
 

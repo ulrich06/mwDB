@@ -68,7 +68,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     //TODO Not allow setting?
 
     //TODO Remove these comments when completely done
-    private final Map<Integer, MultivariateNormalDistribution> distributions = new HashMap<>();
+    //private final Map<Integer, MultivariateNormalDistribution> distributions = new HashMap<>();
 
 
     /**
@@ -558,5 +558,35 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             attSet(INTERNAL_SUMSQUARE_KEY_PREFIX+curClass, KType.DOUBLE_ARRAY, new double[0]);
         }
         attSet(INTERNAL_KNOWN_CLASSES_LIST, KType.INT_ARRAY, new int[0]);
+    }
+
+    public String allDistributionsToString(){
+        String result = "";
+        int allClasses[] = getKnownClasses();
+        if (allClasses.length==0){
+            return "No classes";
+        }
+        for (int classNum : allClasses) {
+            initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
+            int total = getClassTotal(classNum);
+            if (total < 2){
+                //Not enough data to build model for that class.
+                result += classNum+": Not enough data("+total+")\n";
+            }else{
+                double means[] = getSums(classNum);
+                for (int i=0;i<means.length;i++){
+                    means[i] = means[i]/total;
+                }
+                //double sumSquares[] = getSumSquares(classNum);
+                //MultivariateNormalDistribution distr =
+                        //MultivariateNormalDistribution.getDistribution(sums, sumSquares, total);
+                result += classNum+": mean = ["; //TODO For now - cannot report variance from distribution
+                for (int i=0;i<means.length;i++){
+                    result += means[i]+", ";
+                }
+            }
+            result += "]\n";
+        }
+        return result;//TODO Normalize on average?
     }
 }

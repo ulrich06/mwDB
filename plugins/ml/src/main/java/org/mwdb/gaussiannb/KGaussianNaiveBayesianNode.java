@@ -10,7 +10,6 @@ public interface KGaussianNaiveBayesianNode extends KNode {
     /**
      * Public keys - node parameters, values, etc.
      */
-
     String VALUE_KEY = "value";
     String CLASS_INDEX_KEY = "classIndex";
     String BUFFER_SIZE_KEY = "bufferSize";
@@ -53,4 +52,8 @@ public interface KGaussianNaiveBayesianNode extends KNode {
      */
     int[] getRealBufferClasses();
 
+    /**
+     * @return All the distributions
+     */
+    String allDistributionsToString();
 }

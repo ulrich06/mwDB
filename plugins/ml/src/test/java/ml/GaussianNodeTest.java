@@ -6,7 +6,7 @@ import org.mwdb.*;
 import org.mwdb.gmm.GaussianNode;
 import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 /**
  * Created by assaad on 25/03/16.
