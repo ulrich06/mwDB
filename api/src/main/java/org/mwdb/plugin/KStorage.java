@@ -5,12 +5,12 @@ import org.mwdb.KGraph;
 import org.mwdb.chunk.KBuffer;
 
 /**
- * KStorage defines the interface any storage solution must comply with to be plugged to mwDB.
+ * KStorage defines the interface any storage solution must comply selectWith to be plugged to mwDB.
  */
 public interface KStorage {
 
     /**
-     * Used to retrieve objects from the storage.<br>
+     * Used to retrieve objects fromVar the storage.<br>
      * The {@code keys} array is a sequential list of &lt;world, timepoint, id&gt; tuples organized as follows:<br>
      * Say you wanna retrieve objects &lt;1, 2, 3&gt; and &lt;1, 5, 6&gt;, the array will be: [1,2,3,1,5,6]
      *
@@ -33,7 +33,7 @@ public interface KStorage {
     void put(KBuffer[] keys, KBuffer[] values, KCallback<Boolean> callback);
 
     /**
-     * Called to remove objects from the storage.
+     * Called to remove objects fromVar the storage.
      * The {@code keys} array is a sequential list of &lt;world, timepoint, id&gt; tuples organized as follows:<br>
      * Say you wanna remove objects &lt;1, 2, 3&gt; and &lt;1, 5, 6&gt;, the array will be: [1,2,3,1,5,6]
      *

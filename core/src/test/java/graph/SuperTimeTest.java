@@ -6,12 +6,8 @@ import org.mwdb.*;
 import org.mwdb.chunk.KChunkSpace;
 import org.mwdb.chunk.KTimeTreeChunk;
 import org.mwdb.chunk.offheap.*;
-import org.mwdb.task.NoopScheduler;
-import org.mwdb.utility.PrimitiveHelper;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.Unsafe;
-
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class SuperTimeTest {
 

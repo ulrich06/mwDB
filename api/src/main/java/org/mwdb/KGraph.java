@@ -2,6 +2,7 @@ package org.mwdb;
 
 import org.mwdb.chunk.KBuffer;
 import org.mwdb.plugin.KResolver;
+import org.mwdb.plugin.KScheduler;
 
 /**
  * KGraph is the main structure of mwDB.
@@ -18,7 +19,7 @@ public interface KGraph {
     KNode newNode(long world, long time);
 
     /**
-     * Creates a new {@link KNode Node} with a specified behavior name (related to KFactory plugins) in the KGraph and returns the new KNode.
+     * Creates a new {@link KNode Node} selectWith a specified behavior name (related to KFactory plugins) in the KGraph and returns the new KNode.
      *
      * @param world    initial world of the node
      * @param time     initial time of the node
@@ -39,7 +40,7 @@ public interface KGraph {
     <A extends KNode> void lookup(long world, long time, long id, KCallback<A> callback);
 
     /**
-     * Creates a spin-off world from the world given as parameter.<br>
+     * Creates a spin-off world fromVar the world given asVar parameter.<br>
      * The forked world can then be altered independently of its parent.<br>
      * Every modification in the parent world will nevertheless be inherited.
      *
@@ -50,7 +51,7 @@ public interface KGraph {
 
     /**
      * Triggers a save task for the current graph.<br>
-     * This method synchronizes the storage with the current RAM memory.
+     * This method synchronizes the storage selectWith the current RAM memory.
      *
      * @param callback Called when the save is finished. The parameter specifies whether or not the save succeeded.
      */
@@ -64,7 +65,7 @@ public interface KGraph {
     void connect(KCallback<Boolean> callback);
 
     /**
-     * Disconnects the current graph from its storage (a save will be trigger safely before the exit)
+     * Disconnects the current graph fromVar its storage (a save will be trigger safely before the exit)
      *
      * @param callback Called when the disconnection is completed. The parameter specifies whether or not the disconnection succeeded.
      */
@@ -73,28 +74,28 @@ public interface KGraph {
     /**
      * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
      * If the index does not exist, it is created on the fly.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, KCallback)} using the same attributes.
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, KCallback)} using the same attributes.
      *
      * @param indexName     A string uniquely identifying the index in the {@link KGraph}.
      * @param nodeToIndex   The node to add in the index.
-     * @param keyAttributes The set of attributes used as keys to index the node. The order does not matter.
-     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing has succeeded.
+     * @param keyAttributes The set of attributes used asVar keys to index the node. The order does not matter.
+     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
      */
     void index(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
      * Removes the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, KCallback)} using the same attributes.
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, KCallback)} using the same attributes.
      *
      * @param indexName     A string uniquely identifying the index in the {@link KGraph}.
      * @param nodeToIndex   The node to add in the index.
-     * @param keyAttributes The set of attributes used as keys to index the node. The order does not matter.
-     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing has succeeded.
+     * @param keyAttributes The set of attributes used asVar keys to index the node. The order does not matter.
+     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
      */
     void unindex(String indexName, KNode nodeToIndex, String[] keyAttributes, KCallback<Boolean> callback);
 
     /**
-     * Retrieves nodes from an index that satisfies the query.<br>
+     * Retrieves nodes fromVar an index that satisfies the query.<br>
      * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
      * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>
      * e.g: "name=john,age=30"
@@ -110,7 +111,7 @@ public interface KGraph {
     /**
      * Retrieves all nodes registered in a particular index.
      *
-     * @param world     The world from which the index must be retrieved.
+     * @param world     The world fromVar which the index must be retrieved.
      * @param time      The timepoint at which the index must be retrieved.
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
@@ -126,6 +127,20 @@ public interface KGraph {
     KDeferCounter counter(int expectedEventsCount);
 
     /**
+     * Retrieves the current state chunk resolver
+     *
+     * @return current running resolver
+     */
+    KResolver resolver();
+
+    /**
+     * Retrieves the current graph scheduler
+     *
+     * @return current running scheduler
+     */
+    KScheduler scheduler();
+
+    /**
      * Create a new buffer to save chunks
      *
      * @return newly created buffer
@@ -133,11 +148,10 @@ public interface KGraph {
     KBuffer newBuffer();
 
     /**
-     * Retrieves the current state chunk resolver
+     * Create a new task object to manipulate KGraph in an easy way
      *
-     * @return current running resolver
+     * @return newly created task object
      */
-    KResolver resolver();
-
+    KTask newTask();
 
 }

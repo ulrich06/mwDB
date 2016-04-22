@@ -5,7 +5,7 @@ import org.mwdb.KGraph;
 public interface KChunkSpace {
 
     /**
-     * Create KChunk, out of the space, not marked, used as a factory
+     * Create KChunk, out of the space, not marked, used asVar a factory
      */
     KChunk create(byte type, long world, long time, long id, KBuffer initialPayload, KChunk origin);
 
@@ -15,7 +15,7 @@ public interface KChunkSpace {
     KChunk getAndMark(byte type, long world, long time, long id);
 
     /**
-     * Insert the chunk into the space and mark it before as used
+     * Insert the chunk into the space and mark it before asVar used
      */
     KChunk putAndMark(KChunk elem);
 
@@ -32,19 +32,26 @@ public interface KChunkSpace {
     void freeChunk(KChunk chunk);
 
     /**
-     * Declare the chunk as dirty
+     * Declare the chunk asVar dirty
      */
     void declareDirty(KChunk elem);
 
     /**
-     * Declare the chunk as clean
+     * Declare the chunk asVar clean
      */
     void declareClean(KChunk elem);
 
     /**
-     * Set current working space
+     * Set current working graph
      */
     void setGraph(KGraph graph);
+
+    /**
+     * Get current working graph
+     *
+     * @return current graph
+     */
+    KGraph graph();
 
     void clear();
 

@@ -3,7 +3,7 @@ package org.mwdb.chunk;
 public interface KLongLongMap {
 
     /**
-     * Retrieve the value inserted with the param key
+     * Retrieve the value inserted selectWith the param key
      *
      * @param key key that have to be retrieve
      * @return associated value, Constants.NULL.LONG in case of not found.
@@ -20,7 +20,7 @@ public interface KLongLongMap {
     void put(long key, long value);
 
     /**
-     * Remove the key passed as parameter from the map
+     * Remove the key passed as parameter fromVar the map
      *
      * @param key key that have to be removed
      */

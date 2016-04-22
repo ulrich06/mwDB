@@ -28,6 +28,18 @@ public abstract class AbstractNode implements KNode {
         this._previousResolveds.set(currentResolution);
     }
 
+    protected KResolver.KNodeState unphasedState() {
+        return this._resolver.resolveState(this, true);
+    }
+
+    protected KResolver.KNodeState phasedState() {
+        return this._resolver.resolveState(this, false);
+    }
+
+    protected KResolver.KNodeState newState(long time) {
+        return this._resolver.newState(this, _world, time);
+    }
+
     @Override
     public KGraph graph() {
         return _graph;

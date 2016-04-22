@@ -97,6 +97,7 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
     @Override
     public void set(double value) {
         KResolver.KNodeState previousState = graph().resolver().resolveState(this, true); //past state, not cloned
+
         long timeOrigin = previousState.time();
         long time = time();
         double precision = (double) previousState.get(PRECISION_KEY);
@@ -181,6 +182,8 @@ public class PolynomialNode extends AbstractNode implements KPolynomialNode {
 
         long previousTime = timeOrigin + (long) previousState.get(LAST_TIME_KEY);
         long newstep = time - previousTime;
+
+
         //It does not fit, create a new state
         KResolver.KNodeState phasedState = graph().resolver().newState(this, world(), previousTime); //force clone
         //put inside

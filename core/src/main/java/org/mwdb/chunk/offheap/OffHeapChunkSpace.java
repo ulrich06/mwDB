@@ -41,6 +41,11 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         this._graph = p_graph;
     }
 
+    @Override
+    public KGraph graph() {
+        return _graph;
+    }
+
     final class InternalDirtyStateList implements KChunkIterator {
 
         private final long _dirtyElements;
@@ -150,7 +155,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                 while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
 
                 if (newFlag == 1) {
-                    //was at zero before, risky operation, check with LRU
+                    //was at zero before, risky operation, check selectWith LRU
                     if (this._lru.dequeue(m)) {
                         return internal_create(foundChunkPtr);
                     } else {
@@ -207,7 +212,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
                     newFlag = previousFlag - 1;
                 }
                 while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
-                //check if this object has to be re-enqueue to the list of available
+                //check if this object hasField to be re-enqueue to the list of available
                 if (newFlag == 0) {
                     //declare available for recycling
                     this._lru.enqueue(m);

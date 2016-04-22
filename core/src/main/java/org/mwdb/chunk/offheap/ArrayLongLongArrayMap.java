@@ -189,7 +189,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                     } else {
                         OffHeapLongArray.set(elementNext_ptr, previousM, OffHeapLongArray.get(elementNext_ptr, m));
                     }
-                    //we enqueue m has in the available queue
+                    //we enqueue m hasField in the available queue
                     OffHeapLongArray.set(elementNext_ptr, m, OffHeapLongArray.get(root_array_ptr, INDEX_NEXT_EMPTY));
                     OffHeapLongArray.set(root_array_ptr, INDEX_NEXT_EMPTY, m);
                     break;

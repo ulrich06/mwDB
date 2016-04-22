@@ -238,7 +238,7 @@ public class ArrayLongLongArrayMap implements KLongLongArrayMap {
                     } else {
                         internalState._elementNext[previousM] = internalState._elementNext[m];
                     }
-                    //we enqueue m has in the available queue
+                    //we enqueue m hasField in the available queue
                     internalState._elementNext[m] = internalState._nextAvailableSlot;
                     internalState._nextAvailableSlot = m;
                     return;

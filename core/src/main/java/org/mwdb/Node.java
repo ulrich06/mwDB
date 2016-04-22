@@ -107,7 +107,7 @@ public class Node extends AbstractNode {
             waiter.then(new KCallback() {
                 @Override
                 public void on(Object o) {
-                    //filter
+                    //select
                     A[] resultSet = (A[]) new KNode[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 

@@ -1,16 +1,13 @@
 package org.mwdb.chunk.heap;
 
 import org.mwdb.Constants;
+import org.mwdb.KGraph;
 import org.mwdb.KType;
 import org.mwdb.chunk.*;
 import org.mwdb.plugin.KResolver;
 import org.mwdb.utility.Base64;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
 
@@ -36,7 +33,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    private final KChunkListener _listener;
+    private final KChunkListener _space;
     private boolean inLoadMode;
 
     @Override
@@ -44,6 +41,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         if (!this.inLoadMode) {
             internal_set_dirty();
         }
+    }
+
+    @Override
+    public final KGraph graph() {
+        return _space.graph();
     }
 
     private final class InternalState {
@@ -87,7 +89,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
             System.arraycopy(_elementHash, 0, clonedElementHash, 0, this._elementDataSize);
             byte[] clonedElementType = new byte[this._elementDataSize];
             System.arraycopy(_elementType, 0, clonedElementType, 0, this._elementDataSize);
-            return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came from a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
+            return new InternalState(this._elementDataSize, clonedElementK, _elementV /* considered as safe because came fromVar a softClone */, clonedElementNext, clonedElementHash, clonedElementType, _elementCount, false);
         }
 
         InternalState softClone() {
@@ -97,14 +99,14 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_listener, KBuffer initialPayload, KChunk origin) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_space, KBuffer initialPayload, KChunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
         this._id = p_id;
         this._flags = 0;
         this._marks = 0;
-        this._listener = p_listener;
+        this._space = p_space;
         if (initialPayload != null) {
             load(initialPayload);
         } else if (origin != null) {
@@ -196,74 +198,81 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
     }
 
+    @Override
+    public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
+        internal_set(_space.graph().resolver().stringToLongKey(key), p_elemType, p_unsafe_elem, true);
+    }
+
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
         Object param_elem = null;
         //check the param type
-        try {
-            switch (p_elemType) {
-                /** Primitives */
-                case KType.BOOL:
-                    param_elem = (boolean) p_unsafe_elem;
-                    break;
-                case KType.DOUBLE:
-                    param_elem = (double) p_unsafe_elem;
-                    break;
-                case KType.LONG:
-                    if (p_unsafe_elem instanceof Integer) {
-                        int preCasting = (int) p_unsafe_elem;
-                        param_elem = (long) preCasting;
-                    } else {
-                        param_elem = (long) p_unsafe_elem;
-                    }
-                    break;
-                case KType.INT:
-                    param_elem = (int) p_unsafe_elem;
-                    break;
-                case KType.STRING:
-                    param_elem = (String) p_unsafe_elem;
-                    break;
-                /** Arrays */
-                case KType.DOUBLE_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        double[] castedParamDouble = (double[]) p_unsafe_elem;
-                        double[] clonedDoubleArray = new double[castedParamDouble.length];
-                        System.arraycopy(castedParamDouble, 0, clonedDoubleArray, 0, castedParamDouble.length);
-                        param_elem = clonedDoubleArray;
-                    }
-                    break;
-                case KType.LONG_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        long[] castedParamLong = (long[]) p_unsafe_elem;
-                        long[] clonedLongArray = new long[castedParamLong.length];
-                        System.arraycopy(castedParamLong, 0, clonedLongArray, 0, castedParamLong.length);
-                        param_elem = clonedLongArray;
-                    }
-                    break;
-                case KType.INT_ARRAY:
-                    if (p_unsafe_elem != null) {
-                        int[] castedParamInt = (int[]) p_unsafe_elem;
-                        int[] clonedIntArray = new int[castedParamInt.length];
-                        System.arraycopy(castedParamInt, 0, clonedIntArray, 0, castedParamInt.length);
-                        param_elem = clonedIntArray;
-                    }
-                    break;
-                /** Maps */
-                case KType.STRING_LONG_MAP:
-                    param_elem = (KStringLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_MAP:
-                    param_elem = (KLongLongMap) p_unsafe_elem;
-                    break;
-                case KType.LONG_LONG_ARRAY_MAP:
-                    param_elem = (KLongLongArrayMap) p_unsafe_elem;
-                    break;
-                default:
-                    throw new RuntimeException("Internal Exception, unknown type");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("mwDB usage error, set method called with type " + KType.typeName(p_elemType) + " while param object is " + p_unsafe_elem);
-        }
 
+        if (p_unsafe_elem != null) {
+            try {
+                switch (p_elemType) {
+                    /** Primitives */
+                    case KType.BOOL:
+                        param_elem = (boolean) p_unsafe_elem;
+                        break;
+                    case KType.DOUBLE:
+                        param_elem = (double) p_unsafe_elem;
+                        break;
+                    case KType.LONG:
+                        if (p_unsafe_elem instanceof Integer) {
+                            int preCasting = (int) p_unsafe_elem;
+                            param_elem = (long) preCasting;
+                        } else {
+                            param_elem = (long) p_unsafe_elem;
+                        }
+                        break;
+                    case KType.INT:
+                        param_elem = (int) p_unsafe_elem;
+                        break;
+                    case KType.STRING:
+                        param_elem = (String) p_unsafe_elem;
+                        break;
+                    /** Arrays */
+                    case KType.DOUBLE_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            double[] castedParamDouble = (double[]) p_unsafe_elem;
+                            double[] clonedDoubleArray = new double[castedParamDouble.length];
+                            System.arraycopy(castedParamDouble, 0, clonedDoubleArray, 0, castedParamDouble.length);
+                            param_elem = clonedDoubleArray;
+                        }
+                        break;
+                    case KType.LONG_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            long[] castedParamLong = (long[]) p_unsafe_elem;
+                            long[] clonedLongArray = new long[castedParamLong.length];
+                            System.arraycopy(castedParamLong, 0, clonedLongArray, 0, castedParamLong.length);
+                            param_elem = clonedLongArray;
+                        }
+                        break;
+                    case KType.INT_ARRAY:
+                        if (p_unsafe_elem != null) {
+                            int[] castedParamInt = (int[]) p_unsafe_elem;
+                            int[] clonedIntArray = new int[castedParamInt.length];
+                            System.arraycopy(castedParamInt, 0, clonedIntArray, 0, castedParamInt.length);
+                            param_elem = clonedIntArray;
+                        }
+                        break;
+                    /** Maps */
+                    case KType.STRING_LONG_MAP:
+                        param_elem = (KStringLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_MAP:
+                        param_elem = (KLongLongMap) p_unsafe_elem;
+                        break;
+                    case KType.LONG_LONG_ARRAY_MAP:
+                        param_elem = (KLongLongArrayMap) p_unsafe_elem;
+                        break;
+                    default:
+                        throw new RuntimeException("Internal Exception, unknown type");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("mwDB usage error, set method called with type " + KType.typeName(p_elemType) + " while param object is " + p_unsafe_elem);
+            }
+        }
 
         int entry = -1;
         InternalState internalState = state;
@@ -384,6 +393,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
+    public Object getFromKey(String key) {
+        return get(_space.graph().resolver().stringToLongKey(key));
+    }
+
+    @Override
     public final byte getType(long p_elementIndex) {
         final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {
@@ -401,6 +415,10 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         return -1;
     }
 
+    @Override
+    public byte getTypeFromKey(String key) {
+        return getType(_space.graph().resolver().stringToLongKey(key));
+    }
 
     @Override
     public final Object getOrCreate(long p_elementIndex, byte elemType) {
@@ -421,6 +439,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
                 break;
         }
         return get(p_elementIndex);
+    }
+
+    @Override
+    public Object getOrCreateFromKey(String key, byte elemType) {
+        return getOrCreate(_space.graph().resolver().stringToLongKey(key), elemType);
     }
 
     @Override
@@ -881,9 +904,9 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     private void internal_set_dirty() {
-        if (_listener != null) {
+        if (_space != null) {
             if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                _listener.declareDirty(this);
+                _space.declareDirty(this);
             }
         }
     }

@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 import java.util.Random;
 

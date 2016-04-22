@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.Constants;
 import org.mwdb.KConstants;
+import org.mwdb.KGraph;
 import org.mwdb.chunk.*;
 import org.mwdb.chunk.heap.HeapTimeTreeChunk;
 import org.mwdb.chunk.heap.KHeapChunk;
@@ -229,6 +230,11 @@ public class TimeTreeTest implements KChunkListener {
             long addr = ((KOffHeapChunk) chunk).addr();
             OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
         }
+    }
+
+    @Override
+    public KGraph graph() {
+        return null;
     }
 
     private void free(KChunk chunk) {

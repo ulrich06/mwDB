@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.offheap.*;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 
@@ -39,7 +39,8 @@ public class HelloWorldTest {
             public void on(Boolean o) {
 
                 KNode node0 = graph.newNode(0, 0);
-                //do something with the node
+
+                //do something selectWith the node
                 graph.lookup(0, 0, node0.id(), new KCallback<KNode>() {
                     @Override
                     public void on(KNode result) {
@@ -49,6 +50,10 @@ public class HelloWorldTest {
 
                 node0.attSet("name", KType.STRING, "MyName");
                 Assert.assertTrue(PrimitiveHelper.equals("MyName", node0.att("name").toString()));
+
+                node0.attRemove("name");
+                Assert.assertTrue(node0.att("name") == null);
+                node0.attSet("name", KType.STRING, "MyName");
 
                 node0.attSet("value", KType.STRING, "MyValue");
                 Assert.assertTrue(PrimitiveHelper.equals("MyValue", node0.att("value").toString()));
@@ -111,9 +116,9 @@ public class HelloWorldTest {
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
 
                 long[] refValuesNull = node1.relValues("children");
-                Assert.assertEquals(0,refValuesNull.length);
+                Assert.assertEquals(0, refValuesNull.length);
 
-                //destroy the node explicitly without waiting GC
+                //destroy the node explicitly selectWithout waiting GC
                 node0.free();
                 node1.free();
                 node2.free();

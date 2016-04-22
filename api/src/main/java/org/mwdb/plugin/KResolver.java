@@ -11,7 +11,7 @@ public interface KResolver {
      */
 
     /**
-     * Initializes the resolver with the graph passed as parameter
+     * Initializes the resolver selectWith the graph passed as parameter
      *
      * @param graph graph this resolver belongs to
      */
@@ -41,15 +41,15 @@ public interface KResolver {
     void freeNode(KNode node);
 
     /**
-     * Creates a lookup task to retrieve a particular node based on world/time/node_id
+     * Creates a lookup job to retrieve a particular node based on world/time/node_id
      *
      * @param world    The world identifier
      * @param time     The timepoint.
      * @param id       The id of the node to retrieve.
      * @param callback Called when the node is retrieved.
-     * @return The created lookup task to be given to the scheduler.
+     * @return The created lookup job to be given to the scheduler.
      */
-    <A extends KNode> KCallback lookupTask(long world, long time, long id, KCallback<A> callback);
+    <A extends KNode> KScheduler.KJob lookupJob(long world, long time, long id, KCallback<A> callback);
 
     /**
      * Creates and schedules a lookup task.
@@ -86,7 +86,7 @@ public interface KResolver {
      * @param node              The node for which timepoints are requested.
      * @param beginningOfSearch The earliest timePoint of the search (included).
      * @param endOfSearch       The latest timePoint of the search (included).
-     * @param callback          Called when finished, with the list of timepoints included in the bounds for this node.
+     * @param callback          Called when finished, selectWith the list of timepoints included in the bounds for this node.
      */
     void resolveTimepoints(KNode node, long beginningOfSearch, long endOfSearch, KCallback<long[]> callback);
 
@@ -135,6 +135,15 @@ public interface KResolver {
         void set(long index, byte elemType, Object elem);
 
         /**
+         * Set the named state element
+         *
+         * @param key      unique key of element
+         * @param elemType type of the element (based on KType definition)
+         * @param elem     element to be set
+         */
+        void setFromKey(String key, byte elemType, Object elem);
+
+        /**
          * Get the named state element
          *
          * @param index unique key of element
@@ -142,6 +151,14 @@ public interface KResolver {
          */
         Object get(long index);
 
+        /**
+         * Get the named state element
+         *
+         * @param key unique key of element
+         * @return stored element
+         */
+        Object getFromKey(String key);
+        
         /**
          * Atomically get or create an element according to the elemType parameter.
          * This method is particularly handy for map manipulation that have to be initialize by the node state before any usage.
@@ -153,12 +170,30 @@ public interface KResolver {
         Object getOrCreate(long index, byte elemType);
 
         /**
+         * Atomically get or create an element according to the elemType parameter.
+         * This method is particularly handy for map manipulation that have to be initialize by the node state before any usage.
+         *
+         * @param key      unique key of element
+         * @param elemType type of the element (according to KType definition)
+         * @return new or previously stored element
+         */
+        Object getOrCreateFromKey(String key, byte elemType);
+
+        /**
          * Get the type of the stored element, -1 if not found
          *
          * @param index unique key of element
          * @return type currently stored, encoded as a int according the KType defintion
          */
         byte getType(long index);
+
+        /**
+         * Get the type of the stored element, -1 if not found
+         *
+         * @param key unique key of element
+         * @return type currently stored, encoded as a int according the KType defintion
+         */
+        byte getTypeFromKey(String key);
 
     }
 

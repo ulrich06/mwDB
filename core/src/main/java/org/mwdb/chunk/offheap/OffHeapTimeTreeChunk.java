@@ -224,7 +224,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
 
     @Override
     public synchronized final void save(KBuffer buffer) {
-        //lock and load from main memory
+        //lock and load fromVar main memory
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         try {
             ptrConsistency();

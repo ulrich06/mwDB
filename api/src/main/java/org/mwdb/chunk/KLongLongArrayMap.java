@@ -21,7 +21,7 @@ public interface KLongLongArrayMap {
     void put(long key, long value);
 
     /**
-     * Remove the current K/V tuple from the map
+     * Remove the current K/V tuple fromVar the map
      *
      * @param key   to delete key
      * @param value to delete value

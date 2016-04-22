@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.chunk.offheap.*;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 import org.mwdb.utility.PrimitiveHelper;
 import org.mwdb.utility.Unsafe;
 

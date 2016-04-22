@@ -6,7 +6,7 @@ import org.mwdb.GraphBuilder;
 import org.mwdb.KCallback;
 import org.mwdb.KGraph;
 import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.task.NoopScheduler;
+import org.mwdb.manager.NoopScheduler;
 
 import java.util.Random;
 

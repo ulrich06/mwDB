@@ -1,18 +1,16 @@
 package org.mwdb.plugin;
 
-import org.mwdb.KCallback;
-
 /**
  * In charge of the scheduling of tasks in mwDB
  */
 public interface KScheduler {
 
     /**
-     * Registers a task for execution.
+     * Registers a job for execution.
      *
-     * @param task The new task to execute.
+     * @param job The new job to execute.
      */
-    void dispatch(KCallback task);
+    void dispatch(KJob job);
 
     /**
      * Starts the scheduler (i.e.: the execution of tasks).
@@ -24,5 +22,14 @@ public interface KScheduler {
      * Terminates the scheduler (i.e.: the execution of tasks).
      */
     void stop();
-    
+
+    /**
+     *
+     */
+    interface KJob {
+
+        void run();
+
+    }
+
 }
