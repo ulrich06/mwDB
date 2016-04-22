@@ -37,7 +37,7 @@ public interface KTask {
     KTask from(Object inputValue);
 
     /**
-     * Retrieve nodes fromVar a global named index using a query
+     * Retrieve an indexed nodes which respect a query
      *
      * @param indexName named of the global index to use
      * @param query     query to retrieve node such as name=FOO
@@ -46,7 +46,7 @@ public interface KTask {
     KTask fromIndex(String indexName, String query);
 
     /**
-     * Retrieve all nodes fromVar a global named index
+     * Retrieve all indexed nodes fromVar a global named index
      *
      * @param indexName named of the global index to use
      * @return this task to chain actions (fluent API)
@@ -70,6 +70,13 @@ public interface KTask {
 
     KTask selectWhere(KTask subTask);
 
+    /**
+     * Traverse the specified relation
+     * If it is followed by {@link #asVar(String)} method, the element are stored in an array
+     *
+     * @param relationName relation to traverse
+     * @return this task to chain actions (fluent API)
+     */
     KTask traverse(String relationName);
 
     interface KTaskMap {
