@@ -1,6 +1,7 @@
 package org.mwdb.gaussiannb;
 
 import org.mwdb.*;
+import org.mwdb.math.matrix.KMatrix;
 import org.mwdb.math.matrix.operation.MultivariateNormalDistribution;
 
 import java.util.*;
@@ -573,19 +574,27 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
                 //Not enough data to build model for that class.
                 result += classNum+": Not enough data("+total+")\n";
             }else{
+                double sums[] = getSums(classNum);
                 double means[] = getSums(classNum);
                 for (int i=0;i<means.length;i++){
                     means[i] = means[i]/total;
                 }
-                //double sumSquares[] = getSumSquares(classNum);
-                //MultivariateNormalDistribution distr =
-                        //MultivariateNormalDistribution.getDistribution(sums, sumSquares, total);
+                double sumSquares[] = getSumSquares(classNum);
+                KMatrix cov =
+                        MultivariateNormalDistribution.getCovariance(sums, sumSquares, total);
                 result += classNum+": mean = ["; //TODO For now - cannot report variance from distribution
                 for (int i=0;i<means.length;i++){
                     result += means[i]+", ";
                 }
+                result += "]\nCovariance:\n";
+                for (int i=0;i<cov.rows();i++){
+                    result += "[";
+                    for (int j=0;j<cov.columns();j++){
+                        result += cov.get(i,j)+", ";
+                    }
+                    result += "]\n";
+                }
             }
-            result += "]\n";
         }
         return result;//TODO Normalize on average?
     }
