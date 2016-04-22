@@ -18,7 +18,7 @@ public class Gaussian1D {
 
         return 1/Math.sqrt(2*Math.PI*cov)*Math.exp(-(feature-avg)*(feature-avg)/(2*cov));
     }
-    
+
     public static double[] getDensity(double sum, double sumSq, int total, double[] feature){
         if(total<2){
             return null;
