@@ -47,13 +47,13 @@ public class Gaussian1DTest {
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
                 System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
-                System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getVariance(sum, sumsquare, total));
+                System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
                 Assert.assertTrue(Math.abs(avgBatch[0] - sum / total) < eps);
-                Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getVariance(sum, sumsquare, total)) < eps);
+                Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getCovariance(sum, sumsquare, total)) < eps);
 
                 double testvec = rand.nextDouble() * 100;
-                System.out.println("Prob: " + Gaussian1D.getProbability(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
-                Assert.assertTrue(Math.abs(Gaussian1D.getProbability(sum, sumsquare, total, testvec) - gaussianNodeBatch.getProbability(new double[]{testvec}, null, false)) < eps);
+                System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
+                Assert.assertTrue(Math.abs(Gaussian1D.getDensity(sum, sumsquare, total, testvec) - gaussianNodeBatch.getProbability(new double[]{testvec}, null, false)) < eps);
 
 
             }
