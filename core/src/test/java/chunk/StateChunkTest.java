@@ -91,8 +91,8 @@ public class StateChunkTest implements KChunkListener {
         chunk.set(3, KType.LONG, 1000l);
         chunk.set(4, KType.INT, 100);
 
-        chunk.set(5,KType.INT,1);
-        chunk.set(5,KType.INT,null);
+        chunk.set(5, KType.INT, 1);
+        chunk.set(5, KType.INT, null);
 
         KBuffer buffer = Buffer.newHeapBuffer();
         chunk.save(buffer);

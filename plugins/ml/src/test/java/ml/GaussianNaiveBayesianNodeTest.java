@@ -1,16 +1,10 @@
 package ml;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.mwdb.*;
 import org.mwdb.gaussiannb.KGaussianNaiveBayesianNode;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.gmm.KGaussianNode;
 import org.mwdb.manager.NoopScheduler;
 
-import javax.sound.midi.Soundbank;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by Andrey Boytsov on 4/18/2016.

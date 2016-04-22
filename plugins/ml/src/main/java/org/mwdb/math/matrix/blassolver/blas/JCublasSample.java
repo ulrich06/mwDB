@@ -4,6 +4,7 @@ package org.mwdb.math.matrix.blassolver.blas;
 import jcuda.*;
 import jcuda.jcublas.*;
 
+//TODO delete this
 class JCublasSample
 {
     /* Matrix size */
