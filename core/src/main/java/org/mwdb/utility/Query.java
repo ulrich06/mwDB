@@ -32,7 +32,7 @@ public class Query {
 
         }
         attributes[size] = att;
-        values[size] = val;
+        values[size] = val.trim();
         size++;
     }
 

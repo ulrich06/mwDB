@@ -3,11 +3,11 @@ package org.mwdb.task.action;
 import org.mwdb.KTaskAction;
 import org.mwdb.KTaskContext;
 
-public class ActionAs implements KTaskAction {
+public class ActionAsVar implements KTaskAction {
 
     private final String _name;
 
-    public ActionAs(final String p_name) {
+    public ActionAsVar(final String p_name) {
         this._name = p_name;
     }
 

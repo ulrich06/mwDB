@@ -5,16 +5,15 @@ import org.mwdb.KTaskContext;
 
 public class ActionFrom implements KTaskAction {
 
-    private final String _name;
+    private final Object _value;
 
-    public ActionFrom(final String p_name) {
-        this._name = p_name;
+    public ActionFrom(final Object value) {
+        this._value = value;
     }
 
     @Override
     public void eval(final KTaskContext context) {
-        context.setResult(context.getVariable(_name));
-        //continue for next step
+        context.setResult(_value);
         context.next();
     }
 

@@ -39,13 +39,13 @@ public class Task implements KTask {
 
     @Override
     public KTask fromIndex(String indexName, String query) {
-        addTask(new ActionGlobalFind(indexName, query));
+        addTask(new ActionFromIndex(indexName, query));
         return this;
     }
 
     @Override
     public KTask fromIndexAll(String indexName) {
-        addTask(new ActionGlobalAll(indexName));
+        addTask(new ActionFromIndexAll(indexName));
         return this;
     }
 
@@ -63,57 +63,62 @@ public class Task implements KTask {
 
     @Override
     public KTask asVar(String variableName) {
-        addTask(new ActionAs(variableName));
+        addTask(new ActionAsVar(variableName));
         return this;
     }
 
     @Override
     public KTask fromVar(String variableName) {
-        addTask(new ActionFrom(variableName));
+        addTask(new ActionFromVar(variableName));
         return this;
     }
 
     @Override
-    public KTask select(KTaskFilter filter) {
-        addTask(new ActionFilter(filter));
+    public KTask select(KTaskSelect filter) {
+        addTask(new ActionSelect(filter));
         return this;
     }
 
     @Override
-    public KTask traverse(String relation) {
-        addTask(new ActionRelation(relation));
+    public KTask selectWhere(KTask subTask) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public KTask traverse(String relationName) {
+        addTask(new ActionTraverse(relationName));
         return this;
     }
 
     @Override
     public KTask map(KTaskMap mapFunction) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public KTask flatMap(KTaskFlatMap flatMapFunction) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public KTask group(KTaskGroup groupFunction) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public KTask groupWhere(KTask groupSubTask) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public KTask from(Object inputValue) {
-        addTask(new ActionInput(inputValue));
+        addTask(new ActionFrom(inputValue));
         return this;
     }
 
     @Override
     public KTask trigger(KTask subTask) {
-        addTask(new ActionSub(subTask));
+        addTask(new ActionTrigger(subTask));
         return this;
     }
 
@@ -152,13 +157,7 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask selectWhere(KTask subTask) {
-        return null;
-    }
-
-    @Override
     public void executeThenAsync(final KTaskContext parent, final Object initialResult, final KTaskAction p_finalAction) {
-
         final KTaskAction[] final_actions = new KTaskAction[_actionCursor + 2];
         System.arraycopy(_actions, 0, final_actions, 0, _actionCursor);
         if (p_finalAction != null) {

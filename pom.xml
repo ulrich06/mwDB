@@ -72,6 +72,8 @@
     <modules>
         <module>api</module>
         <module>core</module>
+        <module>js</module>
+
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
         <module>plugins/leveldb</module>

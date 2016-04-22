@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ActionRelation implements KTaskAction {
+public class ActionTraverse implements KTaskAction {
 
     private final String _name;
 
-    public ActionRelation(final String p_name) {
+    public ActionTraverse(final String p_name) {
         this._name = p_name;
     }
 
