@@ -16,10 +16,9 @@ public class Gaussian1D {
         double avg=sum/total;
         double cov=getCovariance(sum,sumSq,total);
 
-        double proba=1/Math.sqrt(2*Math.PI*cov)*Math.exp(-(feature-avg)*(feature-avg)/(2*cov));
-        return proba;
-
+        return 1/Math.sqrt(2*Math.PI*cov)*Math.exp(-(feature-avg)*(feature-avg)/(2*cov));
     }
+    
     public static double[] getDensity(double sum, double sumSq, int total, double[] feature){
         if(total<2){
             return null;
