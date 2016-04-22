@@ -87,6 +87,10 @@ public class MultivariateNormalDistribution {
         return new MultivariateNormalDistribution(avg,cov);
     }
 
+
+
+
+
     public double density(double[] features, boolean normalizeOnAvg) {
 
         if(normalizeOnAvg){

@@ -134,6 +134,7 @@ public class GaussianNodeTest {
                 });
 
 
+
                 Assert.assertTrue(KMatrix.compare(avgLive, ravg, eps));
                 Assert.assertTrue(KMatrix.compareArray(covLive, rcovData, eps));
 
