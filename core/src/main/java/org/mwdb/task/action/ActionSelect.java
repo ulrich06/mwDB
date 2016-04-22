@@ -5,11 +5,11 @@ import org.mwdb.KTask;
 import org.mwdb.KTaskAction;
 import org.mwdb.KTaskContext;
 
-public class ActionFilter implements KTaskAction {
+public class ActionSelect implements KTaskAction {
 
-    private final KTask.KTaskFilter _filter;
+    private final KTask.KTaskSelect _filter;
 
-    public ActionFilter(final KTask.KTaskFilter p_filter) {
+    public ActionSelect(final KTask.KTaskSelect p_filter) {
         this._filter = p_filter;
     }
 

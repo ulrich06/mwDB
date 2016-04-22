@@ -4,11 +4,11 @@ import org.mwdb.KTask;
 import org.mwdb.KTaskAction;
 import org.mwdb.KTaskContext;
 
-public class ActionSub implements KTaskAction {
+public class ActionTrigger implements KTaskAction {
 
     private final KTask _subTask;
 
-    public ActionSub(final KTask p_subTask) {
+    public ActionTrigger(final KTask p_subTask) {
         _subTask = p_subTask;
     }
 

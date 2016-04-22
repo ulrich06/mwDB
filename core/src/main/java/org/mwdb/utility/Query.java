@@ -32,7 +32,7 @@ public class Query {
 
         }
         attributes[size] = att;
-        values[size] = val;
+        values[size] = val.trim();
         size++;
     }
 
@@ -75,12 +75,12 @@ public class Query {
         while (cursor < query.length()) {
             if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
                 if (lastElemStart != -1) {
-                    currentKey = p_resolver.stringToLongKey(query.substring(lastElemStart, cursor));
+                    currentKey = p_resolver.stringToLongKey(query.substring(lastElemStart, cursor).trim());
                 }
                 lastElemStart = cursor + 1;
             } else if (query.charAt(cursor) == Constants.QUERY_SEP) {
                 if (currentKey != Constants.NULL_LONG) {
-                    flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
+                    flatQuery.add(currentKey, query.substring(lastElemStart, cursor).trim());
                 }
                 currentKey = Constants.NULL_LONG;
                 lastElemStart = cursor + 1;
@@ -89,7 +89,7 @@ public class Query {
         }
         //insert the last element
         if (currentKey != Constants.NULL_LONG) {
-            flatQuery.add(currentKey, query.substring(lastElemStart, cursor));
+            flatQuery.add(currentKey, query.substring(lastElemStart, cursor).trim());
         }
         flatQuery.compute();
         return flatQuery;

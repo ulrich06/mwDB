@@ -62,11 +62,11 @@ public interface KTask {
 
     KTask selectWithout(String name, String pattern);
 
-    interface KTaskFilter {
+    interface KTaskSelect {
         boolean select(KNode node);
     }
 
-    KTask select(KTaskFilter filterFunction);
+    KTask select(KTaskSelect filterFunction);
 
     KTask selectWhere(KTask subTask);
 

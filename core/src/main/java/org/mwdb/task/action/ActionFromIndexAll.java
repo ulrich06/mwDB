@@ -5,20 +5,17 @@ import org.mwdb.KNode;
 import org.mwdb.KTaskAction;
 import org.mwdb.KTaskContext;
 
-public class ActionGlobalFind implements KTaskAction {
+public class ActionFromIndexAll implements KTaskAction {
 
     private final String _indexName;
 
-    private final String _query;
-
-    public ActionGlobalFind(final String p_indexName, final String p_query) {
+    public ActionFromIndexAll(final String p_indexName) {
         _indexName = p_indexName;
-        _query = p_query;
     }
 
     @Override
     public void eval(final KTaskContext context) {
-        context.graph().find(context.getWorld(), context.getTime(), _indexName, _query, new KCallback<KNode[]>() {
+        context.graph().all(context.getWorld(), context.getTime(), _indexName, new KCallback<KNode[]>() {
             @Override
             public void on(KNode[] result) {
                 context.setResult(result);
