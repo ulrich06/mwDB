@@ -1,7 +1,7 @@
 package org.mwg.gmm;
 
 import org.mwg.Node;
-import org.mwg.math.matrix.KMatrix;
+import org.mwg.util.matrix.KMatrix;
 
 public interface KGaussianNode extends Node {
 

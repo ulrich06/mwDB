@@ -2,8 +2,8 @@ package org.mwg.gmm;
 
 import org.mwg.*;
 import org.mwg.clustering.KMeans;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.util.matrix.KMatrix;
+import org.mwg.util.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.AbstractNode;
 
 public class GaussianNode extends AbstractNode implements KGaussianNode {

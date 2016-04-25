@@ -1,7 +1,7 @@
 package org.mwg;
 
 import org.mwg.plugin.NodeFactory;
-import org.mwg.polynomial.PolynomialNode;
+import org.mwg.regression.PolynomialNode;
 
 public class PolynomialNodeFactory implements NodeFactory {
     @Override

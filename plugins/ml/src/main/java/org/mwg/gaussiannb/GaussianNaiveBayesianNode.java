@@ -1,11 +1,9 @@
 package org.mwg.gaussiannb;
 
 import org.mwg.*;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.util.matrix.operation.Gaussian1D;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeState;
-import org.mwg.plugin.Resolver;
 
 import java.util.*;
 
@@ -135,16 +133,16 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
     }
 
     @Override
-    public void set(String attributeName, byte attributeType, Object attributeValue) {
+    public void set(String attributeName, Object attributeValue) {
         //TODO Changed class index? Need to recalculate everything
         //TODO Changed buffer size? Might also need recalculation
         //TODO Class index should be positive
         //TODO Input dimensions should be positive
 
-        if (attributeName.equals(VALUE_KEY) && attributeType == Type.DOUBLE_ARRAY) {
+        if (attributeName.equals(VALUE_KEY)) {
             addValue((double[]) attributeValue);
         } else {
-            super.set(attributeName, attributeType, attributeValue);
+            super.set(attributeName, attributeValue);
         }
     }
 
@@ -276,7 +274,7 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         setTotal(classNum, 0);
         final int dimensions = getInputDimensions();
         setSums(classNum, new double[dimensions]);
-        setSumsSquared(classNum, new double[dimensions*(dimensions+1)/2]);
+        setSumsSquared(classNum, new double[dimensions]);
 
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
     }
@@ -296,27 +294,17 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
         setTotal(classNum, getClassTotal(classNum)+1);
 
         double currentSum[] = getSums(classNum);
+        double currentSumSquares[] = getSumSquares(classNum);
         for (int i=0;i<value.length;i++) {
             currentSum[i] += value[i];
+            currentSumSquares[i] += value[i]*value[i];
         }
         //Value at class index - force 0 (or it will be the ultimate predictor)
         currentSum[classIndex] = 0;
+        currentSumSquares[classIndex] = 0;
         setSums(classNum, currentSum);
-        //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
-
-        double currentSumSquares[] = getSumSquares(classNum);
-        int k = 0;
-        for (int i=0;i<value.length;i++){
-            for (int j=i;j<value.length;j++){
-                //Value at class index - force 0 (or it will be the ultimate predictor)
-                if ((i!=classIndex)&&(j!=classIndex)) {
-                    currentSumSquares[k] += value[i]*value[j];
-                }
-            }
-            k++;
-        }
         setSumsSquared(classNum, currentSumSquares);
-        //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
+        //Need to re-put
     }
 
     private void addValueToBuffer(double[] value){
@@ -377,14 +365,29 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
             //Not enough data to build model for that class.
             return 0;
         }
+
+        //For each dimension
+        //Step 1. Get sum
+        //Step 2. Get sum of squares.
+        //Step 3. Multiply for each dimension
+        double likelihood = 1;
         double sums[] = getSums(classNum);
         double sumSquares[] = getSumSquares(classNum);
-        MultivariateNormalDistribution distr =
-                MultivariateNormalDistribution.getDistribution(sums, sumSquares, total);
-        return distr.density(value, true);//TODO Normalize on average?
+        final int classIndex = getClassIndex();
+        for (int i=0;i<getInputDimensions();i++){
+            if (i!=classIndex) {
+                likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
+            }
+        }
+        //TODO Use log likelihood? Can be better for underflows.
+        return likelihood;
     }
 
     private int predictValue(double value[]){
+        int kk[] = getKnownClasses();
+        if (kk.length==1){
+            return kk[0];
+        }
         double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
         valueWithClassRemoved[getClassIndex()] = 0; //Do NOT use real class for prediction
         int classes[] = getKnownClasses();
@@ -578,20 +581,16 @@ public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussian
                     means[i] = means[i]/total;
                 }
                 double sumSquares[] = getSumSquares(classNum);
-                KMatrix cov =
-                        MultivariateNormalDistribution.getCovariance(sums, sumSquares, total);
                 result += classNum+": mean = ["; //TODO For now - cannot report variance from distribution
                 for (int i=0;i<means.length;i++){
                     result += means[i]+", ";
                 }
                 result += "]\nCovariance:\n";
-                for (int i=0;i<cov.rows();i++){
-                    result += "[";
-                    for (int j=0;j<cov.columns();j++){
-                        result += cov.get(i,j)+", ";
-                    }
-                    result += "]\n";
+                result += "[";
+                for (int j=0;j<means.length;j++){
+                    result += Gaussian1D.getCovariance(sums[j], sumSquares[j], total)+", ";
                 }
+                result += "]\n";
             }
         }
         return result;//TODO Normalize on average?
