@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ActionParForeach implements KTaskAction {
+public class ActionForeachPar implements KTaskAction {
 
     private final KTask _subTask;
 
-    public ActionParForeach(final KTask p_subTask) {
+    public ActionForeachPar(final KTask p_subTask) {
         _subTask = p_subTask;
     }
 

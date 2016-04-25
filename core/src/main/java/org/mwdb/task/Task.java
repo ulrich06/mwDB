@@ -152,7 +152,7 @@ public class Task implements KTask {
 
     @Override
     public KTask foreachPar(KTask subTask) {
-        addTask(new ActionParForeach(subTask));
+        addTask(new ActionForeachPar(subTask));
         return this;
     }
 
