@@ -82,7 +82,7 @@ public interface Node {
      *
      * @param propertyName The name of the attribute to remove.
      */
-    void remove(String propertyName);
+    void rm(String propertyName);
 
     /**
      * Retrieves asynchronously the nodes contained in a traverseIndex.

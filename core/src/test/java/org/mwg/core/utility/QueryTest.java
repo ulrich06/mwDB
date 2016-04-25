@@ -2,6 +2,7 @@ package org.mwg.core.utility;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.plugin.Query;
 
 public class QueryTest {
 

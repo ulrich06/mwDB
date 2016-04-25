@@ -80,14 +80,6 @@ public class Constants extends org.mwg.Constants {
      */
     public static final String DISCONNECTED_ERROR = "Please connect your graph, prior to any usage of it";
 
-
-    /**
-     * Queries
-     */
-    public static final char QUERY_SEP = ',';
-
-    public static final char QUERY_KV_SEP = '=';
-
     /**
      * OffHeap
      */

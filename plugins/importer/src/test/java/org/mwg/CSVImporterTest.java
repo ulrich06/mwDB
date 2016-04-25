@@ -62,7 +62,7 @@ public class CSVImporterTest {
 
                 //create an empty
                 Node house = graph.newNode(0, 0);
-                house.attSet("ID", Type.STRING, "ABC123");
+                house.setProperty("ID", Type.STRING, "ABC123");
                 graph.index("houses", house, new String[]{"ID"}, null);
 
                 CSVImporter importer = new CSVImporter();
@@ -101,7 +101,7 @@ public class CSVImporterTest {
 
                 //create an empty
                 Node house = graph.newNode(0, 0);
-                house.attSet("ID", Type.STRING, "ABC123");
+                house.setProperty("ID", Type.STRING, "ABC123");
                 graph.index("houses", house, new String[]{"ID"}, null);
 
                 CSVImporter importer = new CSVImporter();
@@ -124,8 +124,8 @@ public class CSVImporterTest {
                                 callback.on(previouslyDefinedSensors[0]);
                             } else {
                                 Node sensorNode = graph.newNode(toResolveworld, toResolveTime);
-                                sensorNode.attSet("room", Type.STRING, roomName);
-                                sensorNode.attSet("sensor", Type.STRING, locationName);
+                                sensorNode.setProperty("room", Type.STRING, roomName);
+                                sensorNode.setProperty("sensor", Type.STRING, locationName);
                                 house.index("rooms", sensorNode, new String[]{"room", "sensor"}, new Callback<Boolean>() {
                                     @Override
                                     public void on(Boolean result) {

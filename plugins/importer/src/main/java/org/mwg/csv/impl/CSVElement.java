@@ -49,7 +49,7 @@ public class CSVElement {
             if (verbose) {
                 System.out.print(names[i] + ":" + Type.typeName(types[i]) + "->" + values[i]);
             }
-            target.set(names[i], types[i], values[i]);
+            target.setProperty(names[i], types[i], values[i]);
         }
         if (verbose) {
             System.out.println("</Inject>");

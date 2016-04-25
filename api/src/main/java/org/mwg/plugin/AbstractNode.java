@@ -1,8 +1,11 @@
 package org.mwg.plugin;
 
 import org.mwg.*;
+import org.mwg.struct.LongLongArrayMap;
+import org.mwg.struct.LongLongArrayMapCallBack;
 import org.mwg.struct.Map;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -73,6 +76,9 @@ public abstract class AbstractNode implements Node {
         return null;
     }
 
+    /**
+     * @native ts
+     */
     @Override
     public void set(String propertyName, Object propertyValue) {
         if (propertyValue instanceof String) {
@@ -128,7 +134,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void remove(String attributeName) {
+    public void rm(String attributeName) {
         setProperty(attributeName, Type.INT, null);
     }
 
@@ -257,24 +263,192 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public <A extends Node> void find(String indexName, String query, Callback<A[]> callback) {
-        throw new RuntimeException("Not Implemented");
+    public <A extends org.mwg.Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback) {
+        NodeState currentNodeState = this._resolver.resolveState(this, false);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        if (indexMap != null) {
+            final AbstractNode selfPointer = this;
+            final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
+            final long[] foundId = indexMap.get(flatQuery.hash());
+            if (foundId == null) {
+                callback.on((A[]) new org.mwg.Node[0]);
+                return;
+            }
+            final org.mwg.Node[] resolved = new org.mwg.Node[foundId.length];
+            final DeferCounter waiter = _graph.counter(foundId.length);
+            //TODO replace by a par lookup
+            final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
+
+            for (int i = 0; i < foundId.length; i++) {
+                selfPointer._resolver.lookup(world, time, foundId[i], new Callback<org.mwg.Node>() {
+                    @Override
+                    public void on(org.mwg.Node resolvedNode) {
+                        if (resolvedNode != null) {
+                            resolved[nextResolvedTabIndex.getAndIncrement()] = resolvedNode;
+                        }
+                        waiter.count();
+                    }
+                });
+            }
+            waiter.then(new Callback() {
+                @Override
+                public void on(Object o) {
+                    //select
+                    A[] resultSet = (A[]) new org.mwg.Node[nextResolvedTabIndex.get()];
+                    int resultSetIndex = 0;
+
+                    for (int i = 0; i < resultSet.length; i++) {
+                        org.mwg.Node resolvedNode = resolved[i];
+                        NodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
+                        boolean exact = true;
+                        for (int j = 0; j < flatQuery.size; j++) {
+                            Object obj = resolvedState.get(flatQuery.attributes[j]);
+                            if (flatQuery.values[j] == null) {
+                                if (obj != null) {
+                                    exact = false;
+                                    break;
+                                }
+                            } else {
+                                if (obj == null) {
+                                    exact = false;
+                                    break;
+                                } else {
+                                    if (!Constants.equals(flatQuery.values[j], obj.toString())) {
+                                        exact = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (exact) {
+                            resultSet[resultSetIndex] = (A) resolvedNode;
+                            resultSetIndex++;
+                        }
+                    }
+                    if (resultSet.length == resultSetIndex) {
+                        callback.on(resultSet);
+                    } else {
+                        A[] trimmedResultSet = (A[]) new org.mwg.Node[resultSetIndex];
+                        System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
+                        callback.on(trimmedResultSet);
+                    }
+                }
+            });
+        } else {
+            callback.on((A[]) new org.mwg.Node[0]);
+        }
     }
 
     @Override
-    public <A extends Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback) {
-        throw new RuntimeException("Not Implemented");
+    public <A extends org.mwg.Node> void find(String indexName, String query, Callback<A[]> callback) {
+        findAt(indexName, time(), world(), query, callback);
     }
 
     @Override
-    public <A extends Node> void all(String indexName, Callback<A[]> callback) {
-        throw new RuntimeException("Not Implemented");
+    public <A extends org.mwg.Node> void allAt(String indexName, long world, long time, Callback<A[]> callback) {
+        NodeState currentNodeState = this._resolver.resolveState(this, false);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        if (indexMap != null) {
+            final AbstractNode selfPointer = this;
+            int mapSize = (int) indexMap.size();
+            final A[] resolved = (A[]) new org.mwg.Node[mapSize];
+            DeferCounter waiter = _graph.counter(mapSize);
+            //TODO replace by a parralel lookup
+            final AtomicInteger loopInteger = new AtomicInteger(0);
+            indexMap.each(new LongLongArrayMapCallBack() {
+                @Override
+                public void on(final long hash, final long nodeId) {
+                    selfPointer._resolver.lookup(world, time, nodeId, new Callback<org.mwg.Node>() {
+                        @Override
+                        public void on(org.mwg.Node resolvedNode) {
+                            resolved[loopInteger.getAndIncrement()] = (A) resolvedNode;
+                            waiter.count();
+                        }
+                    });
+                }
+            });
+            waiter.then(new Callback() {
+                @Override
+                public void on(Object o) {
+                    if (loopInteger.get() == resolved.length) {
+                        callback.on(resolved);
+                    } else {
+                        A[] toSend = (A[]) new org.mwg.Node[loopInteger.get()];
+                        System.arraycopy(resolved, 0, toSend, 0, toSend.length);
+                        callback.on(toSend);
+                    }
+                }
+            });
+        } else {
+            callback.on((A[]) new org.mwg.Node[0]);
+        }
     }
-
 
     @Override
-    public <A extends Node> void allAt(String indexName, long world, long time, Callback<A[]> callback) {
-        throw new RuntimeException("Not Implemented");
+    public <A extends org.mwg.Node> void all(String indexName, Callback<A[]> callback) {
+        allAt(indexName, world(), time(), callback);
     }
+
+    @Override
+    public void index(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
+        NodeState currentNodeState = this._resolver.resolveState(this, true);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToLongKey(indexName), Type.LONG_LONG_ARRAY_MAP);
+        Query flatQuery = new Query();
+        NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
+        for (int i = 0; i < keyAttributes.length; i++) {
+            long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
+            Object attValue = toIndexNodeState.get(attKey);
+            if (attValue != null) {
+                flatQuery.add(attKey, attValue.toString());
+            } else {
+                flatQuery.add(attKey, null);
+            }
+        }
+        flatQuery.compute();
+        //TODO AUTOMATIC UPDATE
+        indexMap.put(flatQuery.hash(), nodeToIndex.id());
+
+        if (Constants.isDefined(callback)) {
+            callback.on(true);
+        }
+    }
+
+    @Override
+    public void unindex(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
+        NodeState currentNodeState = this._resolver.resolveState(this, true);
+        if (currentNodeState == null) {
+            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
+        }
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        if (indexMap != null) {
+            Query flatQuery = new Query();
+            NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
+            for (int i = 0; i < keyAttributes.length; i++) {
+                long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
+                Object attValue = toIndexNodeState.get(attKey);
+                if (attValue != null) {
+                    flatQuery.add(attKey, attValue.toString());
+                } else {
+                    flatQuery.add(attKey, null);
+                }
+            }
+            flatQuery.compute();
+            //TODO AUTOMATIC UPDATE
+            indexMap.remove(flatQuery.hash(), nodeToIndex.id());
+        }
+        if (Constants.isDefined(callback)) {
+            callback.on(true);
+        }
+    }
+
 
 }

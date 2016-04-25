@@ -1,7 +1,6 @@
-package org.mwg.core.utility;
+package org.mwg.plugin;
 
-import org.mwg.core.Constants;
-import org.mwg.plugin.Resolver;
+import org.mwg.Constants;
 
 public class Query {
 

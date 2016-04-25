@@ -22,5 +22,25 @@ public class Constants {
 
     public static final String CACHE_MISS_ERROR = "Cache miss error";
 
+    public static final char QUERY_SEP = ',';
+
+    public static final char QUERY_KV_SEP = '=';
+
+    /**
+     * @native ts
+     * return param != undefined && param != null;
+     */
+    public static boolean isDefined(Object param) {
+        return param != null;
+    }
+
+    /**
+     * @native ts
+     * return src === other
+     */
+    public static boolean equals(String src, String other) {
+        return src.equals(other);
+    }
+
 }
 

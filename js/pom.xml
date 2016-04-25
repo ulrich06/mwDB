@@ -35,13 +35,14 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <source>${basedir}/../microframework/src/main/java</source>
+                            <source>${basedir}/../api/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
                             <targetJS>${basedir}/target/classes</targetJS>
                             <appendJavaStd>true</appendJavaStd>
                             <appendJunitStd>false</appendJunitStd>
                         </configuration>
                     </execution>
+                    <!--
                     <execution>
                         <id>compile-test</id>
                         <goals>
@@ -59,6 +60,7 @@
                             <appendJunitStd>true</appendJunitStd>
                         </configuration>
                     </execution>
+                    -->
                 </executions>
             </plugin>
         </plugins>

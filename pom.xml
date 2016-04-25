@@ -5,7 +5,7 @@
     <artifactId>root</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
-    <name>mwDB</name>
+    <name>mwg</name>
     <url>https://github.com/kevoree-modeling/mwDB</url>
     <description>Many-World Database</description>
 
@@ -72,7 +72,7 @@
     <modules>
         <module>api</module>
         <module>core</module>
-        <module>js</module>
+        <!-- <module>js</module> -->
 
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
