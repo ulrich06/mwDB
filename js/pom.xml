@@ -7,6 +7,10 @@
     <name>mwg :: Js</name>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <java2typescript.plugin.version>46</java2typescript.plugin.version>
+    </properties>
+
     <build>
         <plugins>
             
@@ -20,6 +24,43 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.kevoree.modeling</groupId>
+                <artifactId>org.kevoree.modeling.java2typescript.mavenplugin</artifactId>
+                <version>${java2typescript.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile-src</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <source>${basedir}/../microframework/src/main/java</source>
+                            <target>${basedir}/target/generated-sources</target>
+                            <targetJS>${basedir}/target/classes</targetJS>
+                            <appendJavaStd>true</appendJavaStd>
+                            <appendJunitStd>false</appendJunitStd>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-test</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <source>${basedir}/../microframework/src/test/java</source>
+                            <target>${basedir}/target/generated-test-sources</target>
+                            <targetJS>${basedir}/target/test-classes</targetJS>
+                            <flatJUnit>true</flatJUnit>
+                            <libraries>
+                                <library>${basedir}/target/classes</library>
+                            </libraries>
+                            <appendJavaStd>false</appendJavaStd>
+                            <appendJunitStd>true</appendJunitStd>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
