@@ -1,11 +1,11 @@
 package ml;
 
-import org.mwdb.*;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.polynomial.KPolynomialNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.polynomial.KPolynomialNode;
+import org.mwg.core.NoopScheduler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -70,7 +70,7 @@ public class TestDbReverse {
         System.out.println(eurUsd.lastKey());
 
 
-        final KGraph graph = GraphBuilder.builder()
+        final Graph graph = GraphBuilder.builder()
             //    .withOffHeapMemory()
                 .withMemorySize(100_000)
                 .withAutoSave(10000)
@@ -79,7 +79,7 @@ public class TestDbReverse {
                 .withScheduler(new NoopScheduler()).
                         build();
 
-        graph.connect(new KCallback<Boolean>() {
+        graph.connect(new Callback<Boolean>() {
                           @Override
                           public void on(Boolean result) {
                               try {
@@ -107,7 +107,7 @@ public class TestDbReverse {
                                   }
 
                                   final long t = iter.next();
-                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
+                                  polyNode.jump(t, new Callback<KPolynomialNode>() {
                                       @Override
                                       public void on(KPolynomialNode result) {
                                           result.set(eurUsd.get(t));
@@ -122,7 +122,7 @@ public class TestDbReverse {
                               System.out.println("Polynomial insert speed: " + d + " value/sec");
 
 
-                              polyNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
+                              polyNode.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                                   @Override
                                   public void on(long[] result) {
                                       System.out.println("Polynomial number of timepoints: " + result.length);
@@ -137,7 +137,7 @@ public class TestDbReverse {
                                       System.out.println(i);
                                   }
                                   final long t = iter.next();
-                                  polyNode.jump(t, new KCallback<KPolynomialNode>() {
+                                  polyNode.jump(t, new Callback<KPolynomialNode>() {
                                       @Override
                                       public void on(KPolynomialNode result) {
                                           try {
@@ -163,8 +163,8 @@ public class TestDbReverse {
                               // System.out.println(error[0]);
 
                               starttime = System.nanoTime();
-                              // KNode normalNode = graph.newNode(0, timestamps.get(0));
-                              KNode normalNode = graph.newNode(0, eurUsd.firstKey());
+                              // Node normalNode = graph.newNode(0, timestamps.get(0));
+                              Node normalNode = graph.newNode(0, eurUsd.firstKey());
                               iter = eurUsd.keySet().iterator();
 
                               for (int i = 0; i < eurUsd.size(); i++) {
@@ -172,11 +172,11 @@ public class TestDbReverse {
                                       System.out.println(i);
                                   }
                                   final long t = iter.next();
-                                  normalNode.jump(t, new KCallback<KNode>() {
+                                  normalNode.jump(t, new Callback<Node>() {
                                       @Override
-                                      public void on(KNode result) {
+                                      public void on(Node result) {
                                           try {
-                                              result.attSet("euroUsd", KType.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
+                                              result.set("euroUsd", Type.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
                                           } catch (Exception ex) {
                                               ex.printStackTrace();
                                           }
@@ -188,12 +188,12 @@ public class TestDbReverse {
                               d = (endtime - starttime);
                               d = d / 1000000000;
                               d = eurUsd.size() / d;
-                              System.out.println("KNode insert speed: " + d + " values/s");
+                              System.out.println("Node insert speed: " + d + " values/s");
 
-                              normalNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
+                              normalNode.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                                   @Override
                                   public void on(long[] result) {
-                                      System.out.println("KNode number of timepoints: " + result.length);
+                                      System.out.println("Node number of timepoints: " + result.length);
                                   }
                               });
 
@@ -207,11 +207,11 @@ public class TestDbReverse {
                                       System.out.println(i);
                                   }
                                   final long t = iter.next();
-                                  normalNode.jump(t, new KCallback<KNode>() {
+                                  normalNode.jump(t, new Callback<Node>() {
                                       @Override
-                                      public void on(KNode result) {
+                                      public void on(Node result) {
                                           try {
-                                              double[] d = (double[]) result.att("euroUsd");
+                                              double[] d = (double[]) result.get("euroUsd");
                                               if (Math.abs(d[0] - eurUsd.get(t)) > precision) {
                                                   error2[0]++;
                                                   //System.out.println("Error " + d + " " + euros.get(i1));
@@ -232,7 +232,7 @@ public class TestDbReverse {
                               ///  System.out.println();
 
 
-                              graph.disconnect(new KCallback<Boolean>() {
+                              graph.disconnect(new Callback<Boolean>() {
                                   @Override
                                   public void on(Boolean result) {
 

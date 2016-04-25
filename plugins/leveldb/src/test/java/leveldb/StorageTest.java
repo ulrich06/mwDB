@@ -12,10 +12,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.chunk.offheap.*;
-import org.mwdb.manager.NoopScheduler;
-import org.mwdb.utility.Unsafe;
+import org.mwg.*;
+import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.NoopScheduler;
+import org.mwg.core.utility.Unsafe;
 
 public class StorageTest {
 
@@ -34,13 +34,13 @@ public class StorageTest {
     final int valuesToInsert = 1_000_000;
     final long timeOrigin = 1000;
 
-    private void test(String name, KGraph graph) {
-        graph.connect(new KCallback<Boolean>() {
+    private void test(String name, Graph graph) {
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 final long before = System.currentTimeMillis();
-                KNode node = graph.newNode(0, 0);
-                final KDeferCounter counter = graph.counter(valuesToInsert);
+                Node node = graph.newNode(0, 0);
+                final DeferCounter counter = graph.counter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
                     if (i % 1_000_000 == 0) {
@@ -49,10 +49,10 @@ public class StorageTest {
 
                     final double value = i * 0.3;
                     final long time = timeOrigin + i;
-                    graph.lookup(0, time, node.id(), new KCallback<KNode>() {
+                    graph.lookup(0, time, node.id(), new Callback<Node>() {
                         @Override
-                        public void on(KNode timedNode) {
-                            timedNode.attSet("value", KType.DOUBLE, value);
+                        public void on(Node timedNode) {
+                            timedNode.set("value", Type.DOUBLE, value);
                             counter.count();
                             timedNode.free();//free the node, for cache management
                         }
@@ -60,7 +60,7 @@ public class StorageTest {
                 }
                 node.free();
 
-                counter.then(new KCallback() {
+                counter.then(new Callback() {
                     @Override
                     public void on(Object result) {
 
@@ -69,7 +69,7 @@ public class StorageTest {
                         System.out.println("<end insert phase>" + " " + (System.currentTimeMillis() - before) / 1000 + "s");
                         System.out.println(name + " result: " + (valuesToInsert / ((System.currentTimeMillis() - before) / 1000) / 1000) + "kv/s");
 
-                        graph.disconnect(new KCallback<Boolean>() {
+                        graph.disconnect(new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
                                 System.out.println("Graph disconnected");

@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.kevoree.mwdb.plugins</groupId>
+    <groupId>org.kevoree.mwg.plugins</groupId>
     <artifactId>leveldb</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>mwDB :: Plugins :: LevelDB</name>
+    <name>mwg :: Plugins :: LevelDB</name>
 
     <properties>
         <leveldb.version>1.8</leveldb.version>
     </properties>
 
     <dependencies>
-      <dependency>
-          <groupId>org.kevoree.mwdb</groupId>
-          <artifactId>api</artifactId>
-          <version>1-SNAPSHOT</version>
-      </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>api</artifactId>
+            <version>1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.fusesource.leveldbjni</groupId>
             <artifactId>leveldbjni-all</artifactId>
@@ -29,7 +30,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.mwdb</groupId>
+            <groupId>org.kevoree.mwg</groupId>
             <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>

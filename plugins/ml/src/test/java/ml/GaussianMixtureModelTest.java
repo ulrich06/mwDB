@@ -1,12 +1,12 @@
 package ml;
 
 import org.junit.Test;
-import org.mwdb.GaussianNodeFactory;
-import org.mwdb.GraphBuilder;
-import org.mwdb.KCallback;
-import org.mwdb.KGraph;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.Callback;
+import org.mwg.GaussianNodeFactory;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
+import org.mwg.gmm.KGaussianNode;
+import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
 
@@ -16,8 +16,8 @@ import java.util.Random;
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 double[] data = new double[3];

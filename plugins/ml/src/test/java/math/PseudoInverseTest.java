@@ -4,10 +4,10 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Test;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
-import org.mwdb.math.matrix.operation.PInvSVD;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.operation.PInvSVD;
 
 /**
  * Created by assaad on 25/03/16.

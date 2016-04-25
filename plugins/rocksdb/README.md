@@ -33,7 +33,7 @@ Simply reference the full qualified name of the storage (should be an existant d
 
 ```java
 import org.kevoree.modeling.cdn.KContentDeliveryDriver;
-import org.mwdb.RocksDBStorage;
+import org.mwg.RocksDBStorage;
 
 KContentDeliveryDriver rocksDBDriver = 
 	new RocksDBPlugin("/opt/kmf_storage");

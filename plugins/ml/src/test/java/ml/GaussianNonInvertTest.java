@@ -1,17 +1,17 @@
 package ml;
 
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.gmm.KGaussianNode;
+import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
 
 public class GaussianNonInvertTest {
     @Test
     public void Singularity() {
-        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 double[] data = new double[3];

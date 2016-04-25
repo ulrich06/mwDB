@@ -3,12 +3,12 @@ package math;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.LU;
-import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
-import org.mwdb.math.matrix.jamasolver.QR;
-import org.mwdb.math.matrix.jamasolver.SVD;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.LU;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.jamasolver.QR;
+import org.mwg.math.matrix.jamasolver.SVD;
 
 /**
  * Created by assaad on 06/04/16.
@@ -62,7 +62,7 @@ public class JamaPerf {
         System.out.println("Blas LU: " + d + " ms");
 
         startTime =System.nanoTime();
-        org.mwdb.math.matrix.jamasolver.LU lujama= new org.mwdb.math.matrix.jamasolver.LU(matASq);
+        org.mwg.math.matrix.jamasolver.LU lujama= new org.mwg.math.matrix.jamasolver.LU(matASq);
         endTime=System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -78,7 +78,7 @@ public class JamaPerf {
         System.out.println();
 
         startTime =System.nanoTime();
-        org.mwdb.math.matrix.blassolver.QR qrblas= new org.mwdb.math.matrix.blassolver.QR(m,n,blas);
+        org.mwg.math.matrix.blassolver.QR qrblas= new org.mwg.math.matrix.blassolver.QR(m,n,blas);
         qrblas.factor(matA,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);
@@ -102,7 +102,7 @@ public class JamaPerf {
         System.out.println();
 
         startTime =System.nanoTime();
-        org.mwdb.math.matrix.blassolver.SVD svdblas= new org.mwdb.math.matrix.blassolver.SVD(m,n,blas);
+        org.mwg.math.matrix.blassolver.SVD svdblas= new org.mwg.math.matrix.blassolver.SVD(m,n,blas);
         svdblas.factor(matA,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);

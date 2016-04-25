@@ -1,30 +1,30 @@
 package math;
 
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.core.NoopScheduler;
 
 public class MathNodeTest {
 
     @Test
     public void test() {
-        KGraph graph = GraphBuilder
+        Graph graph = GraphBuilder
                 .builder()
                 .withFactory(new MathNodeFactory())
                 .withScheduler(new NoopScheduler())
                 .build();
-        graph.connect(new KCallback<Boolean>() {
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                KNode node = graph.newNode(0, 0, "MathNode");
-                node.attSet("$valueSquare", KType.STRING, "{value} ^ 2 / {min} * 2");
-                node.attSet("value", KType.DOUBLE, 3.0);
-                node.attSet("min", KType.DOUBLE, 3.0);
+                Node node = graph.newNode(0, 0, "MathNode");
+                node.set("$valueSquare", Type.STRING, "{value} ^ 2 / {min} * 2");
+                node.set("value", Type.DOUBLE, 3.0);
+                node.set("min", Type.DOUBLE, 3.0);
 
-                System.out.println(node.att("value"));
-                System.out.println(node.att("$valueSquare"));
-                System.out.println(node.att("$valueSquare"));
+                System.out.println(node.get("value"));
+                System.out.println(node.get("$valueSquare"));
+                System.out.println(node.get("$valueSquare"));
 
                 graph.disconnect(null);
             }

@@ -2,11 +2,10 @@ package ml;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.gmm.GaussianNode;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.gmm.KGaussianNode;
+import org.mwg.core.NoopScheduler;
 
 /**
  * Created by assaad on 25/03/16.
@@ -64,8 +63,8 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 KGaussianNode gaussianNodeBatch = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
@@ -85,7 +84,7 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(time, new KCallback<KGaussianNode>() {
+                    gaussianNodeLive.jump(time, new Callback<KGaussianNode>() {
                         @Override
                         public void on(KGaussianNode result) {
                             result.learn(trains);
@@ -116,7 +115,7 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new KCallback<KGaussianNode>(){
+                gaussianNodeLive.jump(time, new Callback<KGaussianNode>(){
                     @Override
                     public void on(KGaussianNode result) {
                         double[] a = result.getAvg();

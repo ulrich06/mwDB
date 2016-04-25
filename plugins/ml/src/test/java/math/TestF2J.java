@@ -1,12 +1,11 @@
 package math;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.math.matrix.blassolver.blas.KBlas;
-import org.mwdb.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
 
 /**
  * Created by assaad on 13/04/16.
@@ -37,7 +36,7 @@ public class TestF2J {
         long startTime, endTime;
         double d;
         startTime =System.nanoTime();
-        org.mwdb.math.matrix.blassolver.QR qrblas= new org.mwdb.math.matrix.blassolver.QR(m,n,blas);
+        org.mwg.math.matrix.blassolver.QR qrblas= new org.mwg.math.matrix.blassolver.QR(m,n,blas);
         qrblas.factor(matA,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);
@@ -46,7 +45,7 @@ public class TestF2J {
 
 
         startTime =System.nanoTime();
-        org.mwdb.math.matrix.blassolver.QR qrblasF2j= new org.mwdb.math.matrix.blassolver.QR(m,n,blasF2J);
+        org.mwg.math.matrix.blassolver.QR qrblasF2j= new org.mwg.math.matrix.blassolver.QR(m,n,blasF2J);
         qrblasF2j.factor(matAcopy,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);

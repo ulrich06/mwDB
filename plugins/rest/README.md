@@ -65,13 +65,13 @@ In all following examples we will consider the following very simple meta model 
 
 ```java
 class Node {
-    att name: String with index
-    att load: Continuous
+    get name: String with index
+    get load: Continuous
     rel processes: Process
 }
 class Process {
-    att name: String
-    att load: Continuous
+    get name: String
+    get load: Continuous
 }
 ```
 

@@ -2,10 +2,10 @@ package math;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.math.matrix.operation.PolynomialFit;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.operation.PolynomialFit;
 
 /**
  * Created by assaad on 23/03/16.
