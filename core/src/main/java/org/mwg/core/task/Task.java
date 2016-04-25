@@ -123,6 +123,16 @@ public class Task implements org.mwg.task.Task {
     }
 
     @Override
+    public org.mwg.task.Task ifThen(TaskFunctionConditional cond, org.mwg.task.Task then) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public org.mwg.task.Task whileDo(TaskFunctionConditional cond, org.mwg.task.Task then) {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
     public org.mwg.task.Task then(TaskAction p_action) {
         addTask(new ActionWrapper(p_action));
         return this;

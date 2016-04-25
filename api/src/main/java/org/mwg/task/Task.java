@@ -95,6 +95,10 @@ public interface Task {
      */
     Task wait(Task subTask);
 
+    Task ifThen(TaskFunctionConditional cond, Task then);
+
+    Task whileDo(TaskFunctionConditional cond, Task then);
+
     Task then(TaskAction action);
 
     Task thenAsync(TaskAction action);
