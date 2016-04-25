@@ -70,8 +70,7 @@ public interface Task {
 
     /**
      * Filter the previous result to get nodes that respect the specified condition in {@code filterFunction}
-     * WARNING: Do not do an asynchronous call in the filter function. If you want to do this,
-     * please use {@link #selectWhere(Task)}
+     * If you want to access/modify the context, please use, please use {@link #selectWhere(Task)}
      * @param filterFunction condition that nodes have to respect
      * @return this task to chain actions (fluent API)
      */
@@ -79,9 +78,9 @@ public interface Task {
 
     /**
      * Filter the previous result to get nodes that respect the specified condition in {@code subTask}
-     * Similar to {@link #select(TaskFunctionSelect)}, but allow asynchronous method call
-     * @param subTask
-     * @return
+     * Similar to {@link #select(TaskFunctionSelect)}, but allow access/modification of the context
+     * @param subTask sub task called to filter the element
+     * @return this task to chain actions (fluent API)
      */
     Task selectWhere(Task subTask);
 
@@ -102,10 +101,28 @@ public interface Task {
 
     Task groupWhere(Task groupSubTask);
 
+    /**
+     * Iterate through a pre-loaded collection of object add apply the {@code action} on each element
+     * If you want to access/modify the context, please use {@link #foreachWhere(Task)} method
+     * @param action action to apply on each element
+     * @param <TYPE> the type of the element
+     * @return this task to chain actions (fluent API)
+     */
     <TYPE> Task foreach(ForEachAction action);
 
+    /**
+     * Iterate through a collection and call the sub task for each elements
+     * @param subTask sub task to call for each elements
+     * @return this task to chain actions (fluent API)
+     */
     Task foreachWhere(Task subTask);
 
+    /**
+     * Same as {@link #foreachWhere(Task)} method, but all the subtask are called in parallel
+     * Tre is thus as thread as element in the collection
+     * @param subTask
+     * @return
+     */
     Task foreachPar(Task subTask);
 
     /**
