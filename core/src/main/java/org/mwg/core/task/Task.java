@@ -1,6 +1,6 @@
 package org.mwg.core.task;
 
-import org.mwg.*;
+import org.mwg.Graph;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
@@ -155,7 +155,22 @@ public class Task implements org.mwg.task.Task {
     }
 
     @Override
-    public org.mwg.task.Task foreach(org.mwg.task.Task subTask) {
+    public <TYPE> org.mwg.task.Task foreach(ForEachAction action) {
+        org.mwg.task.Task task = _graph.newTask().then(new TaskAction() {
+            @Override
+            public void eval(org.mwg.task.TaskContext context) {
+                Object previousResult = context.getPreviousResult();
+                if(previousResult != null) {
+                    action.eval((TYPE) previousResult);
+                }
+            }
+        });
+        foreachWhere(task);
+        return this;
+    }
+
+    @Override
+    public org.mwg.task.Task foreachWhere(org.mwg.task.Task subTask) {
         addTask(new ActionForeach(subTask));
         return this;
     }

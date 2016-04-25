@@ -34,6 +34,12 @@ public interface Task {
      */
     Task fromVar(String variableName);
 
+    /**
+     * Method to initialise a task with any object
+     *
+     * @param inputValue object used as source of a task
+     * @return this task to chain actions (fluent API)
+     */
     Task from(Object inputValue);
 
     /**
@@ -64,11 +70,19 @@ public interface Task {
 
     /**
      * Filter the previous result to get nodes that respect the specified condition in {@code filterFunction}
+     * WARNING: Do not do an asynchronous call in the filter function. If you want to do this,
+     * please use {@link #selectWhere(Task)}
      * @param filterFunction condition that nodes have to respect
      * @return this task to chain actions (fluent API)
      */
     Task select(TaskFunctionSelect filterFunction);
 
+    /**
+     * Filter the previous result to get nodes that respect the specified condition in {@code subTask}
+     * Similar to {@link #select(TaskFunctionSelect)}, but allow asynchronous method call
+     * @param subTask
+     * @return
+     */
     Task selectWhere(Task subTask);
 
     /**
@@ -88,7 +102,9 @@ public interface Task {
 
     Task groupWhere(Task groupSubTask);
 
-    Task foreach(Task subTask);
+    <TYPE> Task foreach(ForEachAction action);
+
+    Task foreachWhere(Task subTask);
 
     Task foreachPar(Task subTask);
 

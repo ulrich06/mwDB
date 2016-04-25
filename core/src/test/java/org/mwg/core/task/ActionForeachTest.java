@@ -3,6 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
+import org.mwg.task.ForEachAction;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -12,12 +13,12 @@ import java.util.List;
 public class ActionForeachTest extends AbstractActionTest {
 
     @Test
-    public void test() {
+    public void testForeachWhere() {
 
         final long[] i = {0};
         graph.newTask()
                 .from(new long[]{1, 2, 3})
-                .foreach(graph.newTask().then(new TaskAction() {
+                .foreachWhere(graph.newTask().then(new TaskAction() {
                     @Override
                     public void eval(TaskContext context) {
                         i[0]++;
@@ -37,7 +38,7 @@ public class ActionForeachTest extends AbstractActionTest {
                 })
                 .execute();
 
-        graph.newTask().fromIndexAll("nodes").foreach(graph.newTask().then(new TaskAction() {
+        graph.newTask().fromIndexAll("nodes").foreachWhere(graph.newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
@@ -58,7 +59,7 @@ public class ActionForeachTest extends AbstractActionTest {
         paramIterable.add("n0");
         paramIterable.add("n1");
         paramIterable.add("root");
-        graph.newTask().from(paramIterable).foreach(graph.newTask().then(new TaskAction() {
+        graph.newTask().from(paramIterable).foreachWhere(graph.newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
@@ -74,6 +75,40 @@ public class ActionForeachTest extends AbstractActionTest {
             }
         }).execute();
         
+    }
+
+
+
+    @Test
+    public void testForeach() {
+        long[] toTest = {1,2,3,4,5};
+        int[] index = {0};
+
+        graph.newTask().from(toTest).foreach(new ForEachAction<Long>() {
+            @Override
+            public void eval(Long object) {
+                Assert.assertEquals(toTest[index[0]],(long) object);
+                index[0]++;
+            }
+        }).execute();
+
+        index[0] = 0;
+        graph.newTask().fromIndexAll("nodes").foreach(new ForEachAction<Node>() {
+            @Override
+            public void eval(Node object) {
+                object.set("name","node" + index[0]);
+                index[0]++;
+            }
+        }).fromIndexAll("nodes").then(new TaskAction() {
+            @Override
+            public void eval(TaskContext context) {
+                Node[] result = (Node[]) context.getPreviousResult();
+                Assert.assertEquals(3,result.length);
+                Assert.assertEquals("node0",result[0].get("name"));
+                Assert.assertEquals("node1",result[1].get("name"));
+                Assert.assertEquals("node2",result[2].get("name"));
+            }
+        }).execute();
     }
 
 }

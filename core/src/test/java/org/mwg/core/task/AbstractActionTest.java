@@ -1,5 +1,8 @@
 package org.mwg.core.task;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
 
@@ -7,7 +10,8 @@ public abstract class AbstractActionTest {
 
     protected Graph graph;
 
-    public AbstractActionTest() {
+    @Before
+    public void initGraph() {
         graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -33,6 +37,16 @@ public abstract class AbstractActionTest {
                 graph.index("nodes", n1, new String[]{"name"}, null);
                 graph.index("nodes", root, new String[]{"name"}, null);
 
+            }
+        });
+    }
+
+    @After
+    public void removeGraph() {
+        graph.disconnect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                Assert.assertEquals("Error during graph disconnection",true,result);
             }
         });
     }
