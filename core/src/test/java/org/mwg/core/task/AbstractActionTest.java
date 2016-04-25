@@ -15,15 +15,15 @@ public abstract class AbstractActionTest {
 
                 //create graph nodes
                 Node n0 = graph.newNode(0, 0);
-                n0.set("name", Type.STRING, "n0");
-                n0.set("value", Type.INT, 8);
+                n0.setProperty("name", Type.STRING, "n0");
+                n0.setProperty("value", Type.INT, 8);
 
                 Node n1 = graph.newNode(0, 0);
-                n1.set("name", Type.STRING, "n1");
-                n1.set("value", Type.INT, 3);
+                n1.setProperty("name", Type.STRING, "n1");
+                n1.setProperty("value", Type.INT, 3);
 
                 Node root = graph.newNode(0, 0);
-                root.set("name", Type.STRING, "root");
+                root.setProperty("name", Type.STRING, "root");
                 root.add("children", n0);
                 root.add("children", n1);
 

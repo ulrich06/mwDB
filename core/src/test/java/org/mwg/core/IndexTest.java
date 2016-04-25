@@ -39,7 +39,7 @@ public class IndexTest {
             @Override
             public void on(Boolean o) {
                 org.mwg.Node node_t0 = graph.newNode(0, 0);
-                node_t0.set("name", Type.STRING, "MyName");
+                node_t0.setProperty("name", Type.STRING, "MyName");
 
                 graph.all(0, 0, "nodes", new Callback<org.mwg.Node[]>() {
                     @Override
@@ -86,8 +86,8 @@ public class IndexTest {
 
 
                 org.mwg.Node node_t1 = graph.newNode(0, 0);
-                node_t1.set("name", Type.STRING, "MyName");
-                node_t1.set("version", Type.STRING, "1.0");
+                node_t1.setProperty("name", Type.STRING, "MyName");
+                node_t1.setProperty("version", Type.STRING, "1.0");
 
                 graph.index("nodes", node_t1, new String[]{"name", "version"}, new Callback<Boolean>() {
                     @Override

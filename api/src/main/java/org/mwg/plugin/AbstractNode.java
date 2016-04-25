@@ -74,7 +74,32 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void set(String propertyName, byte propertyType, Object propertyValue) {
+    public void set(String propertyName, Object propertyValue) {
+        if (propertyValue instanceof String) {
+            setProperty(propertyName, Type.STRING, propertyValue);
+        } else if (propertyValue instanceof Double) {
+            setProperty(propertyName, Type.DOUBLE, propertyValue);
+        } else if (propertyValue instanceof Long) {
+            setProperty(propertyName, Type.LONG, propertyValue);
+        } else if (propertyValue instanceof Float) {
+            setProperty(propertyName, Type.DOUBLE, (double) ((float) propertyValue));
+        } else if (propertyValue instanceof Integer) {
+            setProperty(propertyName, Type.INT, propertyValue);
+        } else if (propertyValue instanceof Boolean) {
+            setProperty(propertyName, Type.BOOL, propertyValue);
+        } else if (propertyValue instanceof int[]) {
+            setProperty(propertyName, Type.INT_ARRAY, propertyValue);
+        } else if (propertyValue instanceof double[]) {
+            setProperty(propertyName, Type.DOUBLE_ARRAY, propertyValue);
+        } else if (propertyValue instanceof long[]) {
+            setProperty(propertyName, Type.LONG_ARRAY, propertyValue);
+        } else {
+            throw new RuntimeException("Invalid property type: " + propertyValue + ", please use a Type listed in org.mwg.Type");
+        }
+    }
+
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         NodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
             preciseState.set(this._resolver.stringToLongKey(propertyName), propertyType, propertyValue);
@@ -104,7 +129,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void remove(String attributeName) {
-        set(attributeName, Type.INT, null);
+        setProperty(attributeName, Type.INT, null);
     }
 
     @Override
@@ -237,17 +262,18 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public <A extends Node> void find(String indexName, long world, long time, String query, Callback<A[]> callback) {
-        throw new RuntimeException("Not Implemented");
-    }
-
-    @Override
-    public <A extends Node> void all(String indexName, long world, long time, Callback<A[]> callback) {
+    public <A extends Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback) {
         throw new RuntimeException("Not Implemented");
     }
 
     @Override
     public <A extends Node> void all(String indexName, Callback<A[]> callback) {
+        throw new RuntimeException("Not Implemented");
+    }
+
+
+    @Override
+    public <A extends Node> void allAt(String indexName, long world, long time, Callback<A[]> callback) {
         throw new RuntimeException("Not Implemented");
     }
 

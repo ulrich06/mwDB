@@ -431,7 +431,7 @@ class Graph implements org.mwg.Graph {
                         callback.on((A[]) new org.mwg.Node[0]);
                     }
                 } else {
-                    foundIndex.find(Constants.INDEX_ATTRIBUTE, world, time, query, new Callback<A[]>() {
+                    foundIndex.findAt(Constants.INDEX_ATTRIBUTE, world, time, query, new Callback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();
@@ -455,7 +455,7 @@ class Graph implements org.mwg.Graph {
                         callback.on((A[]) new org.mwg.Node[0]);
                     }
                 } else {
-                    foundIndex.all(Constants.INDEX_ATTRIBUTE, world, time, new Callback<A[]>() {
+                foundIndex.allAt(Constants.INDEX_ATTRIBUTE, world, time, new Callback<A[]>() {
                         @Override
                         public void on(A[] collectedNodes) {
                             foundIndex.free();

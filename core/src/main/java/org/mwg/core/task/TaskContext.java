@@ -74,7 +74,11 @@ class TaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void setVariable(String name, Object value) {
-        this._variables.put(name, value);
+        if (value != null) {
+            this._variables.put(name, value);
+        } else {
+            this._variables.remove(name);
+        }
     }
 
     @Override
@@ -120,11 +124,11 @@ class TaskContext implements org.mwg.task.TaskContext {
         }
     }
 
-    private void cleanObj(Object o){
+    private void cleanObj(Object o) {
         if (o instanceof Node) {
             ((Node) o).free();
         } else if (o instanceof org.mwg.task.TaskContext) {
-            ((org.mwg.task.TaskContext)o).clean();
+            ((org.mwg.task.TaskContext) o).clean();
         } else if (o instanceof org.mwg.task.TaskContext[]) {
             org.mwg.task.TaskContext[] loop = (org.mwg.task.TaskContext[]) o;
             for (int j = 0; j < loop.length; j++) {

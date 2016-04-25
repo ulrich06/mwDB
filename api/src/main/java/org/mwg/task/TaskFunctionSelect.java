@@ -5,6 +5,7 @@ import org.mwg.Node;
 /**
  * Task closure function to select nodes for next action
  */
+@FunctionalInterface
 public interface TaskFunctionSelect {
 
     /**

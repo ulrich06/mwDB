@@ -49,19 +49,19 @@ public class HelloWorldTest {
                     }
                 });
 
-                node0.set("name", Type.STRING, "MyName");
+                node0.set("name", "MyName");
                 Assert.assertTrue(PrimitiveHelper.equals("MyName", node0.get("name").toString()));
 
                 node0.remove("name");
                 Assert.assertTrue(node0.get("name") == null);
-                node0.set("name", Type.STRING, "MyName");
+                node0.setProperty("name", Type.STRING, "MyName");
 
-                node0.set("value", Type.STRING, "MyValue");
+                node0.setProperty("value", Type.STRING, "MyValue");
                 Assert.assertTrue(PrimitiveHelper.equals("MyValue", node0.get("value").toString()));
                 //check that other attribute name is not affected
                 Assert.assertTrue(PrimitiveHelper.equals("MyName", node0.get("name").toString()));
 
-                node0.set("name", Type.STRING, "MyName2");
+                node0.setProperty("name", Type.STRING, "MyName2");
                 Assert.assertTrue(PrimitiveHelper.equals("MyName2", node0.get("name").toString()));
                 Assert.assertTrue(PrimitiveHelper.equals("MyValue", node0.get("value").toString()));
 

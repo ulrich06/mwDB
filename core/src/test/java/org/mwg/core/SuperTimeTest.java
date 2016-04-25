@@ -44,7 +44,7 @@ public class SuperTimeTest {
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
                         public void on(org.mwg.Node result) {
-                            result.set("time", Type.INT, finalI);
+                            result.setProperty("time", Type.INT, finalI);
                         }
                     });
                 }
@@ -60,7 +60,7 @@ public class SuperTimeTest {
                 graph.lookup(0, Constants.SCALE_1, node_t0.id(), new Callback<org.mwg.Node>() {
                     @Override
                     public void on(org.mwg.Node result) {
-                        result.set("time", Type.INT, (int) Constants.SCALE_1);
+                        result.setProperty("time", Type.INT, (int) Constants.SCALE_1);
                     }
                 });
 
@@ -73,7 +73,7 @@ public class SuperTimeTest {
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
                         public void on(org.mwg.Node result) {
-                            result.set("time", Type.INT, finalI);
+                            result.setProperty("time", Type.INT, finalI);
                         }
                     });
                 }
@@ -86,7 +86,7 @@ public class SuperTimeTest {
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
                         public void on(org.mwg.Node result) {
-                            result.set("time", Type.INT, finalI);
+                            result.setProperty("time", Type.INT, finalI);
                         }
                     });
                 }

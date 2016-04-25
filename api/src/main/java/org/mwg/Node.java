@@ -53,10 +53,19 @@ public interface Node {
      * This method hasField to be used for primitive types.
      *
      * @param propertyName  The name of the attribute. Must be unique per node.
+     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     */
+    void set(String propertyName, Object propertyValue);
+
+    /**
+     * Sets the value of an attribute of this node, for its current world and time.<br>
+     * This method hasField to be used for primitive types.
+     *
+     * @param propertyName  The name of the attribute. Must be unique per node.
      * @param propertyType  The type of the attribute. Must be one of {@link Type} int value.
      * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
      */
-    void set(String propertyName, byte propertyType, Object propertyValue);
+    void setProperty(String propertyName, byte propertyType, Object propertyValue);
 
     /**
      * Gets or creates atomically a complex type (such as Maps).<br>
@@ -130,13 +139,13 @@ public interface Node {
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per relation)
-     * @param query     The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30")
+     * @param query     The query on the searched node's attribute (e.g.: "firstName=john,lastName=doe,age=30")
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
     <A extends Node> void find(String indexName, String query, Callback<A[]> callback);
 
     /**
-     * Retrieves nodes fromVar an index that satisfies a queryin a particular world and time.<br>
+     * Retrieves nodes fromVar an index that satisfies a query in a particular world and time.<br>
      * The query is composed by &lt;key, value&gt; tuples, separated by commas.
      *
      * @param indexName The name of the index (should be unique per relation)
@@ -145,7 +154,7 @@ public interface Node {
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
      */
-    <A extends Node> void find(String indexName, long world, long time, String query, Callback<A[]> callback);
+    <A extends Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback);
 
     /**
      * Retrieves all nodes in a particular index at the current node world and the current node time
@@ -163,7 +172,7 @@ public interface Node {
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
      */
-    <A extends Node> void all(String indexName, long world, long time, Callback<A[]> callback);
+    <A extends Node> void allAt(String indexName, long world, long time, Callback<A[]> callback);
 
     /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.

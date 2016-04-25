@@ -52,7 +52,7 @@ public class TimelineTest {
                     }
                 });
                 //do a simple modification
-                node_t0.set("name", Type.STRING, "MyName");
+                node_t0.setProperty("name", Type.STRING, "MyName");
                 Assert.assertTrue(node_t0.timeDephasing() == 0);
                 //check the unmodified time tree
                 node_t0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
@@ -74,7 +74,7 @@ public class TimelineTest {
                         Assert.assertTrue(node_t1.timeDephasing() == 0); //node should be in phase now
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t1.toString()));
 
-                        node_t1.set("name", Type.STRING, "MyName@t1");
+                        node_t1.setProperty("name", Type.STRING, "MyName@t1");
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName@t1\"}}", node_t1.toString()));
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t0.toString()));
 
@@ -105,7 +105,7 @@ public class TimelineTest {
                                         Assert.assertTrue(longs[1] == 0);
                                     }
                                 });
-                                node_t1_w0.set("name", Type.STRING, "MyName@t1@w1");
+                                node_t1_w0.setProperty("name", Type.STRING, "MyName@t1@w1");
                                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"data\": {\"name\": \"MyName@t1@w1\"}}", node_t1_w0.toString()));
                                 //test the new timeline
                                 node_t1_w0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {

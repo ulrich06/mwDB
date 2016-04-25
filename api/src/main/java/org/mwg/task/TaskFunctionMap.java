@@ -5,6 +5,7 @@ import org.mwg.Node;
 /**
  * Task closure function to transform nodes for next action
  */
+@FunctionalInterface
 public interface TaskFunctionMap {
     /**
      * Convert a node to any kind of object for next action

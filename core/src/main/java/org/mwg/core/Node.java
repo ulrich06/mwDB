@@ -76,7 +76,7 @@ class Node extends AbstractNode {
     }
 
     @Override
-    public <A extends org.mwg.Node> void find(String indexName, long world, long time, String query, Callback<A[]> callback) {
+    public <A extends org.mwg.Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -157,11 +157,11 @@ class Node extends AbstractNode {
 
     @Override
     public <A extends org.mwg.Node> void find(String indexName, String query, Callback<A[]> callback) {
-        find(indexName, time(), world(), query, callback);
+        findAt(indexName, time(), world(), query, callback);
     }
 
     @Override
-    public <A extends org.mwg.Node> void all(String indexName, long world, long time, Callback<A[]> callback) {
+    public <A extends org.mwg.Node> void allAt(String indexName, long world, long time, Callback<A[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -205,7 +205,7 @@ class Node extends AbstractNode {
 
     @Override
     public <A extends org.mwg.Node> void all(String indexName, Callback<A[]> callback) {
-        all(indexName, world(), time(), callback);
+        allAt(indexName, world(), time(), callback);
     }
 
     @Override
