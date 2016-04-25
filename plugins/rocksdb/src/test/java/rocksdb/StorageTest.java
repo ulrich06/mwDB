@@ -1,21 +1,20 @@
 package rocksdb;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.NoopScheduler;
+import org.mwg.core.chunk.offheap.OffHeapByteArray;
+import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
+import org.mwg.core.chunk.offheap.OffHeapLongArray;
+import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.utility.Unsafe;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class StorageTest {
 

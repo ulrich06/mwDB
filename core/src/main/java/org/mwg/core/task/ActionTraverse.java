@@ -36,29 +36,25 @@ class ActionTraverse implements TaskAction {
                     }
                 }
             }
-            if (!toLoad.isEmpty()) {
-                DeferCounter deferCounter = context.graph().counter(toLoad.size());
-                final Node[] resultNodes = new Node[toLoad.size()];
-                final AtomicInteger cursor = new AtomicInteger();
-                for (Long idNode : toLoad) {
-                    context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {
-                        @Override
-                        public void on(Node result) {
-                            resultNodes[cursor.getAndIncrement()] = result;
-                            deferCounter.count();
-                        }
-                    });
-                }
-                deferCounter.then(new Callback() {
+            DeferCounter deferCounter = context.graph().counter(toLoad.size());
+            final Node[] resultNodes = new Node[toLoad.size()];
+            final AtomicInteger cursor = new AtomicInteger();
+            for (Long idNode : toLoad) {
+                context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {
                     @Override
-                    public void on(Object result) {
-                        context.setResult(resultNodes);
-                        context.next();
+                    public void on(Node result) {
+                        resultNodes[cursor.getAndIncrement()] = result;
+                        deferCounter.count();
                     }
                 });
-            } else {
-                context.next();
             }
+            deferCounter.then(new Callback() {
+                @Override
+                public void on(Object result) {
+                    context.setResult(resultNodes);
+                    context.next();
+                }
+            });
         } else {
             context.next();
         }
