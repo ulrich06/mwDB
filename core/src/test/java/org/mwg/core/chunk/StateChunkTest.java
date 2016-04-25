@@ -7,17 +7,17 @@ import org.mwg.core.Constants;
 import org.mwg.Graph;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.HeapStateChunk;
-import org.mwg.core.chunk.heap.KHeapChunk;
+import org.mwg.core.chunk.heap.HeapChunk;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-public class StateChunkTest implements KChunkListener {
+public class StateChunkTest implements ChunkListener {
 
     private int nbCount = 0;
 
     public interface StateChunkFactory {
-        KStateChunk create(KChunkListener listener, Buffer payload, KChunk origin);
+        StateChunk create(ChunkListener listener, Buffer payload, Chunk origin);
     }
 
     @Test
@@ -25,7 +25,7 @@ public class StateChunkTest implements KChunkListener {
         StateChunkFactory factory = new StateChunkFactory() {
 
             @Override
-            public KStateChunk create(KChunkListener listener, Buffer payload, KChunk origin) {
+            public StateChunk create(ChunkListener listener, Buffer payload, Chunk origin) {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
@@ -42,7 +42,7 @@ public class StateChunkTest implements KChunkListener {
         StateChunkFactory factory = new StateChunkFactory() {
 
             @Override
-            public KStateChunk create(KChunkListener listener, Buffer payload, KChunk origin) {
+            public StateChunk create(ChunkListener listener, Buffer payload, Chunk origin) {
                 return new OffHeapStateChunk(listener, Constants.OFFHEAP_NULL_PTR, payload, origin);
             }
         };
@@ -81,7 +81,7 @@ public class StateChunkTest implements KChunkListener {
         //reset nb count
         nbCount = 0;
 
-        KStateChunk chunk = factory.create(this, null, null);
+        StateChunk chunk = factory.create(this, null, null);
 
         //init chunk selectWith primitives
         chunk.set(0, Type.BOOL, true);
@@ -95,7 +95,7 @@ public class StateChunkTest implements KChunkListener {
 
         Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
         chunk.save(buffer);
-        KStateChunk chunk2 = factory.create(this, buffer, null);
+        StateChunk chunk2 = factory.create(this, buffer, null);
         Buffer buffer2 = org.mwg.core.utility.Buffer.newHeapBuffer();
         chunk2.save(buffer2);
 
@@ -170,7 +170,7 @@ public class StateChunkTest implements KChunkListener {
             Assert.assertTrue(chunk.get(1000 + i).equals(i));
         }
 
-        KStateChunk chunk3 = factory.create(this, null, chunk);
+        StateChunk chunk3 = factory.create(this, null, chunk);
         Buffer buffer3 = org.mwg.core.utility.Buffer.newHeapBuffer();
         chunk3.save(buffer3);
 
@@ -189,15 +189,15 @@ public class StateChunkTest implements KChunkListener {
 
     }
 
-    private void free(KStateChunk chunk) {
-        if (chunk instanceof KOffHeapChunk) {
-            OffHeapStateChunk.free(((KOffHeapChunk) chunk).addr());
+    private void free(StateChunk chunk) {
+        if (chunk instanceof OffHeapChunk) {
+            OffHeapStateChunk.free(((OffHeapChunk) chunk).addr());
         }
     }
 
     private void protectionTest(StateChunkFactory factory) {
 
-        KStateChunk chunk = factory.create(this, null, null);
+        StateChunk chunk = factory.create(this, null, null);
 
         //boolean protection test
         //protectionMethod(chunk, Type.BOOL, null, true);
@@ -241,7 +241,7 @@ public class StateChunkTest implements KChunkListener {
     }
 
     private void typeSwitchTest(StateChunkFactory factory) {
-        KStateChunk chunk = factory.create(this, null, null);
+        StateChunk chunk = factory.create(this, null, null);
 
         //init primitives
         chunk.set(0, Type.BOOL, true);
@@ -304,7 +304,7 @@ public class StateChunkTest implements KChunkListener {
     }
 
     private void cloneTest(StateChunkFactory factory) {
-        KStateChunk chunk = factory.create(this, null, null);
+        StateChunk chunk = factory.create(this, null, null);
 
         //init primitives
         chunk.set(0, Type.BOOL, true);
@@ -322,7 +322,7 @@ public class StateChunkTest implements KChunkListener {
         ((StringLongMap) chunk.getOrCreate(10, Type.STRING_LONG_MAP)).put("100", 100);
 
         //clone the chunk
-        KStateChunk chunk2 = factory.create(this, null, chunk);
+        StateChunk chunk2 = factory.create(this, null, chunk);
 
         //test primitives
         Assert.assertTrue(chunk2.getType(0) == Type.BOOL);
@@ -404,7 +404,7 @@ public class StateChunkTest implements KChunkListener {
     }
 
 
-    private void protectionMethod(KStateChunk chunk, byte elemType, Object elem, boolean shouldCrash) {
+    private void protectionMethod(StateChunk chunk, byte elemType, Object elem, boolean shouldCrash) {
         boolean hasCrash = false;
         try {
             chunk.set(0, elemType, elem);
@@ -415,13 +415,13 @@ public class StateChunkTest implements KChunkListener {
     }
 
     @Override
-    public void declareDirty(KChunk chunk) {
+    public void declareDirty(Chunk chunk) {
         nbCount++;
         //simulate space management
-        if (chunk instanceof KHeapChunk) {
-            ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
-        } else if (chunk instanceof KOffHeapChunk) {
-            long addr = ((KOffHeapChunk) chunk).addr();
+        if (chunk instanceof HeapChunk) {
+            ((HeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
+        } else if (chunk instanceof OffHeapChunk) {
+            long addr = ((OffHeapChunk) chunk).addr();
             OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
         }
 

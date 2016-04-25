@@ -2,7 +2,7 @@ package org.mwg.core.chunk;
 
 import org.mwg.struct.LongLongMap;
 
-public interface KWorldOrderChunk extends KChunk, LongLongMap {
+public interface WorldOrderChunk extends Chunk, LongLongMap {
 
     long magic();
 

@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class FixedStackTest {
     private static final int CAPACITY = 15;
 
-    class RefFixedStack implements KStack {
+    class RefFixedStack implements Stack {
 
         private LinkedBlockingDeque<Long> q;
 
@@ -69,7 +69,7 @@ public class FixedStackTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    public void test(KStack stack) {
+    public void test(Stack stack) {
         // stack is initially full, dequeue until empty
         for (int i = 0; i < CAPACITY; i++) {
             Assert.assertTrue(stack.dequeueTail() == i);

@@ -8,7 +8,7 @@ public interface KLongTree {
 
     void clearAt(long max);
 
-    void range(long startKey, long endKey, long maxElements, KTreeWalker walker);
+    void range(long startKey, long endKey, long maxElements, TreeWalker walker);
 
     long magic();
 

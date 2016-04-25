@@ -1,14 +1,14 @@
 package org.mwg.core.chunk.offheap;
 
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KStack;
+import org.mwg.core.chunk.Stack;
 
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @ignore ts
  */
-public class OffHeapFixedStack implements KStack {
+public class OffHeapFixedStack implements Stack {
 
     private long _first;
     private long _last;

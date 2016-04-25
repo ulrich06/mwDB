@@ -2,11 +2,11 @@ package org.mwg.core;
 
 import org.mwg.*;
 import org.mwg.Graph;
+import org.mwg.core.chunk.StateChunk;
 import org.mwg.plugin.NodeState;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.struct.LongLongArrayMapCallBack;
-import org.mwg.core.chunk.KStateChunk;
-import org.mwg.core.chunk.KStateChunkCallBack;
+import org.mwg.core.chunk.StateChunkCallBack;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.core.utility.DeferCounter;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -217,11 +217,11 @@ class Node extends AbstractNode {
         builder.append(time());
         builder.append(",\"id\":");
         builder.append(id());
-        KStateChunk state = (KStateChunk) this._resolver.resolveState(this, true);
+        StateChunk state = (StateChunk) this._resolver.resolveState(this, true);
         if (state != null) {
             builder.append(",\"data\": {");
             final boolean[] isFirst = {true};
-            state.each(new KStateChunkCallBack() {
+            state.each(new StateChunkCallBack() {
                 @Override
                 public void on(String attributeName, int elemType, Object elem) {
                     if (elem != null) {

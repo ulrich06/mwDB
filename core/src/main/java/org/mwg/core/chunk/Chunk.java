@@ -2,7 +2,7 @@ package org.mwg.core.chunk;
 
 import org.mwg.struct.Buffer;
 
-public interface KChunk {
+public interface Chunk {
 
     long world();
 

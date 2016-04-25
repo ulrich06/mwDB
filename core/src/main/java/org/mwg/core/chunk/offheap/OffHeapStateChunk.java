@@ -15,7 +15,7 @@ import org.mwg.core.utility.Unsafe;
  * Memory layout: all structures are memory blocks of either primitive values (as longs)
  * or pointers to memory blocks
  */
-public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapChunk {
+public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
@@ -43,7 +43,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     private static final int INDEX_HASH_READ_ONLY = 16;
 
     //pointer values
-    private final KChunkListener _space;
+    private final ChunkListener _space;
     private long elementK_ptr;
     private long elementV_ptr;
     private long elementNext_ptr;
@@ -64,7 +64,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
         }
     }
 
-    public OffHeapStateChunk(KChunkListener space, long previousAddr, Buffer initialPayload, KChunk origin) {
+    public OffHeapStateChunk(ChunkListener space, long previousAddr, Buffer initialPayload, Chunk origin) {
         _space = space;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(17);
@@ -236,7 +236,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     @Override
-    public final void each(KStateChunkCallBack callBack, Resolver resolver) {
+    public final void each(StateChunkCallBack callBack, Resolver resolver) {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ;
         try {
             consistencyCheck();
@@ -824,7 +824,7 @@ public class OffHeapStateChunk implements KStateChunk, KChunkListener, KOffHeapC
     }
 
     @Override
-    public final void declareDirty(KChunk chunk) {
+    public final void declareDirty(Chunk chunk) {
         if (!inLoadMode) {
             internal_set_dirty();
         }

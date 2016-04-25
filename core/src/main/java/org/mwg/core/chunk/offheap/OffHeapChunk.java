@@ -1,11 +1,11 @@
 package org.mwg.core.chunk.offheap;
 
-import org.mwg.core.chunk.KChunk;
+import org.mwg.core.chunk.Chunk;
 
 /**
  * @ignore ts
  */
-public interface KOffHeapChunk extends KChunk {
+public interface OffHeapChunk extends Chunk {
 
     long addr();
     

@@ -2,9 +2,9 @@ package org.mwg.core.chunk;
 
 import org.mwg.Graph;
 
-public interface KChunkListener {
+public interface ChunkListener {
 
-    void declareDirty(KChunk chunk);
+    void declareDirty(Chunk chunk);
 
     Graph graph();
 

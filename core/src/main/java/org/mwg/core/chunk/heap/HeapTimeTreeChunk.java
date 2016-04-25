@@ -2,13 +2,13 @@ package org.mwg.core.chunk.heap;
 
 import org.mwg.struct.Buffer;
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KChunkListener;
-import org.mwg.core.chunk.KTimeTreeChunk;
-import org.mwg.core.chunk.KTreeWalker;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.TimeTreeChunk;
+import org.mwg.core.chunk.TreeWalker;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.Unsafe;
 
-public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
+public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
@@ -23,7 +23,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     private final long _time;
     private final long _id;
 
-    private final KChunkListener _listener;
+    private final ChunkListener _listener;
 
     private volatile int _threshold;
     private volatile int _root_index = -1;
@@ -54,7 +54,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
         }
     }
 
-    public HeapTimeTreeChunk(final long p_world, final long p_time, final long p_obj, final KChunkListener p_listener, final Buffer initialPayload) {
+    public HeapTimeTreeChunk(final long p_world, final long p_time, final long p_obj, final ChunkListener p_listener, final Buffer initialPayload) {
         //listener
         this._listener = p_listener;
         //identifier
@@ -138,7 +138,7 @@ public class HeapTimeTreeChunk implements KTimeTreeChunk, KHeapChunk {
     }
 
     @Override
-    public synchronized final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
+    public synchronized final void range(long startKey, long endKey, long maxElements, TreeWalker walker) {
         //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
 

@@ -2,22 +2,22 @@ package org.mwg.core.chunk.offheap;
 
 import org.mwg.struct.Buffer;
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KChunkListener;
+import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongMapCallBack;
-import org.mwg.core.chunk.KWorldOrderChunk;
+import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 
 /**
  * @ignore ts
  */
-public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
+public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
 
-    private final KChunkListener listener;
+    private final ChunkListener listener;
     private final long rootPtr;
 
     /**
-     * Global KChunk indexes
+     * Global Chunk indexes
      */
     private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
     private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
@@ -48,7 +48,7 @@ public class OffHeapWorldOrderChunk implements KWorldOrderChunk, KOffHeapChunk {
     private long elementNext_ptr;
     private long elementHash_ptr;
 
-    public OffHeapWorldOrderChunk(KChunkListener listener, long previousAddr, Buffer initialString) {
+    public OffHeapWorldOrderChunk(ChunkListener listener, long previousAddr, Buffer initialString) {
         this.listener = listener;
 
         if (previousAddr != Constants.OFFHEAP_NULL_PTR) {

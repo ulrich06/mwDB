@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.Node;
-import org.mwg.core.chunk.KChunkSpace;
-import org.mwg.core.chunk.KTimeTreeChunk;
+import org.mwg.core.chunk.ChunkSpace;
+import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
 
@@ -49,9 +49,9 @@ public class SuperTimeTest {
                     });
                 }
 
-                KChunkSpace space = ((org.mwg.core.Graph) graph).space();
+                ChunkSpace space = ((org.mwg.core.Graph) graph).space();
 
-                KTimeTreeChunk superTimeTree = (KTimeTreeChunk) space.getAndMark(Constants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
+                TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(Constants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
                 Assert.assertTrue(superTimeTree != null);
                 long superTimeTreeSize = superTimeTree.size();
                 Assert.assertTrue(superTimeTreeSize == 1); // TimeTree is not splitted

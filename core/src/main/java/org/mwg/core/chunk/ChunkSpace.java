@@ -3,22 +3,22 @@ package org.mwg.core.chunk;
 import org.mwg.Graph;
 import org.mwg.struct.Buffer;
 
-public interface KChunkSpace {
+public interface ChunkSpace {
 
     /**
-     * Create KChunk, out of the space, not marked, used asVar a factory
+     * Create Chunk, out of the space, not marked, used asVar a factory
      */
-    KChunk create(byte type, long world, long time, long id, Buffer initialPayload, KChunk origin);
+    Chunk create(byte type, long world, long time, long id, Buffer initialPayload, Chunk origin);
 
     /**
      * Get and mark chunk for the association of keys
      */
-    KChunk getAndMark(byte type, long world, long time, long id);
+    Chunk getAndMark(byte type, long world, long time, long id);
 
     /**
      * Insert the chunk into the space and mark it before asVar used
      */
-    KChunk putAndMark(KChunk elem);
+    Chunk putAndMark(Chunk elem);
 
     /**
      * UnMark chunk for the association of keys
@@ -28,19 +28,19 @@ public interface KChunkSpace {
     /**
      * UnMark chunk
      */
-    void unmarkChunk(KChunk chunk);
+    void unmarkChunk(Chunk chunk);
 
-    void freeChunk(KChunk chunk);
+    void freeChunk(Chunk chunk);
 
     /**
      * Declare the chunk asVar dirty
      */
-    void declareDirty(KChunk elem);
+    void declareDirty(Chunk elem);
 
     /**
      * Declare the chunk asVar clean
      */
-    void declareClean(KChunk elem);
+    void declareClean(Chunk elem);
 
     /**
      * Set current working graph
@@ -60,7 +60,7 @@ public interface KChunkSpace {
 
     long size();
 
-    KChunkIterator detachDirties();
+    ChunkIterator detachDirties();
 
 
 }

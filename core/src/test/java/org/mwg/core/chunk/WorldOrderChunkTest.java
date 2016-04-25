@@ -6,25 +6,25 @@ import org.mwg.Graph;
 import org.mwg.struct.Buffer;
 import org.mwg.core.Constants;
 import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
-import org.mwg.core.chunk.heap.KHeapChunk;
+import org.mwg.core.chunk.heap.HeapChunk;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
 
-public class WorldOrderChunkTest implements KChunkListener {
+public class WorldOrderChunkTest implements ChunkListener {
 
     private int nbCount = 0;
 
     private interface WorldOrderChunkFactory {
-        KWorldOrderChunk create(Buffer initialPayload);
+        WorldOrderChunk create(Buffer initialPayload);
     }
 
     @Test
     public void heapTest() {
-        final KChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         WorldOrderChunkFactory factory = new WorldOrderChunkFactory() {
 
             @Override
-            public KWorldOrderChunk create(Buffer initialPayload) {
+            public WorldOrderChunk create(Buffer initialPayload) {
                 return new HeapWorldOrderChunk(-1, -1, -1, selfPointer, initialPayload);
             }
         };
@@ -42,11 +42,11 @@ public class WorldOrderChunkTest implements KChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        final KChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         WorldOrderChunkFactory factory = new WorldOrderChunkFactory() {
 
             @Override
-            public KWorldOrderChunk create(Buffer initialPayload) {
+            public WorldOrderChunk create(Buffer initialPayload) {
                 return new OffHeapWorldOrderChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, initialPayload);
             }
         };
@@ -62,7 +62,7 @@ public class WorldOrderChunkTest implements KChunkListener {
 
     private void orderTest(WorldOrderChunkFactory factory) {
         nbCount = 0;
-        KWorldOrderChunk map = factory.create(null);
+        WorldOrderChunk map = factory.create(null);
         //mass insert
         for (long i = 0; i < 10_000; i++) {
             map.put(i, i * 3);
@@ -78,7 +78,7 @@ public class WorldOrderChunkTest implements KChunkListener {
     private void saveLoadTest(WorldOrderChunkFactory factory) {
         nbCount = 0;
 
-        KWorldOrderChunk map = factory.create(null);
+        WorldOrderChunk map = factory.create(null);
         //mass insert
         for (long i = 0; i < 10_000; i++) {
             map.put(i, i * 3);
@@ -90,7 +90,7 @@ public class WorldOrderChunkTest implements KChunkListener {
 
         Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
         map.save(buffer);
-        KWorldOrderChunk map2 = factory.create(buffer);
+        WorldOrderChunk map2 = factory.create(buffer);
         for (long i = 0; i < 10_000; i++) {
             Assert.assertTrue(map2.get(i) == i * 3);
         }
@@ -109,13 +109,13 @@ public class WorldOrderChunkTest implements KChunkListener {
     }
 
     @Override
-    public void declareDirty(KChunk chunk) {
+    public void declareDirty(Chunk chunk) {
         nbCount++;
         //simulate space management
-        if (chunk instanceof KHeapChunk) {
-            ((KHeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
-        } else if (chunk instanceof KOffHeapChunk) {
-            long addr = ((KOffHeapChunk) chunk).addr();
+        if (chunk instanceof HeapChunk) {
+            ((HeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
+        } else if (chunk instanceof OffHeapChunk) {
+            long addr = ((OffHeapChunk) chunk).addr();
             OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
         }
     }
@@ -125,9 +125,9 @@ public class WorldOrderChunkTest implements KChunkListener {
         return null;
     }
 
-    private void free(KChunk chunk) {
-        if (chunk instanceof KOffHeapChunk) {
-            OffHeapWorldOrderChunk.free(((KOffHeapChunk) chunk).addr());
+    private void free(Chunk chunk) {
+        if (chunk instanceof OffHeapChunk) {
+            OffHeapWorldOrderChunk.free(((OffHeapChunk) chunk).addr());
         }
     }
 

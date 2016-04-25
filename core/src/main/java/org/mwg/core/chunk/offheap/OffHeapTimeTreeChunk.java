@@ -2,16 +2,16 @@ package org.mwg.core.chunk.offheap;
 
 import org.mwg.struct.Buffer;
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KChunkListener;
-import org.mwg.core.chunk.KTimeTreeChunk;
-import org.mwg.core.chunk.KTreeWalker;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.TimeTreeChunk;
+import org.mwg.core.chunk.TreeWalker;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 
 /**
  * @ignore ts
  */
-public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
+public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
     //constants definition
     private static final byte BLACK_LEFT = '{';
@@ -21,7 +21,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private static final int META_SIZE = 3;
 
     /**
-     * Global KChunk indexes
+     * Global Chunk indexes
      */
     private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
     private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
@@ -48,9 +48,9 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     private long kPtr;
     private long colorsPtr;
 
-    private final KChunkListener _listener;
+    private final ChunkListener _listener;
 
-    public OffHeapTimeTreeChunk(KChunkListener p_listener, long previousAddr, Buffer initialPayload) {
+    public OffHeapTimeTreeChunk(ChunkListener p_listener, long previousAddr, Buffer initialPayload) {
         //listener
         this._listener = p_listener;
         //init
@@ -180,7 +180,7 @@ public class OffHeapTimeTreeChunk implements KTimeTreeChunk, KOffHeapChunk {
     }
 
     @Override
-    public final void range(long startKey, long endKey, long maxElements, KTreeWalker walker) {
+    public final void range(long startKey, long endKey, long maxElements, TreeWalker walker) {
         while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
         try {
             ptrConsistency();

@@ -14,14 +14,14 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * @ignore ts
  */
-public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
+public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
 
     /**
      * Global variables
      */
     private final long _capacity;
     private final long _saveBatchSize;
-    private final KStack _lru;
+    private final Stack _lru;
 
     private Graph _graph;
 
@@ -47,7 +47,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         return _graph;
     }
 
-    final class InternalDirtyStateList implements KChunkIterator {
+    final class InternalDirtyStateList implements ChunkIterator {
 
         private final long _dirtyElements;
         private final long _max;
@@ -74,7 +74,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         }
 
         @Override
-        public KChunk next() {
+        public Chunk next() {
             long previous;
             long next;
             boolean shouldReturnNull = false;
@@ -134,7 +134,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public final KChunk getAndMark(byte type, long world, long time, long id) {
+    public final Chunk getAndMark(byte type, long world, long time, long id) {
         long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != Constants.OFFHEAP_NULL_PTR) {
@@ -178,7 +178,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
         return null;
     }
 
-    private KOffHeapChunk internal_create(long addr) {
+    private OffHeapChunk internal_create(long addr) {
         byte chunkType = (byte) OffHeapLongArray.get(addr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
         switch (chunkType) {
             case Constants.STATE_CHUNK:
@@ -227,9 +227,9 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public void unmarkChunk(KChunk chunk) {
+    public void unmarkChunk(Chunk chunk) {
 
-        long chunkAddr = ((KOffHeapChunk) chunk).addr();
+        long chunkAddr = ((OffHeapChunk) chunk).addr();
 
         long previousMarks;
         long newMarks;
@@ -265,8 +265,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk create(byte p_type, long p_world, long p_time, long p_id, Buffer initialPayload, KChunk previousChunk) {
-        KOffHeapChunk newChunk = null;
+    public Chunk create(byte p_type, long p_world, long p_time, long p_id, Buffer initialPayload, Chunk previousChunk) {
+        OffHeapChunk newChunk = null;
         switch (p_type) {
             case Constants.STATE_CHUNK:
                 newChunk = new OffHeapStateChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload, previousChunk);
@@ -292,9 +292,9 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunk putAndMark(KChunk p_elem) {
+    public Chunk putAndMark(Chunk p_elem) {
 
-        final long elemPtr = ((KOffHeapChunk) p_elem).addr();
+        final long elemPtr = ((OffHeapChunk) p_elem).addr();
 
         //First try to mark the chunk, the mark should be previously to zero
         long previousFlag;
@@ -419,12 +419,12 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public KChunkIterator detachDirties() {
+    public ChunkIterator detachDirties() {
         return _dirtyState.getAndSet(new InternalDirtyStateList(this._saveBatchSize, this));
     }
 
     @Override
-    public void declareDirty(KChunk dirtyChunk) {
+    public void declareDirty(Chunk dirtyChunk) {
 
         long world = dirtyChunk.world();
         long time = dirtyChunk.time();
@@ -475,7 +475,7 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public void declareClean(KChunk cleanChunk) {
+    public void declareClean(Chunk cleanChunk) {
         long world = cleanChunk.world();
         long time = cleanChunk.time();
         long id = cleanChunk.id();
@@ -550,8 +550,8 @@ public class OffHeapChunkSpace implements KChunkSpace, KChunkListener {
     }
 
     @Override
-    public void freeChunk(KChunk chunk) {
-        KOffHeapChunk casted = (KOffHeapChunk) chunk;
+    public void freeChunk(Chunk chunk) {
+        OffHeapChunk casted = (OffHeapChunk) chunk;
         switch (casted.chunkType()) {
             case Constants.STATE_CHUNK:
                 OffHeapStateChunk.free(casted.addr());

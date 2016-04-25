@@ -18,7 +18,7 @@ class Graph implements org.mwg.Graph {
 
     private final Storage _storage;
 
-    private final KChunkSpace _space;
+    private final ChunkSpace _space;
 
     private final Scheduler _scheduler;
 
@@ -42,7 +42,7 @@ class Graph implements org.mwg.Graph {
     private static final int GLO_TREE_INDEX = 2;
     private static final int GLO_DIC_INDEX = 3;
 
-    Graph(Storage p_storage, KChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
+    Graph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
         //subElements set
         this._storage = p_storage;
         this._space = p_space;
@@ -143,7 +143,7 @@ class Graph implements org.mwg.Graph {
 
     @Override
     public void save(Callback<Boolean> callback) {
-        KChunkIterator dirtyIterator = this._space.detachDirties();
+        ChunkIterator dirtyIterator = this._space.detachDirties();
         saveDirtyList(dirtyIterator, callback);
     }
 
@@ -192,11 +192,11 @@ class Graph implements org.mwg.Graph {
                                 Boolean noError = true;
                                 try {
                                     //init the global universe tree (mandatory for synchronious create)
-                                    KWorldOrderChunk globalWorldOrder = (KWorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
+                                    WorldOrderChunk globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
                                     selfPointer._space.putAndMark(globalWorldOrder);
 
                                     //init the global dictionary chunk
-                                    KStateChunk globalDictionaryChunk = (KStateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
+                                    StateChunk globalDictionaryChunk = (StateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
                                     selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                     if (payloads[UNIVERSE_INDEX] != null) {
@@ -304,7 +304,7 @@ class Graph implements org.mwg.Graph {
         return new org.mwg.core.task.Task(this);
     }
 
-    private void saveDirtyList(final KChunkIterator dirtyIterator, final Callback<Boolean> callback) {
+    private void saveDirtyList(final ChunkIterator dirtyIterator, final Callback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
             dirtyIterator.free();
             if (PrimitiveHelper.isDefined(callback)) {
@@ -317,7 +317,7 @@ class Graph implements org.mwg.Graph {
             Buffer[] toSaveValues = new Buffer[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
-                KChunk loopChunk = dirtyIterator.next();
+                Chunk loopChunk = dirtyIterator.next();
                 if (loopChunk != null && (loopChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
                     //Save chunk Key
                     toSaveKeys[i] = newBuffer();
@@ -533,7 +533,7 @@ class Graph implements org.mwg.Graph {
         return _scheduler;
     }
 
-    public KChunkSpace space() {
+    public ChunkSpace space() {
         return _space;
     }
 

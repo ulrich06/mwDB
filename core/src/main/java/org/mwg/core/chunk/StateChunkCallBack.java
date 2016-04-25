@@ -1,6 +1,6 @@
 package org.mwg.core.chunk;
 
-public interface KStateChunkCallBack {
+public interface StateChunkCallBack {
 
     void on(String attributeName, int elemType, Object elem);
 

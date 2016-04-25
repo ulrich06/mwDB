@@ -4,26 +4,26 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.Constants;
+import org.mwg.core.chunk.heap.HeapChunk;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.HeapTimeTreeChunk;
-import org.mwg.core.chunk.heap.KHeapChunk;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
 
-public class TimeTreeTest implements KChunkListener {
+public class TimeTreeTest implements ChunkListener {
 
     private interface KTimeTreeChunkFactory {
-        KTimeTreeChunk create(Buffer payload);
+        TimeTreeChunk create(Buffer payload);
     }
 
     private int nbCount = 0;
 
     @Test
     public void heapTest() {
-        KChunkListener selfPointer = this;
+        ChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(Buffer payload) {
+            public TimeTreeChunk create(Buffer payload) {
                 return new HeapTimeTreeChunk(-1, -1, -1, selfPointer, payload);
             }
         };
@@ -45,10 +45,10 @@ public class TimeTreeTest implements KChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        KChunkListener selfPointer = this;
+        ChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
-            public KTimeTreeChunk create(Buffer payload) {
+            public TimeTreeChunk create(Buffer payload) {
                 return new OffHeapTimeTreeChunk(selfPointer, org.mwg.core.Constants.OFFHEAP_NULL_PTR, payload);
             }
         };
@@ -66,7 +66,7 @@ public class TimeTreeTest implements KChunkListener {
 
     /*
     private void savePrint(KTimeTreeChunkFactory factory) {
-        KTimeTreeChunk tree = factory.create(null);
+        TimeTreeChunk tree = factory.create(null);
         int nbElements = 10;
         Random random = new Random();
         for (int i = 0; i < nbElements; i++) {
@@ -82,7 +82,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private void emptyHalf(KTimeTreeChunkFactory factory) {
         nbCount = 0;
-        KTimeTreeChunk tree = factory.create(null);
+        TimeTreeChunk tree = factory.create(null);
 
         int nbElements = 10;
 
@@ -91,7 +91,7 @@ public class TimeTreeTest implements KChunkListener {
         }
 
         final long[] nbCall = {0};
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new KTreeWalker() {
+        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
             @Override
             public void elem(long t) {
                 nbCall[0]++;
@@ -101,7 +101,7 @@ public class TimeTreeTest implements KChunkListener {
 
         final long[] median = new long[1];
         nbCall[0] = 0;
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new KTreeWalker() {
+        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
             @Override
             public void elem(long t) {
                 median[0] = 5;
@@ -114,7 +114,7 @@ public class TimeTreeTest implements KChunkListener {
 
         tree.clearAt(median[0]);
         nbCall[0] = 0;
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, org.mwg.core.Constants.END_OF_TIME, new KTreeWalker() {
+        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, org.mwg.core.Constants.END_OF_TIME, new TreeWalker() {
             @Override
             public void elem(long t) {
                 nbCall[0]++;
@@ -128,7 +128,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private void previousOrEqualsTest(KTimeTreeChunkFactory factory) {
         nbCount = 0;
-        KTimeTreeChunk tree = factory.create(null);
+        TimeTreeChunk tree = factory.create(null);
         for (long i = 0; i <= 6; i++) {
             tree.insert(i);
         }
@@ -153,7 +153,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private void saveLoad(KTimeTreeChunkFactory factory) {
         nbCount = 0;
-        KTimeTreeChunk tree = factory.create(null);
+        TimeTreeChunk tree = factory.create(null);
         for (long i = 0; i <= 2; i++) {
             tree.insert(i);
         }
@@ -163,7 +163,7 @@ public class TimeTreeTest implements KChunkListener {
         Assert.assertTrue(compareWithString(buffer, "A,C,E"));
         Assert.assertTrue(tree.size() == 3);
 
-        KTimeTreeChunk tree2 = factory.create(buffer);
+        TimeTreeChunk tree2 = factory.create(buffer);
         Assert.assertTrue(tree2.size() == 3);
 
         Buffer buffer2 = org.mwg.core.utility.Buffer.newOffHeapBuffer();
@@ -205,7 +205,7 @@ public class TimeTreeTest implements KChunkListener {
 
     private void massiveTest(KTimeTreeChunkFactory factory) {
         nbCount = 0;
-        KTimeTreeChunk tree = factory.create(null);
+        TimeTreeChunk tree = factory.create(null);
         long max = 24;
         for (long i = 0; i <= max; i = i + 2) {
             tree.insert(i);
@@ -219,13 +219,13 @@ public class TimeTreeTest implements KChunkListener {
 
 
     @Override
-    public void declareDirty(KChunk chunk) {
+    public void declareDirty(Chunk chunk) {
         nbCount++;
         //simulate space management
-        if (chunk instanceof KHeapChunk) {
-            ((KHeapChunk) chunk).setFlags(org.mwg.core.Constants.DIRTY_BIT, 0);
-        } else if (chunk instanceof KOffHeapChunk) {
-            long addr = ((KOffHeapChunk) chunk).addr();
+        if (chunk instanceof HeapChunk) {
+            ((HeapChunk) chunk).setFlags(org.mwg.core.Constants.DIRTY_BIT, 0);
+        } else if (chunk instanceof OffHeapChunk) {
+            long addr = ((OffHeapChunk) chunk).addr();
             OffHeapLongArray.set(addr, org.mwg.core.Constants.OFFHEAP_CHUNK_INDEX_FLAGS, org.mwg.core.Constants.DIRTY_BIT);
         }
     }
@@ -235,9 +235,9 @@ public class TimeTreeTest implements KChunkListener {
         return null;
     }
 
-    private void free(KChunk chunk) {
-        if (chunk instanceof KOffHeapChunk) {
-            OffHeapTimeTreeChunk.free(((KOffHeapChunk) chunk).addr());
+    private void free(Chunk chunk) {
+        if (chunk instanceof OffHeapChunk) {
+            OffHeapTimeTreeChunk.free(((OffHeapChunk) chunk).addr());
         }
     }
 

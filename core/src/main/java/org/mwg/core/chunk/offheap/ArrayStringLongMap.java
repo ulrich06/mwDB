@@ -2,7 +2,7 @@ package org.mwg.core.chunk.offheap;
 
 import org.mwg.struct.StringLongMap;
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KChunkListener;
+import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
@@ -13,7 +13,7 @@ import org.mwg.core.utility.Unsafe;
 public class ArrayStringLongMap implements StringLongMap {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
-    private final KChunkListener listener;
+    private final ChunkListener listener;
     private final long root_array_ptr;
     //LongArrays
     private static final int INDEX_ELEMENT_V = 0;
@@ -38,7 +38,7 @@ public class ArrayStringLongMap implements StringLongMap {
     //string[]
     private long elementK_ptr;
 
-    public ArrayStringLongMap(KChunkListener listener, long initialCapacity, long previousAddr) {
+    public ArrayStringLongMap(ChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
         if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
             this.root_array_ptr = OffHeapLongArray.allocate(ROOT_ARRAY_SIZE);

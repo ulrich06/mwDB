@@ -14,7 +14,7 @@ import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-public class StringLongMapTest implements KChunkListener {
+public class StringLongMapTest implements ChunkListener {
 
     private int dirtyCount = 0;
 
@@ -116,7 +116,7 @@ public class StringLongMapTest implements KChunkListener {
     }
 
     @Override
-    public void declareDirty(KChunk chunk) {
+    public void declareDirty(Chunk chunk) {
         dirtyCount++;
     }
 

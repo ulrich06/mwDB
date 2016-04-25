@@ -2,21 +2,21 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.core.Constants;
+import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.struct.Buffer;
-import org.mwg.core.chunk.KChunkListener;
+import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongMapCallBack;
-import org.mwg.core.chunk.KWorldOrderChunk;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
+public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
     private final long _world;
     private final long _time;
     private final long _id;
-    private final KChunkListener _listener;
+    private final ChunkListener _listener;
 
     private volatile int _lock;
     private volatile long _marks;
@@ -67,7 +67,7 @@ public class HeapWorldOrderChunk implements KWorldOrderChunk, KHeapChunk {
         this._extra = extraValue;
     }
 
-    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, KChunkListener p_listener, Buffer initialPayload) {
+    public HeapWorldOrderChunk(long p_universe, long p_time, long p_obj, ChunkListener p_listener, Buffer initialPayload) {
         this._world = p_universe;
         this._time = p_time;
         this._id = p_obj;

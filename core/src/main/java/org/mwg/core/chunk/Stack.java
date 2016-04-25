@@ -1,6 +1,6 @@
 package org.mwg.core.chunk;
 
-public interface KStack {
+public interface Stack {
 
     boolean enqueue(long index);
 

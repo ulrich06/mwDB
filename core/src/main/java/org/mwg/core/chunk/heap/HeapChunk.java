@@ -1,8 +1,8 @@
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.chunk.KChunk;
+import org.mwg.core.chunk.Chunk;
 
-public interface KHeapChunk extends KChunk {
+public interface HeapChunk extends Chunk {
 
     long mark();
 

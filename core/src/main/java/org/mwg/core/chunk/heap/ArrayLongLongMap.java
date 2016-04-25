@@ -2,7 +2,7 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.core.Constants;
-import org.mwg.core.chunk.KChunkListener;
+import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongMap;
 import org.mwg.struct.LongLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -11,9 +11,9 @@ public class ArrayLongLongMap implements LongLongMap {
 
     private volatile InternalState state;
     private volatile boolean aligned;
-    private final KChunkListener _listener;
+    private final ChunkListener _listener;
 
-    public ArrayLongLongMap(KChunkListener p_listener, int initialCapacity, ArrayLongLongMap p_origin) {
+    public ArrayLongLongMap(ChunkListener p_listener, int initialCapacity, ArrayLongLongMap p_origin) {
         this._listener = p_listener;
         if (p_origin == null) {
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity], new long[initialCapacity], new int[initialCapacity], new int[initialCapacity], 0);

@@ -1,10 +1,10 @@
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.chunk.KStack;
+import org.mwg.core.chunk.Stack;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-public class FixedStack implements KStack {
+public class FixedStack implements Stack {
 
     private int _first;
     private int _last;

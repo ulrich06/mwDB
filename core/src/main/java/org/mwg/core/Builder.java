@@ -1,7 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
-import org.mwg.core.chunk.KChunkSpace;
+import org.mwg.core.chunk.ChunkSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
 import org.mwg.plugin.NodeFactory;
@@ -26,7 +26,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
         } else {
             nodeTracker = new NoopNodeTracker();
         }
-        KChunkSpace space;
+        ChunkSpace space;
         long memorySize = p_memorySize;
         if (memorySize == -1) {
             memorySize = 100_000;

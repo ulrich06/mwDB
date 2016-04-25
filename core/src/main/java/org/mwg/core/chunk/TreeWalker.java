@@ -1,6 +1,6 @@
 package org.mwg.core.chunk;
 
-public interface KTreeWalker {
+public interface TreeWalker {
 
     void elem(long t);
 

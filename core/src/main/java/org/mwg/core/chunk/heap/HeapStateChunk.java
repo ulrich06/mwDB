@@ -10,7 +10,7 @@ import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
+public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
@@ -34,11 +34,11 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    private final KChunkListener _space;
+    private final ChunkListener _space;
     private boolean inLoadMode;
 
     @Override
-    public final void declareDirty(KChunk chunk) {
+    public final void declareDirty(Chunk chunk) {
         if (!this.inLoadMode) {
             internal_set_dirty();
         }
@@ -100,7 +100,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
         }
     }
 
-    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final KChunkListener p_space, Buffer initialPayload, KChunk origin) {
+    public HeapStateChunk(final long p_world, final long p_time, final long p_id, final ChunkListener p_space, Buffer initialPayload, Chunk origin) {
         this.inLoadMode = false;
         this._world = p_world;
         this._time = p_time;
@@ -448,7 +448,7 @@ public class HeapStateChunk implements KHeapChunk, KStateChunk, KChunkListener {
     }
 
     @Override
-    public final void each(KStateChunkCallBack callBack, Resolver resolver) {
+    public final void each(StateChunkCallBack callBack, Resolver resolver) {
         final InternalState currentState = this.state;
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {

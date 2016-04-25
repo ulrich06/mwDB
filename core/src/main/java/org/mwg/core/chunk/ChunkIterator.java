@@ -1,10 +1,10 @@
 package org.mwg.core.chunk;
 
-public interface KChunkIterator {
+public interface ChunkIterator {
 
     boolean hasNext();
 
-    KChunk next();
+    Chunk next();
 
     long size();
 
