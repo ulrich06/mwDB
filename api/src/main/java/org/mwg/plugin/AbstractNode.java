@@ -134,7 +134,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void rm(String attributeName) {
+    public void removeProperty(String attributeName) {
         setProperty(attributeName, Type.INT, null);
     }
 

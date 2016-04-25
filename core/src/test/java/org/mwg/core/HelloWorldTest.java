@@ -52,7 +52,7 @@ public class HelloWorldTest {
                 node0.set("name", "MyName");
                 Assert.assertTrue(PrimitiveHelper.equals("MyName", node0.get("name").toString()));
 
-                node0.rm("name");
+                node0.removeProperty("name");
                 Assert.assertTrue(node0.get("name") == null);
                 node0.setProperty("name", Type.STRING, "MyName");
 

@@ -53,6 +53,8 @@ public interface Task {
      */
     Task fromIndexAll(String indexName);
 
+    Task select(TaskFunctionSelect filterFunction);
+
     /**
      * @param name
      * @param pattern
@@ -61,8 +63,6 @@ public interface Task {
     Task selectWith(String name, String pattern);
 
     Task selectWithout(String name, String pattern);
-
-    Task select(TaskFunctionSelect filterFunction);
 
     Task selectWhere(Task subTask);
 
