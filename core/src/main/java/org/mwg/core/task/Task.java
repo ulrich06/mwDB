@@ -93,7 +93,8 @@ public class Task implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task map(TaskFunctionMap mapFunction) {
-        throw new RuntimeException("Not implemented yet");
+        addTask(new ActionMap(mapFunction));
+        return this;
     }
 
     @Override
