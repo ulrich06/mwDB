@@ -1,9 +1,7 @@
 package math;
 
-import org.junit.Test;
-import org.mwdb.utility.PrimitiveHelper;
+import org.mwg.core.utility.PrimitiveHelper;
 
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeMap;
 

@@ -77,8 +77,9 @@
         <module>plugins/importer</module>
         <module>plugins/rocksdb</module>
         <module>plugins/leveldb</module>
-        <module>plugins/debug</module>
-        <module>plugins/ml</module>
+
+        <!-- <module>plugins/debug</module> -->
+        <!--<module>plugins/ml</module>-->
     </modules>
 
     <dependencies>
@@ -130,7 +131,7 @@
                         <phase>process-sources</phase>
                         <configuration>
                             <licenseName>apache_v2</licenseName>
-                            <organizationName>org.mwdb</organizationName>
+                            <organizationName>org.mwg</organizationName>
                             <inceptionYear>2016</inceptionYear>
                             <includes>
                                 <include>*.java</include>

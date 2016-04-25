@@ -1,10 +1,10 @@
 package math;
 
 import org.junit.Test;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.math.matrix.KTransposeType;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.KTransposeType;
 
 /**
  * Created by assaad on 24/03/16.

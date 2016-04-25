@@ -2,14 +2,13 @@ package ml;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.math.matrix.KMatrix;
-import org.mwdb.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwdb.math.matrix.blassolver.blas.F2JBlas;
-import org.mwdb.polynomial.KPolynomialNode;
-import org.mwdb.polynomial.PolynomialNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.polynomial.KPolynomialNode;
+import org.mwg.polynomial.PolynomialNode;
+import org.mwg.core.NoopScheduler;
 
 /**
  * Created by assaad on 08/04/16.
@@ -20,8 +19,8 @@ public class PolynomialNodeTest {
 
     @Test
     public void testConstant() {
-        final KGraph graph = GraphBuilder.builder().withFactory(new PolynomialNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        final Graph graph = GraphBuilder.builder().withFactory(new PolynomialNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
@@ -66,13 +65,13 @@ public class PolynomialNodeTest {
     }
 
 
-    public static void testPoly(long[] times, double[] values, int numOfPoly, final KGraph graph) {
+    public static void testPoly(long[] times, double[] values, int numOfPoly, final Graph graph) {
         PolynomialNode polynomialNode = (PolynomialNode) graph.newNode(0, times[0], "PolynomialNode");
         polynomialNode.setPrecision(precision);
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new KCallback<KPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<KPolynomialNode>() {
                 @Override
                 public void on(KPolynomialNode result) {
                     result.set(values[ia]);
@@ -82,7 +81,7 @@ public class PolynomialNodeTest {
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new KCallback<KPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<KPolynomialNode>() {
                 @Override
                 public void on(KPolynomialNode result) {
                     double v = result.get();
@@ -91,7 +90,7 @@ public class PolynomialNodeTest {
             });
         }
 
-        polynomialNode.timepoints(KConstants.BEGINNING_OF_TIME, KConstants.END_OF_TIME, new KCallback<long[]>() {
+        polynomialNode.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
             @Override
             public void on(long[] result) {
                 Assert.assertTrue(result.length == numOfPoly);

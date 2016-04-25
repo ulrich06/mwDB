@@ -1,11 +1,11 @@
 package ml;
 
-import org.mwdb.GaussianNodeFactory;
-import org.mwdb.GraphBuilder;
-import org.mwdb.KCallback;
-import org.mwdb.KGraph;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.GaussianNodeFactory;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
+import org.mwg.Callback;
+import org.mwg.gmm.KGaussianNode;
+import org.mwg.core.NoopScheduler;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -16,8 +16,8 @@ import java.util.Scanner;
  */
 public class GaussianMixtureSim {
    public static void main(String[] arg){
-       KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
-       graph.connect(new KCallback<Boolean>() {
+       Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+       graph.connect(new Callback<Boolean>() {
            @Override
            public void on(Boolean result) {
                boolean exit=false;

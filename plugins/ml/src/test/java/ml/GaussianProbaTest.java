@@ -3,9 +3,9 @@ package ml;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.gmm.KGaussianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.gmm.KGaussianNode;
+import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
 
@@ -16,8 +16,8 @@ public class GaussianProbaTest {
 
     @Test
     public void test1() {
-        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 

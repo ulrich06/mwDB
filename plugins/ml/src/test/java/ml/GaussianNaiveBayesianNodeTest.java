@@ -1,9 +1,9 @@
 package ml;
 
 import org.junit.Test;
-import org.mwdb.*;
-import org.mwdb.gaussiannb.KGaussianNaiveBayesianNode;
-import org.mwdb.manager.NoopScheduler;
+import org.mwg.*;
+import org.mwg.gaussiannb.KGaussianNaiveBayesianNode;
+import org.mwg.core.NoopScheduler;
 
 
 /**
@@ -85,8 +85,8 @@ public class GaussianNaiveBayesianNodeTest {
     public void test() {
         //This test fails only on crash. Otherwise, it is just for
 
-        KGraph graph = GraphBuilder.builder().withFactory(new GaussianNaiveBayesianNodeFactory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new KCallback<Boolean>() {
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianNaiveBayesianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 KGaussianNaiveBayesianNode gaussianNBNode = (KGaussianNaiveBayesianNode) graph.newNode(0, 0, "GaussianNaiveBayesianNode");
@@ -96,7 +96,7 @@ public class GaussianNaiveBayesianNodeTest {
                 gaussianNBNode.initialize(2,1,60,0.3, 0.2);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.attSet("value", KType.DOUBLE_ARRAY, dummyDataset1[i]);
+                    gaussianNBNode.set("value", Type.DOUBLE_ARRAY, dummyDataset1[i]);
                     if (gaussianNBNode.isInBootstrapMode()!=bootstraps1[i]){
                         System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
                                 gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferErrorFraction());
