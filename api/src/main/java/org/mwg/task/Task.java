@@ -62,6 +62,11 @@ public interface Task {
 
     Task selectWithout(String name, String pattern);
 
+    /**
+     * Filter the previous result to get nodes that respect the specified condition in {@code filterFunction}
+     * @param filterFunction condition that nodes have to respect
+     * @return this task to chain actions (fluent API)
+     */
     Task select(TaskFunctionSelect filterFunction);
 
     Task selectWhere(Task subTask);

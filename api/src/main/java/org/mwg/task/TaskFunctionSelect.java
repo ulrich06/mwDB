@@ -9,7 +9,8 @@ import org.mwg.Node;
 public interface TaskFunctionSelect {
 
     /**
-     * Selection function, called for each
+     * Selection function called that specify if a specified node
+     * will be in the result set or not
      *
      * @param node node to select or not for next action
      * @return true to keep this node for the next action
