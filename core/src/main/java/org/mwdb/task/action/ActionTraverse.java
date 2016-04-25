@@ -34,29 +34,26 @@ public class ActionTraverse implements KTaskAction {
                     }
                 }
             }
-            if (!toLoad.isEmpty()) {
-                KDeferCounter deferCounter = context.graph().counter(toLoad.size());
-                final KNode[] resultNodes = new KNode[toLoad.size()];
-                final AtomicInteger cursor = new AtomicInteger();
-                for (Long idNode : toLoad) {
-                    context.graph().lookup(context.getWorld(), context.getTime(), idNode, new KCallback<KNode>() {
-                        @Override
-                        public void on(KNode result) {
-                            resultNodes[cursor.getAndIncrement()] = result;
-                            deferCounter.count();
-                        }
-                    });
-                }
-                deferCounter.then(new KCallback() {
+
+            KDeferCounter deferCounter = context.graph().counter(toLoad.size());
+            final KNode[] resultNodes = new KNode[toLoad.size()];
+            final AtomicInteger cursor = new AtomicInteger();
+            for (Long idNode : toLoad) {
+                context.graph().lookup(context.getWorld(), context.getTime(), idNode, new KCallback<KNode>() {
                     @Override
-                    public void on(Object result) {
-                        context.setResult(resultNodes);
-                        context.next();
+                    public void on(KNode result) {
+                        resultNodes[cursor.getAndIncrement()] = result;
+                        deferCounter.count();
                     }
                 });
-            } else {
-                context.next();
             }
+            deferCounter.then(new KCallback() {
+                @Override
+                public void on(Object result) {
+                    context.setResult(resultNodes);
+                    context.next();
+                }
+            });
         } else {
             context.next();
         }
