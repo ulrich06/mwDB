@@ -6,8 +6,8 @@ import org.mwg.*;
 import org.mwg.math.matrix.KMatrix;
 import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.math.matrix.blassolver.blas.F2JBlas;
-import org.mwg.polynomial.KPolynomialNode;
-import org.mwg.polynomial.PolynomialNode;
+import org.mwg.regression.KPolynomialNode;
+import org.mwg.regression.PolynomialNode;
 import org.mwg.core.NoopScheduler;
 
 /**

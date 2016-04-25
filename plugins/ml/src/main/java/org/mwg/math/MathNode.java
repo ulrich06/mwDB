@@ -1,8 +1,8 @@
 package org.mwg.math;
 
 import org.mwg.*;
-import org.mwg.math.expression.KMathExpressionEngine;
-import org.mwg.math.expression.impl.MathExpressionEngine;
+import org.mwg.util.expression.KMathExpressionEngine;
+import org.mwg.util.expression.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
 public class MathNode extends AbstractNode {

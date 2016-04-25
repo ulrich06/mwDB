@@ -3,12 +3,12 @@ package math;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.blassolver.LU;
-import org.mwg.math.matrix.blassolver.blas.KBlas;
-import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
-import org.mwg.math.matrix.jamasolver.QR;
-import org.mwg.math.matrix.jamasolver.SVD;
+import org.mwg.util.matrix.KMatrix;
+import org.mwg.util.matrix.blassolver.LU;
+import org.mwg.util.matrix.blassolver.blas.KBlas;
+import org.mwg.util.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.util.matrix.jamasolver.QR;
+import org.mwg.util.matrix.jamasolver.SVD;
 
 /**
  * Created by assaad on 06/04/16.

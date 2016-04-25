@@ -1,19 +1,16 @@
-package org.mwg.gaussiannb;
+package org.mwg.classifier;
 
 import org.mwg.*;
-import org.mwg.util.matrix.operation.Gaussian1D;
+import org.mwg.gaussiannb.KGaussianNaiveBayesianNode;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeState;
+import org.mwg.util.matrix.operation.Gaussian1D;
 
 import java.util.*;
 
-/**
- * Created by Andrey Boytsov on 4/14/2016.
- */
 public class GaussianNaiveBayesianNode extends AbstractNode implements KGaussianNaiveBayesianNode {
 
     //TODO Any synchronization?
-
     //TODO Try out changing parameters on the fly
 
     //NOT final
