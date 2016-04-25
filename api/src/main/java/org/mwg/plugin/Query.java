@@ -5,9 +5,8 @@ import org.mwg.Constants;
 public class Query {
 
     private long _hash;
-
     private int capacity = 1;
-    public long[] attributes = new long[capacity];
+    long[] attributes = new long[capacity];
     public String[] values = new String[capacity];
     public int size = 0;
 

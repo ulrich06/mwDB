@@ -1,5 +1,7 @@
 package org.mwg.task;
 
+import org.mwg.Callback;
+
 public interface Task {
 
     /**
@@ -102,11 +104,11 @@ public interface Task {
 
     Task groupWhere(Task groupSubTask);
 
-    <TYPE> Task foreach(ForEachAction action);
-
-    Task foreachWhere(Task subTask);
+    Task foreach(Task subTask);
 
     Task foreachPar(Task subTask);
+
+    <T> Task foreachThen(Callback<T> action);
 
     /**
      * Execute and wait a sub task, result of this sub task is immediately enqueue and available for next
