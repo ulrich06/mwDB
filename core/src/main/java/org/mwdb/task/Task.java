@@ -117,7 +117,7 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask trigger(KTask subTask) {
+    public KTask wait(KTask subTask) {
         addTask(new ActionTrigger(subTask));
         return this;
     }
@@ -151,7 +151,7 @@ public class Task implements KTask {
     }
 
     @Override
-    public KTask foreachParallel(KTask subTask) {
+    public KTask foreachPar(KTask subTask) {
         addTask(new ActionParForeach(subTask));
         return this;
     }

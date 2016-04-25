@@ -81,10 +81,38 @@ public class SimpleTraversalTest {
                         .execute();
 */
 
+                KTask hello = graph.newTask();
+                hello.thenAsync(new KTaskAction() {
+                    @Override
+                    public void eval(KTaskContext context) {
+
+                        new KCallback(){
+
+                            @Override
+                            public void on(Object result) {
+                                context.setResult("Hello");
+                                context.next();
+                            }
+                        };
+
+
+                    }
+                });
+                hello.traverse("children").then(new KTaskAction() {
+                    @Override
+                    public void eval(KTaskContext context) {
+                        //TODO
+                        context.getVariable("x");
+                    }
+                });
+
                 KTask traversal = graph.newTask();
                 traversal
                         .from(new long[]{1, 2, 3})
                         .asVar("x")
+
+                        .foreach(hello)
+
                         .foreach(graph.newTask().asVar("sub").fromVar("sub"))
                         .executeThen(new KTaskAction() {
                             @Override

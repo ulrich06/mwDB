@@ -86,7 +86,7 @@ public interface KTask {
     KTask map(KTaskMap mapFunction);
 
     interface KTaskFlatMap {
-        Object map(KNode[] nodes);
+        Object flatMap(KNode[] nodes);
     }
 
     KTask flatMap(KTaskFlatMap flatMapFunction);
@@ -101,7 +101,7 @@ public interface KTask {
 
     KTask foreach(KTask subTask);
 
-    KTask foreachParallel(KTask subTask);
+    KTask foreachPar(KTask subTask);
 
     /**
      * Execute and wait a sub task, result of this sub task is immediately enqueue and available for next
@@ -109,7 +109,7 @@ public interface KTask {
      * @param subTask that have to be executed
      * @return this task to chain actions (fluent API)
      */
-    KTask trigger(KTask subTask);
+    KTask wait(KTask subTask);
 
     KTask then(KTaskAction action);
 
