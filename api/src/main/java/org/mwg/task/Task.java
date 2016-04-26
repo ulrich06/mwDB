@@ -95,6 +95,22 @@ public interface Task {
      */
     Task traverse(String relationName);
 
+    /**
+     * Traverse a relation indexed by {@code indexName} and retrieve specific node thanks to the {@code query}
+     *
+     * @param indexName index name of indexed relation
+     * @param query query to retrieve specific nodes
+     * @return this task to chain actions (fluent API)
+     */
+    Task traverseIndex(String indexName, String query);
+
+    /**
+     * Traverse a relation indexed by {@code indexName}
+     * @param indexName index name of indexed relation
+     * @return this task to chain actions (fluent API)
+     */
+    Task traverseIndexAll(String indexName);
+
     Task map(TaskFunctionMap mapFunction);
 
     Task flatMap(TaskFunctionFlatMap flatMapFunction);
@@ -135,6 +151,12 @@ public interface Task {
      */
     Task wait(Task subTask);
 
+    /**
+     * Execute a sub task if the condition is satisfied
+     * @param cond condition to check
+     * @param then sub task to execute if the condition is satisfied
+     * @return this task to chain actions (fluent API)
+     */
     Task ifThen(TaskFunctionConditional cond, Task then);
 
     Task whileDo(TaskFunctionConditional cond, Task then);

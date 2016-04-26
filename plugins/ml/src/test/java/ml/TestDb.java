@@ -1,9 +1,9 @@
 package ml;
 
 import org.mwg.*;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.util.matrix.KMatrix;
+import org.mwg.util.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.util.matrix.blassolver.blas.F2JBlas;
 import org.mwg.regression.KPolynomialNode;
 import org.mwg.regression.PolynomialNode;
 import org.mwg.core.NoopScheduler;
@@ -103,7 +103,7 @@ public class TestDb {
                                       @Override
                                       public void on(Node result) {
                                           try {
-                                              result.set("euroUsd", Type.DOUBLE_ARRAY, new double[]{eurUsd.get(t)});
+                                              result.set("euroUsd", new double[]{eurUsd.get(t)});
                                           } catch (Exception ex) {
                                               ex.printStackTrace();
                                           }

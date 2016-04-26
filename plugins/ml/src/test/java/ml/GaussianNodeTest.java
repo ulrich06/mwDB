@@ -3,7 +3,7 @@ package ml;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.math.matrix.KMatrix;
+import org.mwg.util.matrix.KMatrix;
 import org.mwg.gmm.KGaussianNode;
 import org.mwg.core.NoopScheduler;
 

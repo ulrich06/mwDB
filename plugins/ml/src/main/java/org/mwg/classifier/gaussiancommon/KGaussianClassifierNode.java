@@ -1,11 +1,8 @@
-package org.mwg.gaussiannb;
+package org.mwg.classifier.gaussiancommon;
 
 import org.mwg.Node;
 
-/**
- * Created by Andrey Boytsov on 4/14/2016.
- */
-public interface KGaussianNaiveBayesianNode extends Node {
+public interface KGaussianClassifierNode extends Node {
 
     /**
      * Public keys - node parameters, values, etc.

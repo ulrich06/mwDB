@@ -3,6 +3,10 @@ package org.mwg.core.task;
 import org.mwg.Graph;
 import org.mwg.task.TaskContext;
 
+/**
+ * A wrapper of a TaskContext
+ * Protect the call to the next method, that means that we cannot call it on an instance of this class
+ */
 class TaskContextWrapper implements TaskContext {
 
     private final TaskContext _wrapped;
@@ -39,6 +43,11 @@ class TaskContextWrapper implements TaskContext {
     @Override
     public Object getVariable(String name) {
         return _wrapped.getVariable(name);
+    }
+
+    @Override
+    public String[] getVariablesKeys() {
+        return _wrapped.getVariablesKeys();
     }
 
     @Override

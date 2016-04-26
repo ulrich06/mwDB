@@ -38,11 +38,11 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
 
     @Override
-    public void set(String attributeName, byte attributeType, Object attributeValue) {
-        if (attributeName.equals(VALUE_KEY) && attributeType == Type.DOUBLE_ARRAY) {
+    public void set(String attributeName, Object attributeValue) {
+        if (attributeName.equals(VALUE_KEY)) {
             learn((double[]) attributeValue);
         } else {
-            super.set(attributeName, attributeType, attributeValue);
+            super.set(attributeName, attributeValue);
         }
     }
 
@@ -97,8 +97,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     @Override
     public void configMixture(int levels, int maxPerLevel) {
-        super.set(INTERNAL_LEVEL_KEY, Type.INT, levels);
-        super.set(INTERNAL_WIDTH_KEY, Type.INT, maxPerLevel);
+        super.set(INTERNAL_LEVEL_KEY, levels);
+        super.set(INTERNAL_WIDTH_KEY, maxPerLevel);
     }
 
     @Override
@@ -157,9 +157,9 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
 
     private void updateLevel(final int newLevel) {
-        super.set(INTERNAL_LEVEL_KEY, Type.INT, newLevel);
+        super.set(INTERNAL_LEVEL_KEY, newLevel);
         if (newLevel == 0) {
-            super.set(INTERNAL_SUBGAUSSIAN_KEY, Type.LONG_ARRAY, null);
+            super.set(INTERNAL_SUBGAUSSIAN_KEY, null);
         } else {
             super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
                 @Override
@@ -290,12 +290,12 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
 
         //Store everything
-        set(INTERNAL_TOTAL_KEY, Type.INT, total);
-        set(INTERNAL_WEIGHT_KEY, Type.DOUBLE, weight);
-        set(INTERNAL_SUM_KEY, Type.DOUBLE_ARRAY, sum);
-        set(INTERNAL_MIN_KEY, Type.DOUBLE_ARRAY, min);
-        set(INTERNAL_MAX_KEY, Type.DOUBLE_ARRAY, max);
-        set(INTERNAL_SUMSQUARE_KEY, Type.DOUBLE_ARRAY, sumsquares);
+        set(INTERNAL_TOTAL_KEY, total);
+        set(INTERNAL_WEIGHT_KEY, weight);
+        set(INTERNAL_SUM_KEY, sum);
+        set(INTERNAL_MIN_KEY, min);
+        set(INTERNAL_MAX_KEY, max);
+        set(INTERNAL_SUMSQUARE_KEY, sumsquares);
 
         //Add the subGaussian to the relationship
         // TODO: to debug here to validate
@@ -312,7 +312,7 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
                 long[] newrelations = new long[oldrel.length + subrelations.length];
                 System.arraycopy(oldrel, 0, newrelations, 0, oldrel.length);
                 System.arraycopy(subrelations, 0, newrelations, oldrel.length, subrelations.length);
-                set(INTERNAL_SUBGAUSSIAN_KEY, Type.LONG_ARRAY, newrelations);
+                set(INTERNAL_SUBGAUSSIAN_KEY, newrelations);
             }
 
 
@@ -389,12 +389,12 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         checkAndCompress();
 
         //Store everything
-        set(INTERNAL_TOTAL_KEY, Type.INT, total);
-        set(INTERNAL_WEIGHT_KEY, Type.DOUBLE, weight);
-        set(INTERNAL_SUM_KEY, Type.DOUBLE_ARRAY, sum);
-        set(INTERNAL_MIN_KEY, Type.DOUBLE_ARRAY, min);
-        set(INTERNAL_MAX_KEY, Type.DOUBLE_ARRAY, max);
-        set(INTERNAL_SUMSQUARE_KEY, Type.DOUBLE_ARRAY, sumsquares);
+        set(INTERNAL_TOTAL_KEY, total);
+        set(INTERNAL_WEIGHT_KEY, weight);
+        set(INTERNAL_SUM_KEY, sum);
+        set(INTERNAL_MIN_KEY, min);
+        set(INTERNAL_MAX_KEY, max);
+        set(INTERNAL_SUMSQUARE_KEY, sumsquares);
     }
 
 
@@ -415,9 +415,9 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
             weight = incWeight(0);
 
             //set total, weight, sum, return
-            set(INTERNAL_TOTAL_KEY, Type.INT, total);
-            set(INTERNAL_WEIGHT_KEY, Type.DOUBLE, weight);
-            set(INTERNAL_SUM_KEY, Type.DOUBLE_ARRAY, sum);
+            set(INTERNAL_TOTAL_KEY, total);
+            set(INTERNAL_WEIGHT_KEY, weight);
+            set(INTERNAL_SUM_KEY, sum);
             if (createNode && level > 0) {
                 createLevel(values, level - 1, width);
                 checkAndCompress();
@@ -482,12 +482,12 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
             }
 
             //Store everything
-            set(INTERNAL_TOTAL_KEY, Type.INT, total);
-            set(INTERNAL_WEIGHT_KEY, Type.DOUBLE, weight);
-            set(INTERNAL_SUM_KEY, Type.DOUBLE_ARRAY, sum);
-            set(INTERNAL_MIN_KEY, Type.DOUBLE_ARRAY, min);
-            set(INTERNAL_MAX_KEY, Type.DOUBLE_ARRAY, max);
-            set(INTERNAL_SUMSQUARE_KEY, Type.DOUBLE_ARRAY, sumsquares);
+            set(INTERNAL_TOTAL_KEY, total);
+            set(INTERNAL_WEIGHT_KEY, weight);
+            set(INTERNAL_SUM_KEY, sum);
+            set(INTERNAL_MIN_KEY, min);
+            set(INTERNAL_MAX_KEY, max);
+            set(INTERNAL_SUMSQUARE_KEY, sumsquares);
         }
 
     }

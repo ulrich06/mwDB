@@ -1,4 +1,4 @@
-package org.mwg.classifier;
+package org.mwg.classifier.gaussian;
 
 import org.mwg.Graph;
 import org.mwg.Node;

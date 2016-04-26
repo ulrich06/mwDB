@@ -18,9 +18,9 @@ public class MathNodeTest {
             public void on(Boolean result) {
 
                 Node node = graph.newNode(0, 0, "MathNode");
-                node.set("$valueSquare", Type.STRING, "{value} ^ 2 / {min} * 2");
-                node.set("value", Type.DOUBLE, 3.0);
-                node.set("min", Type.DOUBLE, 3.0);
+                node.set("$valueSquare", "{value} ^ 2 / {min} * 2");
+                node.set("value", 3.0);
+                node.set("min", 3.0);
 
                 System.out.println(node.get("value"));
                 System.out.println(node.get("$valueSquare"));

@@ -62,7 +62,7 @@ public class JamaPerf {
         System.out.println("Blas LU: " + d + " ms");
 
         startTime =System.nanoTime();
-        org.mwg.math.matrix.jamasolver.LU lujama= new org.mwg.math.matrix.jamasolver.LU(matASq);
+        org.mwg.util.matrix.jamasolver.LU lujama= new org.mwg.util.matrix.jamasolver.LU(matASq);
         endTime=System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -78,7 +78,7 @@ public class JamaPerf {
         System.out.println();
 
         startTime =System.nanoTime();
-        org.mwg.math.matrix.blassolver.QR qrblas= new org.mwg.math.matrix.blassolver.QR(m,n,blas);
+        org.mwg.util.matrix.blassolver.QR qrblas= new org.mwg.util.matrix.blassolver.QR(m,n,blas);
         qrblas.factor(matA,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);
@@ -102,7 +102,7 @@ public class JamaPerf {
         System.out.println();
 
         startTime =System.nanoTime();
-        org.mwg.math.matrix.blassolver.SVD svdblas= new org.mwg.math.matrix.blassolver.SVD(m,n,blas);
+        org.mwg.util.matrix.blassolver.SVD svdblas= new org.mwg.util.matrix.blassolver.SVD(m,n,blas);
         svdblas.factor(matA,false);
         endTime=System.nanoTime();
         d = (endTime - startTime);

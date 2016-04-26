@@ -80,7 +80,7 @@
         <module>plugins/leveldb</module>
 
         <!-- <module>plugins/debug</module> -->
-        <!-- <module>plugins/ml</module> -->
+        <module>plugins/ml</module>
 
     </modules>
 

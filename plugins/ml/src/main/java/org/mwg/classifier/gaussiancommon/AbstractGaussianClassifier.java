@@ -1,4 +1,4 @@
-package org.mwg.classifier;
+package org.mwg.classifier.gaussiancommon;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
@@ -12,14 +12,13 @@ import org.mwg.util.matrix.operation.MultivariateNormalDistribution;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class GaussianClassifierNode extends AbstractNode implements KGaussianClassifierNode {
-
-    //TODO Any synchronization?
-
-    //TODO Try out changing parameters on the fly
+/**
+ * Created by andre on 4/26/2016.
+ */
+public abstract class AbstractGaussianClassifier extends AbstractNode implements KGaussianClassifierNode{
 
     //NOT final
-    private NodeState currentState = null;
+    protected NodeState currentState = null;
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -30,7 +29,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
      * Prefix for sum attribute. For each class its class label will be appended to
      * this key prefix.
      */
-    private static final String INTERNAL_SUM_KEY_PREFIX = "_sum_";
+    protected static final String INTERNAL_SUM_KEY_PREFIX = "_sum_";
 
     /**
      * Prefix for sum of squares attribute. For each class its class label will be appended to
@@ -63,23 +62,13 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
      */
     private static final String INTERNAL_KNOWN_CLASSES_LIST = "_knownClassesList";
 
-    //TODO How to keep that one? It is an object. Try some serialization?
-    /**
-     * Prefix for distribution objects. For each class its class label will be appended to
-     * this key prefix.
-     */
-    //private static final String INTERNAL_DISTRIBUTION_KEY_PREFIX = "_distributions_";
-
     //TODO Not allow setting?
-
-    //TODO Remove these comments when completely done
-    //private final Map<Integer, MultivariateNormalDistribution> distributions = new HashMap<>();
 
 
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
-    private int getClassIndex() {
+    protected int getClassIndex() {
         Object objClassIndex = currentState.get(_resolver.stringToLongKey(CLASS_INDEX_KEY));
         Objects.requireNonNull(objClassIndex, "Class index must be not null");
         return ((Integer) objClassIndex).intValue();
@@ -88,7 +77,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
-    private int getBufferSize() {
+    protected int getBufferSize() {
         Object objClassIndex = currentState.get(_resolver.stringToLongKey(BUFFER_SIZE_KEY));
         Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
         return ((Integer) objClassIndex).intValue();
@@ -97,7 +86,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
-    private int getInputDimensions() {
+    protected int getInputDimensions() {
         Object objClassIndex = currentState.get(_resolver.stringToLongKey(INPUT_DIM_KEY));
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
         return ((Integer) objClassIndex).intValue();
@@ -110,7 +99,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
      * @param errorMessage Error message thrown with {@code IllegalArgumentException} (if thrown)
      * @throws IllegalArgumentException if condition is false
      */
-    private void illegalArgumentIfFalse(boolean condition, String errorMessage) {
+    protected void illegalArgumentIfFalse(boolean condition, String errorMessage) {
         assert errorMessage != null;
         if (!condition) {
             throw new IllegalArgumentException(errorMessage);
@@ -120,7 +109,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
     /**
      * {@inheritDoc}
      */
-    public GaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractGaussianClassifier(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -148,7 +137,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         }
     }
 
-    private void addToKnownClassesList(int classLabel) {
+    protected void addToKnownClassesList(int classLabel) {
         int[] knownClasses = getKnownClasses();
         int[] newKnownClasses = new int[knownClasses.length + 1];
         for (int i = 0; i < knownClasses.length; i++) {
@@ -198,12 +187,12 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         currentState.set(_resolver.stringToLongKey(KGaussianClassifierNode.HIGH_ERROR_THRESH_KEY), Type.DOUBLE, highErrorThreshold);
     }
 
-    private final void setTotal(int classNum, int val) {
+    protected final void setTotal(int classNum, int val) {
         assert val >= 0;
         currentState.set(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX + classNum), Type.INT, val);
     }
 
-    private final void setSums(int classNum, double[] vals) {
+    protected final void setSums(int classNum, double[] vals) {
         assert vals != null;
         currentState.set(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX + classNum), Type.DOUBLE_ARRAY, vals);
     }
@@ -213,18 +202,18 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
     }
 
-    private final void setSumsSquared(int classNum, double[] vals) {
+    protected final void setSumsSquared(int classNum, double[] vals) {
         assert vals != null;
         currentState.set(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum), Type.DOUBLE_ARRAY, vals);
     }
 
-    private final int getClassTotal(int classNum) {
+    protected final int getClassTotal(int classNum) {
         Object objClassTotal = currentState.get(_resolver.stringToLongKey(INTERNAL_TOTAL_KEY_PREFIX + classNum));
         Objects.requireNonNull(objClassTotal, "Class total must be not null (class " + classNum + ")");
         return ((Integer) objClassTotal).intValue();
     }
 
-    private double[] getSums(int classNum) {
+    protected double[] getSums(int classNum) {
         Object objSum = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX + classNum));
         Objects.requireNonNull(objSum, "Sums must be not null (class " + classNum + ")");
         return (double[]) objSum;
@@ -252,7 +241,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         return (double[]) objValueBuffer;
     }
 
-    private double[] getSumSquares(int classNum) {
+    protected double[] getSumSquares(int classNum) {
         Object objSumSq = currentState.get(_resolver.stringToLongKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum));
         Objects.requireNonNull(objSumSq, "Sums of squares must be not null (class " + classNum + ")");
         return (double[]) objSumSq;
@@ -263,25 +252,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
      *
      * @param classNum Number of class
      */
-    private void initializeClassIfNecessary(int classNum) {
-        Object oldSumsObj = currentState.get(_resolver.stringToLongKey(INTERNAL_SUM_KEY_PREFIX + classNum));
-        if (oldSumsObj != null) {
-            //Is there, but could be deleted
-            double oldSums[] = (double[]) oldSumsObj;
-            if (oldSums.length > 0) { //Is the class deleted?
-                //Already initialized
-                return;
-            }
-        }
-
-        addToKnownClassesList(classNum);
-        setTotal(classNum, 0);
-        final int dimensions = getInputDimensions();
-        setSums(classNum, new double[dimensions]);
-        setSumsSquared(classNum, new double[dimensions * (dimensions + 1) / 2]);
-
-        //Model can stay uninitialized until total is at least <TODO 2? 1?>
-    }
+    protected abstract void initializeClassIfNecessary(int classNum);
 
     /**
      * Adds value's contribution to total, sum and sum of squares of new model.
@@ -289,37 +260,15 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
      *
      * @param value New value
      */
-    private void updateModelParameters(double value[]) {
-        final int classIndex = getClassIndex();
-        final int classNum = (int) value[classIndex];
-        //Rebuild Gaussian for mentioned class
-        //Update sum, sum of squares and total
-        initializeClassIfNecessary(classNum);
-        setTotal(classNum, getClassTotal(classNum) + 1);
+    protected abstract void updateModelParameters(double value[]);
 
-        double currentSum[] = getSums(classNum);
-        for (int i = 0; i < value.length; i++) {
-            currentSum[i] += value[i];
-        }
-        //Value at class index - force 0 (or it will be the ultimate predictor)
-        currentSum[classIndex] = 0;
-        setSums(classNum, currentSum);
-        //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
-
-        double currentSumSquares[] = getSumSquares(classNum);
-        int k = 0;
-        for (int i = 0; i < value.length; i++) {
-            for (int j = i; j < value.length; j++) {
-                //Value at class index - force 0 (or it will be the ultimate predictor)
-                if ((i != classIndex) && (j != classIndex)) {
-                    currentSumSquares[k] += value[i] * value[j];
-                }
-            }
-            k++;
-        }
-        setSumsSquared(classNum, currentSumSquares);
-        //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
-    }
+    /**
+     *
+     * @param value
+     * @param classNum
+     * @return
+     */
+    protected abstract double getLikelihoodForClass(double value[], int classNum);
 
     private void addValueToBuffer(double[] value) {
         double valueBuffer[] = getValueBuffer();
@@ -346,6 +295,7 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         setValueBuffer(newBuffer);
     }
 
+
     /**
      * Adds new value to the buffer. Gaussian model is regenerated.
      *
@@ -370,39 +320,9 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         return valLength / getInputDimensions();
     }
 
-    //TODO Later use cached distributions
-    private double getLikelihoodForClass(double value[], int classNum) {
-        //It is assumed that real class is removed and replaces with 0
-        initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
-        int total = getClassTotal(classNum);
-        if (total < 2) {
-            //Not enough data to build model for that class.
-            return 0;
-        }
-        double sums[] = getSums(classNum);
-        double sumSquares[] = getSumSquares(classNum);
-        MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total);
-        return distr.density(value, true);//TODO Normalize on average? Does not matter (comparing anyway)
-        //But normalization leaves less chance for underflow
-    }
+    protected abstract int predictValue(double value[]);
 
-    private int predictValue(double value[]) {
-        double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
-        valueWithClassRemoved[getClassIndex()] = 0; //Do NOT use real class for prediction
-        int classes[] = getKnownClasses();
-        double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
-        int curMaxLikelihoodClass = -1;
-        for (int curClass : classes) {
-            double curLikelihood = getLikelihoodForClass(valueWithClassRemoved, curClass);
-            if (curLikelihood > curMaxLikelihood) {
-                curMaxLikelihood = curLikelihood;
-                curMaxLikelihoodClass = curClass;
-            }
-        }
-        return curMaxLikelihoodClass;
-    }
-
-    private int[] getKnownClasses() {
+    protected int[] getKnownClasses() {
         Object objKnownClasses = currentState.get(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST));
         if (objKnownClasses != null) {
             return (int[]) objKnownClasses;
@@ -561,41 +481,4 @@ public class GaussianClassifierNode extends AbstractNode implements KGaussianCla
         currentState.set(_resolver.stringToLongKey(INTERNAL_KNOWN_CLASSES_LIST), Type.INT_ARRAY, new int[0]);
     }
 
-    public String allDistributionsToString() {
-        String result = "";
-        int allClasses[] = getKnownClasses();
-        if (allClasses.length == 0) {
-            return "No classes";
-        }
-        for (int classNum : allClasses) {
-            initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
-            int total = getClassTotal(classNum);
-            if (total < 2) {
-                //Not enough data to build model for that class.
-                result += classNum + ": Not enough data(" + total + ")\n";
-            } else {
-                double sums[] = getSums(classNum);
-                double means[] = getSums(classNum);
-                for (int i = 0; i < means.length; i++) {
-                    means[i] = means[i] / total;
-                }
-                double sumSquares[] = getSumSquares(classNum);
-                KMatrix cov =
-                        MultivariateNormalDistribution.getCovariance(sums, sumSquares, total);
-                result += classNum + ": mean = ["; //TODO For now - cannot report variance from distribution
-                for (int i = 0; i < means.length; i++) {
-                    result += means[i] + ", ";
-                }
-                result += "]\nCovariance:\n";
-                for (int i = 0; i < cov.rows(); i++) {
-                    result += "[";
-                    for (int j = 0; j < cov.columns(); j++) {
-                        result += cov.get(i, j) + ", ";
-                    }
-                    result += "]\n";
-                }
-            }
-        }
-        return result;//TODO Normalize on average?
-    }
 }
