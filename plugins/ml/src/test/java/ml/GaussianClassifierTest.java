@@ -99,11 +99,11 @@ public class GaussianClassifierTest {
                     gaussianNBNode.set("value", dummyDataset1[i]);
                     if (gaussianNBNode.isInBootstrapMode()!=bootstraps1[i]){
                         System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
-                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferErrorFraction());
+                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         errors++;
                     }else{
                         System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
-                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferErrorFraction());
+                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                     }
                     System.out.println(gaussianNBNode.allDistributionsToString());
                     int rbc[] = gaussianNBNode.getRealBufferClasses();

@@ -50,7 +50,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier implem
 
     @Override
     protected void updateModelParameters(double value[]){
-        final int classIndex = getClassIndex();
+        final int classIndex = getResponseIndex();
         final int classNum = (int)value[classIndex];
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
@@ -87,7 +87,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier implem
         double likelihood = 1;
         double sums[] = getSums(classNum);
         double sumSquares[] = getSumSquares(classNum);
-        final int classIndex = getClassIndex();
+        final int classIndex = getResponseIndex();
         for (int i=0;i<getInputDimensions();i++){
             if (i!=classIndex) {
                 likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
@@ -104,7 +104,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier implem
             return kk[0];
         }
         double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
-        valueWithClassRemoved[getClassIndex()] = 0; //Do NOT use real class for prediction
+        valueWithClassRemoved[getResponseIndex()] = 0; //Do NOT use real class for prediction
         int classes[] = getKnownClasses();
         double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
