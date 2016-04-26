@@ -4,11 +4,11 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionConditional;
 
-public class ActionIfThen implements TaskAction {
+class ActionIfThen implements TaskAction {
     private TaskFunctionConditional _condition;
     private org.mwg.task.Task _action;
 
-    public ActionIfThen(TaskFunctionConditional cond, org.mwg.task.Task action) {
+    ActionIfThen(TaskFunctionConditional cond, org.mwg.task.Task action) {
         _condition = cond;
         _action = action;
     }

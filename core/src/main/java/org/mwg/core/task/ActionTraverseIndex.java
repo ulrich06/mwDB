@@ -9,11 +9,11 @@ import org.mwg.task.TaskContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ActionTraverseIndex implements TaskAction {
+class ActionTraverseIndex implements TaskAction {
     private String _indexName;
     private String _query;
 
-    public ActionTraverseIndex(String indexName, String query) {
+    ActionTraverseIndex(String indexName, String query) {
         this._query = query;
         this._indexName = indexName;
     }
