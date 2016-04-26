@@ -151,6 +151,12 @@ public interface Task {
      */
     Task wait(Task subTask);
 
+    /**
+     * Execute a sub task if the condition is satisfied
+     * @param cond condition to check
+     * @param then sub task to execute if the condition is satisfied
+     * @return this task to chain actions (fluent API)
+     */
     Task ifThen(TaskFunctionConditional cond, Task then);
 
     Task whileDo(TaskFunctionConditional cond, Task then);
