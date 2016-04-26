@@ -108,7 +108,9 @@ public class ActionTraverseIndex implements TaskAction {
         for(Node node : nodes) {
             if(node != null) {
                 LongLongArrayMap indexed = (LongLongArrayMap) node.get(_indexName);
-                nbNoadToLoad += indexed.size();
+                if(indexed != null) {//no index value
+                    nbNoadToLoad += indexed.size();
+                }
             }
         }
         return nbNoadToLoad;

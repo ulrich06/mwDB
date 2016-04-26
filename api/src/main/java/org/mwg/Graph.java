@@ -150,6 +150,7 @@ public interface Graph {
 
     /**
      * Create a new task object to manipulate Graph in an easy way
+     * By default, the world and the time of the task is 0
      *
      * @return newly created task object
      */
