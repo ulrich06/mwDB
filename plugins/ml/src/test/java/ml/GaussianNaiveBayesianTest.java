@@ -3,9 +3,8 @@ package ml;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.classifier.gaussian.GaussianClassifierNodeFactory;
-import org.mwg.classifier.gaussian.KGaussianClassifierNode;
+import org.mwg.classifier.gaussiancommon.KGaussianClassifierNode;
 import org.mwg.classifier.gaussiannb.GaussianNaiveBayesianNodeFactory;
-import org.mwg.classifier.gaussiannb.KGaussianNaiveBayesianNode;
 import org.mwg.core.NoopScheduler;
 
 import static junit.framework.TestCase.assertTrue;
@@ -96,7 +95,7 @@ public class GaussianNaiveBayesianTest {
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
-                    KGaussianNaiveBayesianNode gaussianNBNode = (KGaussianNaiveBayesianNode) graph.newNode(0, 0, "GaussianNaiveBayesianNode");
+                    KGaussianClassifierNode gaussianNBNode = (KGaussianClassifierNode) graph.newNode(0, 0, "GaussianNaiveBayesianNode");
                     KGaussianClassifierNode gaussianClassifierNode = (KGaussianClassifierNode) graph.newNode(0, 0, "GaussianClassifierNode");
 
                     int errors = 0;

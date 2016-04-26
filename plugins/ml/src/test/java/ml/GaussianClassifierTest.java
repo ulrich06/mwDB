@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mwg.*;
 import org.mwg.classifier.gaussian.GaussianClassifierNodeFactory;
 import org.mwg.core.NoopScheduler;
-import org.mwg.classifier.gaussian.KGaussianClassifierNode;
+import org.mwg.classifier.gaussiancommon.KGaussianClassifierNode;
 
 
 /**
