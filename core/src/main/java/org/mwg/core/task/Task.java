@@ -131,6 +131,8 @@ public class Task implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task whileDo(TaskFunctionConditional cond, org.mwg.task.Task then) {
+        //addTask(new ActionWhileDo(cond, then));
+        //return this;
         throw new RuntimeException("Not implemented yet");
     }
 
@@ -199,6 +201,10 @@ public class Task implements org.mwg.task.Task {
             }
         };
         final org.mwg.task.TaskContext context = new TaskContext(parent, initialResult, _graph, final_actions);
+        if (parent != null) {
+            context.setWorld(parent.getWorld());
+            context.setTime(parent.getTime());
+        }
         _graph.scheduler().dispatch(new Job() {
             @Override
             public void run() {
