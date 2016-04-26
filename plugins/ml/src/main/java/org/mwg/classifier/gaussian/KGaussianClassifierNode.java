@@ -1,8 +1,8 @@
-package org.mwg.classifier;
+package org.mwg.classifier.gaussian;
 
 import org.mwg.Node;
 
-public interface KGaussianNaiveBayesianNode extends Node {
+public interface KGaussianClassifierNode extends Node {
 
     /**
      * Public keys - node parameters, values, etc.

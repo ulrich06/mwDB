@@ -2,8 +2,10 @@ package ml;
 
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.gaussianclassifier.KGaussianClassifierNode;
-import org.mwg.gaussiannb.KGaussianNaiveBayesianNode;
+import org.mwg.classifier.gaussian.GaussianClassifierNodeFactory;
+import org.mwg.classifier.gaussian.KGaussianClassifierNode;
+import org.mwg.classifier.gaussiannb.GaussianNaiveBayesianNodeFactory;
+import org.mwg.classifier.gaussiannb.KGaussianNaiveBayesianNode;
 import org.mwg.core.NoopScheduler;
 
 import static junit.framework.TestCase.assertTrue;

@@ -2,9 +2,9 @@ package ml;
 
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.classifier.GaussianClassifierNodeFactory;
+import org.mwg.classifier.gaussian.GaussianClassifierNodeFactory;
 import org.mwg.core.NoopScheduler;
-import org.mwg.gaussianclassifier.KGaussianClassifierNode;
+import org.mwg.classifier.gaussian.KGaussianClassifierNode;
 
 
 /**

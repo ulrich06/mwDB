@@ -1,8 +1,8 @@
-package org.mwg.classifier;
+package org.mwg.classifier.gaussiannb;
 
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.gaussiannb.GaussianNaiveBayesianNode;
+import org.mwg.classifier.gaussiannb.GaussianNaiveBayesianNode;
 import org.mwg.plugin.NodeFactory;
 
 public class GaussianNaiveBayesianNodeFactory implements NodeFactory {

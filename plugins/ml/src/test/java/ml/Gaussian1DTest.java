@@ -8,7 +8,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.gmm.KGaussianNode;
 import org.mwg.core.NoopScheduler;
-import org.mwg.math.matrix.operation.Gaussian1D;
+import org.mwg.util.matrix.operation.Gaussian1D;
 
 import java.util.Random;
 
