@@ -16,7 +16,7 @@ public interface TaskContext {
 
     Object getVariable(String name);
 
-    String[] getVariablesKey();
+    String[] getVariablesKeys();
 
     void setVariable(String name, Object value);
 

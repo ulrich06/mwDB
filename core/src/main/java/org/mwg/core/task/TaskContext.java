@@ -73,7 +73,7 @@ class TaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public String[] getVariablesKey() {
+    public String[] getVariablesKeys() {
         String[] result = new String[this._variables.size()];
         int index = 0;
         for(String key : this._variables.keySet()) {
@@ -129,7 +129,7 @@ class TaskContext implements org.mwg.task.TaskContext {
     }
 
     private void mergeVariables(org.mwg.task.TaskContext actionResult) {
-        String[]variables = actionResult.getVariablesKey();
+        String[]variables = actionResult.getVariablesKeys();
         for(String variableName : variables) {
             this.setVariable(variableName,actionResult.getVariable(variableName));
         }

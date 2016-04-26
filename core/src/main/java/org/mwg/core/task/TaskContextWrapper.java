@@ -42,8 +42,8 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public String[] getVariablesKey() {
-        return _wrapped.getVariablesKey();
+    public String[] getVariablesKeys() {
+        return _wrapped.getVariablesKeys();
     }
 
     @Override
