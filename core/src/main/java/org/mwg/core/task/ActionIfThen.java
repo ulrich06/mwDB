@@ -15,7 +15,7 @@ class ActionIfThen implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        if(_condition.eval(context)) {
+        if (_condition.eval(context)) {
             _action.executeThenAsync(context, context.getPreviousResult(), new TaskAction() {
                 @Override
                 public void eval(TaskContext subTaskFinalContext) {
@@ -23,6 +23,9 @@ class ActionIfThen implements TaskAction {
                     context.next();
                 }
             });
+        } else {
+            context.setResult(context.getPreviousResult());
+            context.next();
         }
     }
 }
