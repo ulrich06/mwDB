@@ -110,4 +110,40 @@ public class ActionForeachTest extends AbstractActionTest {
         }).execute();
     }
 
+    @Test
+    public void testForEachMergeVariables(){
+        final int[] index = {0};
+        org.mwg.task.Task forEachTask = graph.newTask().then(new TaskAction() {
+            @Override
+            public void eval(TaskContext context) {
+                context.setVariable("param" + index[0]++,context.getPreviousResult());
+                context.setResult(context.getPreviousResult());
+            }
+        });
+
+        List<String> paramIterable = new ArrayList<String>();
+        paramIterable.add("n0");
+        paramIterable.add("n1");
+        paramIterable.add("root");
+        graph.newTask().from(paramIterable).foreach(forEachTask).fromVar("param0").then(new TaskAction() {
+            @Override
+            public void eval(TaskContext context) {
+                Object result = (String) context.getPreviousResult();
+                Assert.assertEquals("n0",result);
+            }
+        }).fromVar("param1").then(new TaskAction() {
+            @Override
+            public void eval(TaskContext context) {
+                Object result = (String) context.getPreviousResult();
+                Assert.assertEquals("n1",result);
+            }
+        }).fromVar("param2").then(new TaskAction() {
+            @Override
+            public void eval(TaskContext context) {
+                Object result = (String) context.getPreviousResult();
+                Assert.assertEquals("root",result);
+            }
+        }).execute();
+    }
+
 }

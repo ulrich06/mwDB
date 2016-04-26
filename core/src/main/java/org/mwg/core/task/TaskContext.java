@@ -73,6 +73,16 @@ class TaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
+    public String[] getVariablesKey() {
+        String[] result = new String[this._variables.size()];
+        int index = 0;
+        for(String key : this._variables.keySet()) {
+            result[index++] = key;
+        }
+        return result;
+    }
+
+    @Override
     public final void setVariable(String name, Object value) {
         if (value != null) {
             this._variables.put(name, value);
@@ -108,7 +118,21 @@ class TaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void setResult(Object actionResult) {
+        if(actionResult instanceof org.mwg.task.TaskContext) {
+            mergeVariables((org.mwg.task.TaskContext) actionResult);
+        } else if(actionResult instanceof org.mwg.task.TaskContext[]) {
+            for(org.mwg.task.TaskContext taskContext : (org.mwg.task.TaskContext[])actionResult) {
+                mergeVariables(taskContext);
+            }
+        }
         this._results[_currentTaskId.get()] = actionResult;
+    }
+
+    private void mergeVariables(org.mwg.task.TaskContext actionResult) {
+        String[]variables = actionResult.getVariablesKey();
+        for(String variableName : variables) {
+            this.setVariable(variableName,actionResult.getVariable(variableName));
+        }
     }
 
     @Override

@@ -138,7 +138,8 @@ public class Task implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task ifThen(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        throw new RuntimeException("Not implemented yet");
+        addTask(new ActionIfThen(cond,then));
+        return this;
     }
 
     @Override
