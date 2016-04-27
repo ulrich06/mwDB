@@ -149,10 +149,9 @@ public abstract class AbstractNode implements Node {
             if (flatRefs == null || flatRefs.length == 0) {
                 callback.on((A[]) new Node[0]);
             } else {
-                final A[] result = (A[]) new Node[flatRefs.length];
+                final A[] result = (A[]) new Object[flatRefs.length];
                 final DeferCounter counter = _graph.counter(flatRefs.length);
                 final int[] resultIndex = new int[1];
-
                 for (int i = 0; i < flatRefs.length; i++) {
                     this._resolver.lookup(_world, _time, flatRefs[i], new Callback<Node>() {
                         @Override
@@ -171,7 +170,7 @@ public abstract class AbstractNode implements Node {
                         if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
-                            A[] toSend = (A[]) new Node[resultIndex[0]];
+                            A[] toSend = (A[]) new Object[resultIndex[0]];
                             System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
