@@ -47,17 +47,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
     }
 
     @Override
-    public void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-    }
-
-    @Override
-    public void unindex(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-    }
-
-
-    @Override
     public byte type(String attributeName) {
         if (attributeName.equals(AVG_KEY)) {
             return Type.DOUBLE_ARRAY;
