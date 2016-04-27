@@ -17,7 +17,7 @@ public class MultivariateNormalDistribution {
         this.means = means;
         this.covariance =cov;
         pinvsvd = new PInvSVD();
-        pinvsvd.factor(covariance,true);
+        pinvsvd.factor(covariance,false);
         inv=pinvsvd.getPInv();
         det=pinvsvd.getDeterminant(); //todo test if we need to do 1/det
         rank=pinvsvd.getRank();
@@ -92,7 +92,6 @@ public class MultivariateNormalDistribution {
 
 
     public double density(double[] features, boolean normalizeOnAvg) {
-
         if(normalizeOnAvg){
             return getExponentTerm(features);
         }
@@ -100,8 +99,6 @@ public class MultivariateNormalDistribution {
             return Math.pow(2 * Math.PI, -0.5 * rank) *
                     Math.pow(det, -0.5) * getExponentTerm(features);
         }
-
-
     }
 
     private double getExponentTerm(double[] features) {
