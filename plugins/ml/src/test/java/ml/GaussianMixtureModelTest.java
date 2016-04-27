@@ -5,7 +5,7 @@ import org.mwg.Callback;
 import org.mwg.GaussianNodeFactory;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
@@ -23,7 +23,7 @@ public class GaussianMixtureModelTest {
                 double[] data = new double[3];
                 Random rand = new Random();
 
-                KGaussianNode node1 = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode node1 = (GaussianNode) graph.newNode(0,0,"GaussianNode");
                 node1.configMixture(1, 100);
 
                 for (int i = 0; i < 220; i++) {

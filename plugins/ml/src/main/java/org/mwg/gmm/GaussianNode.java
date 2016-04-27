@@ -6,7 +6,7 @@ import org.mwg.util.matrix.KMatrix;
 import org.mwg.util.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.AbstractNode;
 
-public class GaussianNode extends AbstractNode implements KGaussianNode {
+public class GaussianNode extends AbstractNode {
 
     public GaussianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -14,6 +14,7 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     public static final int _CAPACITYFACTOR = 3;
     public static final int _COMPRESSIONITER = 10;
+
     public static double[] err;
 
     private static final String MIN_KEY = "getMin";
@@ -84,13 +85,11 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
     }
 
 
-    @Override
     public void configMixture(int levels, int maxPerLevel) {
         super.set(INTERNAL_LEVEL_KEY, levels);
         super.set(INTERNAL_WIDTH_KEY, maxPerLevel);
     }
 
-    @Override
     public int getLevel() {
         Integer g = (Integer) super.get(INTERNAL_LEVEL_KEY);
         if (g != null) {
@@ -98,7 +97,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         } else return 0;
     }
 
-    @Override
     public int getMaxPerLevel() {
         Integer g = (Integer) super.get(INTERNAL_WIDTH_KEY);
         if (g != null) {
@@ -106,17 +104,13 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         } else return 0;
     }
 
-    @Override
     public void learnBatch(double[][] values) {
         //todo can be optimized later, but for now:
         for (int i = 0; i < values.length; i++) {
             learn(values[i]);
         }
-
-
     }
 
-    @Override
     public void learn(final double[] value) {
         long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
         if (subgaussians == null || subgaussians.length == 0) {
@@ -141,7 +135,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
                 }
             });
         }
-
     }
 
 
@@ -154,8 +147,8 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
                 @Override
                 public void on(Node[] result) {
                     for (int i = 0; i < result.length; i++) {
-                        KGaussianNode g = (KGaussianNode) result[i];
-                        ((GaussianNode) g).updateLevel(newLevel - 1);
+                        GaussianNode g = (GaussianNode) result[i];
+                        g.updateLevel(newLevel - 1);
                     }
                 }
             });
@@ -163,9 +156,9 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
     }
 
     private void createLevel(double[] values, int level, int width) {
-        KGaussianNode g = (KGaussianNode) graph().newNode(this.world(), this.time(), "GaussianNode");
+        GaussianNode g = (GaussianNode) graph().newNode(this.world(), this.time(), "GaussianNode");
         g.configMixture(level, width);
-        ((GaussianNode) g).internallearn(values, false); //dirac
+        g.internallearn(values, false); //dirac
 
         super.add(INTERNAL_SUBGAUSSIAN_KEY, g);
     }
@@ -481,7 +474,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     }
 
-    @Override
     public int getNumberOfFeatures() {
         int total = getTotal();
         if (total == 0) {
@@ -492,7 +484,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double[] getSum() {
         int total = getTotal();
         if (total == 0) {
@@ -502,7 +493,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double[] getSumSquares() {
         int total = getTotal();
         if (total == 0) {
@@ -526,7 +516,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg) {
         double[] sum = (double[]) super.get(INTERNAL_SUM_KEY);
         double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
@@ -539,7 +528,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double[] getProbabilityArray(double[][] featArray, double[] err, boolean normalizeOnAvg) {
         double[] res = new double[featArray.length];
 
@@ -559,7 +547,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     }
 
-    @Override
     public int getTotal() {
         Integer x = (Integer) super.get(INTERNAL_TOTAL_KEY);
         if (x == null) {
@@ -569,12 +556,11 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public Double getWeight() {
         return (Double) super.get(INTERNAL_WEIGHT_KEY);
     }
 
-    @Override
+
     public double[] getAvg() {
         int total = getTotal();
         if (total == 0) {
@@ -592,7 +578,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
 
     }
 
-    @Override
     public double[][] getCovariance(double[] avg) {
         if (avg == null) {
             return null;
@@ -624,7 +609,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public KMatrix getCovarianceMatrix(double[] avg) {
         int features = avg.length;
 
@@ -653,7 +637,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double[] getMin() {
         int total = getTotal();
         if (total == 0) {
@@ -668,7 +651,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public double[] getMax() {
         int total = getTotal();
         if (total == 0) {
@@ -683,7 +665,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         }
     }
 
-    @Override
     public long[] getSubGraph() {
         long[] res = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
         if (res == null) {
@@ -692,7 +673,6 @@ public class GaussianNode extends AbstractNode implements KGaussianNode {
         return res;
     }
 
-    @Override
     public boolean checkInside(double[] feature, int level) {
         return false; //to reimplement
     }
