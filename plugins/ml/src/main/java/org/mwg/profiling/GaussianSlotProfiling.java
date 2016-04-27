@@ -76,7 +76,7 @@ public class GaussianSlotProfiling extends AbstractNode {
         int slot=getIntTime(time(),numOfSlot,24*3600*1000);
 
 
-        double[] total;
+        int[] total;
         double[] min;
         double[] max;
         double[] sum;
@@ -84,15 +84,17 @@ public class GaussianSlotProfiling extends AbstractNode {
         int features = values.length;
         int index = slot * features;
         int indexSquare = slot * features * (features + 1) / 2;
+        int indexTot=numOfSlot*features;
+        int indexSquareTot=numOfSlot* features * (features + 1) / 2;
 
-        total = (double[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
+        total = (int[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
         if (total == null) {
             resolved.setFromKey(FEATURESNUMBER, Type.INT, features);
-            total = new double[numOfSlot];
-            min = new double[numOfSlot * features];
-            max = new double[numOfSlot * features];
-            sum = new double[numOfSlot * features];
-            sumSquare = new double[numOfSlot * features * (features + 1) / 2];
+            total = new int[numOfSlot+1];
+            min = new double[(numOfSlot+1) * features];
+            max = new double[(numOfSlot+1) * features];
+            sum = new double[(numOfSlot+1) * features];
+            sumSquare = new double[(numOfSlot+1) * features * (features + 1) / 2];
         } else {
             min = (double[]) resolved.getFromKey(INTERNAL_MIN_KEY);
             max = (double[]) resolved.getFromKey(INTERNAL_MAX_KEY);
@@ -102,6 +104,7 @@ public class GaussianSlotProfiling extends AbstractNode {
 
         //update the profile
         total[slot] += 1;
+        total[numOfSlot]+=1;
 
         if (total[slot] == 1) {
             int count = 0;
@@ -110,9 +113,16 @@ public class GaussianSlotProfiling extends AbstractNode {
                 max[index + i] = values[i];
                 sum[index + i] = values[i];
                 for (int j = i; j < features; j++) {
-                    sumSquare[indexSquare + count] = values[i] * values[j];
+                    sumSquare[indexSquare + count] += values[i] * values[j];
+                    sumSquare[indexSquareTot + count] += values[i] * values[j];
                     count++;
                 }
+
+                //Update generic indexes
+                min[indexTot + i] = values[i];
+                max[indexTot + i] = values[i];
+                sum[indexTot + i] += values[i];
+
             }
         } else {
             int count = 0;
@@ -126,8 +136,18 @@ public class GaussianSlotProfiling extends AbstractNode {
                 sum[index + i] += values[i];
                 for (int j = i; j < features; j++) {
                     sumSquare[indexSquare + count] += values[i] * values[j];
+                    sumSquare[indexSquareTot + count] += values[i] * values[j];
                     count++;
                 }
+
+                //Update generic indexes
+                if (values[i] < min[indexTot + i]) {
+                    min[indexTot + i] = values[i];
+                }
+                if (values[i] > max[indexTot + i]) {
+                    max[indexTot + i] = values[i];
+                }
+                sum[indexTot + i] += values[i];
             }
         }
 
@@ -136,11 +156,38 @@ public class GaussianSlotProfiling extends AbstractNode {
 
 
         //Save the state
-        resolved.setFromKey(INTERNAL_TOTAL_KEY, Type.DOUBLE_ARRAY, total);
+        resolved.setFromKey(INTERNAL_TOTAL_KEY, Type.INT_ARRAY, total);
         resolved.setFromKey(INTERNAL_MIN_KEY, Type.DOUBLE_ARRAY, min);
         resolved.setFromKey(INTERNAL_MAX_KEY, Type.DOUBLE_ARRAY, max);
         resolved.setFromKey(INTERNAL_SUM_KEY, Type.DOUBLE_ARRAY, sum);
         resolved.setFromKey(INTERNAL_SUMSQUARE_KEY, Type.DOUBLE_ARRAY, sumSquare);
+    }
+
+
+    public double[] getMin(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        return (double[])resolved.getFromKey(INTERNAL_MIN_KEY);
+    }
+
+    public double[] getMax(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        return (double[])resolved.getFromKey(INTERNAL_MAX_KEY);
+    }
+
+    public double[] getSum(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        return (double[])resolved.getFromKey(INTERNAL_SUM_KEY);
+    }
+
+
+    public double[] getSumSquare(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        return (double[])resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
+    }
+
+    public int[] getTotal(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        return (int[])resolved.getFromKey(INTERNAL_TOTAL_KEY);
     }
 
     public double[] getAvg(){
@@ -148,13 +195,13 @@ public class GaussianSlotProfiling extends AbstractNode {
         int numOfSlot= resolved.getFromKeyWithDefault(SLOTSNUMBER,SLOTSNUMBER_DEF);
         int features= resolved.getFromKeyWithDefault(FEATURESNUMBER,FEATURESNUMBER_DEF);
 
-        double[] total=(double[])resolved.getFromKey(INTERNAL_TOTAL_KEY);
+        int[] total=(int[])resolved.getFromKey(INTERNAL_TOTAL_KEY);
         double[] sum=(double[])resolved.getFromKey(INTERNAL_SUM_KEY);
 
-        double[] result = new double[numOfSlot*features];
+        double[] result = new double[(numOfSlot+1)*features];
         if(total!=null){
             int count=0;
-            for(int i=0;i<numOfSlot;i++){
+            for(int i=0;i<(numOfSlot+1);i++){
                 if(total[i]!=0) {
                     for (int j = 0; j < features; j++) {
                         result[count] = sum[count] / total[i];
