@@ -2,7 +2,7 @@ package ml;
 
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
@@ -19,8 +19,8 @@ public class GaussianNonInvertTest {
 
                 Random rand = new Random();
 
-                KGaussianNode node1 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
-                KGaussianNode node2 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode node1 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode node2 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]
