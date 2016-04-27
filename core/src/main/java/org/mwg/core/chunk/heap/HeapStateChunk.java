@@ -399,6 +399,16 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     }
 
     @Override
+    public <A> A getFromKeyWithDefault(String key, A defaultValue) {
+        Object result = getFromKey(key);
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return (A) result;
+        }
+    }
+
+    @Override
     public final byte getType(long p_elementIndex) {
         final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {

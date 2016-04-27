@@ -1111,7 +1111,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         if (tempPtr != Constants.OFFHEAP_NULL_PTR) {
             freeElement(tempPtr, tempType);
         }
-        if(elem != null){
+        if (elem != null) {
             OffHeapLongArray.set(elementTypeAddr, index, elemType);
         }
     }
@@ -1153,6 +1153,16 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     @Override
     public Object getFromKey(String key) {
         return get(_space.graph().resolver().stringToLongKey(key));
+    }
+
+    @Override
+    public <A> A getFromKeyWithDefault(String key, A defaultValue) {
+        Object result = getFromKey(key);
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return (A) result;
+        }
     }
 
     private Object internal_getElementV(long index) {
