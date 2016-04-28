@@ -114,15 +114,8 @@ public class GaussianSlotProfiling extends AbstractNode {
                 sum[index + i] = values[i];
                 for (int j = i; j < features; j++) {
                     sumSquare[indexSquare + count] += values[i] * values[j];
-                    sumSquare[indexSquareTot + count] += values[i] * values[j];
                     count++;
                 }
-
-                //Update generic indexes
-                min[indexTot + i] = values[i];
-                max[indexTot + i] = values[i];
-                sum[indexTot + i] += values[i];
-
             }
         } else {
             int count = 0;
@@ -136,11 +129,27 @@ public class GaussianSlotProfiling extends AbstractNode {
                 sum[index + i] += values[i];
                 for (int j = i; j < features; j++) {
                     sumSquare[indexSquare + count] += values[i] * values[j];
+                    count++;
+                }
+            }
+        }
+
+
+        if(total[numOfSlot]==1){
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                min[indexTot + i] = values[i];
+                max[indexTot + i] = values[i];
+                sum[indexTot + i] = values[i];
+                for (int j = i; j < features; j++) {
                     sumSquare[indexSquareTot + count] += values[i] * values[j];
                     count++;
                 }
-
-                //Update generic indexes
+            }
+        }
+        else{
+            int count = 0;
+            for (int i = 0; i < features; i++) {
                 if (values[i] < min[indexTot + i]) {
                     min[indexTot + i] = values[i];
                 }
@@ -148,8 +157,14 @@ public class GaussianSlotProfiling extends AbstractNode {
                     max[indexTot + i] = values[i];
                 }
                 sum[indexTot + i] += values[i];
+                for (int j = i; j < features; j++) {
+                    sumSquare[indexSquareTot + count] += values[i] * values[j];
+                    count++;
+                }
             }
+
         }
+
 
         //Split condition
         //todo split state according to any function
