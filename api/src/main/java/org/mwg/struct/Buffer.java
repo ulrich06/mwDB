@@ -10,7 +10,7 @@ public interface Buffer {
      *
      * @param b byte to append
      */
-    void write(Byte b);
+    void write(byte b);
 
     /**
      * Read the buffer at a precise position
