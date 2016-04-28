@@ -45,7 +45,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
 
     protected final void setValueBuffer(double[] valueBuffer) {
         Objects.requireNonNull(valueBuffer,"value buffer must be not null");
-        phasedState().set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
+        unphasedState().set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
     }
 
     protected void removeFirstValueFromBuffer() {
@@ -68,18 +68,18 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
 
     @Override
     public boolean isInBootstrapMode() {
-        return phasedState().getFromKeyWithDefault(INTERNAL_BOOTSTRAP_MODE_KEY, true);
+        return unphasedState().getFromKeyWithDefault(INTERNAL_BOOTSTRAP_MODE_KEY, true);
     }
 
     protected double[] getValueBuffer() {
-        return phasedState().getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
+        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
     }
 
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getMaxBufferLength() {
-        Object objClassIndex = phasedState().getFromKey(BUFFER_SIZE_KEY);
+        Object objClassIndex = unphasedState().getFromKey(BUFFER_SIZE_KEY);
         Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -88,7 +88,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getInputDimensions() {
-        Object objClassIndex = phasedState().getFromKey(INPUT_DIM_KEY);
+        Object objClassIndex = unphasedState().getFromKey(INPUT_DIM_KEY);
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -97,7 +97,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getResponseIndex() {
-        Object objClassIndex = phasedState().getFromKey(RESPONSE_INDEX_KEY);
+        Object objClassIndex = unphasedState().getFromKey(RESPONSE_INDEX_KEY);
         Objects.requireNonNull(objClassIndex, "Response index must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -165,10 +165,10 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
     public void setBootstrapMode(boolean newBootstrapMode) {
         if (newBootstrapMode) {
             //New state starts now
-            unphasedState();
+            phasedState();
             setBootstrapModeHook();
         }
-        phasedState().setFromKey(INTERNAL_BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
+        unphasedState().setFromKey(INTERNAL_BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
     }
 
     protected void addValueNoBootstrap(double value[]) {
@@ -185,13 +185,13 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
     }
 
     protected double getHigherErrorThreshold() {
-        Object objHET = phasedState().getFromKey(HIGH_ERROR_THRESH_KEY);
+        Object objHET = unphasedState().getFromKey(HIGH_ERROR_THRESH_KEY);
         Objects.requireNonNull(objHET, "Higher error threshold must be not null");
         return (double) objHET;
     }
 
     protected double getLowerErrorThreshold() {
-        Object objLET = phasedState().getFromKey(LOW_ERROR_THRESH_KEY);
+        Object objLET = unphasedState().getFromKey(LOW_ERROR_THRESH_KEY);
         Objects.requireNonNull(objLET, "Lower error threshold must be not null");
         return (double) objLET;
     }
@@ -231,14 +231,14 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
         illegalArgumentIfFalse(highErrorThreshold >= lowErrorThreshold, "High error threshold should be above or equal to lower");
         illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
 
-        unphasedState();
+        phasedState();
 
         //Set the attributes
-        phasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, classIndex);
-        phasedState().setFromKey(INPUT_DIM_KEY, Type.INT, inputDimension);
-        phasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, bufferSize);
-        phasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, lowErrorThreshold);
-        phasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, highErrorThreshold);
+        unphasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, classIndex);
+        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, inputDimension);
+        unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, bufferSize);
+        unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, lowErrorThreshold);
+        unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, highErrorThreshold);
     }
 
     @Override

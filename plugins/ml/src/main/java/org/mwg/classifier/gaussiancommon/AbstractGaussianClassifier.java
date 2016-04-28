@@ -70,38 +70,38 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
             newKnownClasses[i] = knownClasses[i];
         }
         newKnownClasses[knownClasses.length] = classLabel;
-        phasedState().setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, newKnownClasses);
+        unphasedState().setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, newKnownClasses);
     }
 
     protected final void setTotal(int classNum, int val) {
         assert val >= 0;
-        phasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, val);
+        unphasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, val);
     }
 
     protected final void setSums(int classNum, double[] vals) {
         assert vals != null;
-        phasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
+        unphasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
     }
 
     protected final void setSumsSquared(int classNum, double[] vals) {
         assert vals != null;
-        phasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
+        unphasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
     }
 
     protected final int getClassTotal(int classNum) {
-        Object objClassTotal = phasedState().getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
+        Object objClassTotal = unphasedState().getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
         Objects.requireNonNull(objClassTotal, "Class total must be not null (class " + classNum + ")");
         return ((Integer) objClassTotal).intValue();
     }
 
     protected double[] getSums(int classNum) {
-        Object objSum = phasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        Object objSum = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         Objects.requireNonNull(objSum, "Sums must be not null (class " + classNum + ")");
         return (double[]) objSum;
     }
 
     protected double[] getSumSquares(int classNum) {
-        Object objSumSq = phasedState().getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
+        Object objSumSq = unphasedState().getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         Objects.requireNonNull(objSumSq, "Sums of squares must be not null (class " + classNum + ")");
         return (double[]) objSumSq;
     }
@@ -124,7 +124,7 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     protected abstract int predictValue(double value[]);
 
     protected int[] getKnownClasses() {
-        return phasedState().getFromKeyWithDefault(INTERNAL_KNOWN_CLASSES_LIST, new int[0]);
+        return unphasedState().getFromKeyWithDefault(INTERNAL_KNOWN_CLASSES_LIST, new int[0]);
     }
 
 
@@ -235,11 +235,11 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     private void removeAllClasses() {
         int classes[] = getKnownClasses();
         for (int curClass : classes) {
-            phasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + curClass, Type.INT, 0);
-            phasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
-            phasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
+            unphasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + curClass, Type.INT, 0);
+            unphasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
+            unphasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
         }
-        phasedState().setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, new int[0]);
+        unphasedState().setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, new int[0]);
     }
 
 }
