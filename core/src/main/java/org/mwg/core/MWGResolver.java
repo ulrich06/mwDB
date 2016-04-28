@@ -866,6 +866,9 @@ class MWGResolver implements Resolver {
                     long divergenceTimepoint = objectWorldOrder.get(currentWorld);
                     if (divergenceTimepoint != CoreConstants.NULL_LONG) {
                         if (divergenceTimepoint < beginningOfSearch) {
+                            //take the first one before leaving
+                            collectedWorlds[0][collectedIndex] = currentWorld;
+                            collectedIndex++;
                             break;
                         } else if (divergenceTimepoint > endOfSearch) {
                             //next round, go to parent world
