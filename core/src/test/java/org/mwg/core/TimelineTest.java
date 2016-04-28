@@ -88,6 +88,15 @@ public class TimelineTest {
                             }
                         });
 
+                        node_t1.timepoints(1, Constants.END_OF_TIME, new Callback<long[]>() {
+                            @Override
+                            public void on(long[] longs) {
+                                counter[0]++;
+                                Assert.assertTrue(longs.length == 1);
+                                Assert.assertTrue(longs[0] == 1);
+                            }
+                        });
+
                         //now try to diverge the world
                         long newWorld = graph.diverge(0);
                         graph.lookup(newWorld, 2, node_t0.id(), new Callback<org.mwg.Node>() {
@@ -150,7 +159,7 @@ public class TimelineTest {
 
             }
         });
-        Assert.assertTrue(counter[0] == 7);
+        Assert.assertTrue(counter[0] == 8);
     }
 
 }

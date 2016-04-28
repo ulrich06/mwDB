@@ -865,7 +865,7 @@ class MWGResolver implements Resolver {
                 while (currentWorld != CoreConstants.NULL_LONG) {
                     long divergenceTimepoint = objectWorldOrder.get(currentWorld);
                     if (divergenceTimepoint != CoreConstants.NULL_LONG) {
-                        if (divergenceTimepoint < beginningOfSearch) {
+                        if (divergenceTimepoint <= beginningOfSearch) {
                             //take the first one before leaving
                             collectedWorlds[0][collectedIndex] = currentWorld;
                             collectedIndex++;
@@ -928,9 +928,9 @@ class MWGResolver implements Resolver {
                         final TimeTreeChunk timeTree = (TimeTreeChunk) superTimeTrees[i];
                         if (timeTree != null) {
                             long currentDivergenceTime = objectWorldOrder.get(collectedWorlds[i]);
-                            if (currentDivergenceTime < beginningOfSearch) {
-                                currentDivergenceTime = beginningOfSearch;
-                            }
+                            //if (currentDivergenceTime < beginningOfSearch) {
+                            //    currentDivergenceTime = beginningOfSearch;
+                            //}
                             final long finalPreviousDivergenceTime = previousDivergenceTime;
                             timeTree.range(currentDivergenceTime, previousDivergenceTime, CoreConstants.END_OF_TIME, new TreeWalker() {
                                 @Override
