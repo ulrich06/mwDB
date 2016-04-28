@@ -3,9 +3,9 @@ package org.mwg.core.utility;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
 
-public class Buffer {
+public class BufferBuilder {
 
-    private Buffer(){}
+    private BufferBuilder(){}
 
     public static void keyToBuffer(org.mwg.struct.Buffer buffer, byte chunkType, long world, long time, long id) {
         buffer.write(chunkType);

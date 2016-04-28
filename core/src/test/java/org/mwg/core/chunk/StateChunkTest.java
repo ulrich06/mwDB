@@ -6,6 +6,7 @@ import org.mwg.Type;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.HeapStateChunk;
 import org.mwg.core.chunk.heap.HeapChunk;
@@ -94,10 +95,10 @@ public class StateChunkTest implements ChunkListener {
         chunk.set(5, Type.INT, 1);
         chunk.set(5, Type.INT, null);
 
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         chunk.save(buffer);
         StateChunk chunk2 = factory.create(this, buffer, null);
-        Buffer buffer2 = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer2 = BufferBuilder.newHeapBuffer();
         chunk2.save(buffer2);
 
         Assert.assertTrue(compareBuffers(buffer, buffer2));
@@ -116,14 +117,14 @@ public class StateChunkTest implements ChunkListener {
         chunk.set(7, Type.INT_ARRAY, new int[]{0, 1, 2, 3, 4});
 
         buffer.free();
-        buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        buffer = BufferBuilder.newHeapBuffer();
 
         chunk.save(buffer);
         free(chunk2);
         chunk2 = factory.create(this, buffer, null);
 
         buffer2.free();
-        buffer2 = org.mwg.core.utility.Buffer.newHeapBuffer();
+        buffer2 = BufferBuilder.newHeapBuffer();
         chunk2.save(buffer2);
 
         Assert.assertTrue(compareBuffers(buffer, buffer2));
@@ -146,13 +147,13 @@ public class StateChunkTest implements ChunkListener {
         long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME);
 
         buffer.free();
-        buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        buffer = BufferBuilder.newHeapBuffer();
         chunk.save(buffer);
         free(chunk2);
         chunk2 = factory.create(this, buffer, null);
 
         buffer2.free();
-        buffer2 = org.mwg.core.utility.Buffer.newHeapBuffer();
+        buffer2 = BufferBuilder.newHeapBuffer();
         chunk2.save(buffer2);
 
         Assert.assertTrue(((StringLongMap) chunk2.get(9)).size() == 3);
@@ -172,11 +173,11 @@ public class StateChunkTest implements ChunkListener {
         }
 
         StateChunk chunk3 = factory.create(this, null, chunk);
-        Buffer buffer3 = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer3 = BufferBuilder.newHeapBuffer();
         chunk3.save(buffer3);
 
         buffer.free();
-        buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        buffer = BufferBuilder.newHeapBuffer();
         chunk.save(buffer);
         Assert.assertTrue(compareBuffers(buffer, buffer3));
 

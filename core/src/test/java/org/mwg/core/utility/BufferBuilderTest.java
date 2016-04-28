@@ -6,7 +6,7 @@ import org.junit.Test;
 /**
  * Created by ludovicmouline on 28/04/16.
  */
-public class BufferTest {
+public class BufferBuilderTest {
     private byte[] data = new byte[]{1,2,3,4,5};
     private byte[] data2 = new byte[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 
@@ -52,13 +52,13 @@ public class BufferTest {
 
     @Test
     public void testWriteAllHeap() {
-        org.mwg.struct.Buffer buffer = Buffer.newHeapBuffer();
+        org.mwg.struct.Buffer buffer = BufferBuilder.newHeapBuffer();
         testWriteAll(buffer);
     }
 
     @Test
     public void testWriteAllOffHeap() {
-        org.mwg.struct.Buffer buffer = Buffer.newOffHeapBuffer();
+        org.mwg.struct.Buffer buffer = BufferBuilder.newOffHeapBuffer();
         testWriteAll(buffer);
     }
 }
