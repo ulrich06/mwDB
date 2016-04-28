@@ -13,10 +13,6 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     //constants definition
-    private static final byte BLACK_LEFT = '{';
-    private static final byte BLACK_RIGHT = '}';
-    private static final byte RED_LEFT = '[';
-    private static final byte RED_RIGHT = ']';
     private static final int META_SIZE = 3;
 
     private final long _world;
@@ -159,7 +155,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     @Override
     public synchronized final void save(Buffer buffer) {
         //lock and load fromVar main memory
-        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1));
         try {
             if (_root_index == -1) {
                 return;
@@ -181,14 +177,12 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         }
     }
 
-    private boolean inLoad = false;
 
     private void load(final Buffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
         }
         _size = 0;
-        inLoad = true;
         long cursor = 0;
         long previous = 0;
         long payloadSize = buffer.size();
@@ -201,7 +195,6 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
             cursor++;
         }
         internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
-        inLoad = false;
     }
 
     @Override
@@ -230,13 +223,24 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     @Override
     public synchronized final void insert(long p_key) {
+
+        boolean toSetDirty;
         //lock and load fromVar main memory
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
-        internal_insert(p_key);
+        toSetDirty = internal_insert(p_key);
         //free the lock and write to main memory
         if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
             throw new RuntimeException("CAS Error !!!");
         }
+        if (toSetDirty) {
+            internal_set_dirty();
+        }
+
+    }
+
+    @Override
+    public synchronized final void unsafe_insert(long p_key) {
+        internal_insert(p_key);
     }
 
     @Override
@@ -263,13 +267,13 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
                 internal_insert(previousValue[i]);
             }
         }
-        //dirty
-        internal_set_dirty();
 
         //free the lock and write to main memory
         if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
             throw new RuntimeException("CAS Error !!!");
         }
+        //dirty
+        internal_set_dirty();
     }
 
     private void allocate(int capacity) {
@@ -590,7 +594,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         }
     }
 
-    private void internal_insert(long p_key) {
+    private boolean internal_insert(long p_key) {
         if ((_size + 1) > _threshold) {
             int length = (_size == 0 ? 1 : _size << 1);
             reallocate(length);
@@ -609,7 +613,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
             while (true) {
                 if (p_key == key(n)) {
                     //nop _size
-                    return;
+                    return false;
                 } else if (p_key < key(n)) {
                     if (left(n) == -1) {
                         setKey(newIndex, p_key);
@@ -641,21 +645,20 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
             setParent(newIndex, n);
         }
         insertCase1(newIndex);
-        internal_set_dirty();
+        //internal_set_dirty();
+        return true;
     }
 
     private void internal_set_dirty() {
-        if (!inLoad) {
-            long magicBefore;
-            long magicAfter;
-            do {
-                magicBefore = _magic;
-                magicAfter = magicBefore + 1;
-            } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
-            if (_listener != null) {
-                if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
-                    _listener.declareDirty(this);
-                }
+        long magicBefore;
+        long magicAfter;
+        do {
+            magicBefore = _magic;
+            magicAfter = magicBefore + 1;
+        } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
+        if (_listener != null) {
+            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+                _listener.declareDirty(this);
             }
         }
     }

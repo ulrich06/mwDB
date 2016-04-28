@@ -743,9 +743,10 @@ class MWGResolver implements Resolver {
                         nodeTimeTree.range(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, nodeTimeTree.size() / 2, new TreeWalker() {
                             @Override
                             public void elem(long t) {
-                                finalRightTree.insert(t);
+                                finalRightTree.unsafe_insert(t);
                             }
                         });
+                        _space.declareDirty(finalRightTree);
                         nodeSuperTimeTree.insert(medianPoint[0]);
                         //remove times insert in the right tree
                         nodeTimeTree.clearAt(medianPoint[0]);
