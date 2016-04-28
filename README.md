@@ -1,3 +1,10 @@
+Many-World Graph Project
+========================
+
+## Build status
+
+<img src="https://travis-ci.org/kevoree-modeling/mwDB.svg?branch=master" />
+
 What's new?
 ===========
 

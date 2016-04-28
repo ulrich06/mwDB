@@ -19,6 +19,7 @@ public interface Buffer {
      */
     void writeAll(byte[] bytes);
 
+
     /**
      * Read the buffer at a precise position
      *

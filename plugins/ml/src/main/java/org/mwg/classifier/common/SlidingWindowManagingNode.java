@@ -17,10 +17,6 @@ import java.util.Objects;
  * and
  */
 public abstract class SlidingWindowManagingNode extends AbstractNode implements  KSlidingWindowManagingNode{
-
-    //NOT final
-    protected NodeState currentState = null;
-
     /**
      * Attribute key - whether the node is in bootstrap (re-learning) mode
      */
@@ -49,7 +45,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
 
     protected final void setValueBuffer(double[] valueBuffer) {
         Objects.requireNonNull(valueBuffer,"value buffer must be not null");
-        currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
+        unphasedState().set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
     }
 
     protected void removeFirstValueFromBuffer() {
@@ -72,29 +68,18 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
 
     @Override
     public boolean isInBootstrapMode() {
-        Object objBootstrapMode = currentState.get(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY));
-        if (objBootstrapMode != null) {
-            return ((Boolean) objBootstrapMode).booleanValue();
-        }
-        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), Type.BOOL, true); //Start in bootstrap mode
-        return true;
+        return unphasedState().getFromKeyWithDefault(INTERNAL_BOOTSTRAP_MODE_KEY, true);
     }
 
     protected double[] getValueBuffer() {
-        Object objValueBuffer = currentState.get(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY));
-        if (objValueBuffer == null) {
-            double emptyValueBuffer[] = new double[0];
-            currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, emptyValueBuffer); //Value buffer, starts empty
-            return emptyValueBuffer;
-        }
-        return (double[]) objValueBuffer;
+        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
     }
 
     /**
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getMaxBufferLength() {
-        Object objClassIndex = currentState.get(_resolver.stringToLongKey(BUFFER_SIZE_KEY));
+        Object objClassIndex = unphasedState().getFromKey(BUFFER_SIZE_KEY);
         Objects.requireNonNull(objClassIndex, "Buffer size must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -103,7 +88,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getInputDimensions() {
-        Object objClassIndex = currentState.get(_resolver.stringToLongKey(INPUT_DIM_KEY));
+        Object objClassIndex = unphasedState().getFromKey(INPUT_DIM_KEY);
         Objects.requireNonNull(objClassIndex, "Input dimensions must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -112,7 +97,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      * @return Class index - index in a value array, where class label is supposed to be
      */
     protected int getResponseIndex() {
-        Object objClassIndex = currentState.get(_resolver.stringToLongKey(RESPONSE_INDEX_KEY));
+        Object objClassIndex = unphasedState().getFromKey(RESPONSE_INDEX_KEY);
         Objects.requireNonNull(objClassIndex, "Response index must be not null");
         return ((Integer) objClassIndex).intValue();
     }
@@ -180,10 +165,10 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
     public void setBootstrapMode(boolean newBootstrapMode) {
         if (newBootstrapMode) {
             //New state starts now
-            currentState = graph().resolver().resolveState(this, true);
+            phasedState();
             setBootstrapModeHook();
         }
-        currentState.set(_resolver.stringToLongKey(INTERNAL_BOOTSTRAP_MODE_KEY), Type.BOOL, newBootstrapMode);
+        unphasedState().setFromKey(INTERNAL_BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
     }
 
     protected void addValueNoBootstrap(double value[]) {
@@ -200,13 +185,13 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
     }
 
     protected double getHigherErrorThreshold() {
-        Object objHET = currentState.get(_resolver.stringToLongKey(HIGH_ERROR_THRESH_KEY));
+        Object objHET = unphasedState().getFromKey(HIGH_ERROR_THRESH_KEY);
         Objects.requireNonNull(objHET, "Higher error threshold must be not null");
         return (double) objHET;
     }
 
     protected double getLowerErrorThreshold() {
-        Object objLET = currentState.get(_resolver.stringToLongKey(LOW_ERROR_THRESH_KEY));
+        Object objLET = unphasedState().getFromKey(LOW_ERROR_THRESH_KEY);
         Objects.requireNonNull(objLET, "Lower error threshold must be not null");
         return (double) objLET;
     }
@@ -240,23 +225,20 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
 
     @Override
     public void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold) {
-        illegalArgumentIfFalse(currentState == null, "Already initialized before");
         illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
         illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
-        illegalArgumentIfFalse((highErrorThreshold >= 0) && (highErrorThreshold <= 1), "Higher error threshold should be within [0;1]");
-        illegalArgumentIfFalse((lowErrorThreshold >= 0) && (lowErrorThreshold <= 1), "Lower error threshold should be within [0;1]");
+        //High and low error thresholds are not bounded - meaning might depend on implementation
         illegalArgumentIfFalse(highErrorThreshold >= lowErrorThreshold, "High error threshold should be above or equal to lower");
         illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
 
-        //TODO fix this! state can be variable
-        currentState = graph().resolver().resolveState(this, true);
+        phasedState();
 
         //Set the attributes
-        currentState.set(_resolver.stringToLongKey(RESPONSE_INDEX_KEY), Type.INT, classIndex);
-        currentState.set(_resolver.stringToLongKey(INPUT_DIM_KEY), Type.INT, inputDimension);
-        currentState.set(_resolver.stringToLongKey(BUFFER_SIZE_KEY), Type.INT, bufferSize);
-        currentState.set(_resolver.stringToLongKey(LOW_ERROR_THRESH_KEY), Type.DOUBLE, lowErrorThreshold);
-        currentState.set(_resolver.stringToLongKey(HIGH_ERROR_THRESH_KEY), Type.DOUBLE, highErrorThreshold);
+        unphasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, classIndex);
+        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, inputDimension);
+        unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, bufferSize);
+        unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, lowErrorThreshold);
+        unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, highErrorThreshold);
     }
 
     @Override
