@@ -47,11 +47,17 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
     @Override
     protected void updateModelParameters(double[] value) {
-        //TODO 1 step of stochastic gradient descent (based on current value)
+        //TODO Step 1. Compose matrix X and vector Y (KMatrix).
+        //TODO Don't forget intercept - it is at response index, so corresponding column should be 1
+
+        // inv(Xt * X) * Xt * y
+        //TODO use pseudoinverse right away? What if we have too few points?
     }
 
     @Override
     public double getBufferError() {
+        //TODO What about intercept?
+
         //For each value in value buffer
         int startIndex = 0;
         final int dims = getInputDimensions();
@@ -72,6 +78,9 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
             for (int i=0;i<curValue.length;i++){
                 if (i!=responseIndex){
                     response += coefficients[i]*curValue[i];
+                }else{
+                    //Acts as intercept
+                    response += coefficients[i];
                 }
             }
             sqrResidualSum += (response - curValue[responseIndex])*(response - curValue[responseIndex]);
