@@ -37,6 +37,20 @@ public class OffHeapByteArray {
         return newBiggerMemorySegment;
     }
 
+    /**
+     * Transfer an primitive array from heap to off-heap memory
+     *
+     * @param src Object to copy, should be an array
+     * @param destAddr start of address to store the source object
+     * @param nbElements offset of destination address
+     */
+    public static void copyArray(final Object src, final long destAddr, final long nbElements) {
+        int baseOffset = unsafe.arrayBaseOffset(src.getClass());
+        int scaleOffset = unsafe.arrayIndexScale(src.getClass());
+
+        unsafe.copyMemory(src,baseOffset,null,destAddr,nbElements * scaleOffset);
+    }
+
     public static void set(final long addr, final long index, final byte valueToInsert) {
         unsafe.putByteVolatile(null, addr + index, valueToInsert);
     }

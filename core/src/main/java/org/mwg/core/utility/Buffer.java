@@ -5,6 +5,8 @@ import org.mwg.core.chunk.offheap.OffHeapByteArray;
 
 public class Buffer {
 
+    private Buffer(){}
+
     public static void keyToBuffer(org.mwg.struct.Buffer buffer, byte chunkType, long world, long time, long id) {
         buffer.write(chunkType);
         buffer.write(CoreConstants.KEY_SEP);
@@ -13,6 +15,13 @@ public class Buffer {
         Base64.encodeLongToBuffer(time, buffer);
         buffer.write(CoreConstants.KEY_SEP);
         Base64.encodeLongToBuffer(id, buffer);
+    }
+
+    private static long getNewSize(long old, long target) {
+        while(old < target) {
+            old = old * 2;
+        }
+        return old;
     }
 
     public static org.mwg.struct.Buffer newOffHeapBuffer() {
@@ -25,7 +34,7 @@ public class Buffer {
             private long capacity = 0;
 
             @Override
-            public void write(Byte b) {
+            public void write(byte b) {
                 if (bufferPtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     capacity = CoreConstants.MAP_INITIAL_CAPACITY;
                     bufferPtr = OffHeapByteArray.allocate(capacity);
@@ -40,6 +49,25 @@ public class Buffer {
                 } else {
                     OffHeapByteArray.set(bufferPtr, writeCursor, b);
                     writeCursor++;
+                }
+            }
+
+            @Override
+            public void writeAll(byte[] bytes) {
+                if(bufferPtr == CoreConstants.OFFHEAP_NULL_PTR) {
+                    capacity = getNewSize(CoreConstants.MAP_INITIAL_CAPACITY,bytes.length);
+                    bufferPtr = OffHeapByteArray.allocate(capacity);
+                    OffHeapByteArray.copyArray(bytes,bufferPtr,bytes.length);
+                    writeCursor = bytes.length;
+                } else if(writeCursor + bytes.length > capacity) {
+                    long newCapacity = getNewSize(capacity,bytes.length);
+                    bufferPtr = OffHeapByteArray.reallocate(bufferPtr,capacity,newCapacity);
+                    OffHeapByteArray.copyArray(bytes,bufferPtr + writeCursor,bytes.length);
+                    capacity = newCapacity;
+                    writeCursor = writeCursor + bytes.length;
+                } else {
+                    OffHeapByteArray.copyArray(bytes,bufferPtr + writeCursor,bytes.length);
+                    writeCursor = writeCursor + bytes.length;
                 }
             }
 
@@ -83,7 +111,7 @@ public class Buffer {
             private int writeCursor;
 
             @Override
-            public void write(Byte b) {
+            public void write(byte b) {
                 if (buffer == null) {
                     buffer = new byte[CoreConstants.MAP_INITIAL_CAPACITY];
                     buffer[0] = b;
@@ -97,6 +125,26 @@ public class Buffer {
                 } else {
                     buffer[writeCursor] = b;
                     writeCursor++;
+                }
+            }
+
+            @Override
+            public void writeAll(byte[] bytes) {
+                if(buffer == null) {
+                    int initSize = (int) getNewSize(CoreConstants.MAP_INITIAL_CAPACITY,bytes.length);
+                    buffer = new byte[initSize];
+                    System.arraycopy(bytes,0,buffer,0,bytes.length);
+                    writeCursor = bytes.length;
+                } else if(writeCursor + bytes.length > buffer.length) {
+                    int newSize = (int) getNewSize(buffer.length,buffer.length + bytes.length);
+                    byte[] tmp = new byte[newSize];
+                    System.arraycopy(buffer,0,tmp,0,buffer.length);
+                    System.arraycopy(bytes,0,tmp,writeCursor,bytes.length);
+                    buffer = tmp;
+                    writeCursor = writeCursor + bytes.length;
+                } else {
+                    System.arraycopy(bytes,0,buffer,writeCursor,bytes.length);
+                    writeCursor = writeCursor + bytes.length;
                 }
             }
 
