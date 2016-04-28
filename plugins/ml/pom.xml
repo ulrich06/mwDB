@@ -75,6 +75,7 @@
                     <compilerArguments>
                         <profile>compact1</profile>
                     </compilerArguments>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

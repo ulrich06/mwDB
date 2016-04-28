@@ -1,7 +1,7 @@
 package org.mwg;
 
-import org.mwg.struct.Buffer;
 import org.mwg.plugin.Storage;
+import org.mwg.struct.Buffer;
 import org.rocksdb.*;
 
 import java.io.File;
@@ -154,6 +154,7 @@ public class RocksDBStorage implements Storage {
             }
             Short currentPrefix = Short.parseShort(new String(current));
             _db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
+            
 
             if (callback != null) {
                 callback.on(currentPrefix);
