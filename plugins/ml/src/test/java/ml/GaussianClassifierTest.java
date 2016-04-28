@@ -82,7 +82,7 @@ public class GaussianClassifierTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 
-   // @Test
+    @Test
     public void test() {
         //This test fails only on crash. Otherwise, it is just for
         Graph graph = GraphBuilder.builder().withFactory(new GaussianClassifierNodeFactory()).withScheduler(new NoopScheduler()).build();
@@ -98,26 +98,26 @@ public class GaussianClassifierTest {
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     gaussianNBNode.set("value", dummyDataset1[i]);
                     if (gaussianNBNode.isInBootstrapMode()!=bootstraps1[i]){
-                        System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
-                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
+                        //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
+                               // gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         errors++;
                     }else{
-                        System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
-                                gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
+                        //System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
+                                //gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                     }
-                    System.out.println(gaussianNBNode.allDistributionsToString());
-                    int rbc[] = gaussianNBNode.getRealBufferClasses();
-                    System.out.print("[");
-                    for (int j=0;j<rbc.length;j++) {
-                        System.out.print(rbc[j]+", ");
-                    }
-                    System.out.println("]");
-                    int pbc[] = gaussianNBNode.getPredictedBufferClasses();
-                    System.out.print("[");
-                    for (int j=0;j<pbc.length;j++) {
-                        System.out.print(pbc[j]+", ");
-                    }
-                    System.out.println("]");
+                    //System.out.println(gaussianNBNode.allDistributionsToString());
+                    //int rbc[] = gaussianNBNode.getRealBufferClasses();
+                    ///System.out.print("[");
+                    //for (int j=0;j<rbc.length;j++) {
+                    //    System.out.print(rbc[j]+", ");
+                    //}
+                    //System.out.println("]");
+                    //int pbc[] = gaussianNBNode.getPredictedBufferClasses();
+                    //System.out.print("[");
+                    //for (int j=0;j<pbc.length;j++) {
+                    //    System.out.print(pbc[j]+", ");
+                    //}
+                    //System.out.println("]");
                     //assertTrue(gaussianNBNode.isInBootstrapMode()==bootstraps1[i]);
                 }
 

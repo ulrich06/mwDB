@@ -26,18 +26,12 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
     @Override
     public double[] getCoefficients(){
-        Object objCoefBuffer = currentState.get(_resolver.stringToLongKey(INTERNAL_VALUE_COEFFICIENTS_KEY));
-        if (objCoefBuffer == null) {
-            double emptyCoefBuffer[] = new double[0];
-            currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_COEFFICIENTS_KEY), Type.DOUBLE_ARRAY, emptyCoefBuffer); //Value buffer, starts empty
-            return emptyCoefBuffer;
-        }
-        return (double[]) objCoefBuffer;
+        return phasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
     }
 
     private void setCoefficients(double[] coefficients) {
         Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        currentState.set(_resolver.stringToLongKey(INTERNAL_VALUE_COEFFICIENTS_KEY), Type.DOUBLE_ARRAY, coefficients);
+        phasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
     }
 
     @Override

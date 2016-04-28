@@ -38,12 +38,12 @@ public class LinearRegressionNodeTest {
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
                     lrNode.set("value", dummyDataset1[i]);
-                    double coefs[] = lrNode.getCoefficients();
-                    System.out.print("Coefficients: ");
-                    for (int j=0;j<coefs.length;j++){
-                        System.out.print(coefs[j]+", ");
-                    }
-                    System.out.println();
+                    //double coefs[] = lrNode.getCoefficients();
+                    //System.out.print("Coefficients: ");
+                    //for (int j=0;j<coefs.length;j++){
+                    //    System.out.print(coefs[j]+", ");
+                    //}
+                    //System.out.println();
                 }
                 assertFalse(lrNode.isInBootstrapMode());
 
