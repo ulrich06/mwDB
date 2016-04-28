@@ -14,7 +14,7 @@ import org.mwg.task.Task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class Graph implements org.mwg.Graph {
+class CoreGraph implements org.mwg.Graph {
 
     private final Storage _storage;
 
@@ -42,7 +42,7 @@ class Graph implements org.mwg.Graph {
     private static final int GLO_TREE_INDEX = 2;
     private static final int GLO_DIC_INDEX = 3;
 
-    Graph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
+    CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
         //subElements set
         this._storage = p_storage;
         this._space = p_space;
@@ -73,20 +73,20 @@ class Graph implements org.mwg.Graph {
     @Override
     public org.mwg.Node newNode(long world, long time) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
+            throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
 
         long[] initPreviouslyResolved = new long[6];
         //init previously resolved values
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
         //init previous magics
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
 
-        org.mwg.Node newNode = new Node(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+        org.mwg.Node newNode = new CoreNode(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
         this._resolver.initNode(newNode, Constants.NULL_LONG);
         return newNode;
     }
@@ -94,25 +94,25 @@ class Graph implements org.mwg.Graph {
     @Override
     public org.mwg.Node newNode(long world, long time, String nodeType) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
+            throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
 
         long[] initPreviouslyResolved = new long[6];
         //init previously resolved values
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
         //init previous magics
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
-        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
+        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
 
         long extraCode = _resolver.stringToLongKey(nodeType);
         NodeFactory resolvedFactory = factoryByCode(extraCode);
         org.mwg.Node newNode;
         if (resolvedFactory == null) {
             System.out.println("WARNING: UnKnow NodeType " + nodeType + ", missing plugin configuration in the builder ? Using generic node as a fallback");
-            newNode = new Node(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+            newNode = new CoreNode(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
         } else {
             newNode = resolvedFactory.create(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
         }
@@ -136,7 +136,7 @@ class Graph implements org.mwg.Graph {
     @Override
     public <A extends org.mwg.Node> void lookup(long world, long time, long id, Callback<A> callback) {
         if (!_isConnected.get()) {
-            throw new RuntimeException(Constants.DISCONNECTED_ERROR);
+            throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
         this._resolver.lookup(world, time, id, callback);
     }
@@ -155,7 +155,7 @@ class Graph implements org.mwg.Graph {
         if (_isConnected.compareAndSet(false, true)) {
             //first connect the scheduler
             this._scheduler.start();
-            final Graph selfPointer = this;
+            final CoreGraph selfPointer = this;
             this._storage.connect(this, new Callback<Short>() {
                 @Override
                 public void on(Short graphPrefix) {
@@ -170,16 +170,16 @@ class Graph implements org.mwg.Graph {
                     final Buffer[] connectionKeys = new Buffer[4];
                     //preload ObjKeyGenerator
                     connectionKeys[0] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[0], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[0], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     //preload WorldKeyGenerator
                     connectionKeys[1] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[1], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[1], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     //preload GlobalWorldOrder
                     connectionKeys[2] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[2], Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[2], CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                     //preload GlobalDictionary
                     connectionKeys[3] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[3], Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2]);
+                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[3], CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
                     selfPointer._storage.get(connectionKeys, new Callback<Buffer[]>() {
                         @Override
                         public void on(Buffer[] payloads) {
@@ -192,11 +192,11 @@ class Graph implements org.mwg.Graph {
                                 Boolean noError = true;
                                 try {
                                     //init the global universe tree (mandatory for synchronious create)
-                                    WorldOrderChunk globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(Constants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
+                                    WorldOrderChunk globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
                                     selfPointer._space.putAndMark(globalWorldOrder);
 
                                     //init the global dictionary chunk
-                                    StateChunk globalDictionaryChunk = (StateChunk) selfPointer._space.create(Constants.STATE_CHUNK, Constants.GLOBAL_DICTIONARY_KEY[0], Constants.GLOBAL_DICTIONARY_KEY[1], Constants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
+                                    StateChunk globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
                                     selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                     if (payloads[UNIVERSE_INDEX] != null) {
@@ -256,7 +256,7 @@ class Graph implements org.mwg.Graph {
         //ok we have the lock
         if (_isConnected.compareAndSet(true, false)) {
             //JS workaround for closure encapsulation and this variable
-            final Graph selfPointer = this;
+            final CoreGraph selfPointer = this;
             //first we stop scheduler, no tasks will be executed anymore
             selfPointer._scheduler.stop();
             save(new Callback<Boolean>() {
@@ -311,14 +311,14 @@ class Graph implements org.mwg.Graph {
                 callback.on(null);
             }
         } else {
-            long sizeToSaveKeys = (dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE);
+            long sizeToSaveKeys = (dirtyIterator.size() + CoreConstants.PREFIX_TO_SAVE_SIZE);
             Buffer[] toSaveKeys = new Buffer[(int) sizeToSaveKeys];
-            long sizeToSaveValues = dirtyIterator.size() + Constants.PREFIX_TO_SAVE_SIZE;
+            long sizeToSaveValues = dirtyIterator.size() + CoreConstants.PREFIX_TO_SAVE_SIZE;
             Buffer[] toSaveValues = new Buffer[(int) sizeToSaveValues];
             int i = 0;
             while (dirtyIterator.hasNext()) {
                 Chunk loopChunk = dirtyIterator.next();
-                if (loopChunk != null && (loopChunk.flags() & Constants.DIRTY_BIT) == Constants.DIRTY_BIT) {
+                if (loopChunk != null && (loopChunk.flags() & CoreConstants.DIRTY_BIT) == CoreConstants.DIRTY_BIT) {
                     //Save chunk Key
                     toSaveKeys[i] = newBuffer();
                     org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
@@ -337,14 +337,14 @@ class Graph implements org.mwg.Graph {
 
             //save obj key gen key
             toSaveKeys[i] = newBuffer();
-            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], Constants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
+            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
             //save obj key gen payload
             toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
             i++;
             //save world key gen key
             toSaveKeys[i] = newBuffer();
-            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], Constants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
+            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
             //save world key gen payload
             toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), toSaveValues[i]);
@@ -388,7 +388,7 @@ class Graph implements org.mwg.Graph {
                 if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
-                foundIndex.index(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
+                foundIndex.index(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
                         foundIndex.free();
@@ -407,7 +407,7 @@ class Graph implements org.mwg.Graph {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex != null) {
-                    foundIndex.unindex(Constants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
+                    foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
                         @Override
                         public void on(Boolean result) {
                             foundIndex.free();
@@ -422,18 +422,18 @@ class Graph implements org.mwg.Graph {
     }
 
     @Override
-    public <A extends org.mwg.Node> void find(long world, long time, String indexName, String query, Callback<A[]> callback) {
+    public void find(long world, long time, String indexName, String query, Callback<org.mwg.Node[]> callback) {
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on((A[]) new org.mwg.Node[0]);
+                        callback.on((Node[]) new org.mwg.Node[0]);
                     }
                 } else {
-                    foundIndex.findAt(Constants.INDEX_ATTRIBUTE, world, time, query, new Callback<A[]>() {
+                    foundIndex.findAt(CoreConstants.INDEX_ATTRIBUTE, world, time, query, new Callback<org.mwg.Node[]>() {
                         @Override
-                        public void on(A[] collectedNodes) {
+                        public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
                             if (PrimitiveHelper.isDefined(callback)) {
                                 callback.on(collectedNodes);
@@ -446,18 +446,18 @@ class Graph implements org.mwg.Graph {
     }
 
     @Override
-    public <A extends org.mwg.Node> void all(long world, long time, String indexName, Callback<A[]> callback) {
+    public void all(long world, long time, String indexName, Callback<org.mwg.Node[]> callback) {
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on((A[]) new org.mwg.Node[0]);
+                        callback.on(new org.mwg.Node[0]);
                     }
                 } else {
-                foundIndex.allAt(Constants.INDEX_ATTRIBUTE, world, time, new Callback<A[]>() {
+                    foundIndex.allAt(CoreConstants.INDEX_ATTRIBUTE, world, time, new Callback<org.mwg.Node[]>() {
                         @Override
-                        public void on(A[] collectedNodes) {
+                        public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
                             if (PrimitiveHelper.isDefined(callback)) {
                                 callback.on(collectedNodes);
@@ -470,9 +470,9 @@ class Graph implements org.mwg.Graph {
     }
 
     private void getIndexOrCreate(long world, long time, String indexName, Callback<org.mwg.Node> callback, boolean createIfNull) {
-        final Graph selfPointer = this;
+        final CoreGraph selfPointer = this;
         final long indexNameCoded = this._resolver.stringToLongKey(indexName);
-        this._resolver.lookup(world, time, Constants.END_OF_TIME, new Callback<org.mwg.Node>() {
+        this._resolver.lookup(world, time, CoreConstants.END_OF_TIME, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node globalIndexNodeUnsafe) {
                 if (globalIndexNodeUnsafe == null && !createIfNull) {
@@ -482,28 +482,28 @@ class Graph implements org.mwg.Graph {
                     if (globalIndexNodeUnsafe == null) {
                         long[] initPreviouslyResolved = new long[6];
                         //init previously resolved values
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] = time;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] = time;
                         //init previous magics
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
-                        initPreviouslyResolved[Constants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = CoreConstants.NULL_LONG;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = CoreConstants.NULL_LONG;
+                        initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = CoreConstants.NULL_LONG;
 
-                        globalIndexNodeUnsafe = new Node(world, time, Constants.END_OF_TIME, selfPointer, initPreviouslyResolved);
-                        selfPointer._resolver.initNode(globalIndexNodeUnsafe, Constants.NULL_LONG);
-                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.map(Constants.INDEX_ATTRIBUTE, Type.LONG_LONG_MAP);
+                        globalIndexNodeUnsafe = new CoreNode(world, time, CoreConstants.END_OF_TIME, selfPointer, initPreviouslyResolved);
+                        selfPointer._resolver.initNode(globalIndexNodeUnsafe, CoreConstants.NULL_LONG);
+                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.map(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_LONG_MAP);
                     } else {
-                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.get(Constants.INDEX_ATTRIBUTE);
+                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.get(CoreConstants.INDEX_ATTRIBUTE);
                     }
 
                     long indexId = globalIndexContent.get(indexNameCoded);
                     //globalIndexNodeUnsafe.free();
-                    if (indexId == Constants.NULL_LONG) {
+                    if (indexId == CoreConstants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
                             org.mwg.Node newIndexNode = newNode(world, time);
-                            newIndexNode.map(Constants.INDEX_ATTRIBUTE, Type.LONG_LONG_ARRAY_MAP);
+                            newIndexNode.map(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);
                             callback.on(newIndexNode);

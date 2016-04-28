@@ -90,7 +90,7 @@ public interface Node {
      * @param relationName The name of the traverseIndex to retrieve.
      * @param callback     Callback to be called when the nodes of the relationship have been connected.
      */
-    <A extends Node> void rel(String relationName, Callback<A[]> callback);
+    void rel(String relationName, Callback<Node[]> callback);
 
     /**
      * Adds a node to a traverseIndex.<br>
@@ -142,7 +142,7 @@ public interface Node {
      * @param query     The query on the searched node's attribute (e.g.: "firstName=john,lastName=doe,age=30")
      * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
-    <A extends Node> void find(String indexName, String query, Callback<A[]> callback);
+    void find(String indexName, String query, Callback<Node[]> callback);
 
     /**
      * Retrieves nodes fromVar an index that satisfies a query in a particular world and time.<br>
@@ -154,7 +154,7 @@ public interface Node {
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
      */
-    <A extends Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback);
+    void findAt(String indexName, long world, long time, String query, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes in a particular index at the current node world and the current node time
@@ -162,7 +162,7 @@ public interface Node {
      * @param indexName The name of the index
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      */
-    <A extends Node> void all(String indexName, Callback<A[]> callback);
+    void all(String indexName, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes in a particular index and in a particular world and time
@@ -172,7 +172,7 @@ public interface Node {
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
      */
-    <A extends Node> void allAt(String indexName, long world, long time, Callback<A[]> callback);
+    void allAt(String indexName, long world, long time, Callback<Node[]> callback);
 
     /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.

@@ -145,7 +145,7 @@ public class MatrixTest {
         long timestart, timeend;
 
         timestart = System.currentTimeMillis();
-        svd.factor(matA,false);
+        svd.factor(matA, false);
         timeend = System.currentTimeMillis();
         System.out.println(blas + " SVD Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
@@ -165,17 +165,17 @@ public class MatrixTest {
     }
 
     @Test
-    public void MatrixPseudoInv(){
+    public void MatrixPseudoInv() {
         int m = 3;
-        int n= 2;
+        int n = 2;
         int[] dimA = {m, m};
         double eps = 1e-7;
 
         //KMatrix matA = Matrix.random(m, n, 0, 100);
 
         //double[] dataA={4,3,3,2};
-        double[] dataA={4,3,6,3,2,4};
-        KMatrix matA= new KMatrix(dataA,m,n);
+        double[] dataA = {4, 3, 6, 3, 2, 4};
+        KMatrix matA = new KMatrix(dataA, m, n);
 
         KMatrix res = null;
 
@@ -183,9 +183,9 @@ public class MatrixTest {
         // SimpleMatrix resEjml =new SimpleMatrix(1,1);
 
         timestart = System.currentTimeMillis();
-            res = KMatrix.pinv(matA, false);
+        res = KMatrix.pinv(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000 ) + " s");
+        System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000) + " s");
 
         KMatrix id = KMatrix.multiply(res, matA);
 

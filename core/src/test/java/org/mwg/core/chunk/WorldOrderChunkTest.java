@@ -3,8 +3,8 @@ package org.mwg.core.chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Graph;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.Buffer;
-import org.mwg.core.Constants;
 import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
 import org.mwg.core.chunk.heap.HeapChunk;
 import org.mwg.core.chunk.offheap.*;
@@ -47,7 +47,7 @@ public class WorldOrderChunkTest implements ChunkListener {
 
             @Override
             public WorldOrderChunk create(Buffer initialPayload) {
-                return new OffHeapWorldOrderChunk(selfPointer, Constants.OFFHEAP_NULL_PTR, initialPayload);
+                return new OffHeapWorldOrderChunk(selfPointer, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
             }
         };
         orderTest(factory);
@@ -83,7 +83,7 @@ public class WorldOrderChunkTest implements ChunkListener {
         for (long i = 0; i < 10_000; i++) {
             map.put(i, i * 3);
         }
-        Assert.assertTrue(map.extra() == Constants.NULL_LONG);
+        Assert.assertTrue(map.extra() == CoreConstants.NULL_LONG);
         map.setExtra(1_000_000);
         Assert.assertTrue(map.size() == 10_000);
         Assert.assertTrue(map.extra() == 1_000_000);
@@ -113,10 +113,10 @@ public class WorldOrderChunkTest implements ChunkListener {
         nbCount++;
         //simulate space management
         if (chunk instanceof HeapChunk) {
-            ((HeapChunk) chunk).setFlags(Constants.DIRTY_BIT, 0);
+            ((HeapChunk) chunk).setFlags(CoreConstants.DIRTY_BIT, 0);
         } else if (chunk instanceof OffHeapChunk) {
             long addr = ((OffHeapChunk) chunk).addr();
-            OffHeapLongArray.set(addr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, Constants.DIRTY_BIT);
+            OffHeapLongArray.set(addr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS, CoreConstants.DIRTY_BIT);
         }
     }
 

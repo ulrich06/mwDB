@@ -1,7 +1,7 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.Type;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
@@ -78,7 +78,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             this._elementHash = p_elementHash;
             this._elementType = p_elementType;
             this._elementCount = p_elementCount;
-            this.threshold = (int) (_elementDataSize * Constants.MAP_LOAD_FACTOR);
+            this.threshold = (int) (_elementDataSize * CoreConstants.MAP_LOAD_FACTOR);
         }
 
         InternalState deepClone() {
@@ -137,7 +137,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
         } else {
             //init a new state
-            int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            int initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
             InternalState newstate = new InternalState(initialCapacity, /* keys */new long[initialCapacity], /* values */ new Object[initialCapacity], /* next */ new int[initialCapacity], /* hash */ new int[initialCapacity], /* elemType */ new byte[initialCapacity], 0, false);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate._elementNext[i] = -1;
@@ -164,7 +164,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public final byte chunkType() {
-        return Constants.STATE_CHUNK;
+        return CoreConstants.STATE_CHUNK;
     }
 
     @Override
@@ -399,6 +399,16 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     }
 
     @Override
+    public <A> A getFromKeyWithDefault(String key, A defaultValue) {
+        Object result = getFromKey(key);
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return (A) result;
+        }
+    }
+
+    @Override
     public final byte getType(long p_elementIndex) {
         final InternalState internalState = state;
         if (internalState._elementDataSize == 0) {
@@ -430,13 +440,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         }
         switch (elemType) {
             case Type.STRING_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
                 break;
             case Type.LONG_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
                 break;
             case Type.LONG_LONG_ARRAY_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
                 break;
         }
         return get(p_elementIndex);
@@ -477,7 +487,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         long payloadSize = payload.size();
 
         int previousStart = -1;
-        long currentChunkElemKey = Constants.NULL_LONG;
+        long currentChunkElemKey = CoreConstants.NULL_LONG;
         byte currentChunkElemType = -1;
 
         //init detections
@@ -498,11 +508,11 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         int currentSubIndex = 0;
 
         //map key variables
-        long currentMapLongKey = Constants.NULL_LONG;
+        long currentMapLongKey = CoreConstants.NULL_LONG;
         String currentMapStringKey = null;
 
         while (cursor < payloadSize) {
-            if (payload.read(cursor) == Constants.CHUNK_SEP) {
+            if (payload.read(cursor) == CoreConstants.CHUNK_SEP) {
                 if (isFirstElem) {
                     //initial the map
                     isFirstElem = false;
@@ -574,13 +584,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 toInsert = currentStringLongMap;
                                 break;
                             case Type.LONG_LONG_MAP:
-                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                     currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongMap;
                                 break;
                             case Type.LONG_LONG_ARRAY_MAP:
-                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                     currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongArrayMap;
@@ -604,22 +614,22 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     }
                     //next round, reset all variables...
                     previousStart = cursor + 1;
-                    currentChunkElemKey = Constants.NULL_LONG;
+                    currentChunkElemKey = CoreConstants.NULL_LONG;
                     currentChunkElemType = -1;
                     currentSubSize = -1;
                     currentSubIndex = 0;
-                    currentMapLongKey = Constants.NULL_LONG;
+                    currentMapLongKey = CoreConstants.NULL_LONG;
                     currentMapStringKey = null;
                 }
-            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
-                if (currentChunkElemKey == Constants.NULL_LONG) {
+            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
+                if (currentChunkElemKey == CoreConstants.NULL_LONG) {
                     currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 } else if (currentChunkElemType == -1) {
                     currentChunkElemType = (byte) Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
-            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
+            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
                     currentSubSize = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     //init array or maps
@@ -668,21 +678,21 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             }
                             break;
                         case Type.LONG_LONG_MAP:
-                            if (currentMapLongKey != Constants.NULL_LONG) {
+                            if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                 currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
-                                currentMapLongKey = Constants.NULL_LONG;
+                                currentMapLongKey = CoreConstants.NULL_LONG;
                             }
                             break;
                         case Type.LONG_LONG_ARRAY_MAP:
-                            if (currentMapLongKey != Constants.NULL_LONG) {
+                            if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                 currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
-                                currentMapLongKey = Constants.NULL_LONG;
+                                currentMapLongKey = CoreConstants.NULL_LONG;
                             }
                             break;
                     }
                 }
                 previousStart = cursor + 1;
-            } else if (payload.read(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
+            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SUB_SEP) {
                 switch (currentChunkElemType) {
                     case Type.STRING_LONG_MAP:
                         if (currentMapStringKey == null) {
@@ -694,21 +704,21 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                         }
                         break;
                     case Type.LONG_LONG_MAP:
-                        if (currentMapLongKey == Constants.NULL_LONG) {
+                        if (currentMapLongKey == CoreConstants.NULL_LONG) {
                             currentMapLongKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                         } else {
                             currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                             //reset key for next loop
-                            currentMapLongKey = Constants.NULL_LONG;
+                            currentMapLongKey = CoreConstants.NULL_LONG;
                         }
                         break;
                     case Type.LONG_LONG_ARRAY_MAP:
-                        if (currentMapLongKey == Constants.NULL_LONG) {
+                        if (currentMapLongKey == CoreConstants.NULL_LONG) {
                             currentMapLongKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                         } else {
                             currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                             //reset key for next loop
-                            currentMapLongKey = Constants.NULL_LONG;
+                            currentMapLongKey = CoreConstants.NULL_LONG;
                         }
                         break;
                 }
@@ -762,13 +772,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     toInsert = currentStringLongMap;
                     break;
                 case Type.LONG_LONG_MAP:
-                    if (currentMapLongKey != Constants.NULL_LONG) {
+                    if (currentMapLongKey != CoreConstants.NULL_LONG) {
                         currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                     }
                     toInsert = currentLongLongMap;
                     break;
                 case Type.LONG_LONG_ARRAY_MAP:
-                    if (currentMapLongKey != Constants.NULL_LONG) {
+                    if (currentMapLongKey != CoreConstants.NULL_LONG) {
                         currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(payload, previousStart, cursor));
                     }
                     toInsert = currentLongLongArrayMap;
@@ -804,12 +814,12 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 long loopKey = internalState._elementK[i];
                 Object loopValue = internalState._elementV[i];
                 if (loopValue != null) {
-                    buffer.write(Constants.CHUNK_SEP);
+                    buffer.write(CoreConstants.CHUNK_SEP);
                     Base64.encodeLongToBuffer(loopKey, buffer);
-                    buffer.write(Constants.CHUNK_SUB_SEP);
+                    buffer.write(CoreConstants.CHUNK_SUB_SEP);
                     /** Encode to type of elem, for unSerialization */
                     Base64.encodeIntToBuffer(internalState._elementType[i], buffer);
-                    buffer.write(Constants.CHUNK_SUB_SEP);
+                    buffer.write(CoreConstants.CHUNK_SUB_SEP);
                     switch (internalState._elementType[i]) {
                         /** Primitive Types */
                         case Type.STRING:
@@ -836,7 +846,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             double[] castedDoubleArr = (double[]) loopValue;
                             Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
                             for (int j = 0; j < castedDoubleArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                             }
                             break;
@@ -844,7 +854,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);
                             for (int j = 0; j < castedLongArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                             }
                             break;
@@ -852,7 +862,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             int[] castedIntArr = (int[]) loopValue;
                             Base64.encodeIntToBuffer(castedIntArr.length, buffer);
                             for (int j = 0; j < castedIntArr.length; j++) {
-                                buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                 Base64.encodeIntToBuffer(castedIntArr[j], buffer);
                             }
                             break;
@@ -863,9 +873,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             castedStringLongMap.each(new StringLongMapCallBack() {
                                 @Override
                                 public void on(final String key, final long value) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeStringToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -876,9 +886,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             castedLongLongMap.each(new LongLongMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -889,9 +899,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             castedLongLongArrayMap.each(new LongLongArrayMapCallBack() {
                                 @Override
                                 public void on(final long key, final long value) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(key, buffer);
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(value, buffer);
                                 }
                             });
@@ -906,7 +916,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     private void internal_set_dirty() {
         if (_space != null) {
-            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
                 _space.declareDirty(this);
             }
         }

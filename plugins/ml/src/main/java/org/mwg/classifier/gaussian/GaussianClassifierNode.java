@@ -55,7 +55,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier implement
 
     @Override
     protected void updateModelParameters(double value[]) {
-        final int classIndex = getClassIndex();
+        final int classIndex = getResponseIndex();
         final int classNum = (int) value[classIndex];
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
@@ -105,7 +105,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier implement
     @Override
     protected int predictValue(double value[]) {
         double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
-        valueWithClassRemoved[getClassIndex()] = 0; //Do NOT use real class for prediction
+        valueWithClassRemoved[getResponseIndex()] = 0; //Do NOT use real class for prediction
         int classes[] = getKnownClasses();
         double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;

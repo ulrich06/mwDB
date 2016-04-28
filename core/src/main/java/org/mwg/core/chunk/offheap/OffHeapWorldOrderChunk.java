@@ -1,7 +1,7 @@
 package org.mwg.core.chunk.offheap;
 
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.Buffer;
-import org.mwg.core.Constants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongMapCallBack;
 import org.mwg.core.chunk.WorldOrderChunk;
@@ -19,12 +19,12 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
     /**
      * Global Chunk indexes
      */
-    private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
-    private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
-    private static final int INDEX_ID = Constants.OFFHEAP_CHUNK_INDEX_ID;
-    private static final int INDEX_TYPE = Constants.OFFHEAP_CHUNK_INDEX_TYPE;
-    private static final int INDEX_FLAGS = Constants.OFFHEAP_CHUNK_INDEX_FLAGS;
-    private static final int INDEX_MARKS = Constants.OFFHEAP_CHUNK_INDEX_MARKS;
+    private static final int INDEX_WORLD = CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD;
+    private static final int INDEX_TIME = CoreConstants.OFFHEAP_CHUNK_INDEX_TIME;
+    private static final int INDEX_ID = CoreConstants.OFFHEAP_CHUNK_INDEX_ID;
+    private static final int INDEX_TYPE = CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE;
+    private static final int INDEX_FLAGS = CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS;
+    private static final int INDEX_MARKS = CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS;
 
     //LongArrays
     private static final int INDEX_ELEMENT_V = 6;
@@ -51,7 +51,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
     public OffHeapWorldOrderChunk(ChunkListener listener, long previousAddr, Buffer initialString) {
         this.listener = listener;
 
-        if (previousAddr != Constants.OFFHEAP_NULL_PTR) {
+        if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             this.rootPtr = previousAddr;
             elementK_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_K);
             elementV_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_V);
@@ -62,7 +62,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             load(initialString);
         } else {
             this.rootPtr = OffHeapLongArray.allocate(ROOT_SIZE);
-            long initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            long initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
             /** Init long variables */
             //init lock
             OffHeapLongArray.set(this.rootPtr, INDEX_LOCK, 0);
@@ -71,11 +71,11 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             //init capacity
             OffHeapLongArray.set(this.rootPtr, INDEX_CAPACITY, initialCapacity);
             //init threshold
-            OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (initialCapacity * CoreConstants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.rootPtr, INDEX_SIZE, 0);
 
-            OffHeapLongArray.set(this.rootPtr, INDEX_EXTRA, Constants.NULL_LONG);
+            OffHeapLongArray.set(this.rootPtr, INDEX_EXTRA, CoreConstants.NULL_LONG);
 
             /** Init Long[] variables */
             //init elementK
@@ -158,7 +158,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
 
     @Override
     public final byte chunkType() {
-        return Constants.WORLD_ORDER_CHUNK;
+        return CoreConstants.WORLD_ORDER_CHUNK;
     }
 
     @Override
@@ -179,7 +179,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
     public final long get(long key) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_LOCK, 0, 1)) ;
-        long result = Constants.NULL_LONG;
+        long result = CoreConstants.NULL_LONG;
         try {
             consistencyCheck();
 
@@ -212,7 +212,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
             for (long i = 0; i < elementCount; i++) {
                 long loopValue = OffHeapLongArray.get(elementV_ptr, i);
-                if (loopValue != Constants.NULL_LONG) {
+                if (loopValue != CoreConstants.NULL_LONG) {
                     callback.on(OffHeapLongArray.get(elementK_ptr, i), loopValue);
                 }
             }
@@ -245,7 +245,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             long count = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
             long hashIndex = PrimitiveHelper.longHash(key, capacity);
             long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-            while (m != Constants.OFFHEAP_NULL_PTR) {
+            while (m != CoreConstants.OFFHEAP_NULL_PTR) {
                 if (key == OffHeapLongArray.get(elementK_ptr, m)) {
                     entry = m;
                     break;
@@ -276,10 +276,10 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                     for (long i = 0; i < count; i++) {
                         long previousValue = OffHeapLongArray.get(elementV_ptr, i);
                         long previousKey = OffHeapLongArray.get(elementK_ptr, i);
-                        if (previousValue != Constants.NULL_LONG) {
+                        if (previousValue != CoreConstants.NULL_LONG) {
                             long newHashIndex = PrimitiveHelper.longHash(previousKey, newCapacity);
                             long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, newHashIndex);
-                            if (currentHashedIndex != Constants.OFFHEAP_NULL_PTR) {
+                            if (currentHashedIndex != CoreConstants.OFFHEAP_NULL_PTR) {
                                 OffHeapLongArray.set(elementNext_ptr, i, currentHashedIndex);
                             }
                             OffHeapLongArray.set(elementHash_ptr, newHashIndex, i);
@@ -287,13 +287,13 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                     }
                     capacity = newCapacity;
                     OffHeapLongArray.set(rootPtr, INDEX_CAPACITY, capacity);
-                    OffHeapLongArray.set(rootPtr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
+                    OffHeapLongArray.set(rootPtr, INDEX_THRESHOLD, (long) (newCapacity * CoreConstants.MAP_LOAD_FACTOR));
                     hashIndex = PrimitiveHelper.longHash(key, capacity);
                 }
                 //set K and associated K_H
                 OffHeapLongArray.set(elementK_ptr, count, key);
                 //set value or index if null
-                if (value == Constants.NULL_LONG) {
+                if (value == CoreConstants.NULL_LONG) {
                     OffHeapLongArray.set(elementV_ptr, count, count);
                 } else {
                     OffHeapLongArray.set(elementV_ptr, count, value);
@@ -308,7 +308,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                 OffHeapLongArray.set(rootPtr, INDEX_SIZE, count + 1);
                 internal_set_dirty();
             } else {
-                if (OffHeapLongArray.get(elementV_ptr, entry) != value && value != Constants.NULL_LONG) {
+                if (OffHeapLongArray.get(elementV_ptr, entry) != value && value != CoreConstants.NULL_LONG) {
                     //setValue
                     OffHeapLongArray.set(elementV_ptr, entry, value);
                     internal_set_dirty();
@@ -330,11 +330,11 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
 
             long size = OffHeapLongArray.get(rootPtr, INDEX_SIZE);
             Base64.encodeLongToBuffer(size, buffer);
-            buffer.write(Constants.CHUNK_SEP);
+            buffer.write(CoreConstants.CHUNK_SEP);
             long extra = OffHeapLongArray.get(rootPtr, INDEX_EXTRA);
-            if (extra != Constants.NULL_LONG) {
+            if (extra != CoreConstants.NULL_LONG) {
                 Base64.encodeLongToBuffer(extra, buffer);
-                buffer.write(Constants.CHUNK_SEP);
+                buffer.write(CoreConstants.CHUNK_SEP);
             }
 
             boolean isFirst = true;
@@ -342,13 +342,13 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             long elementCount = OffHeapLongArray.get(this.rootPtr, INDEX_SIZE);
             for (long i = 0; i < elementCount; i++) {
                 long loopValue = OffHeapLongArray.get(elementV_ptr, i);
-                if (loopValue != Constants.NULL_LONG) {
+                if (loopValue != CoreConstants.NULL_LONG) {
                     if (!isFirst) {
-                        buffer.write(Constants.CHUNK_SUB_SEP);
+                        buffer.write(CoreConstants.CHUNK_SUB_SEP);
                     }
                     isFirst = false;
                     Base64.encodeLongToBuffer(OffHeapLongArray.get(elementK_ptr, i), buffer);
-                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                     Base64.encodeLongToBuffer(loopValue, buffer);
                 }
             }
@@ -362,7 +362,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
 
     private void load(Buffer buffer) {
         int cursor = 0;
-        long loopKey = Constants.NULL_LONG;
+        long loopKey = CoreConstants.NULL_LONG;
         int previousStart = -1;
         long capacity = -1;
         int insertIndex = 0;
@@ -371,7 +371,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
 
         while (cursor < buffer.size()) {
 
-            if (buffer.read(cursor) == Constants.CHUNK_SEP) {
+            if (buffer.read(cursor) == CoreConstants.CHUNK_SEP) {
 
                 if (!initDone) {
                     long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
@@ -387,7 +387,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                     //init capacity
                     OffHeapLongArray.set(this.rootPtr, INDEX_CAPACITY, capacity);
                     //init threshold
-                    OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+                    OffHeapLongArray.set(this.rootPtr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
                     //init elementCount
                     OffHeapLongArray.set(this.rootPtr, INDEX_SIZE, size);
                     //init elementK
@@ -411,8 +411,8 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                 //reset for next round
                 previousStart = cursor + 1;
 
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP) {
-                if (loopKey != Constants.NULL_LONG) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SEP) {
+                if (loopKey != CoreConstants.NULL_LONG) {
                     long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     //insert raw
                     OffHeapLongArray.set(elementK_ptr, insertIndex, loopKey);
@@ -426,17 +426,17 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
                     OffHeapLongArray.set(elementHash_ptr, hashIndex, insertIndex);
                     insertIndex++;
                     //reset key for next round
-                    loopKey = Constants.NULL_LONG;
+                    loopKey = CoreConstants.NULL_LONG;
                 }
                 previousStart = cursor + 1;
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) {
                 loopKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                 previousStart = cursor + 1;
             }
             //loop in all case
             cursor++;
         }
-        if (loopKey != Constants.NULL_LONG) {
+        if (loopKey != CoreConstants.NULL_LONG) {
             long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
             //insert raw
             OffHeapLongArray.set(elementK_ptr, insertIndex, loopKey);
@@ -461,7 +461,7 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
         } while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_MAGIC, previousMagic, nextMagic));
 
         if (listener != null) {
-            if ((OffHeapLongArray.get(rootPtr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((OffHeapLongArray.get(rootPtr, INDEX_FLAGS) & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
                 listener.declareDirty(this);
             }
         }

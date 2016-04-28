@@ -2,8 +2,8 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.LongLongMap;
-import org.mwg.core.Constants;
 import org.mwg.Graph;
 import org.mwg.struct.LongLongMapCallBack;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
@@ -19,7 +19,7 @@ public class LongLongMapTest implements ChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, null));
+        test(new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null));
     }
 
     @Test
@@ -31,7 +31,7 @@ public class LongLongMapTest implements ChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        org.mwg.core.chunk.offheap.ArrayLongLongMap map = new org.mwg.core.chunk.offheap.ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY,-1);
+        org.mwg.core.chunk.offheap.ArrayLongLongMap map = new org.mwg.core.chunk.offheap.ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY,-1);
         org.mwg.core.chunk.offheap.ArrayLongLongMap.incrementCopyOnWriteCounter(map.rootAddress());
         test(map);
         org.mwg.core.chunk.offheap.ArrayLongLongMap.free(map.rootAddress());
@@ -57,7 +57,7 @@ public class LongLongMapTest implements ChunkListener {
         Assert.assertTrue(1 == map.get(0));
         Assert.assertTrue(2 == map.get(1));
 
-        map.put(2, Constants.NULL_LONG);
+        map.put(2, CoreConstants.NULL_LONG);
         Assert.assertTrue(2 == map.get(2));
 
         Assert.assertTrue(dirtyCount == 5);
@@ -81,11 +81,11 @@ public class LongLongMapTest implements ChunkListener {
         Assert.assertTrue(2 == keys[2]);
 
         //force the graph to do a rehash capacity
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
             map.put(i, i);
         }
         //test that all values are consistent
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.get(i) == i);
         }
     }

@@ -83,7 +83,7 @@ public class GaussianNaiveBayesianTest {
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 
-        @Test
+       // @Test
         public void test() {
             //This test fails only on crash. Otherwise, it is just for
 
@@ -109,14 +109,14 @@ public class GaussianNaiveBayesianTest {
                         gaussianClassifierNode.set("value", dummyDataset1[i]);
                         if (gaussianNBNode.isInBootstrapMode()!=bootstraps1[i]){
                             System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
-                                    gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferErrorFraction());
+                                    gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                             errors++;
                         }else{
                             System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
-                                    gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferErrorFraction());
+                                    gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         }
                         System.out.println(i+" GAUSSIAN:"+gaussianClassifierNode.isInBootstrapMode()+"\t"+
-                                gaussianClassifierNode.getBufferErrorCount()+"/"+gaussianClassifierNode.getCurrentBufferLength()+"="+gaussianClassifierNode.getBufferErrorFraction());
+                                gaussianClassifierNode.getBufferErrorCount()+"/"+gaussianClassifierNode.getCurrentBufferLength()+"="+gaussianClassifierNode.getBufferError());
                         System.out.println(gaussianNBNode.allDistributionsToString());
                         int rbc[] = gaussianNBNode.getRealBufferClasses();
                         System.out.print("[");

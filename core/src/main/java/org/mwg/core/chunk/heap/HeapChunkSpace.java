@@ -2,7 +2,7 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.Graph;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -212,11 +212,11 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
     @Override
     public Chunk create(byte p_type, long p_world, long p_time, long p_id, Buffer p_initialPayload, Chunk origin) {
         switch (p_type) {
-            case Constants.STATE_CHUNK:
+            case CoreConstants.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
-            case Constants.WORLD_ORDER_CHUNK:
+            case CoreConstants.WORLD_ORDER_CHUNK:
                 return new HeapWorldOrderChunk(p_world, p_time, p_id, this, p_initialPayload);
-            case Constants.TIME_TREE_CHUNK:
+            case CoreConstants.TIME_TREE_CHUNK:
                 return new HeapTimeTreeChunk(p_world, p_time, p_id, this, p_initialPayload);
         }
         return null;
@@ -323,7 +323,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         while (m >= 0) {
             HeapChunk currentM = (HeapChunk) this._values[m];
             if (currentM != null && type == currentM.chunkType() && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
-                if (currentM.setFlags(Constants.DIRTY_BIT, 0)) {
+                if (currentM.setFlags(CoreConstants.DIRTY_BIT, 0)) {
                     //add an additional mark
                     currentM.mark();
                     //now enqueue in the dirtyList to be saved later
@@ -356,7 +356,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         while (m >= 0) {
             HeapChunk currentM = (HeapChunk) this._values[m];
             if (currentM != null && type == currentM.chunkType() && world == currentM.world() && time == currentM.time() && id == currentM.id()) {
-                currentM.setFlags(0, Constants.DIRTY_BIT);
+                currentM.setFlags(0, CoreConstants.DIRTY_BIT);
                 //free the save mark
                 if (heapChunk.unmark() == 0) {
                     this._lru.enqueue(m);

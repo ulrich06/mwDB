@@ -107,7 +107,7 @@ public interface Graph {
      * @param query     The query the node must satisfy.
      * @param callback  Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
      */
-    <A extends Node> void find(long world, long time, String indexName, String query, Callback<A[]> callback);
+    void find(long world, long time, String indexName, String query, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes registered in a particular index.
@@ -117,7 +117,7 @@ public interface Graph {
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
      */
-    <A extends Node> void all(long world, long time, String indexName, Callback<A[]> callback);
+    void all(long world, long time, String indexName, Callback<Node[]> callback);
 
     /**
      * Utility method to create a waiter based on a counter

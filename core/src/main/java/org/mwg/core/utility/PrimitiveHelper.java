@@ -1,9 +1,9 @@
 package org.mwg.core.utility;
 
-import org.mwg.core.Constants;
-
 /*import java.nio.ByteBuffer;
 import java.security.MessageDigest;*/
+
+import org.mwg.Constants;
 
 public class PrimitiveHelper {
     private static final long PRIME1 = 2654435761L;

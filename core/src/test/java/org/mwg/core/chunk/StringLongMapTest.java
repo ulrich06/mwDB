@@ -3,7 +3,8 @@ package org.mwg.core.chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Graph;
-import org.mwg.core.Constants;
+import org.mwg.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.StringLongMap;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.chunk.heap.ArrayStringLongMap;
@@ -20,7 +21,7 @@ public class StringLongMapTest implements ChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, null));
+        test(new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null));
     }
 
     @Test
@@ -32,7 +33,7 @@ public class StringLongMapTest implements ChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        org.mwg.core.chunk.offheap.ArrayStringLongMap map = new org.mwg.core.chunk.offheap.ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, -1);
+        org.mwg.core.chunk.offheap.ArrayStringLongMap map = new org.mwg.core.chunk.offheap.ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, -1);
         org.mwg.core.chunk.offheap.ArrayStringLongMap.incrementCopyOnWriteCounter(map.rootAddress());
         test(map);
         org.mwg.core.chunk.offheap.ArrayStringLongMap.free(map.rootAddress());
@@ -106,11 +107,11 @@ public class StringLongMapTest implements ChunkListener {
         Assert.assertTrue(PrimitiveHelper.equals("DictionaryUsage", keys[2]));
 
         //force the graph to do a rehash capacity
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
             map.put("i_" + i, i);
         }
         //test that all values are consistent
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
             Assert.assertTrue(map.getValue("i_" + i) == i);
         }
     }

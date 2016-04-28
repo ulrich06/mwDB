@@ -2,7 +2,7 @@
 package org.mwg.core.chunk.offheap;
 
 import org.mwg.Graph;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -137,30 +137,30 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public final Chunk getAndMark(byte type, long world, long time, long id) {
         long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+            if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
 
                 //CAS on the mark of the chunk
                 long previousFlag;
                 long newFlag;
                 do {
-                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
                     newFlag = previousFlag + 1;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
 
                 if (newFlag == 1) {
                     //was at zero before, risky operation, check selectWith LRU
                     if (this._lru.dequeue(m)) {
                         return internal_create(foundChunkPtr);
                     } else {
-                        if (OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS) > 1) {
+                        if (OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS) > 1) {
                             //ok fine we are several on the same object...
                             return internal_create(foundChunkPtr);
                         } else {
@@ -179,13 +179,13 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     }
 
     private OffHeapChunk internal_create(long addr) {
-        byte chunkType = (byte) OffHeapLongArray.get(addr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+        byte chunkType = (byte) OffHeapLongArray.get(addr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
         switch (chunkType) {
-            case Constants.STATE_CHUNK:
+            case CoreConstants.STATE_CHUNK:
                 return new OffHeapStateChunk(this, addr, null, null);
-            case Constants.TIME_TREE_CHUNK:
+            case CoreConstants.TIME_TREE_CHUNK:
                 return new OffHeapTimeTreeChunk(this, addr, null);
-            case Constants.WORLD_ORDER_CHUNK:
+            case CoreConstants.WORLD_ORDER_CHUNK:
                 return new OffHeapWorldOrderChunk(this, addr, null);
             default:
                 return null;
@@ -196,23 +196,23 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public void unmark(byte type, long world, long time, long id) {
         long index = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, index);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+            if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
 
                 //CAS on the mark of the chunk
                 long previousFlag;
                 long newFlag;
                 do {
-                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
                     newFlag = previousFlag - 1;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
                 //check if this object hasField to be re-enqueue to the list of available
                 if (newFlag == 0) {
                     //declare available for recycling
@@ -234,10 +234,10 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         long previousMarks;
         long newMarks;
         do {
-            previousMarks = OffHeapLongArray.get(chunkAddr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+            previousMarks = OffHeapLongArray.get(chunkAddr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
             newMarks = previousMarks - 1;
         }
-        while (!OffHeapLongArray.compareAndSwap(chunkAddr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, newMarks));
+        while (!OffHeapLongArray.compareAndSwap(chunkAddr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, newMarks));
         if (newMarks == 0) {
 
             long world = chunk.world();
@@ -246,13 +246,13 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
             byte type = chunk.chunkType();
             long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
             long m = OffHeapLongArray.get(_elementHash, hashIndex);
-            while (m != Constants.OFFHEAP_NULL_PTR) {
+            while (m != CoreConstants.OFFHEAP_NULL_PTR) {
                 long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-                if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                        && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+                if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                        && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                        && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                        && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                        && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                         ) {
                     //declare available for recycling
                     this._lru.enqueue(m);
@@ -268,25 +268,25 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public Chunk create(byte p_type, long p_world, long p_time, long p_id, Buffer initialPayload, Chunk previousChunk) {
         OffHeapChunk newChunk = null;
         switch (p_type) {
-            case Constants.STATE_CHUNK:
-                newChunk = new OffHeapStateChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload, previousChunk);
+            case CoreConstants.STATE_CHUNK:
+                newChunk = new OffHeapStateChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload, previousChunk);
                 break;
-            case Constants.WORLD_ORDER_CHUNK:
-                newChunk = new OffHeapWorldOrderChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
+            case CoreConstants.WORLD_ORDER_CHUNK:
+                newChunk = new OffHeapWorldOrderChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
                 break;
-            case Constants.TIME_TREE_CHUNK:
-                newChunk = new OffHeapTimeTreeChunk(this, Constants.OFFHEAP_NULL_PTR, initialPayload);
+            case CoreConstants.TIME_TREE_CHUNK:
+                newChunk = new OffHeapTimeTreeChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
                 break;
         }
         if (newChunk != null) {
             long newChunkPtr = newChunk.addr();
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD, p_world);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME, p_time);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID, p_id);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD, p_world);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME, p_time);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID, p_id);
 
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, 0);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE, p_type);
-            OffHeapLongArray.set(newChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, 0);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS, 0);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE, p_type);
+            OffHeapLongArray.set(newChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, 0);
         }
         return newChunk;
     }
@@ -300,30 +300,30 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         long previousFlag;
         long newFlag;
         do {
-            previousFlag = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+            previousFlag = OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
             newFlag = previousFlag + 1;
         }
-        while (!OffHeapLongArray.compareAndSwap(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
+        while (!OffHeapLongArray.compareAndSwap(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousFlag, newFlag));
 
         if (newFlag != 1) {
             throw new RuntimeException("Warning, trying to put an unsafe object " + p_elem);
         }
 
-        final long world = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD);
-        final long time = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME);
-        final long id = OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
-        final byte type = (byte) OffHeapLongArray.get(elemPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+        final long world = OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD);
+        final long time = OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME);
+        final long id = OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID);
+        final byte type = (byte) OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
 
         long entry = -1;
         long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != -1) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+            if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
                 entry = m;
                 break;
@@ -347,11 +347,11 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 }
             }
             long currentVictimPtr = OffHeapLongArray.get(_elementValues, currentVictimIndex);
-            if (currentVictimPtr != Constants.OFFHEAP_NULL_PTR) {
-                long victimWorld = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD);
-                long victimTime = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME);
-                long victimObj = OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_ID);
-                byte victimType = (byte) OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+            if (currentVictimPtr != CoreConstants.OFFHEAP_NULL_PTR) {
+                long victimWorld = OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD);
+                long victimTime = OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME);
+                long victimObj = OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID);
+                byte victimType = (byte) OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
 
                 long indexVictim = PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._capacity);
 
@@ -359,14 +359,14 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, -1, 0)) ;
                 //we obtains the token, now remove the element
                 m = OffHeapLongArray.get(_elementHash, indexVictim);
-                long last = Constants.OFFHEAP_NULL_PTR;
-                while (m != Constants.OFFHEAP_NULL_PTR) {
+                long last = CoreConstants.OFFHEAP_NULL_PTR;
+                while (m != CoreConstants.OFFHEAP_NULL_PTR) {
                     long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-                    if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                            && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == victimType
-                            && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == victimWorld
-                            && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == victimTime
-                            && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == victimObj
+                    if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                            && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == victimType
+                            && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == victimWorld
+                            && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == victimTime
+                            && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == victimObj
                             ) {
                         break;
                     }
@@ -374,12 +374,12 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                     m = OffHeapLongArray.get(_elementNext, m);
                 }
                 //POP THE VALUE FROM THE NEXT LIST
-                if (last == Constants.OFFHEAP_NULL_PTR) {
+                if (last == CoreConstants.OFFHEAP_NULL_PTR) {
                     OffHeapLongArray.set(_elementHash, indexVictim, OffHeapLongArray.get(_elementNext, m));
                 } else {
                     OffHeapLongArray.set(_elementNext, last, OffHeapLongArray.get(_elementNext, m));
                 }
-                OffHeapLongArray.set(_elementNext, m, Constants.OFFHEAP_NULL_PTR);
+                OffHeapLongArray.set(_elementNext, m, CoreConstants.OFFHEAP_NULL_PTR);
                 //free the lock
 
                 if (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, 0, -1)) {
@@ -387,15 +387,15 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 }
                 this._elementCount.decrementAndGet();
                 //FREE VICTIM FROM MEMORY
-                byte chunkType = (byte) OffHeapLongArray.get(currentVictimPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+                byte chunkType = (byte) OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
                 switch (chunkType) {
-                    case Constants.STATE_CHUNK:
+                    case CoreConstants.STATE_CHUNK:
                         OffHeapStateChunk.free(currentVictimPtr);
                         break;
-                    case Constants.TIME_TREE_CHUNK:
+                    case CoreConstants.TIME_TREE_CHUNK:
                         OffHeapTimeTreeChunk.free(currentVictimPtr);
                         break;
-                    case Constants.WORLD_ORDER_CHUNK:
+                    case CoreConstants.WORLD_ORDER_CHUNK:
                         OffHeapWorldOrderChunk.free(currentVictimPtr);
                         break;
                 }
@@ -432,31 +432,31 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         byte type = dirtyChunk.chunkType();
         long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+            if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
 
                 long previousFlag;
                 long nextFlag;
                 do {
-                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS);
-                    nextFlag = previousFlag | Constants.DIRTY_BIT;
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS);
+                    nextFlag = previousFlag | CoreConstants.DIRTY_BIT;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
                 if (previousFlag != nextFlag) {
                     //add an additional mark
                     long previousMarks;
                     long nextMarks;
                     do {
-                        previousMarks = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                        previousMarks = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
                         nextMarks = previousMarks + 1;
                     }
-                    while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
+                    while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
                     //add to dirty list
                     boolean success = false;
                     while (!success) {
@@ -482,31 +482,31 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         byte type = cleanChunk.chunkType();
         long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
-            if (foundChunkPtr != Constants.OFFHEAP_NULL_PTR
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE) == type
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_WORLD) == world
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_TIME) == time
-                    && OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_ID) == id
+            if (foundChunkPtr != CoreConstants.OFFHEAP_NULL_PTR
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE) == type
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD) == world
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TIME) == time
+                    && OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID) == id
                     ) {
 
                 //remove the dirty bit
                 long previousFlag;
                 long nextFlag;
                 do {
-                    previousFlag = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS);
-                    nextFlag = previousFlag & ~Constants.DIRTY_BIT;
+                    previousFlag = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS);
+                    nextFlag = previousFlag & ~CoreConstants.DIRTY_BIT;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS, previousFlag, nextFlag));
                 //unmark
                 long previousMarks;
                 long nextMarks;
                 do {
-                    previousMarks = OffHeapLongArray.get(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS);
+                    previousMarks = OffHeapLongArray.get(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS);
                     nextMarks = previousMarks - 1;
                 }
-                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, Constants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
+                while (!OffHeapLongArray.compareAndSwap(foundChunkPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS, previousMarks, nextMarks));
                 if (nextMarks == 0) {
                     this._lru.enqueue(m);
                 }
@@ -526,16 +526,16 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public void free() {
         for (long i = 0; i < this._capacity; i++) {
             long previousPtr = OffHeapLongArray.get(_elementValues, i);
-            if (previousPtr != Constants.OFFHEAP_NULL_PTR) {
-                byte chunkType = (byte) OffHeapLongArray.get(previousPtr, Constants.OFFHEAP_CHUNK_INDEX_TYPE);
+            if (previousPtr != CoreConstants.OFFHEAP_NULL_PTR) {
+                byte chunkType = (byte) OffHeapLongArray.get(previousPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
                 switch (chunkType) {
-                    case Constants.STATE_CHUNK:
+                    case CoreConstants.STATE_CHUNK:
                         OffHeapStateChunk.free(previousPtr);
                         break;
-                    case Constants.TIME_TREE_CHUNK:
+                    case CoreConstants.TIME_TREE_CHUNK:
                         OffHeapTimeTreeChunk.free(previousPtr);
                         break;
-                    case Constants.WORLD_ORDER_CHUNK:
+                    case CoreConstants.WORLD_ORDER_CHUNK:
                         OffHeapWorldOrderChunk.free(previousPtr);
                         break;
                 }
@@ -553,13 +553,13 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public void freeChunk(Chunk chunk) {
         OffHeapChunk casted = (OffHeapChunk) chunk;
         switch (casted.chunkType()) {
-            case Constants.STATE_CHUNK:
+            case CoreConstants.STATE_CHUNK:
                 OffHeapStateChunk.free(casted.addr());
                 break;
-            case Constants.TIME_TREE_CHUNK:
+            case CoreConstants.TIME_TREE_CHUNK:
                 OffHeapTimeTreeChunk.free(casted.addr());
                 break;
-            case Constants.WORLD_ORDER_CHUNK:
+            case CoreConstants.WORLD_ORDER_CHUNK:
                 OffHeapWorldOrderChunk.free(casted.addr());
                 break;
         }

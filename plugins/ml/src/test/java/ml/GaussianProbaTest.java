@@ -4,7 +4,7 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
@@ -21,8 +21,8 @@ public class GaussianProbaTest {
             @Override
             public void on(Boolean result) {
 
-                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
-                KGaussianNode gaussianNodeBatch =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode gaussianNodeLive =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode gaussianNodeBatch =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 int test=100;
                 int feat=2;

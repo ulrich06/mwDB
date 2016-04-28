@@ -4,7 +4,7 @@ import org.mwg.GaussianNodeFactory;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 
 import java.text.DecimalFormat;
@@ -23,7 +23,7 @@ public class GaussianMixtureSim {
                boolean exit=false;
                String command;
 
-               KGaussianNode node1 =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+               GaussianNode node1 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
                node1.configMixture(2,3);
 
                while(!exit){

@@ -1,6 +1,6 @@
 package org.mwg.core;
 
-public class Constants extends org.mwg.Constants {
+public class CoreConstants extends org.mwg.Constants {
     
     /**
      * Configuration constants

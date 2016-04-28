@@ -54,6 +54,15 @@ public interface NodeState {
     Object getFromKey(String key);
 
     /**
+     * Get the named state element
+     *
+     * @param key          unique key of element
+     * @param defaultValue default value in case of null on the previous state
+     * @return stored element
+     */
+    <A> A getFromKeyWithDefault(String key, A defaultValue);
+
+    /**
      * Atomically get or create an element according to the elemType parameter.
      * This method is particularly handy for map manipulation that have to be initialize by the node state before any usage.
      *

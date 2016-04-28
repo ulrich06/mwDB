@@ -2,7 +2,7 @@ package org.mwg.core.chunk.offheap;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.plugin.Resolver;
@@ -20,12 +20,12 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     // keys
-    private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
-    private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
-    private static final int INDEX_ID = Constants.OFFHEAP_CHUNK_INDEX_ID;
-    private static final int INDEX_TYPE = Constants.OFFHEAP_CHUNK_INDEX_TYPE;
-    private static final int INDEX_FLAGS = Constants.OFFHEAP_CHUNK_INDEX_FLAGS;
-    private static final int INDEX_MARKS = Constants.OFFHEAP_CHUNK_INDEX_MARKS;
+    private static final int INDEX_WORLD = CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD;
+    private static final int INDEX_TIME = CoreConstants.OFFHEAP_CHUNK_INDEX_TIME;
+    private static final int INDEX_ID = CoreConstants.OFFHEAP_CHUNK_INDEX_ID;
+    private static final int INDEX_TYPE = CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE;
+    private static final int INDEX_FLAGS = CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS;
+    private static final int INDEX_MARKS = CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS;
 
     // long arrays
     private static final int INDEX_ELEMENT_K = 6;
@@ -66,14 +66,14 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     public OffHeapStateChunk(ChunkListener space, long previousAddr, Buffer initialPayload, Chunk origin) {
         _space = space;
-        if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
+        if (previousAddr == CoreConstants.OFFHEAP_NULL_PTR) {
             root_array_ptr = OffHeapLongArray.allocate(17);
             OffHeapLongArray.set(root_array_ptr, INDEX_FLAGS, 0);
             OffHeapLongArray.set(root_array_ptr, INDEX_COUNTER, 0);
-            long initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            long initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DATA_SIZE, initialCapacity);
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, 0);
-            long threshold = (long) (initialCapacity * Constants.MAP_LOAD_FACTOR);
+            long threshold = (long) (initialCapacity * CoreConstants.MAP_LOAD_FACTOR);
             OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, threshold);
             OffHeapLongArray.set(root_array_ptr, INDEX_LOCK, 0); // not locked
 
@@ -144,7 +144,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         // increase the copy on write counters, manage the map indirections
         for (long i = 0; i < elementCount; i++) {
             byte elementType = (byte) OffHeapLongArray.get(origin.elementType_ptr, i);
-            if (elementType != Constants.OFFHEAP_NULL_PTR) { // is there a real value?
+            if (elementType != CoreConstants.OFFHEAP_NULL_PTR) { // is there a real value?
                 long elemPtr = OffHeapLongArray.get(clonedElementV_ptr, i);
                 switch (elementType) {
                     /** String */
@@ -163,7 +163,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         break;
                     // Maps
                     case Type.LONG_LONG_MAP:
-                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
+                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
                             long tmpLongLongMap_ptr = OffHeapLongArray.get(clonedElementV_ptr, i);
                             long longLongMap_ptr = ArrayLongLongMap.softClone(tmpLongLongMap_ptr);
                             ArrayLongLongMap.incrementCopyOnWriteCounter(tmpLongLongMap_ptr);
@@ -171,7 +171,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         break;
                     case Type.LONG_LONG_ARRAY_MAP:
-                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
+                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
                             long tmpLongLongArrayMap_ptr = OffHeapLongArray.get(clonedElementV_ptr, i);
                             long longLongArrayMap_ptr = ArrayLongLongArrayMap.softClone(tmpLongLongArrayMap_ptr);
                             ArrayLongLongArrayMap.incrementCopyOnWriteCounter(tmpLongLongArrayMap_ptr);
@@ -179,7 +179,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         break;
                     case Type.STRING_LONG_MAP:
-                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
+                        if (OffHeapLongArray.get(clonedElementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
                             long tmpStringLongMap_ptr = OffHeapLongArray.get(clonedElementV_ptr, i);
                             long stringLongMap_ptr = ArrayStringLongMap.softClone(tmpStringLongMap_ptr);
                             ArrayStringLongMap.incrementCopyOnWriteCounter(tmpStringLongMap_ptr);
@@ -241,7 +241,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         try {
             consistencyCheck();
             for (int i = 0; i < OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT); i++) {
-                if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) {
+                if (OffHeapLongArray.get(elementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
                     callBack.on(resolver.longKeyToString(OffHeapLongArray.get(elementK_ptr, i)),
                             (int) OffHeapLongArray.get(elementType_ptr, i),
                             internal_getElementV(i) /*OffHeapLongArray.get(elementV_ptr, i)*/);
@@ -277,17 +277,17 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
             Base64.encodeLongToBuffer(elementCount, buffer);
             for (int i = 0; i < elementCount; i++) {
-                if (OffHeapLongArray.get(elementV_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
+                if (OffHeapLongArray.get(elementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) { //there is a real value
                     long loopKey = OffHeapLongArray.get(elementK_ptr, i);
                     Object loopValue = internal_getElementV(i);
                     if (loopValue != null) {
-                        buffer.write(Constants.CHUNK_SEP);
+                        buffer.write(CoreConstants.CHUNK_SEP);
                         Base64.encodeLongToBuffer(loopKey, buffer);
-                        buffer.write(Constants.CHUNK_SUB_SEP);
+                        buffer.write(CoreConstants.CHUNK_SUB_SEP);
                         /** Encode to type of elem, for unSerialization */
                         byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
                         Base64.encodeIntToBuffer(elementType, buffer);
-                        buffer.write(Constants.CHUNK_SUB_SEP);
+                        buffer.write(CoreConstants.CHUNK_SUB_SEP);
                         switch (elementType) {
                             /** Primitive Types */
                             case Type.STRING:
@@ -314,7 +314,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 double[] castedDoubleArr = (double[]) loopValue;
                                 Base64.encodeIntToBuffer(castedDoubleArr.length, buffer);
                                 for (int j = 0; j < castedDoubleArr.length; j++) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                                 }
                                 break;
@@ -322,7 +322,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 long[] castedLongArr = (long[]) loopValue;
                                 Base64.encodeIntToBuffer(castedLongArr.length, buffer);
                                 for (int j = 0; j < castedLongArr.length; j++) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeLongToBuffer(castedLongArr[j], buffer);
                                 }
                                 break;
@@ -330,7 +330,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 int[] castedIntArr = (int[]) loopValue;
                                 Base64.encodeIntToBuffer(castedIntArr.length, buffer);
                                 for (int j = 0; j < castedIntArr.length; j++) {
-                                    buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                    buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                     Base64.encodeIntToBuffer(castedIntArr[j], buffer);
                                 }
                                 break;
@@ -341,9 +341,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 castedStringLongMap.each(new StringLongMapCallBack() {
                                     @Override
                                     public void on(final String key, final long value) {
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                         Base64.encodeStringToBuffer(key, buffer);
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                         Base64.encodeLongToBuffer(value, buffer);
                                     }
                                 });
@@ -354,9 +354,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 castedLongLongMap.each(new LongLongMapCallBack() {
                                     @Override
                                     public void on(final long key, final long value) {
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                         Base64.encodeLongToBuffer(key, buffer);
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                         Base64.encodeLongToBuffer(value, buffer);
                                     }
                                 });
@@ -367,9 +367,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 castedLongLongArrayMap.each(new LongLongArrayMapCallBack() {
                                     @Override
                                     public void on(final long key, final long value) {
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
                                         Base64.encodeLongToBuffer(key, buffer);
-                                        buffer.write(Constants.CHUNK_SUB_SUB_SUB_SEP);
+                                        buffer.write(CoreConstants.CHUNK_SUB_SUB_SUB_SEP);
                                         Base64.encodeLongToBuffer(value, buffer);
                                     }
                                 });
@@ -394,11 +394,11 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         inLoadMode = true;
 
         //future map elements
-        long newElementK_ptr = Constants.OFFHEAP_NULL_PTR;
-        long newElementV_ptr = Constants.OFFHEAP_NULL_PTR;
-        long newElementType_ptr = Constants.OFFHEAP_NULL_PTR;
-        long newElementNext_ptr = Constants.OFFHEAP_NULL_PTR;
-        long newElementHash_ptr = Constants.OFFHEAP_NULL_PTR;
+        long newElementK_ptr = CoreConstants.OFFHEAP_NULL_PTR;
+        long newElementV_ptr = CoreConstants.OFFHEAP_NULL_PTR;
+        long newElementType_ptr = CoreConstants.OFFHEAP_NULL_PTR;
+        long newElementNext_ptr = CoreConstants.OFFHEAP_NULL_PTR;
+        long newElementHash_ptr = CoreConstants.OFFHEAP_NULL_PTR;
         long newNumberElement = 0;
         long newStateCapacity = 0;
         //reset size
@@ -408,7 +408,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         long payloadSize = buffer.size();
 
         int previousStart = -1;
-        long currentChunkElemKey = Constants.NULL_LONG;
+        long currentChunkElemKey = CoreConstants.NULL_LONG;
         int currentChunkElemType = -1;
 
         //init detections
@@ -429,11 +429,11 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         int currentSubIndex = 0;
 
         //map key variables
-        long currentMapLongKey = Constants.NULL_LONG;
+        long currentMapLongKey = CoreConstants.NULL_LONG;
         String currentMapStringKey = null;
 
         while (cursor < payloadSize) {
-            if (buffer.read(cursor) == Constants.CHUNK_SEP) {
+            if (buffer.read(cursor) == CoreConstants.CHUNK_SEP) {
                 if (isFirstElem) {
                     //initial the map
                     isFirstElem = false;
@@ -502,13 +502,13 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 toInsert = currentStringLongMap;
                                 break;
                             case Type.LONG_LONG_MAP:
-                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                     currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongMap;
                                 break;
                             case Type.LONG_LONG_ARRAY_MAP:
-                                if (currentMapLongKey != Constants.NULL_LONG) {
+                                if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                     currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                                 }
                                 toInsert = currentLongLongArrayMap;
@@ -532,22 +532,22 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                     }
                     //next round, reset all variables...
                     previousStart = cursor + 1;
-                    currentChunkElemKey = Constants.NULL_LONG;
+                    currentChunkElemKey = CoreConstants.NULL_LONG;
                     currentChunkElemType = -1;
                     currentSubSize = -1;
                     currentSubIndex = 0;
-                    currentMapLongKey = Constants.NULL_LONG;
+                    currentMapLongKey = CoreConstants.NULL_LONG;
                     currentMapStringKey = null;
                 }
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
-                if (currentChunkElemKey == Constants.NULL_LONG) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
+                if (currentChunkElemKey == CoreConstants.NULL_LONG) {
                     currentChunkElemKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     previousStart = cursor + 1;
                 } else if (currentChunkElemType == -1) {
                     currentChunkElemType = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
                     currentSubSize = Base64.decodeToIntWithBounds(buffer, previousStart, cursor);
                     //init array or maps
@@ -564,13 +564,13 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                             break;
                         /** Maps */
                         case Type.STRING_LONG_MAP:
-                            currentStringLongMap = new ArrayStringLongMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentStringLongMap = new ArrayStringLongMap(this, currentSubSize, CoreConstants.OFFHEAP_NULL_PTR);
                             break;
                         case Type.LONG_LONG_MAP:
-                            currentLongLongMap = new ArrayLongLongMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentLongLongMap = new ArrayLongLongMap(this, currentSubSize, CoreConstants.OFFHEAP_NULL_PTR);
                             break;
                         case Type.LONG_LONG_ARRAY_MAP:
-                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, currentSubSize, Constants.OFFHEAP_NULL_PTR);
+                            currentLongLongArrayMap = new ArrayLongLongArrayMap(this, currentSubSize, CoreConstants.OFFHEAP_NULL_PTR);
                             break;
                     }
                 } else {
@@ -596,22 +596,22 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                             }
                             break;
                         case Type.LONG_LONG_MAP:
-                            if (currentMapLongKey != Constants.NULL_LONG) {
+                            if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                 currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
-                                currentMapLongKey = Constants.NULL_LONG;
+                                currentMapLongKey = CoreConstants.NULL_LONG;
                             }
                             break;
                         case Type.LONG_LONG_ARRAY_MAP:
-                            if (currentMapLongKey != Constants.NULL_LONG) {
+                            if (currentMapLongKey != CoreConstants.NULL_LONG) {
                                 currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
-                                currentMapLongKey = Constants.NULL_LONG;
+                                currentMapLongKey = CoreConstants.NULL_LONG;
                             }
                             break;
 
                     }
                 }
                 previousStart = cursor + 1;
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SUB_SEP) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SUB_SEP) {
                 switch (currentChunkElemType) {
                     case Type.STRING_LONG_MAP:
                         if (currentMapStringKey == null) {
@@ -623,21 +623,21 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         break;
                     case Type.LONG_LONG_MAP:
-                        if (currentMapLongKey == Constants.NULL_LONG) {
+                        if (currentMapLongKey == CoreConstants.NULL_LONG) {
                             currentMapLongKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                         } else {
                             currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                             //reset key for next loop
-                            currentMapLongKey = Constants.NULL_LONG;
+                            currentMapLongKey = CoreConstants.NULL_LONG;
                         }
                         break;
                     case Type.LONG_LONG_ARRAY_MAP:
-                        if (currentMapLongKey == Constants.NULL_LONG) {
+                        if (currentMapLongKey == CoreConstants.NULL_LONG) {
                             currentMapLongKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                         } else {
                             currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                             //reset key for next loop
-                            currentMapLongKey = Constants.NULL_LONG;
+                            currentMapLongKey = CoreConstants.NULL_LONG;
                         }
                         break;
                 }
@@ -691,13 +691,13 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                     toInsert = currentStringLongMap;
                     break;
                 case Type.LONG_LONG_MAP:
-                    if (currentMapLongKey != Constants.NULL_LONG) {
+                    if (currentMapLongKey != CoreConstants.NULL_LONG) {
                         currentLongLongMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                     }
                     toInsert = currentLongLongMap;
                     break;
                 case Type.LONG_LONG_ARRAY_MAP:
-                    if (currentMapLongKey != Constants.NULL_LONG) {
+                    if (currentMapLongKey != CoreConstants.NULL_LONG) {
                         currentLongLongArrayMap.put(currentMapLongKey, Base64.decodeToLongWithBounds(buffer, previousStart, cursor));
                     }
                     toInsert = currentLongLongArrayMap;
@@ -734,7 +734,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DATA_SIZE, newStateCapacity);
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, newNumberElement);
-        long threshold = (long) (newStateCapacity * Constants.MAP_LOAD_FACTOR);
+        long threshold = (long) (newStateCapacity * CoreConstants.MAP_LOAD_FACTOR);
         OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, threshold);
 
         OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
@@ -754,7 +754,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         long elementV_array_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_V);
         for (long i = 0; i < elementDataSize; i++) {
             long elemV_ptr = OffHeapLongArray.get(elementV_array_ptr, i);
-            if (elemV_ptr != Constants.OFFHEAP_NULL_PTR) {
+            if (elemV_ptr != CoreConstants.OFFHEAP_NULL_PTR) {
                 freeElement(elemV_ptr, (byte) OffHeapLongArray.get(elementType_ptr, i));
             }
         }
@@ -820,7 +820,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public final byte chunkType() {
-        return Constants.STATE_CHUNK;
+        return CoreConstants.STATE_CHUNK;
     }
 
     @Override
@@ -941,7 +941,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
                 //rehashEveryThing
                 for (long i = 0; i < elementDataSize; i++) {
-                    if (OffHeapLongArray.get(newElementType_ptr, i) != Constants.OFFHEAP_NULL_PTR) { //there is a real value
+                    if (OffHeapLongArray.get(newElementType_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) { //there is a real value
                         long keyHash = PrimitiveHelper.longHash(OffHeapLongArray.get(newElementK_ptr, i), newLength);
                         long currentHashedIndex = OffHeapLongArray.get(newElementHash_ptr, keyHash);
                         if (currentHashedIndex != -1) {
@@ -961,7 +961,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 //setPrimitiveType value for all
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_DATA_SIZE, newLength);
                 // elementCount stays the same
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, (long) (newLength * Constants.MAP_LOAD_FACTOR));
+                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_THRESHOLD, (long) (newLength * CoreConstants.MAP_LOAD_FACTOR));
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, newElementK_ptr);
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, newElementV_ptr);
                 OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, newElementNext_ptr);
@@ -1025,7 +1025,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 case Type.STRING:
                     String stringToInsert = (String) elem;
                     if (stringToInsert == null) {
-                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                        OffHeapLongArray.set(addr, index, CoreConstants.OFFHEAP_NULL_PTR);
                     } else {
                         byte[] valueAsByte = stringToInsert.getBytes();
                         long newStringPtr = unsafe.allocateMemory(8 + 4 + valueAsByte.length); //counter for copy on write, length, and string content
@@ -1052,7 +1052,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         OffHeapLongArray.set(addr, index, doubleArrayToInsert_ptr);
                     } else {
-                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                        OffHeapLongArray.set(addr, index, CoreConstants.OFFHEAP_NULL_PTR);
                     }
                     break;
                 case Type.LONG_ARRAY:
@@ -1066,7 +1066,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         OffHeapLongArray.set(addr, index, longArrayToInsert_ptr);
                     } else {
-                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                        OffHeapLongArray.set(addr, index, CoreConstants.OFFHEAP_NULL_PTR);
                     }
                     break;
                 case Type.INT_ARRAY:
@@ -1080,7 +1080,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         }
                         OffHeapLongArray.set(addr, index, intArrayToInsert_ptr);
                     } else {
-                        OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
+                        OffHeapLongArray.set(addr, index, CoreConstants.OFFHEAP_NULL_PTR);
                     }
                     break;
                 /** Maps */
@@ -1103,22 +1103,22 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                     throw new RuntimeException("Should never happen...");
             }
         } else {
-            OffHeapLongArray.set(addr, index, Constants.OFFHEAP_NULL_PTR);
-            OffHeapLongArray.set(elementTypeAddr, index, Constants.OFFHEAP_NULL_PTR);
+            OffHeapLongArray.set(addr, index, CoreConstants.OFFHEAP_NULL_PTR);
+            OffHeapLongArray.set(elementTypeAddr, index, CoreConstants.OFFHEAP_NULL_PTR);
         }
 
         // free the previous elements
-        if (tempPtr != Constants.OFFHEAP_NULL_PTR) {
+        if (tempPtr != CoreConstants.OFFHEAP_NULL_PTR) {
             freeElement(tempPtr, tempType);
         }
-        if(elem != null){
+        if (elem != null) {
             OffHeapLongArray.set(elementTypeAddr, index, elemType);
         }
     }
 
     private void internal_set_dirty() {
         if (this._space != null) {
-            if ((OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((OffHeapLongArray.get(root_array_ptr, INDEX_FLAGS) & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
                 this._space.declareDirty(this);
             }
         }
@@ -1155,6 +1155,16 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         return get(_space.graph().resolver().stringToLongKey(key));
     }
 
+    @Override
+    public <A> A getFromKeyWithDefault(String key, A defaultValue) {
+        Object result = getFromKey(key);
+        if (result == null) {
+            return defaultValue;
+        } else {
+            return (A) result;
+        }
+    }
+
     private Object internal_getElementV(long index) {
         byte elemType = (byte) OffHeapLongArray.get(elementType_ptr, index); // can be safely casted
         switch (elemType) {
@@ -1170,7 +1180,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             /** String */
             case Type.STRING:
                 long elemStringPtr = OffHeapLongArray.get(elementV_ptr, index);
-                if (elemStringPtr == Constants.OFFHEAP_NULL_PTR) {
+                if (elemStringPtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     return null;
                 }
                 int length = unsafe.getInt(elemStringPtr + 8); //cow counter
@@ -1182,7 +1192,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             /** Arrays */
             case Type.DOUBLE_ARRAY:
                 long elemDoublePtr = OffHeapLongArray.get(elementV_ptr, index);
-                if (elemDoublePtr == Constants.OFFHEAP_NULL_PTR) {
+                if (elemDoublePtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     return null;
                 }
                 int doubleArrayLength = (int) OffHeapLongArray.get(elemDoublePtr, 1); // can be safely casted
@@ -1193,7 +1203,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 return doubleArray;
             case Type.LONG_ARRAY:
                 long elemLongPtr = OffHeapLongArray.get(elementV_ptr, index);
-                if (elemLongPtr == Constants.OFFHEAP_NULL_PTR) {
+                if (elemLongPtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     return null;
                 }
                 int longArrayLength = (int) OffHeapLongArray.get(elemLongPtr, 1); // can be safely casted
@@ -1204,7 +1214,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 return longArray;
             case Type.INT_ARRAY:
                 long elemIntPtr = OffHeapLongArray.get(elementV_ptr, index);
-                if (elemIntPtr == Constants.OFFHEAP_NULL_PTR) {
+                if (elemIntPtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     return null;
                 }
                 int intArrayLength = (int) OffHeapLongArray.get(elemIntPtr, 1); // can be safely casted
@@ -1216,14 +1226,14 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             /** Maps */
             case Type.STRING_LONG_MAP:
                 long elemStringLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, elemStringLongMapPtr);
+                return new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, elemStringLongMapPtr);
             case Type.LONG_LONG_MAP:
                 long elemLongLongMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, elemLongLongMapPtr);
+                return new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, elemLongLongMapPtr);
             case Type.LONG_LONG_ARRAY_MAP:
                 long elemLongLongArrayMapPtr = OffHeapLongArray.get(elementV_ptr, index);
-                return new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
-            case Constants.OFFHEAP_NULL_PTR:
+                return new ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, elemLongLongArrayMapPtr);
+            case CoreConstants.OFFHEAP_NULL_PTR:
                 return null;
             default:
                 throw new RuntimeException("Should never happen");
@@ -1239,13 +1249,13 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         }
         switch (elemType) {
             case Type.STRING_LONG_MAP:
-                internal_set(index, elemType, new ArrayStringLongMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
+                internal_set(index, elemType, new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, CoreConstants.OFFHEAP_NULL_PTR), false);
                 break;
             case Type.LONG_LONG_MAP:
-                internal_set(index, elemType, new ArrayLongLongMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
+                internal_set(index, elemType, new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, CoreConstants.OFFHEAP_NULL_PTR), false);
                 break;
             case Type.LONG_LONG_ARRAY_MAP:
-                internal_set(index, elemType, new ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, Constants.OFFHEAP_NULL_PTR), false);
+                internal_set(index, elemType, new ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, CoreConstants.OFFHEAP_NULL_PTR), false);
                 break;
         }
         return get(index);

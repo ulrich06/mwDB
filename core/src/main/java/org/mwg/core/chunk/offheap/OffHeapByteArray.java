@@ -1,6 +1,6 @@
 package org.mwg.core.chunk.offheap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.utility.Unsafe;
 
 /**
@@ -19,7 +19,7 @@ public class OffHeapByteArray {
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity);
         //init the memory
-        unsafe.setMemory(newMemorySegment, capacity, (byte) Constants.OFFHEAP_NULL_PTR);
+        unsafe.setMemory(newMemorySegment, capacity, (byte) CoreConstants.OFFHEAP_NULL_PTR);
         //return the newly created segment
         return newMemorySegment;
     }
@@ -28,7 +28,7 @@ public class OffHeapByteArray {
         //allocate a new bigger segment
         long newBiggerMemorySegment = unsafe.allocateMemory(nextCapacity);
         //reset the segment selectWith -1
-        unsafe.setMemory(newBiggerMemorySegment, nextCapacity, (byte) Constants.OFFHEAP_NULL_PTR);
+        unsafe.setMemory(newBiggerMemorySegment, nextCapacity, (byte) CoreConstants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
         unsafe.copyMemory(addr, newBiggerMemorySegment, previousCapacity);
         //free the previous

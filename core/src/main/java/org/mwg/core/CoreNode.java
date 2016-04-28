@@ -6,9 +6,9 @@ import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.chunk.StateChunkCallBack;
 import org.mwg.plugin.AbstractNode;
 
-class Node extends AbstractNode {
+class CoreNode extends AbstractNode {
 
-    public Node(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public CoreNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

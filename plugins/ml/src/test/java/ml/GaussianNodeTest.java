@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.util.matrix.KMatrix;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 
 /**
@@ -67,8 +67,8 @@ public class GaussianNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                KGaussianNode gaussianNodeBatch = (KGaussianNode) graph.newNode(0,0,"GaussianNode");
-                KGaussianNode gaussianNodeLive =  (KGaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode gaussianNodeBatch = (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                GaussianNode gaussianNodeLive =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
 
                 double eps = 1e-7;
 
@@ -84,9 +84,9 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(time, new Callback<KGaussianNode>() {
+                    gaussianNodeLive.jump(time, new Callback<GaussianNode>() {
                         @Override
-                        public void on(KGaussianNode result) {
+                        public void on(GaussianNode result) {
                             result.learn(trains);
                         }
                             });
@@ -115,9 +115,9 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new Callback<KGaussianNode>(){
+                gaussianNodeLive.jump(time, new Callback<GaussianNode>(){
                     @Override
-                    public void on(KGaussianNode result) {
+                    public void on(GaussianNode result) {
                         double[] a = result.getAvg();
                         double[][] c = result.getCovariance(a);
                         if (c != null) {

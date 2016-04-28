@@ -2,7 +2,7 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
@@ -18,7 +18,7 @@ public class LongLongArrayMapTest implements ChunkListener {
 
     @Test
     public void arrayHeapTest() {
-        test(new org.mwg.core.chunk.heap.ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, null));
+        test(new org.mwg.core.chunk.heap.ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class LongLongArrayMapTest implements ChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        org.mwg.core.chunk.offheap.ArrayLongLongArrayMap map = new org.mwg.core.chunk.offheap.ArrayLongLongArrayMap(this, Constants.MAP_INITIAL_CAPACITY, -1);
+        org.mwg.core.chunk.offheap.ArrayLongLongArrayMap map = new org.mwg.core.chunk.offheap.ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, -1);
         org.mwg.core.chunk.offheap.ArrayLongLongArrayMap.incrementCopyOnWriteCounter(map.rootAddress());
         test(map);
         org.mwg.core.chunk.offheap.ArrayLongLongArrayMap.free(map.rootAddress());
@@ -63,15 +63,15 @@ public class LongLongArrayMapTest implements ChunkListener {
 
 
         //force reHash
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
-            map.put(Constants.BEGINNING_OF_TIME, i);
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
+            map.put(CoreConstants.BEGINNING_OF_TIME, i);
         }
-        Assert.assertTrue(map.size() == Constants.MAP_INITIAL_CAPACITY + 2);
+        Assert.assertTrue(map.size() == CoreConstants.MAP_INITIAL_CAPACITY + 2);
 
-        long[] getRes = map.get(Constants.BEGINNING_OF_TIME);
-        Assert.assertTrue(getRes.length == Constants.MAP_INITIAL_CAPACITY);
-        for (int i = 0; i < Constants.MAP_INITIAL_CAPACITY; i++) {
-            Assert.assertTrue(getRes[i] == (Constants.MAP_INITIAL_CAPACITY - i - 1));
+        long[] getRes = map.get(CoreConstants.BEGINNING_OF_TIME);
+        Assert.assertTrue(getRes.length == CoreConstants.MAP_INITIAL_CAPACITY);
+        for (int i = 0; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
+            Assert.assertTrue(getRes[i] == (CoreConstants.MAP_INITIAL_CAPACITY - i - 1));
         }
 
         //test previous to reHash
@@ -81,15 +81,15 @@ public class LongLongArrayMapTest implements ChunkListener {
 
         //make a remove call
         map.remove(10, 10);
-        Assert.assertTrue(map.size() == Constants.MAP_INITIAL_CAPACITY + 2 - 1);
+        Assert.assertTrue(map.size() == CoreConstants.MAP_INITIAL_CAPACITY + 2 - 1);
         Assert.assertTrue(map.get(10).length == 1);
 
-        map.remove(Constants.BEGINNING_OF_TIME, 0);
-        Assert.assertTrue(map.size() == Constants.MAP_INITIAL_CAPACITY + 2 - 2);
-        getRes = map.get(Constants.BEGINNING_OF_TIME);
-        Assert.assertTrue(getRes.length == Constants.MAP_INITIAL_CAPACITY - 1);
-        for (int i = 1; i < Constants.MAP_INITIAL_CAPACITY; i++) {
-            Assert.assertTrue(getRes[i - 1] == (Constants.MAP_INITIAL_CAPACITY - i));
+        map.remove(CoreConstants.BEGINNING_OF_TIME, 0);
+        Assert.assertTrue(map.size() == CoreConstants.MAP_INITIAL_CAPACITY + 2 - 2);
+        getRes = map.get(CoreConstants.BEGINNING_OF_TIME);
+        Assert.assertTrue(getRes.length == CoreConstants.MAP_INITIAL_CAPACITY - 1);
+        for (int i = 1; i < CoreConstants.MAP_INITIAL_CAPACITY; i++) {
+            Assert.assertTrue(getRes[i - 1] == (CoreConstants.MAP_INITIAL_CAPACITY - i));
         }
 
         Assert.assertTrue(dirtyCount == 18);

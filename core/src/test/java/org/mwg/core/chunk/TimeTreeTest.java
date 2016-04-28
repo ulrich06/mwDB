@@ -49,7 +49,7 @@ public class TimeTreeTest implements ChunkListener {
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
             public TimeTreeChunk create(Buffer payload) {
-                return new OffHeapTimeTreeChunk(selfPointer, org.mwg.core.Constants.OFFHEAP_NULL_PTR, payload);
+                return new OffHeapTimeTreeChunk(selfPointer, org.mwg.core.CoreConstants.OFFHEAP_NULL_PTR, payload);
             }
         };
         previousOrEqualsTest(factory);
@@ -91,7 +91,7 @@ public class TimeTreeTest implements ChunkListener {
         }
 
         final long[] nbCall = {0};
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
+        tree.range(org.mwg.Constants.BEGINNING_OF_TIME, org.mwg.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
             @Override
             public void elem(long t) {
                 nbCall[0]++;
@@ -101,7 +101,7 @@ public class TimeTreeTest implements ChunkListener {
 
         final long[] median = new long[1];
         nbCall[0] = 0;
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
+        tree.range(org.mwg.Constants.BEGINNING_OF_TIME, org.mwg.Constants.END_OF_TIME, tree.size() / 2, new TreeWalker() {
             @Override
             public void elem(long t) {
                 median[0] = 5;
@@ -114,7 +114,7 @@ public class TimeTreeTest implements ChunkListener {
 
         tree.clearAt(median[0]);
         nbCall[0] = 0;
-        tree.range(org.mwg.core.Constants.BEGINNING_OF_TIME, org.mwg.core.Constants.END_OF_TIME, org.mwg.core.Constants.END_OF_TIME, new TreeWalker() {
+        tree.range(org.mwg.Constants.BEGINNING_OF_TIME, org.mwg.Constants.END_OF_TIME, org.mwg.Constants.END_OF_TIME, new TreeWalker() {
             @Override
             public void elem(long t) {
                 nbCall[0]++;
@@ -223,10 +223,10 @@ public class TimeTreeTest implements ChunkListener {
         nbCount++;
         //simulate space management
         if (chunk instanceof HeapChunk) {
-            ((HeapChunk) chunk).setFlags(org.mwg.core.Constants.DIRTY_BIT, 0);
+            ((HeapChunk) chunk).setFlags(org.mwg.core.CoreConstants.DIRTY_BIT, 0);
         } else if (chunk instanceof OffHeapChunk) {
             long addr = ((OffHeapChunk) chunk).addr();
-            OffHeapLongArray.set(addr, org.mwg.core.Constants.OFFHEAP_CHUNK_INDEX_FLAGS, org.mwg.core.Constants.DIRTY_BIT);
+            OffHeapLongArray.set(addr, org.mwg.core.CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS, org.mwg.core.CoreConstants.DIRTY_BIT);
         }
     }
 

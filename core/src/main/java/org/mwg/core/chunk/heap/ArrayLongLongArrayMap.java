@@ -1,7 +1,7 @@
 
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongArrayMapCallBack;
@@ -24,7 +24,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                     newstate._elementNext[i] = i + 1;
                 }
                 newstate._elementHash[i] = -1;
-                newstate._elementV[i] = Constants.NULL_LONG; //we init all values to NULL_LONG
+                newstate._elementV[i] = CoreConstants.NULL_LONG; //we init all values to NULL_LONG
             }
             this.state = newstate;
             aligned = true;
@@ -63,7 +63,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             this._elementHash = p_elementHash;
             this._elementCount = p_elementCount;
             this._nextAvailableSlot = p_nextAvailableSlot;
-            this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
+            this._threshold = (int) (p_stateSize * CoreConstants.MAP_LOAD_FACTOR);
         }
 
         public InternalState clone() {
@@ -124,7 +124,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
     public final void each(LongLongArrayMapCallBack callback) {
         final InternalState internalState = state;
         for (int i = 0; i < internalState._stateSize; i++) {
-            if (internalState._elementV[i] != Constants.NULL_LONG) { //there is a real value
+            if (internalState._elementV[i] != CoreConstants.NULL_LONG) { //there is a real value
                 callback.on(internalState._elementK[i], internalState._elementV[i]);
             }
         }
@@ -153,7 +153,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                 System.arraycopy(internalState._elementV, 0, newElementV, 0, internalState._stateSize);
                 //reset new values
                 for (int i = internalState._stateSize; i < newCapacity; i++) {
-                    newElementV[i] = Constants.NULL_LONG;
+                    newElementV[i] = CoreConstants.NULL_LONG;
                 }
                 int[] newElementNext = new int[newCapacity];
                 int[] newElementHash = new int[newCapacity];
@@ -166,7 +166,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                 int emptySlotHEad = -1;
 
                 for (int i = 0; i < newElementV.length; i++) {
-                    if (newElementV[i] != Constants.NULL_LONG) { //there is a real value
+                    if (newElementV[i] != CoreConstants.NULL_LONG) { //there is a real value
                         int newHashIndex = (int) PrimitiveHelper.longHash(newElementK[i], newCapacity);
                         int currentHashedIndex = newElementHash[newHashIndex];
                         if (currentHashedIndex != -1) {
@@ -230,8 +230,8 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             while (m >= 0) {
                 if (key == internalState._elementK[m] && value == internalState._elementV[m]) {
                     internalState._elementCount--;
-                    internalState._elementK[m] = Constants.NULL_LONG;
-                    internalState._elementV[m] = Constants.NULL_LONG;
+                    internalState._elementK[m] = CoreConstants.NULL_LONG;
+                    internalState._elementV[m] = CoreConstants.NULL_LONG;
                     if (previousM == -1) {
                         //we are in the top of hashFunction
                         internalState._elementHash[hashIndex] = internalState._elementNext[m];

@@ -6,7 +6,7 @@ import org.mwg.GaussianNodeFactory;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.gmm.KGaussianNode;
+import org.mwg.gmm.GaussianNode;
 import org.mwg.core.NoopScheduler;
 import org.mwg.util.matrix.operation.Gaussian1D;
 
@@ -23,7 +23,7 @@ public class Gaussian1DTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                KGaussianNode gaussianNodeBatch = (KGaussianNode) graph.newNode(0, 0, "GaussianNode");
+                GaussianNode gaussianNodeBatch = (GaussianNode) graph.newNode(0, 0, "GaussianNode");
                 double eps = 1e-7;
 
 

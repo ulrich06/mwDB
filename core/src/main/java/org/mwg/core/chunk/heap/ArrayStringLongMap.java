@@ -2,7 +2,7 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.struct.StringLongMap;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -56,7 +56,7 @@ public class ArrayStringLongMap implements StringLongMap {
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementCount = p_elementCount;
-            this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
+            this._threshold = (int) (p_stateSize * CoreConstants.MAP_LOAD_FACTOR);
         }
 
         public InternalState clone() {
@@ -77,7 +77,7 @@ public class ArrayStringLongMap implements StringLongMap {
     public final long getValue(String key) {
         final InternalState internalState = state;
         if (internalState._stateSize == 0) {
-            return Constants.NULL_LONG;
+            return CoreConstants.NULL_LONG;
         }
         int hashIndex = PrimitiveHelper.intHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
         int m = internalState._elementHash[hashIndex];
@@ -88,7 +88,7 @@ public class ArrayStringLongMap implements StringLongMap {
                 m = internalState._elementNext[m];
             }
         }
-        return Constants.NULL_LONG;
+        return CoreConstants.NULL_LONG;
     }
 
     @Override
@@ -178,7 +178,7 @@ public class ArrayStringLongMap implements StringLongMap {
             }
             int newIndex = internalState._elementCount;
             internalState._elementK[newIndex] = key;
-            if (value == Constants.NULL_LONG) {
+            if (value == CoreConstants.NULL_LONG) {
                 internalState._elementV[newIndex] = internalState._elementCount;
             } else {
                 internalState._elementV[newIndex] = value;
@@ -193,7 +193,7 @@ public class ArrayStringLongMap implements StringLongMap {
             internalState._elementCount = internalState._elementCount + 1;
             _listener.declareDirty(null);
         } else {
-            if (internalState._elementV[entry] != value && value != Constants.NULL_LONG) {
+            if (internalState._elementV[entry] != value && value != CoreConstants.NULL_LONG) {
                 //setValue
                 internalState._elementV[entry] = value;
                 _listener.declareDirty(null);

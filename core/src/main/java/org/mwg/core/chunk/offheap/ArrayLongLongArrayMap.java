@@ -1,6 +1,6 @@
 package org.mwg.core.chunk.offheap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.struct.LongLongArrayMapCallBack;
@@ -37,7 +37,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
 
     public ArrayLongLongArrayMap(ChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
-        if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
+        if (previousAddr == CoreConstants.OFFHEAP_NULL_PTR) {
             this.root_array_ptr = OffHeapLongArray.allocate(ROOT_ARRAY_SIZE);
             /** Init long variables */
             //init lock
@@ -45,7 +45,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             //init capacity
             OffHeapLongArray.set(this.root_array_ptr, INDEX_CAPACITY, initialCapacity);
             //init threshold
-            OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * CoreConstants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_COUNT, 0);
 
@@ -65,11 +65,11 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             OffHeapLongArray.set(this.root_array_ptr, INDEX_NEXT_EMPTY, 0);
             for (long i = 0; i < initialCapacity; i++) {
                 if (i == initialCapacity - 1) {
-                    OffHeapLongArray.set(elementNext_ptr, i, Constants.OFFHEAP_NULL_PTR);
+                    OffHeapLongArray.set(elementNext_ptr, i, CoreConstants.OFFHEAP_NULL_PTR);
                 } else {
                     OffHeapLongArray.set(elementNext_ptr, i, i + 1);
                 }
-                OffHeapLongArray.set(elementV_ptr + 8, i, Constants.NULL_LONG);
+                OffHeapLongArray.set(elementV_ptr + 8, i, CoreConstants.NULL_LONG);
             }
 
             //init elementHash
@@ -105,7 +105,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
         int resultIndex = 0;
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         while (m != -1) {
-            if (key == OffHeapLongArray.get(elementK_ptr, m) && OffHeapLongArray.get(elementV_ptr + 8, m) != Constants.NULL_LONG) {
+            if (key == OffHeapLongArray.get(elementK_ptr, m) && OffHeapLongArray.get(elementV_ptr + 8, m) != CoreConstants.NULL_LONG) {
                 if (resultIndex == capacity) {
                     if (capacity == 0) {
                         result = new long[1];
@@ -152,7 +152,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
         long capacity = OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY);
         for (long i = 0; i < capacity; i++) {
             long loopValue = OffHeapLongArray.get(elementV_ptr + 8, i);
-            if (loopValue != Constants.NULL_LONG) {
+            if (loopValue != CoreConstants.NULL_LONG) {
                 callback.on(OffHeapLongArray.get(elementK_ptr, i), loopValue);
             }
         }
@@ -177,12 +177,12 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
             long hashIndex = PrimitiveHelper.longHash(key, capacity);
             long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-            long previousM = Constants.OFFHEAP_NULL_PTR;
-            while (m != Constants.OFFHEAP_NULL_PTR) {
+            long previousM = CoreConstants.OFFHEAP_NULL_PTR;
+            while (m != CoreConstants.OFFHEAP_NULL_PTR) {
                 if (key == OffHeapLongArray.get(elementK_ptr, m) && value == OffHeapLongArray.get(elementV_ptr + 8, m)) {
                     OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_COUNT, OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT) - 1);
-                    OffHeapLongArray.set(elementK_ptr, m, Constants.NULL_LONG);
-                    OffHeapLongArray.set(elementV_ptr + 8, m, Constants.NULL_LONG);
+                    OffHeapLongArray.set(elementK_ptr, m, CoreConstants.NULL_LONG);
+                    OffHeapLongArray.set(elementV_ptr + 8, m, CoreConstants.NULL_LONG);
                     if (previousM == -1) {
                         //we are in the top of hashFunction
                         OffHeapLongArray.set(elementHash_ptr, hashIndex, OffHeapLongArray.get(elementNext_ptr, m));
@@ -260,7 +260,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
 
         long hashIndex = PrimitiveHelper.longHash(key, capacity);
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             if (key == OffHeapLongArray.get(elementK_ptr, m) && value == OffHeapLongArray.get(elementV_ptr + 8, m)) {
                 entry = m;
                 break;
@@ -289,7 +289,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
 
                 //reset new values
                 for (long i = capacity; i < newCapacity; i++) {
-                    OffHeapLongArray.set(elementV_ptr + 8, i, Constants.NULL_LONG);
+                    OffHeapLongArray.set(elementV_ptr + 8, i, CoreConstants.NULL_LONG);
                 }
 
                 //rehashEveryThing
@@ -297,11 +297,11 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                 long emptySlotHEad = -1;
                 for (long i = 0; i < newCapacity; i++) {
                     long previousValue = OffHeapLongArray.get(elementV_ptr + 8, i);
-                    if (previousValue != Constants.NULL_LONG) {
+                    if (previousValue != CoreConstants.NULL_LONG) {
                         long previousKey = OffHeapLongArray.get(elementK_ptr, i);
                         long newHashIndex = PrimitiveHelper.longHash(previousKey, newCapacity);
                         long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, newHashIndex);
-                        if (currentHashedIndex != Constants.OFFHEAP_NULL_PTR) {
+                        if (currentHashedIndex != CoreConstants.OFFHEAP_NULL_PTR) {
                             OffHeapLongArray.set(elementNext_ptr, i, currentHashedIndex);
                         }
                         OffHeapLongArray.set(elementHash_ptr, newHashIndex, i);
@@ -319,21 +319,21 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                 capacity = newCapacity;
                 OffHeapLongArray.set(root_array_ptr, INDEX_NEXT_EMPTY, emptySlotHEad);
                 OffHeapLongArray.set(root_array_ptr, INDEX_CAPACITY, capacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
+                OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * CoreConstants.MAP_LOAD_FACTOR));
                 hashIndex = PrimitiveHelper.longHash(key, capacity);
             }
 
             long nextIndex = OffHeapLongArray.get(root_array_ptr, INDEX_NEXT_EMPTY);
-            if (nextIndex == Constants.OFFHEAP_NULL_PTR) {
+            if (nextIndex == CoreConstants.OFFHEAP_NULL_PTR) {
                 throw new RuntimeException("Implement Error, map should never be null");
             }
             OffHeapLongArray.set(root_array_ptr, INDEX_NEXT_EMPTY, OffHeapLongArray.get(elementNext_ptr, nextIndex));
-            OffHeapLongArray.set(elementNext_ptr, nextIndex, Constants.OFFHEAP_NULL_PTR);
+            OffHeapLongArray.set(elementNext_ptr, nextIndex, CoreConstants.OFFHEAP_NULL_PTR);
 
             //set K
             OffHeapLongArray.set(elementK_ptr, nextIndex, key);
             //set value or index if null
-            if (value == Constants.NULL_LONG) {
+            if (value == CoreConstants.NULL_LONG) {
                 OffHeapLongArray.set(elementV_ptr + 8, nextIndex, elementCount);
             } else {
                 OffHeapLongArray.set(elementV_ptr + 8, nextIndex, value);
@@ -349,7 +349,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
             //inform the listener
             this.listener.declareDirty(null);
         } else {
-            if (OffHeapLongArray.get(elementV_ptr + 8, entry) != value && value != Constants.NULL_LONG) {
+            if (OffHeapLongArray.get(elementV_ptr + 8, entry) != value && value != CoreConstants.NULL_LONG) {
                 //setValue
                 OffHeapLongArray.set(elementV_ptr + 8, entry, value);
                 this.listener.declareDirty(null);

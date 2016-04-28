@@ -1,7 +1,7 @@
 
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongMap;
 import org.mwg.struct.LongLongMapCallBack;
@@ -55,7 +55,7 @@ public class ArrayLongLongMap implements LongLongMap {
             this._elementNext = p_elementNext;
             this._elementHash = p_elementHash;
             this._elementCount = p_elementCount;
-            this._threshold = (int) (p_stateSize * Constants.MAP_LOAD_FACTOR);
+            this._threshold = (int) (p_stateSize * CoreConstants.MAP_LOAD_FACTOR);
         }
 
         public InternalState clone() {
@@ -76,7 +76,7 @@ public class ArrayLongLongMap implements LongLongMap {
     public final long get(long key) {
         final InternalState internalState = state;
         if (internalState._stateSize == 0) {
-            return Constants.NULL_LONG;
+            return CoreConstants.NULL_LONG;
         }
         int hashIndex = (int) PrimitiveHelper.longHash(key, internalState._stateSize);
         int m = internalState._elementHash[hashIndex];
@@ -87,7 +87,7 @@ public class ArrayLongLongMap implements LongLongMap {
                 m = internalState._elementNext[m];
             }
         }
-        return Constants.NULL_LONG;
+        return CoreConstants.NULL_LONG;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class ArrayLongLongMap implements LongLongMap {
             }
             int newIndex = internalState._elementCount;
             internalState._elementK[newIndex] = key;
-            if (value == Constants.NULL_LONG) {
+            if (value == CoreConstants.NULL_LONG) {
                 internalState._elementV[newIndex] = internalState._elementCount;
             } else {
                 internalState._elementV[newIndex] = value;
@@ -184,7 +184,7 @@ public class ArrayLongLongMap implements LongLongMap {
                 _listener.declareDirty(null);
             }
         } else {
-            if (internalState._elementV[entry] != value && value != Constants.NULL_LONG) {
+            if (internalState._elementV[entry] != value && value != CoreConstants.NULL_LONG) {
                 //setValue
                 internalState._elementV[entry] = value;
                 _listener.declareDirty(null);

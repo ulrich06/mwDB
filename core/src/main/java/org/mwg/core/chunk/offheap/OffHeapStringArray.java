@@ -1,6 +1,6 @@
 package org.mwg.core.chunk.offheap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.utility.Unsafe;
 
 /**
@@ -20,7 +20,7 @@ public class OffHeapStringArray {
         //create the memory segment
         long newMemorySegment = unsafe.allocateMemory(capacity * 8);
         //init the memory
-        unsafe.setMemory(newMemorySegment, capacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
+        unsafe.setMemory(newMemorySegment, capacity * 8, (byte) CoreConstants.OFFHEAP_NULL_PTR);
         //return the newly created segment
         return newMemorySegment;
     }
@@ -29,7 +29,7 @@ public class OffHeapStringArray {
         //allocate a new bigger segment
         long newBiggerMemorySegment = unsafe.allocateMemory(nextCapacity * 8);
         //reset the segment selectWith -1
-        unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) Constants.OFFHEAP_NULL_PTR);
+        unsafe.setMemory(newBiggerMemorySegment, nextCapacity * 8, (byte) CoreConstants.OFFHEAP_NULL_PTR);
         //copy previous memory segment content
         unsafe.copyMemory(addr, newBiggerMemorySegment, previousCapacity * 8);
         //free the previous
@@ -58,7 +58,7 @@ public class OffHeapStringArray {
 
     public static String get(final long addr, final long index) {
         long stringPtr = unsafe.getLong(addr + index * 8);
-        if (stringPtr == Constants.OFFHEAP_NULL_PTR) {
+        if (stringPtr == CoreConstants.OFFHEAP_NULL_PTR) {
             return null;
         }
         int length = unsafe.getIntVolatile(null, stringPtr);
@@ -76,7 +76,7 @@ public class OffHeapStringArray {
 
         for (long i = 0; i < capacity; i++) {
             long stringPtr = unsafe.getLong(addr + i * 8);
-            if (stringPtr != Constants.OFFHEAP_NULL_PTR) {
+            if (stringPtr != CoreConstants.OFFHEAP_NULL_PTR) {
                 unsafe.freeMemory(stringPtr);
             }
         }
@@ -92,7 +92,7 @@ public class OffHeapStringArray {
         // copy the strings
         for (int i = 0; i < length; i++) {
             long stringPtr = unsafe.getLongVolatile(null, newAddr + i * 8);
-            if (stringPtr != Constants.OFFHEAP_NULL_PTR) {
+            if (stringPtr != CoreConstants.OFFHEAP_NULL_PTR) {
                 long len = unsafe.getIntVolatile(null, stringPtr);
                 long newStringPtr = unsafe.allocateMemory(4 + len);
                 unsafe.copyMemory(stringPtr, newStringPtr, 4 + len);

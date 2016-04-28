@@ -139,7 +139,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public <A extends Node> void rel(String relationName, Callback<A[]> callback) {
+    public void rel(String relationName, Callback<Node[]> callback) {
         if (callback == null) {
             return;
         }
@@ -147,18 +147,17 @@ public abstract class AbstractNode implements Node {
         if (resolved != null) {
             final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
             if (flatRefs == null || flatRefs.length == 0) {
-                callback.on((A[]) new Node[0]);
+                callback.on(new Node[0]);
             } else {
-                final A[] result = (A[]) new Node[flatRefs.length];
+                final Node[] result = new Node[flatRefs.length];
                 final DeferCounter counter = _graph.counter(flatRefs.length);
                 final int[] resultIndex = new int[1];
-
                 for (int i = 0; i < flatRefs.length; i++) {
                     this._resolver.lookup(_world, _time, flatRefs[i], new Callback<Node>() {
                         @Override
                         public void on(Node kNode) {
                             if (kNode != null) {
-                                result[resultIndex[0]] = (A) kNode;
+                                result[resultIndex[0]] = kNode;
                                 resultIndex[0]++;
                             }
                             counter.count();
@@ -171,7 +170,7 @@ public abstract class AbstractNode implements Node {
                         if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
-                            A[] toSend = (A[]) new Node[resultIndex[0]];
+                            Node[] toSend = new Node[resultIndex[0]];
                             System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
@@ -263,7 +262,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public <A extends org.mwg.Node> void findAt(String indexName, long world, long time, String query, Callback<A[]> callback) {
+    public void findAt(String indexName, long world, long time, String query, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -274,7 +273,7 @@ public abstract class AbstractNode implements Node {
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
             final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
-                callback.on((A[]) new org.mwg.Node[0]);
+                callback.on(new org.mwg.Node[0]);
                 return;
             }
             final org.mwg.Node[] resolved = new org.mwg.Node[foundId.length];
@@ -297,7 +296,7 @@ public abstract class AbstractNode implements Node {
                 @Override
                 public void on(Object o) {
                     //select
-                    A[] resultSet = (A[]) new org.mwg.Node[nextResolvedTabIndex.get()];
+                    Node[] resultSet = new org.mwg.Node[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 
                     for (int i = 0; i < resultSet.length; i++) {
@@ -324,31 +323,31 @@ public abstract class AbstractNode implements Node {
                             }
                         }
                         if (exact) {
-                            resultSet[resultSetIndex] = (A) resolvedNode;
+                            resultSet[resultSetIndex] = resolvedNode;
                             resultSetIndex++;
                         }
                     }
                     if (resultSet.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
-                        A[] trimmedResultSet = (A[]) new org.mwg.Node[resultSetIndex];
+                        Node[] trimmedResultSet = new org.mwg.Node[resultSetIndex];
                         System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
                         callback.on(trimmedResultSet);
                     }
                 }
             });
         } else {
-            callback.on((A[]) new org.mwg.Node[0]);
+            callback.on(new org.mwg.Node[0]);
         }
     }
 
     @Override
-    public <A extends org.mwg.Node> void find(String indexName, String query, Callback<A[]> callback) {
+    public void find(String indexName, String query, Callback<Node[]> callback) {
         findAt(indexName, time(), world(), query, callback);
     }
 
     @Override
-    public <A extends org.mwg.Node> void allAt(String indexName, long world, long time, Callback<A[]> callback) {
+    public void allAt(String indexName, long world, long time, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -357,7 +356,7 @@ public abstract class AbstractNode implements Node {
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
-            final A[] resolved = (A[]) new org.mwg.Node[mapSize];
+            final Node[] resolved = new org.mwg.Node[mapSize];
             DeferCounter waiter = _graph.counter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(0);
@@ -367,7 +366,7 @@ public abstract class AbstractNode implements Node {
                     selfPointer._resolver.lookup(world, time, nodeId, new Callback<org.mwg.Node>() {
                         @Override
                         public void on(org.mwg.Node resolvedNode) {
-                            resolved[loopInteger.getAndIncrement()] = (A) resolvedNode;
+                            resolved[loopInteger.getAndIncrement()] = resolvedNode;
                             waiter.count();
                         }
                     });
@@ -379,19 +378,19 @@ public abstract class AbstractNode implements Node {
                     if (loopInteger.get() == resolved.length) {
                         callback.on(resolved);
                     } else {
-                        A[] toSend = (A[]) new org.mwg.Node[loopInteger.get()];
+                        Node[] toSend = new org.mwg.Node[loopInteger.get()];
                         System.arraycopy(resolved, 0, toSend, 0, toSend.length);
                         callback.on(toSend);
                     }
                 }
             });
         } else {
-            callback.on((A[]) new org.mwg.Node[0]);
+            callback.on(new org.mwg.Node[0]);
         }
     }
 
     @Override
-    public <A extends org.mwg.Node> void all(String indexName, Callback<A[]> callback) {
+    public void all(String indexName, Callback<Node[]> callback) {
         allAt(indexName, world(), time(), callback);
     }
 
