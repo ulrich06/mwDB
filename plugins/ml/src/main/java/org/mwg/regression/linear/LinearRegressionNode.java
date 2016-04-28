@@ -1,12 +1,11 @@
 package org.mwg.regression.linear;
 
-import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.classifier.common.SlidingWindowManagingNode;
-import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.NodeState;
+import org.mwg.util.matrix.KMatrix;
+import org.mwg.util.matrix.KTransposeType;
+import org.mwg.util.matrix.operation.PInvSVD;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -25,7 +24,8 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    private double[] getCoefficients(){
+    @Override
+    public double[] getCoefficients(){
         Object objCoefBuffer = currentState.get(_resolver.stringToLongKey(INTERNAL_VALUE_COEFFICIENTS_KEY));
         if (objCoefBuffer == null) {
             double emptyCoefBuffer[] = new double[0];
@@ -42,22 +42,60 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
     @Override
     protected void setBootstrapModeHook() {
-        //TODO What should we do when bootstrap mode is approaching?
+        //What should we do when bootstrap mode is approaching?
+        //TODO Nothing?
     }
 
     @Override
     protected void updateModelParameters(double[] value) {
-        //TODO Step 1. Compose matrix X and vector Y (KMatrix).
-        //TODO Don't forget intercept - it is at response index, so corresponding column should be 1
+        //Value should be already added to buffer by that time
+        final double currentBuffer[] = getValueBuffer();
+        final double reshapedValue[] = new double[currentBuffer.length];
+        final int dims = getInputDimensions();
+        final int bufferLength = getCurrentBufferLength();
+        final int respIndex = getResponseIndex();
+
+        final double y[] = new double[bufferLength];
+
+        //Step 1. Re-arrange to column-based format.
+        for (int i=0;i<bufferLength;i++){
+            for (int j=0;j<dims;j++){
+                //Intercept goes instead of response value of the matrix
+                if (j==respIndex){
+                    reshapedValue[j*bufferLength+i] = 1;
+                    y[i] = currentBuffer[i*dims+j];
+                }else{
+                    reshapedValue[j*bufferLength+i] = currentBuffer[i*dims+j];
+                }
+            }
+        }
+
+        KMatrix xMatrix = new KMatrix(reshapedValue, bufferLength, dims);
+        KMatrix yVector = new KMatrix(y, bufferLength, 1);
 
         // inv(Xt * X) * Xt * y
-        //TODO use pseudoinverse right away? What if we have too few points?
+        KMatrix xtMulX = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+                (KTransposeType.TRANSPOSE, 1, xMatrix, KTransposeType.NOTRANSPOSE, 0, xMatrix);
+
+        PInvSVD pinvsvd = new PInvSVD();
+        pinvsvd.factor(xtMulX,false);
+        KMatrix pinv=pinvsvd.getPInv();
+
+        KMatrix invMulXt = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+                (KTransposeType.NOTRANSPOSE, 1, pinv, KTransposeType.TRANSPOSE, 0, xMatrix);
+
+        KMatrix result = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+                (KTransposeType.NOTRANSPOSE, 1, invMulXt, KTransposeType.NOTRANSPOSE, 0, yVector);
+
+        final double newCoefficients[] = new double[dims];
+        for (int i=0;i<dims;i++){
+            newCoefficients[i] = result.get(i, 0);
+        }
+        setCoefficients(newCoefficients);
     }
 
     @Override
     public double getBufferError() {
-        //TODO What about intercept?
-
         //For each value in value buffer
         int startIndex = 0;
         final int dims = getInputDimensions();

@@ -243,8 +243,7 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
         illegalArgumentIfFalse(currentState == null, "Already initialized before");
         illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
         illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
-        illegalArgumentIfFalse((highErrorThreshold >= 0) && (highErrorThreshold <= 1), "Higher error threshold should be within [0;1]");
-        illegalArgumentIfFalse((lowErrorThreshold >= 0) && (lowErrorThreshold <= 1), "Lower error threshold should be within [0;1]");
+        //High and low error thresholds are not bounded - meaning might depend on implementation
         illegalArgumentIfFalse(highErrorThreshold >= lowErrorThreshold, "High error threshold should be above or equal to lower");
         illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
 
