@@ -28,7 +28,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier implem
 
     @Override
     protected void initializeClassIfNecessary(int classNum){
-        Object oldSumsObj = phasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX+classNum);
+        Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX+classNum);
         if (oldSumsObj!=null){
             //Is there, but could be deleted
             double oldSums[] = (double[])oldSumsObj;

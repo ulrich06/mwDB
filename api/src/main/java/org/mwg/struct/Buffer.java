@@ -13,6 +13,14 @@ public interface Buffer {
     void write(byte b);
 
     /**
+     * Append a table of bytes to the buffer
+     *
+     * @param bytes byte to append
+     */
+    void writeAll(byte[] bytes);
+
+
+    /**
      * Read the buffer at a precise position
      *
      * @param position index in the buffer

@@ -26,12 +26,12 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
     @Override
     public double[] getCoefficients(){
-        return phasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
+        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
     }
 
     private void setCoefficients(double[] coefficients) {
         Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        phasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
+        unphasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
     }
 
     @Override
@@ -67,18 +67,18 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
         KMatrix xMatrix = new KMatrix(reshapedValue, bufferLength, dims);
         KMatrix yVector = new KMatrix(y, bufferLength, 1);
 
-        // inv(Xt * X) * Xt * y
-        KMatrix xtMulX = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        // inv(Xt * X) * Xt * ys
+        KMatrix xtMulX = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.TRANSPOSE, 1, xMatrix, KTransposeType.NOTRANSPOSE, 0, xMatrix);
 
         PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(xtMulX,false);
         KMatrix pinv=pinvsvd.getPInv();
 
-        KMatrix invMulXt = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        KMatrix invMulXt = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.NOTRANSPOSE, 1, pinv, KTransposeType.TRANSPOSE, 0, xMatrix);
 
-        KMatrix result = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        KMatrix result = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.NOTRANSPOSE, 1, invMulXt, KTransposeType.NOTRANSPOSE, 0, yVector);
 
         final double newCoefficients[] = new double[dims];
@@ -104,7 +104,7 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
         final int responseIndex = getResponseIndex();
         double sqrResidualSum = 0;
-        while (startIndex + dims < valueBuffer.length) { //For each value
+        while (startIndex + dims <= valueBuffer.length) { //For each value
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
             double response = 0;
             for (int i=0;i<curValue.length;i++){
@@ -120,6 +120,6 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
             //Continue the loop
             startIndex += dims;
         }
-        return sqrResidualSum / valueBuffer.length;
+        return sqrResidualSum / numValues;
     }
 }
