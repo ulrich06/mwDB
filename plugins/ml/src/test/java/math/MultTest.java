@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.util.matrix.KMatrix;
 import org.mwg.util.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.util.matrix.blassolver.blas.CudaBlas;
 import org.mwg.util.matrix.blassolver.blas.F2JBlas;
 import org.mwg.util.matrix.blassolver.blas.KBlas;
 import org.mwg.util.matrix.blassolver.blas.NetlibBlas;
@@ -64,7 +63,7 @@ public class MultTest {
         d = d / 1000000;
         System.out.println("F2J mult: " + d + " ms");
 
-
+/*
         blas = new CudaBlas();
         blasengine.setBlas(blas);
         startTime = System.nanoTime();
@@ -73,7 +72,7 @@ public class MultTest {
         d = (endTime - startTime);
         d = d / 1000000;
         System.out.println("Cuda mult: " + d + " ms");
-
+*/
 
         startTime = System.nanoTime();
         KMatrix matD = manualMultpily(matA, matB);
@@ -88,7 +87,7 @@ public class MultTest {
             for (int j = 0; j < p; j++) {
                 Assert.assertTrue(Math.abs(matNetlib.get(i, j) - matD.get(i, j)) < eps);
                 Assert.assertTrue(Math.abs(matF2J.get(i, j) - matD.get(i, j)) < eps);
-                Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
+               // Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
             }
         }
     }

@@ -30,7 +30,7 @@ public class StorageTest {
         test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).withAutoSave(10_000).build());
     }
 
-    final int valuesToInsert = 1_000_000;
+    final int valuesToInsert = 300_000;
     final long timeOrigin = 1000;
 
     private void test(String name, Graph graph) {

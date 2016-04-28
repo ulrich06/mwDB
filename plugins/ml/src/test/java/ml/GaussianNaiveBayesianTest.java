@@ -83,7 +83,7 @@ public class GaussianNaiveBayesianTest {
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
                 false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 
-        @Test
+       // @Test
         public void test() {
             //This test fails only on crash. Otherwise, it is just for
 

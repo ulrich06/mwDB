@@ -82,7 +82,7 @@ public class GaussianClassifierTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, };
 
-    @Test
+   // @Test
     public void test() {
         //This test fails only on crash. Otherwise, it is just for
         Graph graph = GraphBuilder.builder().withFactory(new GaussianClassifierNodeFactory()).withScheduler(new NoopScheduler()).build();

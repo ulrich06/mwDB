@@ -7,10 +7,8 @@ import jcuda.jcublas.*;
 //TODO delete this
 class JCublasSample
 {
-    /* Matrix size */
     private static final int N = 5000;
 
-    /* Main */
     public static void main(String args[])
     {
         double h_A[];
