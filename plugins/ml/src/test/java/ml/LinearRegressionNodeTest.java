@@ -1,16 +1,12 @@
 package ml;
 
-import junit.framework.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
-import org.mwg.classifier.gaussian.GaussianClassifierNodeFactory;
-import org.mwg.classifier.gaussiancommon.KGaussianClassifierNode;
 import org.mwg.core.NoopScheduler;
 import org.mwg.regression.linear.KLinearRegression;
 import org.mwg.regression.linear.LinearRegressionNodeFactory;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
