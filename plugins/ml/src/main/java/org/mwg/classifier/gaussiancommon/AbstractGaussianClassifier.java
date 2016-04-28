@@ -195,7 +195,7 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
 
         final int clIndex = getResponseIndex();
         int errorCount = 0;
-        while (startIndex + dims < valueBuffer.length) {
+        while (startIndex + dims <= valueBuffer.length) {
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
             int realClass = (int) curValue[clIndex];
             int predictedClass = predictValue(curValue);

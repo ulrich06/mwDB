@@ -104,7 +104,7 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
         final int responseIndex = getResponseIndex();
         double sqrResidualSum = 0;
-        while (startIndex + dims < valueBuffer.length) { //For each value
+        while (startIndex + dims <= valueBuffer.length) { //For each value
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
             double response = 0;
             for (int i=0;i<curValue.length;i++){
