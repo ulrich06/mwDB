@@ -2,7 +2,7 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
@@ -33,13 +33,13 @@ public class ChunkSpaceTest {
 
 
     public void test(ChunkSpace space) {
-        StateChunk stateChunk = (StateChunk) space.create(Constants.STATE_CHUNK, 0, 0, 0, null, null);
+        StateChunk stateChunk = (StateChunk) space.create(CoreConstants.STATE_CHUNK, 0, 0, 0, null, null);
         space.putAndMark(stateChunk);
 
-        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) space.create(Constants.WORLD_ORDER_CHUNK, 0, 0, 1, null, null);
+        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) space.create(CoreConstants.WORLD_ORDER_CHUNK, 0, 0, 1, null, null);
         space.putAndMark(worldOrderChunk);
 
-        TimeTreeChunk timeTreeChunk = (TimeTreeChunk) space.create(Constants.TIME_TREE_CHUNK, 0, 0, 2, null, null);
+        TimeTreeChunk timeTreeChunk = (TimeTreeChunk) space.create(CoreConstants.TIME_TREE_CHUNK, 0, 0, 2, null, null);
         space.putAndMark(timeTreeChunk);
 
         space.free();

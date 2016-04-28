@@ -1,24 +1,24 @@
 package org.mwg.core.utility;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
 
 public class Buffer {
 
     public static void keyToBuffer(org.mwg.struct.Buffer buffer, byte chunkType, long world, long time, long id) {
         buffer.write(chunkType);
-        buffer.write(Constants.KEY_SEP);
+        buffer.write(CoreConstants.KEY_SEP);
         Base64.encodeLongToBuffer(world, buffer);
-        buffer.write(Constants.KEY_SEP);
+        buffer.write(CoreConstants.KEY_SEP);
         Base64.encodeLongToBuffer(time, buffer);
-        buffer.write(Constants.KEY_SEP);
+        buffer.write(CoreConstants.KEY_SEP);
         Base64.encodeLongToBuffer(id, buffer);
     }
 
     public static org.mwg.struct.Buffer newOffHeapBuffer() {
         return new org.mwg.struct.Buffer() {
 
-            private long bufferPtr = Constants.OFFHEAP_NULL_PTR;
+            private long bufferPtr = CoreConstants.OFFHEAP_NULL_PTR;
 
             private long writeCursor = 0;
 
@@ -26,8 +26,8 @@ public class Buffer {
 
             @Override
             public void write(Byte b) {
-                if (bufferPtr == Constants.OFFHEAP_NULL_PTR) {
-                    capacity = Constants.MAP_INITIAL_CAPACITY;
+                if (bufferPtr == CoreConstants.OFFHEAP_NULL_PTR) {
+                    capacity = CoreConstants.MAP_INITIAL_CAPACITY;
                     bufferPtr = OffHeapByteArray.allocate(capacity);
                     OffHeapByteArray.set(bufferPtr, writeCursor, b);
                     writeCursor++;
@@ -45,7 +45,7 @@ public class Buffer {
 
             @Override
             public byte read(long position) {
-                if (bufferPtr != Constants.OFFHEAP_NULL_PTR && position < capacity) {
+                if (bufferPtr != CoreConstants.OFFHEAP_NULL_PTR && position < capacity) {
                     return OffHeapByteArray.get(bufferPtr, position);
                 }
                 return -1;
@@ -67,9 +67,9 @@ public class Buffer {
 
             @Override
             public void free() {
-                if (bufferPtr != Constants.OFFHEAP_NULL_PTR) {
+                if (bufferPtr != CoreConstants.OFFHEAP_NULL_PTR) {
                     OffHeapByteArray.free(bufferPtr);
-                    bufferPtr = Constants.OFFHEAP_NULL_PTR;
+                    bufferPtr = CoreConstants.OFFHEAP_NULL_PTR;
                 }
             }
         };
@@ -85,7 +85,7 @@ public class Buffer {
             @Override
             public void write(Byte b) {
                 if (buffer == null) {
-                    buffer = new byte[Constants.MAP_INITIAL_CAPACITY];
+                    buffer = new byte[CoreConstants.MAP_INITIAL_CAPACITY];
                     buffer[0] = b;
                     writeCursor = 1;
                 } else if (writeCursor == buffer.length) {

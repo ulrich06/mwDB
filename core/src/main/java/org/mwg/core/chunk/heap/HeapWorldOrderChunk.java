@@ -1,7 +1,7 @@
 
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.ChunkListener;
@@ -75,13 +75,13 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         this._marks = 0;
         this._lock = 0;
         this._magic = 0;
-        this._extra = Constants.NULL_LONG;
+        this._extra = CoreConstants.NULL_LONG;
 
         this._listener = p_listener;
         if (initialPayload != null) {
             load(initialPayload);
         } else {
-            int initialCapacity = Constants.MAP_INITIAL_CAPACITY;
+            int initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
             InternalState newstate = new InternalState(initialCapacity, new long[initialCapacity * 2], new int[initialCapacity], new int[initialCapacity], 0);
             for (int i = 0; i < initialCapacity; i++) {
                 newstate.elementNext[i] = -1;
@@ -125,7 +125,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
             this.elementKV = elementKV;
             this.elementNext = elementNext;
             this.elementHash = elementHash;
-            this.threshold = (int) (elementDataSize * Constants.MAP_LOAD_FACTOR);
+            this.threshold = (int) (elementDataSize * CoreConstants.MAP_LOAD_FACTOR);
             this.elementCount = elemCount;
         }
     }
@@ -201,7 +201,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     public final long get(long key) {
         final InternalState internalState = state;
         if (internalState.elementDataSize == 0) {
-            return Constants.NULL_LONG;
+            return CoreConstants.NULL_LONG;
         }
         int index = (int) PrimitiveHelper.longHash(key, internalState.elementDataSize);
         int m = internalState.elementHash[index];
@@ -212,7 +212,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
                 m = internalState.elementNext[m];
             }
         }
-        return Constants.NULL_LONG;
+        return CoreConstants.NULL_LONG;
     }
 
     @Override
@@ -278,7 +278,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
             return;
         }
         int cursor = 0;
-        long loopKey = Constants.NULL_LONG;
+        long loopKey = CoreConstants.NULL_LONG;
         int previousStart = -1;
         long capacity = -1;
         int insertIndex = 0;
@@ -286,7 +286,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         long bufferSize = buffer.size();
         boolean initDone = false;
         while (cursor < bufferSize) {
-            if (buffer.read(cursor) == Constants.CHUNK_SEP) {
+            if (buffer.read(cursor) == CoreConstants.CHUNK_SEP) {
                 if (!initDone) {
                     long size = Base64.decodeToLongWithBounds(buffer, 0, cursor);
                     if (size == 0) {
@@ -310,8 +310,8 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
                     _extra = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                 }
                 previousStart = cursor + 1;
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SEP && temp_state != null) {
-                if (loopKey != Constants.NULL_LONG) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SEP && temp_state != null) {
+                if (loopKey != CoreConstants.NULL_LONG) {
                     long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                     //insert raw
                     temp_state.elementKV[insertIndex * 2] = loopKey;
@@ -326,17 +326,17 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
                     temp_state.elementHash[hashIndex] = insertIndex;
                     insertIndex++;
                     //reset key for next round
-                    loopKey = Constants.NULL_LONG;
+                    loopKey = CoreConstants.NULL_LONG;
                 }
                 previousStart = cursor + 1;
-            } else if (buffer.read(cursor) == Constants.CHUNK_SUB_SUB_SEP) {
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) {
                 loopKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                 previousStart = cursor + 1;
             }
             //loop in all case
             cursor++;
         }
-        if (loopKey != Constants.NULL_LONG && temp_state != null) {
+        if (loopKey != CoreConstants.NULL_LONG && temp_state != null) {
             long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
             //insert raw
             temp_state.elementKV[insertIndex * 2] = loopKey;
@@ -359,28 +359,28 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     public final void save(Buffer buffer) {
         final InternalState internalState = state;
         Base64.encodeLongToBuffer(internalState.elementCount, buffer);
-        buffer.write(Constants.CHUNK_SEP);
-        if (_extra != Constants.NULL_LONG) {
+        buffer.write(CoreConstants.CHUNK_SEP);
+        if (_extra != CoreConstants.NULL_LONG) {
             Base64.encodeLongToBuffer(_extra, buffer);
-            buffer.write(Constants.CHUNK_SEP);
+            buffer.write(CoreConstants.CHUNK_SEP);
         }
         boolean isFirst = true;
         for (int i = 0; i < internalState.elementCount; i++) {
             long loopKey = internalState.elementKV[i * 2];
             long loopValue = internalState.elementKV[i * 2 + 1];
             if (!isFirst) {
-                buffer.write(Constants.CHUNK_SUB_SEP);
+                buffer.write(CoreConstants.CHUNK_SUB_SEP);
             }
             isFirst = false;
             Base64.encodeLongToBuffer(loopKey, buffer);
-            buffer.write(Constants.CHUNK_SUB_SUB_SEP);
+            buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
             Base64.encodeLongToBuffer(loopValue, buffer);
         }
     }
 
     @Override
     public final byte chunkType() {
-        return Constants.WORLD_ORDER_CHUNK;
+        return CoreConstants.WORLD_ORDER_CHUNK;
     }
 
     private void internal_set_dirty() {
@@ -391,7 +391,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
             magicAfter = magicBefore + 1;
         } while (!unsafe.compareAndSwapLong(this, _magicOffset, magicBefore, magicAfter));
         if (_listener != null) {
-            if ((_flags & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
                 _listener.declareDirty(this);
             }
         }

@@ -39,7 +39,7 @@ public class SuperTimeTest {
             public void on(Boolean o) {
 
                 org.mwg.Node node_t0 = graph.newNode(0, 0);
-                for (int i = 0; i < Constants.SCALE_1; i++) {
+                for (int i = 0; i < CoreConstants.SCALE_1; i++) {
                     final int finalI = i;
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
@@ -49,18 +49,18 @@ public class SuperTimeTest {
                     });
                 }
 
-                ChunkSpace space = ((org.mwg.core.Graph) graph).space();
+                ChunkSpace space = ((org.mwg.core.CoreGraph) graph).space();
 
-                TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(Constants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
+                TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(CoreConstants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
                 Assert.assertTrue(superTimeTree != null);
                 long superTimeTreeSize = superTimeTree.size();
                 Assert.assertTrue(superTimeTreeSize == 1); // TimeTree is not splitted
 
                 //insert a new timePoint
-                graph.lookup(0, Constants.SCALE_1, node_t0.id(), new Callback<org.mwg.Node>() {
+                graph.lookup(0, CoreConstants.SCALE_1, node_t0.id(), new Callback<org.mwg.Node>() {
                     @Override
                     public void on(org.mwg.Node result) {
-                        result.setProperty("time", Type.INT, (int) Constants.SCALE_1);
+                        result.setProperty("time", Type.INT, (int) CoreConstants.SCALE_1);
                     }
                 });
 
@@ -68,7 +68,7 @@ public class SuperTimeTest {
                 Assert.assertTrue(superTimeTreeSize2 == 1); // TimeTree is still not splitted (split at 2n)
 
                 //insert the rest
-                for (int i = ((int) Constants.SCALE_1 + 1); i < (Constants.SCALE_1 * 2); i++) {
+                for (int i = ((int) CoreConstants.SCALE_1 + 1); i < (CoreConstants.SCALE_1 * 2); i++) {
                     final int finalI = i;
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
@@ -81,7 +81,7 @@ public class SuperTimeTest {
                 long superTimeTreeSize3 = superTimeTree.size();
                 Assert.assertTrue(superTimeTreeSize3 == 2);
 
-                for (int i = ((int) Constants.SCALE_1 * 2); i < (Constants.SCALE_1 * 5); i++) {
+                for (int i = ((int) CoreConstants.SCALE_1 * 2); i < (CoreConstants.SCALE_1 * 5); i++) {
                     final int finalI = i;
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
@@ -98,7 +98,7 @@ public class SuperTimeTest {
                 space.unmarkChunk(superTimeTree);
 
                 //test that lookup are corrects
-                for (int i = 0; i < (Constants.SCALE_1 * 5); i++) {
+                for (int i = 0; i < (CoreConstants.SCALE_1 * 5); i++) {
                     final int finalI = i;
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
@@ -112,8 +112,8 @@ public class SuperTimeTest {
                 node_t0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                     @Override
                     public void on(long[] result) {
-                        for (int i = 0; i < (Constants.SCALE_1 * 5); i++) {
-                            result[i] = (Constants.SCALE_1 * 5) + 1 - i;
+                        for (int i = 0; i < (CoreConstants.SCALE_1 * 5); i++) {
+                            result[i] = (CoreConstants.SCALE_1 * 5) + 1 - i;
                         }
                     }
                 });

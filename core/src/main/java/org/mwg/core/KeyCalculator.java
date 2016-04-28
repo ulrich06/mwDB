@@ -1,5 +1,7 @@
 package org.mwg.core;
 
+import org.mwg.Constants;
+
 import java.util.concurrent.atomic.AtomicLong;
 
 class KeyCalculator {

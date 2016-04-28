@@ -1,7 +1,7 @@
 package org.mwg.core.chunk.offheap;
 
 import org.mwg.struct.Buffer;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
@@ -13,18 +13,18 @@ import org.mwg.core.utility.PrimitiveHelper;
  */
 public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
-    //constants definition
+    //Constants definition
     private static final int META_SIZE = 3;
 
     /**
      * Global Chunk indexes
      */
-    private static final int INDEX_WORLD = Constants.OFFHEAP_CHUNK_INDEX_WORLD;
-    private static final int INDEX_TIME = Constants.OFFHEAP_CHUNK_INDEX_TIME;
-    private static final int INDEX_ID = Constants.OFFHEAP_CHUNK_INDEX_ID;
-    private static final int INDEX_TYPE = Constants.OFFHEAP_CHUNK_INDEX_TYPE;
-    private static final int INDEX_FLAGS = Constants.OFFHEAP_CHUNK_INDEX_FLAGS;
-    private static final int INDEX_MARKS = Constants.OFFHEAP_CHUNK_INDEX_MARKS;
+    private static final int INDEX_WORLD = CoreConstants.OFFHEAP_CHUNK_INDEX_WORLD;
+    private static final int INDEX_TIME = CoreConstants.OFFHEAP_CHUNK_INDEX_TIME;
+    private static final int INDEX_ID = CoreConstants.OFFHEAP_CHUNK_INDEX_ID;
+    private static final int INDEX_TYPE = CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE;
+    private static final int INDEX_FLAGS = CoreConstants.OFFHEAP_CHUNK_INDEX_FLAGS;
+    private static final int INDEX_MARKS = CoreConstants.OFFHEAP_CHUNK_INDEX_MARKS;
 
     /**
      * Local indexes
@@ -50,14 +50,14 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         //listener
         this._listener = p_listener;
         //init
-        if (previousAddr != Constants.OFFHEAP_NULL_PTR) {
+        if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             addr = previousAddr;
         } else if (initialPayload != null) {
             addr = OffHeapLongArray.allocate(14);
             load(initialPayload);
         } else {
             addr = OffHeapLongArray.allocate(14);
-            long capacity = Constants.MAP_INITIAL_CAPACITY;
+            long capacity = CoreConstants.MAP_INITIAL_CAPACITY;
             //init k array
             kPtr = OffHeapLongArray.allocate(capacity);
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
@@ -72,7 +72,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_SIZE, 0);
             OffHeapLongArray.set(addr, INDEX_FLAGS, 0);
             OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
-            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
         }
 
@@ -89,7 +89,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             long previousSize = OffHeapLongArray.get(addr, INDEX_SIZE);
 
             //reset
-            long capacity = Constants.MAP_INITIAL_CAPACITY;
+            long capacity = CoreConstants.MAP_INITIAL_CAPACITY;
             //init k array
             kPtr = OffHeapLongArray.allocate(capacity);
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
@@ -102,7 +102,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
             OffHeapLongArray.set(addr, INDEX_SIZE, 0);
             OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
-            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, PrimitiveHelper.rand());
 
             for (long i = 0; i < previousSize; i++) {
@@ -138,7 +138,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
     @Override
     public final byte chunkType() {
-        return Constants.TIME_TREE_CHUNK;
+        return CoreConstants.TIME_TREE_CHUNK;
     }
 
     @Override
@@ -208,7 +208,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             if (result != -1) {
                 resultKey = key(result);
             } else {
-                resultKey = Constants.NULL_LONG;
+                resultKey = CoreConstants.NULL_LONG;
             }
             return resultKey;
         } finally {
@@ -226,7 +226,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         try {
             ptrConsistency();
 
-            if (OffHeapLongArray.get(addr, INDEX_ROOT_ELEM) == Constants.OFFHEAP_NULL_PTR) {
+            if (OffHeapLongArray.get(addr, INDEX_ROOT_ELEM) == CoreConstants.OFFHEAP_NULL_PTR) {
                 return;
             }
 
@@ -234,7 +234,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             boolean isFirst = true;
             for (int i = 0; i < treeSize; i++) {
                 if (!isFirst) {
-                    buffer.write(Constants.CHUNK_SUB_SEP);
+                    buffer.write(CoreConstants.CHUNK_SUB_SEP);
                 } else {
                     isFirst = false;
                 }
@@ -295,7 +295,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_K, kPtr);
             OffHeapLongArray.set(addr, INDEX_META, metaPtr);
             OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
-            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (newLength * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (newLength * CoreConstants.MAP_LOAD_FACTOR));
 
         }
         if (size == 0) {
@@ -385,7 +385,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             nextMagic = previousMagic + 1;
         } while (!OffHeapLongArray.compareAndSwap(addr, INDEX_MAGIC, previousMagic, nextMagic));
         if (_listener != null) {
-            if ((OffHeapLongArray.get(addr, INDEX_FLAGS) & Constants.DIRTY_BIT) != Constants.DIRTY_BIT) {
+            if ((OffHeapLongArray.get(addr, INDEX_FLAGS) & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
                 _listener.declareDirty(this);
             }
         }
@@ -593,23 +593,23 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
     private void load(final Buffer buffer) {
 
-        long capacity = Constants.MAP_INITIAL_CAPACITY;
+        long capacity = CoreConstants.MAP_INITIAL_CAPACITY;
 
         //init k array
-        kPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY);
+        kPtr = OffHeapLongArray.allocate(CoreConstants.MAP_INITIAL_CAPACITY);
         OffHeapLongArray.set(addr, INDEX_K, kPtr);
         //init meta array
-        metaPtr = OffHeapLongArray.allocate(Constants.MAP_INITIAL_CAPACITY * META_SIZE);
+        metaPtr = OffHeapLongArray.allocate(CoreConstants.MAP_INITIAL_CAPACITY * META_SIZE);
         OffHeapLongArray.set(addr, INDEX_META, metaPtr);
         //init colors array
-        colorsPtr = OffHeapByteArray.allocate(Constants.MAP_INITIAL_CAPACITY);
+        colorsPtr = OffHeapByteArray.allocate(CoreConstants.MAP_INITIAL_CAPACITY);
         OffHeapLongArray.set(addr, INDEX_COLORS, colorsPtr);
 
         OffHeapLongArray.set(addr, INDEX_LOCK, 0);
         OffHeapLongArray.set(addr, INDEX_FLAGS, 0);
         OffHeapLongArray.set(addr, INDEX_SIZE, 0);
         OffHeapLongArray.set(addr, INDEX_ROOT_ELEM, -1);
-        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * Constants.MAP_LOAD_FACTOR));
+        OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
         OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
 
         long cursor = 0;
@@ -617,7 +617,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         long payloadSize = buffer.size();
         while (cursor < payloadSize) {
             byte current = buffer.read(cursor);
-            if (current == Constants.CHUNK_SUB_SEP) {
+            if (current == CoreConstants.CHUNK_SUB_SEP) {
                 internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
                 previous = cursor + 1;
             }

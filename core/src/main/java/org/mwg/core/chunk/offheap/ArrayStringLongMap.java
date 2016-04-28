@@ -1,7 +1,7 @@
 package org.mwg.core.chunk.offheap;
 
 import org.mwg.struct.StringLongMap;
-import org.mwg.core.Constants;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -40,7 +40,7 @@ public class ArrayStringLongMap implements StringLongMap {
 
     public ArrayStringLongMap(ChunkListener listener, long initialCapacity, long previousAddr) {
         this.listener = listener;
-        if (previousAddr == Constants.OFFHEAP_NULL_PTR) {
+        if (previousAddr == CoreConstants.OFFHEAP_NULL_PTR) {
             this.root_array_ptr = OffHeapLongArray.allocate(ROOT_ARRAY_SIZE);
             /** Init long variables */
             //init lock
@@ -48,7 +48,7 @@ public class ArrayStringLongMap implements StringLongMap {
             //init capacity
             OffHeapLongArray.set(this.root_array_ptr, INDEX_CAPACITY, initialCapacity);
             //init threshold
-            OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * Constants.MAP_LOAD_FACTOR));
+            OffHeapLongArray.set(this.root_array_ptr, INDEX_THRESHOLD, (long) (initialCapacity * CoreConstants.MAP_LOAD_FACTOR));
             //init elementCount
             OffHeapLongArray.set(this.root_array_ptr, INDEX_ELEMENT_COUNT, 0);
 
@@ -100,8 +100,8 @@ public class ArrayStringLongMap implements StringLongMap {
         long hashedKey = PrimitiveHelper.stringHash(key);
         long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-        long result = Constants.NULL_LONG;
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        long result = CoreConstants.NULL_LONG;
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             //optimization to avoid string comparison for all collisions
             if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
                 if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
@@ -232,7 +232,7 @@ public class ArrayStringLongMap implements StringLongMap {
         long count = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
         long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), capacity);
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
-        while (m != Constants.OFFHEAP_NULL_PTR) {
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             //optimization to avoid string comparison for all collisions
             if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
                 if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
@@ -267,10 +267,10 @@ public class ArrayStringLongMap implements StringLongMap {
                 //rehashEveryThing
                 for (long i = 0; i < count; i++) {
                     long previousHash = OffHeapLongArray.get(elementK_H_ptr, i);
-                    if (previousHash != Constants.OFFHEAP_NULL_PTR) {
+                    if (previousHash != CoreConstants.OFFHEAP_NULL_PTR) {
                         long newHashIndex = PrimitiveHelper.longHash(OffHeapLongArray.get(elementK_H_ptr, i), newCapacity);
                         long currentHashedIndex = OffHeapLongArray.get(elementHash_ptr, newHashIndex);
-                        if (currentHashedIndex != Constants.OFFHEAP_NULL_PTR) {
+                        if (currentHashedIndex != CoreConstants.OFFHEAP_NULL_PTR) {
                             OffHeapLongArray.set(elementNext_ptr, i, currentHashedIndex);
                         }
                         OffHeapLongArray.set(elementHash_ptr, newHashIndex, i);
@@ -279,14 +279,14 @@ public class ArrayStringLongMap implements StringLongMap {
 
                 capacity = newCapacity;
                 OffHeapLongArray.set(root_array_ptr, INDEX_CAPACITY, capacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * Constants.MAP_LOAD_FACTOR));
+                OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * CoreConstants.MAP_LOAD_FACTOR));
                 hashIndex = PrimitiveHelper.longHash(hashedKey, capacity);
             }
             //set K and associated K_H
             OffHeapStringArray.set(elementK_ptr, count, key);
             OffHeapLongArray.set(elementK_H_ptr, count, hashedKey);
             //set value or index if null
-            if (value == Constants.NULL_LONG) {
+            if (value == CoreConstants.NULL_LONG) {
                 OffHeapLongArray.set(elementV_ptr + 8, count, count);
             } else {
                 OffHeapLongArray.set(elementV_ptr + 8, count, value);
@@ -302,7 +302,7 @@ public class ArrayStringLongMap implements StringLongMap {
             //inform the listener
             this.listener.declareDirty(null);
         } else {
-            if (OffHeapLongArray.get(elementV_ptr + 8, entry) != value && value != Constants.NULL_LONG) {
+            if (OffHeapLongArray.get(elementV_ptr + 8, entry) != value && value != CoreConstants.NULL_LONG) {
                 //setValue
                 OffHeapLongArray.set(elementV_ptr + 8, entry, value);
                 this.listener.declareDirty(null);

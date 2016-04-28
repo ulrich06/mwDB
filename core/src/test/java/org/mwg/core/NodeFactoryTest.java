@@ -9,37 +9,46 @@ import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.core.utility.Unsafe;
+
+import java.lang.reflect.Array;
 
 public class NodeFactoryTest implements NodeFactory {
 
     @Override
     public String name() {
-        return "MathNode";
+        return "HelloWorldNode";
+    }
+
+    interface ExNode extends org.mwg.Node {
+        String sayHello();
+    }
+
+    class ExNodeImpl extends AbstractNode implements ExNode {
+
+        public ExNodeImpl(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+            super(p_world, p_time, p_id, p_graph, currentResolution);
+        }
+
+        @Override
+        public Object get(String propertyName) {
+            if (propertyName.equals("hello")) {
+                return "world";
+            }
+            return super.get(propertyName);
+        }
+
+        @Override
+        public String sayHello() {
+            return "HelloWorld";
+        }
     }
 
     @Override
     public org.mwg.Node create(long world, long time, long id, org.mwg.Graph graph, long[] currentResolution) {
-        return new org.mwg.plugin.AbstractNode(world, time, id, graph, currentResolution) {
-            @Override
-            public Object get(String propertyName) {
-                if (propertyName.equals("hello")) {
-                    return "world";
-                }
-                return super.get(propertyName);
-            }
-
-            @Override
-            public void index(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-            }
-
-            @Override
-            public void unindex(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-            }
-        };
+        return new ExNodeImpl(world, time, id, graph, currentResolution);
     }
 
     @Test
@@ -65,13 +74,23 @@ public class NodeFactoryTest implements NodeFactory {
     }
 
     private void test(Graph graph) {
+
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Node specializedNode = graph.newNode(0, 0, "MathNode");
+                Node specializedNode = graph.newNode(0, 0, "HelloWorldNode");
 
                 String hw = (String) specializedNode.get("hello");
                 Assert.assertTrue(hw.equals("world"));
+
+                Node parent = graph.newNode(0, 0);
+                parent.add("children", specializedNode);
+                parent.rel("children", new Callback<Node[]>() {
+                    @Override
+                    public void on(Node[] result) {
+                        Assert.assertEquals("HelloWorld", ((ExNode) result[0]).sayHello());
+                    }
+                });
 
                 specializedNode.free();
                 graph.disconnect(null);
