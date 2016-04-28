@@ -7,5 +7,9 @@ import org.mwg.classifier.common.KSlidingWindowManagingNode;
  * Created by andre on 4/26/2016.
  */
 public interface KLinearRegression extends KSlidingWindowManagingNode {
-    //TODO add something
+
+    /**
+     * @return Regression coefficients. Intercept is in place of response index.
+     */
+    double[] getCoefficients();
 }
