@@ -67,18 +67,18 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
         KMatrix xMatrix = new KMatrix(reshapedValue, bufferLength, dims);
         KMatrix yVector = new KMatrix(y, bufferLength, 1);
 
-        // inv(Xt * X) * Xt * y
-        KMatrix xtMulX = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        // inv(Xt * X) * Xt * ys
+        KMatrix xtMulX = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.TRANSPOSE, 1, xMatrix, KTransposeType.NOTRANSPOSE, 0, xMatrix);
 
         PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(xtMulX,false);
         KMatrix pinv=pinvsvd.getPInv();
 
-        KMatrix invMulXt = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        KMatrix invMulXt = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.NOTRANSPOSE, 1, pinv, KTransposeType.TRANSPOSE, 0, xMatrix);
 
-        KMatrix result = KMatrix.defaultEngine().multiplyTransposeAlphaBeta
+        KMatrix result = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.NOTRANSPOSE, 1, invMulXt, KTransposeType.NOTRANSPOSE, 0, yVector);
 
         final double newCoefficients[] = new double[dims];

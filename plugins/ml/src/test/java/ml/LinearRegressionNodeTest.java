@@ -55,9 +55,11 @@ public class LinearRegressionNodeTest {
                     System.out.print(coefs[j]+", ");
                 }
                 System.out.println();
+                System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0]-2) < eps);
                 assertTrue(Math.abs(coefs[1]-1) < eps);
+                assertTrue(lrNode.getBufferError() < eps);
             }
         });
     }
