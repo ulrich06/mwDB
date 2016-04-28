@@ -120,6 +120,6 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
             //Continue the loop
             startIndex += dims;
         }
-        return sqrResidualSum / valueBuffer.length;
+        return sqrResidualSum / numValues;
     }
 }
