@@ -25,7 +25,7 @@ public class Buffer {
             private long capacity = 0;
 
             @Override
-            public void write(Byte b) {
+            public void write(byte b) {
                 if (bufferPtr == CoreConstants.OFFHEAP_NULL_PTR) {
                     capacity = CoreConstants.MAP_INITIAL_CAPACITY;
                     bufferPtr = OffHeapByteArray.allocate(capacity);
@@ -83,7 +83,7 @@ public class Buffer {
             private int writeCursor;
 
             @Override
-            public void write(Byte b) {
+            public void write(byte b) {
                 if (buffer == null) {
                     buffer = new byte[CoreConstants.MAP_INITIAL_CAPACITY];
                     buffer[0] = b;
