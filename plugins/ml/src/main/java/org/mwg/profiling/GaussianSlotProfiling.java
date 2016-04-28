@@ -59,7 +59,8 @@ public class GaussianSlotProfiling extends AbstractNode {
 
 
     //get time in 15 minutes chunks
-    private static int getIntTime(long time, int numOfSlot, long periodSize){
+    public static int getIntTime(long time, int numOfSlot){
+        long periodSize=24*3600*1000; //toDo make this a property
         if(numOfSlot<=1){
             return 0;
         }
@@ -73,7 +74,7 @@ public class GaussianSlotProfiling extends AbstractNode {
 
         int numOfSlot = resolved.getFromKeyWithDefault(SLOTSNUMBER, SLOTSNUMBER_DEF);
 
-        int slot=getIntTime(time(),numOfSlot,24*3600*1000);
+        int slot=getIntTime(time(),numOfSlot);
 
 
         int[] total;
@@ -229,5 +230,27 @@ public class GaussianSlotProfiling extends AbstractNode {
             }
         }
         return result;
+    }
+
+    public double[] getPredictions(){
+        NodeState resolved = this._resolver.resolveState(this, true);
+        int numOfSlot= resolved.getFromKeyWithDefault(SLOTSNUMBER,SLOTSNUMBER_DEF);
+        int features= resolved.getFromKeyWithDefault(FEATURESNUMBER,FEATURESNUMBER_DEF);
+        int slot=getIntTime(time(),numOfSlot);
+        int index = slot * features;
+
+        int[] total=(int[])resolved.getFromKey(INTERNAL_TOTAL_KEY);
+        double[] sum=(double[])resolved.getFromKey(INTERNAL_SUM_KEY);
+
+        double[] result = new double[features];
+        if(total!=null) {
+            if (total[slot] != 0) {
+                for (int j = 0; j < features; j++) {
+                    result[j] = sum[j+index] / total[slot];
+                }
+            }
+        }
+        return result;
+
     }
 }
