@@ -269,8 +269,9 @@ public class KMatrix {
         }
     }
 
-    public static KMatrix createIdentity(int width, byte matrixType) {
-        KMatrix ret = new KMatrix(null, width, width);
+    public static KMatrix createIdentity(int rows, int columns) {
+        KMatrix ret = new KMatrix(null, rows, columns);
+        int width=Math.min(rows,columns);
         for (int i = 0; i < width; i++) {
             ret.set(i, i, 1);
         }

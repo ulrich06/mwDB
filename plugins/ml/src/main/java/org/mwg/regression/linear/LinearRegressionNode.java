@@ -17,8 +17,13 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
     /**
      * Attribute key - sliding window of values
-     */
+    */
     private static final String INTERNAL_VALUE_COEFFICIENTS_KEY = "_regressionCoefficients";
+
+    /**
+    * Attribute key - L2 regularization coefficient
+    */
+    private static final String INTERNAL_VALUE_L2_COEF_KEY = "_L2Coefficient";
 
     public LinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -29,9 +34,25 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
         return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
     }
 
+    @Override
+    public double getIntercept(){
+        return getCoefficients()[getResponseIndex()];
+    }
+
     private void setCoefficients(double[] coefficients) {
         Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
         unphasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
+    }
+
+    @Override
+    public double getL2Regularization(){
+        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_L2_COEF_KEY, 0.0);
+    }
+
+    @Override
+    public void setL2Regularization(double l2) {
+        illegalArgumentIfFalse(l2>=0,"L2 coefficients must be non-negative");
+        unphasedState().setFromKey(INTERNAL_VALUE_L2_COEF_KEY, Type.DOUBLE, l2);
     }
 
     @Override
@@ -51,6 +72,8 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
 
         final double y[] = new double[bufferLength];
 
+        final double l2 = getL2Regularization();
+
         //Step 1. Re-arrange to column-based format.
         for (int i=0;i<bufferLength;i++){
             for (int j=0;j<dims;j++){
@@ -67,9 +90,14 @@ public class LinearRegressionNode extends SlidingWindowManagingNode implements K
         KMatrix xMatrix = new KMatrix(reshapedValue, bufferLength, dims);
         KMatrix yVector = new KMatrix(y, bufferLength, 1);
 
-        // inv(Xt * X) * Xt * ys
+        // inv(Xt * X - lambda*I) * Xt * ys
+        // I - almost identity, but with 0 for intercept term
         KMatrix xtMulX = KMatrix.multiplyTransposeAlphaBeta
                 (KTransposeType.TRANSPOSE, 1, xMatrix, KTransposeType.NOTRANSPOSE, 0, xMatrix);
+
+        for (int i=0;i<dims;i++){
+            xtMulX.add(i,i,(i!=respIndex)?l2:0);
+        }
 
         PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(xtMulX,false);
