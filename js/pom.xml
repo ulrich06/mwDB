@@ -37,9 +37,6 @@
                         <configuration>
                             <source>${basedir}/../api/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
-                            <targetJS>${basedir}/target/classes</targetJS>
-                            <appendJavaStd>true</appendJavaStd>
-                            <appendJunitStd>false</appendJunitStd>
                         </configuration>
                     </execution>
                     <!--
