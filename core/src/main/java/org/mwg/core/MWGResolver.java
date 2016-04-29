@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.*;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.*;
 import org.mwg.plugin.*;
 import org.mwg.core.chunk.*;
@@ -249,7 +250,7 @@ class MWGResolver implements Resolver {
             callback.on(cached);
         } else {
             Buffer buffer = _graph.newBuffer();
-            org.mwg.core.utility.Buffer.keyToBuffer(buffer, type, world, time, id);
+            BufferBuilder.keyToBuffer(buffer, type, world, time, id);
 
             this._storage.get(new Buffer[]{buffer}, new Callback<Buffer[]>() {
                 @Override
@@ -298,7 +299,7 @@ class MWGResolver implements Resolver {
                 if (toLoadIndexes[i]) {
                     reverseIndex[lastInsertedIndex] = i;
                     keysToLoad[lastInsertedIndex] = _graph.newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(keysToLoad[lastInsertedIndex], types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
+                    BufferBuilder.keyToBuffer(keysToLoad[lastInsertedIndex], types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
                     lastInsertedIndex = lastInsertedIndex + 1;
                 }
             }

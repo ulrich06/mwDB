@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
 import org.mwg.core.chunk.heap.HeapChunk;
@@ -88,7 +89,7 @@ public class WorldOrderChunkTest implements ChunkListener {
         Assert.assertTrue(map.size() == 10_000);
         Assert.assertTrue(map.extra() == 1_000_000);
 
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         map.save(buffer);
         WorldOrderChunk map2 = factory.create(buffer);
         for (long i = 0; i < 10_000; i++) {
@@ -96,7 +97,7 @@ public class WorldOrderChunkTest implements ChunkListener {
         }
         Assert.assertTrue(map2.extra() == 1_000_000);
 
-        Buffer buffer2 = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer2 = BufferBuilder.newHeapBuffer();
         map2.save(buffer2);
         Assert.assertTrue(compareBuffers(buffer, buffer2));
         buffer.free();

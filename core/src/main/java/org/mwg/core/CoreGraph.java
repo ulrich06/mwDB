@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.*;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
 import org.mwg.plugin.NodeFactory;
@@ -170,16 +171,16 @@ class CoreGraph implements org.mwg.Graph {
                     final Buffer[] connectionKeys = new Buffer[4];
                     //preload ObjKeyGenerator
                     connectionKeys[0] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[0], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys[0], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     //preload WorldKeyGenerator
                     connectionKeys[1] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[1], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys[1], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     //preload GlobalWorldOrder
                     connectionKeys[2] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[2], CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    BufferBuilder.keyToBuffer(connectionKeys[2], CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                     //preload GlobalDictionary
                     connectionKeys[3] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(connectionKeys[3], CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+                    BufferBuilder.keyToBuffer(connectionKeys[3], CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
                     selfPointer._storage.get(connectionKeys, new Callback<Buffer[]>() {
                         @Override
                         public void on(Buffer[] payloads) {
@@ -293,9 +294,9 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public Buffer newBuffer() {
         if (offHeapBuffer) {
-            return org.mwg.core.utility.Buffer.newOffHeapBuffer();
+            return BufferBuilder.newOffHeapBuffer();
         } else {
-            return org.mwg.core.utility.Buffer.newHeapBuffer();
+            return BufferBuilder.newHeapBuffer();
         }
     }
 
@@ -321,7 +322,7 @@ class CoreGraph implements org.mwg.Graph {
                 if (loopChunk != null && (loopChunk.flags() & CoreConstants.DIRTY_BIT) == CoreConstants.DIRTY_BIT) {
                     //Save chunk Key
                     toSaveKeys[i] = newBuffer();
-                    org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
+                    BufferBuilder.keyToBuffer(toSaveKeys[i], loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
                     //Save chunk payload
                     try {
                         Buffer newBuffer = newBuffer();
@@ -337,14 +338,14 @@ class CoreGraph implements org.mwg.Graph {
 
             //save obj key gen key
             toSaveKeys[i] = newBuffer();
-            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
+            BufferBuilder.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
             //save obj key gen payload
             toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
             i++;
             //save world key gen key
             toSaveKeys[i] = newBuffer();
-            org.mwg.core.utility.Buffer.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
+            BufferBuilder.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
             //save world key gen payload
             toSaveValues[i] = newBuffer();
             Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), toSaveValues[i]);

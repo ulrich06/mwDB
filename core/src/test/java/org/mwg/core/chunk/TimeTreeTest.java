@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.Constants;
 import org.mwg.core.chunk.heap.HeapChunk;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.HeapTimeTreeChunk;
 import org.mwg.core.chunk.offheap.*;
@@ -158,7 +159,7 @@ public class TimeTreeTest implements ChunkListener {
             tree.insert(i);
         }
 
-        Buffer buffer = org.mwg.core.utility.Buffer.newOffHeapBuffer();
+        Buffer buffer = BufferBuilder.newOffHeapBuffer();
         tree.save(buffer);
         Assert.assertTrue(compareWithString(buffer, "A,C,E"));
         Assert.assertTrue(tree.size() == 3);
@@ -166,7 +167,7 @@ public class TimeTreeTest implements ChunkListener {
         TimeTreeChunk tree2 = factory.create(buffer);
         Assert.assertTrue(tree2.size() == 3);
 
-        Buffer buffer2 = org.mwg.core.utility.Buffer.newOffHeapBuffer();
+        Buffer buffer2 = BufferBuilder.newOffHeapBuffer();
         tree2.save(buffer2);
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 

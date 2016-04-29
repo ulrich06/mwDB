@@ -41,7 +41,7 @@ public class Base64Test {
 
 
 
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeLongToBuffer(val, buffer);
         long dec = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
         Assert.assertEquals(val, dec);
@@ -69,7 +69,7 @@ public class Base64Test {
     }
 
     private void testInt(int val) {
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeIntToBuffer(val, buffer);
         int dec = Base64.decodeToIntWithBounds(buffer, 0, buffer.size());
         //System.out.println(val + " -> " + enc + " -> " + dec);
@@ -147,7 +147,7 @@ public class Base64Test {
      * org.junit.Assert.assertEquals(val, dec);
      */
     private void testDouble(double val) {
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeDoubleToBuffer(val, buffer);
         double dec = Base64.decodeToDoubleWithBounds(buffer, 0, buffer.size());
         //System.out.println(val + " -> " + enc + " -> " + dec);
@@ -179,7 +179,7 @@ public class Base64Test {
     }
 
     private void boolArrayInnerTest(boolean[] array) {
-        Buffer buffer = org.mwg.core.utility.Buffer.newHeapBuffer();
+        Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeBoolArrayToBuffer(array,buffer);
         boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer,0,buffer.size(), array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
