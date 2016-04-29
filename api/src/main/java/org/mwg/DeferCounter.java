@@ -3,7 +3,7 @@ package org.mwg;
 /**
  * DeferCounter provides a mean to wait for an amount of events before running a method.
  */
-public interface DeferCounter {
+public interface DeferCounter<A> {
 
     /**
      * Notifies the counter that an awaited event hasField occurred.<br>
@@ -16,6 +16,6 @@ public interface DeferCounter {
      *
      * @param callback The task to be executed
      */
-    void then(Callback callback);
+    void then(Callback<A> callback);
 
 }

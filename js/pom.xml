@@ -30,34 +30,32 @@
                 <version>${java2typescript.plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>compile-src</id>
+                        <id>compile-api</id>
                         <goals>
                             <goal>java2ts</goal>
                         </goals>
                         <configuration>
+                            <name>api</name>
+                            <copyJRE>true</copyJRE>
                             <source>${basedir}/../api/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
                         </configuration>
                     </execution>
-                    <!--
                     <execution>
-                        <id>compile-test</id>
+                        <id>compile-core</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>java2ts</goal>
                         </goals>
                         <configuration>
-                            <source>${basedir}/../microframework/src/test/java</source>
-                            <target>${basedir}/target/generated-test-sources</target>
-                            <targetJS>${basedir}/target/test-classes</targetJS>
-                            <flatJUnit>true</flatJUnit>
-                            <libraries>
-                                <library>${basedir}/target/classes</library>
-                            </libraries>
-                            <appendJavaStd>false</appendJavaStd>
-                            <appendJunitStd>true</appendJunitStd>
+                            <name>core</name>
+                            <copyJRE>true</copyJRE>
+                            <moduleImports>
+                                <moduleImport>* as org from './api.ts'</moduleImport>
+                            </moduleImports>
+                            <source>${basedir}/../core/src/main/java</source>
+                            <target>${basedir}/target/generated-sources</target>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
         </plugins>
