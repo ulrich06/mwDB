@@ -22,7 +22,6 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalPrecise() {
-        //This test fails only on crash. Otherwise, it is just for
         Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -34,7 +33,8 @@ public class LinearRegressionNodeTest {
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
                     lrNode.set("value", dummyDataset1[i]);
-                    //double coefs[] = lrNode.getCoefficients();
+                    double coefs[] = lrNode.getCoefficients();
+                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
                     //System.out.print("Coefficients: ");
                     //for (int j=0;j<coefs.length;j++){
                     //    System.out.print(coefs[j]+", ");
@@ -56,6 +56,7 @@ public class LinearRegressionNodeTest {
                 assertTrue(Math.abs(coefs[0]-2) < eps);
                 assertTrue(Math.abs(coefs[1]-1) < eps);
                 assertTrue(lrNode.getBufferError() < eps);
+                assertTrue(lrNode.getL2Regularization() < eps);
             }
         });
 
@@ -64,7 +65,6 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalPrecise2() {
-        //This test fails only on crash. Otherwise, it is just for
         Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNodeFactory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -136,6 +136,43 @@ public class LinearRegressionNodeTest {
                 assertTrue(Math.abs(coefs[0] - 2) < eps);
                 assertTrue(Math.abs(coefs[1] - 1) < eps);
                 assertTrue(Math.abs(lrNode.getBufferError() - 166666.6666666) < eps);
+            }
+        });
+    }
+
+    @Test
+    public void testTooLargeRegularization() {
+        //This test fails only on crash. Otherwise, it is just for
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                KLinearRegression lrNode = (KLinearRegression) graph.newNode(0, 0, "LinearRegressionNode");
+
+                lrNode.initialize(2, 1, 6, 100, 100);
+
+                double resid = 0;
+                lrNode.setL2Regularization(1000000000);
+                for (int i = 0; i < dummyDataset1.length; i++) {
+                    assertTrue(lrNode.isInBootstrapMode());
+                    lrNode.set("value", dummyDataset1[i]);
+                    resid += (dummyDataset1[i][1] - 6)*(dummyDataset1[i][1] - 6);
+                }
+                assertFalse(lrNode.isInBootstrapMode());
+
+                graph.disconnect(null);
+
+                double coefs[] = lrNode.getCoefficients();
+                System.out.print("Final coefficients: ");
+                for (int j = 0; j < coefs.length; j++) {
+                    System.out.print(coefs[j] + ", ");
+                }
+                System.out.println();
+                System.out.println("Error: " + lrNode.getBufferError());
+
+                assertTrue(Math.abs(coefs[0] - 0) < eps);
+                assertTrue(Math.abs(coefs[1] - 6) < eps);
+                assertTrue(Math.abs(lrNode.getBufferError() - (resid/6)) < eps);
             }
         });
     }
