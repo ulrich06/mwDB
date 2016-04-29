@@ -41,7 +41,7 @@ public class Query {
             _hash = ((_hash << 5) - _hash) + attributes[i];
             if (values[i] != null) {
                 for (int j = 0; j < values[i].length(); j++) {
-                    _hash = ((_hash << 5) - _hash) + values[i].charAt(j);
+                    _hash = ((_hash << 5) - _hash) + values[i].codePointAt(j);
                 }
             }
         }
