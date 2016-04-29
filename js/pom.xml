@@ -32,7 +32,7 @@
                     <execution>
                         <id>compile-src</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>java2ts</goal>
                         </goals>
                         <configuration>
                             <source>${basedir}/../api/src/main/java</source>
