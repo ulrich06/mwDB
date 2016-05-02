@@ -99,7 +99,7 @@ public class TestDbReverse {
 
                               starttime = System.nanoTime();
                               MLPolynomialNode polyNode = (MLPolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
-                              polyNode.set(MLPolynomialNode.PRECISION_NAME,precision);
+                              polyNode.set(MLPolynomialNode.PRECISION_KEY,precision);
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
                                   if (i % 1000000 == 0 /*|| i > 1600000*/) {
