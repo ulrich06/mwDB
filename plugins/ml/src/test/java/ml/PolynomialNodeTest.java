@@ -66,7 +66,7 @@ public class PolynomialNodeTest {
 
     public static void testPoly(long[] times, double[] values, int numOfPoly, final Graph graph) {
         MLPolynomialNode polynomialNode = (MLPolynomialNode) graph.newNode(0, times[0], "Polynomial");
-        polynomialNode.set(MLPolynomialNode.PRECISION_NAME,precision);
+        polynomialNode.set(MLPolynomialNode.PRECISION_KEY,precision);
 
         for (int i = 0; i < size; i++) {
             final int ia = i;

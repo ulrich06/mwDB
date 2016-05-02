@@ -5,9 +5,9 @@ import java.util.Random;
 /**
  * Created by assaad on 01/04/16.
  */
-public class KMeans implements KClustering {
-    @Override
-    public int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations,  double[] minD, double[] maxD, double[] err) {
+public class KMeans {
+
+    public int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations,  double[] minD, double[] maxD) {
         int[][] result = new int[numOfCluster][];
         int features= data[0].length;
         int[] totals= new int[numOfCluster];
@@ -24,7 +24,7 @@ public class KMeans implements KClustering {
         double[] div = new double[features];
         for(int i=0;i<div.length;i++){
             if(maxD==null||maxD==minD){
-                div[i]=err[i]*err[i];
+                // div[i]=err[i]*err[i];
             }
             else {
                 div[i]=(maxD[i]-minD[i])*(maxD[i]-minD[i]);

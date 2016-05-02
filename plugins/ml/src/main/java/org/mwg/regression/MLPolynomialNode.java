@@ -27,18 +27,18 @@ public class MLPolynomialNode extends AbstractNode {
 
     //Machine Learning Properties and their default values with _DEF
 
-    public static final String PRECISION_NAME = "PRECISION"; //tolerated Error to specify by the signal
+    public static final String PRECISION_KEY = "PRECISION"; //tolerated Error to specify by the signal
     public static final int PRECISION_DEF = 1;
 
 
     //Public specific getters and setters
-    private static final String FEATURES_NAME = "FEATURES";
+    private static final String FEATURES_KEY = "FEATURES";
 
     //Internal state variables private and starts with _
-    private static final String WEIGHT_NAME = "_weight";
-    private static final String STEP_NAME = "_step";
-    private static final String NB_PAST_NAME = "_nb";
-    private static final String LAST_TIME_NAME = "_lastTime";
+    private static final String INTERNAL_WEIGHT_KEY = "_weight";
+    private static final String INTERNAL_STEP_KEY = "_step";
+    private static final String INTERNAL_NB_PAST_KEY = "_nb";
+    private static final String INTERNAL_LAST_TIME_KEY = "_lastTime";
 
     //Other default parameters that should not be changed externally:
     private static final int _maxDegree = 20; // maximum polynomial degree
@@ -52,10 +52,10 @@ public class MLPolynomialNode extends AbstractNode {
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(FEATURES_NAME)) {
+        if (propertyName.equals(FEATURES_KEY)) {
             learn((double) propertyValue);
         }
-        if(propertyName.equals(PRECISION_NAME)){
+        else if(propertyName.equals(PRECISION_KEY)){
             super.setPropertyWithType(propertyName,propertyType,propertyValue, Type.DOUBLE);
         }
         else {
@@ -65,7 +65,7 @@ public class MLPolynomialNode extends AbstractNode {
 
     @Override
     public Object get(String attributeName) {
-        if (attributeName.equals(FEATURES_NAME)) {
+        if (attributeName.equals(FEATURES_KEY)) {
             return extrapolate();
         }
         else {
@@ -81,35 +81,35 @@ public class MLPolynomialNode extends AbstractNode {
 
         long timeOrigin = previousState.time();
         long time = time();
-        double precision = (double) previousState.getFromKey(PRECISION_NAME);
-        double[] weight = (double[]) previousState.getFromKey(WEIGHT_NAME);
+        double precision = (double) previousState.getFromKey(PRECISION_KEY);
+        double[] weight = (double[]) previousState.getFromKey(INTERNAL_WEIGHT_KEY);
 
         //Initial feed for the very first time
         if (weight == null) {
             weight = new double[1];
             weight[0] = value;
-            previousState.setFromKey(WEIGHT_NAME, Type.DOUBLE_ARRAY, weight);
-            previousState.setFromKey(NB_PAST_NAME, Type.INT, 1);
-            previousState.setFromKey(STEP_NAME, Type.LONG, 0l);
-            previousState.setFromKey(LAST_TIME_NAME, Type.LONG, 0l);
+            previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+            previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 1);
+            previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, 0l);
+            previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, 0l);
             return;
         }
 
 
         // Test the step and set it
 
-        Long stp = (Long) previousState.getFromKey(STEP_NAME);
+        Long stp = (Long) previousState.getFromKey(INTERNAL_STEP_KEY);
         long lastTime = time - timeOrigin;
         if (stp == null || stp == 0) {
 
             if (lastTime == 0) {
                 weight = new double[1];
                 weight[0] = value;
-                previousState.setFromKey(WEIGHT_NAME, Type.DOUBLE_ARRAY, weight);
+                previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
                 return;
             } else {
                 stp = lastTime;
-                previousState.setFromKey(STEP_NAME, Type.LONG, stp);
+                previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, stp);
             }
         }
 
@@ -117,7 +117,7 @@ public class MLPolynomialNode extends AbstractNode {
         //Check if current model already fit the new value:
 
         int deg = weight.length - 1;
-        int num = (int) previousState.getFromKey(NB_PAST_NAME);
+        int num = (int) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
 
         double t = (time - timeOrigin);
         t = t / stp;
@@ -126,8 +126,8 @@ public class MLPolynomialNode extends AbstractNode {
 
         //If the current createModel fits well the new value, return
         if (Math.abs(PolynomialFit.extrapolate(t, weight) - value) <= maxError) {
-            previousState.setFromKey(NB_PAST_NAME, Type.INT, num + 1);
-            previousState.setFromKey(LAST_TIME_NAME, Type.LONG, lastTime);
+            previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
+            previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
             return;
         }
 
@@ -140,7 +140,7 @@ public class MLPolynomialNode extends AbstractNode {
             double[] values = new double[factor * num + 1];
             double inc = 0;
             if (num > 1) {
-                inc = ((long) previousState.getFromKey(LAST_TIME_NAME));
+                inc = ((long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
                 inc = inc / (stp * (factor * num - 1));
             }
             for (int i = 0; i < factor * num; i++) {
@@ -153,15 +153,15 @@ public class MLPolynomialNode extends AbstractNode {
             pf.fit(times, values);
             if (tempError(pf.getCoef(), times, values) <= maxError) {
                 weight = pf.getCoef();
-                previousState.setFromKey(WEIGHT_NAME, Type.DOUBLE_ARRAY, weight);
-                previousState.setFromKey(NB_PAST_NAME, Type.INT, num + 1);
-                previousState.setFromKey(LAST_TIME_NAME, Type.LONG, lastTime);
+                previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+                previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
+                previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
                 return;
             }
         }
 
 
-        long previousTime = timeOrigin + (long) previousState.getFromKey(LAST_TIME_NAME);
+        long previousTime = timeOrigin + (long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
         long newstep = time - previousTime;
 
 
@@ -184,11 +184,11 @@ public class MLPolynomialNode extends AbstractNode {
             weight = new double[1];
             weight[0] = values[0];
 
-            phasedState.setFromKey(PRECISION_NAME, Type.DOUBLE, precision);
-            phasedState.setFromKey(WEIGHT_NAME, Type.DOUBLE_ARRAY, weight);
-            phasedState.setFromKey(NB_PAST_NAME, Type.INT, 2);
-            phasedState.setFromKey(STEP_NAME, Type.LONG, newstep);
-            phasedState.setFromKey(LAST_TIME_NAME, Type.LONG, newstep);
+            phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
+            phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+            phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
+            phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
+            phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
 
             return;
         }
@@ -198,11 +198,11 @@ public class MLPolynomialNode extends AbstractNode {
         PolynomialFit pf = new PolynomialFit(1);
         pf.fit(times, values);
         weight = pf.getCoef();
-        phasedState.setFromKey(PRECISION_NAME, Type.DOUBLE, precision);
-        phasedState.setFromKey(WEIGHT_NAME, Type.DOUBLE_ARRAY, weight);
-        phasedState.setFromKey(NB_PAST_NAME, Type.INT, 2);
-        phasedState.setFromKey(STEP_NAME, Type.LONG, newstep);
-        phasedState.setFromKey(LAST_TIME_NAME, Type.LONG, newstep);
+        phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
+        phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+        phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
+        phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
+        phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
     }
 
 
@@ -212,11 +212,11 @@ public class MLPolynomialNode extends AbstractNode {
         long time = time();
         NodeState state = graph().resolver().resolveState(this, true);
         long timeOrigin = state.time();
-        double[] weight = (double[]) state.getFromKey(WEIGHT_NAME);
+        double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if (weight == null) {
             return 0;
         }
-        Long inferSTEP = (Long) state.getFromKey(STEP_NAME);
+        Long inferSTEP = (Long) state.getFromKey(INTERNAL_STEP_KEY);
         if (inferSTEP == null || inferSTEP == 0) {
             return weight[0];
         }
@@ -230,13 +230,13 @@ public class MLPolynomialNode extends AbstractNode {
     //Other services and funcitons
     public double getPrecision() {
         NodeState state = graph().resolver().resolveState(this, false);
-        Object d = state.getFromKeyWithDefault(PRECISION_NAME, PRECISION_DEF);
+        Object d = state.getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
         return (double) d;
     }
 
     public double[] getWeight() {
         NodeState state = graph().resolver().resolveState(this, false);
-        return (double[]) state.getFromKey(WEIGHT_NAME);
+        return (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
     }
 
 
@@ -289,7 +289,7 @@ public class MLPolynomialNode extends AbstractNode {
         NodeState state = this._resolver.resolveState(this, true);
         if (state != null) {
             builder.append(",\"data\": {");
-            double[] weight = (double[]) state.getFromKey(WEIGHT_NAME);
+            double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
             if (weight != null) {
                 builder.append("\"polynomial\": \"");
                 for (int i = 0; i < weight.length; i++) {

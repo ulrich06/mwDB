@@ -213,7 +213,7 @@ public class LinearRegressionNodeTest {
         });
     }
 
-        @Test
+     //   @Test
         public void testNormalBatchGDIterationCountStop() {
             Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionBatchGDNodeFactory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {

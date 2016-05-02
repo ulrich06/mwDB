@@ -12,6 +12,7 @@ public class MLGaussianGmmNode extends AbstractNode {
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "GaussianGmm";
 
+
     //Factory of the class integrated
     public static class Factory implements NodeFactory {
 
@@ -29,14 +30,14 @@ public class MLGaussianGmmNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    public static final int _CAPACITYFACTOR = 3;
-    public static final int _COMPRESSIONITER = 10;
+    //Machine Learning Properties and their default values with _DEF
 
-    public static double[] err;
 
-    private static final String MIN_KEY = "getMin";
-    private static final String MAX_KEY = "getMax";
-    private static final String VALUE_KEY = "value";
+
+    //Getters and setters
+    private static final String MIN_KEY = "min";
+    private static final String MAX_KEY = "`max";
+    private static final String FEATURES_KEY = "value";
     private static final String AVG_KEY = "getAvg";
     private static final String COV_KEY = "cov";
 
@@ -54,10 +55,13 @@ public class MLGaussianGmmNode extends AbstractNode {
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
 
+    //Private internal params
+    private static final int _COMPRESSION_ITER = 10;
+    private static final int _CAPACITY_FACTOR = 3;
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if(propertyName.equals(VALUE_KEY)){
+        if(propertyName.equals(FEATURES_KEY)){
             learn((double[]) propertyValue);
         }
         else{
@@ -187,7 +191,7 @@ public class MLGaussianGmmNode extends AbstractNode {
 
         final int width = getMaxPerLevel();
         long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
-        if (subgaussians == null || subgaussians.length < _CAPACITYFACTOR * width) {
+        if (subgaussians == null || subgaussians.length < _CAPACITY_FACTOR * width) {
             return;
         } else {
             //Compress here
@@ -208,7 +212,7 @@ public class MLGaussianGmmNode extends AbstractNode {
 
                     //Cluster the different gaussians
                     KMeans clusteringEngine = new KMeans();
-                    int[][] clusters = clusteringEngine.getClusterIds(data, width, _COMPRESSIONITER, getMin(), getMax(), err);
+                    int[][] clusters = clusteringEngine.getClusterIds(data, width, _COMPRESSION_ITER, getMin(), getMax());
 
                     //Select the ones which will remain as head by the maximum weight
                     MLGaussianGmmNode[] mainClusters = new MLGaussianGmmNode[width];
