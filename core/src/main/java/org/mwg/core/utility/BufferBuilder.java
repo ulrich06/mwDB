@@ -74,7 +74,7 @@ public class BufferBuilder {
                     OffHeapByteArray.copyArray(bytes, bufferPtr, bytes.length);
                     writeCursor = bytes.length;
                 } else if (writeCursor + bytes.length > capacity) {
-                    long newCapacity = getNewSize(capacity, bytes.length);
+                    long newCapacity = getNewSize(capacity, capacity + bytes.length);
                     bufferPtr = OffHeapByteArray.reallocate(bufferPtr, capacity, newCapacity);
                     OffHeapByteArray.copyArray(bytes, bufferPtr + writeCursor, bytes.length);
                     capacity = newCapacity;
