@@ -80,7 +80,7 @@ public abstract class AbstractNode implements Node {
      * @native ts
      */
     @Override
-    public void set(String propertyName, Object propertyValue) {
+    public final void set(String propertyName, Object propertyValue) {
         if (propertyValue instanceof String) {
             setProperty(propertyName, Type.STRING, propertyValue);
         } else if (propertyValue instanceof Double) {

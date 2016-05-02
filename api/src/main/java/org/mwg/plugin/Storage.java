@@ -11,26 +11,22 @@ public interface Storage {
 
     /**
      * Used to retrieve objects fromVar the storage.<br>
-     * The {@code keys} array is a sequential list of &lt;world, timepoint, id&gt; tuples organized as follows:<br>
-     * Say you wanna retrieve objects &lt;1, 2, 3&gt; and &lt;1, 5, 6&gt;, the array will be: [1,2,3,1,5,6]
+     * The {@code keys} buffer is a sequential list of keys, assembled in a flat buffer and separator by BUFFER_SEP<br>
      *
-     * @param keys     The array of keys as specified above.
+     * @param keys     The buffer of keys as specified above.
      * @param callback Is called when all objects are collected.
      *                 The size of the array in parameter is always 1/3 of the keys array size.
      *                 Objects in the result array are in the same order as the keys.
      */
-    void get(Buffer[] keys, Callback<Buffer[]> callback);
+    void get(Buffer keys, Callback<Buffer> callback);
 
     /**
      * Used to push objects to the storage.<br>
-     * The {@code keys} array is a sequential list of &lt;world, timepoint, id&gt; tuples organized as follows:<br>
-     * Say you wanna save objects &lt;1, 2, 3&gt; and &lt;1, 5, 6&gt;, the array will be: [1,2,3,1,5,6]
      *
-     * @param keys     The array of keys as specified above.
-     * @param values   The objects to store in a String format, and in the same order as the keys.
+     * @param stream   The objects to store organized as a list of elements, assembled in a flat buffer.
      * @param callback Called when the operation is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
-    void put(Buffer[] keys, Buffer[] values, Callback<Boolean> callback);
+    void put(Buffer stream, Callback<Boolean> callback);
 
     /**
      * Called to remove objects fromVar the storage.
@@ -40,7 +36,7 @@ public interface Storage {
      * @param keys     The array of keys as specified above.
      * @param callback Is called when all keys are deleted.
      */
-    void remove(Buffer[] keys, Callback<Boolean> callback);
+    void remove(Buffer keys, Callback<Boolean> callback);
 
     /**
      * Connects the storage

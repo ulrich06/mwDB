@@ -38,11 +38,6 @@ class CoreGraph implements org.mwg.Graph {
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
 
-    private static final int UNIVERSE_INDEX = 0;
-    private static final int OBJ_INDEX = 1;
-    private static final int GLO_TREE_INDEX = 2;
-    private static final int GLO_DIC_INDEX = 3;
-
     CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
         //subElements set
         this._storage = p_storage;
@@ -167,47 +162,60 @@ class CoreGraph implements org.mwg.Graph {
                             return;
                         }
                     }
-
-                    final Buffer[] connectionKeys = new Buffer[4];
+                    final Buffer connectionKeys = newBuffer();
                     //preload ObjKeyGenerator
-                    connectionKeys[0] = newBuffer();
-                    BufferBuilder.keyToBuffer(connectionKeys[0], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload WorldKeyGenerator
-                    connectionKeys[1] = newBuffer();
-                    BufferBuilder.keyToBuffer(connectionKeys[1], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload GlobalWorldOrder
-                    connectionKeys[2] = newBuffer();
-                    BufferBuilder.keyToBuffer(connectionKeys[2], CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload GlobalDictionary
-                    connectionKeys[3] = newBuffer();
-                    BufferBuilder.keyToBuffer(connectionKeys[3], CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
-                    selfPointer._storage.get(connectionKeys, new Callback<Buffer[]>() {
+                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+                    connectionKeys.write(CoreConstants.BUFFER_SEP);
+                    selfPointer._storage.get(connectionKeys, new Callback<Buffer>() {
                         @Override
-                        public void on(Buffer[] payloads) {
+                        public void on(Buffer payloads) {
+                            connectionKeys.free();
+                            if (payloads != null) {
 
-                            for (int i = 0; i < connectionKeys.length; i++) {
-                                connectionKeys[i].free();
-                            }
+                                BufferIterator it = payloads.iterator();
+                                Buffer view1 = it.next();
+                                Buffer view2 = it.next();
+                                Buffer view3 = it.next();
+                                Buffer view4 = it.next();
 
-                            if (payloads.length == 4) {
                                 Boolean noError = true;
                                 try {
                                     //init the global universe tree (mandatory for synchronious create)
-                                    WorldOrderChunk globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, payloads[GLO_TREE_INDEX], null);
+
+                                    WorldOrderChunk globalWorldOrder;
+                                    if (view3.size() > 0) {
+                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
+                                    } else {
+                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
+                                    }
                                     selfPointer._space.putAndMark(globalWorldOrder);
 
                                     //init the global dictionary chunk
-                                    StateChunk globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], payloads[GLO_DIC_INDEX], null);
+                                    StateChunk globalDictionaryChunk;
+                                    if (view4.size() > 0) {
+                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
+                                    } else {
+                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
+                                    }
                                     selfPointer._space.putAndMark(globalDictionaryChunk);
 
-                                    if (payloads[UNIVERSE_INDEX] != null) {
-                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[UNIVERSE_INDEX], 0, payloads[UNIVERSE_INDEX].size()));
+                                    if (view2.size() > 0) {
+                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(view2, 0, view2.size()));
                                     } else {
                                         selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, 0);
                                     }
 
-                                    if (payloads[OBJ_INDEX] != null) {
-                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(payloads[OBJ_INDEX], 0, payloads[OBJ_INDEX].size()));
+                                    if (view1.size() > 0) {
+                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(view1, 0, view1.size()));
                                     } else {
                                         selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, 0);
                                     }
@@ -227,6 +235,7 @@ class CoreGraph implements org.mwg.Graph {
                                     e.printStackTrace();
                                     noError = false;
                                 }
+                                payloads.free();
                                 selfPointer._lock.set(true);
                                 if (PrimitiveHelper.isDefined(callback)) {
                                     callback.on(noError);
@@ -312,66 +321,47 @@ class CoreGraph implements org.mwg.Graph {
                 callback.on(null);
             }
         } else {
-            long sizeToSaveKeys = (dirtyIterator.size() + CoreConstants.PREFIX_TO_SAVE_SIZE);
-            Buffer[] toSaveKeys = new Buffer[(int) sizeToSaveKeys];
-            long sizeToSaveValues = dirtyIterator.size() + CoreConstants.PREFIX_TO_SAVE_SIZE;
-            Buffer[] toSaveValues = new Buffer[(int) sizeToSaveValues];
-            int i = 0;
+            Buffer stream = newBuffer();
+            boolean isFirst = true;
             while (dirtyIterator.hasNext()) {
                 Chunk loopChunk = dirtyIterator.next();
                 if (loopChunk != null && (loopChunk.flags() & CoreConstants.DIRTY_BIT) == CoreConstants.DIRTY_BIT) {
                     //Save chunk Key
-                    toSaveKeys[i] = newBuffer();
-                    BufferBuilder.keyToBuffer(toSaveKeys[i], loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
+                    if (isFirst) {
+                        isFirst = false;
+                    } else {
+                        stream.write(CoreConstants.BUFFER_SEP);
+                    }
+                    BufferBuilder.keyToBuffer(stream, loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
                     //Save chunk payload
+                    stream.write(CoreConstants.BUFFER_SEP);
                     try {
-                        Buffer newBuffer = newBuffer();
-                        toSaveValues[i] = newBuffer;
-                        loopChunk.save(newBuffer);
+                        loopChunk.save(stream);
                         this._space.declareClean(loopChunk);
-                        i++;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-
             //save obj key gen key
-            toSaveKeys[i] = newBuffer();
-            BufferBuilder.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
+            stream.write(CoreConstants.BUFFER_SEP);
+            BufferBuilder.keyToBuffer(stream, CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
             //save obj key gen payload
-            toSaveValues[i] = newBuffer();
-            Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), toSaveValues[i]);
-            i++;
+            stream.write(CoreConstants.BUFFER_SEP);
+            Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), stream);
             //save world key gen key
-            toSaveKeys[i] = newBuffer();
-            BufferBuilder.keyToBuffer(toSaveKeys[i], CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
+            stream.write(CoreConstants.BUFFER_SEP);
+            BufferBuilder.keyToBuffer(stream, CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
             //save world key gen payload
-            toSaveValues[i] = newBuffer();
-            Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), toSaveValues[i]);
-            i++;
+            stream.write(CoreConstants.BUFFER_SEP);
+            Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), stream);
 
             //shrink in case of i != full size
-            if (i != sizeToSaveValues) {
-                //shrinkValue
-                Buffer[] toSaveValuesShrinked = new Buffer[i];
-                System.arraycopy(toSaveValues, 0, toSaveValuesShrinked, 0, i);
-                toSaveValues = toSaveValuesShrinked;
-
-                Buffer[] toSaveKeysShrinked = new Buffer[i];
-                System.arraycopy(toSaveKeys, 0, toSaveKeysShrinked, 0, i);
-                toSaveKeys = toSaveKeysShrinked;
-            }
-            final Buffer[] finalToSaveValues = toSaveValues;
-            final Buffer[] finalToSaveKeys = toSaveKeys;
-            this._storage.put(toSaveKeys, toSaveValues, new Callback<Boolean>() {
+            this._storage.put(stream, new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
                     //free all value
-                    for (int i = 0; i < finalToSaveValues.length; i++) {
-                        finalToSaveValues[i].free();
-                        finalToSaveKeys[i].free();
-                    }
+                    stream.free();
                     dirtyIterator.free();
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(result);

@@ -9,43 +9,43 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.mwg.struct.Buffer;
 import org.mwg.plugin.Storage;
+import org.mwg.struct.BufferIterator;
 
 public class LevelDBStorage implements Storage {
-	
+
     private static final String _connectedError = "PLEASE CONNECT YOUR DATABASE FIRST";
     private static final byte[] prefixKey = "prefix".getBytes();
-	
+
     private final String storagePath;
-    
+
     private DB db;
     private boolean isConnected;
     private Graph graph;
-	
-    public LevelDBStorage(String storagePath){
-    	this.isConnected = false;
+
+    public LevelDBStorage(String storagePath) {
+        this.isConnected = false;
         this.storagePath = storagePath;
     }
-    
+
     @Override
-    public void get(Buffer[] keys, Callback<Buffer[]> callback) {
+    public void get(Buffer keys, Callback<Buffer> callback) {
         if (!isConnected) {
             throw new RuntimeException(_connectedError);
         }
-        int nbKeys = keys.length;
-        Buffer[] result = new Buffer[nbKeys];
-        for (int i = 0; i < nbKeys; i++) {
+        Buffer result = graph.newBuffer();
+        BufferIterator it = keys.iterator();
+        boolean isFirst = true;
+        while (it.hasNext()) {
+            Buffer view = it.next();
             try {
-                byte[] res = db.get(keys[i].data());
-                if (res != null) {
-                    Buffer newBuf = graph.newBuffer();
-                    int ii = 0;
-                    while (ii < res.length) {
-                        newBuf.write(res[ii]);
-                        ii++;
-                    }
-                    result[i] = newBuf;
+                if (!isFirst) {
+                    result.write(Constants.BUFFER_SEP);
                 } else {
-                    result[i] = null;
+                    isFirst = false;
+                }
+                byte[] res = db.get(view.data());
+                if (res != null) {
+                    result.writeAll(res);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -57,40 +57,44 @@ public class LevelDBStorage implements Storage {
     }
 
     @Override
-    public void put(Buffer[] keys, Buffer[] p_values, Callback<Boolean> callback) {
+    public void put(Buffer stream, Callback<Boolean> callback) {
         if (!isConnected) {
             throw new RuntimeException(_connectedError);
         }
         try {
-            int nbKeys = keys.length;
-            WriteBatch batch = db.createWriteBatch();        
-            for (int i = 0; i < nbKeys; i++) {
-                batch.put(keys[i].data(), p_values[i].data());
+            WriteBatch batch = db.createWriteBatch();
+            BufferIterator it = stream.iterator();
+            while (it.hasNext()) {
+                Buffer keyView = it.next();
+                Buffer valueView = it.next();
+                if (valueView != null) {
+                    batch.put(keyView.data(), valueView.data());
+                }
             }
-            db.write(batch);        
+            db.write(batch);
             if (callback != null) {
-            	callback.on(true);
+                callback.on(true);
             }
         } catch (Exception e) {
             e.printStackTrace();
             if (callback != null) {
-            	callback.on(false);
+                callback.on(false);
             }
         }
     }
 
+
     @Override
-    public void remove(Buffer[] keys, Callback<Boolean> callback) {
+    public void remove(Buffer keys, Callback<Boolean> callback) {
         if (!isConnected) {
             throw new RuntimeException(_connectedError);
         }
         try {
-            int nbKeys = keys.length;
-            WriteBatch batch = db.createWriteBatch();        
-            for (int i = 0; i < nbKeys; i++) {
-                batch.delete(keys[i].data());
+            BufferIterator it = keys.iterator();
+            while (it.hasNext()) {
+                Buffer view = it.next();
+                db.delete(view.data());
             }
-            db.write(batch);        
             if (callback != null) {
                 callback.on(null);
             }
@@ -105,8 +109,8 @@ public class LevelDBStorage implements Storage {
     @Override
     public void disconnect(Short prefix, Callback<Boolean> callback) {
         try {
-        	db.close();
-        	db = null;
+            db.close();
+            db = null;
             if (callback != null) {
                 callback.on(true);
             }

@@ -251,16 +251,20 @@ class MWGResolver implements Resolver {
         } else {
             Buffer buffer = _graph.newBuffer();
             BufferBuilder.keyToBuffer(buffer, type, world, time, id);
-
-            this._storage.get(new Buffer[]{buffer}, new Callback<Buffer[]>() {
+            this._storage.get(buffer, new Callback<Buffer>() {
                 @Override
-                public void on(Buffer[] payloads) {
+                public void on(Buffer payloads) {
                     buffer.free();
                     Chunk result = null;
-                    if (payloads.length > 0 && payloads[0] != null) {
-                        result = selfPointer._space.create(type, world, time, id, payloads[0], null);
-                        selfPointer._space.putAndMark(result);
+                    BufferIterator it = payloads.iterator();
+                    if (it.hasNext()) {
+                        Buffer view = it.next();
+                        if (view.size() > 0) {
+                            result = selfPointer._space.create(type, world, time, id, view, null);
+                            selfPointer._space.putAndMark(result);
+                        }
                     }
+                    payloads.free();
                     callback.on(result);
                 }
             });
@@ -292,29 +296,35 @@ class MWGResolver implements Resolver {
         if (nbElem == 0) {
             callback.on(result);
         } else {
-            final Buffer[] keysToLoad = new Buffer[nbElem];
+            final Buffer keysToLoad = _graph.newBuffer();
             final int[] reverseIndex = new int[nbElem];
             int lastInsertedIndex = 0;
             for (int i = 0; i < nbKeys; i++) {
                 if (toLoadIndexes[i]) {
                     reverseIndex[lastInsertedIndex] = i;
-                    keysToLoad[lastInsertedIndex] = _graph.newBuffer();
-                    BufferBuilder.keyToBuffer(keysToLoad[lastInsertedIndex], types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
+                    if (lastInsertedIndex != 0) {
+                        keysToLoad.write(CoreConstants.BUFFER_SEP);
+                    }
+                    BufferBuilder.keyToBuffer(keysToLoad, types[i], keys[i * KEY_SIZE], keys[i * KEY_SIZE + 1], keys[i * KEY_SIZE + 2]);
                     lastInsertedIndex = lastInsertedIndex + 1;
                 }
             }
             final MWGResolver selfPointer = this;
-            this._storage.get(keysToLoad, new Callback<Buffer[]>() {
+            this._storage.get(keysToLoad, new Callback<Buffer>() {
                 @Override
-                public void on(Buffer[] fromDbBuffers) {
-                    for (int i = 0; i < keysToLoad.length; i++) {
-                        keysToLoad[i].free();
-                    }
-                    for (int i = 0; i < fromDbBuffers.length; i++) {
-                        if (fromDbBuffers[i] != null) {
-                            int reversedIndex = reverseIndex[i];
-                            result[reversedIndex] = selfPointer._space.create(types[reversedIndex], keys[reversedIndex * KEY_SIZE], keys[reversedIndex * KEY_SIZE + 1], keys[reversedIndex * KEY_SIZE + 2], fromDbBuffers[i], null);
+                public void on(Buffer fromDbBuffers) {
+                    keysToLoad.free();
+                    BufferIterator it = fromDbBuffers.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        int reversedIndex = reverseIndex[i];
+                        Buffer view = it.next();
+                        if (view.size() > 0) {
+                            result[reversedIndex] = selfPointer._space.create(types[reversedIndex], keys[reversedIndex * KEY_SIZE], keys[reversedIndex * KEY_SIZE + 1], keys[reversedIndex * KEY_SIZE + 2], view, null);
+                        } else {
+                            result[reversedIndex] = null;
                         }
+                        i++;
                     }
                     callback.on(result);
                 }

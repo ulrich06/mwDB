@@ -2,6 +2,7 @@ package org.mwg;
 
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
 import org.rocksdb.*;
 
 import java.io.File;
@@ -26,25 +27,24 @@ public class RocksDBStorage implements Storage {
     }
 
     @Override
-    public void get(Buffer[] keys, Callback<Buffer[]> callback) {
+    public void get(Buffer keys, Callback<Buffer> callback) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
-        int nbKeys = keys.length;
-        Buffer[] result = new Buffer[nbKeys];
-        for (int i = 0; i < nbKeys; i++) {
+        Buffer result = _graph.newBuffer();
+        BufferIterator it = keys.iterator();
+        boolean isFirst = true;
+        while (it.hasNext()) {
+            Buffer view = it.next();
             try {
-                byte[] res = _db.get(keys[i].data());
-                if (res != null) {
-                    Buffer newBuf = _graph.newBuffer();
-                    int ii = 0;
-                    while (ii < res.length) {
-                        newBuf.write(res[ii]);
-                        ii++;
-                    }
-                    result[i] = newBuf;
+                if (!isFirst) {
+                    result.write(Constants.BUFFER_SEP);
                 } else {
-                    result[i] = null;
+                    isFirst = false;
+                }
+                byte[] res = _db.get(view.data());
+                if (res != null) {
+                    result.writeAll(res);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -56,14 +56,18 @@ public class RocksDBStorage implements Storage {
     }
 
     @Override
-    public void put(Buffer[] p_keys, Buffer[] p_values, Callback<Boolean> p_callback) {
+    public void put(Buffer stream, Callback<Boolean> p_callback) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
-        int nbKeys = p_keys.length;
         WriteBatch batch = new WriteBatch();
-        for (int i = 0; i < nbKeys; i++) {
-            batch.put(p_keys[i].data(), p_values[i].data());
+        BufferIterator it = stream.iterator();
+        while (it.hasNext()) {
+            Buffer keyView = it.next();
+            Buffer valueView = it.next();
+            if (valueView != null) {
+                batch.put(keyView.data(), valueView.data());
+            }
         }
         WriteOptions options = new WriteOptions();
         options.setSync(false);
@@ -81,14 +85,15 @@ public class RocksDBStorage implements Storage {
     }
 
     @Override
-    public void remove(Buffer[] keys, Callback<Boolean> callback) {
+    public void remove(Buffer keys, Callback<Boolean> callback) {
         if (!_isConnected) {
             throw new RuntimeException(_connectedError);
         }
-        int nbKeys = keys.length;
         try {
-            for (int i = 0; i < nbKeys; i++) {
-                _db.remove(keys[i].data());
+            BufferIterator it = keys.iterator();
+            while (it.hasNext()) {
+                Buffer view = it.next();
+                _db.remove(view.data());
             }
             if (callback != null) {
                 callback.on(null);
@@ -154,7 +159,7 @@ public class RocksDBStorage implements Storage {
             }
             Short currentPrefix = Short.parseShort(new String(current));
             _db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
-            
+
 
             if (callback != null) {
                 callback.on(currentPrefix);

@@ -13,9 +13,9 @@ public interface Buffer {
     void write(byte b);
 
     /**
-     * Append a table of bytes to the buffer
+     * Append an array of bytes to the buffer
      *
-     * @param bytes byte to append
+     * @param bytes byte array to append
      */
     void writeAll(byte[] bytes);
 
@@ -45,5 +45,12 @@ public interface Buffer {
      * Free the buffer fromVar memory, this method should be the last called
      */
     void free();
+
+    /**
+     * Create a new iterator for this buffer
+     *
+     * @return the newly created iterator
+     */
+    BufferIterator iterator();
 
 }

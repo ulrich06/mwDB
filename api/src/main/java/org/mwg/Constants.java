@@ -42,5 +42,7 @@ public class Constants {
         return src.equals(other);
     }
 
+    public static final byte BUFFER_SEP = '#';
+
 }
 
