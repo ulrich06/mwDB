@@ -45,7 +45,12 @@ public class LevelDBStorage implements Storage {
                 }
                 byte[] res = db.get(view.data());
                 if (res != null) {
-                    result.writeAll(res);
+
+                    for(int i=0;i<res.length;i++){
+                        result.write(res[i]);
+                    }
+
+                    //result.writeAll(res);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

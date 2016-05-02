@@ -26,6 +26,7 @@ public class BufferBuilder {
     }
 
     public static org.mwg.struct.Buffer newOffHeapBuffer() {
+        
         return new AbstractBuffer() {
 
             private long bufferPtr = CoreConstants.OFFHEAP_NULL_PTR;

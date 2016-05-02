@@ -326,6 +326,7 @@ class MWGResolver implements Resolver {
                         }
                         i++;
                     }
+                    fromDbBuffers.free();
                     callback.on(result);
                 }
             });
