@@ -113,19 +113,14 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
     }
 
     @Override
-    public void set(String attributeName, Object attributeValue) {
-        //TODO Changed class index? Need to recalculate everything
-        //TODO Changed buffer size? Might also need recalculation
-        //TODO Class index should be positive
-        //TODO Input dimensions should be positive
-
-        if (attributeName.equals(VALUE_KEY)) {
-            addValue((double[]) attributeValue);
-        } else {
-            super.set(attributeName, attributeValue);
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if(propertyName.equals(VALUE_KEY)){
+            addValue((double[]) propertyValue);
+        }
+        else{
+            super.setProperty(propertyName,propertyType,propertyValue);
         }
     }
-
     /**
      * Adds new value to the buffer. Connotations change depending on whether the node is in bootstrap mode or not.
      *

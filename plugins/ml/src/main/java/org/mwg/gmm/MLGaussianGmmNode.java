@@ -56,11 +56,12 @@ public class MLGaussianGmmNode extends AbstractNode {
 
 
     @Override
-    public void set(String attributeName, Object attributeValue) {
-        if (attributeName.equals(VALUE_KEY)) {
-            learn((double[]) attributeValue);
-        } else {
-            super.set(attributeName, attributeValue);
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if(propertyName.equals(VALUE_KEY)){
+            learn((double[]) propertyValue);
+        }
+        else{
+            super.setProperty(propertyName,propertyType,propertyValue);
         }
     }
 
