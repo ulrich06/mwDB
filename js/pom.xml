@@ -11,6 +11,19 @@
         <java2typescript.plugin.version>48-SNAPSHOT</java2typescript.plugin.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>api</artifactId>
+            <version>1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             
