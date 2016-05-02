@@ -12,3 +12,8 @@ notifications:
       - andrey.boytsov@uni.lu
     on_success: change
     on_failure: change
+
+#Compile only master branch
+branches:
+  only:
+    - master
