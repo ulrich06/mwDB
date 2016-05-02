@@ -6,8 +6,7 @@ import org.mwg.*;
 import org.mwg.util.matrix.KMatrix;
 import org.mwg.util.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.util.matrix.blassolver.blas.F2JBlas;
-import org.mwg.regression.KPolynomialNode;
-import org.mwg.regression.PolynomialNode;
+import org.mwg.regression.MLPolynomialNode;
 import org.mwg.core.NoopScheduler;
 
 /**
@@ -19,7 +18,7 @@ public class PolynomialNodeTest {
 
     @Test
     public void testConstant() {
-        final Graph graph = GraphBuilder.builder().withFactory(new PolynomialNodeFactory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = GraphBuilder.builder().withFactory(new MLPolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -66,25 +65,25 @@ public class PolynomialNodeTest {
 
 
     public static void testPoly(long[] times, double[] values, int numOfPoly, final Graph graph) {
-        PolynomialNode polynomialNode = (PolynomialNode) graph.newNode(0, times[0], "PolynomialNode");
-        polynomialNode.setPrecision(precision);
+        MLPolynomialNode polynomialNode = (MLPolynomialNode) graph.newNode(0, times[0], "Polynomial");
+        polynomialNode.set(MLPolynomialNode.PRECISION_NAME,precision);
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new Callback<KPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<MLPolynomialNode>() {
                 @Override
-                public void on(KPolynomialNode result) {
-                    result.set(values[ia]);
+                public void on(MLPolynomialNode result) {
+                    result.learn(values[ia]);
                 }
             });
         }
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new Callback<KPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<MLPolynomialNode>() {
                 @Override
-                public void on(KPolynomialNode result) {
-                    double v = result.get();
+                public void on(MLPolynomialNode result) {
+                    double v = result.extrapolate();
                     Assert.assertTrue(Math.abs(values[ia] - v) <= precision);
                 }
             });

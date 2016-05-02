@@ -3,6 +3,7 @@ package math;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
+import org.mwg.math.MLMathNode;
 
 public class MathNodeTest {
 
@@ -10,7 +11,7 @@ public class MathNodeTest {
     public void test() {
         Graph graph = GraphBuilder
                 .builder()
-                .withFactory(new MathNodeFactory())
+                .withFactory(new MLMathNode.Factory())
                 .withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {

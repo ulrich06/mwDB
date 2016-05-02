@@ -2,13 +2,30 @@ package org.mwg.gmm;
 
 import org.mwg.*;
 import org.mwg.clustering.KMeans;
+import org.mwg.plugin.NodeFactory;
 import org.mwg.util.matrix.KMatrix;
 import org.mwg.util.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.AbstractNode;
 
-public class GaussianNode extends AbstractNode {
+public class MLGaussianGmmNode extends AbstractNode {
 
-    public GaussianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    //Name of the algorithm to be used in the meta model
+    public final static String NAME = "GaussianGmm";
+
+    //Factory of the class integrated
+    public static class Factory implements NodeFactory {
+
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            return new MLGaussianGmmNode(world, time, id, graph, initialResolution);
+        }
+    }
+    public MLGaussianGmmNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -122,7 +139,7 @@ public class GaussianNode extends AbstractNode {
                 public void on(Node[] result) {
                     boolean inside = false;
                     for (int i = 0; i < result.length; i++) {
-                        GaussianNode subgaussian = (GaussianNode) result[i];
+                        MLGaussianGmmNode subgaussian = (MLGaussianGmmNode) result[i];
                         if (subgaussian.checkInside(value, level - 1)) {
                             subgaussian.learn(value);
                             inside = true;
@@ -147,7 +164,7 @@ public class GaussianNode extends AbstractNode {
                 @Override
                 public void on(Node[] result) {
                     for (int i = 0; i < result.length; i++) {
-                        GaussianNode g = (GaussianNode) result[i];
+                        MLGaussianGmmNode g = (MLGaussianGmmNode) result[i];
                         g.updateLevel(newLevel - 1);
                     }
                 }
@@ -156,7 +173,7 @@ public class GaussianNode extends AbstractNode {
     }
 
     private void createLevel(double[] values, int level, int width) {
-        GaussianNode g = (GaussianNode) graph().newNode(this.world(), this.time(), "GaussianNode");
+        MLGaussianGmmNode g = (MLGaussianGmmNode) graph().newNode(this.world(), this.time(), "GaussianGmm");
         g.configMixture(level, width);
         g.internallearn(values, false); //dirac
 
@@ -181,10 +198,10 @@ public class GaussianNode extends AbstractNode {
 
                     int[] totals = new int[width];
 
-                    GaussianNode[] subgauss = new GaussianNode[result.length];
+                    MLGaussianGmmNode[] subgauss = new MLGaussianGmmNode[result.length];
                     double[][] data = new double[result.length][];
                     for (int i = 0; i < result.length; i++) {
-                        subgauss[i] = (GaussianNode) result[i];
+                        subgauss[i] = (MLGaussianGmmNode) result[i];
                         data[i] = subgauss[i].getAvg();
                     }
 
@@ -193,7 +210,7 @@ public class GaussianNode extends AbstractNode {
                     int[][] clusters = clusteringEngine.getClusterIds(data, width, _COMPRESSIONITER, getMin(), getMax(), err);
 
                     //Select the ones which will remain as head by the maximum weight
-                    GaussianNode[] mainClusters = new GaussianNode[width];
+                    MLGaussianGmmNode[] mainClusters = new MLGaussianGmmNode[width];
                     for (int i = 0; i < width; i++) {
                         if (clusters[i] != null && clusters[i].length > 0) {
                             int max = 0;
@@ -219,7 +236,7 @@ public class GaussianNode extends AbstractNode {
 
                         if (clusters[i] != null && clusters[i].length > 0) {
                             for (int j = 0; j < clusters[i].length; j++) {
-                                GaussianNode g = subgauss[clusters[i][j]];
+                                MLGaussianGmmNode g = subgauss[clusters[i][j]];
                                 if (g != mainClusters[i]) {
                                     mainClusters[i].move(g);
                                     selfPointer.remove(INTERNAL_SUBGAUSSIAN_KEY, g);
@@ -234,7 +251,7 @@ public class GaussianNode extends AbstractNode {
     }
 
 
-    private void move(GaussianNode subgaus) {
+    private void move(MLGaussianGmmNode subgaus) {
         //manage total
         int total = getTotal();
         Double weight = getWeight();

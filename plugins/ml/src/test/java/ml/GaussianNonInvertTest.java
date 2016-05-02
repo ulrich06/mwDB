@@ -2,7 +2,7 @@ package ml;
 
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.gmm.GaussianNode;
+import org.mwg.gmm.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
@@ -10,7 +10,7 @@ import java.util.Random;
 public class GaussianNonInvertTest {
     @Test
     public void Singularity() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -19,8 +19,8 @@ public class GaussianNonInvertTest {
 
                 Random rand = new Random();
 
-                GaussianNode node1 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
-                GaussianNode node2 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                MLGaussianGmmNode node1 =  (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
+                MLGaussianGmmNode node2 =  (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]

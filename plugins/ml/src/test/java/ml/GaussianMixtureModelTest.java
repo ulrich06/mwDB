@@ -2,10 +2,9 @@ package ml;
 
 import org.junit.Test;
 import org.mwg.Callback;
-import org.mwg.GaussianNodeFactory;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
-import org.mwg.gmm.GaussianNode;
+import org.mwg.gmm.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 
 import java.util.Random;
@@ -16,14 +15,14 @@ import java.util.Random;
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 double[] data = new double[3];
                 Random rand = new Random();
 
-                GaussianNode node1 = (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                MLGaussianGmmNode node1 = (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
                 node1.configMixture(1, 100);
 
                 for (int i = 0; i < 220; i++) {

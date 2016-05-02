@@ -2,11 +2,10 @@ package ml;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.GaussianNodeFactory;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.gmm.GaussianNode;
+import org.mwg.gmm.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 import org.mwg.util.matrix.operation.Gaussian1D;
 
@@ -19,11 +18,11 @@ public class Gaussian1DTest {
 
     @Test
     public void Test() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianNode gaussianNodeBatch = (GaussianNode) graph.newNode(0, 0, "GaussianNode");
+                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 double eps = 1e-7;
 
 
