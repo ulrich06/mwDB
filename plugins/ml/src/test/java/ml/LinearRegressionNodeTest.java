@@ -5,8 +5,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.core.NoopScheduler;
-import org.mwg.regression.linear.KLinearRegression;
-import org.mwg.regression.linear.LinearRegressionNodeFactory;
+import org.mwg.regression.linear.*;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -175,5 +174,123 @@ public class LinearRegressionNodeTest {
                 assertTrue(Math.abs(lrNode.getBufferError() - (resid/6)) < eps);
             }
         });
+    }
+
+    @Test
+    public void testNormalSGD() {
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionSGDNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                KGradientDescentLinearRegression lrNode = (KGradientDescentLinearRegression) graph.newNode(0, 0, "LinearRegressionSGDNode");
+
+                lrNode.initialize(2, 1, 20000, 0.01, 0.001);
+                lrNode.setLearningRate(0.003);
+
+                for (int i = 0; i < 21000; i++) {
+                    double x = Math.random() * 10;
+                    lrNode.set("value", new double[]{x, 2 * x + 1});
+                    double coefs[] = lrNode.getCoefficients();
+                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                }
+                assertFalse(lrNode.isInBootstrapMode());
+
+                graph.disconnect(null);
+
+                double coefs[] = lrNode.getCoefficients();
+                System.out.print("Final coefficients: ");
+                for (int j = 0; j < coefs.length; j++) {
+                    System.out.print(coefs[j] + ", ");
+                }
+                System.out.println();
+                System.out.println("Error: " + lrNode.getBufferError());
+
+                assertTrue(Math.abs(coefs[0] - 2) < eps);
+                assertTrue(Math.abs(coefs[1] - 1) < eps);
+                assertTrue(lrNode.getBufferError() < eps);
+                assertTrue(lrNode.getL2Regularization() < eps);
+            }
+        });
+    }
+
+        @Test
+        public void testNormalBatchGDIterationCountStop() {
+            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionBatchGDNodeFactory()).withScheduler(new NoopScheduler()).build();
+            graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    KBatchGradientDescentLinearRegression lrNode = (KBatchGradientDescentLinearRegression) graph.newNode(0, 0, "LinearRegressionBatchGDNode");
+
+                    lrNode.initialize(2, 1, 50, 0.01, 0.01);
+                    lrNode.setLearningRate(0.0001);
+
+                    lrNode.setIterationCountThreshold(10000);
+
+                    for (int i = 0; i < 100; i++) {
+                        double x = Math.random() * 100;
+                        lrNode.set("value", new double[]{x, 2 * x + 1});
+                        double coefs[] = lrNode.getCoefficients();
+                        assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                    }
+                    //assertFalse(lrNode.isInBootstrapMode());
+
+                    graph.disconnect(null);
+
+                    double coefs[] = lrNode.getCoefficients();
+                    System.out.print("Final coefficients: ");
+                    for (int j = 0; j < coefs.length; j++) {
+                        System.out.print(coefs[j] + ", ");
+                    }
+                    System.out.println();
+                    System.out.println("Error: " + lrNode.getBufferError());
+
+                    assertTrue(Math.abs(coefs[0] - 2) < eps);
+                    assertTrue(Math.abs(coefs[1] - 1) < eps);
+                    assertTrue(lrNode.getBufferError() < eps);
+                    assertTrue(lrNode.getL2Regularization() < eps);
+                }
+            });
+
+        }
+
+    @Test
+    public void testNormalBatchGDErrorThresholdStop() {
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionBatchGDNodeFactory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                KBatchGradientDescentLinearRegression lrNode = (KBatchGradientDescentLinearRegression) graph.newNode(0, 0, "LinearRegressionBatchGDNode");
+
+                lrNode.initialize(2, 1, 15, 1e-6, 1e-6);
+                lrNode.setLearningRate(0.0001);
+
+                lrNode.removeIterationCountThreshold();
+                lrNode.setIterationErrorThreshold(1e-11);
+
+                for (int i = 0; i < 20; i++) {
+                    double x = Math.random() * 100;
+                    lrNode.set("value", new double[]{x, 2 * x + 1});
+                    double coefs[] = lrNode.getCoefficients();
+                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                }
+                assertFalse(lrNode.isInBootstrapMode());
+
+                graph.disconnect(null);
+
+                double coefs[] = lrNode.getCoefficients();
+                System.out.print("Final coefficients: ");
+                for (int j = 0; j < coefs.length; j++) {
+                    System.out.print(coefs[j] + ", ");
+                }
+                System.out.println();
+                System.out.println("Error: " + lrNode.getBufferError());
+
+                assertTrue(Math.abs(coefs[0] - 2) < 1e-3);
+                assertTrue(Math.abs(coefs[1] - 1) < 1e-3);
+                assertTrue(lrNode.getBufferError() < 1e-6);
+                assertTrue(lrNode.getL2Regularization() < 1e-6);
+            }
+        });
+
     }
 }

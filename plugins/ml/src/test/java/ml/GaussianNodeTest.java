@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.util.matrix.KMatrix;
-import org.mwg.gmm.GaussianNode;
+import org.mwg.gmm.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 
 /**
@@ -63,12 +63,12 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianNode gaussianNodeBatch = (GaussianNode) graph.newNode(0,0,"GaussianNode");
-                GaussianNode gaussianNodeLive =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
+                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
+                MLGaussianGmmNode gaussianNodeLive =  (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
 
                 double eps = 1e-7;
 
@@ -84,9 +84,9 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(time, new Callback<GaussianNode>() {
+                    gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>() {
                         @Override
-                        public void on(GaussianNode result) {
+                        public void on(MLGaussianGmmNode result) {
                             result.learn(trains);
                         }
                             });
@@ -115,9 +115,9 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new Callback<GaussianNode>(){
+                gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>(){
                     @Override
-                    public void on(GaussianNode result) {
+                    public void on(MLGaussianGmmNode result) {
                         double[] a = result.getAvg();
                         double[][] c = result.getCovariance(a);
                         if (c != null) {

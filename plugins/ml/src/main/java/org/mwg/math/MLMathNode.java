@@ -1,15 +1,33 @@
 package org.mwg.math;
 
 import org.mwg.*;
+import org.mwg.plugin.NodeFactory;
 import org.mwg.util.expression.KMathExpressionEngine;
 import org.mwg.util.expression.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
-public class MathNode extends AbstractNode {
+public class MLMathNode extends AbstractNode {
+
+    //Name of the algorithm to be used in the meta model
+    public final static String NAME = "Math";
+
+    //Factory of the class integrated
+    public static class Factory implements NodeFactory {
+
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            return new MLMathNode(world, time, id, graph, initialResolution);
+        }
+    }
 
     private KMathExpressionEngine mathEngine;
 
-    public MathNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public MLMathNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
         //mathEngine = new MathExpressionEngine();
     }

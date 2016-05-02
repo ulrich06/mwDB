@@ -71,6 +71,11 @@ public class GraphBuilder {
         return this;
     }
 
+    /**
+     * @native ts
+     * //TODO !!!
+     * return null;
+     */
     public Graph build() {
         if (internalBuilder == null) {
             synchronized (this) {

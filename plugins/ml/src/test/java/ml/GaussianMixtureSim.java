@@ -1,10 +1,9 @@
 package ml;
 
-import org.mwg.GaussianNodeFactory;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
-import org.mwg.gmm.GaussianNode;
+import org.mwg.gmm.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 
 import java.text.DecimalFormat;
@@ -16,14 +15,14 @@ import java.util.Scanner;
  */
 public class GaussianMixtureSim {
    public static void main(String[] arg){
-       Graph graph = GraphBuilder.builder().withFactory(new GaussianNodeFactory()).withScheduler(new NoopScheduler()).build();
+       Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
        graph.connect(new Callback<Boolean>() {
            @Override
            public void on(Boolean result) {
                boolean exit=false;
                String command;
 
-               GaussianNode node1 =  (GaussianNode) graph.newNode(0,0,"GaussianNode");
+               MLGaussianGmmNode node1 =  (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
                node1.configMixture(2,3);
 
                while(!exit){

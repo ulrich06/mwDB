@@ -4,8 +4,7 @@ import org.mwg.*;
 import org.mwg.util.matrix.KMatrix;
 import org.mwg.util.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.util.matrix.blassolver.blas.F2JBlas;
-import org.mwg.regression.KPolynomialNode;
-import org.mwg.regression.PolynomialNode;
+import org.mwg.regression.MLPolynomialNode;
 import org.mwg.core.NoopScheduler;
 
 import java.io.BufferedReader;
@@ -70,7 +69,7 @@ public class TestDb {
                 .withMemorySize(100_000)
                 .withAutoSave(10000)
                 .withStorage(new LevelDBStorage("data"))
-                .withFactory(new PolynomialNodeFactory())
+                .withFactory(new MLPolynomialNode.Factory())
                 .withScheduler(new NoopScheduler()).
                         build();
         graph.connect(new Callback<Boolean>() {
@@ -129,18 +128,18 @@ public class TestDb {
 
 
                               starttime = System.nanoTime();
-                              PolynomialNode polyNode = (PolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
-                              polyNode.setPrecision(precision);
+                              MLPolynomialNode polyNode = (MLPolynomialNode) graph.newNode(0, eurUsd.firstKey(), "PolynomialNode");
+                              polyNode.set(MLPolynomialNode.PRECISION_NAME,precision);
                               iter = eurUsd.keySet().iterator();
                               for (int i = 0; i < eurUsd.size(); i++) {
                                   if (i % 1000000 == 0) {
                                       System.out.println(i);
                                   }
                                   final long t = iter.next();
-                                  polyNode.jump(t, new Callback<PolynomialNode>() {
+                                  polyNode.jump(t, new Callback<MLPolynomialNode>() {
                                       @Override
-                                      public void on(PolynomialNode result) {
-                                          result.set(eurUsd.get(t));
+                                      public void on(MLPolynomialNode result) {
+                                          result.learn(eurUsd.get(t));
                                           result.free();
                                       }
                                   });
@@ -199,12 +198,12 @@ public class TestDb {
                               starttime = System.nanoTime();
                               for (int i = 0; i < eurUsd.size(); i++) {
                                   final long t = iter.next();
-                                  polyNode.jump(t, new Callback<KPolynomialNode>() {
+                                  polyNode.jump(t, new Callback<MLPolynomialNode>() {
                                       @Override
-                                      public void on(KPolynomialNode result) {
+                                      public void on(MLPolynomialNode result) {
                                           try {
 
-                                              double d = result.get();
+                                              double d = result.extrapolate();
                                               if (Math.abs(d - eurUsd.get(t)) > precision) {
                                                   error[0]++;
                                               }
