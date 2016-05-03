@@ -39,6 +39,9 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     private static final long _marksOffset;
     private static final long _magicOffset;
 
+    /**
+     * @ignore ts
+     */
     static {
         try {
             _lockOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_lock"));

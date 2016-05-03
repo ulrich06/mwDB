@@ -25,6 +25,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     private static final long _flagsOffset;
     private static final long _marksOffset;
 
+    /**
+     * @ignore ts
+     */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapStateChunk.class.getDeclaredField("_flags"));

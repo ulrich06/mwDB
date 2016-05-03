@@ -29,7 +29,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
         ChunkSpace space;
         long memorySize = p_memorySize;
         if (memorySize == -1) {
-            memorySize = 100_000;
+            memorySize = 100000;
         }
         long autoSaveSize = p_autoSaveSize;
         if (p_autoSaveSize == -1) {
