@@ -53,4 +53,6 @@ public interface Buffer {
      */
     BufferIterator iterator();
 
+    void removeLast();
+
 }

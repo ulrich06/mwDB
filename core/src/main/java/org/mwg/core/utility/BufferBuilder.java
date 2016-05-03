@@ -115,6 +115,11 @@ public class BufferBuilder {
                     bufferPtr = CoreConstants.OFFHEAP_NULL_PTR;
                 }
             }
+
+            @Override
+            public void removeLast() {
+                writeCursor--;
+            }
         };
     }
 
@@ -194,6 +199,11 @@ public class BufferBuilder {
             @Override
             public void free() {
                 buffer = null;
+            }
+
+            @Override
+            public void removeLast() {
+                writeCursor--;
             }
         };
     }

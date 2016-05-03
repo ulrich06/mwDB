@@ -58,4 +58,9 @@ public class BufferView implements Buffer {
     public final BufferIterator iterator() {
         throw new RuntimeException("iterator creation forbidden forbidden during iteration");
     }
+
+    @Override
+    public void removeLast() {
+        throw new RuntimeException("Write operation forbidden during iteration");
+    }
 }

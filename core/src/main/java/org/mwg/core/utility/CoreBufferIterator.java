@@ -17,7 +17,7 @@ class CoreBufferIterator implements BufferIterator {
 
     @Override
     public final boolean hasNext() {
-        return _cursor < _originSize;
+        return _originSize > 0 && _cursor < _originSize;
     }
 
     @Override

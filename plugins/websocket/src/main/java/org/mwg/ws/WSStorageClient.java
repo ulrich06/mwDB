@@ -6,8 +6,10 @@ import io.undertow.websockets.client.WebSocketClient;
 import io.undertow.websockets.core.*;
 import org.mwg.Callback;
 import org.mwg.Graph;
+import org.mwg.core.CoreConstants;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
 import org.mwg.utils.DynamicArray;
 import org.mwg.utils.impl.DynamicArrayImpl;
 import org.xnio.OptionMap;
@@ -67,6 +69,7 @@ public class WSStorageClient implements Storage {
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
         int messageID = nextMessageID();
+        keys.write(CoreConstants.BUFFER_SEP);
         keys.writeAll(toBytes(messageID)); //message ID
         keys.write(WSMessageType.RQST_GET);
         _callBacks.put(messageID,callback);
@@ -76,6 +79,7 @@ public class WSStorageClient implements Storage {
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
         int messageID = nextMessageID();
+        stream.write(CoreConstants.BUFFER_SEP);
         stream.writeAll(toBytes(messageID)); //message ID
         stream.write(WSMessageType.RQST_PUT);
         _callBacks.put(messageID,callback);
@@ -85,6 +89,7 @@ public class WSStorageClient implements Storage {
     @Override
     public void remove(Buffer keys, Callback<Boolean> callback) {
         int messageID = nextMessageID();
+        keys.write(CoreConstants.BUFFER_SEP);
         keys.writeAll(toBytes(messageID)); //message ID
         keys.write(WSMessageType.RQST_REMOVE);
         _callBacks.put(messageID,callback);
@@ -93,7 +98,7 @@ public class WSStorageClient implements Storage {
 
     @Override
     public void connect(Graph graph, Callback<Short> callback) {
-        if(_channel == null) {
+        if(_channel != null) {
             if(callback != null) {
                 callback.on(null);
             }
@@ -133,7 +138,6 @@ public class WSStorageClient implements Storage {
         WebSockets.sendBinary(byteBuffer, _channel, new WebSocketCallback<Void>() {
             @Override
             public void complete(WebSocketChannel channel, Void context) {
-
             }
 
             @Override
@@ -172,41 +176,51 @@ public class WSStorageClient implements Storage {
             ByteBuffer[] data = message.getData().getResource();
 
             for(ByteBuffer byteBuffer : data) {
+                Buffer buffer = _graph.newBuffer();
                 byte[] bytes = new byte[byteBuffer.limit()];
                 byteBuffer.get(bytes);
+                buffer.writeAll(bytes);
+                bytes = null;
 
+                Buffer wsInfo = null;
+                BufferIterator it = buffer.iterator();
+                while (it.hasNext()) {
+                    wsInfo = it.next();
+                }
 
-                //get message ID
-                int msgID = toInt(bytes[bytes.length - 5],bytes[bytes.length - 4],bytes[bytes.length - 3],
-                        bytes[bytes.length - 2]);
+                int msgID = toInt(wsInfo.read(0),wsInfo.read(1),wsInfo.read(2),wsInfo.read(3));
+                byte messageType = wsInfo.read(4);
 
-
+                //remove the WS info
+                for(int i= 0;i<5;i++) {
+                    buffer.removeLast();
+                }
 
                 Callback callback = _callBacks.get(msgID);
                 if(callback != null) {
-
-                    switch (bytes[bytes.length - 1]) {
+                    switch (messageType) {
                         case WSMessageType.RESP_GET: {
-                            Buffer bufferCallBack = _graph.newBuffer();
-                            for(int i=0;i<bytes.length - 5;i++) {
-                                bufferCallBack.write(bytes[i]);
-                            }
-                            callback.on(bufferCallBack);
+                            callback.on(buffer);
                             break;
                         }
                         case WSMessageType.RESP_PUT: {
-                            callback.on(bytes[0] == 1);
+                            callback.on(buffer.read(0) == 1);
                             break;
                         }
                         case WSMessageType.RESP_REMOVE: {
-                            callback.on(bytes[0] == 1);
+                            callback.on(buffer.read(0) == 1);
                             break;
                         }
                         default:
-                            System.err.println("Unknown message with code " + bytes[bytes.length - 1]);
+                            System.err.println("Unknown message with code " + messageType);
+
                     }
+                } else {
+                    System.err.println("CB not found");
                 }
+
                 _callBacks.remove(msgID);
+
             }
         }
     }

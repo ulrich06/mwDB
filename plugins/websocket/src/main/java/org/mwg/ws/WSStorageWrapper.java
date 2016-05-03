@@ -11,8 +11,11 @@ import io.undertow.websockets.core.WebSockets;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.mwg.Callback;
 import org.mwg.Graph;
+import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.BufferView;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -73,59 +76,77 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
             ByteBuffer[] data = message.getData().getResource();
-
-            Buffer buffer;
             for(ByteBuffer byteBuffer : data) {
-                buffer = _graph.newBuffer();
+                final Buffer buffer = _graph.newBuffer();
                 byte[] bytes = new byte[byteBuffer.limit()];
                 byteBuffer.get(bytes);
-                for(int i =0; i<bytes.length - 5;i++) { //we does not add the bytes specific to the WS plugin
-                    buffer.write(bytes[i]);
+                buffer.writeAll(bytes);
+                bytes = null;
+
+                BufferView wsInfo = null;
+                BufferIterator it = buffer.iterator();
+                while(it.hasNext()) {
+                    wsInfo = (BufferView) it.next();
                 }
-                switch (bytes[bytes.length - 1]) {
-                    case WSMessageType.RQST_GET:
+
+                //Contains the 5 bytes representing the WS info
+                final byte[] wsIndoData = wsInfo.data();
+
+                //remove the WS info
+                for(int i= 0;i<6;i++) {
+                    buffer.removeLast();
+                }
+
+                switch (wsIndoData[wsIndoData.length - 1]) {
+                    case WSMessageType.RQST_GET: {
                         get(buffer, new Callback<Buffer>() {
                             @Override
                             public void on(Buffer result) {
-                                result.write(bytes[bytes.length - 5]); //write message ID
+                                result.write(CoreConstants.BUFFER_SEP);
+                                for (int i = 0; i < 4; i++) {
+                                    result.write(wsIndoData[i]);
+                                }
                                 result.write(WSMessageType.RESP_GET);
                                 ByteBuffer toSend = ByteBuffer.wrap(result.data());
-                                WebSockets.sendBinary(toSend,channel,null);
+                                WebSockets.sendBinary(toSend, channel, null);
+                                buffer.free();
                             }
                         });
                         break;
-                    case WSMessageType.RQST_PUT:
+                    }
+                    case WSMessageType.RQST_PUT: {
                         put(buffer, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                Buffer toSend = _graph.newBuffer();
-                                byte byteResult = (byte) ((result)?1 : 0);
-                                toSend.write(byteResult);
-                                toSend.write(bytes[bytes.length - 5]); //write message ID
-                                toSend.write(WSMessageType.RESP_PUT);
-                                ByteBuffer byteBuffer = ByteBuffer.wrap(toSend.data());
-                                WebSockets.sendBinary(byteBuffer,channel,null);
+                                byte[] toSend = new byte[6];
+                                toSend[0] = (byte) ((result) ? 1 : 0);
+                                System.arraycopy(wsIndoData, 0, toSend, 1, 4);
+                                toSend[5] = WSMessageType.RESP_PUT;
+                                ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
+                                WebSockets.sendBinary(bufferToSend, channel, null);
+                                buffer.free();
                             }
                         });
                         break;
-                    case WSMessageType.RQST_REMOVE:
+                    }
+                    case WSMessageType.RQST_REMOVE: {
                         remove(buffer, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                Buffer toSend = _graph.newBuffer();
-                                byte byteResult = (byte) ((result)?1 : 0);
-                                toSend.write(byteResult);
-                                toSend.write(bytes[bytes.length - 5]); //write message ID
-                                toSend.write(WSMessageType.RESP_REMOVE);
-                                ByteBuffer byteBuffer = ByteBuffer.wrap(toSend.data());
-                                WebSockets.sendBinary(byteBuffer,channel,null);
+                                byte[] toSend = new byte[6];
+                                toSend[0] = (byte) ((result) ? 1 : 0);
+                                System.arraycopy(wsIndoData, 0, toSend, 1, 4);
+                                toSend[5] = WSMessageType.RESP_REMOVE;
+                                ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
+                                WebSockets.sendBinary(bufferToSend, channel, null);
+                                buffer.free();
                             }
                         });
                         break;
+                    }
                     default:
-                        System.err.println("Unknown message with code " + bytes[bytes.length - 1]);
+                        System.err.println("Unknown message with code " + wsIndoData[wsIndoData.length - 1]);
                 }
-                buffer = null;
             }
         }
 
