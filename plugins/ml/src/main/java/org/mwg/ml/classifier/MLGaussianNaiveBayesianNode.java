@@ -15,7 +15,7 @@ public class MLGaussianNaiveBayesianNode extends AbstractGaussianClassifierNode 
 
     //TODO Try out changing parameters on the fly
 
-    public static final String NAME = "MLGaussianNaiveBayesianNode";
+    public static final String NAME = "GaussianNaiveBayesian";
 
     public static class Factory implements NodeFactory {
         @Override

@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class MLGaussianClassifierNode extends AbstractGaussianClassifierNode {
 
-    public static final String NAME = "MLGaussianClassifierNode";
+    public static final String NAME = "GaussianClassifier";
 
     public static class Factory implements NodeFactory {
         @Override

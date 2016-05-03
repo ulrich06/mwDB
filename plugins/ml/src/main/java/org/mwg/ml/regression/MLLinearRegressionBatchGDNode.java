@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class MLLinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
 
-    public static final String NAME = "MLLinearRegressionBatchGDNode";
+    public static final String NAME = "LinearRegressionBatchGD";
 
     public static class Factory implements NodeFactory {
         @Override
