@@ -11,6 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * @ignore ts
+ */
 public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
     /**

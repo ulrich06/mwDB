@@ -8,6 +8,9 @@ import org.mwg.core.chunk.TreeWalker;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.Unsafe;
 
+/**
+ * @ignore ts
+ */
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
@@ -39,9 +42,6 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     private static final long _marksOffset;
     private static final long _magicOffset;
 
-    /**
-     * @ignore ts
-     */
     static {
         try {
             _lockOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_lock"));

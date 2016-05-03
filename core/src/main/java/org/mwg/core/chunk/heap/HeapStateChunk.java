@@ -10,6 +10,9 @@ import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
+/**
+ * @ignore ts
+ */
 public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
@@ -25,9 +28,6 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     private static final long _flagsOffset;
     private static final long _marksOffset;
 
-    /**
-     * @ignore ts
-     */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapStateChunk.class.getDeclaredField("_flags"));
