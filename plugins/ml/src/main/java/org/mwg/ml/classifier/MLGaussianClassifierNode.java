@@ -2,8 +2,8 @@ package org.mwg.ml.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.NodeFactory;
 
 import java.util.Arrays;

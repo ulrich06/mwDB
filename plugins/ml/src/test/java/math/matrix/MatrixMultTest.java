@@ -2,11 +2,11 @@ package math.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
-import org.mwg.maths.matrix.blassolver.blas.KBlas;
-import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
 
 /**
  * Created by assaad on 25/03/16.

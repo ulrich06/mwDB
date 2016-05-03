@@ -2,8 +2,8 @@ package org.mwg.ml.preprocessing;
 
 import org.mwg.*;
 import org.mwg.plugin.NodeFactory;
-import org.mwg.maths.expression.KMathExpressionEngine;
-import org.mwg.maths.expression.impl.MathExpressionEngine;
+import org.mwg.math.expression.KMathExpressionEngine;
+import org.mwg.math.expression.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
 public class MLMathNode extends AbstractNode {

@@ -3,13 +3,13 @@ package math.matrix;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.LU;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
-import org.mwg.maths.matrix.blassolver.blas.KBlas;
-import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
-import org.mwg.maths.matrix.jamasolver.QR;
-import org.mwg.maths.matrix.jamasolver.SVD;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.LU;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.jamasolver.QR;
+import org.mwg.math.matrix.jamasolver.SVD;
 
 /**
  * Created by assaad on 06/04/16.
@@ -38,7 +38,7 @@ public class BlasTest {
         long startTime, endTime;
         double d;
         startTime = System.nanoTime();
-        org.mwg.maths.matrix.blassolver.QR qrblas = new org.mwg.maths.matrix.blassolver.QR(m, n, blas);
+        org.mwg.math.matrix.blassolver.QR qrblas = new org.mwg.math.matrix.blassolver.QR(m, n, blas);
         qrblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -47,7 +47,7 @@ public class BlasTest {
 
 
         startTime = System.nanoTime();
-        org.mwg.maths.matrix.blassolver.QR qrblasF2j = new org.mwg.maths.matrix.blassolver.QR(m, n, blasF2J);
+        org.mwg.math.matrix.blassolver.QR qrblasF2j = new org.mwg.math.matrix.blassolver.QR(m, n, blasF2J);
         qrblasF2j.factor(matAcopy, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -119,7 +119,7 @@ public class BlasTest {
        // System.out.println("Blas LU: " + d + " ms");
 
         startTime = System.nanoTime();
-        org.mwg.maths.matrix.jamasolver.LU lujama = new org.mwg.maths.matrix.jamasolver.LU(matASq);
+        org.mwg.math.matrix.jamasolver.LU lujama = new org.mwg.math.matrix.jamasolver.LU(matASq);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -135,7 +135,7 @@ public class BlasTest {
        // System.out.println();
 
         startTime = System.nanoTime();
-        org.mwg.maths.matrix.blassolver.QR qrblas = new org.mwg.maths.matrix.blassolver.QR(m, n, blas);
+        org.mwg.math.matrix.blassolver.QR qrblas = new org.mwg.math.matrix.blassolver.QR(m, n, blas);
         qrblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -159,7 +159,7 @@ public class BlasTest {
        // System.out.println();
 
         startTime = System.nanoTime();
-        org.mwg.maths.matrix.blassolver.SVD svdblas = new org.mwg.maths.matrix.blassolver.SVD(m, n, blas);
+        org.mwg.math.matrix.blassolver.SVD svdblas = new org.mwg.math.matrix.blassolver.SVD(m, n, blas);
         svdblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);

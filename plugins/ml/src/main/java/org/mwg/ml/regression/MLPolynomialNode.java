@@ -2,7 +2,7 @@ package org.mwg.ml.regression;
 
 import org.mwg.*;
 import org.mwg.plugin.NodeFactory;
-import org.mwg.maths.matrix.operation.PolynomialFit;
+import org.mwg.math.matrix.operation.PolynomialFit;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeState;
 

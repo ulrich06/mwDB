@@ -1,7 +1,7 @@
 package org.mwg.ml.classifier;
 
 import org.mwg.*;
-import org.mwg.maths.matrix.operation.Gaussian1D;
+import org.mwg.math.matrix.operation.Gaussian1D;
 import org.mwg.plugin.NodeFactory;
 
 import java.util.*;
