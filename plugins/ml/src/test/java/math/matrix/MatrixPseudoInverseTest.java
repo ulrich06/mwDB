@@ -12,11 +12,11 @@ import org.mwg.maths.matrix.operation.PInvSVD;
 /**
  * Created by assaad on 25/03/16.
  */
-public class PseudoInverseTest {
+public class MatrixPseudoInverseTest {
     @Test
-    public void gaussian(){
+    public void gaussian() {
 
-       int dim=3;
+        int dim = 3;
         KBlas blas = new NetlibBlas();
 
       /*  double[] mt={4,7,3,2};
@@ -26,21 +26,20 @@ public class PseudoInverseTest {
         KMatrix mit=pt.getPInv();
         double d0= pt.getDeterminant();*/
 
-        double[] matrix ={504,360,180,360,360,0,180,0,720};
+        double[] matrix = {504, 360, 180, 360, 360, 0, 180, 0, 720};
 
 
-        KMatrix matA= new KMatrix(matrix,dim,dim);
+        KMatrix matA = new KMatrix(matrix, dim, dim);
         PInvSVD pinv = new PInvSVD();
-        pinv.factor(matA,false);
-        KMatrix matInv= pinv.getPInv();
-        double d1= pinv.getDeterminant();
+        pinv.factor(matA, false);
+        KMatrix matInv = pinv.getPInv();
+        double d1 = pinv.getDeterminant();
 
 
-
-        double[][]covariance = new double[dim][dim];
-        for(int i=0; i<dim;i++){
-            for (int j=0;j<dim;j++){
-                covariance[i][j]=matA.get(i,j);
+        double[][] covariance = new double[dim][dim];
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                covariance[i][j] = matA.get(i, j);
             }
         }
 
@@ -55,16 +54,14 @@ public class PseudoInverseTest {
         double covarianceMatrixDeterminant = covMatDec.getDeterminant();
 
 
+        double[] matrix2 = {504, 360, 180, 0, 360, 360, 0, 0, 180, 0, 720, 0, 0, 0, 0, 0};
 
 
-        double[] matrix2 ={504,360,180,0,360,360,0,0,180,0,720,0,0,0,0,0};
-
-
-        KMatrix matA2= new KMatrix(matrix2,dim+1,dim+1);
+        KMatrix matA2 = new KMatrix(matrix2, dim + 1, dim + 1);
         PInvSVD pinv2 = new PInvSVD();
-        pinv2.factor(matA2,false);
-        KMatrix matInv2= pinv2.getPInv();
-        double d12= pinv2.getDeterminant();
+        pinv2.factor(matA2, false);
+        KMatrix matInv2 = pinv2.getPInv();
+        double d12 = pinv2.getDeterminant();
 
 
      /*   double[][]covariance2 = new double[dim+1][dim+1];
@@ -85,7 +82,7 @@ public class PseudoInverseTest {
         double covarianceMatrixDeterminant2 = covMatDec2.getDeterminant();
 
 */
-        int x=0;
+        int x = 0;
 
 
     }

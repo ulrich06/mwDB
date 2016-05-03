@@ -13,11 +13,11 @@ import org.mwg.maths.matrix.blassolver.SVD;
 /**
  * Created by assaad on 23/03/16.
  */
-public class MatrixTest {
+public class MatrixOpsTest {
 
     private String blas = "Netlib";
 
-    public MatrixTest() {
+    public MatrixOpsTest() {
         BlasMatrixEngine be = (BlasMatrixEngine) KMatrix.defaultEngine();
         if (blas.equals("Netlib")) {
             be.setBlas(new NetlibBlas());

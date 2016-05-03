@@ -13,7 +13,6 @@ import org.mwg.core.NoopScheduler;
 public class GaussianNodeTest {
 
 
-
     protected final double[] longleyData = new double[]{
             60323, 83.0, 234289, 2356, 1590, 107608, 1947,
             61122, 88.5, 259426, 2325, 1456, 108632, 1948,
@@ -59,16 +58,14 @@ public class GaussianNodeTest {
     };
 
 
-
-
     @Test
     public void test() {
         Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
-                MLGaussianGmmNode gaussianNodeLive =  (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
+                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                MLGaussianGmmNode gaussianNodeLive = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
                 double eps = 1e-7;
 
@@ -89,7 +86,7 @@ public class GaussianNodeTest {
                         public void on(MLGaussianGmmNode result) {
                             result.learn(trains);
                         }
-                            });
+                    });
                     time++;
                 }
 
@@ -115,7 +112,7 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>(){
+                gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>() {
                     @Override
                     public void on(MLGaussianGmmNode result) {
                         double[] a = result.getAvg();
@@ -133,10 +130,8 @@ public class GaussianNodeTest {
                 });
 
 
-
                 Assert.assertTrue(KMatrix.compare(avgLive, ravg, eps));
                 Assert.assertTrue(KMatrix.compareArray(covLive, rcovData, eps));
-
 
 
                 gaussianNodeBatch.free();

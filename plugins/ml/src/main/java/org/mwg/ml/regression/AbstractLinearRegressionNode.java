@@ -1,8 +1,8 @@
-package org.mwg.ml.regression.linear;
+package org.mwg.ml.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.classifier.common.SlidingWindowManagingNode;
+import org.mwg.ml.classifier.AbstractSlidingWindowManagingNode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Created by andre on 4/29/2016.
  */
-public abstract class AbstractLinearRegressionNode extends SlidingWindowManagingNode implements KLinearRegression {
+public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindowManagingNode {
 
     /**
      * Attribute key - sliding window of values
@@ -26,12 +26,10 @@ public abstract class AbstractLinearRegressionNode extends SlidingWindowManaging
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    @Override
     public double[] getCoefficients(){
         return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
     }
 
-    @Override
     public double getIntercept(){
         return getCoefficients()[getResponseIndex()];
     }
@@ -41,12 +39,10 @@ public abstract class AbstractLinearRegressionNode extends SlidingWindowManaging
         unphasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
     }
 
-    @Override
     public double getL2Regularization(){
         return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_L2_COEF_KEY, 0.0);
     }
 
-    @Override
     public void setL2Regularization(double l2) {
         illegalArgumentIfFalse(l2>=0,"L2 coefficients must be non-negative");
         unphasedState().setFromKey(INTERNAL_VALUE_L2_COEF_KEY, Type.DOUBLE, l2);

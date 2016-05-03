@@ -1,8 +1,7 @@
-package org.mwg.ml.classifier.gaussiancommon;
+package org.mwg.ml.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.classifier.common.SlidingWindowManagingNode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,7 +9,7 @@ import java.util.Objects;
 /**
  * Created by andre on 4/26/2016.
  */
-public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNode implements KGaussianClassifierNode{
+public abstract class AbstractGaussianClassifierNode extends AbstractSlidingWindowManagingNode {
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -36,11 +35,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     private static final String INTERNAL_TOTAL_KEY_PREFIX = "_total_";
 
     /**
-     * Attribute key - whether the node is in bootstrap (re-learning) mode
-     */
-    private static final String INTERNAL_BOOTSTRAP_MODE_KEY = "_bootstrapMode";
-
-    /**
      * Attribute key - List of known classes
      */
     private static final String INTERNAL_KNOWN_CLASSES_LIST = "_knownClassesList";
@@ -50,7 +44,7 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     /**
      * {@inheritDoc}
      */
-    public AbstractGaussianClassifier(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractGaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -122,7 +116,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     }
 
 
-    @Override
     public int[] getPredictedBufferClasses() {
         //For each value in value buffer
         int startIndex = 0;
@@ -148,7 +141,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
         return result;
     }
 
-    @Override
     public int[] getRealBufferClasses() {
         //For each value in value buffer
         int startIndex = 0;
@@ -175,7 +167,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
         return result;
     }
 
-    @Override
     public int getBufferErrorCount() {
         //For each value in value buffer
         int startIndex = 0;

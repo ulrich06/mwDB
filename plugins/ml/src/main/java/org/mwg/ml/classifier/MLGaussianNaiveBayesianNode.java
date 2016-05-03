@@ -1,25 +1,40 @@
-package org.mwg.ml.classifier.gaussiannb;
+package org.mwg.ml.classifier;
 
 import org.mwg.*;
-import org.mwg.ml.classifier.gaussiancommon.AbstractGaussianClassifier;
-import org.mwg.ml.classifier.gaussiancommon.KGaussianClassifierNode;
 import org.mwg.maths.matrix.operation.Gaussian1D;
+import org.mwg.plugin.NodeFactory;
 
 import java.util.*;
 
 /**
  * Created by Andrey Boytsov on 4/14/2016.
  */
-public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier implements KGaussianClassifierNode {
+public class MLGaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
 
     //TODO Any synchronization?
 
     //TODO Try out changing parameters on the fly
 
+    public static final String NAME = "GaussianNaiveBayesian";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            MLGaussianNaiveBayesianNode newNode = new MLGaussianNaiveBayesianNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
+
+
     /**
      * {@inheritDoc}
      */
-    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution){
+    public MLGaussianNaiveBayesianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution){
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

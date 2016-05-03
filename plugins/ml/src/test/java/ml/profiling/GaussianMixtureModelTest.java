@@ -22,7 +22,7 @@ public class GaussianMixtureModelTest {
                 double[] data = new double[3];
                 Random rand = new Random();
 
-                MLGaussianGmmNode node1 = (MLGaussianGmmNode) graph.newNode(0,0,"GaussianGmm");
+                MLGaussianGmmNode node1 = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 node1.configMixture(1, 100);
 
                 for (int i = 0; i < 220; i++) {

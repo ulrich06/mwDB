@@ -1,14 +1,30 @@
-package org.mwg.ml.classifier.gaussian;
+package org.mwg.ml.classifier;
 
 import org.mwg.Graph;
-import org.mwg.ml.classifier.gaussiancommon.AbstractGaussianClassifier;
-import org.mwg.ml.classifier.gaussiancommon.KGaussianClassifierNode;
+import org.mwg.Node;
 import org.mwg.maths.matrix.KMatrix;
 import org.mwg.maths.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.plugin.NodeFactory;
 
 import java.util.Arrays;
 
-public class GaussianClassifierNode extends AbstractGaussianClassifier implements KGaussianClassifierNode {
+public class MLGaussianClassifierNode extends AbstractGaussianClassifierNode {
+
+    public static final String NAME = "GaussianClassifier";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            MLGaussianClassifierNode newNode = new MLGaussianClassifierNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -18,7 +34,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier implement
      * @param p_graph
      * @param currentResolution
      */
-    public GaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public MLGaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -113,7 +129,6 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier implement
         return curMaxLikelihoodClass;
     }
 
-    @Override
     public String allDistributionsToString() {
         String result = "";
         int allClasses[] = getKnownClasses();

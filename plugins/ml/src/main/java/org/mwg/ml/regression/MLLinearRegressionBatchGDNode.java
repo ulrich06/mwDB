@@ -1,7 +1,9 @@
-package org.mwg.ml.regression.linear;
+package org.mwg.ml.regression;
 
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.Type;
+import org.mwg.plugin.NodeFactory;
 
 import java.util.Arrays;
 
@@ -11,9 +13,24 @@ import java.util.Arrays;
  *
  * Created by andre on 4/29/2016.
  */
-public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode implements KBatchGradientDescentLinearRegression {
+public class MLLinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
 
-    public LinearRegressionBatchGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public static final String NAME = "LinearRegressionBatchGradientDescent";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            MLLinearRegressionBatchGDNode newNode = new MLLinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
+
+    public MLLinearRegressionBatchGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -87,33 +104,27 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
         }
     }
 
-    @Override
     public double getIterationErrorThreshold() {
         return unphasedState().getFromKeyWithDefault(GD_ERROR_THRESH_KEY, Double.NaN);
     }
 
-    @Override
     public void setIterationErrorThreshold(double errorThreshold) {
         unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, errorThreshold);
     }
 
-    @Override
     public void removeIterationErrorThreshold() {
         unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, Double.NaN);
     }
 
-    @Override
     public int getIterationCountThreshold() {
         return unphasedState().getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
     }
 
-    @Override
     public void setIterationCountThreshold(int iterationCountThreshold) {
         //Any value is acceptable.
         unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, iterationCountThreshold);
     }
 
-    @Override
     public void removeIterationCountThreshold() {
         unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, -1);
     }

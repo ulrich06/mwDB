@@ -11,7 +11,7 @@ import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
 /**
  * Created by assaad on 25/03/16.
  */
-public class MultTest {
+public class MatrixMultTest {
 
 
     public KMatrix manualMultpily(KMatrix matA, KMatrix matB) {
@@ -87,7 +87,7 @@ public class MultTest {
             for (int j = 0; j < p; j++) {
                 Assert.assertTrue(Math.abs(matNetlib.get(i, j) - matD.get(i, j)) < eps);
                 Assert.assertTrue(Math.abs(matF2J.get(i, j) - matD.get(i, j)) < eps);
-               // Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
+                // Assert.assertTrue(Math.abs(matCuda.get(i, j) - matD.get(i, j)) < eps);
             }
         }
     }
