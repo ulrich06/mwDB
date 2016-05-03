@@ -22,7 +22,6 @@ public class MathNodeTest {
                 Node node = graph.newNode(0, 0, "Math");
                 node.set("test","10/5");
                 node.set("valueSquare", "{value} ^ 2");
-                node.set("valueSquare2", "{$value} ^ 2");
                 node.set("value", 3.0);
                 node.set("min", 5.0);
                 node.set("ops","({$valueSquare}+1)/{min}");
@@ -38,7 +37,7 @@ public class MathNodeTest {
                 Assert.assertTrue(((double)node.get("value"))==3.0);
                 Assert.assertTrue(((double)node.get("$value"))==3.0);
                 Assert.assertTrue(((double)node.get("$valueSquare"))==9.0);
-                Assert.assertTrue(((double)node.get("$valueSquare2"))==9.0);
+                Assert.assertTrue((node.get("valueSquare")).equals("{value} ^ 2"));
                 Assert.assertTrue(((double)node.get("$ops"))==2.0);
                 Assert.assertTrue(((double)node.get("$loopA"))==5.0);
 
