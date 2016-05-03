@@ -101,4 +101,7 @@ public class CoreConstants extends org.mwg.Constants {
     public static final long SCALE_4 = 1_000_000;
 
 
+    /** Error messages*/
+    public static String DEAD_NODE_ERROR = "This Node has been tagged destroyed, please don't use it anymore!";
+
 }
