@@ -95,10 +95,13 @@ public class CoreConstants extends org.mwg.Constants {
     /**
      * SuperTimeTree
      */
-    public static final long SCALE_1 = 1_000;
-    public static final long SCALE_2 = 10_000;
-    public static final long SCALE_3 = 100_000;
-    public static final long SCALE_4 = 1_000_000;
+    public static final long SCALE_1 =      1000;
+    public static final long SCALE_2 =     10000;
+    public static final long SCALE_3 =    100000;
+    public static final long SCALE_4 =   1000000;
 
+
+    /** Error messages*/
+    public static String DEAD_NODE_ERROR = "This Node has been tagged destroyed, please don't use it anymore!";
 
 }

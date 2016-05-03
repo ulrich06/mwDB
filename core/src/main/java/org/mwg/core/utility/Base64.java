@@ -194,15 +194,12 @@ import org.mwg.struct.Buffer;
  * }
  * return resultTmp;
  * }
- * <p>
- * <p>
  * public static encodeString(s : string) {
  * var result = "";
  * var sLength = s.length;
  * var currentSourceChar;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
- * <p>
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
  * currentSourceChar = s.charCodeAt(charIdx);
  * if(freeBitsInCurrentChar == 6) {
@@ -219,7 +216,6 @@ import org.mwg.struct.Buffer;
  * freeBitsInCurrentChar = 6;
  * }
  * }
- * <p>
  * if(freeBitsInCurrentChar != 6) {
  * result += Base64.encodeArray[currentEncodedChar];
  * }
@@ -230,7 +226,6 @@ import org.mwg.struct.Buffer;
  * var currentSourceChar;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
- * <p>
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
  * currentSourceChar = s.charCodeAt(charIdx);
  * if(freeBitsInCurrentChar == 6) {
@@ -247,7 +242,6 @@ import org.mwg.struct.Buffer;
  * freeBitsInCurrentChar = 6;
  * }
  * }
- * <p>
  * if(freeBitsInCurrentChar != 6) {
  * buffer.append(Base64.encodeArray[currentEncodedChar]);
  * }
@@ -260,7 +254,6 @@ import org.mwg.struct.Buffer;
  * var currentSourceChar;
  * var currentDecodedChar = 0;
  * var freeBitsInCurrentChar = 8;
- * <p>
  * for(var charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
  * currentSourceChar = Base64.decodeArray[s.charAt(charIdx)];
  * if(freeBitsInCurrentChar == 8) {

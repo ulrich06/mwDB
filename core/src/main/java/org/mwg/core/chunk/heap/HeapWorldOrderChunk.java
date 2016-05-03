@@ -29,6 +29,9 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     private static final long _lockOffset;
     private static final long _magicOffset;
 
+    /**
+     * @ignore ts
+     */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_flags"));
@@ -135,6 +138,11 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return this._marks;
     }
 
+
+    /**
+     * @native ts
+     *
+     */
     @Override
     public final long mark() {
         long before;
@@ -146,6 +154,10 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return after;
     }
 
+    /**
+     * @native ts
+     *
+     */
     @Override
     public final long unmark() {
         long before;
