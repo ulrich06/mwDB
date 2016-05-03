@@ -1,14 +1,31 @@
-package org.mwg.ml.regression.linear;
+package org.mwg.ml.regression;
 
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.maths.matrix.KMatrix;
 import org.mwg.maths.matrix.KTransposeType;
 import org.mwg.maths.matrix.operation.PInvSVD;
+import org.mwg.plugin.NodeFactory;
 
 /**
  * Created by andre on 4/26/2016.
  */
-public class LinearRegressionNode extends AbstractLinearRegressionNode implements KLinearRegression {
+public class LinearRegressionNode extends AbstractLinearRegressionNode {
+
+    public static final String NAME = "LinearRegressionNode";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            LinearRegressionNode newNode = new LinearRegressionNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
 
     public LinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);

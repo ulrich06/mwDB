@@ -1,6 +1,8 @@
-package org.mwg.ml.regression.linear;
+package org.mwg.ml.regression;
 
 import org.mwg.Graph;
+import org.mwg.Node;
+import org.mwg.plugin.NodeFactory;
 
 /**
  * Linear regression node based on stochastic gradient descent.
@@ -8,7 +10,22 @@ import org.mwg.Graph;
  *
  * Created by andre on 4/29/2016.
  */
-public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegressionNode implements KGradientDescentLinearRegression {
+public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegressionNode {
+
+    public static final String NAME = "LinearRegressionSGDNode";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            LinearRegressionSGDNode newNode = new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
 
     public LinearRegressionSGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);

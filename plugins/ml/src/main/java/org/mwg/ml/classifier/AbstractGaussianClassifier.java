@@ -1,8 +1,7 @@
-package org.mwg.ml.classifier.gaussiancommon;
+package org.mwg.ml.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.classifier.common.SlidingWindowManagingNode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,7 +9,7 @@ import java.util.Objects;
 /**
  * Created by andre on 4/26/2016.
  */
-public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNode implements KGaussianClassifierNode{
+public abstract class AbstractGaussianClassifier extends AbstractSlidingWindowManagingNode {
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -122,7 +121,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
     }
 
 
-    @Override
     public int[] getPredictedBufferClasses() {
         //For each value in value buffer
         int startIndex = 0;
@@ -148,7 +146,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
         return result;
     }
 
-    @Override
     public int[] getRealBufferClasses() {
         //For each value in value buffer
         int startIndex = 0;
@@ -175,7 +172,6 @@ public abstract class AbstractGaussianClassifier extends SlidingWindowManagingNo
         return result;
     }
 
-    @Override
     public int getBufferErrorCount() {
         //For each value in value buffer
         int startIndex = 0;

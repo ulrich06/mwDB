@@ -1,4 +1,4 @@
-package org.mwg.ml.classifier.common;
+package org.mwg.ml.classifier;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
@@ -14,18 +14,44 @@ import java.util.Objects;
  * Common superclass for all ML algorithms that use bootstrap mode
  * and
  */
-public abstract class SlidingWindowManagingNode extends AbstractNode implements  KSlidingWindowManagingNode{
+public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
     /**
      * Attribute key - whether the node is in bootstrap (re-learning) mode
      */
     private static final String INTERNAL_BOOTSTRAP_MODE_KEY = "_bootstrapMode";
 
     /**
+     *  Buffer size
+     */
+    public static final String BUFFER_SIZE_KEY = "BufferSize";
+
+    /**
+     *  Number of input dimensions
+     */
+    public static final String INPUT_DIM_KEY = "InputDimensions";
+    /**
+     *  Index of response value
+     */
+    public static final String RESPONSE_INDEX_KEY = "ResponseIndex";
+    /**
+     *  Higher error threshold
+     */
+    public static final String HIGH_ERROR_THRESH_KEY = "HighErrorThreshold";
+    /**
+     *  Lower error threshold
+     */
+    public static final String LOW_ERROR_THRESH_KEY = "LowErrorThreshold";
+    /**
+     *  Value
+     */
+    public static final String VALUE_KEY = "Value";
+
+    /**
      * Attribute key - sliding window of values
      */
     private static final String INTERNAL_VALUE_BUFFER_KEY = "_valueBuffer";
 
-    public SlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractSlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -64,7 +90,6 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
         return valLength / getInputDimensions();
     }
 
-    @Override
     public boolean isInBootstrapMode() {
         return unphasedState().getFromKeyWithDefault(INTERNAL_BOOTSTRAP_MODE_KEY, true);
     }
@@ -124,7 +149,6 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      *
      * @param value New value to add; {@code null} disallowed
      */
-    @Override
     public void addValue(double value[]) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
         illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
@@ -189,6 +213,8 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
         return (double) objLET;
     }
 
+    protected abstract double getBufferError();
+
     /**
      * Adds new value to the buffer. Gaussian model is regenerated.
      *
@@ -216,7 +242,6 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
      */
     protected abstract void updateModelParameters(double value[]);
 
-    @Override
     public void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold) {
         illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
         illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
@@ -234,7 +259,6 @@ public abstract class SlidingWindowManagingNode extends AbstractNode implements 
         unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, highErrorThreshold);
     }
 
-    @Override
     public int getCurrentBufferLength() {
         double valueBuffer[] = getValueBuffer();
         final int dims = getInputDimensions();
