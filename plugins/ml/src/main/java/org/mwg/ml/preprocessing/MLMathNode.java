@@ -32,12 +32,13 @@ public class MLMathNode extends AbstractNode {
 
     @Override
     public Object get(String propertyName) {
-        Object expressionObj = super.get(propertyName);
-        if (propertyName.startsWith("$") && expressionObj != null && type(propertyName) == Type.STRING) {
+        if (propertyName != null && propertyName.startsWith("$")) {
+            Object expressionObj = super.get(propertyName.substring(1));
             KMathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
             return localEngine.eval(this);
+        } else {
+            return super.get(propertyName);
         }
-        return expressionObj;
     }
 
     @Override
