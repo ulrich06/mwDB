@@ -45,7 +45,7 @@ class ActionSelect implements TaskAction {
                     cursor++;
                 }
             }
-            if (current[i] != null && current[i] instanceof Node) {
+            if (current[i] != null && current[i] instanceof AbstractNode) {
                 if (_filter.select((Node) current[i])) {
                     filteredResult[cursor] = current[i];
                     cursor++;

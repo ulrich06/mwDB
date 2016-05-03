@@ -26,7 +26,7 @@ class ActionWithout implements TaskAction {
                 context.setResult(filterNodeArray((AbstractNode[]) previousResult));
             } else if (previousResult instanceof Object[]) {
                 context.setResult(filterArray((Object[]) previousResult));
-            } else if (previousResult instanceof Node) {
+            } else if (previousResult instanceof AbstractNode) {
                 Object currentName = ((Node) previousResult).get(_name);
                 if (currentName == null || !_pattern.matcher(currentName.toString()).matches()) {
                     context.setResult(previousResult);
@@ -52,7 +52,7 @@ class ActionWithout implements TaskAction {
                     filteredResult[cursor] = filtered;
                     cursor++;
                 }
-            } else if (current[i] instanceof Node) {
+            } else if (current[i] instanceof AbstractNode) {
                 Object currentName = ((Node) current[i]).get(_name);
                 if (currentName == null || !_pattern.matcher(currentName.toString()).matches()) {
                     filteredResult[cursor] = current[i];

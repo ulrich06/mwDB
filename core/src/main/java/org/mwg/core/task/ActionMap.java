@@ -43,8 +43,7 @@ class ActionMap implements TaskAction {
                     filteredResult[cursor] = filtered;
                     cursor++;
                 }
-            }
-            if (current[i] != null && current[i] instanceof Node) {
+            }else if (current[i] != null && current[i] instanceof AbstractNode) {
                 filteredResult[cursor] = _map.map((Node) current[i]);
                 cursor++;
             }

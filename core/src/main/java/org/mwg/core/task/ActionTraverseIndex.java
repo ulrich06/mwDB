@@ -26,7 +26,7 @@ class ActionTraverseIndex implements TaskAction {
             Node[] toLoad = new AbstractNode[0];
             if (previousResult instanceof AbstractNode[]) {
                 toLoad = (AbstractNode[]) previousResult;
-            } else if (previousResult instanceof Node) {
+            } else if (previousResult instanceof AbstractNode) {
                 toLoad = new AbstractNode[]{(AbstractNode) previousResult};
             } else if (previousResult instanceof Object[]) {
                 toLoad = getNodes((Object[]) previousResult);
@@ -83,7 +83,7 @@ class ActionTraverseIndex implements TaskAction {
     private Node[] getNodes(Object[] previousResult) {
         Node[] result = new AbstractNode[0];
         for (Object o : previousResult) {
-            if (o instanceof Node) {
+            if (o instanceof AbstractNode) {
                 Node[] tmp = new AbstractNode[result.length + 1];
                 System.arraycopy(result, 0, tmp, 0, result.length);
                 result = tmp;

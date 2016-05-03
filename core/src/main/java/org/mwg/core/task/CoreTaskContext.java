@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     private void cleanObj(Object o) {
-        if (o instanceof Node) {
+        if (o instanceof AbstractNode) {
             ((Node) o).free();
         } else if (o instanceof org.mwg.core.task.CoreTaskContext) {
             ((org.mwg.task.TaskContext) o).clean();

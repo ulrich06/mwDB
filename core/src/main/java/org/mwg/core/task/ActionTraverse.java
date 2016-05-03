@@ -27,7 +27,7 @@ class ActionTraverse implements TaskAction {
                 collectNodeArray((AbstractNode[]) previousResult, toLoad);
             } else if (previousResult instanceof Object[]) {
                 collectArray((Object[]) previousResult, toLoad);
-            } else if (previousResult instanceof Node) {
+            } else if (previousResult instanceof AbstractNode) {
                 Node loop = (Node) previousResult;
                 Object rel = loop.get(_name);
                 if (rel != null && rel instanceof long[]) {
@@ -67,7 +67,7 @@ class ActionTraverse implements TaskAction {
                 collectNodeArray((AbstractNode[]) current[i], toLoad);
             } else if (current[i] instanceof Object[]) {
                 collectArray((Object[]) current[i], toLoad);
-            } else if (current[i] instanceof Node) {
+            } else if (current[i] instanceof AbstractNode) {
                 Node loop = (Node) current[i];
                 Object rel = loop.get(_name);
                 if (rel != null && rel instanceof long[]) {
