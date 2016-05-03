@@ -93,13 +93,13 @@ public class Task implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task traverseIndex(String indexName, String query) {
-        addTask(new ActionTraverseIndex(indexName,query));
+        addTask(new ActionTraverseIndex(indexName, query));
         return this;
     }
 
     @Override
     public org.mwg.task.Task traverseIndexAll(String indexName) {
-        addTask(new ActionTraverseIndex(indexName,null));
+        addTask(new ActionTraverseIndex(indexName, null));
         return this;
     }
 
@@ -138,7 +138,7 @@ public class Task implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task ifThen(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        addTask(new ActionIfThen(cond,then));
+        addTask(new ActionIfThen(cond, then));
         return this;
     }
 
