@@ -37,9 +37,6 @@ public class BufferBuilder {
 
             @Override
             byte[] slice(long initPos, long endPos) {
-                if (initPos == endPos) {
-                    return new byte[0];
-                }
                 int newSize = (int) (endPos - initPos + 1);
                 byte[] result = new byte[newSize];
                 for (int i = 0; i < newSize; i++) {
@@ -132,9 +129,6 @@ public class BufferBuilder {
 
             @Override
             byte[] slice(long initPos, long endPos) {
-                if (initPos == endPos) {
-                    return new byte[0];
-                }
                 int newSize = (int) (endPos - initPos + 1);
                 byte[] newResult = new byte[newSize];
                 System.arraycopy(buffer, (int) initPos, newResult, 0, newSize);

@@ -6,6 +6,8 @@ import org.mwg.core.CoreConstants;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
 
+import java.util.Arrays;
+
 public class BufferBuilderTest {
     private byte[] data = new byte[]{1, 2, 3, 4, 5};
     private byte[] data2 = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
@@ -142,6 +144,17 @@ public class BufferBuilderTest {
         buffer = BufferBuilder.newOffHeapBuffer();
         testIteratorNull(buffer);
         buffer.free();
+    }
+
+    @Test
+    public void testIteratorHeap2(){
+        byte[] bytes = new byte[]{12,11,CoreConstants.BUFFER_SEP,87,CoreConstants.BUFFER_SEP,87,45};
+        Buffer buffer = BufferBuilder.newHeapBuffer();
+        buffer.writeAll(bytes);
+        BufferIterator it = buffer.iterator();
+        while(it.hasNext()){
+            System.out.println(Arrays.toString(it.next().data()));
+        }
     }
 
 }
