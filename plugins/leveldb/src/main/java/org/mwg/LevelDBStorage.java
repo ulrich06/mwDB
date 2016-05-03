@@ -1,15 +1,16 @@
 package org.mwg;
 
-import java.io.File;
-
 import org.fusesource.leveldbjni.JniDBFactory;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
-import org.mwg.struct.Buffer;
 import org.mwg.plugin.Storage;
+import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
+
+import java.io.File;
+import java.util.Arrays;
 
 public class LevelDBStorage implements Storage {
 
@@ -44,6 +45,7 @@ public class LevelDBStorage implements Storage {
                     isFirst = false;
                 }
                 byte[] res = db.get(view.data());
+                System.out.println("GET " + Arrays.toString(view.data()) + " -> " + Arrays.toString(res));
                 if (res != null) {
 
                     /*
@@ -75,6 +77,10 @@ public class LevelDBStorage implements Storage {
                 Buffer valueView = it.next();
                 if (valueView != null) {
                     batch.put(keyView.data(), valueView.data());
+                    System.out.println("PUT " + Arrays.toString(keyView.data()) + " -> " + Arrays.toString(valueView.data()));
+                } else {
+                    System.out.println("GET " + Arrays.toString(keyView.data()) + " -> " + valueView);
+
                 }
             }
             db.write(batch);

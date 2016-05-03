@@ -3,6 +3,8 @@ package org.mwg;
 import org.mwg.ws.WSStorageClient;
 import org.mwg.ws.WSStorageWrapper;
 
+import java.util.Arrays;
+
 /**
  * Created by ludovicmouline on 02/05/16.
  */
@@ -33,32 +35,27 @@ public class Test {
                     public void on(Boolean result) {
                         Node node1 = serverGraph.newNode(0,0);
                         node1.set("name","node1");
-                        final long id = node1.id();
 
-//                        Node node2 = serverGraph.newNode(0,0);
-//                        node2.set("name","node2");
-//                        serverGraph.save(null);
-//
-//                        Node node3 = serverGraph.newNode(0,0);
-//                        node3.set("name","node3");
+                        Node node2 = serverGraph.newNode(0,0);
+                        node2.set("name","node2");
+
+                        Node node3 = serverGraph.newNode(0,0);
+                        node3.set("name","node3");
 
 
-//                        String[] attIndex = new String[]{"name"};
-//                        serverGraph.index("indexName",node1,attIndex,null);
-//                        serverGraph.index("indexName",node2,attIndex,null);
-//                        serverGraph.index("indexName",node3,attIndex,null);
+                        String[] attIndex = new String[]{"name"};
+                        serverGraph.index("indexName",node1,attIndex,null);
+                        serverGraph.index("indexName",node2,attIndex,null);
+                        serverGraph.index("indexName",node3,attIndex,null);
 
-                        node1.free();
-//                        node2.free();
-//                        node3.free();
 
                         serverGraph.save(new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                clientGraph.lookup(0, 0, id, new Callback<Node>() {
+                                clientGraph.all(0, 0, "indexName", new Callback<Node[]>() {
                                     @Override
-                                    public void on(Node result) {
-                                        System.out.println(result);
+                                    public void on(Node[] result) {
+                                        System.out.println(Arrays.toString(result));
                                     }
                                 });
                             }
