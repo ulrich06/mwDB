@@ -17,14 +17,14 @@ class CoreBufferIterator implements BufferIterator {
 
     @Override
     public final boolean hasNext() {
-        return _originSize > 0 && _cursor < _originSize;
+        return _originSize > 0 && (_cursor + 1) < _originSize;
     }
 
     @Override
     public final synchronized Buffer next() {
 
         long previousCursor = _cursor;
-        while (_cursor < _originSize) {
+        while ((_cursor + 1) < _originSize) {
             _cursor++;
             byte current = _origin.read(_cursor);
             if (current == CoreConstants.BUFFER_SEP) {
@@ -32,7 +32,7 @@ class CoreBufferIterator implements BufferIterator {
             }
         }
         if (previousCursor < _originSize) {
-            return new BufferView(_origin, previousCursor + 1, _cursor -1);
+            return new BufferView(_origin, previousCursor + 1, _cursor);
         }
         return null;
     }

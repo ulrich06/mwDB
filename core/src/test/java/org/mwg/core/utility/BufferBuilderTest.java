@@ -108,8 +108,7 @@ public class BufferBuilderTest {
         Assert.assertNotNull(view3);
         Assert.assertEquals(view3.size(), 0);
 
-        Buffer view4 = it.next();
-        Assert.assertNull(view4);
+        Assert.assertEquals(false,it.hasNext());
 
     }
 
@@ -263,8 +262,20 @@ public class BufferBuilderTest {
             Assert.assertEquals(true,catched);
         }
 
+    }
 
+    @Test
+    public void testIteratorOnLimitSize(){
+        byte[] bytes = new byte[]{47, 47, 47, 47, 43, 59, 73, 65, 65, 65, 65, 65, 69, 35, 0, 103};
+        Buffer buffer = BufferBuilder.newHeapBuffer();
 
+        buffer.writeAll(bytes);
+        BufferIterator it = buffer.iterator();
+
+        Assert.assertArrayEquals(new byte[]{47, 47, 47, 47, 43, 59, 73, 65, 65, 65, 65, 65, 69},it.next().data());
+        Assert.assertArrayEquals(new byte[]{0, 103},it.next().data());
+
+        Assert.assertEquals(false,it.hasNext());
     }
 
 }
