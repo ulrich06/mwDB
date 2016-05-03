@@ -140,4 +140,15 @@ public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindow
         }
         return sqrResidualSum / numValues;
     }
+
+    @Override
+    public String toString(){
+        StringBuilder result = new StringBuilder();
+        double coefs[] = getCoefficients();
+        result.append("Coefficients: ");
+        for (int j = 0; j < coefs.length; j++) {
+            result.append(coefs[j] + ", ");
+        }
+        return result.toString();
+    }
 }

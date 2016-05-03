@@ -131,7 +131,8 @@ public class MLGaussianNaiveBayesianNode extends AbstractGaussianClassifierNode 
         return curMaxLikelihoodClass;
     }
 
-    public String allDistributionsToString(){
+    @Override
+    public String toString(){
         String result = "";
         int allClasses[] = getKnownClasses();
         if (allClasses.length==0){
