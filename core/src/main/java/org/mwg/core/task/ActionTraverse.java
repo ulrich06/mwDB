@@ -23,8 +23,8 @@ class ActionTraverse implements TaskAction {
         if (previousResult != null) {
             //dry execute to count waiter
             Set<Long> toLoad = new HashSet<Long>();
-            if (previousResult instanceof Node[]) {
-                collectNodeArray((Node[]) previousResult, toLoad);
+            if (previousResult instanceof AbstractNode[]) {
+                collectNodeArray((AbstractNode[]) previousResult, toLoad);
             } else if (previousResult instanceof Object[]) {
                 collectArray((Object[]) previousResult, toLoad);
             } else if (previousResult instanceof Node) {
@@ -63,8 +63,8 @@ class ActionTraverse implements TaskAction {
 
     private void collectArray(Object[] current, Set<Long> toLoad) {
         for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof Node[]) {
-                collectNodeArray((Node[]) current[i], toLoad);
+            if (current[i] instanceof AbstractNode[]) {
+                collectNodeArray((AbstractNode[]) current[i], toLoad);
             } else if (current[i] instanceof Object[]) {
                 collectArray((Object[]) current[i], toLoad);
             } else if (current[i] instanceof Node) {

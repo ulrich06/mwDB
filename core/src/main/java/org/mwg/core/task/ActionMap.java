@@ -18,8 +18,8 @@ class ActionMap implements TaskAction {
     public final void eval(final TaskContext context) {
         final Object previousResult = context.getPreviousResult();
         if (previousResult != null) {
-            if (previousResult instanceof Node[]) {
-                context.setResult(filterNodeArray((Node[]) previousResult));
+            if (previousResult instanceof AbstractNode[]) {
+                context.setResult(filterNodeArray((AbstractNode[]) previousResult));
             } else if (previousResult instanceof Object[]) {
                 context.setResult(filterArray((Object[]) previousResult));
             }
@@ -31,8 +31,8 @@ class ActionMap implements TaskAction {
         Object[] filteredResult = new Object[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof Node[]) {
-                Object[] filtered = filterNodeArray((Node[]) current[i]);
+            if (current[i] instanceof AbstractNode[]) {
+                Object[] filtered = filterNodeArray((AbstractNode[]) current[i]);
                 if (filtered != null && filtered.length > 0) {
                     filteredResult[cursor] = filtered;
                     cursor++;

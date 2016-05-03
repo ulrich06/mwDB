@@ -273,10 +273,10 @@ public abstract class AbstractNode implements Node {
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
             final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
-                callback.on(new org.mwg.Node[0]);
+                callback.on(new org.mwg.plugin.AbstractNode[0]);
                 return;
             }
-            final org.mwg.Node[] resolved = new org.mwg.Node[foundId.length];
+            final org.mwg.Node[] resolved = new org.mwg.plugin.AbstractNode[foundId.length];
             final DeferCounter waiter = _graph.counter(foundId.length);
             //TODO replace by a par lookup
             final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
@@ -296,7 +296,7 @@ public abstract class AbstractNode implements Node {
                 @Override
                 public void on(Object o) {
                     //select
-                    Node[] resultSet = new org.mwg.Node[nextResolvedTabIndex.get()];
+                    Node[] resultSet = new org.mwg.plugin.AbstractNode[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 
                     for (int i = 0; i < resultSet.length; i++) {
@@ -330,14 +330,14 @@ public abstract class AbstractNode implements Node {
                     if (resultSet.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
-                        Node[] trimmedResultSet = new org.mwg.Node[resultSetIndex];
+                        Node[] trimmedResultSet = new org.mwg.plugin.AbstractNode[resultSetIndex];
                         System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
                         callback.on(trimmedResultSet);
                     }
                 }
             });
         } else {
-            callback.on(new org.mwg.Node[0]);
+            callback.on(new org.mwg.plugin.AbstractNode[0]);
         }
     }
 
@@ -356,7 +356,7 @@ public abstract class AbstractNode implements Node {
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
-            final Node[] resolved = new org.mwg.Node[mapSize];
+            final Node[] resolved = new org.mwg.plugin.AbstractNode[mapSize];
             DeferCounter waiter = _graph.counter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(0);
@@ -378,14 +378,14 @@ public abstract class AbstractNode implements Node {
                     if (loopInteger.get() == resolved.length) {
                         callback.on(resolved);
                     } else {
-                        Node[] toSend = new org.mwg.Node[loopInteger.get()];
+                        Node[] toSend = new org.mwg.plugin.AbstractNode[loopInteger.get()];
                         System.arraycopy(resolved, 0, toSend, 0, toSend.length);
                         callback.on(toSend);
                     }
                 }
             });
         } else {
-            callback.on(new org.mwg.Node[0]);
+            callback.on(new org.mwg.plugin.AbstractNode[0]);
         }
     }
 

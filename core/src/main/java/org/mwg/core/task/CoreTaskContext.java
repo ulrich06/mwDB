@@ -100,8 +100,8 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
             Object previousResult = _results[current - 1];
             if (previousResult != null && previousResult instanceof org.mwg.task.TaskContext) {
                 return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
-            } else if (previousResult != null && previousResult instanceof org.mwg.task.TaskContext[]) {
-                org.mwg.task.TaskContext[] contexts = (org.mwg.task.TaskContext[]) previousResult;
+            } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
+                org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
                 List<Object> result = new ArrayList<Object>();
                 for (int i = 0; i < contexts.length; i++) {
                     Object currentLoop = contexts[i].getPreviousResult();
@@ -118,10 +118,10 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void setResult(Object actionResult) {
-        if(actionResult instanceof org.mwg.task.TaskContext) {
+        if(actionResult instanceof org.mwg.core.task.CoreTaskContext) {
             mergeVariables((org.mwg.task.TaskContext) actionResult);
-        } else if(actionResult instanceof org.mwg.task.TaskContext[]) {
-            for(org.mwg.task.TaskContext taskContext : (org.mwg.task.TaskContext[])actionResult) {
+        } else if(actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
+            for(org.mwg.task.TaskContext taskContext : (org.mwg.core.task.CoreTaskContext[])actionResult) {
                 mergeVariables(taskContext);
             }
         }
@@ -151,10 +151,10 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     private void cleanObj(Object o) {
         if (o instanceof Node) {
             ((Node) o).free();
-        } else if (o instanceof org.mwg.task.TaskContext) {
+        } else if (o instanceof org.mwg.core.task.CoreTaskContext) {
             ((org.mwg.task.TaskContext) o).clean();
-        } else if (o instanceof org.mwg.task.TaskContext[]) {
-            org.mwg.task.TaskContext[] loop = (org.mwg.task.TaskContext[]) o;
+        } else if (o instanceof org.mwg.core.task.CoreTaskContext[]) {
+            org.mwg.core.task.CoreTaskContext[] loop = (org.mwg.core.task.CoreTaskContext[]) o;
             for (int j = 0; j < loop.length; j++) {
                 loop[j].clean();
             }
