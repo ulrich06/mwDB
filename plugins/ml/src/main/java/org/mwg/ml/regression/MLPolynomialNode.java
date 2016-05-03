@@ -32,7 +32,7 @@ public class MLPolynomialNode extends AbstractNode {
 
 
     //Public specific getters and setters
-    private static final String FEATURES_KEY = "FEATURES";
+    public static final String FEATURES_KEY = "FEATURES";
 
     //Internal state variables private and starts with _
     private static final String INTERNAL_WEIGHT_KEY = "_weight";
@@ -74,7 +74,7 @@ public class MLPolynomialNode extends AbstractNode {
     //Main learning function
 
     public void learn(double value) {
-        NodeState previousState = graph().resolver().resolveState(this, true); //past state, not cloned
+        NodeState previousState = unphasedState(); //past state, not cloned
 
         long timeOrigin = previousState.time();
         long time = time();
@@ -163,7 +163,7 @@ public class MLPolynomialNode extends AbstractNode {
 
         //It does not fit, create a new state and split the polynomial
         long newstep = time - previousTime;
-        NodeState phasedState = graph().resolver().newState(this, world(), previousTime); //force clone
+        NodeState phasedState = newState(previousTime); //force clone
         double[] values = new double[2];
         double pt = previousTime - timeOrigin;
         pt = pt / stp;
@@ -202,7 +202,7 @@ public class MLPolynomialNode extends AbstractNode {
 
     public double extrapolate() {
         long time = time();
-        NodeState state = graph().resolver().resolveState(this, true);
+        NodeState state = unphasedState();
         long timeOrigin = state.time();
         double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if (weight == null) {
@@ -221,14 +221,11 @@ public class MLPolynomialNode extends AbstractNode {
 
     //Other services and funcitons
     public double getPrecision() {
-        NodeState state = graph().resolver().resolveState(this, false);
-        Object d = state.getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
-        return (double) d;
+        return (double) unphasedState().getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
     }
 
     public double[] getWeight() {
-        NodeState state = graph().resolver().resolveState(this, false);
-        return (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
+        return (double[]) unphasedState().getFromKey(INTERNAL_WEIGHT_KEY);
     }
 
 
