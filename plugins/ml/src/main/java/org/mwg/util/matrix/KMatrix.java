@@ -269,6 +269,22 @@ public class KMatrix {
         }
     }
 
+
+    public double[] saveToState(){
+        double[] res=new double[_data.length+2];
+        res[0]=_nbRows;
+        res[1]=_nbColumns;
+        System.arraycopy(_data,0,res,2,_data.length);
+        return res;
+    }
+
+    public static KMatrix loadFromState(Object o){
+        double[] res=(double[]) o;
+        double[] data=new double[res.length-2];
+        System.arraycopy(res,2,data,0,data.length);
+        return new KMatrix(data,(int)res[0],(int)res[1]);
+    }
+
     public static KMatrix createIdentity(int rows, int columns) {
         KMatrix ret = new KMatrix(null, rows, columns);
         int width=Math.min(rows,columns);
