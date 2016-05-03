@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class LinearRegressionNodeTest {
 
-    double dummyDataset1[][] = new double[][]{{0,1}, {1,3}, {2,5}, {3,7}, {4,9}, {5,11}};
+    double dummyDataset1[][] = new double[][]{{0, 1}, {1, 3}, {2, 5}, {3, 7}, {4, 9}, {5, 11}};
 
     final double eps = 0.000001;
 
@@ -32,7 +32,7 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
 
-                lrNode.initialize(2,1,6,100, 100);
+                lrNode.initialize(2, 1, 6, 100, 100);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
@@ -52,8 +52,8 @@ public class LinearRegressionNodeTest {
                 //System.out.println();
                 //System.out.println("Error: " + lrNode.getBufferError());
 
-                assertTrue(Math.abs(coefs[0]-2) < eps);
-                assertTrue(Math.abs(coefs[1]-1) < eps);
+                assertTrue(Math.abs(coefs[0] - 2) < eps);
+                assertTrue(Math.abs(coefs[1] - 1) < eps);
                 assertTrue(lrNode.getBufferError() < eps);
                 assertTrue(lrNode.getL2Regularization() < eps);
             }
@@ -70,7 +70,7 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
 
-                lrNode.initialize(2,0,6,100, 100);
+                lrNode.initialize(2, 0, 6, 100, 100);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
@@ -94,8 +94,8 @@ public class LinearRegressionNodeTest {
                 //System.out.println();
                 //System.out.println("Error: " + lrNode.getBufferError());
 
-                assertTrue(Math.abs(coefs[0]+0.5) < eps);
-                assertTrue(Math.abs(coefs[1]-0.5) < eps);
+                assertTrue(Math.abs(coefs[0] + 0.5) < eps);
+                assertTrue(Math.abs(coefs[1] - 0.5) < eps);
                 assertTrue(lrNode.getBufferError() < eps);
             }
         });
@@ -155,7 +155,7 @@ public class LinearRegressionNodeTest {
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
                     lrNode.set(AbstractSlidingWindowManagingNode.VALUE_KEY, dummyDataset1[i]);
-                    resid += (dummyDataset1[i][1] - 6)*(dummyDataset1[i][1] - 6);
+                    resid += (dummyDataset1[i][1] - 6) * (dummyDataset1[i][1] - 6);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
 
@@ -171,7 +171,7 @@ public class LinearRegressionNodeTest {
 
                 assertTrue(Math.abs(coefs[0] - 0) < eps);
                 assertTrue(Math.abs(coefs[1] - 6) < eps);
-                assertTrue(Math.abs(lrNode.getBufferError() - (resid/6)) < eps);
+                assertTrue(Math.abs(lrNode.getBufferError() - (resid / 6)) < eps);
             }
         });
     }
@@ -227,37 +227,37 @@ public class LinearRegressionNodeTest {
 
                     MLLinearRegressionBatchGDNode lrNode = (MLLinearRegressionBatchGDNode) graph.newNode(0, 0, MLLinearRegressionBatchGDNode.NAME);
 
-                    lrNode.initialize(2, 1, 50, 0.01, 0.01);
-                    lrNode.setLearningRate(0.0001);
+                lrNode.initialize(2, 1, 50, 0.01, 0.01);
+                lrNode.setLearningRate(0.0001);
 
-                    lrNode.setIterationCountThreshold(10000);
+                lrNode.setIterationCountThreshold(10000);
 
-                    for (int i = 0; i < 100; i++) {
-                        double x = rng.nextDouble() * 100;
-                        lrNode.set(AbstractSlidingWindowManagingNode.VALUE_KEY, new double[]{x, 2 * x + 1});
-                        double coefs[] = lrNode.getCoefficients();
-                        assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
-                    }
-                    //assertFalse(lrNode.isInBootstrapMode());
-
-                    graph.disconnect(null);
-
+                for (int i = 0; i < 100; i++) {
+                    double x = rng.nextDouble() * 100;
+                    lrNode.set(AbstractSlidingWindowManagingNode.VALUE_KEY, new double[]{x, 2 * x + 1});
                     double coefs[] = lrNode.getCoefficients();
-                    //System.out.print("Final coefficients: ");
-                    //for (int j = 0; j < coefs.length; j++) {
-                    //    System.out.print(coefs[j] + ", ");
-                    //}
-                    //System.out.println();
-                    //System.out.println("Error: " + lrNode.getBufferError());
-
-                    assertTrue(Math.abs(coefs[0] - 2) < 1e-4);
-                    assertTrue(Math.abs(coefs[1] - 1) < 1e-4);
-                    assertTrue(lrNode.getBufferError() < 1e-4);
-                    assertTrue(lrNode.getL2Regularization() < 1e-4);
+                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
                 }
-            });
+                //assertFalse(lrNode.isInBootstrapMode());
 
-        }
+                graph.disconnect(null);
+
+                double coefs[] = lrNode.getCoefficients();
+                //System.out.print("Final coefficients: ");
+                //for (int j = 0; j < coefs.length; j++) {
+                //    System.out.print(coefs[j] + ", ");
+                //}
+                //System.out.println();
+                //System.out.println("Error: " + lrNode.getBufferError());
+
+                assertTrue(Math.abs(coefs[0] - 2) < 1e-4);
+                assertTrue(Math.abs(coefs[1] - 1) < 1e-4);
+                assertTrue(lrNode.getBufferError() < 1e-4);
+                assertTrue(lrNode.getL2Regularization() < 1e-4);
+            }
+        });
+
+    }
 
     @Test
     public void testNormalBatchGDErrorThresholdStop() {
