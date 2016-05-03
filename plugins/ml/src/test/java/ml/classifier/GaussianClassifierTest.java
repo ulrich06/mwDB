@@ -3,7 +3,7 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.classifier.GaussianClassifierNode;
+import org.mwg.ml.classifier.MLGaussianClassifierNode;
 
 
 /**
@@ -84,12 +84,12 @@ public class GaussianClassifierTest {
     @Test
     public void test() {
         //This test fails only on crash. Otherwise, it is just for
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                GaussianClassifierNode gaussianNBNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
+                MLGaussianClassifierNode gaussianNBNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
 
                 int errors = 0;
 

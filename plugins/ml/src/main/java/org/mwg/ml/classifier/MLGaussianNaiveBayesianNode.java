@@ -9,13 +9,13 @@ import java.util.*;
 /**
  * Created by Andrey Boytsov on 4/14/2016.
  */
-public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier {
+public class MLGaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
 
     //TODO Any synchronization?
 
     //TODO Try out changing parameters on the fly
 
-    public static final String NAME = "GaussianNaiveBayesianNode";
+    public static final String NAME = "MLGaussianNaiveBayesianNode";
 
     public static class Factory implements NodeFactory {
         @Override
@@ -25,7 +25,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier {
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            GaussianNaiveBayesianNode newNode = new GaussianNaiveBayesianNode(world, time, id, graph, initialResolution);
+            MLGaussianNaiveBayesianNode newNode = new MLGaussianNaiveBayesianNode(world, time, id, graph, initialResolution);
             return newNode;
         }
     }
@@ -34,7 +34,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifier {
     /**
      * {@inheritDoc}
      */
-    public GaussianNaiveBayesianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution){
+    public MLGaussianNaiveBayesianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution){
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

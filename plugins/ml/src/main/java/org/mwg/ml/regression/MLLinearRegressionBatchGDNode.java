@@ -13,9 +13,9 @@ import java.util.Arrays;
  *
  * Created by andre on 4/29/2016.
  */
-public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
+public class MLLinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
 
-    public static final String NAME = "LinearRegressionBatchGDNode";
+    public static final String NAME = "MLLinearRegressionBatchGDNode";
 
     public static class Factory implements NodeFactory {
         @Override
@@ -25,12 +25,12 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            LinearRegressionBatchGDNode newNode = new LinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
+            MLLinearRegressionBatchGDNode newNode = new MLLinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
             return newNode;
         }
     }
 
-    public LinearRegressionBatchGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public MLLinearRegressionBatchGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

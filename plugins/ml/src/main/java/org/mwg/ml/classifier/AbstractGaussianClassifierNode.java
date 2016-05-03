@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * Created by andre on 4/26/2016.
  */
-public abstract class AbstractGaussianClassifier extends AbstractSlidingWindowManagingNode {
+public abstract class AbstractGaussianClassifierNode extends AbstractSlidingWindowManagingNode {
 
     /**
      * Internal keys - those attributes are only for internal use within the node.
@@ -49,7 +49,7 @@ public abstract class AbstractGaussianClassifier extends AbstractSlidingWindowMa
     /**
      * {@inheritDoc}
      */
-    public AbstractGaussianClassifier(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractGaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

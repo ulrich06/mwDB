@@ -8,9 +8,9 @@ import org.mwg.plugin.NodeFactory;
 
 import java.util.Arrays;
 
-public class GaussianClassifierNode extends AbstractGaussianClassifier{
+public class MLGaussianClassifierNode extends AbstractGaussianClassifierNode {
 
-    public static final String NAME = "GaussianClassifierNode";
+    public static final String NAME = "MLGaussianClassifierNode";
 
     public static class Factory implements NodeFactory {
         @Override
@@ -20,7 +20,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier{
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            GaussianClassifierNode newNode = new GaussianClassifierNode(world, time, id, graph, initialResolution);
+            MLGaussianClassifierNode newNode = new MLGaussianClassifierNode(world, time, id, graph, initialResolution);
             return newNode;
         }
     }
@@ -34,7 +34,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifier{
      * @param p_graph
      * @param currentResolution
      */
-    public GaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public MLGaussianClassifierNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

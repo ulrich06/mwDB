@@ -10,9 +10,9 @@ import org.mwg.plugin.NodeFactory;
 /**
  * Created by andre on 4/26/2016.
  */
-public class LinearRegressionNode extends AbstractLinearRegressionNode {
+public class MLLinearRegressionNode extends AbstractLinearRegressionNode {
 
-    public static final String NAME = "LinearRegressionNode";
+    public static final String NAME = "MLLinearRegressionNode";
 
     public static class Factory implements NodeFactory {
         @Override
@@ -22,12 +22,12 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            LinearRegressionNode newNode = new LinearRegressionNode(world, time, id, graph, initialResolution);
+            MLLinearRegressionNode newNode = new MLLinearRegressionNode(world, time, id, graph, initialResolution);
             return newNode;
         }
     }
 
-    public LinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public MLLinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
