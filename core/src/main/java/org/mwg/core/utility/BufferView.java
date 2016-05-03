@@ -15,9 +15,6 @@ public class BufferView implements Buffer {
         this._origin = p_origin;
         this._initPos = p_initPos;
         this._endPos = p_endPos;
-        if (_endPos < _initPos) {
-            _endPos = _initPos;
-        }
     }
 
     @Override
@@ -32,6 +29,9 @@ public class BufferView implements Buffer {
 
     @Override
     public final byte read(long position) {
+        if(_initPos + position > _endPos) {
+            throw new ArrayIndexOutOfBoundsException("" + position);
+        }
         return _origin.read(_initPos + position);
     }
 
@@ -42,13 +42,7 @@ public class BufferView implements Buffer {
 
     @Override
     public final long size() {
-        if (_initPos == _endPos) {
-            return 0;
-        } else {
-            return _endPos - _initPos + 1;
-        }
-//        return _endPos - _initPos + 1;
-
+        return _endPos - _initPos + 1;
     }
 
     @Override

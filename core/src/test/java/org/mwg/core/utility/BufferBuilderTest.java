@@ -146,26 +146,42 @@ public class BufferBuilderTest {
         buffer.free();
     }
 
-    //@Test
-    public void testIteratorHeap2(){
+
+    @Test
+    public void testIteratorHeap2() {
+        testIterator2(BufferBuilder.newHeapBuffer());
+    }
+
+    @Test
+    public void testIteratorOffHeap2() {
+        testIterator2(BufferBuilder.newOffHeapBuffer());
+    }
+
+    public void testIterator2(Buffer buffer){
         byte[] bytes = new byte[]{12,11, BUFFER_SEP,87, BUFFER_SEP,87,45};
-        Buffer buffer = BufferBuilder.newHeapBuffer();
         buffer.writeAll(bytes);
         BufferIterator it = buffer.iterator();
 
         Assert.assertArrayEquals(new byte[]{12,11},it.next().data());
         Assert.assertArrayEquals(new byte[]{87},it.next().data());
-        Assert.assertArrayEquals(new byte[]{12,45},it.next().data());
+        Assert.assertArrayEquals(new byte[]{87,45},it.next().data());
 
         Assert.assertEquals(false,it.hasNext());
     }
 
-    //@Test
-    public void testOneElementBuffer() {
-        byte[] bytesOneElementBuffer = new byte[] {15,CoreConstants.BUFFER_SEP,16,CoreConstants.BUFFER_SEP,17};
+    @Test
+    public void testOneElementBufferHeap() {
+        testOneElementBuffer(BufferBuilder.newHeapBuffer());
+    }
 
+    @Test
+    public void testOneElementBufferOffHeap() {
+        testOneElementBuffer(BufferBuilder.newOffHeapBuffer());
+    }
 
-        Buffer oneElementBuffer = BufferBuilder.newHeapBuffer();
+    public void testOneElementBuffer(Buffer oneElementBuffer) {
+        byte[] bytesOneElementBuffer = new byte[] {15, CoreConstants.BUFFER_SEP,16,CoreConstants.BUFFER_SEP,17};
+
         oneElementBuffer.writeAll(bytesOneElementBuffer);
 
         BufferIterator itOneElementBuffer = oneElementBuffer.iterator();
@@ -175,25 +191,77 @@ public class BufferBuilderTest {
         Assert.assertArrayEquals(new byte[]{17}, itOneElementBuffer.next().data());
 
         Assert.assertEquals(false,itOneElementBuffer.hasNext());
-
     }
 
-    //@Test
-    public void testEmptyBuffer() {
+    @Test
+    public void testEmptyBufferHeap() {
+        testEmptyBuffer(BufferBuilder.newHeapBuffer());
+    }
+
+    @Test
+    public void testEmptyBufferOffHeap() {
+        testEmptyBuffer(BufferBuilder.newOffHeapBuffer());
+    }
+
+    public void testEmptyBuffer(Buffer buffer) {
         byte[] bytes = new byte[] {BUFFER_SEP, BUFFER_SEP, BUFFER_SEP,15,BUFFER_SEP,BUFFER_SEP};
-        Buffer buffer = BufferBuilder.newHeapBuffer();
         buffer.writeAll(bytes);
 
         BufferIterator it = buffer.iterator();
 
-        Assert.assertArrayEquals(null,it.next().data());
-        Assert.assertArrayEquals(null,it.next().data());
-        Assert.assertArrayEquals(null,it.next().data());
+        BufferView next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0],next.data());
+        Assert.assertEquals(0,next.size());
+
+        next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0],next.data());
+        Assert.assertEquals(0,next.size());
+
+        next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0],next.data());
+        Assert.assertEquals(0,next.size());
+
         Assert.assertArrayEquals(new byte[]{15},it.next().data());
-        Assert.assertArrayEquals(null,it.next().data());
-        Assert.assertArrayEquals(null,it.next().data());
+
+        next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0],next.data());
+        Assert.assertEquals(0,next.size());
+
+        next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0],next.data());
+        Assert.assertEquals(0,next.size());
 
         Assert.assertEquals(false,it.hasNext());
+
+    }
+
+    @Test
+    public void testReadHeap() {
+        testRead(BufferBuilder.newHeapBuffer());
+    }
+
+    @Test
+    public void testReadOffHeap() {
+        testRead(BufferBuilder.newOffHeapBuffer());
+    }
+
+    public void testRead(Buffer buffer) {
+        byte[] bytes = new byte[] {BUFFER_SEP, BUFFER_SEP};
+        buffer.writeAll(bytes);
+
+        BufferIterator it = buffer.iterator();
+
+        BufferView view = (BufferView) it.next();
+        boolean catched = false;
+        try {
+            view.read(10);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            catched = true;
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            Assert.assertEquals(true,catched);
+        }
 
 
 
