@@ -42,12 +42,12 @@ public class BufferView implements Buffer {
 
     @Override
     public final long size() {
-        /*if (_initPos == _endPos) {
+        if (_initPos == _endPos) {
             return 0;
         } else {
             return _endPos - _initPos + 1;
-        }*/
-        return _endPos - _initPos + 1;
+        }
+//        return _endPos - _initPos + 1;
 
     }
 
