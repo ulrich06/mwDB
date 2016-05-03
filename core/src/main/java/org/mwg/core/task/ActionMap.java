@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
@@ -59,7 +60,7 @@ class ActionMap implements TaskAction {
             cursor++;
         }
         if (cursor != current.length) {
-            Node[] filtered_2 = new Node[cursor];
+            Node[] filtered_2 = new AbstractNode[cursor];
             System.arraycopy(filtered, 0, filtered_2, 0, cursor);
             return filtered_2;
         } else {

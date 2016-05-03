@@ -147,9 +147,9 @@ public abstract class AbstractNode implements Node {
         if (resolved != null) {
             final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
             if (flatRefs == null || flatRefs.length == 0) {
-                callback.on(new Node[0]);
+                callback.on(new AbstractNode[0]);
             } else {
-                final Node[] result = new Node[flatRefs.length];
+                final Node[] result = new AbstractNode[flatRefs.length];
                 final DeferCounter counter = _graph.counter(flatRefs.length);
                 final int[] resultIndex = new int[1];
                 for (int i = 0; i < flatRefs.length; i++) {
@@ -170,7 +170,7 @@ public abstract class AbstractNode implements Node {
                         if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
-                            Node[] toSend = new Node[resultIndex[0]];
+                            Node[] toSend = new AbstractNode[resultIndex[0]];
                             System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
@@ -450,11 +450,10 @@ public abstract class AbstractNode implements Node {
     }
 
 
-    public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType){
-        if(propertyType!=propertyTargetType){
-            throw new RuntimeException("Property "+propertyName+" has a type mismatch, provided "+Type.typeName(propertyType)+" expected: "+Type.typeName(propertyTargetType));
-        }
-        else{
+    public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
+        if (propertyType != propertyTargetType) {
+            throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));
+        } else {
             NodeState preciseState = this._resolver.resolveState(this, false);
             if (preciseState != null) {
                 preciseState.set(this._resolver.stringToLongKey(propertyName), propertyType, propertyValue);

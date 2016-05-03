@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.*;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -37,7 +38,7 @@ class ActionTraverse implements TaskAction {
                 }
             }
             DeferCounter deferCounter = context.graph().counter(toLoad.size());
-            final Node[] resultNodes = new Node[toLoad.size()];
+            final Node[] resultNodes = new AbstractNode[toLoad.size()];
             final AtomicInteger cursor = new AtomicInteger();
             for (Long idNode : toLoad) {
                 context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {

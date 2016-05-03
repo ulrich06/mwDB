@@ -4,7 +4,7 @@ import org.mwg.Graph;
 import org.mwg.task.TaskContext;
 
 /**
- * A wrapper of a TaskContext
+ * A wrapper of a CoreTaskContext
  * Protect the call to the next method, that means that we cannot call it on an instance of this class
  */
 class TaskContextWrapper implements TaskContext {

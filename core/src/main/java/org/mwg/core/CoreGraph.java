@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.*;
+import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
@@ -311,7 +312,7 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public Task newTask() {
-        return new org.mwg.core.task.Task(this);
+        return new CoreTask(this);
     }
 
     private void saveDirtyList(final ChunkIterator dirtyIterator, final Callback<Boolean> callback) {

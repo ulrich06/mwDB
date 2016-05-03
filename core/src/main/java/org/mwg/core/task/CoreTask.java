@@ -5,14 +5,14 @@ import org.mwg.Graph;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
-public class Task implements org.mwg.task.Task {
+public class CoreTask implements org.mwg.task.Task {
 
     private final Graph _graph;
 
     private TaskAction[] _actions = new TaskAction[10];
     private int _actionCursor = 0;
 
-    public Task(final Graph p_graph) {
+    public CoreTask(final Graph p_graph) {
         this._graph = p_graph;
     }
 
@@ -213,7 +213,7 @@ public class Task implements org.mwg.task.Task {
                 context.clean();
             }
         };
-        final org.mwg.task.TaskContext context = new TaskContext(parent, initialResult, _graph, final_actions);
+        final org.mwg.task.TaskContext context = new CoreTaskContext(parent, initialResult, _graph, final_actions);
         if (parent != null) {
             context.setWorld(parent.getWorld());
             context.setTime(parent.getTime());

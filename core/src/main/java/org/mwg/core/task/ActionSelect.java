@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -55,7 +56,7 @@ class ActionSelect implements TaskAction {
     }
 
     private Node[] filterNodeArray(Node[] current) {
-        Node[] filtered = new Node[current.length];
+        Node[] filtered = new AbstractNode[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
             if (current[i] != null && _filter.select(current[i])) {
@@ -64,7 +65,7 @@ class ActionSelect implements TaskAction {
             }
         }
         if (cursor != current.length) {
-            Node[] filtered_2 = new Node[cursor];
+            Node[] filtered_2 = new AbstractNode[cursor];
             System.arraycopy(filtered, 0, filtered_2, 0, cursor);
             return filtered_2;
         } else {

@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class TaskContext implements org.mwg.task.TaskContext {
+class CoreTaskContext implements org.mwg.task.TaskContext {
 
     private final Map<String, Object> _variables;
     private final Object[] _results;
@@ -23,7 +23,7 @@ class TaskContext implements org.mwg.task.TaskContext {
     private long _world;
     private long _time;
 
-    TaskContext(final org.mwg.task.TaskContext p_parentContext, final Object p_initialResult, final Graph p_graph, final TaskAction[] p_actions) {
+    CoreTaskContext(final org.mwg.task.TaskContext p_parentContext, final Object p_initialResult, final Graph p_graph, final TaskAction[] p_actions) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
