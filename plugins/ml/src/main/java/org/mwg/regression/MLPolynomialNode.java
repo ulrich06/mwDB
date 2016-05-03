@@ -54,12 +54,10 @@ public class MLPolynomialNode extends AbstractNode {
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (propertyName.equals(FEATURES_KEY)) {
             learn((double) propertyValue);
-        }
-        else if(propertyName.equals(PRECISION_KEY)){
-            super.setPropertyWithType(propertyName,propertyType,propertyValue, Type.DOUBLE);
-        }
-        else {
-            super.setProperty(propertyName, propertyType,propertyValue);
+        } else if (propertyName.equals(PRECISION_KEY)) {
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
+        } else {
+            super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
 
@@ -67,8 +65,7 @@ public class MLPolynomialNode extends AbstractNode {
     public Object get(String attributeName) {
         if (attributeName.equals(FEATURES_KEY)) {
             return extrapolate();
-        }
-        else {
+        } else {
             return super.get(attributeName);
         }
     }
@@ -130,7 +127,7 @@ public class MLPolynomialNode extends AbstractNode {
 
         //Check if we are inserting in the past:
         long previousTime = timeOrigin + (long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
-        if(time>previousTime) {
+        if (time > previousTime) {
             //first check if we can increase the degree
             int newMaxDegree = Math.min(num, _maxDegree);
             if (deg < newMaxDegree) {
@@ -159,8 +156,7 @@ public class MLPolynomialNode extends AbstractNode {
                     return;
                 }
             }
-        }
-        else{
+        } else {
             //we are inserting in the past
 
         }
@@ -188,10 +184,9 @@ public class MLPolynomialNode extends AbstractNode {
             phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
 
             return;
-        }
-        else{
+        } else {
             //Here it's a degree 1
-            values[1]=values[1]-values[0];
+            values[1] = values[1] - values[0];
 
             phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
             phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, values);
