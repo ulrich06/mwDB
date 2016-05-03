@@ -44,7 +44,7 @@ public class Constants {
 
     /**
      * @native ts
-     * public static BUFFER_SEP : string = "#";
+     * public static BUFFER_SEP : number = "#".charCodeAt(0);
      */
     public static final byte BUFFER_SEP = '#';
 

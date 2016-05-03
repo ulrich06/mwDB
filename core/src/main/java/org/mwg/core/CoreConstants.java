@@ -9,14 +9,34 @@ public class CoreConstants extends org.mwg.Constants {
     /**
      * Chunk Save/Load special chars
      */
+    /**
+     * @native ts
+     * public static KEY_SEP : number = ";".charCodeAt(0);
+     */
     public static final byte KEY_SEP = ';';
 
+    /**
+     * @native ts
+     * public static CHUNK_SEP : number = "|".charCodeAt(0);
+     */
     public static final byte CHUNK_SEP = '|';
 
+    /**
+     * @native ts
+     * public static CHUNK_SUB_SEP : number = ",".charCodeAt(0);
+     */
     public static final byte CHUNK_SUB_SEP = ',';
 
+    /**
+     * @native ts
+     * public static CHUNK_SUB_SUB_SEP : number = ":".charCodeAt(0);
+     */
     public static final byte CHUNK_SUB_SUB_SEP = ':';
 
+    /**
+     * @native ts
+     * public static CHUNK_SUB_SUB_SUB_SEP : number = "%".charCodeAt(0);
+     */
     public static final byte CHUNK_SUB_SUB_SUB_SEP = '%';
 
     /**
