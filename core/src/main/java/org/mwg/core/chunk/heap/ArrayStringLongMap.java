@@ -7,6 +7,9 @@ import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
 
+/**
+ * @ignore ts
+ */
 public class ArrayStringLongMap implements StringLongMap {
 
     private volatile InternalState state;

@@ -7,6 +7,9 @@ import org.mwg.core.chunk.ChunkListener;
 import org.mwg.struct.LongLongArrayMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
 
+/**
+ * @ignore ts
+ */
 public class ArrayLongLongArrayMap implements LongLongArrayMap {
 
     private volatile InternalState state;
