@@ -86,16 +86,16 @@ public class GaussianNaiveBayesianTest {
     public void test() {
         //This test fails only on crash. Otherwise, it is just for
 
-            Graph graph = GraphBuilder.builder()
-                    .withFactory(new MLGaussianNaiveBayesianNode.Factory())
-                    .withScheduler(new NoopScheduler())
-                    .withFactory(new MLGaussianClassifierNode.Factory())
-                    .build();
-            graph.connect(new Callback<Boolean>() {
-                @Override
-                public void on(Boolean result) {
-                    MLGaussianNaiveBayesianNode gaussianNBNode = (MLGaussianNaiveBayesianNode) graph.newNode(0, 0, MLGaussianNaiveBayesianNode.NAME);
-                    MLGaussianClassifierNode gaussianClassifierNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
+        Graph graph = GraphBuilder.builder()
+                .withFactory(new MLGaussianNaiveBayesianNode.Factory())
+                .withScheduler(new NoopScheduler())
+                .withFactory(new MLGaussianClassifierNode.Factory())
+                .build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                MLGaussianNaiveBayesianNode gaussianNBNode = (MLGaussianNaiveBayesianNode) graph.newNode(0, 0, MLGaussianNaiveBayesianNode.NAME);
+                MLGaussianClassifierNode gaussianClassifierNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
 
                 int errors = 0;
                 int diffWithGaussian = 0;

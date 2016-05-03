@@ -216,16 +216,16 @@ public class LinearRegressionNodeTest {
         });
     }
 
-        @Test
-        public void testNormalBatchGDIterationCountStop() {
-            Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
-            graph.connect(new Callback<Boolean>() {
-                @Override
-                public void on(Boolean result) {
-                    Random rng = new Random();
-                    rng.setSeed(1);
+    @Test
+    public void testNormalBatchGDIterationCountStop() {
+        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                Random rng = new Random();
+                rng.setSeed(1);
 
-                    MLLinearRegressionBatchGDNode lrNode = (MLLinearRegressionBatchGDNode) graph.newNode(0, 0, MLLinearRegressionBatchGDNode.NAME);
+                MLLinearRegressionBatchGDNode lrNode = (MLLinearRegressionBatchGDNode) graph.newNode(0, 0, MLLinearRegressionBatchGDNode.NAME);
 
                 lrNode.initialize(2, 1, 50, 0.01, 0.01);
                 lrNode.setLearningRate(0.0001);
