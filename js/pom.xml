@@ -61,9 +61,8 @@
                         </goals>
                         <configuration>
                             <name>core</name>
-                            <copyJRE>true</copyJRE>
                             <moduleImports>
-                                <moduleImport>* as org from './api.ts'</moduleImport>
+                                <moduleImport>./api.ts</moduleImport>
                             </moduleImports>
                             <source>${basedir}/../core/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
