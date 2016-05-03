@@ -2,9 +2,9 @@ package org.kevoree.modeling.plugin.test;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.util.Array3LongIntMap;
-import org.mwg.util.K3LongIntMap;
-import org.mwg.util.K3LongMapCallBack;
+import org.mwg.maths.Array3LongIntMap;
+import org.mwg.maths.K3LongIntMap;
+import org.mwg.maths.K3LongMapCallBack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
