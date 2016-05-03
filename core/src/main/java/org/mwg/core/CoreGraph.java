@@ -3,12 +3,9 @@ package org.mwg.core;
 import org.mwg.*;
 import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.plugin.*;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
-import org.mwg.plugin.NodeFactory;
-import org.mwg.plugin.Resolver;
-import org.mwg.plugin.Scheduler;
-import org.mwg.plugin.Storage;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -420,7 +417,7 @@ class CoreGraph implements org.mwg.Graph {
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on((Node[]) new org.mwg.Node[0]);
+                        callback.on(new AbstractNode[0]);
                     }
                 } else {
                     foundIndex.findAt(CoreConstants.INDEX_ATTRIBUTE, world, time, query, new Callback<org.mwg.Node[]>() {
@@ -444,7 +441,7 @@ class CoreGraph implements org.mwg.Graph {
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(new org.mwg.Node[0]);
+                        callback.on(new AbstractNode[0]);
                     }
                 } else {
                     foundIndex.allAt(CoreConstants.INDEX_ATTRIBUTE, world, time, new Callback<org.mwg.Node[]>() {
