@@ -18,7 +18,8 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
     /**
      * Attribute key - whether the node is in bootstrap (re-learning) mode
      */
-    private static final String INTERNAL_BOOTSTRAP_MODE_KEY = "_bootstrapMode";
+    public static final String BOOTSTRAP_MODE_KEY = "bootstrapMode";
+    public static final boolean BOOTSTRAP_MODE_DEF = true;
 
     /**
      *  Buffer size
@@ -44,7 +45,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
     /**
      *  Value
      */
-    public static final String VALUE_KEY = "Value";
+    public static final String FEATURES_KEY = "FEATURES";
 
     /**
      * Attribute key - sliding window of values
@@ -91,7 +92,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
     }
 
     public boolean isInBootstrapMode() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_BOOTSTRAP_MODE_KEY, true);
+        return unphasedState().getFromKeyWithDefault(BOOTSTRAP_MODE_KEY, BOOTSTRAP_MODE_DEF);
     }
 
     protected double[] getValueBuffer() {
@@ -137,10 +138,41 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if(propertyName.equals(VALUE_KEY)){
+        if(propertyName.equals(RESPONSE_INDEX_KEY)){
+            illegalArgumentIfFalse(propertyValue instanceof Integer, "Class index should be integer");
+            illegalArgumentIfFalse((Integer)propertyValue >= 0, "Class index should be non-negative");
+            unphasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, propertyValue);
+        }else if(propertyName.equals(INPUT_DIM_KEY)){
+            illegalArgumentIfFalse(propertyValue instanceof Integer, "Number of input dimensions should be integer");
+            illegalArgumentIfFalse((Integer)propertyValue >= 0, "Input should have at least dimension");
+            unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, propertyValue);
+        }else if(propertyName.equals(BUFFER_SIZE_KEY)){
+            illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
+            illegalArgumentIfFalse((Integer)propertyValue > 0, "Buffer size should be positive");
+            unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
+        }else if (propertyName.equals(LOW_ERROR_THRESH_KEY)){
+            illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
+                    "Low error threshold should be of type double or integer");
+            if (propertyValue instanceof Double){
+                illegalArgumentIfFalse((Double)propertyValue >= 0, "Low error threshold should be non-negative");
+                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
+            }else{
+                illegalArgumentIfFalse((Integer)propertyValue >= 0, "Low error threshold should be non-negative");
+                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer)propertyValue).doubleValue());
+            }
+        }else if (propertyName.equals(HIGH_ERROR_THRESH_KEY)){
+            illegalArgumentIfFalse((propertyValue instanceof Double)||(propertyValue instanceof Integer),
+                    "High error threshold should be of type double or integer");
+            if (propertyValue instanceof Double){
+                illegalArgumentIfFalse((Double)propertyValue >= 0, "High error threshold should be non-negative");
+                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
+            }else{
+                illegalArgumentIfFalse((Integer)propertyValue >= 0, "High error threshold should be non-negative");
+                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer)propertyValue).doubleValue());
+            }
+        }else if(propertyName.equals(FEATURES_KEY)){
             addValue((double[]) propertyValue);
-        }
-        else{
+        }else{
             super.setProperty(propertyName,propertyType,propertyValue);
         }
     }
@@ -179,13 +211,13 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
      */
     protected abstract void setBootstrapModeHook();
 
-    public void setBootstrapMode(boolean newBootstrapMode) {
+    protected void setBootstrapMode(boolean newBootstrapMode) {
         if (newBootstrapMode) {
             //New state starts now
             phasedState();
             setBootstrapModeHook();
         }
-        unphasedState().setFromKey(INTERNAL_BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
+        unphasedState().setFromKey(BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
     }
 
     protected void addValueNoBootstrap(double value[]) {
@@ -241,23 +273,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractNode {
      * @param value New value
      */
     protected abstract void updateModelParameters(double value[]);
-
-    public void initialize(int inputDimension, int classIndex, int bufferSize, double highErrorThreshold, double lowErrorThreshold) {
-        illegalArgumentIfFalse(inputDimension > 0, "Input should have at least dimension");
-        illegalArgumentIfFalse(classIndex < inputDimension, "Class index should be within dimensions");
-        //High and low error thresholds are not bounded - meaning might depend on implementation
-        illegalArgumentIfFalse(highErrorThreshold >= lowErrorThreshold, "High error threshold should be above or equal to lower");
-        illegalArgumentIfFalse(bufferSize > 0, "Buffer size should be positive");
-
-        phasedState();
-
-        //Set the attributes
-        unphasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, classIndex);
-        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, inputDimension);
-        unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, bufferSize);
-        unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, lowErrorThreshold);
-        unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, highErrorThreshold);
-    }
 
     public int getCurrentBufferLength() {
         double valueBuffer[] = getValueBuffer();
