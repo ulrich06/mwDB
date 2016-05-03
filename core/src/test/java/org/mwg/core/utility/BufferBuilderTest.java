@@ -146,13 +146,28 @@ public class BufferBuilderTest {
         buffer.free();
     }
 
-    @Test
+    //@Test
     public void testIteratorHeap2(){
         byte[] bytes = new byte[]{12,11,CoreConstants.BUFFER_SEP,87,CoreConstants.BUFFER_SEP,87,45};
         Buffer buffer = BufferBuilder.newHeapBuffer();
         buffer.writeAll(bytes);
         BufferIterator it = buffer.iterator();
-        while(it.hasNext()){
+
+        Assert.assertArrayEquals(new byte[]{12,11},it.next().data());
+        Assert.assertArrayEquals(new byte[]{87},it.next().data());
+        Assert.assertArrayEquals(new byte[]{12,45},it.next().data());
+
+        Assert.assertEquals(false,it.hasNext());
+    }
+
+    //@Test
+    public void testDiffBetweenEmptyViewAndOneElementView() {
+        byte[] bytes = new byte[] {14,15,CoreConstants.BUFFER_SEP,127,CoreConstants.BUFFER_SEP,CoreConstants.BUFFER_SEP};
+        Buffer buffer = BufferBuilder.newHeapBuffer();
+        buffer.writeAll(bytes);
+
+        BufferIterator it = buffer.iterator();
+        while (it.hasNext()) {
             System.out.println(Arrays.toString(it.next().data()));
         }
     }
