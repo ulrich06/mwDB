@@ -40,10 +40,10 @@ public class MLGaussianSlotProfilingNode extends AbstractNode {
 
 
     //Public specific getters and setters
-    private static final String FEATURES_NAME = "FEATURES";
+    public static final String FEATURES_NAME = "FEATURES";
 
     //Internal state keys
-    public static final String INTERNAL_FEATURES_NUMBER = "_featuresNb";
+    private static final String INTERNAL_FEATURES_NUMBER = "_featuresNb";
     private static final String INTERNAL_TOTAL_KEY = "_total";
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
@@ -202,33 +202,28 @@ public class MLGaussianSlotProfilingNode extends AbstractNode {
 
 
     public double[] getMin() {
-        NodeState resolved = this._resolver.resolveState(this, true);
-        return (double[]) resolved.getFromKey(INTERNAL_MIN_KEY);
+        return (double[]) unphasedState().getFromKey(INTERNAL_MIN_KEY);
     }
 
     public double[] getMax() {
-        NodeState resolved = this._resolver.resolveState(this, true);
-        return (double[]) resolved.getFromKey(INTERNAL_MAX_KEY);
+        return (double[]) unphasedState().getFromKey(INTERNAL_MAX_KEY);
     }
 
     public double[] getSum() {
-        NodeState resolved = this._resolver.resolveState(this, true);
-        return (double[]) resolved.getFromKey(INTERNAL_SUM_KEY);
+        return (double[]) unphasedState().getFromKey(INTERNAL_SUM_KEY);
     }
 
 
     public double[] getSumSquare() {
-        NodeState resolved = this._resolver.resolveState(this, true);
-        return (double[]) resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
+        return (double[]) unphasedState().getFromKey(INTERNAL_SUMSQUARE_KEY);
     }
 
     public int[] getTotal() {
-        NodeState resolved = this._resolver.resolveState(this, true);
-        return (int[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
+        return (int[]) unphasedState().getFromKey(INTERNAL_TOTAL_KEY);
     }
 
     public double[] getAvg() {
-        NodeState resolved = this._resolver.resolveState(this, true);
+        NodeState resolved = unphasedState();
         int numOfSlot = resolved.getFromKeyWithDefault(SLOTS_NUMBER, SLOTS_NUMBER_DEF);
         int features = resolved.getFromKeyWithDefault(INTERNAL_FEATURES_NUMBER, 0);
         if (features == 0) {
@@ -267,7 +262,7 @@ public class MLGaussianSlotProfilingNode extends AbstractNode {
 
     //Result function
     public double[] getPredictions() {
-        NodeState resolved = this._resolver.resolveState(this, true);
+        NodeState resolved = unphasedState();
         int features = resolved.getFromKeyWithDefault(INTERNAL_FEATURES_NUMBER, 0);
         if (features == 0) {
             return null;
