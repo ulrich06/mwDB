@@ -34,6 +34,7 @@ public class MLMathNode extends AbstractNode {
     public Object get(String propertyName) {
         if (propertyName != null && propertyName.startsWith("$")) {
             Object expressionObj = super.get(propertyName.substring(1));
+            //ToDo this is dangerous for infinite loops or circular dependency, to fix 
             KMathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
             return localEngine.eval(this);
         } else {
