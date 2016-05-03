@@ -195,9 +195,8 @@ public class MLPolynomialNode extends AbstractNode {
 
 
         //Save degree 1
-        PolynomialFit pf = new PolynomialFit(1);
-        pf.fit(times, values);
-        weight = pf.getCoef();
+        values[1]=values[1]-values[0];
+        weight = values;
         phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
         phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
         phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
