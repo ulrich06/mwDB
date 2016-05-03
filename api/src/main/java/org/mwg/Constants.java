@@ -42,6 +42,10 @@ public class Constants {
         return src.equals(other);
     }
 
+    /**
+     * @native ts
+     * public static BUFFER_SEP : string = "#";
+     */
     public static final byte BUFFER_SEP = '#';
 
 }
