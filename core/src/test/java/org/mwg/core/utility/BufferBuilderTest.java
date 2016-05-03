@@ -6,7 +6,7 @@ import org.mwg.core.CoreConstants;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
 
-import java.util.Arrays;
+import static org.mwg.Constants.BUFFER_SEP;
 
 public class BufferBuilderTest {
     private byte[] data = new byte[]{1, 2, 3, 4, 5};
@@ -54,9 +54,9 @@ public class BufferBuilderTest {
 
     private void testIterator(org.mwg.struct.Buffer buffer) {
         buffer.writeAll("123".getBytes());
-        buffer.write(CoreConstants.BUFFER_SEP);
+        buffer.write(BUFFER_SEP);
         buffer.writeAll("567".getBytes());
-        buffer.write(CoreConstants.BUFFER_SEP);
+        buffer.write(BUFFER_SEP);
         buffer.writeAll("89".getBytes());
 
         BufferIterator it = buffer.iterator();
@@ -90,8 +90,8 @@ public class BufferBuilderTest {
     }
 
     private void testIteratorNull(org.mwg.struct.Buffer buffer) {
-        buffer.write(CoreConstants.BUFFER_SEP);
-        buffer.write(CoreConstants.BUFFER_SEP);
+        buffer.write(BUFFER_SEP);
+        buffer.write(BUFFER_SEP);
 
         BufferIterator it = buffer.iterator();
         Assert.assertTrue(it.hasNext());
@@ -148,7 +148,7 @@ public class BufferBuilderTest {
 
     //@Test
     public void testIteratorHeap2(){
-        byte[] bytes = new byte[]{12,11,CoreConstants.BUFFER_SEP,87,CoreConstants.BUFFER_SEP,87,45};
+        byte[] bytes = new byte[]{12,11, BUFFER_SEP,87, BUFFER_SEP,87,45};
         Buffer buffer = BufferBuilder.newHeapBuffer();
         buffer.writeAll(bytes);
         BufferIterator it = buffer.iterator();
@@ -161,15 +161,42 @@ public class BufferBuilderTest {
     }
 
     //@Test
-    public void testDiffBetweenEmptyViewAndOneElementView() {
-        byte[] bytes = new byte[] {14,15,CoreConstants.BUFFER_SEP,127,CoreConstants.BUFFER_SEP,CoreConstants.BUFFER_SEP};
+    public void testOneElementBuffer() {
+        byte[] bytesOneElementBuffer = new byte[] {15,CoreConstants.BUFFER_SEP,16,CoreConstants.BUFFER_SEP,17};
+
+
+        Buffer oneElementBuffer = BufferBuilder.newHeapBuffer();
+        oneElementBuffer.writeAll(bytesOneElementBuffer);
+
+        BufferIterator itOneElementBuffer = oneElementBuffer.iterator();
+
+        Assert.assertArrayEquals(new byte[]{15}, itOneElementBuffer.next().data());
+        Assert.assertArrayEquals(new byte[]{16}, itOneElementBuffer.next().data());
+        Assert.assertArrayEquals(new byte[]{17}, itOneElementBuffer.next().data());
+
+        Assert.assertEquals(false,itOneElementBuffer.hasNext());
+
+    }
+
+    //@Test
+    public void testEmptyBuffer() {
+        byte[] bytes = new byte[] {BUFFER_SEP, BUFFER_SEP, BUFFER_SEP,15,BUFFER_SEP,BUFFER_SEP};
         Buffer buffer = BufferBuilder.newHeapBuffer();
         buffer.writeAll(bytes);
 
         BufferIterator it = buffer.iterator();
-        while (it.hasNext()) {
-            System.out.println(Arrays.toString(it.next().data()));
-        }
+
+        Assert.assertArrayEquals(null,it.next().data());
+        Assert.assertArrayEquals(null,it.next().data());
+        Assert.assertArrayEquals(null,it.next().data());
+        Assert.assertArrayEquals(new byte[]{15},it.next().data());
+        Assert.assertArrayEquals(null,it.next().data());
+        Assert.assertArrayEquals(null,it.next().data());
+
+        Assert.assertEquals(false,it.hasNext());
+
+
+
     }
 
 }
