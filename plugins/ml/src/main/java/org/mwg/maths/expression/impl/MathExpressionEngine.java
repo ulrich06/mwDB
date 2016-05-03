@@ -14,10 +14,10 @@ public class MathExpressionEngine implements KMathExpressionEngine {
     public static final char decimalSeparator = '.';
     public static final char minusSign = '-';
     private final MathToken[] _cacheAST;
+    private HashMap<String, Double> vars = new HashMap<String, Double>();
 
     private MathExpressionEngine(String expression) {
 
-        HashMap<String, Double> vars = new HashMap<String, Double>();
         vars.put("PI", Math.PI);
         vars.put("TRUE", 1.0);
         vars.put("FALSE", 0.0);
@@ -227,12 +227,20 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                             } else {
                                 String tokenName = castedFreeToken.content().trim();
                                 Object resolved;
+                                String cleanName;
                                 if (tokenName.startsWith("{") && tokenName.endsWith("}")) {
                                     resolved = context.get(castedFreeToken.content().substring(1, tokenName.length() - 1));
+                                    cleanName = castedFreeToken.content().substring(1, tokenName.length() - 1);
                                 } else {
                                     resolved = context.get(castedFreeToken.content());
+                                    cleanName = castedFreeToken.content();
+                                }
+                                if (cleanName.startsWith("$")) {
+                                    cleanName = cleanName.substring(1);
                                 }
                                 if (resolved != null) {
+                                    double resultAsDouble = PrimitiveHelper.parseDouble(resolved.toString());
+                                    vars.put(cleanName, resultAsDouble);
                                     String valueString = resolved.toString();
                                     if (PrimitiveHelper.equals(valueString, "true")) {
                                         stack.push(1.0);
@@ -240,7 +248,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
                                         stack.push(0.0);
                                     } else {
                                         try {
-                                            stack.push(PrimitiveHelper.parseDouble(resolved.toString()));
+                                            stack.push(resultAsDouble);
                                         } catch (Exception e) {
                                             //noop
                                         }
@@ -290,9 +298,10 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         return result;
     }
 
+    /*
     @Override
     public void setVarResolver(KMathVariableResolver p_resolver) {
         this.varResolver = p_resolver;
-    }
+    }*/
 
 }
