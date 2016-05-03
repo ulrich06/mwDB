@@ -35,15 +35,26 @@ public class Builder implements GraphBuilder.InternalBuilder {
         if (p_autoSaveSize == -1) {
             autoSaveSize = memorySize;
         }
-        if (p_usingOffHeapMemory) {
-            space = new OffHeapChunkSpace(memorySize, autoSaveSize);
-        } else {
-            space = new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
-        }
+        space = createSpace(p_usingOffHeapMemory, memorySize, autoSaveSize);
         org.mwg.core.CoreGraph graph = new org.mwg.core.CoreGraph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler), p_factories);
         if (p_usingOffHeapMemory) {
             graph.offHeapBuffer = true;
         }
         return graph;
     }
+
+    /**
+     * @native ts
+     * return new org.mwg.core.chunk.heap.HeapChunkSpace(memorySize,autoSaveSize);
+     */
+    private ChunkSpace createSpace(boolean usingOffHeapMemory, long memorySize, long autoSaveSize) {
+        if (usingOffHeapMemory) {
+            return new OffHeapChunkSpace(memorySize, autoSaveSize);
+        } else {
+            return new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
+        }
+    }
+
+
 }
+
