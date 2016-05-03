@@ -3,7 +3,10 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
+import org.mwg.ml.classifier.AbstractGaussianClassifierNode;
 import org.mwg.ml.classifier.MLGaussianClassifierNode;
+
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -83,7 +86,7 @@ public class GaussianClassifierTest {
 
     @Test
     public void test() {
-        //This test fails only on crash. Otherwise, it is just for
+        //This test fails if there are too many errors
         Graph graph = GraphBuilder.builder().withFactory(new MLGaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -96,15 +99,15 @@ public class GaussianClassifierTest {
                 gaussianNBNode.initialize(2, 1, 60, 0.3, 0.2);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.set("value", dummyDataset1[i]);
+                    gaussianNBNode.set(AbstractGaussianClassifierNode.VALUE_KEY, dummyDataset1[i]);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
                         //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
                         // gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         errors++;
-                    } else {
+                    } //else {
                         //System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
                         //gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
-                    }
+                    //}
                     //System.out.println(gaussianNBNode.allDistributionsToString());
                     //int rbc[] = gaussianNBNode.getRealBufferClasses();
                     ///System.out.print("[");
@@ -122,8 +125,9 @@ public class GaussianClassifierTest {
                 }
 
                 graph.disconnect(null);
+                assertTrue("Errors: "+errors, errors <= 1);
 
-                System.out.println("Errors: " + errors);
+                //System.out.println("Errors: " + errors);
             }
         });
     }

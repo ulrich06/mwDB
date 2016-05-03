@@ -12,7 +12,7 @@ import org.mwg.plugin.NodeFactory;
  */
 public class MLLinearRegressionNode extends AbstractLinearRegressionNode {
 
-    public static final String NAME = "MLLinearRegressionNode";
+    public static final String NAME = "LinearRegressionBatch";
 
     public static class Factory implements NodeFactory {
         @Override

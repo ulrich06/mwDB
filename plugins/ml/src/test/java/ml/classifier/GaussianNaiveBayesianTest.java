@@ -1,8 +1,10 @@
 package ml.classifier;
 
+import junit.framework.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
+import org.mwg.ml.classifier.AbstractGaussianClassifierNode;
 import org.mwg.ml.classifier.MLGaussianClassifierNode;
 import org.mwg.ml.classifier.MLGaussianNaiveBayesianNode;
 
@@ -84,7 +86,7 @@ public class GaussianNaiveBayesianTest {
 
     @Test
     public void test() {
-        //This test fails only on crash. Otherwise, it is just for
+        //This test fails if there are too many errors
 
         Graph graph = GraphBuilder.builder()
                 .withFactory(new MLGaussianNaiveBayesianNode.Factory())
@@ -98,22 +100,22 @@ public class GaussianNaiveBayesianTest {
                 MLGaussianClassifierNode gaussianClassifierNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
 
                 int errors = 0;
-                int diffWithGaussian = 0;
+                //int diffWithGaussian = 0;
 
                 gaussianNBNode.initialize(2, 1, 60, 0.3, 0.2);
                 gaussianClassifierNode.initialize(2, 1, 60, 0.3, 0.2);
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.set("value", dummyDataset1[i]);
-                    gaussianClassifierNode.set("value", dummyDataset1[i]);
+                    gaussianNBNode.set(AbstractGaussianClassifierNode.VALUE_KEY, dummyDataset1[i]);
+                    gaussianClassifierNode.set(AbstractGaussianClassifierNode.VALUE_KEY, dummyDataset1[i]);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
                         //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
                         //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         errors++;
-                    } else {
+                    } //else {
                         //System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
                         //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
-                    }
+                    //}
                     //System.out.println(i+" GAUSSIAN:"+gaussianClassifierNode.isInBootstrapMode()+"\t"+
                     //        gaussianClassifierNode.getBufferErrorCount()+"/"+gaussianClassifierNode.getCurrentBufferLength()+"="+gaussianClassifierNode.getBufferError());
                     //System.out.println(gaussianNBNode.allDistributionsToString());
@@ -135,9 +137,9 @@ public class GaussianNaiveBayesianTest {
                     //    System.out.print(gbc[j]+", ");
                     //}
                     //System.out.println("]");
-                    if (gaussianNBNode.isInBootstrapMode() != gaussianClassifierNode.isInBootstrapMode()) {
-                        diffWithGaussian++;
-                    }
+                    //if (gaussianNBNode.isInBootstrapMode() != gaussianClassifierNode.isInBootstrapMode()) {
+                    //    diffWithGaussian++;
+                    //}
                 }
 
                 gaussianNBNode.free();
@@ -145,8 +147,9 @@ public class GaussianNaiveBayesianTest {
 
                 graph.disconnect(null);
 
-                System.out.println("Errors: " + errors);
-                System.out.println("Diffrence with Gaussian: " + diffWithGaussian);
+                assertTrue("Errors: "+errors, errors<=3);
+                //System.out.println("Errors: " + errors);
+                //System.out.println("Diffrence with Gaussian: " + diffWithGaussian);
             }
         });
     }

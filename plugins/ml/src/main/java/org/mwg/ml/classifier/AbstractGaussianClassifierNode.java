@@ -35,11 +35,6 @@ public abstract class AbstractGaussianClassifierNode extends AbstractSlidingWind
     private static final String INTERNAL_TOTAL_KEY_PREFIX = "_total_";
 
     /**
-     * Attribute key - whether the node is in bootstrap (re-learning) mode
-     */
-    private static final String INTERNAL_BOOTSTRAP_MODE_KEY = "_bootstrapMode";
-
-    /**
      * Attribute key - List of known classes
      */
     private static final String INTERNAL_KNOWN_CLASSES_LIST = "_knownClassesList";
