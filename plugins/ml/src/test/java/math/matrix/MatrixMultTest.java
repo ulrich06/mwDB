@@ -51,7 +51,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Netlib mult: " + d + " ms");
+        //System.out.println("Netlib mult: " + d + " ms");
 
 
         blas = new F2JBlas();
@@ -61,7 +61,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("F2J mult: " + d + " ms");
+        //System.out.println("F2J mult: " + d + " ms");
 
 /*
         blas = new CudaBlas();
@@ -79,7 +79,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Traditional mult: " + d + " ms");
+        //System.out.println("Traditional mult: " + d + " ms");
 
         double eps = 1e-7;
 

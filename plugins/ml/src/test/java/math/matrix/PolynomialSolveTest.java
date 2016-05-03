@@ -33,7 +33,7 @@ public class PolynomialSolveTest {
         pf.fit(t, res);
         double[] blasCoef = pf.getCoef();
         timeend = System.nanoTime();
-        System.out.println("Polynomial solving done in: " + ((double) (timeend - timestart)) / 1000000 + " ms");
+        //System.out.println("Polynomial solving done in: " + ((double) (timeend - timestart)) / 1000000 + " ms");
 
 
         for (int i = 0; i < coef.length; i++) {

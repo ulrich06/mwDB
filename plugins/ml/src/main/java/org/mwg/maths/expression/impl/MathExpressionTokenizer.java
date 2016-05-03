@@ -41,8 +41,8 @@ public class MathExpressionTokenizer {
             token.append(MathExpressionEngine.minusSign);
             pos++;
             token.append(next());
-        } else if (MathExpressionEngine.isLetter(ch) || (ch == '_') || (ch == '{') || (ch == '}')) {
-            while ((MathExpressionEngine.isLetter(ch) || MathExpressionEngine.isDigit(ch) || (ch == '_') || (ch == '{') || (ch == '}')) && (pos < input.length())) {
+        } else if (MathExpressionEngine.isLetter(ch) || (ch == '_') || (ch == '{') || (ch == '}')|| (ch == '$')) {
+            while ((MathExpressionEngine.isLetter(ch) || MathExpressionEngine.isDigit(ch) || (ch == '_') || (ch == '{') || (ch == '}')|| (ch == '$')) && (pos < input.length())) {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
@@ -50,7 +50,7 @@ public class MathExpressionTokenizer {
             token.append(ch);
             pos++;
         } else {
-            while (!MathExpressionEngine.isLetter(ch) && !MathExpressionEngine.isDigit(ch) && ch != '_' && !MathExpressionEngine.isWhitespace(ch) && ch != '(' && ch != ')' && ch != ',' && (pos < input.length())) {
+            while (!MathExpressionEngine.isLetter(ch) && !MathExpressionEngine.isDigit(ch) && ch != '_' && !MathExpressionEngine.isWhitespace(ch) && ch != '(' && ch != ')' && ch != ',' && (ch != '{') && (ch != '}')&& (ch != '$')&& (pos < input.length())) {
                 token.append(input.charAt(pos));
                 pos++;
                 ch = pos == input.length() ? '\0' : input.charAt(pos);

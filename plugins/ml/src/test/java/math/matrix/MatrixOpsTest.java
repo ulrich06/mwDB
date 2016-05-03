@@ -46,7 +46,7 @@ public class MatrixOpsTest {
             res = KMatrix.invert(matA, false);
         }
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " invert " + ((double) (timeend - timestart)) / (1000 * times) + " s");
+        //System.out.println(blas + " invert " + ((double) (timeend - timestart)) / (1000 * times) + " s");
 
         KMatrix id = KMatrix.multiply(matA, res);
 
@@ -81,7 +81,7 @@ public class MatrixOpsTest {
         timestart = System.currentTimeMillis();
         dlu.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        //System.out.println(blas + " LU Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix P = dlu.getP();
         KMatrix L = dlu.getL();
@@ -114,7 +114,7 @@ public class MatrixOpsTest {
         timestart = System.currentTimeMillis();
         qr.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        //System.out.println(blas + " QR Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
         KMatrix Q = qr.getQ();
         KMatrix R = qr.getR();
@@ -147,7 +147,7 @@ public class MatrixOpsTest {
         timestart = System.currentTimeMillis();
         svd.factor(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " SVD Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
+        //System.out.println(blas + " SVD Factorizarion " + ((double) (timeend - timestart)) / 1000 + " s");
 
 
         KMatrix U = svd.getU();
@@ -185,7 +185,7 @@ public class MatrixOpsTest {
         timestart = System.currentTimeMillis();
         res = KMatrix.pinv(matA, false);
         timeend = System.currentTimeMillis();
-        System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000) + " s");
+        //System.out.println(blas + " pseudo inv " + ((double) (timeend - timestart)) / (1000) + " s");
 
         KMatrix id = KMatrix.multiply(res, matA);
 

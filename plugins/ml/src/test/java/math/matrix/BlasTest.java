@@ -43,7 +43,7 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Blas QR: " + d + " ms");
+        //System.out.println("Blas QR: " + d + " ms");
 
 
         startTime = System.nanoTime();
@@ -52,20 +52,20 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Blas F2J QR: " + d + " ms");
+       // System.out.println("Blas F2J QR: " + d + " ms");
 
 
         //Validate QR
         KMatrix Qblas = qrblas.getQ();
         KMatrix Qjama = qrblasF2j.getQ();
         err = KMatrix.compareMatrix(Qblas, Qjama);
-        System.out.println("Error in matrix Q: " + err);
+        //System.out.println("Error in matrix Q: " + err);
         Assert.assertTrue(err < eps);
 
         KMatrix Rblas = qrblas.getR();
         KMatrix Rjama = qrblasF2j.getR();
         err = KMatrix.compareMatrix(Rblas, Rjama);
-        System.out.println("Error in matrix R: " + err);
+        //System.out.println("Error in matrix R: " + err);
         Assert.assertTrue(err < eps);
 
 
@@ -116,14 +116,14 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Blas LU: " + d + " ms");
+       // System.out.println("Blas LU: " + d + " ms");
 
         startTime = System.nanoTime();
         org.mwg.maths.matrix.jamasolver.LU lujama = new org.mwg.maths.matrix.jamasolver.LU(matASq);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Jama LU: " + d + " ms");
+        //System.out.println("Jama LU: " + d + " ms");
 
 
         startTime = System.nanoTime();
@@ -131,8 +131,8 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Apache LU: " + d + " ms");
-        System.out.println();
+        //System.out.println("Apache LU: " + d + " ms");
+       // System.out.println();
 
         startTime = System.nanoTime();
         org.mwg.maths.matrix.blassolver.QR qrblas = new org.mwg.maths.matrix.blassolver.QR(m, n, blas);
@@ -140,7 +140,7 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Blas QR: " + d + " ms");
+        //System.out.println("Blas QR: " + d + " ms");
 
 
         startTime = System.nanoTime();
@@ -148,15 +148,15 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Jama QR: " + d + " ms");
+       // System.out.println("Jama QR: " + d + " ms");
 
         startTime = System.nanoTime();
         QRDecomposition qrApache = new QRDecomposition(matAapache);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Apache QR: " + d + " ms");
-        System.out.println();
+       // System.out.println("Apache QR: " + d + " ms");
+       // System.out.println();
 
         startTime = System.nanoTime();
         org.mwg.maths.matrix.blassolver.SVD svdblas = new org.mwg.maths.matrix.blassolver.SVD(m, n, blas);
@@ -164,14 +164,14 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Blas SVD: " + d + " ms");
+       // System.out.println("Blas SVD: " + d + " ms");
 
         startTime = System.nanoTime();
         SVD svdjama = new SVD(matA);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Jama SVD: " + d + " ms");
+        //System.out.println("Jama SVD: " + d + " ms");
 
 
         startTime = System.nanoTime();
@@ -179,8 +179,8 @@ public class BlasTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Apache SVD: " + d + " ms");
-        System.out.println();
+        //System.out.println("Apache SVD: " + d + " ms");
+        //System.out.println();
 
 
         //Validate integrity of matrices that they didn't change
@@ -193,26 +193,26 @@ public class BlasTest {
         KMatrix Lblas = lublas.getL();
         KMatrix Ljama = lujama.getL();
         err = KMatrix.compareMatrix(Lblas, Ljama);
-        System.out.println("Error in matrix L: " + err);
+        //System.out.println("Error in matrix L: " + err);
         Assert.assertTrue(err < eps);
 
         KMatrix Ublas = lublas.getU();
         KMatrix Ujama = lujama.getU();
         err = KMatrix.compareMatrix(Ublas, Ujama);
-        System.out.println("Error in matrix U: " + err);
+        //System.out.println("Error in matrix U: " + err);
         Assert.assertTrue(err < eps);
 
         //Validate QR
         KMatrix Qblas = qrblas.getQ();
         KMatrix Qjama = qrjama.getQ();
         err = KMatrix.compareMatrix(Qblas, Qjama);
-        System.out.println("Error in matrix Q: " + err);
+        //System.out.println("Error in matrix Q: " + err);
         Assert.assertTrue(err < eps);
 
         KMatrix Rblas = qrblas.getR();
         KMatrix Rjama = qrjama.getR();
         err = KMatrix.compareMatrix(Rblas, Rjama);
-        System.out.println("Error in matrix R: " + err);
+        //System.out.println("Error in matrix R: " + err);
         Assert.assertTrue(err < eps);
 
 
@@ -235,9 +235,9 @@ public class BlasTest {
         double[] errS = calcerr(Sblas, SApache, Sjama);
         double[] errV = calcerr(Vblas, VApache, Vjama);
         double[] errD = calcerr(Dblas, DApache, Djama);
-        System.out.println("Error in matrix S: " + errS[0] + " , " + errS[1]);
-        System.out.println("Error in matrix V: " + errV[0] + " , " + errV[1]);
-        System.out.println("Error in matrix D: " + errD[0] + " , " + errD[1]);
+        //System.out.println("Error in matrix S: " + errS[0] + " , " + errS[1]);
+        //System.out.println("Error in matrix V: " + errV[0] + " , " + errV[1]);
+        //System.out.println("Error in matrix D: " + errD[0] + " , " + errD[1]);
 
         Assert.assertTrue(errS[0] < eps);
         Assert.assertTrue(errS[1] < eps);

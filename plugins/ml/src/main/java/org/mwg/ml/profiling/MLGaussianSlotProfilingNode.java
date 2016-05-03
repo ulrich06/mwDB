@@ -40,7 +40,7 @@ public class MLGaussianSlotProfilingNode extends AbstractNode {
 
 
     //Public specific getters and setters
-    public static final String FEATURES_NAME = "FEATURES";
+    public static final String FEATURES_KEY = "FEATURES";
 
     //Internal state keys
     private static final String INTERNAL_FEATURES_NUMBER = "_featuresNb";
@@ -54,7 +54,7 @@ public class MLGaussianSlotProfilingNode extends AbstractNode {
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(FEATURES_NAME)) {
+        if (propertyName.equals(FEATURES_KEY)) {
             learn((double[]) propertyValue);
         }
         if(propertyName.equals(SLOTS_NUMBER)){
