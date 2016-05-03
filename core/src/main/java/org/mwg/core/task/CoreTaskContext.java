@@ -99,7 +99,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
             return _initialResult;
         } else {
             Object previousResult = _results[current - 1];
-            if (previousResult != null && previousResult instanceof org.mwg.task.TaskContext) {
+            if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext) {
                 return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
             } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
                 org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
