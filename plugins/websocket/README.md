@@ -3,6 +3,7 @@ Websocket Plugin - NOT STABLE
 
 This plugin allow to synchronize two models with websocket communication.
 
+
 # Architecture information 
 There is two parts: 
     - `WSStorageWrapper` which plays the server role
@@ -36,11 +37,15 @@ See this [example](https://github.com/kevoree-modeling/mwDB/blob/master/plugins/
 #What is possible currently 
 **Last update on 04 May 2016**
 
+Currently the plugin allow to have one machine that produce data and another one that consume these data.
+
 #To do
 **Last update on 04 May 2016**
-- [] Secure websocket (info: we plan to use [ACME](https://tools.ietf.org/html/draft-ietf-acme-acme-01) protocol, maybe using [ACME4J](https://github.com/shred/acme4j)
-- [] Add a strategy to Manage re-connection of a client
-- [] Add a strategy to notify client on modification
+- [ ] Secure websocket (info: we plan to use [ACME](https://tools.ietf.org/html/draft-ietf-acme-acme-01) protocol, maybe using [ACME4J](https://github.com/shred/acme4j)
+- [ ] Add a strategy to Manage re-connection of a client
+- [ ] Add a strategy to notify client on modification
+- [ ] Force the client to reload some data from the server
+- [ ] When the client put data on the storage, the server should access these data, not only on cache miss
 
 
 
