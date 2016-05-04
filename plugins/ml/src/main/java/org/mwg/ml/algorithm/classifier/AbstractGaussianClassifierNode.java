@@ -103,7 +103,6 @@ public abstract class AbstractGaussianClassifierNode extends AbstractSlidingWind
     protected abstract void initializeClassIfNecessary(int classNum);
 
     /**
-     *
      * @param value
      * @param classNum
      * @return
