@@ -12,6 +12,7 @@ import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.BufferView;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
@@ -32,6 +33,7 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     private final Storage _wrapped;
     private final Undertow _server;
     private Graph _graph;
+    private short _prefix = -1;
 
     private Set<WebSocketChannel> _peers;
 
@@ -46,15 +48,22 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
         channel.getReceiveSetter().set(new WSListener());
         channel.resumeReceives();
+        _peers.add(channel);
     }
 
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
+        if(_graph == null) {
+            throw new RuntimeException("Please connect the websocket first.");
+        }
         _wrapped.get(keys,callback);
     }
 
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
+        if(_graph == null) {
+            throw new RuntimeException("Please connect the websocket first.");
+        }
         _wrapped.put(stream,callback);
 
         stream.write(CoreConstants.BUFFER_SEP);
@@ -68,27 +77,46 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
 
     @Override
     public void remove(Buffer keys, Callback<Boolean> callback) {
+        if(_graph == null) {
+            throw new RuntimeException("Please connect the websocket first.");
+        }
         _wrapped.remove(keys,callback);
     }
 
     @Override
     public void connect(Graph graph, Callback<Short> callback) {
-        _server.start();
-        _graph = graph;
-        _wrapped.connect(graph,callback);
+        if(_graph == null) {
+            _server.start();
+            _graph = graph;
+            _wrapped.connect(graph, new Callback<Short>() {
+                @Override
+                public void on(Short result) {
+                    _prefix = result;
+                    if(callback != null) {
+                        callback.on(result);
+                    }
+                }
+            });
+        } else {
+            if(callback != null) {
+                callback.on(null);
+            }
+        }
     }
 
     @Override
     public void disconnect(Short prefix, Callback<Boolean> callback) {
-        _server.stop();
-        _graph = null;
-        _wrapped.disconnect(prefix,callback);
+        if(_graph != null) {
+            _server.stop();
+            _graph = null;
+            _prefix = -1;
+            _wrapped.disconnect(prefix, callback);
+        }
     }
 
     private class WSListener extends AbstractReceiveListener {
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-            _peers.add(channel);
             ByteBuffer[] data = message.getData().getResource();
             for(ByteBuffer byteBuffer : data) {
                 final Buffer buffer = _graph.newBuffer();
@@ -123,6 +151,7 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                                 }
                                 ByteBuffer toSend = ByteBuffer.wrap(result.data());
                                 WebSockets.sendBinary(toSend, channel, null);
+                                result.free();
                                 buffer.free();
                             }
                         });
@@ -132,10 +161,11 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                         put(buffer, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                byte[] toSend = new byte[wsIndoData.length];
+                                byte[] toSend = new byte[wsIndoData.length + 2];
                                 toSend[0] = (byte) ((result) ? 1 : 0);
-                                toSend[1] = WSMessageType.RESP_PUT;
-                                System.arraycopy(wsIndoData, 1, toSend, 1, wsIndoData.length - 1);
+                                toSend[1] = CoreConstants.BUFFER_SEP;
+                                toSend[2] = WSMessageType.RESP_PUT;
+                                System.arraycopy(wsIndoData, 1, toSend, 3, wsIndoData.length - 1);
                                 ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
                                 WebSockets.sendBinary(bufferToSend, channel, null);
                                 buffer.free();
@@ -147,10 +177,11 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                         remove(buffer, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                byte[] toSend = new byte[6];
+                                byte[] toSend = new byte[wsIndoData.length + 2];
                                 toSend[0] = (byte) ((result) ? 1 : 0);
-                                toSend[1] = WSMessageType.RESP_REMOVE;
-                                System.arraycopy(wsIndoData, 1, toSend, 1, wsIndoData.length - 1);
+                                toSend[1] = CoreConstants.BUFFER_SEP;
+                                toSend[2] = WSMessageType.RESP_REMOVE;
+                                System.arraycopy(wsIndoData, 1, toSend, 3, wsIndoData.length - 1);
                                 ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
                                 WebSockets.sendBinary(bufferToSend, channel, null);
                                 buffer.free();
@@ -158,8 +189,24 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                         });
                         break;
                     }
-                    default:
+                    case WSMessageType.RQST_PREFIX: {
+                        Buffer toSend = _graph.newBuffer();
+                        Base64.encodeIntToBuffer(_prefix,toSend);
+                        toSend.write(CoreConstants.BUFFER_SEP);
+                        toSend.write(WSMessageType.RESP_PREFIX);
+                        for (int i = 1; i < wsIndoData.length; i++) {
+                            toSend.write(wsIndoData[i]);
+                        }
+                        ByteBuffer bufferToSend = ByteBuffer.wrap(toSend.data());
+                        WebSockets.sendBinary(bufferToSend, channel, null);
+                        toSend.free();
+
+                        break;
+                    }
+                    default: {
                         System.err.println("Unknown message with code " + wsIndoData[wsIndoData.length - 1]);
+                        buffer.free();
+                    }
                 }
             }
         }

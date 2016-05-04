@@ -2,8 +2,6 @@ package org.mwg.ws;
 
 import org.mwg.*;
 
-import java.util.Arrays;
-
 
 /**
  * Draft of test
@@ -17,15 +15,15 @@ public class Test {
 //                .build();
 
 
-        WSStorageClient wsClient = null;
+        /*WSStorageClient wsClient = null;
         try {
             wsClient = WSStorageClient.init("0.0.0.0",8080);
         } catch (Exception e) {
             e.printStackTrace();
 //            Assert.fail();
-        }
+        }*/
 //        Assert.assertNotNull(wsClient);
-        Graph clientGraph = GraphBuilder.builder().withStorage(wsClient).build();
+        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",8080)).build();
 
         serverGraph.connect(new Callback<Boolean>() {
             @Override
@@ -53,18 +51,18 @@ public class Test {
                         serverGraph.save(new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                clientGraph.all(0, 0, "indexName", new Callback<Node[]>() {
+                                /*clientGraph.all(0, 0, "indexName", new Callback<Node[]>() {
                                     @Override
                                     public void on(Node[] result) {
                                         System.out.println(Arrays.toString(result));
                                     }
+                                });*/
+                                clientGraph.lookup(0, 0, id, new Callback<Node>() {
+                                    @Override
+                                    public void on(Node result) {
+                                        System.out.println(result);
+                                    }
                                 });
-//                                clientGraph.lookup(0, 0, id, new Callback<Node>() {
-//                                    @Override
-//                                    public void on(Node result) {
-//                                        System.out.println(result);
-//                                    }
-//                                });
                             }
                         });
 

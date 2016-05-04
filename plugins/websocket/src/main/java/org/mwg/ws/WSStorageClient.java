@@ -20,7 +20,6 @@ import org.xnio.XnioWorker;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
@@ -29,7 +28,7 @@ import java.util.function.IntUnaryOperator;
  * A websocket client to send request on a remote storage
  */
 public class WSStorageClient implements Storage {
-    private WebSocketClient.ConnectionBuilder _channelBuilder;
+//    private WebSocketClient.ConnectionBuilder _channelBuilder;
     private WebSocketChannel _channel;
 
     private final AtomicInteger _nextIdMessages;
@@ -38,13 +37,18 @@ public class WSStorageClient implements Storage {
     private static final int INITIAL_SIZE = 16;
     private Graph _graph;
 
-    private WSStorageClient(WebSocketClient.ConnectionBuilder builder) {
-        _channelBuilder = builder;
+    private String _url;
+    private int _port;
+
+    public WSStorageClient(String URL, int port/*WebSocketClient.ConnectionBuilder builder*/) {
+//        _channelBuilder = builder;
         _nextIdMessages = new AtomicInteger(0);
         _callBacks = new DynamicArrayImpl<>(INITIAL_SIZE);
+        _url = URL;
+        _port = port;
     }
 
-    //todo mettre dans le connect
+    /*//todo mettre dans le connect
     public static WSStorageClient init(String URL, int port) throws IOException, URISyntaxException {
         XnioWorker _worker;
         Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
@@ -62,11 +66,14 @@ public class WSStorageClient implements Storage {
                 .connectionBuilder(_worker,_buffer,new URI("ws://" + URL + ":" + port));
         return new WSStorageClient(builder);
 
-    }
+    }*/
 
 
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
+        if(_channel == null) {
+            throw new RuntimeException("Please connect your websocket client first.");
+        }
         int messageID = nextMessageID();
         keys.write(CoreConstants.BUFFER_SEP);
         keys.write(WSMessageType.RQST_GET);
@@ -77,6 +84,9 @@ public class WSStorageClient implements Storage {
 
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
+        if(_channel == null) {
+            throw new RuntimeException("Please connect your websocket client first.");
+        }
         int messageID = nextMessageID();
         stream.write(CoreConstants.BUFFER_SEP);
         stream.write(WSMessageType.RQST_PUT);
@@ -87,6 +97,9 @@ public class WSStorageClient implements Storage {
 
     @Override
     public void remove(Buffer keys, Callback<Boolean> callback) {
+        if(_channel == null) {
+            throw new RuntimeException("Please connect your websocket client first.");
+        }
         int messageID = nextMessageID();
         keys.write(CoreConstants.BUFFER_SEP);
         keys.write(WSMessageType.RQST_REMOVE);
@@ -102,8 +115,31 @@ public class WSStorageClient implements Storage {
                 callback.on(null);
             }
         }
-        _graph = graph;
+
         try {
+            XnioWorker _worker;
+            Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
+            _worker = xnio.createWorker(OptionMap.builder()
+                    .set(Options.WORKER_IO_THREADS, 2)
+                    .set(Options.CONNECTION_HIGH_WATER, 1_000_000)
+                    .set(Options.CONNECTION_LOW_WATER, 1_000_000)
+                    .set(Options.WORKER_TASK_CORE_THREADS, 30)
+                    .set(Options.WORKER_TASK_MAX_THREADS, 30)
+                    .set(Options.TCP_NODELAY, true)
+                    .set(Options.CORK, true)
+                    .getMap());
+            ByteBufferPool _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
+            WebSocketClient.ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
+                    .connectionBuilder(_worker, _buffer, new URI("ws://" + _url + ":" + _port));
+            _channel = builder.connect().get();
+            _channel.getReceiveSetter().set(new MessageReceiver());
+            _channel.resumeReceives();
+            _graph = graph;
+        } catch (Exception e) {
+            throw new RuntimeException("Error during connection to ws://" + _url + ":" + _port + "\n" + e.getMessage());
+        }
+
+        /*try {
             _channel = _channelBuilder.connect().get();
             _channel.getReceiveSetter().set(new MessageReceiver());
             _channel.resumeReceives();
@@ -111,10 +147,14 @@ public class WSStorageClient implements Storage {
             if(callback != null) {
                 callback.on(null);
             }
-        }
+        }*/
         if(callback != null) {
-            //todo appeler bse pour avoir vrai DB
-            callback.on((short) 0);
+            Buffer buffer = _graph.newBuffer();
+            buffer.write(WSMessageType.RQST_PREFIX);
+            int msgID = nextMessageID();
+            Base64.encodeIntToBuffer(msgID,buffer);
+            _callBacks.put(msgID,callback);
+            send(buffer);
         }
 
     }
@@ -188,6 +228,7 @@ public class WSStorageClient implements Storage {
                     wsInfo = it.next();
                 }
 
+
                 byte messageType = wsInfo.read(0);
                 int msgID = Base64.decodeToIntWithBounds(wsInfo,1,wsInfo.size());
 
@@ -210,8 +251,18 @@ public class WSStorageClient implements Storage {
                             callback.on(buffer.read(0) == 1);
                             break;
                         }
-                        default:
+                        case WSMessageType.RESP_PREFIX: {
+                            int firstSep = 0;
+                            while(buffer.read(firstSep) != CoreConstants.BUFFER_SEP) {
+                                firstSep++;
+                            }
+                            short prefix = (short) Base64.decodeToIntWithBounds(buffer,0,firstSep);
+                            callback.on(prefix);
+                        }
+                        default: {
                             System.err.println("The message " + msgID + " needs a callback but its type (" + messageType + ") is unknown");
+                            buffer.free();
+                        }
 
                     }
                 } else {
@@ -220,9 +271,11 @@ public class WSStorageClient implements Storage {
                            _graph.reload(buffer);
                            break;
                        }
-                       default:
+                       default: {
                            System.err.println("Either the message " + msgID + " does not need a callback but its type " +
                                    "(" + messageType + ") is unknown or the callback has not been found.");
+                           buffer.free();
+                       }
                    }
                 }
 
