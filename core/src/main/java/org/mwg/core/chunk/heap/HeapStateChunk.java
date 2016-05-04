@@ -12,7 +12,9 @@ import org.mwg.core.utility.Unsafe;
 
 public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final long _world;
@@ -23,9 +25,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     private volatile long _flags;
     private volatile long _marks;
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _flagsOffset;
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _marksOffset;
 
     /** @ignore ts */

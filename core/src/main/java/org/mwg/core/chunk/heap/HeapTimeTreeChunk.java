@@ -662,6 +662,12 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         return true;
     }
 
+    /** @native ts
+     * _magic = _magic + 1;
+     * if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
+     * _listener.declareDirty(this);
+     * }
+     * */
     private void internal_set_dirty() {
         long magicBefore;
         long magicAfter;
