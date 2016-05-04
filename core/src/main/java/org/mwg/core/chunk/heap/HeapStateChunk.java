@@ -77,7 +77,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
         volatile int _elementCount;
 
-        private boolean hashReadOnly;
+        boolean hashReadOnly;
 
         InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount, boolean p_hashReadOnly) {
             this.hashReadOnly = p_hashReadOnly;
@@ -949,9 +949,10 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     /**
      * @native ts
-     * var n_flags = _flags & ~bitsToDisable | bitsToEnable;
-     * _flags = n_flags;
-     * return n_flags != _flags;
+     * var val = this._flags
+     * var nval = val & ~bitsToDisable | bitsToEnable;
+     * this._flags = nval;
+     * return val != nval;
      */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {

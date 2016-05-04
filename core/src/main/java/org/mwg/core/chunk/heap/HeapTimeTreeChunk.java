@@ -10,6 +10,9 @@ import org.mwg.core.utility.Unsafe;
 
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
+    /**
+     * @ignore ts
+     */
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     //constants definition
@@ -142,8 +145,9 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     /**
      * @native ts
-     * var val = this._flags;
+     * var val = this._flags
      * var nval = val & ~bitsToDisable | bitsToEnable;
+     * this._flags = nval;
      * return val != nval;
      */
     @Override
@@ -680,10 +684,10 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     /**
      * @native ts
-     * _magic = _magic + 1;
-     * if (_listener != null) {
-     * if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
-     * _listener.declareDirty(this);
+     * this._magic = this._magic + 1;
+     * if (this._listener != null) {
+     * if ((this._flags & org.mwg.core.CoreConstants.DIRTY_BIT) != org.mwg.core.CoreConstants.DIRTY_BIT) {
+     * this._listener.declareDirty(this);
      * }
      * }
      */
