@@ -17,7 +17,7 @@ public class DynamicArrayImpl<T> implements DynamicArray<T> {
 
     @Override
     public void put(int index, T element) {
-        if(index > _data.length) {
+        if(index >= _data.length) {
             Object[] tmp = new Object[_data.length * 2];
             System.arraycopy(_data,0,tmp,0,_data.length);
             _data = tmp;
@@ -27,7 +27,7 @@ public class DynamicArrayImpl<T> implements DynamicArray<T> {
 
     @Override
     public boolean isEmpty(int index) {
-        if(index > _data.length) {
+        if(index >= _data.length) {
             return true;
         }
         return _data[index] == null;
