@@ -947,6 +947,12 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         return _flags;
     }
 
+    /**
+     * @native ts
+     * var n_flags = _flags & ~bitsToDisable | bitsToEnable;
+     * _flags = n_flags;
+     * return n_flags != _flags;
+     */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
