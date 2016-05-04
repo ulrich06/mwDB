@@ -34,11 +34,24 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     private volatile long _marks;
     private volatile long _magic;
 
+    /**
+     * @ignore ts
+     */
     private static final long _lockOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _flagsOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _marksOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _magicOffset;
 
+    /** @ignore ts */
     static {
         try {
             _lockOffset = unsafe.objectFieldOffset(HeapTimeTreeChunk.class.getDeclaredField("_lock"));
@@ -155,7 +168,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     @Override
     public synchronized final void save(Buffer buffer) {
         //lock and load fromVar main memory
-        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1));
+        while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
         try {
             if (_root_index == -1) {
                 return;

@@ -107,11 +107,17 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         }
     }
 
+    /**
+     * @native ts
+     */
     @Override
     public void lock() {
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
     }
 
+    /**
+     * @native ts
+     */
     @Override
     public void unlock() {
         if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
