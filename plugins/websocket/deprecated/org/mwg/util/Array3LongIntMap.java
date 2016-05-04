@@ -1,4 +1,4 @@
-package org.mwg.maths;
+package org.mwg.math;
 
 /* From an original idea https://code.google.com/p/jdbm2/
  *

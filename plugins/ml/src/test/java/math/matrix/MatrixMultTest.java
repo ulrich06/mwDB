@@ -2,11 +2,11 @@ package math.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
-import org.mwg.maths.matrix.blassolver.blas.KBlas;
-import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.blassolver.blas.F2JBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
 
 /**
  * Created by assaad on 25/03/16.
@@ -14,8 +14,8 @@ import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
 public class MatrixMultTest {
 
 
-    public KMatrix manualMultpily(KMatrix matA, KMatrix matB) {
-        KMatrix matC = new KMatrix(null, matA.rows(), matB.columns());
+    public Matrix manualMultpily(Matrix matA, Matrix matB) {
+        Matrix matC = new Matrix(null, matA.rows(), matB.columns());
 
         for (int i = 0; i < matA.rows(); i++) {
             for (int j = 0; j < matB.columns(); j++) {
@@ -36,18 +36,18 @@ public class MatrixMultTest {
         int r = 500;
         int o = 400;
         int p = 200;
-        KMatrix matA = KMatrix.random(r, o, 0, 100);
-        KMatrix matB = KMatrix.random(o, p, 0, 100);
+        Matrix matA = Matrix.random(r, o, 0, 100);
+        Matrix matB = Matrix.random(o, p, 0, 100);
         long startTime, endTime;
         double d;
 
         KBlas blas = new NetlibBlas();
-        BlasMatrixEngine blasengine = (BlasMatrixEngine) KMatrix.defaultEngine();
+        BlasMatrixEngine blasengine = (BlasMatrixEngine) Matrix.defaultEngine();
         blasengine.setBlas(blas);
 
 
         startTime = System.nanoTime();
-        KMatrix matNetlib = KMatrix.multiply(matA, matB);
+        Matrix matNetlib = Matrix.multiply(matA, matB);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -57,7 +57,7 @@ public class MatrixMultTest {
         blas = new F2JBlas();
         blasengine.setBlas(blas);
         startTime = System.nanoTime();
-        KMatrix matF2J = KMatrix.multiply(matA, matB);
+        Matrix matF2J = Matrix.multiply(matA, matB);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -75,7 +75,7 @@ public class MatrixMultTest {
 */
 
         startTime = System.nanoTime();
-        KMatrix matD = manualMultpily(matA, matB);
+        Matrix matD = manualMultpily(matA, matB);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;

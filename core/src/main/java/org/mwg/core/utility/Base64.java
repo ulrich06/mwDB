@@ -139,7 +139,10 @@ import org.mwg.struct.Buffer;
  * while(i >= 3 && result.charAt(i) == 'A') {
  * i--;
  * }
- * buffer.write(result.substr(0,i+1));
+ * result = result.substr(0,i+1);
+ * for(i = 0; i < result.length; i++) {
+ * buffer.write(result.charCodeAt(i));
+ * }
  * }
  * public static decodeToDouble(s : org.mwg.struct.Buffer) {
  * return Base64.decodeToDoubleWithBounds(s, 0, s.size());

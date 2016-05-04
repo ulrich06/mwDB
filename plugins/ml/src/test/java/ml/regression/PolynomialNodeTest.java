@@ -3,11 +3,11 @@ package ml.regression;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
-import org.mwg.ml.regression.MLPolynomialNode;
 import org.mwg.core.NoopScheduler;
+import org.mwg.ml.algorithm.regression.PolynomialNode;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.blassolver.blas.F2JBlas;
 
 /**
  * Created by assaad on 08/04/16.
@@ -18,13 +18,13 @@ public class PolynomialNodeTest {
 
     @Test
     public void testConstant() {
-        final Graph graph = GraphBuilder.builder().withFactory(new MLPolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = GraphBuilder.builder().withFactory(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
                 try {
-                    BlasMatrixEngine bme = (BlasMatrixEngine) KMatrix.defaultEngine();
+                    BlasMatrixEngine bme = (BlasMatrixEngine) Matrix.defaultEngine();
                     bme.setBlas(new F2JBlas());
                 } catch (Exception ignored) {
 
@@ -65,14 +65,14 @@ public class PolynomialNodeTest {
 
 
     public static void testPoly(long[] times, double[] values, int numOfPoly, final Graph graph) {
-        MLPolynomialNode polynomialNode = (MLPolynomialNode) graph.newNode(0, times[0], "Polynomial");
-        polynomialNode.set(MLPolynomialNode.PRECISION_KEY, precision);
+        PolynomialNode polynomialNode = (PolynomialNode) graph.newNode(0, times[0], "Polynomial");
+        polynomialNode.set(PolynomialNode.PRECISION_KEY, precision);
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new Callback<MLPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<PolynomialNode>() {
                 @Override
-                public void on(MLPolynomialNode result) {
+                public void on(PolynomialNode result) {
                     result.learn(values[ia]);
                 }
             });
@@ -80,9 +80,9 @@ public class PolynomialNodeTest {
 
         for (int i = 0; i < size; i++) {
             final int ia = i;
-            polynomialNode.jump(times[ia], new Callback<MLPolynomialNode>() {
+            polynomialNode.jump(times[ia], new Callback<PolynomialNode>() {
                 @Override
-                public void on(MLPolynomialNode result) {
+                public void on(PolynomialNode result) {
                     double v = result.extrapolate();
                     Assert.assertTrue(Math.abs(values[ia] - v) <= precision);
                 }

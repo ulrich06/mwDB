@@ -4,10 +4,10 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.Test;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.blas.KBlas;
-import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
-import org.mwg.maths.matrix.operation.PInvSVD;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.ml.common.matrix.operation.PInvSVD;
 
 /**
  * Created by assaad on 25/03/16.
@@ -29,10 +29,10 @@ public class MatrixPseudoInverseTest {
         double[] matrix = {504, 360, 180, 360, 360, 0, 180, 0, 720};
 
 
-        KMatrix matA = new KMatrix(matrix, dim, dim);
+        Matrix matA = new Matrix(matrix, dim, dim);
         PInvSVD pinv = new PInvSVD();
         pinv.factor(matA, false);
-        KMatrix matInv = pinv.getPInv();
+        Matrix matInv = pinv.getPInv();
         double d1 = pinv.getDeterminant();
 
 
@@ -57,10 +57,10 @@ public class MatrixPseudoInverseTest {
         double[] matrix2 = {504, 360, 180, 0, 360, 360, 0, 0, 180, 0, 720, 0, 0, 0, 0, 0};
 
 
-        KMatrix matA2 = new KMatrix(matrix2, dim + 1, dim + 1);
+        Matrix matA2 = new Matrix(matrix2, dim + 1, dim + 1);
         PInvSVD pinv2 = new PInvSVD();
         pinv2.factor(matA2, false);
-        KMatrix matInv2 = pinv2.getPInv();
+        Matrix matInv2 = pinv2.getPInv();
         double d12 = pinv2.getDeterminant();
 
 

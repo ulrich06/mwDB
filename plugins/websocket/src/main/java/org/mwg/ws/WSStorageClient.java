@@ -7,6 +7,7 @@ import io.undertow.websockets.core.*;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.Base64;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
@@ -21,11 +22,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
-
-import static org.mwg.utils.BytesIntConversion.toBytes;
-import static org.mwg.utils.BytesIntConversion.toInt;
 
 /**
  * A websocket client to send request on a remote storage
@@ -46,6 +45,7 @@ public class WSStorageClient implements Storage {
         _callBacks = new DynamicArrayImpl<>(INITIAL_SIZE);
     }
 
+    //todo mettre dans le connect
     public static WSStorageClient init(String URL, int port) throws IOException, URISyntaxException {
         XnioWorker _worker;
         Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
@@ -70,8 +70,8 @@ public class WSStorageClient implements Storage {
     public void get(Buffer keys, Callback<Buffer> callback) {
         int messageID = nextMessageID();
         keys.write(CoreConstants.BUFFER_SEP);
-        keys.writeAll(toBytes(messageID)); //message ID
         keys.write(WSMessageType.RQST_GET);
+        Base64.encodeIntToBuffer(messageID,keys);
         _callBacks.put(messageID,callback);
         send(keys);
     }
@@ -80,8 +80,8 @@ public class WSStorageClient implements Storage {
     public void put(Buffer stream, Callback<Boolean> callback) {
         int messageID = nextMessageID();
         stream.write(CoreConstants.BUFFER_SEP);
-        stream.writeAll(toBytes(messageID)); //message ID
         stream.write(WSMessageType.RQST_PUT);
+        Base64.encodeIntToBuffer(messageID,stream);
         _callBacks.put(messageID,callback);
         send(stream);
     }
@@ -90,8 +90,8 @@ public class WSStorageClient implements Storage {
     public void remove(Buffer keys, Callback<Boolean> callback) {
         int messageID = nextMessageID();
         keys.write(CoreConstants.BUFFER_SEP);
-        keys.writeAll(toBytes(messageID)); //message ID
         keys.write(WSMessageType.RQST_REMOVE);
+        Base64.encodeIntToBuffer(messageID,keys);
         _callBacks.put(messageID,callback);
         send(keys);
     }
@@ -114,6 +114,7 @@ public class WSStorageClient implements Storage {
             }
         }
         if(callback != null) {
+            //todo appeler bse pour avoir vrai DB
             callback.on((short) 0);
         }
 
@@ -188,11 +189,15 @@ public class WSStorageClient implements Storage {
                     wsInfo = it.next();
                 }
 
-                int msgID = toInt(wsInfo.read(0),wsInfo.read(1),wsInfo.read(2),wsInfo.read(3));
-                byte messageType = wsInfo.read(4);
+                //int msgID = toInt(wsInfo.read(0),wsInfo.read(1),wsInfo.read(2),wsInfo.read(3));
+                byte messageType = wsInfo.read(0);
+                int msgID = Base64.decodeToIntWithBounds(wsInfo,1,wsInfo.size());
 
                 //remove the WS info
-                for(int i= 0;i<5;i++) {
+                /*for(int i= 0;i<5;i++) {
+                    buffer.removeLast();
+                }*/
+                for(int i=0;i<=wsInfo.size();i++) {
                     buffer.removeLast();
                 }
 
@@ -200,6 +205,7 @@ public class WSStorageClient implements Storage {
                 if(callback != null) {
                     switch (messageType) {
                         case WSMessageType.RESP_GET: {
+                            System.out.println("GET WS " + Arrays.toString(buffer.data()));
                             callback.on(buffer);
                             break;
                         }

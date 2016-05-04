@@ -89,24 +89,24 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                     wsInfo = (BufferView) it.next();
                 }
 
-                //Contains the 5 bytes representing the WS info
+                //Contains bytes representing the WS info
                 final byte[] wsIndoData = wsInfo.data();
 
                 //remove the WS info
-                for(int i= 0;i<6;i++) {
+                for(int i= 0;i<=wsInfo.size();i++) {
                     buffer.removeLast();
                 }
 
-                switch (wsIndoData[wsIndoData.length - 1]) {
+                switch (wsIndoData[0]) {
                     case WSMessageType.RQST_GET: {
                         get(buffer, new Callback<Buffer>() {
                             @Override
                             public void on(Buffer result) {
                                 result.write(CoreConstants.BUFFER_SEP);
-                                for (int i = 0; i < 4; i++) {
+                                result.write(WSMessageType.RESP_GET);
+                                for (int i = 1; i < wsIndoData.length; i++) {
                                     result.write(wsIndoData[i]);
                                 }
-                                result.write(WSMessageType.RESP_GET);
                                 ByteBuffer toSend = ByteBuffer.wrap(result.data());
                                 WebSockets.sendBinary(toSend, channel, null);
                                 buffer.free();
@@ -118,10 +118,10 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                         put(buffer, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                byte[] toSend = new byte[6];
+                                byte[] toSend = new byte[wsIndoData.length];
                                 toSend[0] = (byte) ((result) ? 1 : 0);
-                                System.arraycopy(wsIndoData, 0, toSend, 1, 4);
-                                toSend[5] = WSMessageType.RESP_PUT;
+                                toSend[1] = WSMessageType.RESP_PUT;
+                                System.arraycopy(wsIndoData, 1, toSend, 1, wsIndoData.length - 1);
                                 ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
                                 WebSockets.sendBinary(bufferToSend, channel, null);
                                 buffer.free();
@@ -135,8 +135,8 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
                             public void on(Boolean result) {
                                 byte[] toSend = new byte[6];
                                 toSend[0] = (byte) ((result) ? 1 : 0);
-                                System.arraycopy(wsIndoData, 0, toSend, 1, 4);
-                                toSend[5] = WSMessageType.RESP_REMOVE;
+                                toSend[1] = WSMessageType.RESP_REMOVE;
+                                System.arraycopy(wsIndoData, 1, toSend, 1, wsIndoData.length - 1);
                                 ByteBuffer bufferToSend = ByteBuffer.wrap(toSend);
                                 WebSockets.sendBinary(bufferToSend, channel, null);
                                 buffer.free();

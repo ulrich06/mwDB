@@ -36,7 +36,7 @@ public class NoopStorage implements Storage {
     @Override
     public void connect(org.mwg.Graph graph, Callback<Short> callback) {
         _graph = graph;
-        callback.on(new Short("0"));
+        callback.on((short)0);
     }
 
     @Override

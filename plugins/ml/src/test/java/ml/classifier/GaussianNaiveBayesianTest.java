@@ -3,10 +3,10 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.classifier.AbstractGaussianClassifierNode;
-import org.mwg.ml.classifier.AbstractSlidingWindowManagingNode;
-import org.mwg.ml.classifier.MLGaussianClassifierNode;
-import org.mwg.ml.classifier.MLGaussianNaiveBayesianNode;
+import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
+import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
+import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
+import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -89,15 +89,15 @@ public class GaussianNaiveBayesianTest {
         //This test fails if there are too many errors
 
         Graph graph = GraphBuilder.builder()
-                .withFactory(new MLGaussianNaiveBayesianNode.Factory())
+                .withFactory(new GaussianNaiveBayesianNode.Factory())
                 .withScheduler(new NoopScheduler())
-                .withFactory(new MLGaussianClassifierNode.Factory())
+                .withFactory(new GaussianClassifierNode.Factory())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLGaussianNaiveBayesianNode gaussianNBNode = (MLGaussianNaiveBayesianNode) graph.newNode(0, 0, MLGaussianNaiveBayesianNode.NAME);
-                MLGaussianClassifierNode gaussianClassifierNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
+                GaussianNaiveBayesianNode gaussianNBNode = (GaussianNaiveBayesianNode) graph.newNode(0, 0, GaussianNaiveBayesianNode.NAME);
+                GaussianClassifierNode gaussianClassifierNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
 
                 int errors = 0;
                 //int diffWithGaussian = 0;
