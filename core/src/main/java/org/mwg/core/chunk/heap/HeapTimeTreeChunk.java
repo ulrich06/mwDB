@@ -140,6 +140,12 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         return _flags;
     }
 
+    /**
+     * @native ts
+     * var n_flags = _flags & ~bitsToDisable | bitsToEnable;
+     * _flags = n_flags;
+     * return n_flags != _flags;
+     */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;
@@ -675,8 +681,10 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     /**
      * @native ts
      * _magic = _magic + 1;
+     * if (_listener != null) {
      * if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
      * _listener.declareDirty(this);
+     * }
      * }
      */
     private void internal_set_dirty() {

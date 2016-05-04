@@ -933,7 +933,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             }
         }
     }
-
+    
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
