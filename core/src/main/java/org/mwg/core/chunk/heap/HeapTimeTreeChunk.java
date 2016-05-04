@@ -88,6 +88,11 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         return this._marks;
     }
 
+    /**
+     * @native ts
+     * _marks = _marks + 1;
+     * return _marks
+     */
     @Override
     public final long mark() {
         long before;
@@ -99,6 +104,11 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         return after;
     }
 
+    /**
+     * @native ts
+     * _marks = _marks - 1;
+     * return _marks
+     */
     @Override
     public final long unmark() {
         long before;
@@ -662,12 +672,13 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         return true;
     }
 
-    /** @native ts
+    /**
+     * @native ts
      * _magic = _magic + 1;
      * if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
      * _listener.declareDirty(this);
      * }
-     * */
+     */
     private void internal_set_dirty() {
         long magicBefore;
         long magicAfter;

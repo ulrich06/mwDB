@@ -158,6 +158,11 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     }
 
 
+    /**
+     * @native ts
+     * _marks = _marks + 1;
+     * return _marks
+     */
     @Override
     public final long mark() {
         long before;
@@ -169,6 +174,11 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return after;
     }
 
+    /**
+     * @native ts
+     * _marks = _marks - 1;
+     * return _marks
+     */
     @Override
     public final long unmark() {
         long before;
