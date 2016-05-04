@@ -38,7 +38,8 @@ public class AbstractNodeTest implements NodeFactory {
             @Override
             public void on(Boolean result) {
 
-                Node node =  graph.newNode(0,0,"AbstractNodeTest");
+                final double eps=1e-7;
+                ExMLNodeImpl node =  (ExMLNodeImpl) graph.newNode(0,0,"AbstractNodeTest");
                 node.set("test","10/5");
                 node.set("valueSquare", "{value} ^ 2");
                 node.set("value", 3.0);
@@ -62,6 +63,32 @@ public class AbstractNodeTest implements NodeFactory {
 
                 //node.set("loopB","$loopA"); //here it creates a loop when enabled
                 Assert.assertTrue(((double)node.get("$loopA"))==5.0);
+
+                node.set("f0",0);
+                node.set("f1",1);
+                node.set("f2",2);
+                node.set("f3",3);
+                node.set("f4","f3+1");
+                node.set(AbstractMLNode.FROM,"f0;f1;f2;f3;$f4;");
+                node.extractFeatures(new Callback<double[]>() {
+                    @Override
+                    public void on(double[] result) {
+                        for(int i=0;i<5;i++){
+                            Assert.assertTrue(result[i]==i);
+                        }
+                    }
+                });
+
+                node.set(AbstractMLNode.FROM,"f0^2;f1^2;f2^2;f3^2;$f4^2");
+                node.extractFeatures(new Callback<double[]>() {
+                    @Override
+                    public void on(double[] result) {
+                        for(int i=0;i<5;i++){
+                            //System.out.println(result[i]);
+                            Assert.assertTrue(result[i]==i*i);
+                        }
+                    }
+                });
 
                 graph.disconnect(null);
             }

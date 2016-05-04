@@ -10,8 +10,8 @@ import org.mwg.plugin.AbstractNode;
  * Created by assaad on 04/05/16.
  */
 public abstract class AbstractMLNode extends AbstractNode {
-    public static String FEATURES_SEPARATOR="#";
-    public static String FEATURES_QUERY_KEY="_FEATURES_QUERY";
+    public static String FEATURES_SEPARATOR=";";
+    public static String FROM="FROM";
 
 
     public AbstractMLNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
@@ -31,13 +31,14 @@ public abstract class AbstractMLNode extends AbstractNode {
     }
 
     public void extractFeatures(Callback<double[]> callback){
-        String query= (String)super.get(FEATURES_QUERY_KEY);
+        String query= (String)super.get(FROM);
         double[] result;
         if(query!=null) {
             String[] split = query.split(FEATURES_SEPARATOR);
             result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
-                result[i] = (double) get(split[i]);
+                KMathExpressionEngine localEngine = MathExpressionEngine.parse(split[i]);
+                result[i] = localEngine.eval(this);
             }
             callback.on(result);
         }
