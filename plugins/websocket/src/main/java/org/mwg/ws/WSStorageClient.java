@@ -28,7 +28,6 @@ import java.util.function.IntUnaryOperator;
  * A websocket client to send request on a remote storage
  */
 public class WSStorageClient implements Storage {
-//    private WebSocketClient.ConnectionBuilder _channelBuilder;
     private WebSocketChannel _channel;
 
     private final AtomicInteger _nextIdMessages;
@@ -40,33 +39,12 @@ public class WSStorageClient implements Storage {
     private String _url;
     private int _port;
 
-    public WSStorageClient(String URL, int port/*WebSocketClient.ConnectionBuilder builder*/) {
-//        _channelBuilder = builder;
+    public WSStorageClient(String URL, int port) {
         _nextIdMessages = new AtomicInteger(0);
         _callBacks = new DynamicArrayImpl<>(INITIAL_SIZE);
         _url = URL;
         _port = port;
     }
-
-    /*//todo mettre dans le connect
-    public static WSStorageClient init(String URL, int port) throws IOException, URISyntaxException {
-        XnioWorker _worker;
-        Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
-        _worker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, 2)
-                .set(Options.CONNECTION_HIGH_WATER, 1_000_000)
-                .set(Options.CONNECTION_LOW_WATER, 1_000_000)
-                .set(Options.WORKER_TASK_CORE_THREADS, 30)
-                .set(Options.WORKER_TASK_MAX_THREADS, 30)
-                .set(Options.TCP_NODELAY, true)
-                .set(Options.CORK, true)
-                .getMap());
-        ByteBufferPool _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
-        WebSocketClient.ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
-                .connectionBuilder(_worker,_buffer,new URI("ws://" + URL + ":" + port));
-        return new WSStorageClient(builder);
-
-    }*/
 
 
     @Override
@@ -139,15 +117,6 @@ public class WSStorageClient implements Storage {
             throw new RuntimeException("Error during connection to ws://" + _url + ":" + _port + "\n" + e.getMessage());
         }
 
-        /*try {
-            _channel = _channelBuilder.connect().get();
-            _channel.getReceiveSetter().set(new MessageReceiver());
-            _channel.resumeReceives();
-        } catch (IOException e) {
-            if(callback != null) {
-                callback.on(null);
-            }
-        }*/
         if(callback != null) {
             Buffer buffer = _graph.newBuffer();
             buffer.write(WSMessageType.RQST_PREFIX);
@@ -252,12 +221,15 @@ public class WSStorageClient implements Storage {
                             break;
                         }
                         case WSMessageType.RESP_PREFIX: {
+
                             int firstSep = 0;
                             while(buffer.read(firstSep) != CoreConstants.BUFFER_SEP) {
                                 firstSep++;
                             }
                             short prefix = (short) Base64.decodeToIntWithBounds(buffer,0,firstSep);
                             callback.on(prefix);
+                            buffer.free();
+                            break;
                         }
                         default: {
                             System.err.println("The message " + msgID + " needs a callback but its type (" + messageType + ") is unknown");

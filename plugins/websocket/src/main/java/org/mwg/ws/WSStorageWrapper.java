@@ -64,15 +64,24 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
         if(_graph == null) {
             throw new RuntimeException("Please connect the websocket first.");
         }
-        _wrapped.put(stream,callback);
+        _wrapped.put(stream, new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                if(result) {
+                    stream.write(CoreConstants.BUFFER_SEP);
+                    stream.write(WSMessageType.RQST_FORCE_RELOAD);
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(stream.data());
+                    //fixme
+                    for(WebSocketChannel client: _peers) {
+                        WebSockets.sendBinary(byteBuffer,client,null);
+                    }
+                }
 
-        stream.write(CoreConstants.BUFFER_SEP);
-        stream.write(WSMessageType.RQST_FORCE_RELOAD);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(stream.data());
-        //fixme
-        for(WebSocketChannel client: _peers) {
-            WebSockets.sendBinary(byteBuffer,client,null);
-        }
+                callback.on(result);
+            }
+        });
+
+
     }
 
     @Override
