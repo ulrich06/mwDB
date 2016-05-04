@@ -10,7 +10,7 @@ import org.mwg.plugin.AbstractNode;
  * Created by assaad on 04/05/16.
  */
 public abstract class AbstractMLNode extends AbstractNode {
-    public static String FEATURES_SEPARATOR=";";
+    public static String FROM_SEPARATOR=";";
     public static String FROM="FROM";
 
 
@@ -34,7 +34,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         String query= (String)super.get(FROM);
         double[] result;
         if(query!=null) {
-            String[] split = query.split(FEATURES_SEPARATOR);
+            String[] split = query.split(FROM_SEPARATOR);
             result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
                 KMathExpressionEngine localEngine = MathExpressionEngine.parse(split[i]);
