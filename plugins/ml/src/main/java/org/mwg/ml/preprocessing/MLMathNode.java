@@ -2,8 +2,8 @@ package org.mwg.ml.preprocessing;
 
 import org.mwg.*;
 import org.mwg.plugin.NodeFactory;
-import org.mwg.maths.expression.KMathExpressionEngine;
-import org.mwg.maths.expression.impl.MathExpressionEngine;
+import org.mwg.math.expression.KMathExpressionEngine;
+import org.mwg.math.expression.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
 public class MLMathNode extends AbstractNode {
@@ -25,22 +25,21 @@ public class MLMathNode extends AbstractNode {
         }
     }
 
-    private KMathExpressionEngine mathEngine;
-
     public MLMathNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
-        //mathEngine = new MathExpressionEngine();
     }
 
 
     @Override
     public Object get(String propertyName) {
-        Object expressionObj = super.get(propertyName);
-        if (propertyName.startsWith("$") && expressionObj != null && type(propertyName) == Type.STRING) {
+        if (propertyName != null && propertyName.startsWith("$")) {
+            Object expressionObj = super.get(propertyName.substring(1));
+            //ToDo this is dangerous for infinite loops or circular dependency, to fix 
             KMathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
             return localEngine.eval(this);
+        } else {
+            return super.get(propertyName);
         }
-        return expressionObj;
     }
 
     @Override

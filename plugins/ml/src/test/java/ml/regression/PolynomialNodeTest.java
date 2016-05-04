@@ -3,9 +3,9 @@ package ml.regression;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
 import org.mwg.ml.regression.MLPolynomialNode;
 import org.mwg.core.NoopScheduler;
 

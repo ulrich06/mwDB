@@ -2,11 +2,11 @@ package math.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.maths.matrix.blassolver.blas.F2JBlas;
-import org.mwg.maths.matrix.blassolver.blas.KBlas;
-import org.mwg.maths.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.math.matrix.blassolver.blas.F2JBlas;
+import org.mwg.math.matrix.blassolver.blas.KBlas;
+import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
 
 /**
  * Created by assaad on 25/03/16.
@@ -51,7 +51,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Netlib mult: " + d + " ms");
+        //System.out.println("Netlib mult: " + d + " ms");
 
 
         blas = new F2JBlas();
@@ -61,7 +61,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("F2J mult: " + d + " ms");
+        //System.out.println("F2J mult: " + d + " ms");
 
 /*
         blas = new CudaBlas();
@@ -79,7 +79,7 @@ public class MatrixMultTest {
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
-        System.out.println("Traditional mult: " + d + " ms");
+        //System.out.println("Traditional mult: " + d + " ms");
 
         double eps = 1e-7;
 

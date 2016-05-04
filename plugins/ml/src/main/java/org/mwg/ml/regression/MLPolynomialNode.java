@@ -2,7 +2,7 @@ package org.mwg.ml.regression;
 
 import org.mwg.*;
 import org.mwg.plugin.NodeFactory;
-import org.mwg.maths.matrix.operation.PolynomialFit;
+import org.mwg.math.matrix.operation.PolynomialFit;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeState;
 
@@ -127,74 +127,77 @@ public class MLPolynomialNode extends AbstractNode {
 
         //Check if we are inserting in the past:
         long previousTime = timeOrigin + (long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
-        if (time > previousTime) {
-            //first check if we can increase the degree
-            int newMaxDegree = Math.min(num, _maxDegree);
-            if (deg < newMaxDegree) {
-                deg++;
-                int factor = 1;
-                double[] times = new double[factor * num + 1];
-                double[] values = new double[factor * num + 1];
-                double inc = 0;
-                if (num > 1) {
-                    inc = ((long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
-                    inc = inc / (stp * (factor * num - 1));
-                }
-                for (int i = 0; i < factor * num; i++) {
-                    times[i] = i * inc;
-                    values[i] = PolynomialFit.extrapolate(times[i], weight);
-                }
-                times[factor * num] = (time - timeOrigin) / stp;
-                values[factor * num] = value;
-                PolynomialFit pf = new PolynomialFit(deg);
-                pf.fit(times, values);
-                if (tempError(pf.getCoef(), times, values) <= maxError) {
-                    weight = pf.getCoef();
-                    previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
-                    previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
-                    previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-                    return;
-                }
-            }
-        } else {
-            //we are inserting in the past
+        int factor;
 
+        //The difference between inserting in the future or in the past
+        if (time > previousTime) {
+            factor = 1;
+        } else {
+            factor = 3;
         }
 
-        //It does not fit, create a new state and split the polynomial
-        long newstep = time - previousTime;
-        NodeState phasedState = newState(previousTime); //force clone
-        double[] values = new double[2];
-        double pt = previousTime - timeOrigin;
-        pt = pt / stp;
-        values[0] = PolynomialFit.extrapolate(pt, weight);
-        values[1] = value;
+        //first check if we can increase the degree
+        int newMaxDegree = Math.min(num, _maxDegree);
+        if (deg < newMaxDegree) {
+            deg++;
+            double[] times = new double[factor * num + 1];
+            double[] values = new double[factor * num + 1];
+            double inc = 0;
+            if (num > 1) {
+                inc = ((long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
+                inc = inc / (stp * (factor * num - 1));
+            }
+            for (int i = 0; i < factor * num; i++) {
+                times[i] = i * inc;
+                values[i] = PolynomialFit.extrapolate(times[i], weight);
+            }
+            times[factor * num] = (time - timeOrigin) / stp;
+            values[factor * num] = value;
+            PolynomialFit pf = new PolynomialFit(deg);
+            pf.fit(times, values);
+            if (tempError(pf.getCoef(), times, values) <= maxError) {
+                weight = pf.getCoef();
+                previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+                previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
+                previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
+                return;
+            }
+        }
 
-        //Test if the newly created polynomial is of degree 0 or 1.
-        maxError = maxErr(precision, 0);
-        if (Math.abs(values[1] - values[0]) <= maxError) {
-            // Here it's a degree 0
-            weight = new double[1];
-            weight[0] = values[0];
 
+        //It does not fit, create a new state and split the polynomial, different splits if we are dealing with the future or with the past
+        if (time > previousTime) {
+            long newstep = time - previousTime;
+            NodeState phasedState = newState(previousTime); //force clone
+            double[] values = new double[2];
+            double pt = previousTime - timeOrigin;
+            pt = pt / stp;
+            values[0] = PolynomialFit.extrapolate(pt, weight);
+            values[1] = value;
+
+            //Test if the newly created polynomial is of degree 0 or 1.
+            maxError = maxErr(precision, 0);
+            if (Math.abs(values[1] - values[0]) <= maxError) {
+                // Here it's a degree 0
+                weight = new double[1];
+                weight[0] = values[0];
+            } else {
+                //Here it's a degree 1
+                values[1] = values[1] - values[0];
+                weight = values;
+            }
+
+            //create and set the phase set
             phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
             phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
             phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
             phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
             phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
-
             return;
         } else {
-            //Here it's a degree 1
-            values[1] = values[1] - values[0];
+            // 2 phased states need to be created
 
-            phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
-            phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, values);
-            phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
-            phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
-            phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
         }
-
     }
 
 

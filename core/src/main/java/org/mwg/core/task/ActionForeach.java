@@ -21,7 +21,7 @@ class ActionForeach implements TaskAction {
     public void eval(TaskContext context) {
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
-        final TaskContext[] results = new TaskContext[castedResult.length];
+        final TaskContext[] results = new CoreTaskContext[castedResult.length];
         _subTask.executeThenAsync(context, castedResult[0], new TaskAction() {
             @Override
             public void eval(final TaskContext subTaskFinalContext) {

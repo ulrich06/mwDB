@@ -2,9 +2,9 @@ package org.mwg.ml.regression;
 
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.KTransposeType;
-import org.mwg.maths.matrix.operation.PInvSVD;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.KTransposeType;
+import org.mwg.math.matrix.operation.PInvSVD;
 import org.mwg.plugin.NodeFactory;
 
 /**

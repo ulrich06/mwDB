@@ -7,7 +7,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.core.NoopScheduler;
-import org.mwg.maths.matrix.operation.Gaussian1D;
+import org.mwg.math.matrix.operation.Gaussian1D;
 import org.mwg.ml.profiling.MLGaussianGmmNode;
 
 import java.util.Random;
@@ -44,13 +44,13 @@ public class GaussianProbaTest {
                 double[] avgBatch = gaussianNodeBatch.getAvg();
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
-                System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
-                System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
+                //System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
+                //System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
                 Assert.assertTrue(Math.abs(avgBatch[0] - sum / total) < eps);
                 Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getCovariance(sum, sumsquare, total)) < eps);
 
                 double testvec = rand.nextDouble() * 100;
-                System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
+                //System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
                 Assert.assertTrue(Math.abs(Gaussian1D.getDensity(sum, sumsquare, total, testvec) - gaussianNodeBatch.getProbability(new double[]{testvec}, null, false)) < eps);
 
 
@@ -94,13 +94,13 @@ public class GaussianProbaTest {
 
                 double eps = 1e-8;
                 double d = apache.density(v);
-                System.out.println("apache: " + d);
+                //System.out.println("apache: " + d);
 
                 double y = gaussianNodeLive.getProbability(v, null, false);
-                System.out.println("live: " + y);
+                //System.out.println("live: " + y);
 
                 double z = gaussianNodeBatch.getProbability(v, null, false);
-                System.out.println("batch: " + z);
+                //System.out.println("batch: " + z);
 
 
                 Assert.assertTrue(Math.abs(d - y) < eps);
@@ -142,8 +142,8 @@ public class GaussianProbaTest {
                 double[] avg = node1.getAvg();
                 double[] avg2 = node2.getAvg();
 
-                printd(avg);
-                printd(avg2);
+               // printd(avg);
+                //printd(avg2);
 
                 data[0] = 10;
                 data[1] = 100;
@@ -156,8 +156,8 @@ public class GaussianProbaTest {
 
                 double p = node1.getProbability(avg, null, false);
                 double p2 = node2.getProbability(avg2, null, false);
-                System.out.println("p1: " + p);
-                System.out.println("p2: " + p2);
+                //System.out.println("p1: " + p);
+                //System.out.println("p2: " + p2);
 
 
             }

@@ -1,8 +1,8 @@
 package org.mwg.lru;
 
 import org.kevoree.modeling.KConfig;
-import org.mwg.maths.Array3LongIntMap;
-import org.mwg.maths.K3LongIntMap;
+import org.mwg.math.Array3LongIntMap;
+import org.mwg.math.K3LongIntMap;
 
 /**
  * Created by ludovicmouline on 01/02/16.

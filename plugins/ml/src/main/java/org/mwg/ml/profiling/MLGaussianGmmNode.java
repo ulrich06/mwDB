@@ -2,8 +2,8 @@ package org.mwg.ml.profiling;
 
 import org.mwg.*;
 import org.mwg.plugin.NodeFactory;
-import org.mwg.maths.matrix.KMatrix;
-import org.mwg.maths.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.math.matrix.KMatrix;
+import org.mwg.math.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.AbstractNode;
 
 public class MLGaussianGmmNode extends AbstractNode {

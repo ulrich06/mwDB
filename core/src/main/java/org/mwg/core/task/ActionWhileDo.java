@@ -23,7 +23,7 @@ class ActionWhileDo implements TaskAction {
         /*
         TaskAction task = new TaskAction() {
             @Override
-            public void eval(TaskContext subContext) {
+            public void eval(CoreTaskContext subContext) {
 
             }
         };
@@ -37,10 +37,10 @@ class ActionWhileDo implements TaskAction {
 
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
-        final TaskContext[] results = new TaskContext[castedResult.length];
+        final CoreTaskContext[] results = new CoreTaskContext[castedResult.length];
         _then.executeThenAsync(context, castedResult[0], new TaskAction() {
             @Override
-            public void eval(final TaskContext subTaskFinalContext) {
+            public void eval(final CoreTaskContext subTaskFinalContext) {
                 int current = cursor.getAndIncrement();
                 results[current] = subTaskFinalContext;
                 int nextCursot = current + 1;

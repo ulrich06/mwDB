@@ -1,4 +1,4 @@
-package org.mwg.maths;
+package org.mwg.math;
 
 /**
  * Created by ludovicmouline on 08/02/16.

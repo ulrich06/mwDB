@@ -3,7 +3,7 @@ package ml.profiling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.maths.matrix.KMatrix;
+import org.mwg.math.matrix.KMatrix;
 import org.mwg.ml.profiling.MLGaussianGmmNode;
 import org.mwg.core.NoopScheduler;
 

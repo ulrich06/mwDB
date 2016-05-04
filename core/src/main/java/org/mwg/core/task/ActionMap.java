@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
@@ -17,8 +18,8 @@ class ActionMap implements TaskAction {
     public final void eval(final TaskContext context) {
         final Object previousResult = context.getPreviousResult();
         if (previousResult != null) {
-            if (previousResult instanceof Node[]) {
-                context.setResult(filterNodeArray((Node[]) previousResult));
+            if (previousResult instanceof AbstractNode[]) {
+                context.setResult(filterNodeArray((AbstractNode[]) previousResult));
             } else if (previousResult instanceof Object[]) {
                 context.setResult(filterArray((Object[]) previousResult));
             }
@@ -30,8 +31,8 @@ class ActionMap implements TaskAction {
         Object[] filteredResult = new Object[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof Node[]) {
-                Object[] filtered = filterNodeArray((Node[]) current[i]);
+            if (current[i] instanceof AbstractNode[]) {
+                Object[] filtered = filterNodeArray((AbstractNode[]) current[i]);
                 if (filtered != null && filtered.length > 0) {
                     filteredResult[cursor] = filtered;
                     cursor++;
@@ -42,8 +43,7 @@ class ActionMap implements TaskAction {
                     filteredResult[cursor] = filtered;
                     cursor++;
                 }
-            }
-            if (current[i] != null && current[i] instanceof Node) {
+            }else if (current[i] != null && current[i] instanceof AbstractNode) {
                 filteredResult[cursor] = _map.map((Node) current[i]);
                 cursor++;
             }
@@ -59,7 +59,7 @@ class ActionMap implements TaskAction {
             cursor++;
         }
         if (cursor != current.length) {
-            Node[] filtered_2 = new Node[cursor];
+            Node[] filtered_2 = new AbstractNode[cursor];
             System.arraycopy(filtered, 0, filtered_2, 0, cursor);
             return filtered_2;
         } else {

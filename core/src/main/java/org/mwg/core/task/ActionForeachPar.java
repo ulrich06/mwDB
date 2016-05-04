@@ -20,7 +20,7 @@ class ActionForeachPar implements TaskAction {
     @Override
     public void eval(TaskContext context) {
         final Object[] castedResult = convert(context.getPreviousResult());
-        final TaskContext[] results = new TaskContext[castedResult.length];
+        final TaskContext[] results = new CoreTaskContext[castedResult.length];
         final DeferCounter counter = context.graph().counter(castedResult.length);
         counter.then(new Callback() {
             @Override

@@ -78,6 +78,23 @@ public abstract class AbstractNode implements Node {
 
     /**
      * @native ts
+    if (typeof propertyValue === 'string' || propertyValue instanceof String) {
+    this.setProperty(propertyName, org.mwg.Type.STRING, propertyValue);
+    } else if(typeof propertyValue === 'number' || propertyValue instanceof Number) {
+    if(propertyValue % 1 != 0) {
+    this.setProperty(propertyName, org.mwg.Type.DOUBLE, propertyValue);
+    } else {
+    this.setProperty(propertyName, org.mwg.Type.LONG, propertyValue);
+    }
+    } else if(typeof propertyValue === 'boolean' || propertyValue instanceof Boolean) {
+    this.setProperty(propertyName, org.mwg.Type.BOOL, propertyValue);
+    } else if (propertyValue instanceof Int32Array) {
+    this.setProperty(propertyName, org.mwg.Type.LONG_ARRAY, propertyValue);
+    } else if (propertyValue instanceof Float64Array) {
+    this.setProperty(propertyName, org.mwg.Type.DOUBLE_ARRAY, propertyValue);
+    } else {
+    throw new Error("Invalid property type: " + propertyValue + ", please use a Type listed in org.mwg.Type");
+    }
      */
     @Override
     public final void set(String propertyName, Object propertyValue) {
@@ -147,9 +164,9 @@ public abstract class AbstractNode implements Node {
         if (resolved != null) {
             final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
             if (flatRefs == null || flatRefs.length == 0) {
-                callback.on(new Node[0]);
+                callback.on(new AbstractNode[0]);
             } else {
-                final Node[] result = new Node[flatRefs.length];
+                final Node[] result = new AbstractNode[flatRefs.length];
                 final DeferCounter counter = _graph.counter(flatRefs.length);
                 final int[] resultIndex = new int[1];
                 for (int i = 0; i < flatRefs.length; i++) {
@@ -170,7 +187,7 @@ public abstract class AbstractNode implements Node {
                         if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
-                            Node[] toSend = new Node[resultIndex[0]];
+                            Node[] toSend = new AbstractNode[resultIndex[0]];
                             System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
@@ -273,10 +290,10 @@ public abstract class AbstractNode implements Node {
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
             final long[] foundId = indexMap.get(flatQuery.hash());
             if (foundId == null) {
-                callback.on(new org.mwg.Node[0]);
+                callback.on(new org.mwg.plugin.AbstractNode[0]);
                 return;
             }
-            final org.mwg.Node[] resolved = new org.mwg.Node[foundId.length];
+            final org.mwg.Node[] resolved = new org.mwg.plugin.AbstractNode[foundId.length];
             final DeferCounter waiter = _graph.counter(foundId.length);
             //TODO replace by a par lookup
             final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
@@ -296,7 +313,7 @@ public abstract class AbstractNode implements Node {
                 @Override
                 public void on(Object o) {
                     //select
-                    Node[] resultSet = new org.mwg.Node[nextResolvedTabIndex.get()];
+                    Node[] resultSet = new org.mwg.plugin.AbstractNode[nextResolvedTabIndex.get()];
                     int resultSetIndex = 0;
 
                     for (int i = 0; i < resultSet.length; i++) {
@@ -330,14 +347,14 @@ public abstract class AbstractNode implements Node {
                     if (resultSet.length == resultSetIndex) {
                         callback.on(resultSet);
                     } else {
-                        Node[] trimmedResultSet = new org.mwg.Node[resultSetIndex];
+                        Node[] trimmedResultSet = new org.mwg.plugin.AbstractNode[resultSetIndex];
                         System.arraycopy(resultSet, 0, trimmedResultSet, 0, resultSetIndex);
                         callback.on(trimmedResultSet);
                     }
                 }
             });
         } else {
-            callback.on(new org.mwg.Node[0]);
+            callback.on(new org.mwg.plugin.AbstractNode[0]);
         }
     }
 
@@ -356,7 +373,7 @@ public abstract class AbstractNode implements Node {
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
-            final Node[] resolved = new org.mwg.Node[mapSize];
+            final Node[] resolved = new org.mwg.plugin.AbstractNode[mapSize];
             DeferCounter waiter = _graph.counter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(0);
@@ -378,14 +395,14 @@ public abstract class AbstractNode implements Node {
                     if (loopInteger.get() == resolved.length) {
                         callback.on(resolved);
                     } else {
-                        Node[] toSend = new org.mwg.Node[loopInteger.get()];
+                        Node[] toSend = new org.mwg.plugin.AbstractNode[loopInteger.get()];
                         System.arraycopy(resolved, 0, toSend, 0, toSend.length);
                         callback.on(toSend);
                     }
                 }
             });
         } else {
-            callback.on(new org.mwg.Node[0]);
+            callback.on(new org.mwg.plugin.AbstractNode[0]);
         }
     }
 
@@ -450,11 +467,10 @@ public abstract class AbstractNode implements Node {
     }
 
 
-    public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType){
-        if(propertyType!=propertyTargetType){
-            throw new RuntimeException("Property "+propertyName+" has a type mismatch, provided "+Type.typeName(propertyType)+" expected: "+Type.typeName(propertyTargetType));
-        }
-        else{
+    public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
+        if (propertyType != propertyTargetType) {
+            throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));
+        } else {
             NodeState preciseState = this._resolver.resolveState(this, false);
             if (preciseState != null) {
                 preciseState.set(this._resolver.stringToLongKey(propertyName), propertyType, propertyValue);

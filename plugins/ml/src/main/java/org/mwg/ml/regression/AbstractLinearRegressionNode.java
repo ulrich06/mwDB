@@ -13,39 +13,91 @@ import java.util.Objects;
 public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindowManagingNode {
 
     /**
-     * Attribute key - sliding window of values
+     * Regression coefficients
      */
-    protected static final String INTERNAL_VALUE_COEFFICIENTS_KEY = "_regressionCoefficients";
+    public static final String COEFFICIENTS_KEY = "regressionCoefficients";
+    /**
+     * Regression coefficients - default
+     */
+    public static final double[] COEFFICIENTS_DEF = new double[0];
+    /**
+     * Regression intercept
+     */
+    public static final String INTERCEPT_KEY = "regressionCoefficients";
+    /**
+     * Regression intercept - default
+     */
+    public static final double INTERCEPT_DEF = 0.0;
 
     /**
-     * Attribute key - L2 regularization coefficient
+     * L2 regularization coefficient
      */
-    protected static final String INTERNAL_VALUE_L2_COEF_KEY = "_L2Coefficient";
+    public static final String L2_COEF_KEY = "L2Coefficient";
+    /**
+     * L2 regularization coefficient - default
+     */
+    public static final double L2_COEF_DEF = 0.0;
 
     public AbstractLinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
     public double[] getCoefficients(){
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_COEFFICIENTS_KEY, new double[0]);
+        return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
     }
 
     public double getIntercept(){
-        return getCoefficients()[getResponseIndex()];
+        final double[] allCoefs =  getCoefficients();
+        final int respIndex = getResponseIndex();
+        if ((allCoefs!=null)&&(allCoefs.length > respIndex)){
+            return allCoefs[respIndex];
+        }
+        return INTERCEPT_DEF;
+    }
+
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if (L2_COEF_KEY.equals(propertyName)) {
+            illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
+                    "L2 regularization coefficient should be of type double or integer");
+            if (propertyValue instanceof Double){
+                illegalArgumentIfFalse((Double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization((Double)propertyValue);
+            }else{
+                illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization(((Integer)propertyValue).doubleValue());
+            }
+        }else if (COEFFICIENTS_KEY.equals(propertyName) || INTERCEPT_KEY.equals(propertyName)) {
+            //Nothing. Those cannot be set.
+        }else{
+            super.setProperty(propertyName, propertyType, propertyValue);
+        }
+    }
+
+    @Override
+    public Object get(String propertyName){
+        if(COEFFICIENTS_KEY.equals(propertyName)){
+            return getCoefficients();
+        }else if(INTERCEPT_KEY.equals(propertyName)){
+            return getIntercept();
+        }else if(L2_COEF_KEY.equals(propertyName)){
+            return getL2Regularization();
+        }
+        return super.get(propertyName);
     }
 
     protected void setCoefficients(double[] coefficients) {
         Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        unphasedState().setFromKey(INTERNAL_VALUE_COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
+        unphasedState().setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
     }
 
     public double getL2Regularization(){
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_L2_COEF_KEY, 0.0);
+        return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
     }
 
     public void setL2Regularization(double l2) {
         illegalArgumentIfFalse(l2>=0,"L2 coefficients must be non-negative");
-        unphasedState().setFromKey(INTERNAL_VALUE_L2_COEF_KEY, Type.DOUBLE, l2);
+        unphasedState().setFromKey(L2_COEF_KEY, Type.DOUBLE, l2);
     }
 
     @Override
@@ -87,5 +139,16 @@ public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindow
             startIndex += dims;
         }
         return sqrResidualSum / numValues;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder result = new StringBuilder();
+        double coefs[] = getCoefficients();
+        result.append("Coefficients: ");
+        for (int j = 0; j < coefs.length; j++) {
+            result.append(coefs[j] + ", ");
+        }
+        return result.toString();
     }
 }
