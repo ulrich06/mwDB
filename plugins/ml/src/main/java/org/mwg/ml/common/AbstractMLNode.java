@@ -9,7 +9,7 @@ import org.mwg.plugin.AbstractNode;
  * Created by assaad on 04/05/16.
  */
 public abstract class AbstractMLNode extends AbstractNode {
-    private static String _SEPARATOR="#";
+    public static String FEATURES_SEPARATOR="#";
     public static String FEATURES_QUERY_KEY="_FEATURES_QUERY";
 
 
@@ -32,7 +32,7 @@ public abstract class AbstractMLNode extends AbstractNode {
     public double[] extractFeatures(){
         String query= (String)super.get(FEATURES_QUERY_KEY);
         if(query!=null) {
-            String[] split = query.split(_SEPARATOR);
+            String[] split = query.split(FEATURES_SEPARATOR);
             double[] result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
                 result[i] = (double) get(split[i]);
