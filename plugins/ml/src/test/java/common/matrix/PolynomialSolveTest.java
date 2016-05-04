@@ -1,4 +1,4 @@
-package math.matrix;
+package common.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;

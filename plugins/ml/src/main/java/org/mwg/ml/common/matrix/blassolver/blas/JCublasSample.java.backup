@@ -1,4 +1,4 @@
-package org.mwg.math.matrix.blassolver.blas;
+package org.mwg.common.matrix.blassolver.blas;
 
 /* Imports, JCublas */
 import jcuda.*;

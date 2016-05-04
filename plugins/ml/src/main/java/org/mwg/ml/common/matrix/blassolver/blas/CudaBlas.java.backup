@@ -1,9 +1,9 @@
-package org.mwg.math.matrix.blassolver.blas;
+package org.mwg.common.matrix.blassolver.blas;
 
 import jcuda.Pointer;
 import jcuda.Sizeof;
 import jcuda.jcublas.JCublas;
-import org.mwg.math.matrix.KTransposeType;
+import org.mwg.common.matrix.KTransposeType;
 
 public class CudaBlas implements KBlas {
 
