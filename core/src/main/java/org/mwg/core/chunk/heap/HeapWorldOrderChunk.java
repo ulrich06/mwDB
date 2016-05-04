@@ -160,8 +160,8 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
     /**
      * @native ts
-     * _marks = _marks + 1;
-     * return _marks
+     * this._marks = this._marks + 1;
+     * return this._marks
      */
     @Override
     public final long mark() {
@@ -176,8 +176,8 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
     /**
      * @native ts
-     * _marks = _marks - 1;
-     * return _marks
+     * this._marks = this._marks - 1;
+     * return this._marks
      */
     @Override
     public final long unmark() {
@@ -418,10 +418,10 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
     /**
      * @native ts
-     * _magic = _magic + 1;
-     * if (_listener != null) {
-     * if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
-     * _listener.declareDirty(this);
+     * this._magic = this._magic + 1;
+     * if (this._listener != null) {
+     * if ((this._flags & org.mwg.core.CoreConstants.DIRTY_BIT) != org.mwg.core.CoreConstants.DIRTY_BIT) {
+     * this._listener.declareDirty(this);
      * }
      * }
      */

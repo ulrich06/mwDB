@@ -90,8 +90,8 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     /**
      * @native ts
-     * _marks = _marks + 1;
-     * return _marks
+     * this._marks = this._marks + 1;
+     * return this._marks
      */
     @Override
     public final long mark() {
@@ -106,8 +106,8 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     /**
      * @native ts
-     * _marks = _marks - 1;
-     * return _marks
+     * this._marks = this._marks - 1;
+     * return this._marks
      */
     @Override
     public final long unmark() {
@@ -142,9 +142,9 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     /**
      * @native ts
-     * var n_flags = _flags & ~bitsToDisable | bitsToEnable;
-     * _flags = n_flags;
-     * return n_flags != _flags;
+     * var val = this._flags;
+     * var nval = val & ~bitsToDisable | bitsToEnable;
+     * return val != nval;
      */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {

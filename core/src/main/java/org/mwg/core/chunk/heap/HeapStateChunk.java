@@ -184,8 +184,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     /**
      * @native ts
-     * _marks = _marks + 1;
-     * return _marks
+     * this._marks = this._marks + 1;
+     * return this._marks
      */
     @Override
     public final long mark() {
@@ -200,8 +200,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     /**
      * @native ts
-     * _marks = _marks - 1;
-     * return _marks
+     * this._marks = this._marks - 1;
+     * return this._marks
      */
     @Override
     public final long unmark() {
