@@ -4,7 +4,7 @@ import org.mwg.struct.Buffer;
 
 /**
  * @native ts
- * private static encodeArray = [<number>'A', <number>'B', <number>'C', <number>'D', <number>'E', <number>'F', <number>'G', <number>'H', <number>'I', <number>'J', <number>'K', <number>'L', <number>'M', <number>'N', <number>'O', <number>'P', <number>'Q', <number>'R', <number>'S', <number>'T', <number>'U', <number>'V', <number>'W', <number>'X', <number>'Y', <number>'Z', <number>'a', <number>'b', <number>'c', <number>'d', <number>'e', <number>'f', <number>'g', <number>'h', <number>'i', <number>'j', <number>'k', <number>'l', <number>'m', <number>'n', <number>'o', <number>'p', <number>'q', <number>'r', <number>'s', <number>'t', <number>'u', <number>'v', <number>'w', <number>'x', <number>'y', <number>'z', <number>'0', <number>'1', <number>'2', <number>'3', <number>'4', <number>'5', <number>'6', <number>'7', <number>'8', <number>'9', <number>'+', <number>'/'];
+ * private static encodeArray : number[] = ['A'.charCodeAt(0), 'B'.charCodeAt(0), 'C'.charCodeAt(0), 'D'.charCodeAt(0), 'E'.charCodeAt(0), 'F'.charCodeAt(0), 'G'.charCodeAt(0), 'H'.charCodeAt(0), 'I'.charCodeAt(0), 'J'.charCodeAt(0), 'K'.charCodeAt(0), 'L'.charCodeAt(0), 'M'.charCodeAt(0), 'N'.charCodeAt(0), 'O'.charCodeAt(0), 'P'.charCodeAt(0), 'Q'.charCodeAt(0), 'R'.charCodeAt(0), 'S'.charCodeAt(0), 'T'.charCodeAt(0), 'U'.charCodeAt(0), 'V'.charCodeAt(0), 'W'.charCodeAt(0), 'X'.charCodeAt(0), 'Y'.charCodeAt(0), 'Z'.charCodeAt(0), 'a'.charCodeAt(0), 'b'.charCodeAt(0), 'c'.charCodeAt(0), 'd'.charCodeAt(0), 'e'.charCodeAt(0), 'f'.charCodeAt(0), 'g'.charCodeAt(0), 'h'.charCodeAt(0), 'i'.charCodeAt(0), 'j'.charCodeAt(0), 'k'.charCodeAt(0), 'l'.charCodeAt(0), 'm'.charCodeAt(0), 'n'.charCodeAt(0), 'o'.charCodeAt(0), 'p'.charCodeAt(0), 'q'.charCodeAt(0), 'r'.charCodeAt(0), 's'.charCodeAt(0), 't'.charCodeAt(0), 'u'.charCodeAt(0), 'v'.charCodeAt(0), 'w'.charCodeAt(0), 'x'.charCodeAt(0), 'y'.charCodeAt(0), 'z'.charCodeAt(0), '0'.charCodeAt(0), '1'.charCodeAt(0), '2'.charCodeAt(0), '3'.charCodeAt(0), '4'.charCodeAt(0), '5'.charCodeAt(0), '6'.charCodeAt(0), '7'.charCodeAt(0), '8'.charCodeAt(0), '9'.charCodeAt(0), '+'.charCodeAt(0), '/'.charCodeAt(0)];
  * private static decodeArray = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6, "H":7, "I":8, "J":9, "K":10, "L":11, "M":12, "N":13, "O":14, "P":15, "Q":16, "R":17, "S":18, "T":19, "U":20, "V":21, "W":22, "X":23, "Y":24, "Z":25, "a":26, "b":27, "c":28, "d":29, "e":30, "f":31, "g":32, "h":33, "i":34, "j":35, "k":36, "l":37, "m":38, "n":39, "o":40, "p":41, "q":42, "r":43, "s":44, "t":45, "u":46, "v":47, "w":48, "x":49, "y":50, "z":51, "0":52, "1":53, "2":54, "3":55, "4":56, "5":57, "6":58, "7":59, "8":60, "9":61, "+":62, "/":63};
  * private static powTwo = {0:1,1:2,2:4,3:8,4:16,5:32,6:64,7:128,8:256,9:512,10:1024,11:2048,12:4096,13:8192,14:16384,15:32768,16:65536,17:131072,18:262144,19:524288,20:1048576,21:2097152,22:4194304,23:8388608,24:16777216,25:33554432,26:67108864,27:134217728,28:268435456,29:536870912,30:1073741824,31:2147483648,32:4294967296,33:8589934592,34:17179869184,35:34359738368,36:68719476736,37:137438953472,38:274877906944,39:549755813888,40:1099511627776,41:2199023255552,42:4398046511104,43:8796093022208,44:17592186044416,45:35184372088832,46:70368744177664,47:140737488355328,48:281474976710656,49:562949953421312,50:1125899906842624,51:2251799813685248,52:4503599627370496,53:9007199254740992};
  * public static encodeLong(l:number) {
@@ -114,7 +114,10 @@ import org.mwg.struct.Buffer;
  * while(i >= 3 && result.charAt(i) == 'A') {
  * i--;
  * }
- * return result.substr(0,i+1);
+ * result = result.substr(0,i+1);
+ * for(i = 0; i < result.length; i++) {
+ * buffer.write(result.charCodeAt(i));
+ * }
  * }
  * public static encodeDoubleToBuffer(d : number, buffer : org.mwg.struct.Buffer) {
  * var result = "";
@@ -139,10 +142,7 @@ import org.mwg.struct.Buffer;
  * while(i >= 3 && result.charAt(i) == 'A') {
  * i--;
  * }
- * result = result.substr(0,i+1);
- * for(i = 0; i < result.length; i++) {
- * buffer.write(result.charCodeAt(i));
- * }
+ * buffer.write(result.substr(0,i+1));
  * }
  * public static decodeToDouble(s : org.mwg.struct.Buffer) {
  * return Base64.decodeToDoubleWithBounds(s, 0, s.size());
