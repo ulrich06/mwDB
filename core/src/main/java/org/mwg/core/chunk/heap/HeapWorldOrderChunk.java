@@ -12,6 +12,9 @@ import org.mwg.core.utility.Unsafe;
 
 public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
+    /**
+     * @ignore ts
+     */
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
     private final long _world;
     private final long _time;
@@ -24,13 +27,21 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     private volatile long _flags;
     private volatile long _extra;
 
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _flagsOffset;
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _marksOffset;
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _lockOffset;
-    /** @ignore ts */
+    /**
+     * @ignore ts
+     */
     private static final long _magicOffset;
 
     /** @ignore ts */
