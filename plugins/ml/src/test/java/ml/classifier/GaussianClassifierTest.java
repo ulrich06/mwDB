@@ -3,9 +3,9 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.classifier.AbstractGaussianClassifierNode;
-import org.mwg.ml.classifier.AbstractSlidingWindowManagingNode;
-import org.mwg.ml.classifier.MLGaussianClassifierNode;
+import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
+import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
+import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import static org.junit.Assert.assertTrue;
 
@@ -88,12 +88,12 @@ public class GaussianClassifierTest {
     @Test
     public void test() {
         //This test fails if there are too many errors
-        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                MLGaussianClassifierNode gaussianNBNode = (MLGaussianClassifierNode) graph.newNode(0, 0, MLGaussianClassifierNode.NAME);
+                GaussianClassifierNode gaussianNBNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
 
                 int errors = 0;
 

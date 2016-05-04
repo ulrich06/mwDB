@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.preprocessing.MLMathNode;
+import org.mwg.ml.algorithm.preprocessing.MLMathNode;
 
 public class MathNodeTest {
 

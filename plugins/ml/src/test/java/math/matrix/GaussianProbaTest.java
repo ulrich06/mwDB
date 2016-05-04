@@ -7,8 +7,8 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.core.NoopScheduler;
-import org.mwg.math.matrix.operation.Gaussian1D;
-import org.mwg.ml.profiling.MLGaussianGmmNode;
+import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
+import org.mwg.ml.common.matrix.operation.Gaussian1D;
 
 import java.util.Random;
 
@@ -18,11 +18,11 @@ import java.util.Random;
 public class GaussianProbaTest {
     @Test
     public void Gaussian1D() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 double eps = 1e-7;
 
 
@@ -61,13 +61,13 @@ public class GaussianProbaTest {
 
     @Test
     public void MultinomialTest() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                MLGaussianGmmNode gaussianNodeLive = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
-                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
                 int test = 100;
                 int feat = 2;
@@ -113,7 +113,7 @@ public class GaussianProbaTest {
 
     @Test
     public void Singularity() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -122,8 +122,8 @@ public class GaussianProbaTest {
 
                 Random rand = new Random();
 
-                MLGaussianGmmNode node1 = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
-                MLGaussianGmmNode node2 = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode node1 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode node2 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]

@@ -3,13 +3,13 @@ package math.matrix;
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.blassolver.LU;
-import org.mwg.math.matrix.blassolver.blas.F2JBlas;
-import org.mwg.math.matrix.blassolver.blas.KBlas;
-import org.mwg.math.matrix.blassolver.blas.NetlibBlas;
-import org.mwg.math.matrix.jamasolver.QR;
-import org.mwg.math.matrix.jamasolver.SVD;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.blassolver.LU;
+import org.mwg.ml.common.matrix.blassolver.blas.F2JBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
+import org.mwg.ml.common.matrix.jamasolver.QR;
+import org.mwg.ml.common.matrix.jamasolver.SVD;
 
 /**
  * Created by assaad on 06/04/16.
@@ -27,18 +27,18 @@ public class BlasTest {
         KBlas blas = new NetlibBlas();
         KBlas blasF2J = new F2JBlas();
 
-        KMatrix matA = KMatrix.random(m, n, 0, 100);
-        KMatrix matASq = KMatrix.random(m, m, 0, 100);
+        Matrix matA = Matrix.random(m, n, 0, 100);
+        Matrix matASq = Matrix.random(m, m, 0, 100);
 
-        KMatrix matAcopy = matA.clone();
-        KMatrix matAsqCopy = matASq.clone();
+        Matrix matAcopy = matA.clone();
+        Matrix matAsqCopy = matASq.clone();
 
         double err;
 
         long startTime, endTime;
         double d;
         startTime = System.nanoTime();
-        org.mwg.math.matrix.blassolver.QR qrblas = new org.mwg.math.matrix.blassolver.QR(m, n, blas);
+        org.mwg.ml.common.matrix.blassolver.QR qrblas = new org.mwg.ml.common.matrix.blassolver.QR(m, n, blas);
         qrblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -47,7 +47,7 @@ public class BlasTest {
 
 
         startTime = System.nanoTime();
-        org.mwg.math.matrix.blassolver.QR qrblasF2j = new org.mwg.math.matrix.blassolver.QR(m, n, blasF2J);
+        org.mwg.ml.common.matrix.blassolver.QR qrblasF2j = new org.mwg.ml.common.matrix.blassolver.QR(m, n, blasF2J);
         qrblasF2j.factor(matAcopy, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -56,15 +56,15 @@ public class BlasTest {
 
 
         //Validate QR
-        KMatrix Qblas = qrblas.getQ();
-        KMatrix Qjama = qrblasF2j.getQ();
-        err = KMatrix.compareMatrix(Qblas, Qjama);
+        Matrix Qblas = qrblas.getQ();
+        Matrix Qjama = qrblasF2j.getQ();
+        err = Matrix.compareMatrix(Qblas, Qjama);
         //System.out.println("Error in matrix Q: " + err);
         Assert.assertTrue(err < eps);
 
-        KMatrix Rblas = qrblas.getR();
-        KMatrix Rjama = qrblasF2j.getR();
-        err = KMatrix.compareMatrix(Rblas, Rjama);
+        Matrix Rblas = qrblas.getR();
+        Matrix Rjama = qrblasF2j.getR();
+        err = Matrix.compareMatrix(Rblas, Rjama);
         //System.out.println("Error in matrix R: " + err);
         Assert.assertTrue(err < eps);
 
@@ -80,11 +80,11 @@ public class BlasTest {
 
         KBlas blas = new NetlibBlas();
 
-        KMatrix matA = KMatrix.random(m, n, 0, 100);
-        KMatrix matASq = KMatrix.random(m, m, 0, 100);
+        Matrix matA = Matrix.random(m, n, 0, 100);
+        Matrix matASq = Matrix.random(m, m, 0, 100);
 
-        KMatrix matAcopy = matA.clone();
-        KMatrix matAsqCopy = matASq.clone();
+        Matrix matAcopy = matA.clone();
+        Matrix matAsqCopy = matASq.clone();
 
         Array2DRowRealMatrix matAapache = new Array2DRowRealMatrix(m, n);
         for (int i = 0; i < m; i++) {
@@ -102,9 +102,9 @@ public class BlasTest {
 
         double err;
 
-        err = KMatrix.compareMatrix(matA, matAcopy);
+        err = Matrix.compareMatrix(matA, matAcopy);
         Assert.assertTrue(err < eps);
-        err = KMatrix.compareMatrix(matASq, matAsqCopy);
+        err = Matrix.compareMatrix(matASq, matAsqCopy);
         Assert.assertTrue(err < eps);
 
         long startTime, endTime;
@@ -119,7 +119,7 @@ public class BlasTest {
        // System.out.println("Blas LU: " + d + " ms");
 
         startTime = System.nanoTime();
-        org.mwg.math.matrix.jamasolver.LU lujama = new org.mwg.math.matrix.jamasolver.LU(matASq);
+        org.mwg.ml.common.matrix.jamasolver.LU lujama = new org.mwg.ml.common.matrix.jamasolver.LU(matASq);
         endTime = System.nanoTime();
         d = (endTime - startTime);
         d = d / 1000000;
@@ -135,7 +135,7 @@ public class BlasTest {
        // System.out.println();
 
         startTime = System.nanoTime();
-        org.mwg.math.matrix.blassolver.QR qrblas = new org.mwg.math.matrix.blassolver.QR(m, n, blas);
+        org.mwg.ml.common.matrix.blassolver.QR qrblas = new org.mwg.ml.common.matrix.blassolver.QR(m, n, blas);
         qrblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -159,7 +159,7 @@ public class BlasTest {
        // System.out.println();
 
         startTime = System.nanoTime();
-        org.mwg.math.matrix.blassolver.SVD svdblas = new org.mwg.math.matrix.blassolver.SVD(m, n, blas);
+        org.mwg.ml.common.matrix.blassolver.SVD svdblas = new org.mwg.ml.common.matrix.blassolver.SVD(m, n, blas);
         svdblas.factor(matA, false);
         endTime = System.nanoTime();
         d = (endTime - startTime);
@@ -184,52 +184,52 @@ public class BlasTest {
 
 
         //Validate integrity of matrices that they didn't change
-        err = KMatrix.compareMatrix(matA, matAcopy);
+        err = Matrix.compareMatrix(matA, matAcopy);
         Assert.assertTrue(err < eps);
-        err = KMatrix.compareMatrix(matASq, matAsqCopy);
+        err = Matrix.compareMatrix(matASq, matAsqCopy);
         Assert.assertTrue(err < eps);
 
         //Validate LU
-        KMatrix Lblas = lublas.getL();
-        KMatrix Ljama = lujama.getL();
-        err = KMatrix.compareMatrix(Lblas, Ljama);
+        Matrix Lblas = lublas.getL();
+        Matrix Ljama = lujama.getL();
+        err = Matrix.compareMatrix(Lblas, Ljama);
         //System.out.println("Error in matrix L: " + err);
         Assert.assertTrue(err < eps);
 
-        KMatrix Ublas = lublas.getU();
-        KMatrix Ujama = lujama.getU();
-        err = KMatrix.compareMatrix(Ublas, Ujama);
+        Matrix Ublas = lublas.getU();
+        Matrix Ujama = lujama.getU();
+        err = Matrix.compareMatrix(Ublas, Ujama);
         //System.out.println("Error in matrix U: " + err);
         Assert.assertTrue(err < eps);
 
         //Validate QR
-        KMatrix Qblas = qrblas.getQ();
-        KMatrix Qjama = qrjama.getQ();
-        err = KMatrix.compareMatrix(Qblas, Qjama);
+        Matrix Qblas = qrblas.getQ();
+        Matrix Qjama = qrjama.getQ();
+        err = Matrix.compareMatrix(Qblas, Qjama);
         //System.out.println("Error in matrix Q: " + err);
         Assert.assertTrue(err < eps);
 
-        KMatrix Rblas = qrblas.getR();
-        KMatrix Rjama = qrjama.getR();
-        err = KMatrix.compareMatrix(Rblas, Rjama);
+        Matrix Rblas = qrblas.getR();
+        Matrix Rjama = qrjama.getR();
+        err = Matrix.compareMatrix(Rblas, Rjama);
         //System.out.println("Error in matrix R: " + err);
         Assert.assertTrue(err < eps);
 
 
         //Validate SVD
-        KMatrix Sblas = svdblas.getSMatrix();
+        Matrix Sblas = svdblas.getSMatrix();
         RealMatrix SApache = svdapache.getS();
-        KMatrix Sjama = svdjama.getSMatrix();
+        Matrix Sjama = svdjama.getSMatrix();
 
 
-        KMatrix Vblas = svdblas.getVt();
+        Matrix Vblas = svdblas.getVt();
         RealMatrix VApache = svdapache.getVT();
-        KMatrix Vjama = svdjama.getVt();
+        Matrix Vjama = svdjama.getVt();
 
 
-        KMatrix Dblas = svdblas.getU();
+        Matrix Dblas = svdblas.getU();
         RealMatrix DApache = svdapache.getU();
-        KMatrix Djama = svdjama.getU();
+        Matrix Djama = svdjama.getU();
 
 
         double[] errS = calcerr(Sblas, SApache, Sjama);
@@ -269,7 +269,7 @@ public class BlasTest {
     }
 
 
-    public double[] calcerr(KMatrix blas, RealMatrix apache, KMatrix jama) {
+    public double[] calcerr(Matrix blas, RealMatrix apache, Matrix jama) {
         double[] err = new double[2];
         int m1 = Math.min(blas.rows(), apache.getRowDimension());
         int n1 = Math.min(blas.columns(), apache.getColumnDimension());

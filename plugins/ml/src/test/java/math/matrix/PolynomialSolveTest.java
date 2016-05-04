@@ -2,10 +2,10 @@ package math.matrix;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.math.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.math.matrix.blassolver.blas.F2JBlas;
-import org.mwg.math.matrix.operation.PolynomialFit;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.blassolver.blas.F2JBlas;
+import org.mwg.ml.common.matrix.operation.PolynomialFit;
 
 /**
  * Created by assaad on 23/03/16.
@@ -22,7 +22,7 @@ public class PolynomialSolveTest {
             res[i] = PolynomialFit.extrapolate(t[i], coef);
         }
 
-        BlasMatrixEngine blasengine = (BlasMatrixEngine) KMatrix.defaultEngine();
+        BlasMatrixEngine blasengine = (BlasMatrixEngine) Matrix.defaultEngine();
         blasengine.setBlas(new F2JBlas());
 
 

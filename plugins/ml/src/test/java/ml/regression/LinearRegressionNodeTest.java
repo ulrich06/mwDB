@@ -6,12 +6,13 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.classifier.AbstractGaussianClassifierNode;
-import org.mwg.ml.classifier.AbstractSlidingWindowManagingNode;
-import org.mwg.ml.regression.AbstractLinearRegressionNode;
-import org.mwg.ml.regression.MLLinearRegressionBatchGDNode;
-import org.mwg.ml.regression.MLLinearRegressionNode;
-import org.mwg.ml.regression.MLLinearRegressionSGDNode;
+import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
+import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
+import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Random;
 
@@ -29,11 +30,11 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalPrecise() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
@@ -71,11 +72,11 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalPrecise2() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 0);
@@ -117,11 +118,11 @@ public class LinearRegressionNodeTest {
     @Test
     public void testSuddenError() {
         //This test fails only on crash. Otherwise, it is just for
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
@@ -157,11 +158,11 @@ public class LinearRegressionNodeTest {
     @Test
     public void testTooLargeRegularization() {
         //This test fails only on crash. Otherwise, it is just for
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLLinearRegressionNode lrNode = (MLLinearRegressionNode) graph.newNode(0, 0, MLLinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
@@ -197,14 +198,14 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalSGD() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 Random rng = new Random();
                 rng.setSeed(1);
 
-                MLLinearRegressionSGDNode lrNode = (MLLinearRegressionSGDNode) graph.newNode(0, 0, MLLinearRegressionSGDNode.NAME);
+                LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newNode(0, 0, LinearRegressionSGDNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
@@ -241,14 +242,14 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalBatchGDIterationCountStop() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 Random rng = new Random();
                 rng.setSeed(1);
 
-                MLLinearRegressionBatchGDNode lrNode = (MLLinearRegressionBatchGDNode) graph.newNode(0, 0, MLLinearRegressionBatchGDNode.NAME);
+                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
@@ -288,14 +289,14 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalBatchGDErrorThresholdStop() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLLinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 Random rng = new Random();
                 rng.setSeed(1);
 
-                MLLinearRegressionBatchGDNode lrNode = (MLLinearRegressionBatchGDNode) graph.newNode(0, 0, MLLinearRegressionBatchGDNode.NAME);
+                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
 
                 lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
                 lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
