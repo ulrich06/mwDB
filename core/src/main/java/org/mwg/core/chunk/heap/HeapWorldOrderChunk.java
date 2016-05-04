@@ -10,9 +10,6 @@ import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-/**
- * @ignore ts
- */
 public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
@@ -27,11 +24,16 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     private volatile long _flags;
     private volatile long _extra;
 
+    /** @ignore ts */
     private static final long _flagsOffset;
+    /** @ignore ts */
     private static final long _marksOffset;
+    /** @ignore ts */
     private static final long _lockOffset;
+    /** @ignore ts */
     private static final long _magicOffset;
 
+    /** @ignore ts */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_flags"));

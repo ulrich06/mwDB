@@ -7,9 +7,6 @@ import org.mwg.struct.LongLongMap;
 import org.mwg.struct.LongLongMapCallBack;
 import org.mwg.core.utility.PrimitiveHelper;
 
-/**
- * @ignore ts
- */
 public class ArrayLongLongMap implements LongLongMap {
 
     private volatile InternalState state;

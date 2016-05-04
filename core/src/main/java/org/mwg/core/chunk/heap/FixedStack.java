@@ -4,9 +4,6 @@ import org.mwg.core.chunk.Stack;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * @ignore ts
- */
 public class FixedStack implements Stack {
 
     private int _first;

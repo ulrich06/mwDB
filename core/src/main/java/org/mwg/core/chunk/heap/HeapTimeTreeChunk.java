@@ -8,9 +8,6 @@ import org.mwg.core.chunk.TreeWalker;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.Unsafe;
 
-/**
- * @ignore ts
- */
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
