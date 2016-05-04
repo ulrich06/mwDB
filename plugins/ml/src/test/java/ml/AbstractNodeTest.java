@@ -69,7 +69,7 @@ public class AbstractNodeTest implements NodeFactory {
                 node.set("f2",2);
                 node.set("f3",3);
                 node.set("f4","f3+1");
-                node.set(AbstractMLNode.FROM,"f0;f1;f2;f3;$f4;");
+                node.set(AbstractMLNode.FROM,"f0;f1;f2;f3;$f4");
                 node.extractFeatures(new Callback<double[]>() {
                     @Override
                     public void on(double[] result) {
