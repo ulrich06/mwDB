@@ -1,5 +1,6 @@
 package org.mwg.ml.common;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.ml.common.mathexp.KMathExpressionEngine;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
@@ -29,18 +30,19 @@ public abstract class AbstractMLNode extends AbstractNode {
         }
     }
 
-    public double[] extractFeatures(){
+    public void extractFeatures(Callback<double[]> callback){
         String query= (String)super.get(FEATURES_QUERY_KEY);
+        double[] result;
         if(query!=null) {
             String[] split = query.split(FEATURES_SEPARATOR);
-            double[] result = new double[split.length];
+            result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
                 result[i] = (double) get(split[i]);
             }
-            return result;
+            callback.on(result);
         }
-        else{
-            return null;
+        else {
+            callback.on(null);
         }
     }
 
