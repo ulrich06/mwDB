@@ -1,4 +1,4 @@
-package math;
+package common;
 
 import org.mwg.core.utility.PrimitiveHelper;
 

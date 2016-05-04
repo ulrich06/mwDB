@@ -1,4 +1,4 @@
-package math.matrix;
+package common.matrix;
 
 import org.apache.commons.math3.linear.*;
 import org.junit.Assert;
