@@ -12,4 +12,6 @@ public class WSMessageType {
 
     public static final byte RQST_REMOVE = 3;
     public static final byte RESP_REMOVE = 4;
+
+    public static final byte RQST_FORCE_RELOAD = 5;
 }

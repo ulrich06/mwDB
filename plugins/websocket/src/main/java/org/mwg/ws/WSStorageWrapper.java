@@ -19,6 +19,8 @@ import org.mwg.struct.BufferIterator;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Add a WS wrapper on another storage to allow a remote access on this storage
@@ -31,10 +33,13 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     private final Undertow _server;
     private Graph _graph;
 
+    private Set<WebSocketChannel> _peers;
+
     public WSStorageWrapper(Storage _wrapped, int port) {
         this._wrapped = _wrapped;
         HttpHandler handler = Handlers.websocket(this);
         _server = Undertow.builder().addHttpListener(port,"0.0.0.0").setHandler(handler).build();
+        _peers = new HashSet<>();
     }
 
     @Override
@@ -51,6 +56,14 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
         _wrapped.put(stream,callback);
+
+        stream.write(CoreConstants.BUFFER_SEP);
+        stream.write(WSMessageType.RQST_FORCE_RELOAD);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(stream.data());
+        //fixme
+        for(WebSocketChannel client: _peers) {
+            WebSockets.sendBinary(byteBuffer,client,null);
+        }
     }
 
     @Override
@@ -75,6 +88,7 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     private class WSListener extends AbstractReceiveListener {
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
+            _peers.add(channel);
             ByteBuffer[] data = message.getData().getResource();
             for(ByteBuffer byteBuffer : data) {
                 final Buffer buffer = _graph.newBuffer();

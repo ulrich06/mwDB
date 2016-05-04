@@ -1,14 +1,19 @@
 package org.mwg.core;
 
-import org.mwg.*;
-import org.mwg.core.task.CoreTask;
-import org.mwg.core.utility.BufferBuilder;
-import org.mwg.plugin.*;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.heap.ArrayLongLongMap;
+import org.mwg.Callback;
+import org.mwg.Constants;
+import org.mwg.DeferCounter;
+import org.mwg.Type;
 import org.mwg.core.chunk.*;
+import org.mwg.core.chunk.heap.ArrayLongLongMap;
+import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.Base64;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.PrimitiveHelper;
+import org.mwg.plugin.*;
+import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
+import org.mwg.struct.LongLongMap;
 import org.mwg.task.Task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,6 +60,7 @@ class CoreGraph implements org.mwg.Graph {
         //variables init
         this._isConnected = new AtomicBoolean(false);
         this._lock = new AtomicBoolean(false);
+
     }
 
     @Override
@@ -526,4 +532,8 @@ class CoreGraph implements org.mwg.Graph {
         return _space;
     }
 
+    @Override
+    public void reload(Buffer stream) {
+        System.out.println("RELOAD DATA: NOT YET IMPLEMENTED");
+    }
 }

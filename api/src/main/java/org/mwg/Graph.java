@@ -156,4 +156,10 @@ public interface Graph {
      */
     Task newTask();
 
+    /**
+     * Update existing values received by remote machine
+     *
+     * @param stream A byte array representing a list of <key,value> data
+     */
+    void reload(Buffer stream);
 }

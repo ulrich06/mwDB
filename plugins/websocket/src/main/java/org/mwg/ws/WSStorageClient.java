@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
@@ -189,23 +188,17 @@ public class WSStorageClient implements Storage {
                     wsInfo = it.next();
                 }
 
-                //int msgID = toInt(wsInfo.read(0),wsInfo.read(1),wsInfo.read(2),wsInfo.read(3));
                 byte messageType = wsInfo.read(0);
                 int msgID = Base64.decodeToIntWithBounds(wsInfo,1,wsInfo.size());
 
-                //remove the WS info
-                /*for(int i= 0;i<5;i++) {
-                    buffer.removeLast();
-                }*/
                 for(int i=0;i<=wsInfo.size();i++) {
                     buffer.removeLast();
                 }
 
                 Callback callback = _callBacks.get(msgID);
-                if(callback != null) {
+                if(callback != null) { //messageType with callback
                     switch (messageType) {
                         case WSMessageType.RESP_GET: {
-                            System.out.println("GET WS " + Arrays.toString(buffer.data()));
                             callback.on(buffer);
                             break;
                         }
@@ -218,11 +211,19 @@ public class WSStorageClient implements Storage {
                             break;
                         }
                         default:
-                            System.err.println("Unknown message with code " + messageType);
+                            System.err.println("The message " + msgID + " needs a callback but its type (" + messageType + ") is unknown");
 
                     }
                 } else {
-                    System.err.println("CB not found");
+                   switch (messageType) {
+                       case WSMessageType.RQST_FORCE_RELOAD: {
+                           _graph.reload(buffer);
+                           break;
+                       }
+                       default:
+                           System.err.println("Either the message " + msgID + " does not need a callback but its type " +
+                                   "(" + messageType + ") is unknown or the callback has not been found.");
+                   }
                 }
 
                 _callBacks.remove(msgID);
