@@ -2,7 +2,6 @@ package org.mwg.ml.common;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.ml.common.mathexp.KMathExpressionEngine;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
@@ -23,7 +22,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         if (propertyName != null && propertyName.startsWith("$")) {
             Object expressionObj = super.get(propertyName.substring(1));
             //ToDo this is dangerous for infinite loops or circular dependency, to fix
-            KMathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
+            org.mwg.ml.common.mathexp.MathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
             return localEngine.eval(this);
         } else {
             return super.get(propertyName);
@@ -37,7 +36,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             String[] split = query.split(FROM_SEPARATOR);
             result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
-                KMathExpressionEngine localEngine = MathExpressionEngine.parse(split[i]);
+                org.mwg.ml.common.mathexp.MathExpressionEngine localEngine = MathExpressionEngine.parse(split[i]);
                 result[i] = localEngine.eval(this);
             }
             callback.on(result);

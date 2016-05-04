@@ -2,14 +2,13 @@ package org.mwg.ml.common.mathexp.impl;
 
 
 import org.mwg.Node;
-import org.mwg.ml.common.mathexp.KMathExpressionEngine;
-import org.mwg.ml.common.mathexp.KMathVariableResolver;
+import org.mwg.ml.common.mathexp.MathVariableResolver;
 
 import java.util.*;
 
-public class MathExpressionEngine implements KMathExpressionEngine {
+public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpressionEngine {
 
-    private KMathVariableResolver varResolver;
+    private MathVariableResolver varResolver;
 
     public static final char decimalSeparator = '.';
     public static final char minusSign = '-';
@@ -22,7 +21,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         vars.put("TRUE", 1.0);
         vars.put("FALSE", 0.0);
 
-        varResolver = new KMathVariableResolver() {
+        varResolver = new MathVariableResolver() {
             @Override
             public Double resolve(String potentialVarName) {
                 return vars.get(potentialVarName);
@@ -33,7 +32,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
     }
 
 
-    static class LRUCache extends LinkedHashMap<String, KMathExpressionEngine> {
+    static class LRUCache extends LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> {
 
         int cacheSize;
 
@@ -43,21 +42,21 @@ public class MathExpressionEngine implements KMathExpressionEngine {
         }
 
         @Override
-        protected boolean removeEldestEntry(Map.Entry<String, KMathExpressionEngine> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, org.mwg.ml.common.mathexp.MathExpressionEngine> eldest) {
             return size() >= cacheSize;
         }
 
     }
 
-    private static LinkedHashMap<String, KMathExpressionEngine> cached = new LRUCache(100);
+    private static LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> cached = new LRUCache(100);
 
 
-    public static synchronized KMathExpressionEngine parse(String p_expression) {
-        KMathExpressionEngine cachedEngine = cached.get(p_expression);
+    public static synchronized org.mwg.ml.common.mathexp.MathExpressionEngine parse(String p_expression) {
+        org.mwg.ml.common.mathexp.MathExpressionEngine cachedEngine = cached.get(p_expression);
         if (cachedEngine != null) {
             return cachedEngine;
         }
-        KMathExpressionEngine newEngine = new MathExpressionEngine(p_expression);
+        org.mwg.ml.common.mathexp.MathExpressionEngine newEngine = new MathExpressionEngine(p_expression);
         cached.put(p_expression, newEngine);
         return newEngine;
     }
@@ -300,7 +299,7 @@ public class MathExpressionEngine implements KMathExpressionEngine {
 
     /*
     @Override
-    public void setVarResolver(KMathVariableResolver p_resolver) {
+    public void setVarResolver(MathVariableResolver p_resolver) {
         this.varResolver = p_resolver;
     }*/
 

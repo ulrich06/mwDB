@@ -78,23 +78,23 @@ public abstract class AbstractNode implements Node {
 
     /**
      * @native ts
-    if (typeof propertyValue === 'string' || propertyValue instanceof String) {
-    this.setProperty(propertyName, org.mwg.Type.STRING, propertyValue);
-    } else if(typeof propertyValue === 'number' || propertyValue instanceof Number) {
-    if(propertyValue % 1 != 0) {
-    this.setProperty(propertyName, org.mwg.Type.DOUBLE, propertyValue);
-    } else {
-    this.setProperty(propertyName, org.mwg.Type.LONG, propertyValue);
-    }
-    } else if(typeof propertyValue === 'boolean' || propertyValue instanceof Boolean) {
-    this.setProperty(propertyName, org.mwg.Type.BOOL, propertyValue);
-    } else if (propertyValue instanceof Int32Array) {
-    this.setProperty(propertyName, org.mwg.Type.LONG_ARRAY, propertyValue);
-    } else if (propertyValue instanceof Float64Array) {
-    this.setProperty(propertyName, org.mwg.Type.DOUBLE_ARRAY, propertyValue);
-    } else {
-    throw new Error("Invalid property type: " + propertyValue + ", please use a Type listed in org.mwg.Type");
-    }
+     * if (typeof propertyValue === 'string' || propertyValue instanceof String) {
+     * this.setProperty(propertyName, org.mwg.Type.STRING, propertyValue);
+     * } else if(typeof propertyValue === 'number' || propertyValue instanceof Number) {
+     * if(propertyValue % 1 != 0) {
+     * this.setProperty(propertyName, org.mwg.Type.DOUBLE, propertyValue);
+     * } else {
+     * this.setProperty(propertyName, org.mwg.Type.LONG, propertyValue);
+     * }
+     * } else if(typeof propertyValue === 'boolean' || propertyValue instanceof Boolean) {
+     * this.setProperty(propertyName, org.mwg.Type.BOOL, propertyValue);
+     * } else if (propertyValue instanceof Int32Array) {
+     * this.setProperty(propertyName, org.mwg.Type.LONG_ARRAY, propertyValue);
+     * } else if (propertyValue instanceof Float64Array) {
+     * this.setProperty(propertyName, org.mwg.Type.DOUBLE_ARRAY, propertyValue);
+     * } else {
+     * throw new Error("Invalid property type: " + propertyValue + ", please use a Type listed in org.mwg.Type");
+     * }
      */
     @Override
     public final void set(String propertyName, Object propertyValue) {
