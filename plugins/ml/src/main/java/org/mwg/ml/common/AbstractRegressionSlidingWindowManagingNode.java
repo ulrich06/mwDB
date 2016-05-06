@@ -84,7 +84,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
         if (resultBuffer.length == 0) {
             return;
         }
-        double newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length-1);
+        double newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length);
         setResultBuffer(newResultBuffer);
     }
 

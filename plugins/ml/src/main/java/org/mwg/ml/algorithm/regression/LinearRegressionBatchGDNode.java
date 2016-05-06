@@ -35,7 +35,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     }
 
     @Override
-    protected void updateModelParameters(double value[], double outcome) {
+    protected void updateModelParameters(double value[], double result) {
         //Value should be already added to buffer by that time
         int dims = getInputDimensions();
         if (dims==INPUT_DIM_UNKNOWN){
@@ -47,6 +47,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
         final int bufferLength = getCurrentBufferLength();
 
         final double valueBuffer[] = getValueBuffer();
+        final double resultBuffer[] = getResultBuffer();
 
         final double gdErrorThresh = getIterationErrorThreshold();
         final int gdIterThresh = getIterationCountThreshold();
@@ -69,6 +70,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
             iterCount++;
 
             int startIndex = 0;
+            int index = 0;
             double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
             while (startIndex + dims <= valueBuffer.length){
                 double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
@@ -79,12 +81,14 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
                 }
                 h += intercept;
 
+                double outcome = resultBuffer[index];
                 for (int j=0;j<dims;j++){
                     coefs[j] -= alpha * ( ( h - outcome)*curValue[j] - lambda * coefs[j])/bufferLength;
                 }
                 intercept -= alpha * ( h - outcome) / bufferLength;
 
                 startIndex += dims;
+                index++;
             }
             setCoefficients(coefs);
             setIntercept(intercept);

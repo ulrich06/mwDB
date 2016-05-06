@@ -82,8 +82,9 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
         final double newCoefficients[] = new double[dims];
         for (int i=0;i<dims;i++){
-            newCoefficients[i] = result.get(i, 0);
+            newCoefficients[i] = result.get(i+1, 0);
         }
+        setIntercept(result.get(0, 0));
         setCoefficients(newCoefficients);
     }
 }

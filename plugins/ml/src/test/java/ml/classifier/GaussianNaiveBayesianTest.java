@@ -121,10 +121,12 @@ public class GaussianNaiveBayesianTest {
                 };
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    gaussianClassifierNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
-                    gaussianClassifierNode.learn((int) dummyDataset1[i][1], cb);
+                    //gaussianNBNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    //gaussianClassifierNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    //gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
+                    //gaussianClassifierNode.learn((int) dummyDataset1[i][1], cb);
+                    gaussianNBNode.addValue(new double[] {dummyDataset1[i][0]}, (int) dummyDataset1[i][1]);
+                    gaussianClassifierNode.addValue(new double[] {dummyDataset1[i][0]}, (int) dummyDataset1[i][1]);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
                         //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
                         //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());

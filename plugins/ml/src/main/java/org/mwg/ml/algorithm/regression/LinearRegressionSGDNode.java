@@ -66,6 +66,7 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
         //Intercept: value is 1, L2 reg-n not used.
         intercept -= alpha * ( h - response);
         setCoefficients(coefs);
+        setIntercept(intercept);
     }
 
 }

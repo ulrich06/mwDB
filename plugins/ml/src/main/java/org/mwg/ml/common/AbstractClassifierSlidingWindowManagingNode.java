@@ -271,7 +271,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
         if (resultBuffer.length == 0) {
             return;
         }
-        int newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length-1);
+        int newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length);
         setResultBuffer(newResultBuffer);
     }
 
