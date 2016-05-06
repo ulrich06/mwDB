@@ -3,9 +3,9 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
 import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
 import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
+import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import static junit.framework.TestCase.assertTrue;
@@ -103,20 +103,30 @@ public class GaussianNaiveBayesianTest {
                 //int diffWithGaussian = 0;
 
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.INPUT_DIM_KEY, Type.INT, 2);
-                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.INPUT_DIM_KEY, Type.INT, 2);
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
+                gaussianNBNode.set(AbstractMLNode.FEATURES_QUERY_KEY, "f1");
+                gaussianClassifierNode.set(AbstractMLNode.FEATURES_QUERY_KEY, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.set(AbstractGaussianClassifierNode.FEATURES_KEY, dummyDataset1[i]);
-                    gaussianClassifierNode.set(AbstractGaussianClassifierNode.FEATURES_KEY, dummyDataset1[i]);
+                    gaussianNBNode.set("f1", dummyDataset1[i][0]);
+                    gaussianClassifierNode.set("f1", dummyDataset1[i][0]);
+                    gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
+                    gaussianClassifierNode.learn((int) dummyDataset1[i][1], cb);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
                         //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
                         //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());

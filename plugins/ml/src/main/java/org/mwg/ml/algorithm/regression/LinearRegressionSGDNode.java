@@ -32,15 +32,15 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
     }
 
     @Override
-    protected void updateModelParameters(double[] value) {
+    protected void updateModelParameters(double[] value, double response) {
         //Value should be already added to buffer by that time
         final int dims = getInputDimensions();
-        final int respIndex = getResponseIndex();
         final double alpha = getLearningRate();
         double lambda = getL2Regularization();
 
         //Get coefficients. If they are of length 0, initialize with random.
         double coefs[] = getCoefficients();
+        double intercept = getIntercept();
         if (coefs.length==0){
             coefs = new double[dims];
         }
@@ -50,19 +50,17 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
 
         double h = 0;
         for (int j=0;j<dims;j++){
-            h += coefs[j]*( (j!=respIndex)?value[j]:1 );
+            h += coefs[j]*value[j];
         }
+        h += intercept;
 
         //For stochastic gradient descent:
         //Theta_j = theta_j - alpha * ( (h(X_i) - y_i )*X_j - lambda * theta_j)
         for (int j=0;j<dims;j++){
-            if (j!=respIndex){
-                coefs[j] -= alpha * ( ( h - value[respIndex] )*value[j] - lambda * coefs[j]);
-            }else{
-                //Intercept: value is 1, L2 reg-n not used.
-                coefs[j] -= alpha * ( h - value[respIndex] );
-            }
+            coefs[j] -= alpha * ( ( h - response)*value[j] - lambda * coefs[j]);
         }
+        //Intercept: value is 1, L2 reg-n not used.
+        intercept -= alpha * ( h - response);
         setCoefficients(coefs);
     }
 

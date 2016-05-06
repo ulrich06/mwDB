@@ -3,8 +3,8 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
 import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
+import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import static org.junit.Assert.assertTrue;
@@ -97,42 +97,29 @@ public class GaussianClassifierTest {
 
                 int errors = 0;
 
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.INPUT_DIM_KEY, Type.INT, 2);
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
+                gaussianNBNode.set(AbstractMLNode.FEATURES_QUERY_KEY, "f1");
+
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.setProperty(AbstractGaussianClassifierNode.FEATURES_KEY, Type.DOUBLE_ARRAY, dummyDataset1[i]);
+                    gaussianNBNode.set("f1", dummyDataset1[i][0]);
+                    gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
-                        //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
-                        // gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
                         errors++;
-                    } //else {
-                        //System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
-                        //gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
-                    //}
-                    //System.out.println(gaussianNBNode.allDistributionsToString());
-                    //int rbc[] = gaussianNBNode.getRealBufferClasses();
-                    ///System.out.print("[");
-                    //for (int j=0;j<rbc.length;j++) {
-                    //    System.out.print(rbc[j]+", ");
-                    //}
-                    //System.out.println("]");
-                    //int pbc[] = gaussianNBNode.getPredictedBufferClasses();
-                    //System.out.print("[");
-                    //for (int j=0;j<pbc.length;j++) {
-                    //    System.out.print(pbc[j]+", ");
-                    //}
-                    //System.out.println("]");
-                    //assertTrue(gaussianNBNode.isInBootstrapMode()==bootstraps1[i]);
+                    }
                 }
 
                 graph.disconnect(null);
                 assertTrue("Errors: "+errors, errors <= 1);
-
-                //System.out.println("Errors: " + errors);
             }
         });
     }

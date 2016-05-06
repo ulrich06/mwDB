@@ -2,6 +2,8 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
+import org.mwg.ml.RegressionNode;
+import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Arrays;
@@ -10,7 +12,7 @@ import java.util.Objects;
 /**
  * Created by andre on 4/29/2016.
  */
-public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindowManagingNode {
+public abstract class AbstractLinearRegressionNode extends AbstractRegressionSlidingWindowManagingNode implements RegressionNode {
 
     /**
      * Regression coefficients
@@ -47,12 +49,11 @@ public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindow
     }
 
     public double getIntercept(){
-        final double[] allCoefs =  getCoefficients();
-        final int respIndex = getResponseIndex();
-        if ((allCoefs!=null)&&(allCoefs.length > respIndex)){
-            return allCoefs[respIndex];
-        }
-        return INTERCEPT_DEF;
+        return unphasedState().getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF);
+    }
+
+    protected void setIntercept(double intercept){
+        unphasedState().set(_resolver.stringToLongKey(INTERCEPT_KEY), Type.DOUBLE, intercept);
     }
 
     @Override
@@ -107,6 +108,20 @@ public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindow
     }
 
     @Override
+    public double predictValue(double curValue[]){
+        return predictValueInternal(curValue, getCoefficients(), getIntercept());
+    }
+
+    private double predictValueInternal(double curValue[], double coefs[], double intercept){
+        double response = 0;
+        for (int i=0;i<curValue.length;i++){
+            response += coefs[i]*curValue[i];
+        }
+        response += intercept;
+        return response;
+    }
+
+    @Override
     public double getBufferError() {
         //For each value in value buffer
         int startIndex = 0;
@@ -119,24 +134,19 @@ public abstract class AbstractLinearRegressionNode extends AbstractSlidingWindow
         }
 
         double coefficients[] = getCoefficients();
-
-        final int responseIndex = getResponseIndex();
+        int index = 0;
+        double results[] = getResultBuffer();
+        double intercept = getIntercept();
         double sqrResidualSum = 0;
         while (startIndex + dims <= valueBuffer.length) { //For each value
             double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
-            double response = 0;
-            for (int i=0;i<curValue.length;i++){
-                if (i!=responseIndex){
-                    response += coefficients[i]*curValue[i];
-                }else{
-                    //Acts as intercept
-                    response += coefficients[i];
-                }
-            }
-            sqrResidualSum += (response - curValue[responseIndex])*(response - curValue[responseIndex]);
+            double response = predictValueInternal(curValue,coefficients,intercept);
+
+            sqrResidualSum += (response - results[index])*(response - results[index]);
 
             //Continue the loop
             startIndex += dims;
+            index++;
         }
         return sqrResidualSum / numValues;
     }

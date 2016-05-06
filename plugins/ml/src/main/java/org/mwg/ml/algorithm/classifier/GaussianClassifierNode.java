@@ -2,13 +2,15 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.ml.ClassificationNode;
+import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.NodeFactory;
 
 import java.util.Arrays;
 
-public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
+public class GaussianClassifierNode extends AbstractClassifierSlidingWindowManagingNode implements ClassificationNode {
 
     public static final String NAME = "GaussianClassifier";
 
@@ -64,9 +66,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
     }
 
     @Override
-    protected void updateModelParameters(double value[]) {
-        final int classIndex = getResponseIndex();
-        final int classNum = (int) value[classIndex];
+    protected void updateModelParameters(double value[], int classNum) {
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
         initializeClassIfNecessary(classNum);
@@ -76,8 +76,6 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
         for (int i = 0; i < value.length; i++) {
             currentSum[i] += value[i];
         }
-        //Value at class index - force 0 (or it will be the ultimate predictor)
-        currentSum[classIndex] = 0;
         setSums(classNum, currentSum);
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
 
@@ -86,9 +84,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
         for (int i = 0; i < value.length; i++) {
             for (int j = i; j < value.length; j++) {
                 //Value at class index - force 0 (or it will be the ultimate predictor)
-                if ((i != classIndex) && (j != classIndex)) {
-                    currentSumSquares[k] += value[i] * value[j];
-                }
+                currentSumSquares[k] += value[i] * value[j];
             }
             k++;
         }
@@ -96,7 +92,6 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
     }
 
-    @Override
     protected double getLikelihoodForClass(double value[], int classNum) {
         //It is assumed that real class is removed and replaces with 0
         initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
@@ -114,13 +109,11 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode {
 
     @Override
     protected int predictValue(double value[]) {
-        double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
-        valueWithClassRemoved[getResponseIndex()] = 0; //Do NOT use real class for prediction
         int classes[] = getKnownClasses();
         double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes) {
-            double curLikelihood = getLikelihoodForClass(valueWithClassRemoved, curClass);
+            double curLikelihood = getLikelihoodForClass(value, curClass);
             if (curLikelihood > curMaxLikelihood) {
                 curMaxLikelihood = curLikelihood;
                 curMaxLikelihoodClass = curClass;

@@ -6,11 +6,9 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.NoopScheduler;
-import org.mwg.ml.algorithm.classifier.AbstractGaussianClassifierNode;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 

@@ -1,6 +1,8 @@
 package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.*;
+import org.mwg.ml.ClassificationNode;
+import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 import org.mwg.plugin.NodeFactory;
 
@@ -9,7 +11,7 @@ import java.util.*;
 /**
  * Created by Andrey Boytsov on 4/14/2016.
  */
-public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
+public class GaussianNaiveBayesianNode extends AbstractClassifierSlidingWindowManagingNode implements ClassificationNode {
 
     //TODO Any synchronization?
 
@@ -62,9 +64,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
 
 
     @Override
-    protected void updateModelParameters(double value[]){
-        final int classIndex = getResponseIndex();
-        final int classNum = (int)value[classIndex];
+    protected void updateModelParameters(double value[], int classNum){
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
         initializeClassIfNecessary(classNum);
@@ -76,9 +76,6 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
             currentSum[i] += value[i];
             currentSumSquares[i] += value[i]*value[i];
         }
-        //Value at class index - force 0 (or it will be the ultimate predictor)
-        currentSum[classIndex] = 0;
-        currentSumSquares[classIndex] = 0;
         setSums(classNum, currentSum);
         setSumsSquared(classNum, currentSumSquares);
         //Need to re-put
@@ -100,11 +97,8 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
         double likelihood = 1;
         double sums[] = getSums(classNum);
         double sumSquares[] = getSumSquares(classNum);
-        final int classIndex = getResponseIndex();
         for (int i=0;i<getInputDimensions();i++){
-            if (i!=classIndex) {
-                likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
-            }
+            likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
         }
         //TODO Use log likelihood? Can be better for underflows.
         return likelihood;
@@ -116,13 +110,11 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode {
         if (kk.length==1){
             return kk[0];
         }
-        double valueWithClassRemoved[] = Arrays.copyOf(value, value.length);
-        valueWithClassRemoved[getResponseIndex()] = 0; //Do NOT use real class for prediction
         int classes[] = getKnownClasses();
         double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes){
-            double curLikelihood = getLikelihoodForClass(valueWithClassRemoved, curClass);
+            double curLikelihood = getLikelihoodForClass(value, curClass);
             if (curLikelihood > curMaxLikelihood){
                 curMaxLikelihood = curLikelihood;
                 curMaxLikelihoodClass = curClass;

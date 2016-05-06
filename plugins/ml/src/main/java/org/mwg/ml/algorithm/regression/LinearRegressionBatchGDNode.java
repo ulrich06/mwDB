@@ -35,10 +35,9 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     }
 
     @Override
-    protected void updateModelParameters(double value[]) {
+    protected void updateModelParameters(double value[], double outcome) {
         //Value should be already added to buffer by that time
         final int dims = getInputDimensions();
-        final int respIndex = getResponseIndex();
         final double alpha = getLearningRate();
         final double lambda = getL2Regularization();
         final int bufferLength = getCurrentBufferLength();
@@ -50,6 +49,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
         //Get coefficients. If they are of length 0, initialize with random.
         double coefs[] = getCoefficients();
+        double intercept = getIntercept();
         if (coefs.length==0){
             coefs = new double[dims];
             setCoefficients(coefs);
@@ -71,21 +71,19 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
                 double h = 0;
                 for (int j=0;j<dims;j++){
-                    h += oldCoefs[j]*( (j!=respIndex)?curValue[j]:1 );
+                    h += oldCoefs[j]*curValue[j];
                 }
+                h += intercept;
 
                 for (int j=0;j<dims;j++){
-                    if (j!=respIndex){
-                        coefs[j] -= alpha * ( ( h - curValue[respIndex] )*curValue[j] - lambda * coefs[j])/bufferLength;
-                    }else{
-                        //Intercept: value is 1, L2 reg-n not used.
-                        coefs[j] -= alpha * ( h - curValue[respIndex] ) / bufferLength;
-                    }
+                    coefs[j] -= alpha * ( ( h - outcome)*curValue[j] - lambda * coefs[j])/bufferLength;
                 }
+                intercept -= alpha * ( h - outcome) / bufferLength;
 
                 startIndex += dims;
             }
             setCoefficients(coefs);
+            setIntercept(intercept);
             if (gdErrorThresh>0){
                 double newError = getBufferError();
                 exitCase |= (prevError-newError)<gdErrorThresh;

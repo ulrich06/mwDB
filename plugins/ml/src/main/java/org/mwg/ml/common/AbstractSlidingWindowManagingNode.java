@@ -16,6 +16,12 @@ import java.util.Objects;
  */
 public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     /**
+     * Internal keys - those attributes are only for internal use within the node.
+     * They are not supposed to be accessed from outside (although it is not banned).
+     */
+    protected static final String INTERNAL_RESULTS_BUFFER_KEY = "_results";
+
+    /**
      * Attribute key - whether the node is in bootstrap (re-learning) mode
      */
     public static final String BOOTSTRAP_MODE_KEY = "bootstrapMode";
@@ -35,18 +41,13 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
      */
     public static final String INPUT_DIM_KEY = "InputDimensions";
     /**
-     *  Number of input dimensions - default
+     * Unknown number of input dimensions
      */
-    public static final int INPUT_DIM_DEF = 2;
-
+    public static final int INPUT_DIM_UNKNOWN = -1;
     /**
-     *  Index of response value
+     *  Number of input dimensions - default (unknown so far)
      */
-    public static final String RESPONSE_INDEX_KEY = "ResponseIndex";
-    /**
-     *  Index of response value - default
-     */
-    public static final int RESPONSE_INDEX_DEF = 0;
+    public static final int INPUT_DIM_DEF = INPUT_DIM_UNKNOWN;
 
     /**
      *  Higher error threshold
@@ -67,15 +68,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     public static final double LOW_ERROR_THRESH_DEF = 0.05;
 
     /**
-     *  Value
-     */
-    public static final String FEATURES_KEY = "FEATURES";
-    /**
-     *  Value - default
-     */
-    public static final double[] FEATURES_DEF = new double[0];
-
-    /**
      * Attribute key - sliding window of values
      */
     private static final String INTERNAL_VALUE_BUFFER_KEY = "_valueBuffer";
@@ -84,22 +76,12 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    protected void addValueToBuffer(double[] value) {
-        double valueBuffer[] = getValueBuffer();
-        double newBuffer[] = new double[valueBuffer.length + value.length];
-        for (int i = 0; i < valueBuffer.length; i++) {
-            newBuffer[i] = valueBuffer[i];
-        }
-        for (int i = valueBuffer.length; i < newBuffer.length; i++) {
-            newBuffer[i] = value[i - valueBuffer.length];
-        }
-        setValueBuffer(newBuffer);
-    }
-
     protected final void setValueBuffer(double[] valueBuffer) {
         Objects.requireNonNull(valueBuffer,"value buffer must be not null");
         unphasedState().set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
     }
+
+    //Results buffer is set by further class. .
 
     protected void removeFirstValueFromBuffer() {
         final int dims = getInputDimensions();
@@ -112,7 +94,10 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
             newBuffer[i] = valueBuffer[i + dims];
         }
         setValueBuffer(newBuffer);
+        removeFirstValueFromResultBuffer();
     }
+
+    protected abstract void removeFirstValueFromResultBuffer();
 
     protected int getNumValuesInBuffer() {
         final int valLength = getValueBuffer().length;
@@ -141,13 +126,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         return unphasedState().getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
     }
 
-    /**
-     * @return Class index - index in a value array, where class label is supposed to be
-     */
-    protected int getResponseIndex() {
-        return unphasedState().getFromKeyWithDefault(RESPONSE_INDEX_KEY, RESPONSE_INDEX_DEF);
-    }
-
     @Override
     public void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
         // Nothing for now
@@ -160,15 +138,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if(RESPONSE_INDEX_KEY.equals(propertyName)){
-            illegalArgumentIfFalse(propertyValue instanceof Integer, "Class index should be integer");
-            illegalArgumentIfFalse((Integer)propertyValue >= 0, "Class index should be non-negative");
-            unphasedState().setFromKey(RESPONSE_INDEX_KEY, Type.INT, propertyValue);
-        }else if(INPUT_DIM_KEY.equals(propertyName)){
-            illegalArgumentIfFalse(propertyValue instanceof Integer, "Number of input dimensions should be integer");
-            illegalArgumentIfFalse((Integer)propertyValue >= 0, "Input should have at least dimension");
-            unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, propertyValue);
-        }else if(BUFFER_SIZE_KEY.equals(propertyName)){
+        if(BUFFER_SIZE_KEY.equals(propertyName)){
             illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
             illegalArgumentIfFalse((Integer)propertyValue > 0, "Buffer size should be positive");
             unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
@@ -192,29 +162,11 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
                 illegalArgumentIfFalse((Integer)propertyValue >= 0, "High error threshold should be non-negative");
                 unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer)propertyValue).doubleValue());
             }
-        }else if(FEATURES_KEY.equals(propertyName)){
-            addValue((double[]) propertyValue);
-        }else if(INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName)){
+        }else if(INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName) ||
+                INPUT_DIM_KEY.equals(propertyName) || INTERNAL_RESULTS_BUFFER_KEY.equals(propertyName)){
             //Nothing. They are unsettable directly
         }else{
             super.setProperty(propertyName,propertyType,propertyValue);
-        }
-    }
-    /**
-     * Adds new value to the buffer. Connotations change depending on whether the node is in bootstrap mode or not.
-     *
-     * @param value New value to add; {@code null} disallowed
-     */
-    public void addValue(double value[]) {
-        illegalArgumentIfFalse(value != null, "Value must be not null");
-        illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
-
-        unphasedState().setFromKey(FEATURES_KEY, Type.DOUBLE_ARRAY, value);
-
-        if (isInBootstrapMode()) {
-            addValueBootstrap(value);
-        } else {
-            addValueNoBootstrap(value);
         }
     }
 
@@ -246,19 +198,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         unphasedState().setFromKey(BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
     }
 
-    protected void addValueNoBootstrap(double value[]) {
-        addValueToBuffer(value);
-        while (getCurrentBufferLength() > getMaxBufferLength()) {
-            removeFirstValueFromBuffer();
-        }
-
-        //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = getBufferError();
-        if (errorInBuffer > getHigherErrorThreshold()) {
-            setBootstrapMode(true); //If number of errors is above higher threshold, get into the bootstrap
-        }
-    }
-
     protected double getHigherErrorThreshold() {
         return unphasedState().getFromKeyWithDefault(HIGH_ERROR_THRESH_KEY, HIGH_ERROR_THRESH_DEF);
     }
@@ -269,33 +208,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
 
     protected abstract double getBufferError();
 
-    /**
-     * Adds new value to the buffer. Gaussian model is regenerated.
-     *
-     * @param value New value to add; {@code null} disallowed
-     */
-    private void addValueBootstrap(double value[]) {
-        addValueToBuffer(value); //In bootstrap - no need to account for length
-
-        if (getNumValuesInBuffer() >= getMaxBufferLength()) {
-            //Predict for each value in the buffer. Calculate percentage of errors.
-            double errorInBuffer = getBufferError();
-            if (errorInBuffer <= getLowerErrorThreshold()) {
-                setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
-            }
-        }
-
-        updateModelParameters(value);
-    }
-
-    /**
-     * Adds value's contribution to total, sum and sum of squares of new model.
-     * Does NOT build model yet.
-     *
-     * @param value New value
-     */
-    protected abstract void updateModelParameters(double value[]);
-
     public int getCurrentBufferLength() {
         double valueBuffer[] = getValueBuffer();
         final int dims = getInputDimensions();
@@ -304,9 +216,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
 
     @Override
     public Object get(String propertyName){
-        if(RESPONSE_INDEX_KEY.equals(propertyName)){
-            return getResponseIndex();
-        }else if(INPUT_DIM_KEY.equals(propertyName)){
+        if(INPUT_DIM_KEY.equals(propertyName)){
             return getInputDimensions();
         }else if(BUFFER_SIZE_KEY.equals(propertyName)){
             return getMaxBufferLength();
@@ -314,8 +224,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
             return getLowerErrorThreshold();
         }else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)){
             return getHigherErrorThreshold();
-        }else if(FEATURES_KEY.equals(propertyName)){
-            return unphasedState().getFromKeyWithDefault(FEATURES_KEY, FEATURES_DEF);
         }else if(BOOTSTRAP_MODE_KEY.equals(propertyName)){
             return isInBootstrapMode();
         }

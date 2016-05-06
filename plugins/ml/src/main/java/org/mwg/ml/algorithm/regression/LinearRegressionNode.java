@@ -32,28 +32,25 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
     }
 
     @Override
-    protected void updateModelParameters(double[] value) {
-        //Value should be already added to buffer by that time
-        final double currentBuffer[] = getValueBuffer();
-        final double reshapedValue[] = new double[currentBuffer.length];
+    protected void updateModelParameters(double[] value, double response) {
         final int dims = getInputDimensions();
         final int bufferLength = getCurrentBufferLength();
-        final int respIndex = getResponseIndex();
+        //Value should be already added to buffer by that time
+        final double currentBuffer[] = getValueBuffer();
+        //Adding place for intercepts
+        final double reshapedValue[] = new double[currentBuffer.length + bufferLength];
 
-        final double y[] = new double[bufferLength];
+        final double y[] = getResultBuffer();
 
         final double l2 = getL2Regularization();
 
         //Step 1. Re-arrange to column-based format.
         for (int i=0;i<bufferLength;i++){
+            reshapedValue[i] = 1; //First column is 1 (for intercepts)
+        }
+        for (int i=0;i<bufferLength;i++){
             for (int j=0;j<dims;j++){
-                //Intercept goes instead of response value of the matrix
-                if (j==respIndex){
-                    reshapedValue[j*bufferLength+i] = 1;
-                    y[i] = currentBuffer[i*dims+j];
-                }else{
-                    reshapedValue[j*bufferLength+i] = currentBuffer[i*dims+j];
-                }
+                reshapedValue[(j+1)*bufferLength+i] = currentBuffer[i*dims+j];
             }
         }
 
@@ -65,8 +62,8 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
         Matrix xtMulX = Matrix.multiplyTransposeAlphaBeta
                 (TransposeType.TRANSPOSE, 1, xMatrix, TransposeType.NOTRANSPOSE, 0, xMatrix);
 
-        for (int i=0;i<dims;i++){
-            xtMulX.add(i,i,(i!=respIndex)?l2:0);
+        for (int i=1;i<=dims;i++){
+            xtMulX.add(i,i,l2);
         }
 
         PInvSVD pinvsvd = new PInvSVD();
