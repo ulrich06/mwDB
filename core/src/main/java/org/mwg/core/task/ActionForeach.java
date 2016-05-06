@@ -39,7 +39,15 @@ class ActionForeach implements TaskAction {
         });
     }
 
-    private Object[] convert(Object elem) {
+    /**
+     * @native ts
+     * var result= [];
+     * for(p in elem){
+     *  result.push(p);
+     * }
+     * return result;
+     */
+    static Object[] convert(Object elem) {
         if (elem instanceof Object[]) {
             return (Object[]) elem;
         } else if (elem instanceof boolean[]) {

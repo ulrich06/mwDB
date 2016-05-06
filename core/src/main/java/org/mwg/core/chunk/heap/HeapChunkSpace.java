@@ -77,7 +77,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
                 }
                 next = previous + 1;
             } while (!this._iterationCounter.compareAndSet(previous, next));
-            return this._parent._values[this._dirtyElements[previous]];
+            return this._parent.getValues()[this._dirtyElements[previous]];
         }
 
         public boolean declareDirty(int dirtyIndex) {
@@ -104,6 +104,10 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         public void free() {
             //noop
         }
+    }
+
+    public Chunk[] getValues() {
+        return _values;
     }
 
     public HeapChunkSpace(int initialCapacity, int saveBatchSize) {

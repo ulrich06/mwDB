@@ -111,12 +111,12 @@ public class ActionForeachTest extends AbstractActionTest {
     }
 
     @Test
-    public void testForEachMergeVariables(){
+    public void testForEachMergeVariables() {
         final int[] index = {0};
         org.mwg.task.Task forEachTask = graph.newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
-                context.setVariable("param" + index[0]++,context.getPreviousResult());
+                context.setVariable("param" + index[0]++, context.getPreviousResult());
                 context.setResult(context.getPreviousResult());
             }
         });
@@ -129,19 +129,19 @@ public class ActionForeachTest extends AbstractActionTest {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();
-                Assert.assertEquals("n0",result);
+                Assert.assertEquals("n0", result);
             }
         }).fromVar("param1").then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();
-                Assert.assertEquals("n1",result);
+                Assert.assertEquals("n1", result);
             }
         }).fromVar("param2").then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();
-                Assert.assertEquals("root",result);
+                Assert.assertEquals("root", result);
             }
         }).execute();
     }

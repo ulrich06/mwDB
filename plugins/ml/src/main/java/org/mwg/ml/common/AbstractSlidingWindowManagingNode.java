@@ -10,7 +10,7 @@ import java.util.Objects;
 
 /**
  * Created by andre on 4/26/2016.
- *
+ * <p>
  * Common superclass for all ML algorithm that use bootstrap mode
  * and
  */
@@ -28,20 +28,20 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     public static final boolean BOOTSTRAP_MODE_DEF = true;
 
     /**
-     *  Buffer size
+     * Buffer size
      */
     public static final String BUFFER_SIZE_KEY = "BufferSize";
     /**
-     *  Buffer size - default
+     * Buffer size - default
      */
     public static final int BUFFER_SIZE_DEF = 50;
 
     /**
-     *  Number of input dimensions
+     * Number of input dimensions
      */
     public static final String INPUT_DIM_KEY = "InputDimensions";
     /**
-     * Unknown number of input dimensions
+     * Number of input dimensions - default
      */
     public static final int INPUT_DIM_UNKNOWN = -1;
     /**
@@ -50,20 +50,20 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     public static final int INPUT_DIM_DEF = INPUT_DIM_UNKNOWN;
 
     /**
-     *  Higher error threshold
+     * Higher error threshold
      */
     public static final String HIGH_ERROR_THRESH_KEY = "HighErrorThreshold";
     /**
-     *  Higher error threshold - default
+     * Higher error threshold - default
      */
     public static final double HIGH_ERROR_THRESH_DEF = 0.1;
 
     /**
-     *  Lower error threshold
+     * Lower error threshold
      */
     public static final String LOW_ERROR_THRESH_KEY = "LowErrorThreshold";
     /**
-     *  Lower error threshold
+     * Lower error threshold
      */
     public static final double LOW_ERROR_THRESH_DEF = 0.05;
 
@@ -77,7 +77,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     }
 
     protected final void setValueBuffer(double[] valueBuffer) {
-        Objects.requireNonNull(valueBuffer,"value buffer must be not null");
+        Objects.requireNonNull(valueBuffer, "value buffer must be not null");
         unphasedState().set(_resolver.stringToLongKey(INTERNAL_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
     }
 
@@ -140,33 +140,33 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if(BUFFER_SIZE_KEY.equals(propertyName)){
             illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
-            illegalArgumentIfFalse((Integer)propertyValue > 0, "Buffer size should be positive");
+            illegalArgumentIfFalse((Integer) propertyValue > 0, "Buffer size should be positive");
             unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
-        }else if (LOW_ERROR_THRESH_KEY.equals(propertyName)){
-            illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
+        } else if (LOW_ERROR_THRESH_KEY.equals(propertyName)) {
+            illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
                     "Low error threshold should be of type double or integer");
-            if (propertyValue instanceof Double){
-                illegalArgumentIfFalse((Double)propertyValue >= 0, "Low error threshold should be non-negative");
+            if (propertyValue instanceof Double) {
+                illegalArgumentIfFalse((Double) propertyValue >= 0, "Low error threshold should be non-negative");
                 unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
-            }else{
-                illegalArgumentIfFalse((Integer)propertyValue >= 0, "Low error threshold should be non-negative");
-                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer)propertyValue).doubleValue());
+            } else {
+                illegalArgumentIfFalse((Integer) propertyValue >= 0, "Low error threshold should be non-negative");
+                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer) propertyValue).doubleValue());
             }
-        }else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)){
-            illegalArgumentIfFalse((propertyValue instanceof Double)||(propertyValue instanceof Integer),
+        } else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)) {
+            illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
                     "High error threshold should be of type double or integer");
-            if (propertyValue instanceof Double){
-                illegalArgumentIfFalse((Double)propertyValue >= 0, "High error threshold should be non-negative");
+            if (propertyValue instanceof Double) {
+                illegalArgumentIfFalse((Double) propertyValue >= 0, "High error threshold should be non-negative");
                 unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
-            }else{
-                illegalArgumentIfFalse((Integer)propertyValue >= 0, "High error threshold should be non-negative");
-                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer)propertyValue).doubleValue());
+            } else {
+                illegalArgumentIfFalse((Integer) propertyValue >= 0, "High error threshold should be non-negative");
+                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer) propertyValue).doubleValue());
             }
         }else if(INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName) ||
                 INPUT_DIM_KEY.equals(propertyName) || INTERNAL_RESULTS_BUFFER_KEY.equals(propertyName)){
             //Nothing. They are unsettable directly
-        }else{
-            super.setProperty(propertyName,propertyType,propertyValue);
+        } else {
+            super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
 
@@ -218,11 +218,11 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     public Object get(String propertyName){
         if(INPUT_DIM_KEY.equals(propertyName)){
             return getInputDimensions();
-        }else if(BUFFER_SIZE_KEY.equals(propertyName)){
+        } else if (BUFFER_SIZE_KEY.equals(propertyName)) {
             return getMaxBufferLength();
-        }else if (LOW_ERROR_THRESH_KEY.equals(propertyName)){
+        } else if (LOW_ERROR_THRESH_KEY.equals(propertyName)) {
             return getLowerErrorThreshold();
-        }else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)){
+        } else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)) {
             return getHigherErrorThreshold();
         }else if(BOOTSTRAP_MODE_KEY.equals(propertyName)){
             return isInBootstrapMode();

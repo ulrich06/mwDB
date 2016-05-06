@@ -151,6 +151,13 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      */
     protected abstract void initializeClassIfNecessary(int classNum);
 
+    /**
+     * @param value
+     * @param classNum
+     * @return
+     */
+    protected abstract double getLikelihoodForClass(double value[], int classNum);
+
     protected int[] getKnownClasses() {
         return unphasedState().getFromKeyWithDefault(INTERNAL_KNOWN_CLASSES_LIST, new int[0]);
     }

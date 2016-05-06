@@ -49,12 +49,12 @@ public class Matrix {
     }
 
 
-//    @Override
+    //    @Override
     public double[] data() {
         return _data;
     }
 
- //   @Override
+    //   @Override
     public double[] exportRowMatrix() {
         double[] res = new double[_data.length];
         int k = 0;
@@ -67,7 +67,7 @@ public class Matrix {
         return res;
     }
 
- //   @Override
+    //   @Override
     public Matrix importRowMatrix(double[] rowdata, int rows, int columns) {
         Matrix res = new Matrix(null, rows, columns);
 
@@ -81,63 +81,63 @@ public class Matrix {
         return res;
     }
 
- //   @Override
+    //   @Override
     public void setData(double[] data) {
         System.arraycopy(data, 0, this._data, 0, data.length);
     }
 
-  //  @Override
+    //  @Override
     public int rows() {
         return _nbRows;
     }
 
- //   @Override
+    //   @Override
     public int columns() {
         return _nbColumns;
     }
 
-  //  @Override
+    //  @Override
     public double get(int rowIndex, int columnIndex) {
         return _data[rowIndex + columnIndex * _nbRows];
     }
 
-  //  @Override
+    //  @Override
     public double set(int rowIndex, int columnIndex, double value) {
         _data[rowIndex + columnIndex * _nbRows] = value;
 
         return value;
     }
 
- //   @Override
+    //   @Override
     public double add(int rowIndex, int columnIndex, double value) {
         return set(rowIndex, columnIndex, get(rowIndex, columnIndex) + value);
     }
 
-//    @Override
+    //    @Override
     public void setAll(double value) {
         for (int i = 0; i < _nbColumns * _nbRows; i++) {
             this._data[i] = value;
         }
     }
 
- //   @Override
+    //   @Override
     public double getAtIndex(int index) {
         return this._data[index];
     }
 
- //   @Override
+    //   @Override
     public double setAtIndex(int index, double value) {
         this._data[index] = value;
         return value;
     }
 
-  //  @Override
+    //  @Override
     public double addAtIndex(int index, double value) {
         this._data[index] += value;
         return this._data[index];
     }
 
-  //  @Override
+    //  @Override
     public Matrix clone() {
         double[] newback = new double[_data.length];
         System.arraycopy(_data, 0, newback, 0, _data.length);
@@ -146,7 +146,6 @@ public class Matrix {
         return res;
 
     }
-
 
 
     /**
@@ -270,24 +269,24 @@ public class Matrix {
     }
 
 
-    public double[] saveToState(){
-        double[] res=new double[_data.length+2];
-        res[0]=_nbRows;
-        res[1]=_nbColumns;
-        System.arraycopy(_data,0,res,2,_data.length);
+    public double[] saveToState() {
+        double[] res = new double[_data.length + 2];
+        res[0] = _nbRows;
+        res[1] = _nbColumns;
+        System.arraycopy(_data, 0, res, 2, _data.length);
         return res;
     }
 
-    public static Matrix loadFromState(Object o){
-        double[] res=(double[]) o;
-        double[] data=new double[res.length-2];
-        System.arraycopy(res,2,data,0,data.length);
-        return new Matrix(data,(int)res[0],(int)res[1]);
+    public static Matrix loadFromState(Object o) {
+        double[] res = (double[]) o;
+        double[] data = new double[res.length - 2];
+        System.arraycopy(res, 2, data, 0, data.length);
+        return new Matrix(data, (int) res[0], (int) res[1]);
     }
 
     public static Matrix createIdentity(int rows, int columns) {
         Matrix ret = new Matrix(null, rows, columns);
-        int width=Math.min(rows,columns);
+        int width = Math.min(rows, columns);
         for (int i = 0; i < width; i++) {
             ret.set(i, i, 1);
         }
@@ -365,9 +364,9 @@ public class Matrix {
     }
 
     public static Matrix identity(int rows, int columns) {
-        Matrix res= new Matrix(null, rows,columns);
-        for(int i=0;i< Math.max(rows,columns);i++){
-            res.set(i,i,1.0);
+        Matrix res = new Matrix(null, rows, columns);
+        for (int i = 0; i < Math.max(rows, columns); i++) {
+            res.set(i, i, 1.0);
         }
         return res;
     }
