@@ -32,7 +32,6 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      */
     public boolean addValue(double value[], double result) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
-        illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
 
         if (isInBootstrapMode()) {
             addValueBootstrap(value, result);
@@ -63,7 +62,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
 
     protected final void setResultBuffer(double[] resBuffer) {
         Objects.requireNonNull(resBuffer,"result buffer must be not null");
-        unphasedState().set(_resolver.stringToLongKey(INTERNAL_RESULTS_BUFFER_KEY), Type.INT_ARRAY, resBuffer);
+        unphasedState().setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.DOUBLE_ARRAY, resBuffer);
     }
 
     protected void addValueNoBootstrap(double value[], double result) {

@@ -67,6 +67,9 @@ public class GaussianNaiveBayesianNode extends AbstractClassifierSlidingWindowMa
     protected void updateModelParameters(double value[], int classNum){
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
+        if (getInputDimensions()==INPUT_DIM_UNKNOWN){
+            setInputDimensions(value.length);
+        }
         initializeClassIfNecessary(classNum);
         setTotal(classNum, getClassTotal(classNum)+1);
 

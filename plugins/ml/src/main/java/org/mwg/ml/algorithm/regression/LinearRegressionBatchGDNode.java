@@ -37,7 +37,11 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     @Override
     protected void updateModelParameters(double value[], double outcome) {
         //Value should be already added to buffer by that time
-        final int dims = getInputDimensions();
+        int dims = getInputDimensions();
+        if (dims==INPUT_DIM_UNKNOWN){
+            dims = value.length;
+            setInputDimensions(dims);
+        }
         final double alpha = getLearningRate();
         final double lambda = getL2Regularization();
         final int bufferLength = getCurrentBufferLength();

@@ -33,7 +33,11 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
     @Override
     protected void updateModelParameters(double[] value, double response) {
-        final int dims = getInputDimensions();
+        int dims = getInputDimensions();
+        if (dims==INPUT_DIM_UNKNOWN){
+            dims = value.length;
+            setInputDimensions(dims);
+        }
         final int bufferLength = getCurrentBufferLength();
         //Value should be already added to buffer by that time
         final double currentBuffer[] = getValueBuffer();
@@ -54,7 +58,7 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
             }
         }
 
-        Matrix xMatrix = new Matrix(reshapedValue, bufferLength, dims);
+        Matrix xMatrix = new Matrix(reshapedValue, bufferLength, dims+1);
         Matrix yVector = new Matrix(y, bufferLength, 1);
 
         // inv(Xt * X - lambda*I) * Xt * ys

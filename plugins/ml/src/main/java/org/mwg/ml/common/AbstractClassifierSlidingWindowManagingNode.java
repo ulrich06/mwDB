@@ -232,7 +232,6 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      */
     public boolean addValue(double value[], int result) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
-        illegalArgumentIfFalse(value.length == getInputDimensions(), "Class index is not included in the value");
 
         if (isInBootstrapMode()) {
             addValueBootstrap(value, result);

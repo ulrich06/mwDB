@@ -4,6 +4,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
+import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
 import java.util.Objects;
@@ -126,6 +127,13 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         return unphasedState().getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
     }
 
+    /**
+     * @return Class index - index in a value array, where class label is supposed to be
+     */
+    protected void setInputDimensions(int dims) {
+        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, dims);
+    }
+
     @Override
     public void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
         // Nothing for now
@@ -134,6 +142,10 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     @Override
     public void unindex(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
         // Nothing for now
+    }
+
+    public void setPropertyUnphased(String propertyName, byte propertyType, Object propertyValue){
+        unphasedState().setFromKey(propertyName, propertyType, propertyValue);
     }
 
     @Override

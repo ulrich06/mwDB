@@ -34,7 +34,11 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
     @Override
     protected void updateModelParameters(double[] value, double response) {
         //Value should be already added to buffer by that time
-        final int dims = getInputDimensions();
+        int dims = getInputDimensions();
+        if (dims==INPUT_DIM_UNKNOWN){
+            dims = value.length;
+            setInputDimensions(dims);
+        }
         final double alpha = getLearningRate();
         double lambda = getL2Regularization();
 

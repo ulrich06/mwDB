@@ -58,9 +58,9 @@ public class GaussianClassifierNode extends AbstractClassifierSlidingWindowManag
 
         addToKnownClassesList(classNum);
         setTotal(classNum, 0);
-        final int dimensions = getInputDimensions();
-        setSums(classNum, new double[dimensions]);
-        setSumsSquared(classNum, new double[dimensions * (dimensions + 1) / 2]);
+        final int dims = getInputDimensions();
+        setSums(classNum, new double[dims]);
+        setSumsSquared(classNum, new double[dims * (dims + 1) / 2]);
 
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
     }
@@ -69,6 +69,9 @@ public class GaussianClassifierNode extends AbstractClassifierSlidingWindowManag
     protected void updateModelParameters(double value[], int classNum) {
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
+        if (getInputDimensions()==INPUT_DIM_UNKNOWN){
+            setInputDimensions(value.length);
+        }
         initializeClassIfNecessary(classNum);
         setTotal(classNum, getClassTotal(classNum) + 1);
 

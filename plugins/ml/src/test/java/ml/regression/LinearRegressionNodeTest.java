@@ -10,6 +10,7 @@ import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
+import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Random;
@@ -34,17 +35,23 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 6);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
 
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, dummyDataset1[i]);
-                    double coefs[] = lrNode.getCoefficients();
-                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    lrNode.learn(dummyDataset1[i][1], cb);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
 
@@ -59,7 +66,7 @@ public class LinearRegressionNodeTest {
                 //System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0] - 2) < eps);
-                assertTrue(Math.abs(coefs[1] - 1) < eps);
+                assertTrue(Math.abs(lrNode.getIntercept() - 1) < eps);
                 assertTrue(lrNode.getBufferError() < eps);
                 assertTrue(lrNode.getL2Regularization() < eps);
             }
@@ -76,15 +83,23 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 0);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 6);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
 
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, dummyDataset1[i]);
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][1]);
+                    lrNode.learn(dummyDataset1[i][0], cb);
                     //double coefs[] = lrNode.getCoefficients();
                     //System.out.print("Coefficients: ");
                     //for (int j=0;j<coefs.length;j++){
@@ -104,8 +119,8 @@ public class LinearRegressionNodeTest {
                 //System.out.println();
                 //System.out.println("Error: " + lrNode.getBufferError());
 
-                assertTrue(Math.abs(coefs[0] + 0.5) < eps);
-                assertTrue(Math.abs(coefs[1] - 0.5) < eps);
+                assertTrue(Math.abs(lrNode.getIntercept() + 0.5) < eps);
+                assertTrue(Math.abs(coefs[0] - 0.5) < eps);
                 assertTrue(lrNode.getBufferError() < eps);
             }
         });
@@ -122,18 +137,27 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 6);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
 
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, dummyDataset1[i]);
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    lrNode.learn(dummyDataset1[i][1], cb);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
-                lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, new double[]{6, 1013});
+                lrNode.set("f1", 6.0);
+                lrNode.learn((int) 1013.0, cb);
                 assertTrue(lrNode.isInBootstrapMode());
 
                 graph.disconnect(null);
@@ -147,7 +171,7 @@ public class LinearRegressionNodeTest {
                 //System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0] - 2) < eps);
-                assertTrue(Math.abs(coefs[1] - 1) < eps);
+                assertTrue(Math.abs(lrNode.getIntercept() - 1) < eps);
                 assertTrue(Math.abs(lrNode.getBufferError() - 166666.6666666) < eps);
             }
         });
@@ -162,17 +186,25 @@ public class LinearRegressionNodeTest {
             public void on(Boolean result) {
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 6);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100);
+
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
 
                 double resid = 0;
                 lrNode.setL2Regularization(1000000000);
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, dummyDataset1[i]);
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    lrNode.learn(dummyDataset1[i][1], cb);
                     resid += (dummyDataset1[i][1] - 6) * (dummyDataset1[i][1] - 6);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
@@ -188,7 +220,7 @@ public class LinearRegressionNodeTest {
                 //System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0] - 0) < eps);
-                assertTrue(Math.abs(coefs[1] - 6) < eps);
+                assertTrue(Math.abs(lrNode.getIntercept() - 6) < eps);
                 assertTrue(Math.abs(lrNode.getBufferError() - (resid / 6)) < eps);
             }
         });
@@ -205,18 +237,24 @@ public class LinearRegressionNodeTest {
 
                 LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newNode(0, 0, LinearRegressionSGDNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 10000);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.001);
                 lrNode.setLearningRate(0.003);
 
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < 11000; i++) {
                     double x = rng.nextDouble() * 10;
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, new double[]{x, 2 * x + 1});
-                    double coefs[] = lrNode.getCoefficients();
-                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
+                    lrNode.learn(2*x+1, cb);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
 
@@ -249,20 +287,26 @@ public class LinearRegressionNodeTest {
 
                 LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 50);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.01);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.01);
                 lrNode.setLearningRate(0.0001);
 
                 lrNode.setIterationCountThreshold(10000);
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
 
                 for (int i = 0; i < 100; i++) {
                     double x = rng.nextDouble() * 100;
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, new double[]{x, 2 * x + 1});
-                    double coefs[] = lrNode.getCoefficients();
-                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
+                    lrNode.learn(2*x+1, cb);
                 }
                 //assertFalse(lrNode.isInBootstrapMode());
 
@@ -277,7 +321,7 @@ public class LinearRegressionNodeTest {
                 //System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0] - 2) < 1e-4);
-                assertTrue(Math.abs(coefs[1] - 1) < 1e-4);
+                assertTrue(Math.abs(lrNode.getIntercept() - 1) < 1e-4);
                 assertTrue(lrNode.getBufferError() < 1e-4);
                 assertTrue(lrNode.getL2Regularization() < 1e-4);
             }
@@ -296,8 +340,6 @@ public class LinearRegressionNodeTest {
 
                 LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.INPUT_DIM_KEY, Type.INT, 2);
-                lrNode.setProperty(AbstractLinearRegressionNode.RESPONSE_INDEX_KEY, Type.INT, 1);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 10);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 1e-6);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 1e-6);
@@ -306,11 +348,19 @@ public class LinearRegressionNodeTest {
                 lrNode.removeIterationCountThreshold();
                 lrNode.setIterationErrorThreshold(1e-11);
 
+                lrNode.set(AbstractMLNode.FROM, "f1");
+
+                Callback<Boolean> cb = new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        //Nothing so far
+                    }
+                };
+
                 for (int i = 0; i < 16; i++) {
                     double x = rng.nextDouble() * 100;
-                    lrNode.set(AbstractSlidingWindowManagingNode.FEATURES_KEY, new double[]{x, 2 * x + 1});
-                    double coefs[] = lrNode.getCoefficients();
-                    assertTrue(lrNode.getIntercept() == coefs[1]); //Exactly the same
+                    lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
+                    lrNode.learn(2*x+1, cb);
                 }
                 assertFalse(lrNode.isInBootstrapMode());
 
@@ -325,7 +375,7 @@ public class LinearRegressionNodeTest {
                 //System.out.println("Error: " + lrNode.getBufferError());
 
                 assertTrue(Math.abs(coefs[0] - 2) < 1e-3);
-                assertTrue(Math.abs(coefs[1] - 1) < 1e-3);
+                assertTrue(Math.abs(lrNode.getIntercept() - 1) < 1e-3);
                 assertTrue(lrNode.getBufferError() < 1e-6);
                 assertTrue(lrNode.getL2Regularization() < 1e-6);
             }

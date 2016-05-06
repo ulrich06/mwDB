@@ -25,7 +25,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     /**
      * Regression intercept
      */
-    public static final String INTERCEPT_KEY = "regressionCoefficients";
+    public static final String INTERCEPT_KEY = "regressionIntercept";
     /**
      * Regression intercept - default
      */
@@ -53,7 +53,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     }
 
     protected void setIntercept(double intercept){
-        unphasedState().set(_resolver.stringToLongKey(INTERCEPT_KEY), Type.DOUBLE, intercept);
+        unphasedState().setFromKey(INTERCEPT_KEY, Type.DOUBLE, intercept);
     }
 
     @Override

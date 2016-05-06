@@ -102,18 +102,16 @@ public class GaussianNaiveBayesianTest {
                 int errors = 0;
                 //int diffWithGaussian = 0;
 
-                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.INPUT_DIM_KEY, Type.INT, 2);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.INPUT_DIM_KEY, Type.INT, 2);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
-                gaussianNBNode.set(AbstractMLNode.FEATURES_QUERY_KEY, "f1");
-                gaussianClassifierNode.set(AbstractMLNode.FEATURES_QUERY_KEY, "f1");
+                gaussianNBNode.set(AbstractMLNode.FROM, "f1");
+                gaussianClassifierNode.set(AbstractMLNode.FROM, "f1");
 
                 Callback<Boolean> cb = new Callback<Boolean>() {
                     @Override
@@ -123,8 +121,8 @@ public class GaussianNaiveBayesianTest {
                 };
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    gaussianNBNode.set("f1", dummyDataset1[i][0]);
-                    gaussianClassifierNode.set("f1", dummyDataset1[i][0]);
+                    gaussianNBNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
+                    gaussianClassifierNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
                     gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
                     gaussianClassifierNode.learn((int) dummyDataset1[i][1], cb);
                     if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
