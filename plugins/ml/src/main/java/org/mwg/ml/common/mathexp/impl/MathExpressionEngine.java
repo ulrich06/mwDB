@@ -239,6 +239,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                 }
                                 if (resolved != null) {
                                     double resultAsDouble = PrimitiveHelper.parseDouble(resolved.toString());
+                                    //ToDo uncomment and unvalidate cache
                                     //vars.put(cleanName, resultAsDouble);
                                     String valueString = resolved.toString();
                                     if (PrimitiveHelper.equals(valueString, "true")) {
