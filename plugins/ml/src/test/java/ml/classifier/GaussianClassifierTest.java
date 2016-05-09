@@ -85,6 +85,8 @@ public class GaussianClassifierTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 
+    int errors = 0;
+
     @Test
     public void test() {
         //This test fails if there are too many errors
@@ -93,13 +95,13 @@ public class GaussianClassifierTest {
             @Override
             public void on(Boolean result) {
 
-                GaussianClassifierNode gaussianNBNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
+                GaussianClassifierNode gaussianClassifierNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
 
-                int errors = 0;
+                errors = 0;
 
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
-                gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
+                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
+                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
+                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
                 Callback<Boolean> cb = new Callback<Boolean>() {
                     @Override
@@ -108,15 +110,23 @@ public class GaussianClassifierTest {
                     }
                 };
 
-                gaussianNBNode.set(AbstractMLNode.FROM, "f1");
+                gaussianClassifierNode.set(AbstractMLNode.FROM, "f1");
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    //gaussianNBNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
-                    gaussianNBNode.addValue(new double[] {dummyDataset1[i][0]}, (int) dummyDataset1[i][1]);
-                    if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
-                        errors++;
-                    }
+                    final double val = dummyDataset1[i][0];
+                    final int classNum = (int) dummyDataset1[i][1];
+                    final boolean expectedBootstrap = bootstraps1[i];
+                    gaussianClassifierNode.jump(i, new Callback<GaussianClassifierNode>() {
+                        @Override
+                        public void on(GaussianClassifierNode result) {
+                            result.set("f1", val);
+                            result.learn(classNum, cb);
+                            if (result.isInBootstrapMode() != expectedBootstrap) {
+                                errors++;
+                            }
+                            result.free();
+                        }
+                    });
                 }
 
                 graph.disconnect(null);

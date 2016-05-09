@@ -84,6 +84,8 @@ public class GaussianNaiveBayesianTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 
+    int errors = 0;
+
     @Test
     public void test() {
         //This test fails if there are too many errors
@@ -97,21 +99,12 @@ public class GaussianNaiveBayesianTest {
             @Override
             public void on(Boolean result) {
                 GaussianNaiveBayesianNode gaussianNBNode = (GaussianNaiveBayesianNode) graph.newNode(0, 0, GaussianNaiveBayesianNode.NAME);
-                GaussianClassifierNode gaussianClassifierNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
-
-                int errors = 0;
-                //int diffWithGaussian = 0;
-
-                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
-                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
-                gaussianClassifierNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 gaussianNBNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
 
                 gaussianNBNode.set(AbstractMLNode.FROM, "f1");
-                gaussianClassifierNode.set(AbstractMLNode.FROM, "f1");
 
                 Callback<Boolean> cb = new Callback<Boolean>() {
                     @Override
@@ -121,54 +114,27 @@ public class GaussianNaiveBayesianTest {
                 };
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
-                    //gaussianNBNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //gaussianClassifierNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //gaussianNBNode.learn((int) dummyDataset1[i][1], cb);
-                    //gaussianClassifierNode.learn((int) dummyDataset1[i][1], cb);
-                    gaussianNBNode.addValue(new double[] {dummyDataset1[i][0]}, (int) dummyDataset1[i][1]);
-                    gaussianClassifierNode.addValue(new double[] {dummyDataset1[i][0]}, (int) dummyDataset1[i][1]);
-                    if (gaussianNBNode.isInBootstrapMode() != bootstraps1[i]) {
-                        //System.out.println(i+" EXPECTED:"+bootstraps1[i]+"\t"+
-                        //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
-                        errors++;
-                    } //else {
-                        //System.out.println(i+" CORRECT:"+bootstraps1[i]+"\t"+
-                        //        gaussianNBNode.getBufferErrorCount()+"/"+gaussianNBNode.getCurrentBufferLength()+"="+gaussianNBNode.getBufferError());
-                    //}
-                    //System.out.println(i+" GAUSSIAN:"+gaussianClassifierNode.isInBootstrapMode()+"\t"+
-                    //        gaussianClassifierNode.getBufferErrorCount()+"/"+gaussianClassifierNode.getCurrentBufferLength()+"="+gaussianClassifierNode.getBufferError());
-                    //System.out.println(gaussianNBNode.allDistributionsToString());
-                    //int rbc[] = gaussianNBNode.getRealBufferClasses();
-                    //System.out.print("[");
-                    //for (int j=0;j<rbc.length;j++) {
-                    //   System.out.print(rbc[j]+", ");
-                    //}
-                    //System.out.println("]");
-                    //int pbc[] = gaussianNBNode.getPredictedBufferClasses();
-                    //System.out.print("[");
-                    //for (int j=0;j<pbc.length;j++) {
-                    //    System.out.print(pbc[j]+", ");
-                    //}
-                    //System.out.println("]");
-                    //int gbc[] = gaussianClassifierNode.getPredictedBufferClasses();
-                    //System.out.print("[");
-                    //for (int j=0;j<gbc.length;j++) {
-                    //    System.out.print(gbc[j]+", ");
-                    //}
-                    //System.out.println("]");
-                    //if (gaussianNBNode.isInBootstrapMode() != gaussianClassifierNode.isInBootstrapMode()) {
-                    //    diffWithGaussian++;
-                    //}
+                    final double val = dummyDataset1[i][0];
+                    final int classNum = (int) dummyDataset1[i][1];
+                    final boolean expectedBootstrap = bootstraps1[i];
+                    gaussianNBNode.jump(i, new Callback<GaussianNaiveBayesianNode>() {
+                        @Override
+                        public void on(GaussianNaiveBayesianNode result) {
+                            result.set("f1", val);
+                            result.learn(classNum, cb);
+                            if (result.isInBootstrapMode() != expectedBootstrap) {
+                                errors++;
+                            }
+                            result.free();
+                        }
+                    });
                 }
 
                 gaussianNBNode.free();
-                gaussianClassifierNode.free();
 
                 graph.disconnect(null);
 
                 assertTrue("Errors: "+errors, errors<=3);
-                //System.out.println("Errors: " + errors);
-                //System.out.println("Diffrence with Gaussian: " + diffWithGaussian);
             }
         });
     }

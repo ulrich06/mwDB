@@ -27,6 +27,12 @@ public class LinearRegressionNodeTest {
 
     final double eps = 0.000001;
 
+    double coefs[] = new double[0];
+    double intercept = Double.NaN;
+    double bufferError = Double.NaN;
+    boolean bootstrapMode = true;
+    double l2Reg = Double.NaN;
+
     @Test
     public void testNormalPrecise() {
         Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
@@ -50,26 +56,30 @@ public class LinearRegressionNodeTest {
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //lrNode.learn(dummyDataset1[i][1], cb);
-                    lrNode.addValue(new double[] {dummyDataset1[i][0]}, dummyDataset1[i][1]);
+                    final double val = dummyDataset1[i][0];
+                    final double response = dummyDataset1[i][1];
+                    lrNode.jump(i, new Callback<LinearRegressionNode>() {
+                        @Override
+                        public void on(LinearRegressionNode result) {
+                            result.set("f1", val);
+                            result.learn(response, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                assertFalse(lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                double coefs[] = lrNode.getCoefficients();
-                //System.out.print("Final coefficients: ");
-                //for (int j=0;j<coefs.length;j++){
-                //    System.out.print(coefs[j]+", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(""+coefs[0], Math.abs(coefs[0] - 2) < eps);
-                assertTrue(""+lrNode.getIntercept(), Math.abs(lrNode.getIntercept() - 1) < eps);
-                assertTrue(""+lrNode.getBufferError(), lrNode.getBufferError() < eps);
-                assertTrue(""+lrNode.getL2Regularization(), lrNode.getL2Regularization() < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 2) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept - 1) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bufferError < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, l2Reg < eps);
             }
         });
 
@@ -99,32 +109,29 @@ public class LinearRegressionNodeTest {
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][1]);
-                    //lrNode.learn(dummyDataset1[i][0], cb);
-                    lrNode.addValue(new double[] {dummyDataset1[i][1]}, dummyDataset1[i][0]);
-
-                    //double coefs[] = lrNode.getCoefficients();
-                    //System.out.print("Coefficients: ");
-                    //for (int j=0;j<coefs.length;j++){
-                    //    System.out.print(coefs[j]+", ");
-                    //}
-                    //System.out.println();
+                    final double val = dummyDataset1[i][1];
+                    final double response = dummyDataset1[i][0];
+                    lrNode.jump(i, new Callback<LinearRegressionNode>() {
+                        @Override
+                        public void on(LinearRegressionNode result) {
+                            result.set("f1", val);
+                            result.learn(response, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                assertFalse(lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                double coefs[] = lrNode.getCoefficients();
-                //System.out.print("Final coefficients: ");
-                //for (int j=0;j<coefs.length;j++){
-                //    System.out.print(coefs[j]+", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(lrNode.getIntercept() + 0.5) < eps);
-                assertTrue(Math.abs(coefs[0] - 0.5) < eps);
-                assertTrue(lrNode.getBufferError() < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept + 0.5) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 0.5) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bufferError < eps);
             }
         });
 
@@ -155,29 +162,42 @@ public class LinearRegressionNodeTest {
 
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //lrNode.learn(dummyDataset1[i][1], cb);
-                    lrNode.addValue(new double[] {dummyDataset1[i][0]}, dummyDataset1[i][1]);
+                    final double val = dummyDataset1[i][0];
+                    final double response = dummyDataset1[i][1];
+                    lrNode.jump(i, new Callback<LinearRegressionNode>() {
+                        @Override
+                        public void on(LinearRegressionNode result) {
+                            result.set("f1", val);
+                            result.learn(response, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                assertFalse(lrNode.isInBootstrapMode());
-                //lrNode.set("f1", 6.0);
-                //lrNode.learn((int) 1013.0, cb);
-                lrNode.addValue(new double[] {6}, 1013);
-                assertTrue(lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError, bootstrapMode);
+                lrNode.jump(dummyDataset1.length, new Callback<LinearRegressionNode>() {
+                    @Override
+                    public void on(LinearRegressionNode result) {
+                        result.set("f1", 6);
+                        result.learn(1013, cb);
+                        coefs = result.getCoefficients();
+                        intercept = result.getIntercept();
+                        bufferError = result.getBufferError();
+                        bootstrapMode = result.isInBootstrapMode();
+                        result.free();
+                    }
+                });
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                double coefs[] = lrNode.getCoefficients();
-                //System.out.print("Final coefficients: ");
-                //for (int j = 0; j < coefs.length; j++) {
-                //    System.out.print(coefs[j] + ", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(coefs[0] - 2) < eps);
-                assertTrue(Math.abs(lrNode.getIntercept() - 1) < eps);
-                assertTrue(Math.abs(lrNode.getBufferError() - 166666.6666666) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 2) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept - 1) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(bufferError - 166666.6666666) < eps);
             }
         });
     }
@@ -208,26 +228,30 @@ public class LinearRegressionNodeTest {
                 lrNode.setL2Regularization(1000000000);
                 for (int i = 0; i < dummyDataset1.length; i++) {
                     assertTrue(lrNode.isInBootstrapMode());
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, dummyDataset1[i][0]);
-                    //lrNode.learn(dummyDataset1[i][1], cb);
-                    lrNode.addValue(new double[] {dummyDataset1[i][0]}, dummyDataset1[i][1]);
+                    final double val = dummyDataset1[i][0];
+                    final double response = dummyDataset1[i][1];
+                    lrNode.jump(i, new Callback<LinearRegressionNode>() {
+                        @Override
+                        public void on(LinearRegressionNode result) {
+                            result.set("f1", val);
+                            result.learn(response, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                     resid += (dummyDataset1[i][1] - 6) * (dummyDataset1[i][1] - 6);
                 }
-                assertFalse(lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                double coefs[] = lrNode.getCoefficients();
-                //System.out.print("Final coefficients: ");
-                //for (int j = 0; j < coefs.length; j++) {
-                //    System.out.print(coefs[j] + ", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(coefs[0] - 0) < eps);
-                assertTrue(Math.abs(lrNode.getIntercept() - 6) < eps);
-                assertTrue(Math.abs(lrNode.getBufferError() - (resid / 6)) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 0) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept - 6) < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(bufferError - (resid / 6)) < eps);
             }
         });
     }
@@ -243,7 +267,9 @@ public class LinearRegressionNodeTest {
 
                 LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newNode(0, 0, LinearRegressionSGDNode.NAME);
 
-                lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 10000);
+                final int BUFFER_SIZE = 8513;
+
+                lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFFER_SIZE);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.001);
                 lrNode.setLearningRate(0.003);
@@ -257,28 +283,30 @@ public class LinearRegressionNodeTest {
                     }
                 };
 
-                for (int i = 0; i < 11000; i++) {
+                for (int i = 0; i < BUFFER_SIZE+1000; i++) {
                     double x = rng.nextDouble() * 10;
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
-                    //lrNode.learn(2*x+1, cb);
-                    lrNode.addValue(new double[] {x}, 2*x+1);
+                    lrNode.jump(i, new Callback<LinearRegressionSGDNode>() {
+                        @Override
+                        public void on(LinearRegressionSGDNode result) {
+                            result.set("f1", x);
+                            result.learn(2*x+1, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                double coefs[] = lrNode.getCoefficients();
-                assertFalse(lrNode.getIntercept()+"\t"+coefs[0]+"\t"+lrNode.getBufferError(), lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                //System.out.print("Final coefficients: ");
-                //for (int j = 0; j < coefs.length; j++) {
-                //    System.out.print(coefs[j] + ", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(coefs[0] - 2) < 1e-3);
-                assertTrue(Math.abs(lrNode.getIntercept() - 1) < 1e-3);
-                assertTrue(lrNode.getBufferError() < eps);
-                assertTrue(lrNode.getL2Regularization() < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 2) < 1e-3);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept - 1) < 2e-3);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bufferError < eps);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, l2Reg < eps);
             }
         });
     }
@@ -312,26 +340,28 @@ public class LinearRegressionNodeTest {
 
                 for (int i = 0; i < 100; i++) {
                     double x = rng.nextDouble() * 100;
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
-                    //lrNode.learn(2*x+1, cb);
-                    lrNode.addValue(new double[] {x}, 2*x+1);
+                    lrNode.jump(i, new Callback<LinearRegressionBatchGDNode>() {
+                        @Override
+                        public void on(LinearRegressionBatchGDNode result) {
+                            result.set("f1", x);
+                            result.learn(2*x+1, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                //assertFalse(lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                double coefs[] = lrNode.getCoefficients();
-                //System.out.print("Final coefficients: ");
-                //for (int j = 0; j < coefs.length; j++) {
-                //    System.out.print(coefs[j] + ", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(coefs[0] - 2) < 1e-4);
-                assertTrue(Math.abs(lrNode.getIntercept() - 1) < 1e-4);
-                assertTrue(lrNode.getBufferError() < 1e-4);
-                assertTrue(lrNode.getL2Regularization() < 1e-4);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg,Math.abs(coefs[0] - 2) < 1e-4);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg,Math.abs(intercept - 1) < 1e-4);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg,bufferError < 1e-4);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg,l2Reg < 1e-4);
             }
         });
 
@@ -367,26 +397,28 @@ public class LinearRegressionNodeTest {
 
                 for (int i = 0; i < 16; i++) {
                     double x = rng.nextDouble() * 100;
-                    //lrNode.setPropertyUnphased("f1", Type.DOUBLE, x);
-                    //lrNode.learn(2*x+1, cb);
-                    lrNode.addValue(new double[] {x}, 2*x+1);
+                    lrNode.jump(i, new Callback<LinearRegressionBatchGDNode>() {
+                        @Override
+                        public void on(LinearRegressionBatchGDNode result) {
+                            result.set("f1", x);
+                            result.learn(2*x+1, cb);
+                            coefs = result.getCoefficients();
+                            intercept = result.getIntercept();
+                            bufferError = result.getBufferError();
+                            bootstrapMode = result.isInBootstrapMode();
+                            l2Reg = result.getL2Regularization();
+                            result.free();
+                        }
+                    });
                 }
-                double coefs[] = lrNode.getCoefficients();
-                assertFalse(lrNode.getIntercept()+"\t"+coefs[0]+"\t"+lrNode.getBufferError(), lrNode.isInBootstrapMode());
+                assertFalse(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bootstrapMode);
 
                 graph.disconnect(null);
 
-                //System.out.print("Final coefficients: ");
-                //for (int j = 0; j < coefs.length; j++) {
-                //    System.out.print(coefs[j] + ", ");
-                //}
-                //System.out.println();
-                //System.out.println("Error: " + lrNode.getBufferError());
-
-                assertTrue(Math.abs(coefs[0] - 2) < 1e-3);
-                assertTrue(Math.abs(lrNode.getIntercept() - 1) < 1e-3);
-                assertTrue(lrNode.getBufferError() < 1e-6);
-                assertTrue(lrNode.getL2Regularization() < 1e-6);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(coefs[0] - 2) < 1e-3);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, Math.abs(intercept - 1) < 1e-3);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, bufferError < 1e-6);
+                assertTrue(intercept+"\t"+coefs[0]+"\t"+bufferError+"\t"+l2Reg, l2Reg < 1e-6);
             }
         });
 

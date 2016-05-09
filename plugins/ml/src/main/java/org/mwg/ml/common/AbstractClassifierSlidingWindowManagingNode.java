@@ -145,13 +145,6 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
     }
 
     /**
-     * Initializes map values for class num: sum, sum of squares and total.
-     *
-     * @param classNum Number of class
-     */
-    protected abstract void initializeClassIfNecessary(int classNum);
-
-    /**
      * @param value
      * @param classNum
      * @return
@@ -230,7 +223,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      *
      * @param value New value to add; {@code null} disallowed
      */
-    public boolean addValue(double value[], int result) {
+    protected boolean addValue(double value[], int result) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
 
         if (isInBootstrapMode()) {

@@ -30,7 +30,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      *
      * @param value New value to add; {@code null} disallowed
      */
-    public boolean addValue(double value[], double result) {
+    protected boolean addValue(double value[], double result) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
 
         if (isInBootstrapMode()) {

@@ -41,7 +41,6 @@ public class GaussianNaiveBayesianNode extends AbstractClassifierSlidingWindowMa
     }
 
 
-    @Override
     protected void initializeClassIfNecessary(int classNum){
         Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX+classNum);
         if (oldSumsObj!=null){

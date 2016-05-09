@@ -44,7 +44,6 @@ public class GaussianClassifierNode extends AbstractClassifierSlidingWindowManag
 
     //TODO Try out changing parameters on the fly
 
-    @Override
     protected void initializeClassIfNecessary(int classNum) {
         Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         if (oldSumsObj != null) {
