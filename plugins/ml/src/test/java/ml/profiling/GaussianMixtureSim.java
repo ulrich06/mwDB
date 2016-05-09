@@ -38,6 +38,7 @@ public class GaussianMixtureSim {
                             data[i] = Double.parseDouble(args[i + 1]);
                         }
                         //to set data here
+                        node1.setTrainingVector(data);
                         node1.learn(new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
