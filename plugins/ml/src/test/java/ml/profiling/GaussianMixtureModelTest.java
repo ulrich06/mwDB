@@ -29,6 +29,7 @@ public class GaussianMixtureModelTest {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]
                     data[1] = 90 + rand.nextDouble() * 20; //avg=100 [90,110]
                     data[2] = -60 + rand.nextDouble() * 20; //avg=-50 [-60,-40]
+                    node1.setTrainingVector(data);
 
                     node1.learn(new Callback<Boolean>() {
                         @Override
