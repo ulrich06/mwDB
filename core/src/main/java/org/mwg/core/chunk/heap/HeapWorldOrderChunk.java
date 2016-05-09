@@ -10,11 +10,11 @@ import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-/**
- * @ignore ts
- */
 public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
 
+    /**
+     * @ignore ts
+     */
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
     private final long _world;
     private final long _time;
@@ -27,11 +27,24 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     private volatile long _flags;
     private volatile long _extra;
 
+    /**
+     * @ignore ts
+     */
     private static final long _flagsOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _marksOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _lockOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _magicOffset;
 
+    /** @ignore ts */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapWorldOrderChunk.class.getDeclaredField("_flags"));
@@ -94,11 +107,17 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         }
     }
 
+    /**
+     * @native ts
+     */
     @Override
     public void lock() {
         while (!unsafe.compareAndSwapInt(this, _lockOffset, 0, 1)) ;
     }
 
+    /**
+     * @native ts
+     */
     @Override
     public void unlock() {
         if (!unsafe.compareAndSwapInt(this, _lockOffset, 1, 0)) {
@@ -139,6 +158,11 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     }
 
 
+    /**
+     * @native ts
+     * this._marks = this._marks + 1;
+     * return this._marks
+     */
     @Override
     public final long mark() {
         long before;
@@ -150,6 +174,11 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return after;
     }
 
+    /**
+     * @native ts
+     * this._marks = this._marks - 1;
+     * return this._marks
+     */
     @Override
     public final long unmark() {
         long before;
@@ -387,6 +416,15 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return CoreConstants.WORLD_ORDER_CHUNK;
     }
 
+    /**
+     * @native ts
+     * this._magic = this._magic + 1;
+     * if (this._listener != null) {
+     * if ((this._flags & org.mwg.core.CoreConstants.DIRTY_BIT) != org.mwg.core.CoreConstants.DIRTY_BIT) {
+     * this._listener.declareDirty(this);
+     * }
+     * }
+     */
     private void internal_set_dirty() {
         long magicBefore;
         long magicAfter;
@@ -406,6 +444,13 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         return _flags;
     }
 
+    /**
+     * @native ts
+     * var val = this._flags
+     * var nval = val & ~bitsToDisable | bitsToEnable;
+     * this._flags = nval;
+     * return val != nval;
+     */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;

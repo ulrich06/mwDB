@@ -3,9 +3,9 @@ package ml.profiling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.math.matrix.KMatrix;
-import org.mwg.ml.profiling.MLGaussianGmmNode;
+import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
 import org.mwg.core.NoopScheduler;
+import org.mwg.ml.common.matrix.Matrix;
 
 /**
  * Created by assaad on 25/03/16.
@@ -60,12 +60,12 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        Graph graph = GraphBuilder.builder().withFactory(new MLGaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                MLGaussianGmmNode gaussianNodeBatch = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
-                MLGaussianGmmNode gaussianNodeLive = (MLGaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
                 double eps = 1e-7;
 
@@ -81,9 +81,9 @@ public class GaussianNodeTest {
                     }
                     final double[] trains = train[i];
 
-                    gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>() {
+                    gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
                         @Override
-                        public void on(MLGaussianGmmNode result) {
+                        public void on(GaussianGmmNode result) {
                             result.learn(trains);
                         }
                     });
@@ -104,17 +104,17 @@ public class GaussianNodeTest {
                 double[] avgBatch = gaussianNodeBatch.getAvg();
                 double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
 
-                Assert.assertTrue(KMatrix.compare(avgBatch, ravg, eps));
-                Assert.assertTrue(KMatrix.compareArray(covBatch, rcovData, eps));
+                Assert.assertTrue(Matrix.compare(avgBatch, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covBatch, rcovData, eps));
 
 
                 final double[] avgLive = new double[7];
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new Callback<MLGaussianGmmNode>() {
+                gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
                     @Override
-                    public void on(MLGaussianGmmNode result) {
+                    public void on(GaussianGmmNode result) {
                         double[] a = result.getAvg();
                         double[][] c = result.getCovariance(a);
                         if (c != null) {
@@ -130,8 +130,8 @@ public class GaussianNodeTest {
                 });
 
 
-                Assert.assertTrue(KMatrix.compare(avgLive, ravg, eps));
-                Assert.assertTrue(KMatrix.compareArray(covLive, rcovData, eps));
+                Assert.assertTrue(Matrix.compare(avgLive, ravg, eps));
+                Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
 
 
                 gaussianNodeBatch.free();

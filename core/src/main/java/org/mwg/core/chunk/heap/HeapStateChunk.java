@@ -10,11 +10,11 @@ import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
-/**
- * @ignore ts
- */
 public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
+    /**
+     * @ignore ts
+     */
     private static final sun.misc.Unsafe unsafe = Unsafe.getUnsafe();
 
     private final long _world;
@@ -25,9 +25,16 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     private volatile long _flags;
     private volatile long _marks;
 
+    /**
+     * @ignore ts
+     */
     private static final long _flagsOffset;
+    /**
+     * @ignore ts
+     */
     private static final long _marksOffset;
 
+    /** @ignore ts */
     static {
         try {
             _flagsOffset = unsafe.objectFieldOffset(HeapStateChunk.class.getDeclaredField("_flags"));
@@ -70,7 +77,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
         volatile int _elementCount;
 
-        private boolean hashReadOnly;
+        boolean hashReadOnly;
 
         InternalState(int elementDataSize, long[] p_elementK, Object[] p_elementV, int[] p_elementNext, int[] p_elementHash, byte[] p_elementType, int p_elementCount, boolean p_hashReadOnly) {
             this.hashReadOnly = p_hashReadOnly;
@@ -175,6 +182,11 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         return this._marks;
     }
 
+    /**
+     * @native ts
+     * this._marks = this._marks + 1;
+     * return this._marks
+     */
     @Override
     public final long mark() {
         long before;
@@ -186,6 +198,11 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         return after;
     }
 
+    /**
+     * @native ts
+     * this._marks = this._marks - 1;
+     * return this._marks
+     */
     @Override
     public final long unmark() {
         long before;
@@ -916,7 +933,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             }
         }
     }
-
+    
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {
@@ -930,6 +947,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         return _flags;
     }
 
+    /**
+     * @native ts
+     * var val = this._flags
+     * var nval = val & ~bitsToDisable | bitsToEnable;
+     * this._flags = nval;
+     * return val != nval;
+     */
     @Override
     public final boolean setFlags(long bitsToEnable, long bitsToDisable) {
         long val;

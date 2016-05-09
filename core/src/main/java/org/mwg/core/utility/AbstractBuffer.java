@@ -12,5 +12,9 @@ abstract class AbstractBuffer implements Buffer {
         return new CoreBufferIterator(this);
     }
 
+    /* Need to be present in Abstract class for TS*/
+    public abstract byte read(long position);
+    public abstract long size();
+
 }
 
