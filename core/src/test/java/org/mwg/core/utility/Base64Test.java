@@ -257,5 +257,15 @@ public class Base64Test {
 
         */
 
+    @Test
+    public void testBigNegativeLong() {
+        long inital = -214748364888888888L;
+        Buffer buffer = BufferBuilder.newHeapBuffer();
+        Base64.encodeLongToBuffer(inital,buffer);
+
+        long finish = Base64.decodeToLongWithBounds(buffer,0,buffer.size());
+        Assert.assertEquals(inital,finish);
+    }
+
 
 }
