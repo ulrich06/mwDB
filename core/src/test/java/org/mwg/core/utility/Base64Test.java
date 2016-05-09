@@ -2,8 +2,8 @@ package org.mwg.core.utility;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.struct.Buffer;
 import org.mwg.Constants;
+import org.mwg.struct.Buffer;
 
 public class Base64Test {
 
@@ -258,13 +258,26 @@ public class Base64Test {
         */
 
     @Test
-    public void testBigNegativeLong() {
-        long inital = -214748364888888888L;
+    public void testBigLong() {
+        //Long.Max
+        long longMax = Long.MAX_VALUE;
         Buffer buffer = BufferBuilder.newHeapBuffer();
-        Base64.encodeLongToBuffer(inital,buffer);
+        Base64.encodeLongToBuffer(longMax,buffer);
 
-        long finish = Base64.decodeToLongWithBounds(buffer,0,buffer.size());
-        Assert.assertEquals(inital,finish);
+        long decodedLongMax = Base64.decodeToLongWithBounds(buffer,0,buffer.size());
+        Assert.assertEquals(longMax,decodedLongMax);
+
+        buffer.free();
+
+        //Long.Min
+        long longMin = Long.MIN_VALUE;
+        Buffer buffer2 = BufferBuilder.newHeapBuffer();
+        Base64.encodeLongToBuffer(longMin,buffer2);
+
+        long decodedLongMin = Base64.decodeToLongWithBounds(buffer2,0,buffer2.size());
+        Assert.assertEquals(longMin,decodedLongMin);
+
+        buffer2.free();
     }
 
 
