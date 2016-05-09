@@ -27,7 +27,7 @@ public class AbstractNodeTest implements NodeFactory {
     }
 
 
-    @Test
+    //@Test
     public void test() {
         Graph graph = GraphBuilder
                 .builder()
@@ -95,6 +95,62 @@ public class AbstractNodeTest implements NodeFactory {
         });
 
 
+    }
+
+    @Test
+    public void testTime() {
+        Graph graph = GraphBuilder
+                .builder()
+                .withFactory(this)
+                .withScheduler(new NoopScheduler())
+                .build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+
+                final double eps = 1e-7;
+                ExMLNodeImpl node = (ExMLNodeImpl) graph.newNode(0, 0, "AbstractNodeTest");
+                node.set("f0", 0);
+                node.set("f1", 1);
+                node.set("f2", 2);
+                node.set("f3", 3);
+                node.set("f4", "f3+1");
+                node.set(AbstractMLNode.FROM, "f0;f1;f2;f3;$f4");
+
+                for (int i = 0; i < 5; i++) {
+                    int finalI = i * 100 + 50;
+                    node.jump(i, new Callback<ExMLNodeImpl>() {
+                        @Override
+                        public void on(ExMLNodeImpl result) {
+                            result.set("f3", finalI);
+                            result.free();
+                        }
+                    });
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    int finalI = i;
+                    node.jump(i, new Callback<ExMLNodeImpl>() {
+                        @Override
+                        public void on(ExMLNodeImpl res) {
+                            //   System.out.println(res.get("f3"));
+                            res.extractFeatures(new Callback<double[]>() {
+                                                    @Override
+                                                    public void on(double[] result) {
+                                                        //System.out.println(res.get("f3"));
+                                                        //System.out.println(result[0] + "," + result[1] + "," + result[2] + "," + result[3] + "," + result[4]);
+                                                        Assert.assertTrue(result[4] == 50 + finalI * 100 + 1);
+                                                    }
+                                                }
+                            );
+                            res.free();
+                        }
+                    });
+                }
+
+
+            }
+        });
     }
 
 }
