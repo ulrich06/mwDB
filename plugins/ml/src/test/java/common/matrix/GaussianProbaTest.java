@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
+import org.mwg.Node;
 import org.mwg.core.NoopScheduler;
 import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
@@ -22,13 +23,14 @@ public class GaussianProbaTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNode= (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 double eps = 1e-7;
 
 
                 int total = 16;
                 double[][] train = new double[total][1];
                 Random rand = new Random();
+                gaussianNode.set(GaussianGmmNode.FROM,"f1");
 
                 double sum = 0;
                 double sumsquare = 0;
@@ -36,22 +38,44 @@ public class GaussianProbaTest {
                     train[i][0] = rand.nextDouble() * 100;
                     sum += train[i][0];
                     sumsquare += train[i][0] * train[i][0];
+
+                    int finalI = i;
+                    gaussianNode.jump(i, new Callback<Node>() {
+                        @Override
+                        public void on(Node result) {
+                            gaussianNode.set("f1",train[finalI][0]);
+                            gaussianNode.learn(new Callback<Boolean>() {
+                                @Override
+                                public void on(Boolean result) {
+
+                                }
+                            });
+                            result.free();
+                        }
+                    });
+
                 }
 
+                double finalSum = sum;
+                double finalSumsquare = sumsquare;
+                gaussianNode.jump(16, new Callback<GaussianGmmNode>() {
+                    @Override
+                    public void on(GaussianGmmNode result) {
+                        double[] avgBatch = result.getAvg();
+                        double[][] covBatch = result.getCovariance(avgBatch);
 
-                gaussianNodeBatch.learnBatch(train);
+                        //System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
+                        //System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
+                        Assert.assertTrue(Math.abs(avgBatch[0] - finalSum / total) < eps);
+                        Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getCovariance(finalSum, finalSumsquare, total)) < eps);
 
-                double[] avgBatch = gaussianNodeBatch.getAvg();
-                double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
+                        double testvec = rand.nextDouble() * 100;
+                        //System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
+                        Assert.assertTrue(Math.abs(Gaussian1D.getDensity(finalSum, finalSumsquare, total, testvec) - result.getProbability(new double[]{testvec}, null, false)) < eps);
 
-                //System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
-                //System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
-                Assert.assertTrue(Math.abs(avgBatch[0] - sum / total) < eps);
-                Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getCovariance(sum, sumsquare, total)) < eps);
+                    }
+                });
 
-                double testvec = rand.nextDouble() * 100;
-                //System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
-                Assert.assertTrue(Math.abs(Gaussian1D.getDensity(sum, sumsquare, total, testvec) - gaussianNodeBatch.getProbability(new double[]{testvec}, null, false)) < eps);
 
 
             }
@@ -67,7 +91,8 @@ public class GaussianProbaTest {
             public void on(Boolean result) {
 
                 GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
-                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+
+                gaussianNodeLive.set(GaussianGmmNode.FROM,"f1;f2");
 
                 int test = 100;
                 int feat = 2;
@@ -81,12 +106,19 @@ public class GaussianProbaTest {
                         v[j] = random.nextDouble() * (1 + 100 * j);
                         b[i][j] = v[j];
                     }
-                    gaussianNodeLive.learn(v);
-                }
-                gaussianNodeBatch.learnBatch(b);
+                    gaussianNodeLive.set("f1",b[i][0]);
+                    gaussianNodeLive.set("f2",b[i][1]);
 
-                double[] ravg = gaussianNodeBatch.getAvg();
-                double[][] rcovData = gaussianNodeBatch.getCovariance(ravg);
+                    gaussianNodeLive.learn(new Callback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+
+                        }
+                    });
+                }
+
+                double[] ravg=gaussianNodeLive.getAvg();
+                double[][] rcovData=gaussianNodeLive.getCovariance(ravg);
 
 
                 //Test probability calculation.
@@ -99,13 +131,9 @@ public class GaussianProbaTest {
                 double y = gaussianNodeLive.getProbability(v, null, false);
                 //System.out.println("live: " + y);
 
-                double z = gaussianNodeBatch.getProbability(v, null, false);
-                //System.out.println("batch: " + z);
 
 
                 Assert.assertTrue(Math.abs(d - y) < eps);
-                Assert.assertTrue(Math.abs(d - z) < eps);
-
 
             }
         });
@@ -125,6 +153,9 @@ public class GaussianProbaTest {
                 GaussianGmmNode node1 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 GaussianGmmNode node2 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
+                node1.set(GaussianGmmNode.FROM,"f1;f2;f3");
+                node2.set(GaussianGmmNode.FROM,"f1;f2;f3;f4");
+
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]
                     data[1] = 90 + rand.nextDouble() * 20; //avg=100 [90,110]
@@ -135,15 +166,36 @@ public class GaussianProbaTest {
                     datan[2] = data[2];
                     datan[3] = 0 * data[0] + 0 * data[1] + 0 * data[2];
 
-                    node1.learn(data);
-                    node2.learn(datan);
+                    node1.set("f1",data[0]);
+                    node1.set("f2",data[1]);
+                    node1.set("f3",data[2]);
+
+                    node2.set("f1",datan[0]);
+                    node2.set("f2",datan[1]);
+                    node2.set("f3",datan[2]);
+                    node2.set("f4",datan[3]);
+
+
+                    node1.learn(new Callback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+
+                        }
+                    });
+
+                    node2.learn(new Callback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+
+                        }
+                    });
                 }
 
                 double[] avg = node1.getAvg();
                 double[] avg2 = node2.getAvg();
 
-               // printd(avg);
-                //printd(avg2);
+                printd(avg);
+                printd(avg2);
 
                 data[0] = 10;
                 data[1] = 100;
@@ -156,8 +208,8 @@ public class GaussianProbaTest {
 
                 double p = node1.getProbability(avg, null, false);
                 double p2 = node2.getProbability(avg2, null, false);
-                //System.out.println("p1: " + p);
-                //System.out.println("p2: " + p2);
+                System.out.println("p1: " + p);
+                System.out.println("p2: " + p2);
 
 
             }

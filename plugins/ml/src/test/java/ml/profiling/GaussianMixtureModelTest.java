@@ -30,7 +30,12 @@ public class GaussianMixtureModelTest {
                     data[1] = 90 + rand.nextDouble() * 20; //avg=100 [90,110]
                     data[2] = -60 + rand.nextDouble() * 20; //avg=-50 [-60,-40]
 
-                    node1.learn(data);
+                    node1.learn(new Callback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+
+                        }
+                    });
                 }
             }
         });

@@ -37,7 +37,13 @@ public class GaussianMixtureSim {
                         for (int i = 0; i < data.length; i++) {
                             data[i] = Double.parseDouble(args[i + 1]);
                         }
-                        node1.learn(data);
+                        //to set data here
+                        node1.learn(new Callback<Boolean>() {
+                            @Override
+                            public void on(Boolean result) {
+
+                            }
+                        });
 
                         long[] sublev = node1.getSubGraph();
                         for (int i = 0; i < sublev.length; i++) {

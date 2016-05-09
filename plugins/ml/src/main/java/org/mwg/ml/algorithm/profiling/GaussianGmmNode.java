@@ -1,15 +1,55 @@
 package org.mwg.ml.algorithm.profiling;
 
 import org.mwg.*;
+import org.mwg.ml.ProfilingNode;
+import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
-import org.mwg.plugin.AbstractNode;
 
-public class GaussianGmmNode extends AbstractNode {
+public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode{
 
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "GaussianGmm";
+
+    @Override
+    public void learn(Callback<Boolean> callback) {
+        extractFeatures(new Callback<double[]>() {
+            @Override
+            public void on(final double[] value) {
+                long[] subgaussians = (long[]) GaussianGmmNode.super.get(INTERNAL_SUBGAUSSIAN_KEY);
+                if (subgaussians == null || subgaussians.length == 0) {
+                    internallearn(value, true);
+                    callback.on(true);
+                } else {
+                    final int level = getLevel();
+                    GaussianGmmNode.super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
+                        @Override
+                        public void on(Node[] result) {
+                            boolean inside = false;
+                            for (int i = 0; i < result.length; i++) {
+                                GaussianGmmNode subgaussian = (GaussianGmmNode) result[i];
+                                if (subgaussian.checkInside(value, level - 1)) {
+                                   // subgaussian.learn(value); //toDO problem to fix
+                                    inside = true;
+                                    break;
+                                }
+                            }
+                            //if inside a sub, not add it to root
+                            //if not insider a sub, add it to root
+                            internallearn(value, !inside);
+                            callback.on(true);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    @Override
+    public void predict(Callback<double[]> callback) {
+
+    }
 
 
     //Factory of the class integrated
@@ -29,16 +69,13 @@ public class GaussianGmmNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    //Machine Learning Properties and their default values with _DEF
-
 
 
     //Getters and setters
-    private static final String MIN_KEY = "min";
-    private static final String MAX_KEY = "`max";
-    private static final String FEATURES_KEY = "value";
-    private static final String AVG_KEY = "getAvg";
-    private static final String COV_KEY = "cov";
+    public static final String MIN_KEY = "min";
+    public static final String MAX_KEY = "max";
+    public static final String AVG_KEY = "avg";
+    public static final String COV_KEY = "cov";
 
 
     //Mixture model keys
@@ -60,12 +97,7 @@ public class GaussianGmmNode extends AbstractNode {
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if(propertyName.equals(FEATURES_KEY)){
-            learn((double[]) propertyValue);
-        }
-        else{
             super.setProperty(propertyName,propertyType,propertyValue);
-        }
     }
 
     @Override
@@ -125,38 +157,6 @@ public class GaussianGmmNode extends AbstractNode {
         } else return 0;
     }
 
-    public void learnBatch(double[][] values) {
-        //todo can be optimized later, but for now:
-        for (int i = 0; i < values.length; i++) {
-            learn(values[i]);
-        }
-    }
-
-    public void learn(final double[] value) {
-        long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
-        if (subgaussians == null || subgaussians.length == 0) {
-            internallearn(value, true);
-        } else {
-            final int level = getLevel();
-            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
-                @Override
-                public void on(Node[] result) {
-                    boolean inside = false;
-                    for (int i = 0; i < result.length; i++) {
-                        GaussianGmmNode subgaussian = (GaussianGmmNode) result[i];
-                        if (subgaussian.checkInside(value, level - 1)) {
-                            subgaussian.learn(value);
-                            inside = true;
-                            break;
-                        }
-                    }
-                    //if inside a sub, not add it to root
-                    //if not insider a sub, add it to root
-                    internallearn(value, !inside);
-                }
-            });
-        }
-    }
 
 
     private void updateLevel(final int newLevel) {
@@ -320,84 +320,6 @@ public class GaussianGmmNode extends AbstractNode {
 
 
         }
-    }
-
-
-    public void internallearnBatch(double[][] values) {
-        if (values.length == 0) {
-            return;
-        }
-        if (values.length == 1) {
-            learn(values[0]);
-            return;
-        }
-
-        //here values are more than 2
-
-
-        int features = values[0].length;
-        int level = getLevel();
-        int width = getMaxPerLevel();
-
-
-        //manage total
-        int total = getTotal();
-        Double weight = getWeight();
-
-        double[] sum;
-        double[] min;
-        double[] max;
-        double[] sumsquares;
-
-        if (total == 0) {
-            weight = 0.0;
-            sum = new double[features];
-            min = new double[features];
-            max = new double[features];
-            sumsquares = new double[features * (features + 1) / 2];
-        } else {
-            //get everything from saved
-            sum = (double[]) super.get(INTERNAL_SUM_KEY);
-            min = (double[]) super.get(INTERNAL_MIN_KEY);
-            max = (double[]) super.get(INTERNAL_MAX_KEY);
-            sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-        }
-
-        for (int k = 0; k < values.length; k++) {
-            //Update the values
-            for (int i = 0; i < features; i++) {
-                if (values[k][i] < min[i]) {
-                    min[i] = values[k][i];
-                }
-
-                if (values[k][i] > max[i]) {
-                    max[i] = values[k][i];
-                }
-                sum[i] += values[k][i];
-                if (level > 0) {
-                    createLevel(values[k], level - 1, width);
-                }
-            }
-
-            int count = 0;
-            for (int i = 0; i < features; i++) {
-                for (int j = i; j < features; j++) {
-                    sumsquares[count] += values[k][i] * values[k][j];
-                    count++;
-                }
-            }
-            total++;
-            weight = incWeight(weight);
-        }
-        checkAndCompress();
-
-        //Store everything
-        set(INTERNAL_TOTAL_KEY, total);
-        set(INTERNAL_WEIGHT_KEY, weight);
-        set(INTERNAL_SUM_KEY, sum);
-        set(INTERNAL_MIN_KEY, min);
-        set(INTERNAL_MAX_KEY, max);
-        set(INTERNAL_SUMSQUARE_KEY, sumsquares);
     }
 
 

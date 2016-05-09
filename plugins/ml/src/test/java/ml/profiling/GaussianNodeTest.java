@@ -64,7 +64,6 @@ public class GaussianNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNodeBatch = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
                 GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
 
                 double eps = 1e-7;
@@ -79,12 +78,17 @@ public class GaussianNodeTest {
                         train[i][j] = longleyData[k];
                         k++;
                     }
-                    final double[] trains = train[i];
-
+                    int finalI = i;
                     gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
                         @Override
                         public void on(GaussianGmmNode result) {
-                            result.learn(trains);
+                            result.setTrainingVector(train[finalI]);
+                            result.learn(new Callback<Boolean>() {
+                                @Override
+                                public void on(Boolean result) {
+
+                                }
+                            });
                         }
                     });
                     time++;
@@ -98,14 +102,6 @@ public class GaussianNodeTest {
                         k++;
                     }
                 }
-
-                gaussianNodeBatch.learnBatch(train);
-
-                double[] avgBatch = gaussianNodeBatch.getAvg();
-                double[][] covBatch = gaussianNodeBatch.getCovariance(avgBatch);
-
-                Assert.assertTrue(Matrix.compare(avgBatch, ravg, eps));
-                Assert.assertTrue(Matrix.compareArray(covBatch, rcovData, eps));
 
 
                 final double[] avgLive = new double[7];
@@ -134,7 +130,6 @@ public class GaussianNodeTest {
                 Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
 
 
-                gaussianNodeBatch.free();
                 gaussianNodeLive.free();
 
                 graph.disconnect(null);
