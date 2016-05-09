@@ -1,10 +1,14 @@
 package org.mwg.ws;
 
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mwg.*;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -66,22 +70,38 @@ public class WebSocketCommunicationTest {
     }*/
 
     private Random _random;
-    private long _seed = 12345L;
+    private long _seed = 12L;
     private long _world;
     private long _time;
+
+    private Path path;
 
     @Before
     public void init() {
         _random = new Random(_seed);
-        _world = _random.nextLong();
-        _time = -214748364888888888L;
+//        _world = _random.nextLong();
+//        _time = _random.nextLong();
+        _world = 587451; //fixme
+        _time = 125478; //fixme
+
+        path = Paths.get("data");
+        System.out.println(path.toString());
     }
+
+    @After
+    public void deleteDB() {
+        File f = path.toFile();
+        deleteDirectory(f);
+        System.out.println(f.exists());
+    }
+
+
 
 
 
     @Test
     public void testGet() {
-        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage("data"),12345))
+        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(path.toString()),12345))
                 .build();
 
         Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",12345)).build();
@@ -137,8 +157,72 @@ public class WebSocketCommunicationTest {
             e.printStackTrace();
         }
 
-        System.out.println(latch.getCount());
+        assertEquals(0,latch.getCount());
 
+
+    }
+
+    @Test
+    public void testGet2() {
+        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage("data"),12346))
+                .build();
+
+        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",12346)).build();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        System.out.println("Test with world=" + _world + " and time=" + _time);
+
+        org.mwg.core.utility.DeferCounter counter = new org.mwg.core.utility.DeferCounter(1);
+
+
+
+        serverGraph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                assertEquals(true,result);
+
+                System.out.println("coonnectec");
+
+                clientGraph.connect(new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        assertEquals(true,result);
+
+                        System.out.println("connected");
+
+                        Node n1 = serverGraph.newNode(_world,_time);
+                        n1.set("name","node1");
+                        n1.set("value",1);
+                        serverGraph.index("indexName", n1, new String[]{"name"}, new Callback<Boolean>() {
+                            @Override
+                            public void on(Boolean result) {
+                                assertEquals(true,result);
+                                System.out.println("titi");
+                                clientGraph.all(_world, _time, "indexName", new Callback<Node[]>() {
+                                    @Override
+                                    public void on(Node[] result) {
+                                        System.out.println("toto");
+                                        System.out.println(Arrays.toString(result));
+                                        assertEquals(1,result.length);
+
+                                        assertEquals("node1", result[0].get("name"));
+                                        assertEquals(1, result[0].get("value"));
+                                        assertEquals(_world,result[0].world());
+                                        assertEquals(_time,result[0].time());
+                                        counter.count();
+                                    }
+                                });
+                            }
+                        });
+
+
+                    }
+                });
+
+
+            }
+        });
 
     }
 
@@ -199,64 +283,15 @@ public class WebSocketCommunicationTest {
         assertArrayEquals(new int[]{1,1},finalResult);
     }
 
-    /*@Test
-    public void testGet2() {
-        final long world = random.nextLong();
-        final long time = random.nextLong();
-        System.out.println("Test with world=" + world + " and time=" + time);
-
-        org.mwg.core.utility.DeferCounter counter = new org.mwg.core.utility.DeferCounter(1);
-
-
-
-        serverGraph.connect(new Callback<Boolean>() {
-            @Override
-            public void on(Boolean result) {
-                assertEquals(true,result);
-
-                System.out.println("coonnectec");
-
-                clientGraph.connect(new Callback<Boolean>() {
-                    @Override
-                    public void on(Boolean result) {
-                        assertEquals(true,result);
-
-                        System.out.println("connected");
-
-                        Node n1 = serverGraph.newNode(world,time);
-                        n1.set("name","node1");
-                        n1.set("value",1);
-                        serverGraph.index("indexName", n1, new String[]{"name"}, new Callback<Boolean>() {
-                            @Override
-                            public void on(Boolean result) {
-                                assertEquals(true,result);
-                                System.out.println("titi");
-                                clientGraph.all(world, time, "indexName", new Callback<Node[]>() {
-                                    @Override
-                                    public void on(Node[] result) {
-                                        System.out.println("toto");
-                                        System.out.println(Arrays.toString(result));
-                                        assertEquals(1,result.length);
-
-                                        assertEquals("node1", result[0].get("name"));
-                                        assertEquals(1, result[0].get("value"));
-                                        assertEquals(world,result[0].world());
-                                        assertEquals(time,result[0].time());
-                                        counter.count();
-                                    }
-                                });
-                            }
-                        });
-
-
-                    }
-                });
-
-
+    private void deleteDirectory(File file) {
+        if(file.isDirectory()) {
+            for (File content : file.listFiles()) {
+                deleteDirectory(content);
             }
-        });
+        }
 
-    }*/
+        file.delete();
 
+    }
 
 }
