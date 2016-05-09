@@ -67,7 +67,6 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
         _wrapped.put(stream, new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                System.out.println("Data put");
                 if(result) {
                     stream.write(CoreConstants.BUFFER_SEP);
                     stream.write(WSMessageType.RQST_FORCE_RELOAD);

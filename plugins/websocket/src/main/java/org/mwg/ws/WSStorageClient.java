@@ -137,6 +137,7 @@ public class WSStorageClient implements Storage {
             _nextIdMessages.set(0);
             _callBacks.clean();
             _graph = null;
+            callback.on(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
