@@ -73,7 +73,12 @@ public class PolynomialNodeTest {
             polynomialNode.jump(times[ia], new Callback<PolynomialNode>() {
                 @Override
                 public void on(PolynomialNode result) {
-                    result.learn(values[ia]);
+                    result.learn(values[ia], new Callback<Boolean>() {
+                        @Override
+                        public void on(Boolean result) {
+
+                        }
+                    });
                 }
             });
         }
@@ -83,8 +88,12 @@ public class PolynomialNodeTest {
             polynomialNode.jump(times[ia], new Callback<PolynomialNode>() {
                 @Override
                 public void on(PolynomialNode result) {
-                    double v = result.extrapolate();
-                    Assert.assertTrue(Math.abs(values[ia] - v) <= precision);
+                    result.extrapolate(new Callback<Double>() {
+                        @Override
+                        public void on(Double v) {
+                            Assert.assertTrue(Math.abs(values[ia] - v) <= precision);
+                        }
+                    });
                 }
             });
         }
