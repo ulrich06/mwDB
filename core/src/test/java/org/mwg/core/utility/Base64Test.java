@@ -256,29 +256,4 @@ public class Base64Test {
 
 
         */
-
-    @Test
-    public void testBigLong() {
-        //Long.Max
-        long longMax = Long.MAX_VALUE;
-        Buffer buffer = BufferBuilder.newHeapBuffer();
-        Base64.encodeLongToBuffer(longMax,buffer);
-
-        long decodedLongMax = Base64.decodeToLongWithBounds(buffer,0,buffer.size());
-        Assert.assertEquals(longMax,decodedLongMax);
-
-        buffer.free();
-
-        //Long.Min
-        long longMin = Long.MIN_VALUE;
-        Buffer buffer2 = BufferBuilder.newHeapBuffer();
-        Base64.encodeLongToBuffer(longMin,buffer2);
-
-        long decodedLongMin = Base64.decodeToLongWithBounds(buffer2,0,buffer2.size());
-        Assert.assertEquals(longMin,decodedLongMin);
-
-        buffer2.free();
-    }
-
-
 }
