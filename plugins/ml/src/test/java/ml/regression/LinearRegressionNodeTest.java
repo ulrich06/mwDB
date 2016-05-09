@@ -1,10 +1,7 @@
 package ml.regression;
 
 import org.junit.Test;
-import org.mwg.Callback;
-import org.mwg.Graph;
-import org.mwg.GraphBuilder;
-import org.mwg.Type;
+import org.mwg.*;
 import org.mwg.core.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
@@ -258,7 +255,12 @@ public class LinearRegressionNodeTest {
 
     @Test
     public void testNormalSGD() {
-        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = GraphBuilder.builder()
+                //.withOffHeapMemory()
+                //.withMemorySize(20_000)
+                //.withAutoSave(10000)
+                //.withStorage(new LevelDBStorage("data"))
+                .withFactory(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -267,7 +269,7 @@ public class LinearRegressionNodeTest {
 
                 LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newNode(0, 0, LinearRegressionSGDNode.NAME);
 
-                final int BUFFER_SIZE = 8513;
+                final int BUFFER_SIZE = 8100;
 
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFFER_SIZE);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
