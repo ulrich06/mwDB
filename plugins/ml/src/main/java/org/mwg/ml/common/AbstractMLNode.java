@@ -36,8 +36,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             String[] split = query.split(FROM_SEPARATOR);
             result = new double[split.length];
             for (int i = 0; i < result.length; i++) {
-                org.mwg.ml.common.mathexp.MathExpressionEngine localEngine = MathExpressionEngine.parse(split[i]);
-                result[i] = localEngine.eval(this);
+                result[i] = Double.parseDouble(get(split[i]).toString());
             }
             callback.on(result);
         } else {

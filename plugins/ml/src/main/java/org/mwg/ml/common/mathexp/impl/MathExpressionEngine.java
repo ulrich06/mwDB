@@ -239,7 +239,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                 }
                                 if (resolved != null) {
                                     double resultAsDouble = PrimitiveHelper.parseDouble(resolved.toString());
-                                    vars.put(cleanName, resultAsDouble);
+                                    //vars.put(cleanName, resultAsDouble);
                                     String valueString = resolved.toString();
                                     if (PrimitiveHelper.equals(valueString, "true")) {
                                         stack.push(1.0);

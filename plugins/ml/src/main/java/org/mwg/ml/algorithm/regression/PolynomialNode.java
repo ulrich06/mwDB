@@ -2,12 +2,13 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.*;
 import org.mwg.ml.RegressionNode;
+import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.ml.common.matrix.operation.PolynomialFit;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeState;
 
-public class PolynomialNode extends AbstractNode implements RegressionNode {
+public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "Polynomial";
