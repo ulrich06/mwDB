@@ -29,7 +29,7 @@
             <groupId>org.kevoree.mwg.plugins</groupId>
             <artifactId>leveldb</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <!--<scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

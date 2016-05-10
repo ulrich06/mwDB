@@ -47,5 +47,36 @@ Currently the plugin allow to have one machine that produce data and another one
 - [ ] Force the client to reload some data from the server
 - [ ] When the client put data on the storage, the server should access these data, not only on cache miss
 
+#Test information
+##WebSocket Secure with authentification by certificate exchange
+To test our wss implementation, we create keystore and truststore files for server and client following the procedure below.
 
+**Certificates password:**
+- `server.keystore`: WS-Server-Keystore-16
+- wsTestKey: same as  `server.keystore` password
+- `server.truststore`: WS-Server-Truststore-16
+- `client.keystore`: WS-Client-Keystore-16
+- wsTestKeyClt: same as `client.keystore` password
+- `client.truststore`: WS-Client-Truststore-16
 
+**Procedure of keystore/truststore creation:**
+- `keytool -genkey -alias wsTestKey -keystore server.keystore`
+- password: see above
+- press enter until the end (except for the question Is ...?, answer by yes)
+- `keytool -export -alias wsTestKey -file certfile.cert -keystore server.keystore`
+- `keytool -import -alias publicWsTestKey -file certfile.cert -keystore server.truststore`
+- answer by `yes` to the question `Trust this certificate? [no]:`
+- `keytool -genkey -alias wsTestKeyClt -keystore client.keystore`
+- password: see above
+- `keytool -export -alias wsTestKeyClt -file client.cert -keystore client.keystore`
+- `keytool -import -alias wsTestKeyClt -file client.cert -keystore client.truststore`
+- `keytool -import -alias wsTestKeyClt -file client.cert -keystore server.truststore`
+- `keytool -import -alias wsTestKey -file certfile.cert -keystore client.truststore`
+- answer by `yes` to the question `Trust this certificate? [no]:`
+- `rm certfile.cert`
+- `rm client.cert`
+
+At the end:
+   - `server.keystore` should contain the private key of the server
+   - `server.truststore` and `client.truststore` should contain the public key of the client and the server
+   - `client.keystore` should contain the private key of the client

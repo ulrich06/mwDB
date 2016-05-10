@@ -2,11 +2,13 @@ package org.mwg.ws;
 
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mwg.*;
 
 import java.io.File;
+import java.net.BindException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -22,31 +24,48 @@ import static org.mwg.Constants.END_OF_TIME;
 public class WebSocketCommunicationTest {
     private long _world;
     private long _time;
-    private static final String DB_BASE_NAME = "data_";
+    private Graph serverGraph;
+    private Graph clientGraph;
+    private Path dbPath;
 
     @Before
     public void init() {
          Random random = new Random(12345L);
         _world = BEGINNING_OF_TIME + (long)(random.nextDouble() * (END_OF_TIME - BEGINNING_OF_TIME));
         _time = BEGINNING_OF_TIME + (long)(random.nextDouble() * (END_OF_TIME - BEGINNING_OF_TIME));
+
+        dbPath = Paths.get("data");
+
+        serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(dbPath.toString()),12345))
+                .build();
+
+        clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",12345)).build();
     }
 
     @After
     public void deleteDB() {
-        Path path = Paths.get(".");
-        deleteDBDirectory(path.toFile());
+        CountDownLatch latch = new CountDownLatch(1);
+        clientGraph.disconnect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                serverGraph.disconnect(new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        latch.countDown();
+                    }
+                });
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        deleteDBDirectory(dbPath.toFile());
     }
 
     @Test
     public void testGet() {
-        int port = 12346;
-        Path path = Paths.get(DB_BASE_NAME + 1);
-
-        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(path.toString()),port))
-                .build();
-
-        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",port)).build();
-
         CountDownLatch latch = new CountDownLatch(1);
 
         System.out.println("Test with world=" + _world + " and time=" + _time);
@@ -104,13 +123,6 @@ public class WebSocketCommunicationTest {
 
     @Test
     public void testConnectionDisconnection() {
-        int port = 12345;
-        Path path = Paths.get(DB_BASE_NAME + 2);
-        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(path.toString()),port))
-                .build();
-
-        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",port)).build();
-
         int[] finalResult = new int[]{-1,-1};
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -161,6 +173,50 @@ public class WebSocketCommunicationTest {
         assertArrayEquals(new int[]{1,1},finalResult);
     }
 
+    @Test
+    public void testReleaseOfWSPort() {
+        Graph server1 = GraphBuilder.builder()
+                .withStorage(new WSStorageWrapper(new LevelDBStorage("data1"),8484))
+                .build();
+
+
+        Graph server2 = GraphBuilder.builder()
+                .withStorage(new WSStorageWrapper(new LevelDBStorage("data2"),8484))
+                .build();
+
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        server1.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                try {
+                    server2.connect(null);
+                } catch (RuntimeException exception) {
+                    try {
+                        throw exception.getCause();
+                    } catch (BindException throwable) {
+
+                    } catch (Throwable e) {
+                        Assert.fail("Exception throw:" + e.getMessage());
+                    }
+                } catch (Exception e) {
+                    Assert.fail("Exception throw:" + e.getMessage());
+                }
+            }
+        });
+
+
+        try {
+            latch.await(350,TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        deleteDBDirectory(Paths.get("data1").toFile());
+        deleteDBDirectory(Paths.get("data2").toFile());
+    }
+
     /**
      * Tests below currently does not pass due to a known bug
      * We keep it to show some known situations with unexpected behavior
@@ -169,14 +225,6 @@ public class WebSocketCommunicationTest {
 
     //    @Test
     public void testGet2() {
-        int port = 12347;
-        Path path = Paths.get(DB_BASE_NAME + 3);
-
-        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(path.toString()),port))
-                .build();
-
-        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",port)).build();
-
         CountDownLatch latch = new CountDownLatch(1);
 
         System.out.println("Test with world=" + _world + " and time=" + _time);
@@ -234,14 +282,6 @@ public class WebSocketCommunicationTest {
     }
 
     public void testPut() {
-        int port = 12348;
-        Path path = Paths.get(DB_BASE_NAME + 4);
-
-        Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage(path.toString()),port))
-                .build();
-
-        Graph clientGraph = GraphBuilder.builder().withStorage(new WSStorageClient("0.0.0.0",port)).build();
-
         CountDownLatch latch = new CountDownLatch(1);
 
         System.out.println("Test with world=" + _world + " and time=" + _time);
@@ -297,16 +337,16 @@ public class WebSocketCommunicationTest {
         assertEquals(0,latch.getCount());
     }
 
+
+
     private void deleteDBDirectory(File file) {
         if (file.isDirectory()) {
             for (File content : file.listFiles()) {
                 deleteDBDirectory(content);
             }
         }
-        if(file.getPath().startsWith("./" + DB_BASE_NAME)) {
 
-            file.delete();
-        }
+        file.delete();
     }
 
 }
