@@ -38,7 +38,7 @@ class ActionTraverse implements TaskAction {
                 }
             }
             DeferCounter deferCounter = context.graph().counter(toLoad.size());
-            final Node[] resultNodes = new AbstractNode[toLoad.size()];
+            final Node[] resultNodes = new AbstractNode[toLoad.size()]; //toDo change abstractNode type
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {
                 context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {

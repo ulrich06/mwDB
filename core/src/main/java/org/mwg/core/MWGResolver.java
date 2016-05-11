@@ -535,7 +535,7 @@ class MWGResolver implements Resolver {
         //protection against deleted Node
         long[] previousResolveds = castedNode._previousResolveds.get();
         if (previousResolveds == null) {
-            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR);
+            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR+" node id: "+node.id());
         }
         //let's go for the resolution now
         final long nodeWorld = node.world();

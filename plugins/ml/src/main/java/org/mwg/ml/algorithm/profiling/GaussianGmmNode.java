@@ -26,8 +26,6 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode{
 
 
     private void learnVector(double[] value,Callback<Boolean> callback){
-
-
         long[] subgaussians = (long[]) GaussianGmmNode.super.get(INTERNAL_SUBGAUSSIAN_KEY);
         if (subgaussians == null || subgaussians.length == 0) {
             internallearn(value, true);
@@ -363,7 +361,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode{
     }
 
 
-    public void internallearn(double[] values, boolean createNode) {
+    private void internallearn(double[] values, boolean createNode) {
         int features = values.length;
 
         //manage total

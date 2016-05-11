@@ -21,8 +21,9 @@ public class MultivariateNormalDistribution {
         inv=pinvsvd.getPInv();
         det=pinvsvd.getDeterminant(); //todo test if we need to do 1/det
         rank=pinvsvd.getRank();
-
     }
+
+
 
     public static Matrix getCovariance(double[] sum, double[] sumsquares, int total) {
         if (total < 2) {
