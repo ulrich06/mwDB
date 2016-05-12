@@ -210,7 +210,8 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
     private void updateLevel(final int newLevel) {
         super.set(INTERNAL_LEVEL_KEY, newLevel);
         if (newLevel == 0) {
-            super.set(INTERNAL_SUBGAUSSIAN_KEY, null);
+            //ToDo free children here
+            super.set(INTERNAL_SUBGAUSSIAN_KEY,new long[0]);
         } else {
             super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
                 @Override
@@ -385,7 +386,7 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
 
                 Matrix covBackup= new Matrix(null,nbfeature,nbfeature);
                 for(int i=0;i<nbfeature;i++){
-                    covBackup.set(i,i,err[i]);
+                    covBackup.set(i,i,err[i]*err[i]);
                 }
 
                 int[] totals=new int[evaluates.size()];
