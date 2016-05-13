@@ -78,12 +78,12 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest{
                     bdtNode.jump(i, cjc);
                     assertTrue(i+". Expected: "+((i>=59)?false:true), cjc.errors == 0);
                 }
-                //Now starting to make errors
+                //Now starting to make errors:
                 for (int i = 1001; i < 1019; i++) {
                     final double f1 = rng.nextDouble();
                     final double f2 = rng.nextDouble();
                     cjc.value = new double[]{f1,f2};
-                    cjc.expectedClass = (f1>=0.5)?3:((f2>=0.5)?4:5);
+                    cjc.expectedClass = (f1>=0.5)?2:((f2>=0.5)?0:1);
                     cjc.expectedBootstrap = false;
                     bdtNode.jump(i, cjc);
                     assertTrue(i+". Expected: false", cjc.errors == 0);
