@@ -8,6 +8,8 @@ import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
  */
 public class StreamDecisionTreeNode extends AbstractClassifierSlidingWindowManagingNode{
 
+    //TODO We BADLY need to keep the tree between received data points.
+
     public StreamDecisionTreeNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
@@ -22,6 +24,15 @@ public class StreamDecisionTreeNode extends AbstractClassifierSlidingWindowManag
         final int predictedClass = predictValue(value);
         //No real likelihood. Just yes or no.
         return (classNum==predictedClass)?1.0:0.0;
+    }
+
+    @Override
+    protected void addValueBootstrap(double[] value, int classNum){
+        //-1 because we will add 1 value to the buffer later.
+        while (getCurrentBufferLength() > (getMaxBufferLength()-1)) {
+            removeFirstValueFromBuffer();
+        }
+        super.addValueBootstrap(value, classNum);
     }
 
     @Override

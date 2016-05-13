@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.ml.common.DecisionTreeNode;
 import org.mwg.plugin.NodeFactory;
 
 import java.util.*;
@@ -36,16 +37,6 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     DecisionTreeNode rootNode = null;
 
-    protected class DecisionTreeNode{
-        //TODO Add conditions and splits.
-        double boundary; //For splitting the criterion
-        int classNum; //For leaf
-        DecisionTreeNode left; // <boundary
-        DecisionTreeNode right; //>=boundary
-        int featureNum;
-        //TODO Unknown? NaN?
-    }
-
     public BatchDecisionTreeNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
@@ -60,19 +51,23 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return predict(node.left, value);
     }
 
-    protected void createDecisionTree(){
-        if (isInBootstrapMode()){
-            rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
-        }else{
-            //Learn decision tree FROM OLD VALUES
-            rootNode = split(unpackValues(getStableValueBuffer()), getStableRealBufferClasses());
-        }
+    protected static final String INTERNAL_DECISION_TREE_KEY = "_decisionTreeSerialized";
+
+    protected void setDecisionTreeArray(double[] decisionTreeArray) {
+        Objects.requireNonNull(decisionTreeArray, "Decision tree must be not null at that point");
+        unphasedState().setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, decisionTreeArray);
+    }
+
+    protected double[] getDecisionTreeArray() {
+        Object objDT = unphasedState().getFromKey(INTERNAL_DECISION_TREE_KEY);
+        Objects.requireNonNull(objDT, "Decision tree must be not null at that point");
+        return (double[]) objDT;
     }
 
     @Override
     protected int predictValue(double[] value) {
         if (rootNode==null){
-            createDecisionTree();
+            rootNode = DecisionTreeNode.deserializeFromDoubleArray(getDecisionTreeArray());
         }
         return predict(rootNode, value);
     }
@@ -337,44 +332,13 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return true;
     }
 
-    /**
-     * Prefix for sum attribute. For each class its class label will be appended to
-     * this key prefix.
-     */
-    protected static final String INTERNAL_STABLE_VALUE_BUFFER_KEY = "_stableResultsBuffer";
-
-    /**
-     * Prefix for sum attribute. For each class its class label will be appended to
-     * this key prefix.
-     */
-    protected static final String INTERNAL_STABLE_RESULTS_BUFFER_KEY = "_stableResultsValueBuffer";
-
-    protected double[] getStableValueBuffer() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_STABLE_VALUE_BUFFER_KEY, new double[0]);
-    }
-
-    protected final void setStableValueBuffer(double[] valueBuffer) {
-        Objects.requireNonNull(valueBuffer, "stable value buffer must be not null");
-        unphasedState().set(_resolver.stringToLongKey(INTERNAL_STABLE_VALUE_BUFFER_KEY), Type.DOUBLE_ARRAY, valueBuffer);
-    }
-
-    public int[] getStableRealBufferClasses() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_STABLE_RESULTS_BUFFER_KEY, new int[0]);
-    }
-
-    protected final void setStableRealBufferClasses(int[] resBuffer) {
-        Objects.requireNonNull(resBuffer,"stable result buffer must be not null");
-        unphasedState().set(_resolver.stringToLongKey(INTERNAL_STABLE_RESULTS_BUFFER_KEY), Type.INT_ARRAY, resBuffer);
-    }
-
     @Override
     protected void updateModelParameters(double[] value, int classNumber) {
         if (getInputDimensions()==INPUT_DIM_UNKNOWN){
             setInputDimensions(value.length);
         }
 
-        setStableValueBuffer(getValueBuffer());
-        setStableRealBufferClasses(getRealBufferClasses());
-        createDecisionTree();
+        rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
+        setDecisionTreeArray(rootNode.serializeToDoubleArray());
     }
 }
