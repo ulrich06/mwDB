@@ -31,6 +31,17 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    //We don't need large buffer. Gradient algorithm uses sliding window only for evaluations.
+    //Therefore, we have to keep the window size even in bootstrap mode
+    @Override
+    protected void addValueBootstrap(double value[], double result){
+        //-1 because we will add 1 value to the buffer later.
+        while (getCurrentBufferLength() > (getMaxBufferLength()-1)) {
+            removeFirstValueFromBuffer();
+        }
+        super.addValueBootstrap(value, result);
+    }
+
     @Override
     protected void updateModelParameters(double[] value, double response) {
         //Value should be already added to buffer by that time

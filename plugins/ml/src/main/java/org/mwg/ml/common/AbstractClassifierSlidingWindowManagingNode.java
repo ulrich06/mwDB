@@ -286,7 +286,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      *
      * @param value New value to add; {@code null} disallowed
      */
-    private void addValueBootstrap(double value[], int result) {
+    protected void addValueBootstrap(double value[], int result) {
         addValueToBuffer(value, result); //In bootstrap - no need to account for length
 
         if (getNumValuesInBuffer() >= getMaxBufferLength()) {

@@ -26,6 +26,9 @@ public class StreamDecisionTreeNode extends AbstractClassifierSlidingWindowManag
 
     @Override
     protected void updateModelParameters(double[] value, int classNumber) {
+        //TODO No tree? Initialize with the leaf.
 
+        //TODO If there is a tree already:
+          //TODO Go to the leaf
     }
 }
