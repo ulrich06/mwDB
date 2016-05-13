@@ -1,18 +1,33 @@
 package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.plugin.NodeFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by andre on 5/9/2016.
  */
 public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagingNode {
 
-    //TODO what to do after node split? Re-create decision tree from buffer?
+    public static final String NAME = "BatchDecisionTreeClassifier";
+
+    public static class Factory implements NodeFactory {
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            BatchDecisionTreeNode newNode = new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
+            return newNode;
+        }
+    }
+
+    //TODO what to do after node split? Re-create decision tree from buffer? Now - yes
 
     //TODO Make criterion configurable (entropy vs Giny index vs accuracy improvement vs ... think of other options)
 
@@ -34,10 +49,26 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    protected int predict(DecisionTreeNode node, double value[]){
+        if ((node.left == null) && (node.right == null)){
+            return node.classNum;
+        }
+        if (value[node.featureNum]>=node.boundary){
+            return predict(node.right, value);
+        }
+        return predict(node.left, value);
+    }
+
+    protected void createDecisionTree(){
+        rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
+    }
+
     @Override
     protected int predictValue(double[] value) {
-        //TODO
-        return 0;
+        if (rootNode==null){
+            createDecisionTree();
+        }
+        return predict(rootNode, value);
     }
 
     @Override
@@ -57,12 +88,37 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     private static double getBoundary(double values[]){
         //TODO: for now it is only median. Add more sophisticated things.
-        double sortedValues[] = Arrays.copyOf(values, values.length);
+        //When counting median, leave only unique elements.
+        //Otherwise we can end up with everything above or below the boundary.
+        Set<Double> uniqueValuesSet = new HashSet<>();
+        for (double d : values){
+            uniqueValuesSet.add(d);
+        }
+        Double sortedValues[] = uniqueValuesSet.toArray(new Double[0]);
         Arrays.sort(sortedValues);
         final int midArray = sortedValues.length/2;
         if (values.length % 2 == 0)
             return (sortedValues[midArray] + sortedValues[midArray - 1])/2; //Mind that index start with 0
         return sortedValues[midArray]; //Again, mind that index start with 0
+    }
+
+    private static double[] getAllPossibleBoundaries(double values[]){
+        //When counting median, leave only unique elements.
+        //Otherwise we can end up with everything above or below the boundary.
+        Set<Double> uniqueValuesSet = new HashSet<>();
+        for (double d : values){
+            uniqueValuesSet.add(d);
+        }
+        if (uniqueValuesSet.size()==1){
+            return new double[]{values[0]};
+        }
+        Double sortedValues[] = uniqueValuesSet.toArray(new Double[0]);
+        Arrays.sort(sortedValues);
+        double result[] = new double[sortedValues.length-1];
+        for (int i=0;i<result.length;i++){
+            result[i] = (sortedValues[i]+sortedValues[i+1])/2;
+        }
+        return result;
     }
 
     private static int[] toIntArray(List<Integer> intList){
@@ -85,26 +141,37 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return result;
     }
 
-    private static double getImprovement(double[] values, int classNumbers[]){
+    private static double[] getImprovementAndBoundary(double[] values, int classNumbers[]){
         //TODO for now using only accuracy improvement. Add more criteria.
-        double boundary = getBoundary(values);
-        int originalErrors = getMajorityErrors(classNumbers);
-        List<Integer> aboveBoundaryClassNumbers = new ArrayList<Integer>();
-        List<Integer> belowBoundaryClassNumbers = new ArrayList<Integer>();
-        for (int i=0;i<values.length;i++){
-            //= can go either way.
-            //It is a median, so something is likely to be on the boundary.
-            if (values[i]>=boundary){
-                aboveBoundaryClassNumbers.add(classNumbers[i]);
-            }else{
-                belowBoundaryClassNumbers.add(classNumbers[i]);
+        double boundariesList[] = getAllPossibleBoundaries(values);
+        double maxImprovement = -1; //Improvement cannot be <0 ,so we'll replace that immediately
+        double bestBoundary = Double.NaN;
+        for (double boundary : boundariesList){
+            int originalErrors = getMajorityErrors(classNumbers);
+            List<Integer> aboveBoundaryClassNumbers = new ArrayList<Integer>();
+            List<Integer> belowBoundaryClassNumbers = new ArrayList<Integer>();
+            for (int i=0;i<values.length;i++){
+                //= can go either way.
+                //It is a median, so something is likely to be on the boundary.
+                if (values[i]>=boundary){
+                    aboveBoundaryClassNumbers.add(classNumbers[i]);
+                }else{
+                    belowBoundaryClassNumbers.add(classNumbers[i]);
+                }
+            }
+            int errorsAbove = getMajorityErrors(toIntArray(aboveBoundaryClassNumbers));
+            int errorsBelow = getMajorityErrors(toIntArray(belowBoundaryClassNumbers));
+            double errorPercentageBefore = ((double)originalErrors)/classNumbers.length;
+            double errorPercentageAfter = ((double)errorsAbove + errorsBelow)/classNumbers.length;
+            double improvement = errorPercentageBefore-errorPercentageAfter;
+            if (improvement > maxImprovement){
+                maxImprovement = improvement;
+                bestBoundary = boundary;
             }
         }
-        int errorsAbove = getMajorityErrors(toIntArray(aboveBoundaryClassNumbers));
-        int errorsBelow = getMajorityErrors(toIntArray(belowBoundaryClassNumbers));
-        double accuracyBefore = ((double)originalErrors)/classNumbers.length;
-        double accuracyAfter = ((double)errorsAbove + errorsBelow)/classNumbers.length;
-        return accuracyAfter-accuracyBefore;
+
+        //double boundary = getBoundary(values);
+        return new double[]{maxImprovement, bestBoundary};
     }
 
     private static int getMajorityErrors(int classNumbers[]){
@@ -138,6 +205,9 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
                 currentCount = 0;
             }
             currentCount++;
+        }
+        if (currentCount > maxCount) {
+            maxClass = currentClass;
         }
         return maxClass;
     }
@@ -181,14 +251,22 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
             return createLeaf(classNumbers[0]);
         }
 
+        if (allValuesAreTheSame(values)){
+            return createLeaf(getMostFrequentElement(classNumbers));
+        }
+
         final int dims = getInputDimensions();
         int chosenFeature = -1;
         double maxImprovement = 0; //TODO initialize with threshold
+        double bestBoundary = Double.NaN;
         for (int i=0;i<dims;i++){
             double valuesOfFeature[] = extractColumn(values, i);
-            double improvement = getImprovement(valuesOfFeature, classNumbers);
+            double improvementAndBoundary[] = getImprovementAndBoundary(valuesOfFeature, classNumbers);
+            double improvement = improvementAndBoundary[0];
+            double boundary = improvementAndBoundary[1];
             if (improvement > maxImprovement){
                 maxImprovement = improvement;
+                bestBoundary = boundary;
                 chosenFeature = i;
             }
         }
@@ -199,7 +277,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         //So, we chose the feature.
         //TODO Do not duplicate the code. We did all of that when choosing the features
         double valuesByFeature[] = extractColumn(values, chosenFeature);
-        double boundary = getBoundary(valuesByFeature);
+        double boundary = bestBoundary;
 
         List<Integer> aboveBoundaryClassNumbers = new ArrayList<Integer>();
         List<double[]> aboveBoundaryValues = new ArrayList<double[]>();
@@ -216,25 +294,38 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
                 belowBoundaryValues.add(values[i]);
             }
         }
-        double bbValuesArray[][] = toDouble2DArray(aboveBoundaryValues);
+        double bbValuesArray[][] = toDouble2DArray(belowBoundaryValues);
         int bbClasses[] = toIntArray(belowBoundaryClassNumbers);
         double abValuesArray[][] = toDouble2DArray(aboveBoundaryValues);
         int abClasses[] = toIntArray(aboveBoundaryClassNumbers);
 
         DecisionTreeNode split = new DecisionTreeNode();
         split.featureNum = chosenFeature;
-        split.boundary = Double.NaN;
+        split.boundary = boundary;
         //split.classNum does not matter
         split.left = split(bbValuesArray, bbClasses);
         split.right = split(abValuesArray, abClasses);
         return split;
     }
 
-    private boolean allClassNumbersAreTheSame(int[] classNumbers) {
+    protected static boolean allClassNumbersAreTheSame(int[] classNumbers) {
         final int curClass = classNumbers[0];
         for (int i=1;i<classNumbers.length;i++){
             if (classNumbers[i]!=curClass){
                 return false;
+            }
+        }
+        return true;
+    }
+
+    //TODO Limit precision? Introduce epsilon?
+    protected static boolean allValuesAreTheSame(double[][] values) {
+        final double curValue[] = values[0];
+        for (int i=1;i<values.length;i++){
+            for (int j=0;j<curValue.length;j++){
+                if (values[i][j]!=curValue[j]){
+                    return false;
+                }
             }
         }
         return true;
@@ -246,6 +337,6 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
             setInputDimensions(value.length);
         }
 
-        rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
+        createDecisionTree();
     }
 }
