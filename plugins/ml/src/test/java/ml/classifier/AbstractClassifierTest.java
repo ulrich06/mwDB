@@ -85,7 +85,7 @@ public class AbstractClassifierTest {
         ClassificationJumpCallback cjc = new ClassificationJumpCallback();
 
         for (int i = 0; i < dummyDataset1.length; i++) {
-            cjc.value = dummyDataset1[i][0];
+            cjc.value = new double[]{dummyDataset1[i][0]};
             cjc.expectedClass = (int) dummyDataset1[i][1];
             cjc.expectedBootstrap = bootstraps1[i];
             classfierNode.jump(i, cjc);
@@ -105,8 +105,19 @@ public class AbstractClassifierTest {
      * Created by andre on 5/9/2016.
      */
     protected static class ClassificationJumpCallback implements Callback<AbstractClassifierSlidingWindowManagingNode> {
+
+        final String features[];
+
+        public ClassificationJumpCallback(String featureNames[]){
+            this.features = featureNames;
+        }
+
+        public ClassificationJumpCallback(){
+            this(new String[]{FEATURE});
+        }
+
         public int errors = 0;
-        public double value = Double.NaN;
+        public double value[] = null;
         public boolean expectedBootstrap = true;
         public int expectedClass = Integer.MIN_VALUE;
 
@@ -119,7 +130,9 @@ public class AbstractClassifierTest {
 
         @Override
         public void on(AbstractClassifierSlidingWindowManagingNode result) {
-            result.set(FEATURE, value);
+            for (int i=0;i<features.length;i++){
+                result.set(features[i], value[i]);
+            }
             result.learn(expectedClass, cb);
             if (result.isInBootstrapMode() != expectedBootstrap) {
                 errors++;
