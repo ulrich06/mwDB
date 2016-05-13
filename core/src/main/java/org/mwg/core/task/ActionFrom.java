@@ -13,7 +13,7 @@ class ActionFrom implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.setResult(_value);
+        context.setResult(_value,false);
         context.next();
     }
 

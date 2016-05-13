@@ -14,12 +14,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 class CoreTaskContext implements org.mwg.task.TaskContext {
 
     private final Map<String, Object> _variables;
-    private final Object[] _results;
+//    private final Object[] _results;
+    private final Entry[] _results;
     private final Graph _graph;
     private final TaskAction[] _actions;
     private final AtomicInteger _currentTaskId;
     private final org.mwg.task.TaskContext _parentContext;
-    private final Object _initialResult;
+//    private final Object _initialResult;
+    private final Entry _initialResult;
 
     private long _world;
     private long _time;
@@ -29,9 +31,11 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         this._time = 0;
         this._graph = p_graph;
         this._parentContext = p_parentContext;
-        this._initialResult = p_initialResult;
+//        this._initialResult = p_initialResult;
+        this._initialResult = new Entry(p_initialResult,true);
         this._variables = new ConcurrentHashMap<String, Object>();
-        this._results = new Object[p_actions.length];
+//        this._results = new Object[p_actions.length];
+        this._results = new Entry[p_actions.length];
         this._actions = p_actions;
         this._currentTaskId = new AtomicInteger(0);
     }
@@ -96,29 +100,39 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     public final Object getPreviousResult() {
         int current = _currentTaskId.get();
         if (current == 0) {
-            return _initialResult;
+            return _initialResult._data;
         } else {
-            Object previousResult = _results[current - 1];
-            if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext) {
-                return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
-            } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
-                org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
-                List<Object> result = new ArrayList<Object>();
-                for (int i = 0; i < contexts.length; i++) {
-                    Object currentLoop = contexts[i].getPreviousResult();
-                    if (currentLoop != null) {
-                        result.add(currentLoop);
+            Object previousEntry = _results[current - 1];
+            if (previousEntry != null) {
+                Object previousResult = _results[current - 1]._data;
+                if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext) {
+                    return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
+                } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
+                    org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
+                    List<Object> result = new ArrayList<Object>();
+                    for (int i = 0; i < contexts.length; i++) {
+                        Object currentLoop = contexts[i].getPreviousResult();
+                        if (currentLoop != null) {
+                            result.add(currentLoop);
+                        }
                     }
+                    return result.toArray(new Object[result.size()]);
+                } else {
+                    return previousResult;
                 }
-                return result.toArray(new Object[result.size()]);
             } else {
-                return previousResult;
+                return null;
             }
         }
     }
 
     @Override
     public final void setResult(Object actionResult) {
+        setResult(actionResult,true);
+    }
+
+    @Override
+    public void setResult(Object actionResult, boolean toFree) {
         if(actionResult instanceof org.mwg.core.task.CoreTaskContext) {
             mergeVariables((org.mwg.task.TaskContext) actionResult);
         } else if(actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
@@ -126,7 +140,12 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
                 mergeVariables(taskContext);
             }
         }
-        this._results[_currentTaskId.get()] = actionResult;
+
+        this._results[_currentTaskId.get()] = new Entry(actionResult,toFree);
+    }
+
+    private final void internalSetResult(Object actionResult, boolean toFree) {
+
     }
 
     private void mergeVariables(org.mwg.task.TaskContext actionResult) {
@@ -145,7 +164,9 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     @Override
     public final void clean() {
         for (int i = 0; i < _results.length; i++) {
-            cleanObj(_results[i]);
+            if(_results[i] != null && _results[i]._shouldBeFreed) {
+                cleanObj(_results[i]._data);
+            }
         }
     }
 
@@ -167,4 +188,13 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         }
     }
 
+    private class Entry {
+        Object _data;
+        boolean _shouldBeFreed;
+
+        public Entry(Object data, boolean shouldBeFreed) {
+            this._data = data;
+            this._shouldBeFreed = shouldBeFreed;
+        }
+    }
 }

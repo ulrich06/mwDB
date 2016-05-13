@@ -24,6 +24,9 @@ public interface TaskContext {
 
     void setResult(Object actionResult);
 
+    //todo rename
+    void setResult(Object actionResult,boolean toFree);
+
     void next();
 
     void clean();
