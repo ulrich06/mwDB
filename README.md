@@ -8,8 +8,5 @@ Donc il faudrait une notion de tache global (i.e commune a une tache et tous ces
 Solution 1: mettre une notion de variable local et parente
 Probleme avec les taches wrappe qui elles doivent pouvoir acceder aux variables locals et parentes
 
-## Problemes des free sur objets en entree
+## Problemes des free sur objets en entree - OK
 Empecher les free sur objets en input (notion de flqg a ajouter)
-
-## Notion de result
-Des taches pourrait servir a recuperer des objets et etre traiter en dehors des taches -> notion de result

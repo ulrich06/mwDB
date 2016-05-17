@@ -23,7 +23,7 @@ public class ActionFromTest extends AbstractActionTest {
     }
 
     @Test
-    public void testFromNode() {
+    public void testFromNodes() {
         graph.all(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
@@ -60,7 +60,7 @@ public class ActionFromTest extends AbstractActionTest {
     }
 
     @Test
-    public void testFromNodes() {
+    public void testFromNode() {
         graph.find(0, 0, "roots", "name=root", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
