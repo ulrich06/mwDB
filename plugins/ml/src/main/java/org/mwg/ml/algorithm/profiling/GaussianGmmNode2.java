@@ -9,6 +9,8 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.task.*;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -128,7 +130,7 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
     //Mixture model keys
     private static final String INTERNAL_LEVEL_KEY = "_level";
     private static final String INTERNAL_WIDTH_KEY = "_width";
-    private static final String INTERNAL_SUBGAUSSIAN_KEY = "_subGaussian";
+    public static final String INTERNAL_SUBGAUSSIAN_KEY = "_subGaussian";
 
     //Gaussian keys
     private static final String INTERNAL_SUM_KEY = "_sum";
@@ -469,6 +471,19 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
         mainTask.execute();
 
 
+    }
+
+    @Override
+    public String toString(){
+        double[] avg=getAvg();
+        StringBuilder sb=new StringBuilder("");
+        NumberFormat formatter = new DecimalFormat("#0.00");
+        for(int i=0;i<avg.length;i++){
+            sb.append(formatter.format(avg[i]));
+            sb.append(" ");
+        }
+        sb.append(", total: "+getTotal()+", level: "+getLevel());
+        return sb.toString();
     }
 
 
