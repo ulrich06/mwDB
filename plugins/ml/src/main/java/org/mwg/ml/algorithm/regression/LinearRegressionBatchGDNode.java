@@ -83,13 +83,17 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
                 double outcome = resultBuffer[index];
                 for (int j=0;j<dims;j++){
-                    coefs[j] -= alpha * ( ( h - outcome)*curValue[j] - lambda * coefs[j])/bufferLength;
+                    coefs[j] -= alpha * ( ( h - outcome)*curValue[j])/bufferLength;
                 }
                 intercept -= alpha * ( h - outcome) / bufferLength;
 
                 startIndex += dims;
                 index++;
             }
+            for (int j=0;j<dims;j++){
+                coefs[j] += alpha * lambda * oldCoefs[j];
+            }
+
             setCoefficients(coefs);
             setIntercept(intercept);
             if (gdErrorThresh>0){
@@ -110,29 +114,6 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
         }
     }
 
-    public double getIterationErrorThreshold() {
-        return unphasedState().getFromKeyWithDefault(GD_ERROR_THRESH_KEY, Double.NaN);
-    }
 
-    public void setIterationErrorThreshold(double errorThreshold) {
-        unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, errorThreshold);
-    }
-
-    public void removeIterationErrorThreshold() {
-        unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, Double.NaN);
-    }
-
-    public int getIterationCountThreshold() {
-        return unphasedState().getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
-    }
-
-    public void setIterationCountThreshold(int iterationCountThreshold) {
-        //Any value is acceptable.
-        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, iterationCountThreshold);
-    }
-
-    public void removeIterationCountThreshold() {
-        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, -1);
-    }
 }
 
