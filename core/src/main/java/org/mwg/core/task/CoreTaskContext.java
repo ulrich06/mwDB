@@ -8,6 +8,7 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -164,6 +165,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
                 cleanObj(_results[i]);
             }
         }
+        int a = 42;
     }
 
     private void cleanObj(Object o) {
@@ -187,4 +189,8 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         }
     }
 
+    @Override
+    public String toString() {
+        return Arrays.toString(_results);
+    }
 }
