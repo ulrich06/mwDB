@@ -42,4 +42,9 @@ public class StreamDecisionTreeNode extends AbstractClassifierSlidingWindowManag
         //TODO If there is a tree already:
           //TODO Go to the leaf
     }
+
+    @Override
+    protected void removeAllClassesHook() {
+        //Nothing
+    }
 }

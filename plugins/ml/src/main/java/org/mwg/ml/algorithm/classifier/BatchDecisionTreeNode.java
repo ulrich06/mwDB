@@ -341,4 +341,9 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
         setDecisionTreeArray(rootNode.serializeToDoubleArray());
     }
+
+    @Override
+    protected void removeAllClassesHook() {
+        //Nothing to do here
+    }
 }

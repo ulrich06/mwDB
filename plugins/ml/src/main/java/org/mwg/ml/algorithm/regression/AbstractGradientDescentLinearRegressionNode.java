@@ -33,4 +33,42 @@ public abstract class AbstractGradientDescentLinearRegressionNode extends Abstra
         unphasedState().setFromKey(INTERNAL_VALUE_LEARNING_RATE_KEY, Type.DOUBLE, newLearningRate);
     }
 
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if (GD_ERROR_THRESH_KEY.equals(propertyName)){
+            setIterationErrorThreshold(((Double)propertyValue).doubleValue());
+        }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
+            setIterationCountThreshold(((Integer)propertyValue).intValue());
+        }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
+            setLearningRate(((Double)propertyValue).doubleValue());
+        }else{
+            super.setProperty(propertyName, propertyType, propertyValue);
+        }
+    }
+
+    public double getIterationErrorThreshold() {
+        return unphasedState().getFromKeyWithDefault(GD_ERROR_THRESH_KEY, Double.NaN);
+    }
+
+    public void setIterationErrorThreshold(double errorThreshold) {
+        unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, errorThreshold);
+    }
+
+    public void removeIterationErrorThreshold() {
+        unphasedState().setFromKey(GD_ERROR_THRESH_KEY, Type.DOUBLE, Double.NaN);
+    }
+
+    public int getIterationCountThreshold() {
+        return unphasedState().getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
+    }
+
+    public void setIterationCountThreshold(int iterationCountThreshold) {
+        //Any value is acceptable.
+        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, iterationCountThreshold);
+    }
+
+    public void removeIterationCountThreshold() {
+        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, -1);
+    }
+
 }

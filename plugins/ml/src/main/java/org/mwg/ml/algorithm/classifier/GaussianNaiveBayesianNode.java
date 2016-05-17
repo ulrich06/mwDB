@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by Andrey Boytsov on 4/14/2016.
  */
-public class GaussianNaiveBayesianNode extends AbstractClassifierSlidingWindowManagingNode implements ClassificationNode {
+public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode implements ClassificationNode {
 
     //TODO Any synchronization?
 
