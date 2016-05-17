@@ -34,7 +34,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LogisticRegressionClassifierNode lrNode = (LogisticRegressionClassifierNode) graph.newNode(0, 0, LogisticRegressionClassifierNode.NAME);
+                LogisticRegressionClassifierNode lrNode = (LogisticRegressionClassifierNode) graph.newTypedNode(0, 0, LogisticRegressionClassifierNode.NAME);
                 lrNode.setProperty(LogisticRegressionClassifierNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 lrNode.setProperty(LogisticRegressionClassifierNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 lrNode.setProperty(LogisticRegressionClassifierNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
@@ -58,7 +58,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LogisticRegressionClassifierNode lrNode = (LogisticRegressionClassifierNode) graph.newNode(0, 0, LogisticRegressionClassifierNode.NAME);
+                LogisticRegressionClassifierNode lrNode = (LogisticRegressionClassifierNode) graph.newTypedNode(0, 0, LogisticRegressionClassifierNode.NAME);
                 lrNode.setProperty(LogisticRegressionClassifierNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 lrNode.setProperty(LogisticRegressionClassifierNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 lrNode.setProperty(LogisticRegressionClassifierNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
