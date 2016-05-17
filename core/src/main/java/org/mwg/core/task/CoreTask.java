@@ -5,6 +5,8 @@ import org.mwg.Graph;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
+import java.util.regex.Pattern;
+
 public class CoreTask implements org.mwg.task.Task {
 
     private final Graph _graph;
@@ -52,13 +54,13 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task selectWith(String name, String pattern) {
-        addTask(new ActionWith(name, pattern));
+        addTask(new ActionWith(name, Pattern.compile(pattern)));
         return this;
     }
 
     @Override
     public org.mwg.task.Task selectWithout(String name, String pattern) {
-        addTask(new ActionWithout(name, pattern));
+        addTask(new ActionWithout(name, Pattern.compile(pattern)));
         return this;
     }
 

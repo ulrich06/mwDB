@@ -1,5 +1,6 @@
 package org.mwg.core.chunk.heap;
 
+import org.mwg.Constants;
 import org.mwg.Type;
 import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
@@ -560,9 +561,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                         switch (currentChunkElemType) {
                             /** Primitive Object */
                             case Type.BOOL:
-                                if (payload.read(previousStart) == '0') {
+                                if (payload.read(previousStart) == CoreConstants.BOOL_FALSE) {
                                     toInsert = false;
-                                } else if (payload.read(previousStart) == '1') {
+                                } else if (payload.read(previousStart) == CoreConstants.BOOL_TRUE) {
                                     toInsert = true;
                                 }
                                 break;
@@ -753,9 +754,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             switch (currentChunkElemType) {
                 /** Primitive Object */
                 case Type.BOOL:
-                    if (payload.read(previousStart) == '0') {
+                    if (payload.read(previousStart) == CoreConstants.BOOL_FALSE) {
                         toInsert = false;
-                    } else if (payload.read(previousStart) == '1') {
+                    } else if (payload.read(previousStart) == CoreConstants.BOOL_TRUE) {
                         toInsert = true;
                     }
                     break;
@@ -847,9 +848,9 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             break;
                         case Type.BOOL:
                             if ((boolean) internalState._elementV[i]) {
-                                buffer.write((byte) '1');
+                                buffer.write(CoreConstants.BOOL_TRUE);
                             } else {
-                                buffer.write((byte) '0');
+                                buffer.write(CoreConstants.BOOL_FALSE);
                             }
                             break;
                         case Type.LONG:
@@ -933,7 +934,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             }
         }
     }
-    
+
     private void internal_set_dirty() {
         if (_space != null) {
             if ((_flags & CoreConstants.DIRTY_BIT) != CoreConstants.DIRTY_BIT) {

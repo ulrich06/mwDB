@@ -28,7 +28,7 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                BatchDecisionTreeNode bdtNode = (BatchDecisionTreeNode) graph.newNode(0, 0, BatchDecisionTreeNode.NAME);
+                BatchDecisionTreeNode bdtNode = (BatchDecisionTreeNode) graph.newTypedNode(0, 0, BatchDecisionTreeNode.NAME);
                 standardSettings(bdtNode);
 
                 ClassificationJumpCallback cjc = new ClassificationJumpCallback();
@@ -54,7 +54,7 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                BatchDecisionTreeNode bdtNode = (BatchDecisionTreeNode) graph.newNode(0, 0, BatchDecisionTreeNode.NAME);
+                BatchDecisionTreeNode bdtNode = (BatchDecisionTreeNode) graph.newTypedNode(0, 0, BatchDecisionTreeNode.NAME);
 
                 bdtNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 bdtNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);

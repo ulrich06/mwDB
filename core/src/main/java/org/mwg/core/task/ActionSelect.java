@@ -33,15 +33,15 @@ class ActionSelect implements TaskAction {
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
             if (current[i] instanceof AbstractNode[]) {
-                Node[] filtered = filterNodeArray((AbstractNode[]) current[i]);
-                if (filtered != null && filtered.length > 0) {
-                    filteredResult[cursor] = filtered;
+                Node[] filteredNodes = filterNodeArray((AbstractNode[]) current[i]);
+                if (filteredNodes != null && filteredNodes.length > 0) {
+                    filteredResult[cursor] = filteredNodes;
                     cursor++;
                 }
             } else if (current[i] instanceof Object[]) {
-                Object[] filtered = filterArray((Object[]) current[i]);
-                if (filtered != null && filtered.length > 0) {
-                    filteredResult[cursor] = filtered;
+                Object[] filteredObjs = filterArray((Object[]) current[i]);
+                if (filteredObjs != null && filteredObjs.length > 0) {
+                    filteredResult[cursor] = filteredObjs;
                     cursor++;
                 }
             }

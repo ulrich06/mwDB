@@ -1,7 +1,9 @@
 package org.mwg.core.task;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 
@@ -15,6 +17,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
 
     private final Map<String, Object> _variables;
     private final Object[] _results;
+    private final boolean[] _ignoreClean;
     private final Graph _graph;
     private final TaskAction[] _actions;
     private final AtomicInteger _currentTaskId;
@@ -32,6 +35,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         this._initialResult = p_initialResult;
         this._variables = new ConcurrentHashMap<String, Object>();
         this._results = new Object[p_actions.length];
+        this._ignoreClean = new boolean[p_actions.length];
         this._actions = p_actions;
         this._currentTaskId = new AtomicInteger(0);
     }
@@ -77,7 +81,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     public String[] getVariablesKeys() {
         String[] result = new String[this._variables.size()];
         int index = 0;
-        for(String key : this._variables.keySet()) {
+        for (String key : this._variables.keySet()) {
             result[index++] = key;
         }
         return result;
@@ -118,21 +122,32 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
+    public final void setUnsafeResult(Object actionResult) {
+        internal_setResult(actionResult, true);
+    }
+
+    @Override
     public final void setResult(Object actionResult) {
-        if(actionResult instanceof org.mwg.core.task.CoreTaskContext) {
+        internal_setResult(actionResult, false);
+    }
+
+    private void internal_setResult(Object actionResult, boolean ignoreClean) {
+        if (actionResult instanceof org.mwg.core.task.CoreTaskContext) {
             mergeVariables((org.mwg.task.TaskContext) actionResult);
-        } else if(actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
-            for(org.mwg.task.TaskContext taskContext : (org.mwg.core.task.CoreTaskContext[])actionResult) {
+        } else if (actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
+            for (org.mwg.task.TaskContext taskContext : (org.mwg.core.task.CoreTaskContext[]) actionResult) {
                 mergeVariables(taskContext);
             }
         }
-        this._results[_currentTaskId.get()] = actionResult;
+        int i = _currentTaskId.get();
+        this._results[i] = actionResult;
+        this._ignoreClean[i] = ignoreClean;
     }
 
     private void mergeVariables(org.mwg.task.TaskContext actionResult) {
-        String[]variables = actionResult.getVariablesKeys();
-        for(String variableName : variables) {
-            this.setVariable(variableName,actionResult.getVariable(variableName));
+        String[] variables = actionResult.getVariablesKeys();
+        for (String variableName : variables) {
+            this.setVariable(variableName, actionResult.getVariable(variableName));
         }
     }
 
@@ -145,26 +160,25 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     @Override
     public final void clean() {
         for (int i = 0; i < _results.length; i++) {
-            cleanObj(_results[i]);
+            if (!_ignoreClean[i]) {
+                cleanObj(_results[i]);
+            }
         }
     }
 
     private void cleanObj(Object o) {
-        if (o instanceof AbstractNode) {
-            ((Node) o).free();
-        } else if (o instanceof org.mwg.core.task.CoreTaskContext) {
-            ((org.mwg.task.TaskContext) o).clean();
-        } else if (o instanceof org.mwg.core.task.CoreTaskContext[]) {
-            org.mwg.core.task.CoreTaskContext[] loop = (org.mwg.core.task.CoreTaskContext[]) o;
-            for (int j = 0; j < loop.length; j++) {
-                loop[j].clean();
+        PrimitiveHelper.iterate(o, new Callback<Object>() {
+            @Override
+            public void on(Object result) {
+                if (result instanceof AbstractNode) {
+                    ((Node) result).free();
+                } else if (result instanceof org.mwg.core.task.CoreTaskContext) {
+                    ((org.mwg.task.TaskContext) result).clean();
+                } else {
+                    cleanObj(result);
+                }
             }
-        } else if (o instanceof Object[]) {
-            Object[] loop = (Object[]) o;
-            for (int j = 0; j < loop.length; j++) {
-                cleanObj(loop[j]);
-            }
-        }
+        });
     }
 
 }

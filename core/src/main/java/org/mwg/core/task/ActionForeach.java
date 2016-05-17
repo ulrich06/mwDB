@@ -42,8 +42,8 @@ class ActionForeach implements TaskAction {
     /**
      * @native ts
      * var result= [];
-     * for(p in elem){
-     *  result.push(p);
+     * for(var p in elem){
+     * result.push(p);
      * }
      * return result;
      */

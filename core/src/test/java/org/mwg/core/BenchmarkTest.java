@@ -73,7 +73,7 @@ public class BenchmarkTest {
                         System.out.println(name + " result: " + (valuesToInsert / ((System.currentTimeMillis() - before) / 1000) / 1000) + "kv/s");
 
                         /*
-                        final DeferCounter counterRead = graph.counter(valuesToInsert);
+                        final CoreDeferCounter counterRead = graph.counter(valuesToInsert);
                         for (long i = 0; i < valuesToInsert; i++) {
                             final double value = i * 0.3;
                             final long time = timeOrigin + i;

@@ -215,7 +215,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode{
     }
 
     private void createLevel(double[] values, int level, int width) {
-        GaussianGmmNode g = (GaussianGmmNode) graph().newNode(this.world(), this.time(), "GaussianGmm");
+        GaussianGmmNode g = (GaussianGmmNode) graph().newTypedNode(this.world(), this.time(), "GaussianGmm");
         g.configMixture(level, width);
         g.internallearn(values, false); //dirac
 

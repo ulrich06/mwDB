@@ -64,7 +64,7 @@ public class GaussianNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
                 double eps = 1e-7;
 

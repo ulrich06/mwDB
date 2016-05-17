@@ -32,10 +32,10 @@ public abstract class AbstractActionTest {
                 root.add("children", n1);
 
                 //create some index
-                graph.index("roots", root, new String[]{"name"}, null);
-                graph.index("nodes", n0, new String[]{"name"}, null);
-                graph.index("nodes", n1, new String[]{"name"}, null);
-                graph.index("nodes", root, new String[]{"name"}, null);
+                graph.index("roots", root, "name", null);
+                graph.index("nodes", n0, "name", null);
+                graph.index("nodes", n1, "name", null);
+                graph.index("nodes", root, "name", null);
 
             }
         });

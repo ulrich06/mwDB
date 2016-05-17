@@ -1,6 +1,6 @@
 package org.mwg.core.chunk;
 
-public interface KLongTree {
+public interface LongTree {
 
     void insert(long key);
 

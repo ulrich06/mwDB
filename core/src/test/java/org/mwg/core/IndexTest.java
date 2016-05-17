@@ -152,7 +152,7 @@ public class IndexTest {
 
 
                 //reIndex
-                graph.index("nodes", node_t1, new String[]{"name", "version"}, new Callback<Boolean>() {
+                graph.index("nodes", node_t1, "name,version", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean o) {
                         counter[0]++;
@@ -174,7 +174,7 @@ public class IndexTest {
 
                 //local index usage
                 org.mwg.Node node_index = graph.newNode(0, 0);
-                node_index.index("children", node_t1, new String[]{"name", "version"}, new Callback<Boolean>() {
+                node_index.index("children", node_t1, "name,version", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
                         counter[0]++;

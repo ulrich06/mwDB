@@ -192,13 +192,4 @@ public class KMeansNode extends AbstractNode {
         kmeansNode.learn(sampleDataset, 2);
     }
 
-    @Override
-    public void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-    }
-
-    @Override
-    public void unindex(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-
-    }
 }

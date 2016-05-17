@@ -23,7 +23,7 @@ public class GaussianProbaTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNode= (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNode= (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
                 double eps = 1e-7;
 
 
@@ -90,7 +90,7 @@ public class GaussianProbaTest {
             @Override
             public void on(Boolean result) {
 
-                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
                 gaussianNodeLive.set(GaussianGmmNode.FROM,"f1;f2");
 
@@ -150,8 +150,8 @@ public class GaussianProbaTest {
 
                 Random rand = new Random();
 
-                GaussianGmmNode node1 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
-                GaussianGmmNode node2 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianGmmNode node2 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
                 node1.set(GaussianGmmNode.FROM,"f1;f2;f3");
                 node2.set(GaussianGmmNode.FROM,"f1;f2;f3;f4");

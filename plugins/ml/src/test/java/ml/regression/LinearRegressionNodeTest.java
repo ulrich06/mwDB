@@ -25,7 +25,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, false);
                 lrNode.free();
@@ -47,7 +47,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, true);
                 lrNode.free();
@@ -69,7 +69,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, false);
 
@@ -100,7 +100,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest{
                     resid += (dummyDataset1[i][1] - 6) * (dummyDataset1[i][1] - 6);
                 }
 
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newNode(0, 0, LinearRegressionNode.NAME);
+                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
                 lrNode.setL2Regularization(1000000000);
 

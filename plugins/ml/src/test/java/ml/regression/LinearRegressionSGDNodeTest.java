@@ -29,7 +29,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newNode(0, 0, LinearRegressionSGDNode.NAME);
+                LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newTypedNode(0, 0, LinearRegressionSGDNode.NAME);
 
                 final int BUFFER_SIZE = 8100;
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFFER_SIZE);

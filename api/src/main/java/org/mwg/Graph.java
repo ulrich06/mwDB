@@ -27,7 +27,7 @@ public interface Graph {
      * @param nodeType name of the special NodeFactory plugin
      * @return newly created node
      */
-    Node newNode(long world, long time, String nodeType);
+    Node newTypedNode(long world, long time, String nodeType);
 
     /**
      * Asynchronous lookup of a particular node.<br>
@@ -71,18 +71,6 @@ public interface Graph {
      * @param callback Called when the disconnection is completed. The parameter specifies whether or not the disconnection succeeded.
      */
     void disconnect(Callback<Boolean> callback);
-
-    /**
-     * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
-     * If the index does not exist, it is created on the fly.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, Callback)} using the same attributes.
-     *
-     * @param indexName     A string uniquely identifying the index in the {@link Graph}.
-     * @param nodeToIndex   The node to add in the index.
-     * @param keyAttributes The set of attributes used asVar keys to index the node. The order does not matter.
-     * @param callback      Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
-     */
-    void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback);
 
     /**
      * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>

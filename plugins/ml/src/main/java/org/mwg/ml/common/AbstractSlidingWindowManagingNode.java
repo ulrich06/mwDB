@@ -134,16 +134,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, dims);
     }
 
-    @Override
-    public void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-        // Nothing for now
-    }
-
-    @Override
-    public void unindex(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
-        // Nothing for now
-    }
-
     public void setPropertyUnphased(String propertyName, byte propertyType, Object propertyValue){
         unphasedState().setFromKey(propertyName, propertyType, propertyValue);
     }

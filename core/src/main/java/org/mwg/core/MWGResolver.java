@@ -120,7 +120,7 @@ class MWGResolver implements Resolver {
                                             selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                             callback.on(null);
                                         } else {
-                                            final long closestWorld = resolve_world((LongLongMap) theGlobalWorldOrder, (LongLongMap) theNodeWorldOrder, time, world);
+                                            final long closestWorld = resolve_world((WorldOrderChunk) theGlobalWorldOrder, (WorldOrderChunk) theNodeWorldOrder, time, world);
                                             selfPointer.getOrLoadAndMark(CoreConstants.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                                 @Override
                                                 public void on(Chunk theNodeSuperTimeTree) {
@@ -129,7 +129,7 @@ class MWGResolver implements Resolver {
                                                         selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                                         callback.on(null);
                                                     } else {
-                                                        final long closestSuperTime = ((KLongTree) theNodeSuperTimeTree).previousOrEqual(time);
+                                                        final long closestSuperTime = ((TimeTreeChunk) theNodeSuperTimeTree).previousOrEqual(time);
                                                         if (closestSuperTime == Constants.NULL_LONG) {
                                                             selfPointer._space.unmarkChunk(theNodeSuperTimeTree);
                                                             selfPointer._space.unmarkChunk(theNodeWorldOrder);
@@ -146,7 +146,7 @@ class MWGResolver implements Resolver {
                                                                     selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    long closestTime = ((KLongTree) theNodeTimeTree).previousOrEqual(time);
+                                                                    long closestTime = ((TimeTreeChunk) theNodeTimeTree).previousOrEqual(time);
                                                                     if (closestTime == Constants.NULL_LONG) {
                                                                         selfPointer._space.unmarkChunk(theNodeTimeTree);
                                                                         selfPointer._space.unmarkChunk(theNodeSuperTimeTree);
@@ -179,8 +179,8 @@ class MWGResolver implements Resolver {
                                                                                 initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] = closestTime;
                                                                                 //init previous magics
                                                                                 initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = ((WorldOrderChunk) theNodeWorldOrder).magic();
-                                                                                initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = ((KLongTree) theNodeSuperTimeTree).magic();
-                                                                                initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = ((KLongTree) theNodeTimeTree).magic();
+                                                                                initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = ((TimeTreeChunk) theNodeSuperTimeTree).magic();
+                                                                                initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = ((TimeTreeChunk) theNodeTimeTree).magic();
 
                                                                                 org.mwg.Node resolvedNode;
                                                                                 if (resolvedFactory == null) {
@@ -338,7 +338,7 @@ class MWGResolver implements Resolver {
         nodeWorldOrder.lock();
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
 
-        Chunk resultState = null;
+        StateChunk resultState = null;
         try {
             AbstractNode castedNode = (AbstractNode) node;
             //protection against deleted Node
@@ -356,15 +356,15 @@ class MWGResolver implements Resolver {
             //check if anything as moved
             if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] == world && previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] == time) {
                 //no new state to create
-                resultState = this._space.getAndMark(CoreConstants.STATE_CHUNK, world, time, nodeId);
+                resultState = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, world, time, nodeId);
                 this._space.unmarkChunk(resultState);
                 this._space.unmarkChunk(nodeWorldOrder);
-                return (NodeState) resultState;
+                return resultState;
             }
 
             //first we create and insert the empty state
             Chunk resultState_0 = this._space.create(CoreConstants.STATE_CHUNK, world, time, nodeId, null, null);
-            resultState = _space.putAndMark(resultState_0);
+            resultState = (StateChunk) _space.putAndMark(resultState_0);
             if (resultState_0 != resultState) {
                 _space.freeChunk(resultState_0);
             }
@@ -535,7 +535,7 @@ class MWGResolver implements Resolver {
         //protection against deleted Node
         long[] previousResolveds = castedNode._previousResolveds.get();
         if (previousResolveds == null) {
-            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR+" node id: "+node.id());
+            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR + " node id: " + node.id());
         }
         //let's go for the resolution now
         final long nodeWorld = node.world();

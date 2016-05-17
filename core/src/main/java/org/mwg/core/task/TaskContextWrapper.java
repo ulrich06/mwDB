@@ -66,6 +66,11 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
+    public void setUnsafeResult(Object actionResult) {
+        _wrapped.setUnsafeResult(actionResult);
+    }
+
+    @Override
     public void next() {
         //noop action here, because the next action will be automatically called
     }

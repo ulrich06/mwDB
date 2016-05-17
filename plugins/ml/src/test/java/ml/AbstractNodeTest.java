@@ -39,7 +39,7 @@ public class AbstractNodeTest implements NodeFactory {
             public void on(Boolean result) {
 
                 final double eps = 1e-7;
-                ExMLNodeImpl node = (ExMLNodeImpl) graph.newNode(0, 0, "AbstractNodeTest");
+                ExMLNodeImpl node = (ExMLNodeImpl) graph.newTypedNode(0, 0, "AbstractNodeTest");
                 node.set("test", "10/5");
                 node.set("valueSquare", "{value} ^ 2");
                 node.set("value", 3.0);
@@ -109,7 +109,7 @@ public class AbstractNodeTest implements NodeFactory {
             public void on(Boolean result) {
 
                 final double eps = 1e-7;
-                ExMLNodeImpl node = (ExMLNodeImpl) graph.newNode(0, 0, "AbstractNodeTest");
+                ExMLNodeImpl node = (ExMLNodeImpl) graph.newTypedNode(0, 0, "AbstractNodeTest");
                 node.set("f0", 0);
                 node.set("f1", 1);
                 node.set("f2", 2);

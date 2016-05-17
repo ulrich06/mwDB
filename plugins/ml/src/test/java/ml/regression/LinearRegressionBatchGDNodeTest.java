@@ -22,7 +22,7 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
+                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newTypedNode(0, 0, LinearRegressionBatchGDNode.NAME);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 50);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.01);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.01);
@@ -50,7 +50,7 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newNode(0, 0, LinearRegressionBatchGDNode.NAME);
+                LinearRegressionBatchGDNode lrNode = (LinearRegressionBatchGDNode) graph.newTypedNode(0, 0, LinearRegressionBatchGDNode.NAME);
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 10);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 1e-6);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 1e-6);

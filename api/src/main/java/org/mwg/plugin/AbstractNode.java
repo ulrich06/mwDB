@@ -412,7 +412,8 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void index(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
+    public void index(String indexName, org.mwg.Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
+        final String[] keyAttributes = flatKeyAttributes.split(Constants.QUERY_SEP + "");
         NodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -436,11 +437,6 @@ public abstract class AbstractNode implements Node {
         if (Constants.isDefined(callback)) {
             callback.on(true);
         }
-    }
-
-    @Override
-    public void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
-        this.index(indexName, nodeToIndex, flatKeyAttributes.split(Constants.QUERY_SEP + ""), callback);
     }
 
     @Override

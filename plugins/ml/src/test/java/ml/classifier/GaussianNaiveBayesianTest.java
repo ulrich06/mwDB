@@ -27,7 +27,7 @@ public class GaussianNaiveBayesianTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianNaiveBayesianNode gaussianNBNode = (GaussianNaiveBayesianNode) graph.newNode(0, 0, GaussianNaiveBayesianNode.NAME);
+                GaussianNaiveBayesianNode gaussianNBNode = (GaussianNaiveBayesianNode) graph.newTypedNode(0, 0, GaussianNaiveBayesianNode.NAME);
                 standardSettings(gaussianNBNode);
                 ClassificationJumpCallback cjc = runThroughDummyDataset(gaussianNBNode);
                 gaussianNBNode.free();

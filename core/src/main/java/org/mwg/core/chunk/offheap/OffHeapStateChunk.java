@@ -295,9 +295,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 break;
                             case Type.BOOL:
                                 if ((boolean) loopValue) {
-                                    buffer.write((byte) '1');
+                                    buffer.write(CoreConstants.BOOL_TRUE);
                                 } else {
-                                    buffer.write((byte) '0');
+                                    buffer.write(CoreConstants.BOOL_FALSE);
                                 }
                                 break;
                             case Type.LONG:
@@ -458,9 +458,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         switch (currentChunkElemType) {
                             /** Primitive Object */
                             case Type.BOOL:
-                                if (buffer.read(previousStart) == '0') {
+                                if (buffer.read(previousStart) == CoreConstants.BOOL_FALSE) {
                                     toInsert = false;
-                                } else if (buffer.read(previousStart) == '1') {
+                                } else if (buffer.read(previousStart) == CoreConstants.BOOL_TRUE) {
                                     toInsert = true;
                                 }
                                 break;
@@ -652,9 +652,9 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             switch (currentChunkElemType) {
                 /** Primitive Object */
                 case Type.BOOL:
-                    if (buffer.read(previousStart) == '0') {
+                    if (buffer.read(previousStart) == CoreConstants.BOOL_FALSE) {
                         toInsert = false;
-                    } else if (buffer.read(previousStart) == '1') {
+                    } else if (buffer.read(previousStart) == CoreConstants.BOOL_TRUE) {
                         toInsert = true;
                     }
                     break;

@@ -42,18 +42,18 @@ public class ActionTraverseTest extends AbstractActionTest {
 
         Node root = graph.newNode(0, 0);
         root.setProperty("name", Type.STRING, "root2");
-        graph.index("rootIndex", root, new String[]{"name"}, new Callback<Boolean>() {
+        graph.index("rootIndex", root, "name", new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                root.index("childrenIndexed", node1, new String[]{"name"}, null);
-                root.index("childrenIndexed", node2, new String[]{"name"}, null);
-                root.index("childrenIndexed", node3, new String[]{"name"}, null);
+                root.index("childrenIndexed", node1, "name", null);
+                root.index("childrenIndexed", node2, "name", null);
+                root.index("childrenIndexed", node3, "name", null);
 
 
                 root.jump(12, new Callback<Node>() {
                     @Override
                     public void on(Node result) {
-                        root.index("childrenIndexed", node3, new String[]{"name"}, null);
+                        root.index("childrenIndexed", node3, "name", null);
                     }
                 });
 

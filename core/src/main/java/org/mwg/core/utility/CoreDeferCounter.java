@@ -4,7 +4,7 @@ import org.mwg.Callback;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DeferCounter implements org.mwg.DeferCounter {
+public class CoreDeferCounter implements org.mwg.DeferCounter {
 
     private final AtomicInteger _nb_down;
 
@@ -12,7 +12,7 @@ public class DeferCounter implements org.mwg.DeferCounter {
 
     private Callback _end;
 
-    public DeferCounter(int nb) {
+    public CoreDeferCounter(int nb) {
         this._counter = nb;
         this._nb_down = new AtomicInteger(0);
     }

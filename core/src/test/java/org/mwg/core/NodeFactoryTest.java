@@ -78,7 +78,7 @@ public class NodeFactoryTest implements NodeFactory {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Node specializedNode = graph.newNode(0, 0, "HelloWorldNode");
+                Node specializedNode = graph.newTypedNode(0, 0, "HelloWorldNode");
 
                 String hw = (String) specializedNode.get("hello");
                 Assert.assertTrue(hw.equals("world"));

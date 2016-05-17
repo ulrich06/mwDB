@@ -22,7 +22,7 @@ public class GaussianMixtureSim {
                 boolean exit = false;
                 String command;
 
-                GaussianGmmNode node1 = (GaussianGmmNode) graph.newNode(0, 0, "GaussianGmm");
+                GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
                 node1.configMixture(2, 3);
 
                 while (!exit) {

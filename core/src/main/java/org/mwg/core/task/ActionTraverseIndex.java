@@ -2,7 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.Node;
-import org.mwg.core.utility.DeferCounter;
+import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.task.TaskAction;
@@ -33,9 +33,9 @@ class ActionTraverseIndex implements TaskAction {
             }
 
             int countNbNodeToLoad = countNbNodeToLoad(toLoad);
-            final DeferCounter counter = new DeferCounter(toLoad.length);
+            final CoreDeferCounter counter = new CoreDeferCounter(toLoad.length);
             final Node[] resultNodes = new AbstractNode[countNbNodeToLoad];
-            final AtomicInteger cursor = new AtomicInteger();
+            final AtomicInteger cursor = new AtomicInteger(0);
             for (Node node : toLoad) {
                 if (_query != null) {
                     node.findAt(_indexName, context.getWorld(), context.getTime(), _query, new Callback<Node[]>() {

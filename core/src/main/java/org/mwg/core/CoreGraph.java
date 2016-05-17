@@ -3,6 +3,7 @@ package org.mwg.core;
 import org.mwg.*;
 import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.*;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
@@ -86,7 +87,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public org.mwg.Node newNode(long world, long time, String nodeType) {
+    public org.mwg.Node newTypedNode(long world, long time, String nodeType) {
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
@@ -370,14 +371,14 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void index(String indexName, org.mwg.Node toIndexNode, String[] keyAttributes, Callback<Boolean> callback) {
+    public void index(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
-                foundIndex.index(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
+                foundIndex.index(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, flatKeyAttributes, new Callback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
                         foundIndex.free();
@@ -388,11 +389,6 @@ class CoreGraph implements org.mwg.Graph {
                 });
             }
         }, true);
-    }
-
-    @Override
-    public void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
-        this.index(indexName, nodeToIndex, flatKeyAttributes.split(Constants.QUERY_SEP + ""), callback);
     }
 
     @Override
@@ -514,7 +510,7 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public DeferCounter counter(int expectedCountCalls) {
-        return new org.mwg.core.utility.DeferCounter(expectedCountCalls);
+        return new CoreDeferCounter(expectedCountCalls);
     }
 
     @Override

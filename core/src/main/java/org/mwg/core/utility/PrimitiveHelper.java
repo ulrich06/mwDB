@@ -1,9 +1,11 @@
 package org.mwg.core.utility;
 
-/*import java.nio.ByteBuffer;
-import java.security.MessageDigest;*/
-
+import org.mwg.Callback;
 import org.mwg.Constants;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class PrimitiveHelper {
     private static final long PRIME1 = 2654435761L;
@@ -230,6 +232,82 @@ public class PrimitiveHelper {
      */
     public static boolean isDefined(Object param) {
         return param != null;
+    }
+
+    /**
+     * @native ts
+     * if(Array.isArray(elem)){
+     *     for(var p in elem){
+     *          callback.on(p);
+     *     }
+     *     return true;
+     * }
+     * return false;
+     */
+    public static boolean iterate(Object elem, Callback<Object> callback) {
+        if (elem instanceof Object[]) {
+            Object[] castedObjArray = (Object[]) elem;
+            for (int i = 0; i < castedObjArray.length; i++) {
+                callback.on(castedObjArray[i]);
+            }
+            return true;
+        } else if (elem instanceof boolean[]) {
+            boolean[] castedBoolArray = (boolean[]) elem;
+            for (int i = 0; i < castedBoolArray.length; i++) {
+                callback.on(castedBoolArray[i]);
+            }
+            return true;
+        } else if (elem instanceof byte[]) {
+            byte[] casted = (byte[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof short[]) {
+            short[] casted = (short[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof char[]) {
+            char[] casted = (char[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof int[]) {
+            int[] casted = (int[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof long[]) {
+            long[] casted = (long[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof float[]) {
+            float[] casted = (float[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof double[]) {
+            double[] casted = (double[]) elem;
+            for (int i = 0; i < casted.length; i++) {
+                callback.on(casted[i]);
+            }
+            return true;
+        } else if (elem instanceof Iterable) {
+            Iterator it = ((Iterable) elem).iterator();
+            while (it.hasNext()) {
+                callback.on(it.next());
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

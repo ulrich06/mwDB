@@ -23,7 +23,7 @@ public class GaussianClassifierTest extends AbstractClassifierTest{
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianClassifierNode gaussianClassifierNode = (GaussianClassifierNode) graph.newNode(0, 0, GaussianClassifierNode.NAME);
+                GaussianClassifierNode gaussianClassifierNode = (GaussianClassifierNode) graph.newTypedNode(0, 0, GaussianClassifierNode.NAME);
                 standardSettings(gaussianClassifierNode);
                 ClassificationJumpCallback cjc = runThroughDummyDataset(gaussianClassifierNode);
                 gaussianClassifierNode.free();
