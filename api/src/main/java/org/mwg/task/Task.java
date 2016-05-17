@@ -73,6 +73,7 @@ public interface Task {
     /**
      * Filter the previous result to get nodes that respect the specified condition in {@code filterFunction}
      * If you want to access/modify the context, please use, please use {@link #selectWhere(Task)}
+     *
      * @param filterFunction condition that nodes have to respect
      * @return this task to chain actions (fluent API)
      */
@@ -81,6 +82,7 @@ public interface Task {
     /**
      * Filter the previous result to get nodes that respect the specified condition in {@code subTask}
      * Similar to {@link #select(TaskFunctionSelect)}, but allow access/modification of the context
+     *
      * @param subTask sub task called to filter the elemen
      * @return this task to chain actions (fluent API)
      */
@@ -99,13 +101,14 @@ public interface Task {
      * Traverse a relation indexed by {@code indexName} and retrieve specific node thanks to the {@code query}
      *
      * @param indexName index name of indexed relation
-     * @param query query to retrieve specific nodes
+     * @param query     query to retrieve specific nodes
      * @return this task to chain actions (fluent API)
      */
     Task traverseIndex(String indexName, String query);
 
     /**
      * Traverse a relation indexed by {@code indexName}
+     *
      * @param indexName index name of indexed relation
      * @return this task to chain actions (fluent API)
      */
@@ -121,6 +124,7 @@ public interface Task {
 
     /**
      * Iterate through a collection and call the sub task for each elements
+     *
      * @param subTask sub task to call for each elements
      * @return this task to chain actions (fluent API)
      */
@@ -129,6 +133,7 @@ public interface Task {
     /**
      * Same as {@link #foreachThen(Callback)} method, but all the subtask are called in parallel
      * There is thus as thread as element in the collection
+     *
      * @param subTask sub task to call for each elements
      * @return this task to chain actions (fluent API)
      */
@@ -137,8 +142,9 @@ public interface Task {
     /**
      * Iterate through a pre-loaded collection of object add apply the {@code action} on each element
      * If you want to access/modify the context, please use {@link #foreach(Task)} method
+     *
      * @param action action to apply on each element
-     * @param <T> type of the element
+     * @param <T>    type of the element
      * @return this task to chain actions (fluent API)
      */
     <T> Task foreachThen(Callback<T> action);
@@ -153,6 +159,7 @@ public interface Task {
 
     /**
      * Execute a sub task if the condition is satisfied
+     *
      * @param cond condition to check
      * @param then sub task to execute if the condition is satisfied
      * @return this task to chain actions (fluent API)
@@ -178,6 +185,14 @@ public interface Task {
      */
     void executeThen(TaskAction action);
 
+    /**
+     * Schedule and execute the current task program. However
+     *
+     * @param parentContext initial context, only in case of cascade execution of tasks, null otherwise
+     * @param initialResult initial content if any, null otherwise
+     * @param finalAction   last action the execution before the clean procedure. Warning this last action will be executed in asynchronous mode. Therefore, no objects of the task will be freed before the call the method next on the parameter context.
+     */
     void executeThenAsync(final TaskContext parentContext, final Object initialResult, final TaskAction finalAction);
+
 
 }

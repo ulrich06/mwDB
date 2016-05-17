@@ -164,16 +164,6 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void execute() {
-        executeThenAsync(null, null, null);
-    }
-
-    @Override
-    public void executeThen(TaskAction p_action) {
-        executeThenAsync(null, null, new ActionWrapper(p_action));
-    }
-
-    @Override
     public <T> org.mwg.task.Task foreachThen(Callback<T> action) {
         org.mwg.task.Task task = _graph.newTask().then(new TaskAction() {
             @Override
@@ -198,6 +188,16 @@ public class CoreTask implements org.mwg.task.Task {
     public org.mwg.task.Task foreachPar(org.mwg.task.Task subTask) {
         addTask(new ActionForeachPar(subTask));
         return this;
+    }
+
+    @Override
+    public void execute() {
+        executeThenAsync(null, null, null);
+    }
+
+    @Override
+    public void executeThen(TaskAction p_action) {
+        executeThenAsync(null, null, new ActionWrapper(p_action));
     }
 
     @Override

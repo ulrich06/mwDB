@@ -122,7 +122,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final void setUnsafeResult(Object actionResult) {
+    public final void setResultWithoutFree(Object actionResult) {
         internal_setResult(actionResult, true);
     }
 
@@ -167,7 +167,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     private void cleanObj(Object o) {
-        PrimitiveHelper.iterate(o, new Callback<Object>() {
+        if (!PrimitiveHelper.iterate(o, new Callback<Object>() {
             @Override
             public void on(Object result) {
                 if (result instanceof AbstractNode) {
@@ -178,7 +178,13 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
                     cleanObj(result);
                 }
             }
-        });
+        })) {
+            if (o instanceof AbstractNode) {
+                ((Node) o).free();
+            } else if (o instanceof org.mwg.core.task.CoreTaskContext) {
+                ((org.mwg.task.TaskContext) o).clean();
+            }
+        }
     }
 
 }

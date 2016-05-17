@@ -1,6 +1,6 @@
 package org.mwg.ml.common.mathexp.impl;
 
-public interface MathToken {
+interface MathToken {
 
     int type();
 

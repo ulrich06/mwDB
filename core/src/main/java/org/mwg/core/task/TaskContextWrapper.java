@@ -66,8 +66,8 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public void setUnsafeResult(Object actionResult) {
-        _wrapped.setUnsafeResult(actionResult);
+    public void setResultWithoutFree(Object actionResult) {
+        _wrapped.setResultWithoutFree(actionResult);
     }
 
     @Override

@@ -5,13 +5,13 @@ package org.mwg.ml.common.mathexp.impl;
  * Abstract definition of a supported operator. An operator is defined by
  * its name (pattern), precedence and if it is left- or right associative.
  */
-public class MathOperation implements MathToken {
+class MathOperation implements MathToken {
 
     private String oper;
     private int precedence;
     private boolean leftAssoc;
 
-    public MathOperation(String oper, int precedence, boolean leftAssoc) {
+    MathOperation(String oper, int precedence, boolean leftAssoc) {
         this.oper = oper;
         this.precedence = precedence;
         this.leftAssoc = leftAssoc;
@@ -21,17 +21,15 @@ public class MathOperation implements MathToken {
         return oper;
     }
 
-    public int getPrecedence() {
+    int getPrecedence() {
         return precedence;
     }
 
-    public boolean isLeftAssoc() {
+    boolean isLeftAssoc() {
         return leftAssoc;
     }
 
-
-    public double eval(double v1, double v2) {
-
+    double eval(double v1, double v2) {
 
         if (PrimitiveHelper.equals(oper, "+")) {
             return v1 + v2;
@@ -68,7 +66,6 @@ public class MathOperation implements MathToken {
         }
         return 0;
     }
-
 
     @Override
     public int type() {

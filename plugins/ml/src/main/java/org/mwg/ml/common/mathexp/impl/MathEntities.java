@@ -1,21 +1,20 @@
 package org.mwg.ml.common.mathexp.impl;
 
-
 import java.util.HashMap;
 
-public class MathEntities {
+class MathEntities {
 
     private static MathEntities INSTANCE = null;
 
-    public static MathEntities getINSTANCE() {
+    static MathEntities getINSTANCE() {
         if (INSTANCE == null) {
             INSTANCE = new MathEntities();
         }
         return INSTANCE;
     }
 
-    public HashMap<String,MathOperation> operators;
-    public HashMap<String,MathFunction> functions;
+    HashMap<String,MathOperation> operators;
+    HashMap<String,MathFunction> functions;
 
     private MathEntities() {
         operators = new HashMap<String,MathOperation>();

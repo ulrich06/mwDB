@@ -24,7 +24,7 @@ public interface TaskContext {
 
     void setResult(Object actionResult);
 
-    void setUnsafeResult(Object actionResult);
+    void setResultWithoutFree(Object actionResult);
 
     void next();
 

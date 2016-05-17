@@ -8,7 +8,7 @@ import java.util.*;
  * defined by a name, the number of parameters and the actual processing
  * implementation.
  */
-public class MathFunction implements MathToken {
+class MathFunction implements MathToken {
 
 
     /**
@@ -36,7 +36,7 @@ public class MathFunction implements MathToken {
      * @param name      The name of the function.
      * @param numParams The number of parameters for this function.
      */
-    public MathFunction(String name, int numParams) {
+    MathFunction(String name, int numParams) {
         this.name = name.toUpperCase();
         this.numParams = numParams;
     }
@@ -45,14 +45,11 @@ public class MathFunction implements MathToken {
         return name;
     }
 
-    public int getNumParams() {
+    int getNumParams() {
         return numParams;
     }
 
-
- 
-
-    public double eval(double[] p) {
+    double eval(double[] p) {
         if (PrimitiveHelper.equals(name, "NOT")) {
             return (p[0] == 0) ? 1 : 0;
         } else if (PrimitiveHelper.equals(name, "IF")) {
