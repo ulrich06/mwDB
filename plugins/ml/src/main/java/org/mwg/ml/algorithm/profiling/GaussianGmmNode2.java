@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
+public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
 
-    public final static double ERR=1.0;
+    public final static double ERR = 1.0;
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "GaussianGmm2";
 
@@ -27,18 +27,18 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
             @Override
             public void on(final double[] values) {
                 //ToDO temporar hack to avoid features extractions
-                learnVector(values,callback);
+                learnVector(values, callback);
             }
         });
     }
 
-    public void learnVector(double[] values, Callback<Boolean> callback){
+    public void learnVector(double[] values, Callback<Boolean> callback) {
         Task creationTask = graph().newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
                 GaussianGmmNode2 node = (GaussianGmmNode2) context.getVariable("starterNode");
-                System.out.println("Vector: "+values[0]+" "+values[1]);
-                node.internallearn(values,true);
+                System.out.println("Vector: " + values[0] + " " + values[1]);
+                node.internallearn(values, true);
             }
         });
 
@@ -73,23 +73,22 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
 
 
     private GaussianGmmNode2 filter(AbstractNode[] result, double[] features) {
-        if(result==null||result.length==0){
+        if (result == null || result.length == 0) {
             return null;
         }
-        double[] distances=new double[result.length];
-        double min=Double.MAX_VALUE;
-        int index=0;
-        for(int i=0;i<result.length;i++){
-            distances[i]=distance(features,((GaussianGmmNode2) result[i]).getAvg());
-            if(distances[i]<min){
-                min=distances[i];
-                index=i;
+        double[] distances = new double[result.length];
+        double min = Double.MAX_VALUE;
+        int index = 0;
+        for (int i = 0; i < result.length; i++) {
+            distances[i] = distance(features, ((GaussianGmmNode2) result[i]).getAvg());
+            if (distances[i] < min) {
+                min = distances[i];
+                index = i;
             }
         }
-        if(min<ERR){
+        if (min < ERR) {
             return ((GaussianGmmNode2) result[index]);
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -113,10 +112,10 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
             return new GaussianGmmNode2(world, time, id, graph, initialResolution);
         }
     }
+
     public GaussianGmmNode2(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
-
 
 
     //Getters and setters
@@ -145,7 +144,7 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        super.setProperty(propertyName,propertyType,propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
@@ -206,12 +205,11 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
     }
 
 
-
     private void updateLevel(final int newLevel) {
         super.set(INTERNAL_LEVEL_KEY, newLevel);
         if (newLevel == 0) {
             //ToDo free children here
-            super.set(INTERNAL_SUBGAUSSIAN_KEY,new long[0]);
+            super.set(INTERNAL_SUBGAUSSIAN_KEY, new long[0]);
         } else {
             super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
                 @Override
@@ -372,9 +370,9 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
     }
 
 
-    public void generateDistributions(int level, double[] err,Callback<ProbaDistribution> callback){
-        int nbfeature=this.getNumberOfFeatures();
-        if(nbfeature==0){
+    public void generateDistributions(int level, double[] err, Callback<ProbaDistribution> callback) {
+        int nbfeature = this.getNumberOfFeatures();
+        if (nbfeature == 0) {
             callback.on(null);
         }
 
@@ -382,30 +380,29 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
             @Override
             public void eval(TaskContext context) {
                 List<GaussianGmmNode2> evaluates = (List<GaussianGmmNode2>) context.getVariable("leaves");
-                System.out.println("resolved: "+evaluates.size()+" nodes");
+                System.out.println("resolved: " + evaluates.size() + " nodes");
 
-                Matrix covBackup= new Matrix(null,nbfeature,nbfeature);
-                for(int i=0;i<nbfeature;i++){
-                    covBackup.set(i,i,err[i]*err[i]);
+                Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
+                for (int i = 0; i < nbfeature; i++) {
+                    covBackup.set(i, i, err[i] * err[i]);
                 }
 
-                int[] totals=new int[evaluates.size()];
-                int globalTotal=0;
+                int[] totals = new int[evaluates.size()];
+                int globalTotal = 0;
 
                 MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[evaluates.size()];
-                for(int i=0;i<evaluates.size();i++){
-                    totals[i]=evaluates.get(i).getTotal();
-                    globalTotal+=totals[i];
-                    double[] avg=evaluates.get(i).getAvg();
+                for (int i = 0; i < evaluates.size(); i++) {
+                    totals[i] = evaluates.get(i).getTotal();
+                    globalTotal += totals[i];
+                    double[] avg = evaluates.get(i).getAvg();
                     Matrix cov;
-                    if(totals[i]>2) {
+                    if (totals[i] > 2) {
                         distributions[i] = new MultivariateNormalDistribution(avg, evaluates.get(i).getCovarianceMatrix(avg));
-                    }
-                    else{
-                        distributions[i]=new MultivariateNormalDistribution(avg,covBackup); //this can be optimized later by inverting covBackup only once
+                    } else {
+                        distributions[i] = new MultivariateNormalDistribution(avg, covBackup); //this can be optimized later by inverting covBackup only once
                     }
                 }
-                callback.on(new ProbaDistribution(totals,distributions,globalTotal));
+                callback.on(new ProbaDistribution(totals, distributions, globalTotal));
             }
         });
 
@@ -418,17 +415,15 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
                 Set<Long> toSolve = new HashSet<Long>();
                 List<GaussianGmmNode2> leaves = (List<GaussianGmmNode2>) context.getVariable("leaves");
 
-                for(int i=0;i<result.length;i++){
-                    if(((GaussianGmmNode2)result[i]).getLevel()==level){
+                for (int i = 0; i < result.length; i++) {
+                    if (((GaussianGmmNode2) result[i]).getLevel() == level) {
                         leaves.add((GaussianGmmNode2) result[i]);
-                    }
-                    else {
+                    } else {
                         long[] relations = (long[]) result[i].get(INTERNAL_SUBGAUSSIAN_KEY);
                         if (relations == null || relations.length == 0) {
                             leaves.add((GaussianGmmNode2) result[i]);
-                        }
-                        else{
-                            for(int j=0;j<relations.length;j++){
+                        } else {
+                            for (int j = 0; j < relations.length; j++) {
                                 toSolve.add(relations[j]);
                             }
                         }
@@ -438,13 +433,13 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
 
                 Node[] children = new Node[toSolve.size()];
                 CountDownLatch countDownLatch = new CountDownLatch(toSolve.size());
-                int i=0;
-                for(long id: toSolve) {
+                int i = 0;
+                for (long id : toSolve) {
                     final int ii = i;
                     graph().lookup(world(), time(), id, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
-                            children[ii]=result;
+                            children[ii] = result;
                             countDownLatch.countDown();
                         }
                     });
@@ -452,7 +447,7 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
                 }
                 try {
                     countDownLatch.await();
-                    context.setVariable("starterNodes",children);
+                    context.setVariable("starterNodes", children);
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -464,7 +459,7 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
                 .ifThen(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
-                        return ((Node[]) context.getVariable("starterNodes")).length>0;
+                        return ((Node[]) context.getVariable("starterNodes")).length > 0;
                     }
                 }, traverse);
 
@@ -771,17 +766,17 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode{
     }
 
 
-    private double distance(double[] features, double[] avg){
-        double res=0;
-        for(int i=0;i<features.length;i++){
-            res+= (features[i]-avg[i])*(features[i]-avg[i]);
+    private double distance(double[] features, double[] avg) {
+        double res = 0;
+        for (int i = 0; i < features.length; i++) {
+            res += (features[i] - avg[i]) * (features[i] - avg[i]);
         }
         return Math.sqrt(res);
     }
 
     public boolean checkInside(double[] feature) {
-        int total=getTotal();
-        if(total<2){
+        int total = getTotal();
+        if (total < 2) {
             return true;
         }
         return true;

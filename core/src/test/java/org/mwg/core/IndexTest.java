@@ -49,7 +49,7 @@ public class IndexTest {
                     }
                 });
 
-                graph.index("nodes", node_t0, new String[]{"name"}, new Callback<Boolean>() {
+                graph.index("nodes", node_t0, "name", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean o) {
                         counter[0]++;
@@ -89,7 +89,7 @@ public class IndexTest {
                 node_t1.setProperty("name", Type.STRING, "MyName");
                 node_t1.setProperty("version", Type.STRING, "1.0");
 
-                graph.index("nodes", node_t1, new String[]{"name", "version"}, new Callback<Boolean>() {
+                graph.index("nodes", node_t1, "name,version", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean o) {
                         counter[0]++;

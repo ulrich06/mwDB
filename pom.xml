@@ -67,6 +67,15 @@
             </roles>
             <timezone>+2</timezone>
         </developer>
+        <developer>
+            <name>Ludovic MOULINE</name>
+            <id>ludovic.mouline</id>
+            <email>ludovic.mouline@uni.lu</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
     </developers>
 
     <modules>

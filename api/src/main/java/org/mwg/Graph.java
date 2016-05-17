@@ -85,6 +85,18 @@ public interface Graph {
     void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback);
 
     /**
+     * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
+     * If the index does not exist, it is created on the fly.<br>
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, Callback)} using the same attributes.
+     *
+     * @param indexName         A string uniquely identifying the index in the {@link Graph}.
+     * @param nodeToIndex       The node to add in the index.
+     * @param flatKeyAttributes The set of attributes used asVar keys to index the node, given as a flat string separated by ','. The order does not matter.
+     * @param callback          Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
+     */
+    void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
+
+    /**
      * Removes the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
      * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, Callback)} using the same attributes.
      *

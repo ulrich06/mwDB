@@ -439,6 +439,11 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
+    public void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
+        this.index(indexName, nodeToIndex, flatKeyAttributes.split(Constants.QUERY_SEP + ""), callback);
+    }
+
+    @Override
     public void unindex(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {

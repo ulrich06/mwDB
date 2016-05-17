@@ -391,6 +391,11 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
+    public void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
+        this.index(indexName, nodeToIndex, flatKeyAttributes.split(Constants.QUERY_SEP + ""), callback);
+    }
+
+    @Override
     public void unindex(String indexName, org.mwg.Node toIndexNode, String[] keyAttributes, Callback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override

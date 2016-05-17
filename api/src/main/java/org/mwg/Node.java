@@ -123,6 +123,18 @@ public interface Node {
     void index(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback);
 
     /**
+     * Creates or compliments an index of nodes.<br>
+     * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
+     * Index names must be unique within a given node.
+     *
+     * @param indexName         The name of the index (should be unique per relation).
+     * @param nodeToIndex       The new node to index.
+     * @param flatKeyAttributes The flat list of attribute names (of the node to index, seperated by a ',') to be used as keys for indexing (order does not matter)
+     * @param callback          Called when the index has been created/updated. The boolean value specifies the success of the operation.
+     */
+    void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
+
+    /**
      * Removes an element fromVar an index of nodes.<br>
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
      * Index names must be unique within the indexed relation names.
