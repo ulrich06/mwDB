@@ -30,13 +30,14 @@ public abstract class AbstractMLNode extends AbstractNode {
     }
 
 
-    public void setTrainingVector(double[] vec){
-        String setFrom="";
-        for(int i=0;i<vec.length;i++){
-            set("f"+i,vec[i]);
-            setFrom=setFrom+"f"+i+FROM_SEPARATOR;
+    //ToDo ouch this is hurting eyes for performance
+    public void setTrainingVector(double[] vec) {
+        String setFrom = "";
+        for (int i = 0; i < vec.length; i++) {
+            set("f" + i, vec[i]);
+            setFrom = setFrom + "f" + i + FROM_SEPARATOR;
         }
-        set(FROM,setFrom);
+        set(FROM, setFrom);
     }
 
     public void extractFeatures(Callback<double[]> callback) {
