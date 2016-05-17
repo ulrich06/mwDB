@@ -79,4 +79,9 @@ class TaskContextWrapper implements TaskContext {
     public void clean() {
         _wrapped.clean();
     }
+
+    @Override
+    public String toString() {
+        return _wrapped.toString();
+    }
 }
