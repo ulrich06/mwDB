@@ -136,22 +136,13 @@ public class Base64Test {
         testDouble(0.000000000000002);
     }
 
-    /**
-     * @native ts
-     * var enc = Base64.encodeDouble(val);
-     * var dec = Base64.decodeToDouble(enc);
-     * org.junit.Assert.assertEquals(val, dec);
-     * var buffer = new java.lang.StringBuilder();
-     * Base64.encodeDoubleToBuffer(val, buffer);
-     * dec = Base64.decodeToDouble(buffer.toString());
-     * org.junit.Assert.assertEquals(val, dec);
-     */
+
     private void testDouble(double val) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeDoubleToBuffer(val, buffer);
         double dec = Base64.decodeToDoubleWithBounds(buffer, 0, buffer.size());
         //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec, 0);
+        Assert.assertTrue(val == dec);
         buffer.free();
 
         /*
