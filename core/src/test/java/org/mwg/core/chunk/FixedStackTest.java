@@ -11,39 +11,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class FixedStackTest {
     private static final int CAPACITY = 15;
 
-    class RefFixedStack implements Stack {
-
-        private LinkedBlockingDeque<Long> q;
-
-        public RefFixedStack(int max) {
-            q = new LinkedBlockingDeque<Long>();
-            for (long i = 0; i < max; i++) {
-                q.add(i);
-            }
-        }
-
-        @Override
-        public boolean enqueue(long index) {
-            q.add(index);
-            return true;
-        }
-
-        @Override
-        public long dequeueTail() {
-            return q.poll();
-        }
-
-        @Override
-        public boolean dequeue(long index) {
-            return q.remove(index);
-        }
-
-        @Override
-        public void free() {
-        }
-
-    }
-
 
     @Test
     public void heapFixedStackTest() {
