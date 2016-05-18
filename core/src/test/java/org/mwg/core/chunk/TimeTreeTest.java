@@ -187,7 +187,7 @@ public class TimeTreeTest implements ChunkListener {
 
     private boolean compareWithString(Buffer buffer, String content) {
         for (int i = 0; i < content.length(); i++) {
-            if (buffer.read(i) != content.charAt(i)) {
+            if (buffer.read(i) != content.codePointAt(i)) {
                 return false;
             }
         }
