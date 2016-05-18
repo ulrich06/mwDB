@@ -171,6 +171,8 @@ public interface Task {
     Task then(TaskAction action);
 
     Task thenAsync(TaskAction action);
+    
+    Task save();
 
     /**
      * Schedule and execute the current task program

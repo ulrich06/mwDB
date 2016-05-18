@@ -60,6 +60,8 @@ public class StateChunkTest implements ChunkListener {
         Unsafe.DEBUG_MODE = true;
 
         saveLoadTest(factory);
+        saveLoadNilTest(factory);
+
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
@@ -80,6 +82,31 @@ public class StateChunkTest implements ChunkListener {
             }
         }
         return true;
+    }
+
+    private void saveLoadNilTest(StateChunkFactory factory) {
+        StateChunk chunk = factory.create(this, null, null);
+
+        chunk.set(0, Type.INT, CoreConstants.OFFHEAP_NULL_PTR);
+        int elem = (int) chunk.get(0);
+        Assert.assertEquals(elem, CoreConstants.OFFHEAP_NULL_PTR);
+        Buffer buffer = BufferBuilder.newHeapBuffer();
+        chunk.save(buffer);
+        String result = new String(buffer.data());
+        Assert.assertEquals("C|A,I,D", result);
+
+        StateChunk chunk2 = factory.create(this, buffer, null);
+        int elem2 = (int) chunk2.get(0);
+        Assert.assertEquals(elem2, CoreConstants.OFFHEAP_NULL_PTR);
+        Buffer buffer2 = BufferBuilder.newHeapBuffer();
+        chunk2.save(buffer2);
+
+        Assert.assertTrue(compareBuffers(buffer, buffer2));
+
+        free(chunk);
+        free(chunk2);
+        buffer.free();
+        buffer2.free();
     }
 
     private void saveLoadTest(StateChunkFactory factory) {

@@ -192,6 +192,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task save() {
+        addTask(new ActionSave());
+        return this;
+    }
+
+    @Override
     public final void execute() {
         executeThenAsync(null, null, null);
     }

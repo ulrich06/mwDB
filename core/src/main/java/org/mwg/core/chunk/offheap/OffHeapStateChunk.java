@@ -241,7 +241,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         try {
             consistencyCheck();
             for (int i = 0; i < OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT); i++) {
-                if (OffHeapLongArray.get(elementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
+                if (OffHeapLongArray.get(elementType_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
                     callBack.on(resolver.longKeyToString(OffHeapLongArray.get(elementK_ptr, i)),
                             (int) OffHeapLongArray.get(elementType_ptr, i),
                             internal_getElementV(i) /*OffHeapLongArray.get(elementV_ptr, i)*/);
@@ -277,7 +277,8 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             long elementCount = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
             Base64.encodeLongToBuffer(elementCount, buffer);
             for (int i = 0; i < elementCount; i++) {
-                if (OffHeapLongArray.get(elementV_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) { //there is a real value
+                byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
+                if (elementType != CoreConstants.OFFHEAP_NULL_PTR) { //there is a real value
                     long loopKey = OffHeapLongArray.get(elementK_ptr, i);
                     Object loopValue = internal_getElementV(i);
                     if (loopValue != null) {
@@ -285,7 +286,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         Base64.encodeLongToBuffer(loopKey, buffer);
                         buffer.write(CoreConstants.CHUNK_SUB_SEP);
                         /** Encode to type of elem, for unSerialization */
-                        byte elementType = (byte) OffHeapLongArray.get(elementType_ptr, i); // can be safely casted
                         Base64.encodeIntToBuffer(elementType, buffer);
                         buffer.write(CoreConstants.CHUNK_SUB_SEP);
                         switch (elementType) {
