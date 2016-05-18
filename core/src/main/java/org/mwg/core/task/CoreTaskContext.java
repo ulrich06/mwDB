@@ -178,9 +178,4 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         }
     }
 
-    @Override
-    public String toString() {
-        return Arrays.toString(_results);
-    }
-
 }
