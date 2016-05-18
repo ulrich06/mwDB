@@ -184,7 +184,7 @@ import org.mwg.struct.Buffer;
  * return Base64.decodeToBoolArrayWithBounds(s, 0, s.size(), arraySize);
  * }
  * public static decodeToBoolArrayWithBounds(s : org.mwg.struct.Buffer, offsetBegin : number, offsetEnd : number, arraySize : number) {
- * var resultTmp = [];
+ * var resultTmp : any[] = [];
  * for (var i = 0; i < (offsetEnd - offsetBegin); i++) {
  * var bitarray = Base64.decodeArray[s.read(offsetBegin + i)] & 0xFF;
  * for (var bit_i = 0; bit_i < 6; bit_i++) {
@@ -200,7 +200,7 @@ import org.mwg.struct.Buffer;
  * public static encodeString(s : string) {
  * var result = "";
  * var sLength = s.length;
- * var currentSourceChar;
+ * var currentSourceChar : number;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
@@ -226,7 +226,7 @@ import org.mwg.struct.Buffer;
  * }
  * public static encodeStringToBuffer(s : string, buffer : org.mwg.struct.Buffer) {
  * var sLength = s.length;
- * var currentSourceChar;
+ * var currentSourceChar : number;
  * var currentEncodedChar = 0;
  * var freeBitsInCurrentChar = 6;
  * for(var charIdx = 0; charIdx < sLength; charIdx++) {
@@ -254,7 +254,7 @@ import org.mwg.struct.Buffer;
  * }
  * public static decodeToStringWithBounds(s : org.mwg.struct.Buffer, offsetBegin : number, offsetEnd : number) {
  * var result = "";
- * var currentSourceChar;
+ * var currentSourceChar : number;
  * var currentDecodedChar = 0;
  * var freeBitsInCurrentChar = 8;
  * for(var charIdx = offsetBegin; charIdx < offsetEnd; charIdx++) {
