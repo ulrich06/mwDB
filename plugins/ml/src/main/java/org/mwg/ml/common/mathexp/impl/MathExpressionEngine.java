@@ -1,42 +1,32 @@
 package org.mwg.ml.common.mathexp.impl;
 
-
 import org.mwg.Node;
-import org.mwg.ml.common.mathexp.MathVariableResolver;
 
 import java.util.*;
 
 public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpressionEngine {
 
-    private MathVariableResolver varResolver;
-
-    public static final char decimalSeparator = '.';
-    public static final char minusSign = '-';
+    static final char decimalSeparator = '.';
+    static final char minusSign = '-';
     private final MathToken[] _cacheAST;
-    private HashMap<String, Double> vars = new HashMap<String, Double>();
 
     private MathExpressionEngine(String expression) {
 
+        /*
         vars.put("PI", Math.PI);
         vars.put("TRUE", 1.0);
         vars.put("FALSE", 0.0);
-
-        varResolver = new MathVariableResolver() {
-            @Override
-            public Double resolve(String potentialVarName) {
-                return vars.get(potentialVarName);
-            }
-        };
+        */
 
         _cacheAST = buildAST(shuntingYard(expression));
     }
 
 
-    static class LRUCache extends LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> {
+    private static class LRUCache extends LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> {
 
-        int cacheSize;
+        final int cacheSize;
 
-        public LRUCache(int cacheSize) {
+        LRUCache(int cacheSize) {
             super(16, 0.75f, true);
             this.cacheSize = cacheSize;
         }
@@ -189,7 +179,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
     }
 
     @Override
-    public final double eval(Node context) {
+    public final double eval(Node context, Map<String, Double> variables) {
         if (this._cacheAST == null) {
             throw new RuntimeException("Call parse before");
         }
@@ -217,8 +207,9 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                     break;
                 case 3:
                     MathFreeToken castedFreeToken = (MathFreeToken) mathToken;
-                    if (varResolver.resolve(castedFreeToken.content()) != null) {
-                        stack.push(varResolver.resolve(castedFreeToken.content()));
+                    Double resolvedVar = variables.get(castedFreeToken.content());
+                    if (resolvedVar != null) {
+                        stack.push(resolvedVar);
                     } else {
                         if (context != null) {
                             if (PrimitiveHelper.equals("TIME", castedFreeToken.content())) {
@@ -238,9 +229,8 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                     cleanName = cleanName.substring(1);
                                 }
                                 if (resolved != null) {
-                                    double resultAsDouble = PrimitiveHelper.parseDouble(resolved.toString());
-                                    //ToDo uncomment and unvalidate cache
-                                    //vars.put(cleanName, resultAsDouble);
+                                    double resultAsDouble = parseDouble(resolved.toString());
+                                    variables.put(cleanName, resultAsDouble);
                                     String valueString = resolved.toString();
                                     if (PrimitiveHelper.equals(valueString, "true")) {
                                         stack.push(1.0);
@@ -253,7 +243,6 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                             //noop
                                         }
                                     }
-
                                 } else {
                                     throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
                                 }
@@ -273,7 +262,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
         }
     }
 
-    public MathToken[] buildAST(List<String> rpn) {
+    private MathToken[] buildAST(List<String> rpn) {
         MathToken[] result = new MathToken[rpn.size()];
         for (int ii = 0; ii < rpn.size(); ii++) {
             String token = rpn.get(ii);
@@ -287,7 +276,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                     result[ii] = new MathFreeToken(token);
                 } else {
                     try {
-                        double parsed = PrimitiveHelper.parseDouble(token);
+                        double parsed = parseDouble(token);
                         result[ii] = new MathDoubleToken(parsed);
                     } catch (Exception e) {
                         result[ii] = new MathFreeToken(token);
@@ -298,10 +287,13 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
         return result;
     }
 
-    /*
-    @Override
-    public void setVarResolver(MathVariableResolver p_resolver) {
-        this.varResolver = p_resolver;
-    }*/
+    /**
+     * @native ts
+     * return parseFloat(val);
+     */
+    private double parseDouble(String val) {
+        return Double.parseDouble(val);
+    }
+
 
 }

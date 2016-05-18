@@ -30,6 +30,14 @@ public interface Graph {
     Node newTypedNode(long world, long time, String nodeType);
 
     /**
+     * Create a copy of this node that can be freed independently
+     *
+     * @param origin node to be cloned
+     * @return cloned node (aka pointer)
+     */
+    Node cloneNode(Node origin);
+
+    /**
      * Asynchronous lookup of a particular node.<br>
      * Based on the tuple &lt;World, Time, Node_ID&gt; this method seeks a {@link Node} in the Graph and returns it to the callback.
      *

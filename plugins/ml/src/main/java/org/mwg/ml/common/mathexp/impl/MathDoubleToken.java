@@ -1,18 +1,19 @@
 package org.mwg.ml.common.mathexp.impl;
 
-public class MathDoubleToken implements MathToken {
+class MathDoubleToken implements MathToken {
+
+    private final double _content;
+
+    MathDoubleToken(double _content) {
+        this._content = _content;
+    }
+
     @Override
     public int type() {
         return 2;
     }
 
-    private double _content;
-
-    public MathDoubleToken(double _content) {
-        this._content = _content;
-    }
-
-    public double content() {
+    double content() {
         return this._content;
     }
 

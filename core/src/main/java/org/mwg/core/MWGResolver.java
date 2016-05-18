@@ -36,6 +36,19 @@ class MWGResolver implements Resolver {
     }
 
     @Override
+    public final long markNodeAndGetType(org.mwg.Node node) {
+        long[] initPreviouslyResolved = ((AbstractNode) node)._previousResolveds.get();
+        if (initPreviouslyResolved == null) {
+            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR + " node id: " + node.id());
+        }
+        this._space.getAndMark(CoreConstants.STATE_CHUNK, node.world(), node.time(), node.id());
+        this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id());
+        this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], node.id());
+        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id());
+        return worldOrderChunk.extra();
+    }
+
+    @Override
     public final void initNode(org.mwg.Node node, long codeType) {
         StateChunk cacheEntry_0 = (StateChunk) this._space.create(CoreConstants.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
         //put and mark

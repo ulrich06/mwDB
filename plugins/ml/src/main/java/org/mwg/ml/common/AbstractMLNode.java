@@ -5,6 +5,9 @@ import org.mwg.Graph;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by assaad on 04/05/16.
  */
@@ -22,7 +25,13 @@ public abstract class AbstractMLNode extends AbstractNode {
             Object expressionObj = super.get(propertyName.substring(1));
             //ToDo this is dangerous for infinite loops or circular dependency, to fix
             org.mwg.ml.common.mathexp.MathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
-            return localEngine.eval(this);
+
+            Map<String, Double> variables = new HashMap<String, Double>();
+            variables.put("PI", Math.PI);
+            variables.put("TRUE", 1.0);
+            variables.put("FALSE", 0.0);
+
+            return localEngine.eval(this, variables);
         } else {
             return super.get(propertyName);
         }

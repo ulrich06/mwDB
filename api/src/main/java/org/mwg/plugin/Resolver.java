@@ -23,6 +23,14 @@ public interface Resolver {
     void initNode(Node node, long typeCode);
 
     /**
+     * Put additional marks to the current node chunks and return the current type of the node
+     *
+     * @param node origin node to additionally mark
+     * @return node type code
+     */
+    long markNodeAndGetType(org.mwg.Node node);
+
+    /**
      * Initializes a newly created world, and sets the parent relationship.
      *
      * @param parentWorld The parent world
