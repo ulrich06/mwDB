@@ -13,6 +13,9 @@ public class ChunkSpaceTest {
         test(new HeapChunkSpace(10, 10));
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapChunkSpaceTest() {
         OffHeapByteArray.alloc_counter = 0;

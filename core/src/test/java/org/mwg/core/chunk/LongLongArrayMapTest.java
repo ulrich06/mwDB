@@ -21,6 +21,9 @@ public class LongLongArrayMapTest implements ChunkListener {
         test(new org.mwg.core.chunk.heap.ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null));
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void arrayOffHeapTest() {
         OffHeapByteArray.alloc_counter = 0;

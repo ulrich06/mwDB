@@ -10,9 +10,24 @@ public class Benchmark2Test {
 
     //@Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100).withAutoSave(10).build());
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100).withAutoSave(10).build();
+        test(graph, new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                graph.disconnect(new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        System.out.println("Graph disconnected");
+                    }
+                });
+            }
+        });
+
     }
 
+    /**
+     * @ignore ts
+     */
     //@Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
@@ -20,15 +35,32 @@ public class Benchmark2Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).withAutoSave(20).build());
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).withAutoSave(20).build();
+
+        test(graph, new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                graph.disconnect(new Callback<Boolean>() {
+                    @Override
+                    public void on(Boolean result) {
+                        System.out.println("Graph disconnected");
+
+                        Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
+                        Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
+                        Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
+                        Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
+                    }
+                });
+            }
+        });
     }
 
-    //final int valuesToInsert = 10_000_000;
+    //final int valuesToInsert = 10000000;
     final int valuesToInsert = 500;
 
     final long timeOrigin = 1000;
 
-    private void test(Graph graph) {
+    private void test(Graph graph, Callback<Boolean> testEnd) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -53,7 +85,7 @@ public class Benchmark2Test {
                         System.out.println(i + " node>" + nodeID);
                     }
 
-                    if (i % 1_000_000 == 0) {
+                    if (i % 1000000 == 0) {
                         System.out.println("<insert til " + i + " in " + (System.currentTimeMillis() - before) / 1000 + "s");
                     }
 
@@ -120,17 +152,7 @@ public class Benchmark2Test {
                         });
 */
 
-                        graph.disconnect(new Callback<Boolean>() {
-                            @Override
-                            public void on(Boolean result) {
-                                System.out.println("Graph disconnected");
-
-                                Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
-                                Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
-                                Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
-                                Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
-                            }
-                        });
+                        testEnd.on(true);
 
 
                     }

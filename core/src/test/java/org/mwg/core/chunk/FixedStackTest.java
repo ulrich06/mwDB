@@ -50,6 +50,9 @@ public class FixedStackTest {
         test(new FixedStack(CAPACITY));
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapFixedStackTest() {
         OffHeapByteArray.alloc_counter = 0;

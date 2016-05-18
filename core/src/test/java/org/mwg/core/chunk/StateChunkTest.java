@@ -39,6 +39,9 @@ public class StateChunkTest implements ChunkListener {
     }
 
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
@@ -191,6 +194,9 @@ public class StateChunkTest implements ChunkListener {
 
     }
 
+    /**
+     * @native ts
+     */
     private void free(StateChunk chunk) {
         if (chunk instanceof OffHeapChunk) {
             OffHeapStateChunk.free(((OffHeapChunk) chunk).addr());
@@ -416,6 +422,11 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertTrue(hasCrash == shouldCrash);
     }
 
+    /**
+     * @native ts
+     * this.nbCount++;
+     * (<org.mwg.core.chunk.heap.HeapChunk>chunk).setFlags(org.mwg.core.CoreConstants.DIRTY_BIT, 0);
+     */
     @Override
     public void declareDirty(Chunk chunk) {
         nbCount++;

@@ -24,6 +24,9 @@ public class StringLongMapTest implements ChunkListener {
         test(new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null));
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void arrayOffHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
@@ -47,14 +50,14 @@ public class StringLongMapTest implements ChunkListener {
     /*
     @Test
     public void bigTest() {
-        //StringLongMap map = new org.mwg.core.chunk.heap.ArrayStringLongMap(this, 1_000_000);
-        StringLongMap map = new org.mwg.core.chunk.offheap.ArrayStringLongMap(this, 100_000_000, -1);
-        // LongLongMap map = new org.mwg.core.chunk.offheap.ArrayLongLongMap(this, 100_000_000);
-        //    LongLongMap map = new org.mwg.core.chunk.heap.ArrayLongLongMap(this, 10_000_000);
+        //StringLongMap map = new org.mwg.core.chunk.heap.ArrayStringLongMap(this, 1000000);
+        StringLongMap map = new org.mwg.core.chunk.offheap.ArrayStringLongMap(this, 100000000, -1);
+        // LongLongMap map = new org.mwg.core.chunk.offheap.ArrayLongLongMap(this, 100000000);
+        //    LongLongMap map = new org.mwg.core.chunk.heap.ArrayLongLongMap(this, 10000000);
 
         long previous = System.currentTimeMillis();
-        for (long i = 0; i < 100_000_000; i++) {
-            if (i % 1_000_000 == 0) {
+        for (long i = 0; i < 100000000; i++) {
+            if (i % 1000000 == 0) {
                 System.out.println(i);
             }
             String toInsert = "hello_" + i;

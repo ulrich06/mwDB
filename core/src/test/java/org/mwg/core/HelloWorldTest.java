@@ -16,6 +16,9 @@ public class HelloWorldTest {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
@@ -25,7 +28,7 @@ public class HelloWorldTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10_000).withAutoSave(20).build());
+        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(20).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
