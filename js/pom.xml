@@ -69,6 +69,22 @@
                             <target>${basedir}/target/generated-sources</target>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>compile-test</id>
+                        <goals>
+                            <goal>java2ts</goal>
+                        </goals>
+                        <configuration>
+                            <name>test</name>
+                            <copyJRE>false</copyJRE>
+                            <copyJunit>true</copyJunit>
+                            <moduleImports>
+                                <moduleImport>../../../generated-sources/src/main/core.ts</moduleImport>
+                            </moduleImports>
+                            <source>${basedir}/../core/src/test/java</source>
+                            <target>${basedir}/target/generated-test-sources</target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

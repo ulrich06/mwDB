@@ -33,6 +33,9 @@ public class WorldOrderChunkTest implements ChunkListener {
         saveLoadTest(factory);
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapTest() {
 
@@ -65,11 +68,11 @@ public class WorldOrderChunkTest implements ChunkListener {
         nbCount = 0;
         WorldOrderChunk map = factory.create(null);
         //mass insert
-        for (long i = 0; i < 10_000; i++) {
+        for (long i = 0; i < 10000; i++) {
             map.put(i, i * 3);
         }
         //mass check
-        for (long i = 0; i < 10_000; i++) {
+        for (long i = 0; i < 10000; i++) {
             Assert.assertTrue(map.get(i) == i * 3);
         }
         free(map);
@@ -81,21 +84,21 @@ public class WorldOrderChunkTest implements ChunkListener {
 
         WorldOrderChunk map = factory.create(null);
         //mass insert
-        for (long i = 0; i < 10_000; i++) {
+        for (long i = 0; i < 10000; i++) {
             map.put(i, i * 3);
         }
         Assert.assertTrue(map.extra() == CoreConstants.NULL_LONG);
-        map.setExtra(1_000_000);
-        Assert.assertTrue(map.size() == 10_000);
-        Assert.assertTrue(map.extra() == 1_000_000);
+        map.setExtra(1000000);
+        Assert.assertTrue(map.size() == 10000);
+        Assert.assertTrue(map.extra() == 1000000);
 
         Buffer buffer = BufferBuilder.newHeapBuffer();
         map.save(buffer);
         WorldOrderChunk map2 = factory.create(buffer);
-        for (long i = 0; i < 10_000; i++) {
+        for (long i = 0; i < 10000; i++) {
             Assert.assertTrue(map2.get(i) == i * 3);
         }
-        Assert.assertTrue(map2.extra() == 1_000_000);
+        Assert.assertTrue(map2.extra() == 1000000);
 
         Buffer buffer2 = BufferBuilder.newHeapBuffer();
         map2.save(buffer2);
@@ -109,6 +112,11 @@ public class WorldOrderChunkTest implements ChunkListener {
         Assert.assertTrue(nbCount == 1);
     }
 
+    /**
+     * @native ts
+     * this.nbCount++;
+     * (<org.mwg.core.chunk.heap.HeapChunk>chunk).setFlags(org.mwg.core.CoreConstants.DIRTY_BIT, 0);
+     */
     @Override
     public void declareDirty(Chunk chunk) {
         nbCount++;
@@ -126,6 +134,9 @@ public class WorldOrderChunkTest implements ChunkListener {
         return null;
     }
 
+    /**
+     * @native ts
+     */
     private void free(Chunk chunk) {
         if (chunk instanceof OffHeapChunk) {
             OffHeapWorldOrderChunk.free(((OffHeapChunk) chunk).addr());

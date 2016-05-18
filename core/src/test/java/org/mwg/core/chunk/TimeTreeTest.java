@@ -36,6 +36,9 @@ public class TimeTreeTest implements ChunkListener {
 
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void offHeapTest() {
 
@@ -171,7 +174,7 @@ public class TimeTreeTest implements ChunkListener {
         tree2.save(buffer2);
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
-        tree2.insert(10_000);
+        tree2.insert(10000);
 
         free(tree);
         free(tree2);
@@ -219,6 +222,11 @@ public class TimeTreeTest implements ChunkListener {
     }
 
 
+    /**
+     * @native ts
+     * this.nbCount++;
+     * (<org.mwg.core.chunk.heap.HeapChunk>chunk).setFlags(org.mwg.core.CoreConstants.DIRTY_BIT, 0);
+     */
     @Override
     public void declareDirty(Chunk chunk) {
         nbCount++;
@@ -236,6 +244,9 @@ public class TimeTreeTest implements ChunkListener {
         return null;
     }
 
+    /**
+     * @native ts
+     */
     private void free(Chunk chunk) {
         if (chunk instanceof OffHeapChunk) {
             OffHeapTimeTreeChunk.free(((OffHeapChunk) chunk).addr());
