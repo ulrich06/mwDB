@@ -166,7 +166,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
         double t = (time - timeOrigin);
         t = t / inferSTEP;
-        callback.on( PolynomialFit.extrapolate(t, weight));
+        callback.on(PolynomialFit.extrapolate(t, weight));
     }
 
     //Factory of the class integrated
@@ -206,7 +206,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
@@ -216,9 +215,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
-
-
-
 
     //Other services and funcitons
     public double getPrecision() {

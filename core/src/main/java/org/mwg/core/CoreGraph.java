@@ -104,19 +104,40 @@ class CoreGraph implements org.mwg.Graph {
 
         long extraCode = _resolver.stringToLongKey(nodeType);
         NodeFactory resolvedFactory = factoryByCode(extraCode);
-        org.mwg.Node newNode;
+        AbstractNode newNode;
         if (resolvedFactory == null) {
             System.out.println("WARNING: UnKnow NodeType " + nodeType + ", missing plugin configuration in the builder ? Using generic node as a fallback");
             newNode = new CoreNode(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
         } else {
-            newNode = resolvedFactory.create(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+            newNode = (AbstractNode) resolvedFactory.create(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
         }
         this._resolver.initNode(newNode, extraCode);
         return newNode;
     }
 
-    public final NodeFactory factoryByCode(long code) {
-        if (_factoryNames != null) {
+    @Override
+    public Node cloneNode(Node origin) {
+        if (!_isConnected.get()) {
+            throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
+        }
+        AbstractNode castedOrigin = (AbstractNode) origin;
+        long[] initPreviouslyResolved = castedOrigin._previousResolveds.get();
+        if (initPreviouslyResolved == null) {
+            throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR + " node id: " + origin.id());
+        }
+        long typeCode = _resolver.markNodeAndGetType(origin);
+        NodeFactory resolvedFactory = factoryByCode(typeCode);
+        org.mwg.Node newNode;
+        if (resolvedFactory == null) {
+            newNode = new CoreNode(castedOrigin.world(), castedOrigin.time(), castedOrigin.id(), this, initPreviouslyResolved);
+        } else {
+            newNode = resolvedFactory.create(castedOrigin.world(), castedOrigin.time(), castedOrigin.id(), this, initPreviouslyResolved);
+        }
+        return newNode;
+    }
+
+    public NodeFactory factoryByCode(long code) {
+        if (_factoryNames != null && code != Constants.NULL_LONG) {
             long resolvedFactoryIndex = _factoryNames.get(code);
             if (resolvedFactoryIndex != Constants.NULL_LONG) {
                 return _factories[(int) resolvedFactoryIndex];

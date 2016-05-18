@@ -66,11 +66,6 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public void setResultWithoutFree(Object actionResult) {
-        _wrapped.setResultWithoutFree(actionResult);
-    }
-
-    @Override
     public void next() {
         //noop action here, because the next action will be automatically called
     }

@@ -18,13 +18,11 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
 
     private final Map<String, Object> _variables;
     private final Object[] _results;
-    private final boolean[] _ignoreClean;
     private final Graph _graph;
     private final TaskAction[] _actions;
     private final AtomicInteger _currentTaskId;
     private final org.mwg.task.TaskContext _parentContext;
-    private final Object _initialResult;
-
+    private Object _initialResult;
     private long _world;
     private long _time;
 
@@ -36,7 +34,6 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         this._initialResult = p_initialResult;
         this._variables = new ConcurrentHashMap<String, Object>();
         this._results = new Object[p_actions.length];
-        this._ignoreClean = new boolean[p_actions.length];
         this._actions = p_actions;
         this._currentTaskId = new AtomicInteger(0);
     }
@@ -123,16 +120,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final void setResultWithoutFree(Object actionResult) {
-        internal_setResult(actionResult, true);
-    }
-
-    @Override
     public final void setResult(Object actionResult) {
-        internal_setResult(actionResult, false);
-    }
-
-    private void internal_setResult(Object actionResult, boolean ignoreClean) {
         if (actionResult instanceof org.mwg.core.task.CoreTaskContext) {
             mergeVariables((org.mwg.task.TaskContext) actionResult);
         } else if (actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
@@ -142,7 +130,6 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         }
         int i = _currentTaskId.get();
         this._results[i] = actionResult;
-        this._ignoreClean[i] = ignoreClean;
     }
 
     private void mergeVariables(org.mwg.task.TaskContext actionResult) {
@@ -160,12 +147,14 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void clean() {
-        for (int i = 0; i < _results.length; i++) {
-            if (!_ignoreClean[i]) {
-                cleanObj(_results[i]);
-            }
+        if (_initialResult != null) {
+            cleanObj(_initialResult);
+            _initialResult = null;
         }
-        int a = 42;
+        for (int i = 0; i < _results.length; i++) {
+            cleanObj(_results[i]);
+            _results[i] = null;
+        }
     }
 
     private void cleanObj(Object o) {
@@ -193,4 +182,5 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     public String toString() {
         return Arrays.toString(_results);
     }
+
 }

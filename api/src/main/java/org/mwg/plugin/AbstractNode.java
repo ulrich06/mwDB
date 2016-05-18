@@ -467,7 +467,6 @@ public abstract class AbstractNode implements Node {
         }
     }
 
-
     public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
         if (propertyType != propertyTargetType) {
             throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));
@@ -480,4 +479,5 @@ public abstract class AbstractNode implements Node {
             }
         }
     }
+
 }
