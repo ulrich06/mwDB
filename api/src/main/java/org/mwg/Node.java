@@ -129,10 +129,10 @@ public interface Node {
      *
      * @param indexName     The name of the index (should be unique per relation).
      * @param nodeToIndex   The node to de-index.
-     * @param keyAttributes The list of attribute names to be used as keys for de-indexing (order does not matter)
+     * @param flatKeyAttributes The list of attribute names (flat string seperated by a ',') to be used as keys for de-indexing (order does not matter)
      * @param callback      Called when the node has been de-index. The boolean value specifies the success of the operation.
      */
-    void unindex(String indexName, Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback);
+    void unindex(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
      * Retrieves nodes fromVar an index that satisfies a query at the current node world and the current node time<br>

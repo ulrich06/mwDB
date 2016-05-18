@@ -413,12 +413,12 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void unindex(String indexName, org.mwg.Node toIndexNode, String[] keyAttributes, Callback<Boolean> callback) {
+    public void unindex(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex != null) {
-                    foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, keyAttributes, new Callback<Boolean>() {
+                    foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, flatKeyAttributes, new Callback<Boolean>() {
                         @Override
                         public void on(Boolean result) {
                             foundIndex.free();

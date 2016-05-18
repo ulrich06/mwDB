@@ -440,7 +440,8 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void unindex(String indexName, org.mwg.Node nodeToIndex, String[] keyAttributes, Callback<Boolean> callback) {
+    public void unindex(String indexName, org.mwg.Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback) {
+        final String[] keyAttributes = flatKeyAttributes.split(Constants.QUERY_SEP + "");
         NodeState currentNodeState = this._resolver.resolveState(this, true);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);

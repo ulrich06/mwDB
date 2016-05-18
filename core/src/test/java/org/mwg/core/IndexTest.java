@@ -136,7 +136,7 @@ public class IndexTest {
 
 
                 //unIndex the node @t1
-                graph.unindex("nodes", node_t1, new String[]{"name", "version"}, new Callback<Boolean>() {
+                graph.unindex("nodes", node_t1, "name,version", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean o) {
                         counter[0]++;
