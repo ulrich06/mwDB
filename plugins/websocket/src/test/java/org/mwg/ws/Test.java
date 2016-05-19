@@ -44,8 +44,7 @@ public class Test {
 //                        node3.set("name","node3");
 
 
-                        String[] attIndex = new String[]{"name"};
-                        serverGraph.index("indexName",node1,attIndex,null);
+                        serverGraph.index("indexName",node1,"name",null);
 //                        serverGraph.index("indexName",node2,attIndex,null);
 //                        serverGraph.index("indexName",node3,attIndex,null);
 

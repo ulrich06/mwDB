@@ -1,9 +1,44 @@
 package org.mwg.ws;
 
 
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mwg.*;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+
 public class WebSocketCommunicationTest {
-    //@org.junit.Test
-    /*public void test() {
+    @AfterClass
+    public static void cleanDB() {
+        Path dbBath = Paths.get("data");
+        if(Files.exists(dbBath)) {
+            try {
+                Files.walkFileTree(dbBath, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    @Test
+    public void test() {
         Graph serverGraph = GraphBuilder.builder().withStorage(new WSStorageWrapper(new LevelDBStorage("data"),8080))
                                 .build();
 
@@ -33,11 +68,9 @@ public class WebSocketCommunicationTest {
                         Node node3 = serverGraph.newNode(0,0);
                         node3.set("name","node3");
 
-
-                        String[] attIndex = new String[]{"name"};
-                        serverGraph.index("indexName",node1,attIndex,null);
-                        serverGraph.index("indexName",node2,attIndex,null);
-                        serverGraph.index("indexName",node3,attIndex,null);
+                        serverGraph.index("indexName",node1,"name",null);
+                        serverGraph.index("indexName",node2,"name",null);
+                        serverGraph.index("indexName",node3,"name",null);
 
                         clientGraph.all(0, 0, "indexName", new Callback<Node[]>() {
                             @Override
@@ -51,5 +84,5 @@ public class WebSocketCommunicationTest {
             }
         });
 
-    }*/
+    }
 }
