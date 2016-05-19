@@ -821,6 +821,10 @@ class MWGResolver implements Resolver {
                     newResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = newSuperTimeTree.magic();
                     newResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = newTimeTree.magic();
                     castedNode._previousResolveds.set(newResolveds);
+
+                    //double unmark because the pointer has moved
+                    _space.unmarkChunk(nodeSuperTimeTree);
+                    _space.unmarkChunk(nodeTimeTree);
                 }
             }
         } catch (Throwable t) {
