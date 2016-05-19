@@ -65,7 +65,7 @@ module.exports = function (grunt) {
         jasmine: {
             run: {
                 // the code to be tested
-                src: ['<%= dir.target_test_js %>/**/*.js'],
+                //src: ['<%= dir.target_test_js %>/**/*.js'],
                 options: {
                     // the tests
                     specs: '<%= dir.target_test_js %>/all.js',
