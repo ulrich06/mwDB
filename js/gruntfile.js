@@ -1,4 +1,4 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
     grunt.initConfig({
         // ----- Environment
         // read in some metadata from project descriptor
@@ -42,6 +42,24 @@ module.exports = function(grunt) {
                 }
             }
         },
+
+        concat: {
+            options: {
+                separator: '\n'
+            },
+            dist: {
+                src: [
+                    '<%= dir.target_test_js %>/generated-sources/src/main/jre.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/api.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/core.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/junit.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/test.js',
+                    '<%= dir.source_test_ts %>/testsRunner.js'
+                ],
+                dest: '<%= dir.target_test_js %>/all.js'
+            }
+        },
+
         // ------- Unit tests with code coverage
         //  See https://github.com/gruntjs/grunt-contrib-jasmine
         jasmine: {
@@ -50,7 +68,7 @@ module.exports = function(grunt) {
                 src: ['<%= dir.target_test_js %>/**/*.js'],
                 options: {
                     // the tests
-                    specs: '<%= dir.source_test_ts %>/testsRunner.js',
+                    specs: '<%= dir.target_test_js %>/all.js',
                     keepRunner: true,
                     display: 'none', //full, short, none
                     summary: true
@@ -59,7 +77,9 @@ module.exports = function(grunt) {
         },
     });
     // ----- Setup tasks
+
     grunt.loadNpmTasks('grunt-typescript');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
-    grunt.registerTask('default', ['typescript:compile','typescript:compile_test','jasmine']);
+    grunt.registerTask('default', ['typescript:compile', 'typescript:compile_test','concat', 'jasmine']);
 };

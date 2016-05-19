@@ -1,9 +1,12 @@
 {
-  "name": "org.mwDB.core",
+  "name": "mwg",
   "version": "1.0.0-SNAPSHOT",
   "devDependencies": {
-    "grunt": "1.0.1",
-    "grunt-typescript": "0.8.0",
-    "grunt-contrib-jasmine": "1.0.3"
+    "grunt": "~0.4.5",
+    "grunt-cli": "",
+    "grunt-typescript": "",
+    "grunt-contrib-jasmine": "",
+    "grunt-contrib-concat": ""
+
   }
 }
