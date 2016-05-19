@@ -3,6 +3,7 @@ package org.mwg.core.chunk.offheap;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.plugin.Resolver;

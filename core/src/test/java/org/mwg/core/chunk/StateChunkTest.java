@@ -7,6 +7,7 @@ import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.HeapStateChunk;
 import org.mwg.core.chunk.heap.HeapChunk;

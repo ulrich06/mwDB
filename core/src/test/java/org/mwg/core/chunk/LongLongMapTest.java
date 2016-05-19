@@ -3,6 +3,7 @@ package org.mwg.core.chunk;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.LongLongMap;
 import org.mwg.Graph;
 import org.mwg.struct.LongLongMapCallBack;

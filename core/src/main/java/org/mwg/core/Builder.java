@@ -1,7 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
-import org.mwg.core.chunk.ChunkSpace;
+import org.mwg.plugin.ChunkSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
 import org.mwg.plugin.NodeFactory;

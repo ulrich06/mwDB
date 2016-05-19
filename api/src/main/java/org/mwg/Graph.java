@@ -1,5 +1,6 @@
 package org.mwg;
 
+import org.mwg.plugin.ChunkSpace;
 import org.mwg.struct.Buffer;
 import org.mwg.plugin.Resolver;
 import org.mwg.plugin.Scheduler;
@@ -163,5 +164,7 @@ public interface Graph {
      * @return newly created task object
      */
     Task newTask();
+
+    ChunkSpace space();
 
 }

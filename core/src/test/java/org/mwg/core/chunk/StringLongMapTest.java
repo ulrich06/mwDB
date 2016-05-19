@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.Constants;
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.StringLongMap;
 import org.mwg.struct.StringLongMapCallBack;
 import org.mwg.core.chunk.heap.ArrayStringLongMap;

@@ -6,6 +6,7 @@ import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.ChunkSpace;
 
 public class ChunkSpaceTest {
     @Test

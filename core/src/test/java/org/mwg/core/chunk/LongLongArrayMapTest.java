@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;

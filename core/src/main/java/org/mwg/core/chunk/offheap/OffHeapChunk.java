@@ -1,6 +1,6 @@
 package org.mwg.core.chunk.offheap;
 
-import org.mwg.core.chunk.Chunk;
+import org.mwg.plugin.Chunk;
 
 /**
  * @ignore ts

@@ -544,6 +544,7 @@ class CoreGraph implements org.mwg.Graph {
         return _scheduler;
     }
 
+    @Override
     public ChunkSpace space() {
         return _space;
     }

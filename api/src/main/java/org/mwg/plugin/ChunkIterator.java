@@ -1,4 +1,4 @@
-package org.mwg.core.chunk;
+package org.mwg.plugin;
 
 public interface ChunkIterator {
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.plugin.Chunk;
 import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
 import org.mwg.core.chunk.heap.HeapChunk;

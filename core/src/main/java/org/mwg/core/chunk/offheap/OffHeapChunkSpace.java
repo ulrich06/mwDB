@@ -3,6 +3,9 @@ package org.mwg.core.chunk.offheap;
 
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkIterator;
+import org.mwg.plugin.ChunkSpace;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
