@@ -341,6 +341,9 @@ class CoreGraph implements org.mwg.Graph {
                 callback.on(null);
             }
         } else {
+
+            boolean isNoop = this._storage instanceof NoopStorage;
+
             Buffer stream = newBuffer();
             boolean isFirst = true;
             while (dirtyIterator.hasNext()) {
@@ -356,7 +359,9 @@ class CoreGraph implements org.mwg.Graph {
                     //Save chunk payload
                     stream.write(CoreConstants.BUFFER_SEP);
                     try {
-                        loopChunk.save(stream);
+                        if (!isNoop) { //optimization to not save unused bytes
+                            loopChunk.save(stream);
+                        }
                         this._space.declareClean(loopChunk);
                     } catch (Exception e) {
                         e.printStackTrace();
