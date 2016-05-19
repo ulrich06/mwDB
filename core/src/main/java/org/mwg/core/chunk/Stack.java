@@ -10,4 +10,6 @@ public interface Stack {
 
     void free();
 
+    long size();
+
 }

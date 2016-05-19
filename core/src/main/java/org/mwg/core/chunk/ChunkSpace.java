@@ -60,7 +60,8 @@ public interface ChunkSpace {
 
     long size();
 
-    ChunkIterator detachDirties();
+    long available();
 
+    ChunkIterator detachDirties();
 
 }

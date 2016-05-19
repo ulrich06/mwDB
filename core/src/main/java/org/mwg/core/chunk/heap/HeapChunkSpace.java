@@ -388,6 +388,11 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         return this._elementCount.get();
     }
 
+    @Override
+    public long available() {
+        return _lru.size();
+    }
+
 }
 
 

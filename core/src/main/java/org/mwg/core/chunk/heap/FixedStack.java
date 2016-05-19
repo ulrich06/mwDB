@@ -151,5 +151,10 @@ public class FixedStack implements Stack {
     public final void free() {
         //noop
     }
-    
+
+    @Override
+    public long size() {
+        return _count;
+    }
+
 }

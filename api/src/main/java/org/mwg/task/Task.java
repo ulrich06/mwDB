@@ -171,7 +171,7 @@ public interface Task {
     Task then(TaskAction action);
 
     Task thenAsync(TaskAction action);
-    
+
     Task save();
 
     /**

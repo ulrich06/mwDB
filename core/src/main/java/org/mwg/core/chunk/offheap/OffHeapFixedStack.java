@@ -151,4 +151,8 @@ public class OffHeapFixedStack implements Stack {
         OffHeapLongArray.free(_prev);
     }
 
+    @Override
+    public long size() {
+        return _count;
+    }
 }
