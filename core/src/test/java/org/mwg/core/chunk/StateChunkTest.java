@@ -95,12 +95,11 @@ public class StateChunkTest implements ChunkListener {
         chunk.save(buffer);
 
         byte[] data = buffer.data();
-        StringBuilder sb = new StringBuilder();
+        byte[] expected = "C|A,I,D".getBytes();
+        Assert.assertEquals(expected.length, data.length);
         for(int i = 0; i < data.length; i++) {
-            sb.append((char)data[i]);
+            Assert.assertEquals(expected[i], data[i]);
         }
-        String result = sb.toString();
-        Assert.assertEquals("C|A,I,D", result);
 
         StateChunk chunk2 = factory.create(this, buffer, null);
         int elem2 = (int) chunk2.get(0);
