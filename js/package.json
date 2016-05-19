@@ -1,0 +1,9 @@
+{
+  "name": "org.mwDB.core",
+  "version": "1.0.0-SNAPSHOT",
+  "devDependencies": {
+    "grunt": "1.0.1",
+    "grunt-typescript": "0.8.0",
+    "grunt-contrib-jasmine": "1.0.3"
+  }
+}
