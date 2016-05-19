@@ -97,7 +97,7 @@ public class StateChunkTest implements ChunkListener {
         byte[] data = buffer.data();
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < data.length; i++) {
-            sb.append(data[i]);
+            sb.append((char)data[i]);
         }
         String result = sb.toString();
         Assert.assertEquals("C|A,I,D", result);
