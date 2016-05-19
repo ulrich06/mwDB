@@ -93,8 +93,13 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertEquals(elem, CoreConstants.OFFHEAP_NULL_PTR);
         Buffer buffer = BufferBuilder.newHeapBuffer();
         chunk.save(buffer);
-        String result = new String(buffer.data());
-        Assert.assertEquals("C|A,I,D", result);
+
+        byte[] data = buffer.data();
+        byte[] expected = "C|A,I,D".getBytes();
+        Assert.assertEquals(expected.length, data.length);
+        for(int i = 0; i < data.length; i++) {
+            Assert.assertEquals(expected[i], data[i]);
+        }
 
         StateChunk chunk2 = factory.create(this, buffer, null);
         int elem2 = (int) chunk2.get(0);
