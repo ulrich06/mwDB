@@ -53,11 +53,26 @@ public class BufferBuilderTest {
     }
 
     private void testIterator(org.mwg.struct.Buffer buffer) {
-        buffer.writeAll("123".getBytes());
+        byte[] one = new byte[3];
+        one[0] = (byte)"1".codePointAt(0);
+        one[1] = (byte)"2".codePointAt(0);
+        one[2] = (byte)"3".codePointAt(0);
+
+        byte[] two = new byte[3];
+        two[0] = (byte)"5".codePointAt(0);
+        two[1] = (byte)"6".codePointAt(0);
+        two[2] = (byte)"7".codePointAt(0);
+
+        byte[] three = new byte[2];
+        three[0] = (byte)"8".codePointAt(0);
+        three[1] = (byte)"9".codePointAt(0);
+
+
+        buffer.writeAll(one);
         buffer.write(BUFFER_SEP);
-        buffer.writeAll("567".getBytes());
+        buffer.writeAll(two);
         buffer.write(BUFFER_SEP);
-        buffer.writeAll("89".getBytes());
+        buffer.writeAll(three);
 
         BufferIterator it = buffer.iterator();
         Assert.assertEquals(it.hasNext(), true);
@@ -66,26 +81,26 @@ public class BufferBuilderTest {
         Assert.assertNotNull(view1);
         Assert.assertEquals(view1.size(), 3);
         byte[] view1flat = view1.data();
-        view1flat[0] = "123".getBytes()[0];
-        view1flat[1] = "123".getBytes()[1];
-        view1flat[2] = "123".getBytes()[2];
+        view1flat[0] = one[0];
+        view1flat[1] = one[1];
+        view1flat[2] = one[2];
         Assert.assertEquals(it.hasNext(), true);
 
         Buffer view2 = it.next();
         Assert.assertNotNull(view2);
         Assert.assertEquals(view2.size(), 3);
         byte[] view2flat = view2.data();
-        view2flat[0] = "567".getBytes()[0];
-        view2flat[1] = "567".getBytes()[1];
-        view2flat[2] = "567".getBytes()[2];
+        view2flat[0] = two[0];
+        view2flat[1] = two[1];
+        view2flat[2] = two[2];
         Assert.assertEquals(it.hasNext(), true);
 
         Buffer view3 = it.next();
         Assert.assertNotNull(view3);
         Assert.assertEquals(view3.size(), 2);
         byte[] view3flat = view3.data();
-        view3flat[0] = "89".getBytes()[0];
-        view3flat[1] = "89".getBytes()[1];
+        view3flat[0] = three[0];
+        view3flat[1] = three[1];
         Assert.assertEquals(it.hasNext(), false);
     }
 
