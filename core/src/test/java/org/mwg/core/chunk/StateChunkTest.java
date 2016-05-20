@@ -23,9 +23,6 @@ public class StateChunkTest implements ChunkListener {
         StateChunk create(ChunkListener listener, Buffer payload, Chunk origin);
     }
 
-    /**
-     * @ignore ts
-     */
     @Test
     public void heapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
@@ -100,7 +97,7 @@ public class StateChunkTest implements ChunkListener {
         byte[] data = buffer.data();
         byte[] expected = "C|A,I,D".getBytes();
         Assert.assertEquals(expected.length, data.length);
-        for(int i = 0; i < data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             Assert.assertEquals(expected[i], data[i]);
         }
 
