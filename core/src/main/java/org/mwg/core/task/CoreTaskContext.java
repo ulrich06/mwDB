@@ -7,8 +7,6 @@ import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,14 +102,22 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
                 return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
             } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
                 org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
-                List<Object> result = new ArrayList<Object>();
+                Object[] result = new Object[contexts.length];
+                int result_index = 0;
                 for (int i = 0; i < contexts.length; i++) {
                     Object currentLoop = contexts[i].getPreviousResult();
                     if (currentLoop != null) {
-                        result.add(currentLoop);
+                        result[result_index] = currentLoop;
+                        result_index++;
                     }
                 }
-                return result.toArray(new Object[result.size()]);
+                if (contexts.length == result_index) {
+                    return result;
+                } else {
+                    Object[] shrinked = new Object[result_index];
+                    System.arraycopy(result, 0, shrinked, 0, result_index);
+                    return shrinked;
+                }
             } else {
                 return previousResult;
             }

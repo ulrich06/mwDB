@@ -11,6 +11,9 @@ import org.mwg.core.utility.Unsafe;
 
 public class SuperTimeTest {
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());

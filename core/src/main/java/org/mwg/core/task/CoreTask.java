@@ -7,6 +7,8 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 public class CoreTask implements org.mwg.task.Task {
@@ -239,24 +241,52 @@ public class CoreTask implements org.mwg.task.Task {
     private Object protect(Object input) {
         if (input instanceof AbstractNode) {
             return _graph.cloneNode((Node) input);
-        } else if (input instanceof AbstractNode[]) {
-            AbstractNode[] castedNodeArr = (AbstractNode[]) input;
-            AbstractNode[] castedNodeArrCloned = new AbstractNode[castedNodeArr.length];
-            for (int i = 0; i < castedNodeArr.length; i++) {
-                castedNodeArrCloned[i] = (AbstractNode) _graph.cloneNode(castedNodeArr[i]);
-            }
-            return castedNodeArrCloned;
         } else if (input instanceof Object[]) {
             Object[] casted = (Object[]) input;
             Object[] cloned = new Object[casted.length];
+            boolean isAllNode = true;
             for (int i = 0; i < casted.length; i++) {
                 cloned[i] = protect(casted[i]);
+                isAllNode = isAllNode && (cloned[i] instanceof AbstractNode);
+            }
+            if (isAllNode) {
+                Node[] typedResult = new AbstractNode[cloned.length];
+                System.arraycopy(cloned, 0, typedResult, 0, cloned.length);
+                return typedResult;
             }
             return cloned;
         } else {
-            //todo manage iterable object
-            return input;
+            return protectIterable(input);
         }
+    }
+
+    /**
+     * @native ts
+     * if(input != null && input != undefined && input['iterator'] != undefined){
+     * var flat = [];
+     * var it = input['iterator']();
+     * while(it.hasNext()){
+     * flat.push(it.next());
+     * }
+     * return flat;
+     * } else {
+     * return input;
+     * }
+     */
+    private Object protectIterable(Object input) {
+        if (input instanceof Collection) {
+            Collection casted = (Collection) input;
+            Object[] flat = new Object[casted.size()];
+            int flat_index = 0;
+            Iterator it = casted.iterator();
+            while (it.hasNext()) {
+                flat[flat_index] = it.next();
+                flat_index++;
+            }
+            return flat;
+        }
+
+        return input;
     }
 
 }

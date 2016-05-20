@@ -23,6 +23,9 @@ public class StateChunkTest implements ChunkListener {
         StateChunk create(ChunkListener listener, Buffer payload, Chunk origin);
     }
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void heapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
