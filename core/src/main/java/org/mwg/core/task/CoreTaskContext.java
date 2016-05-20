@@ -83,6 +83,23 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
+    public final void addToVariable(String name, Object value) {
+        Object result = this._variables.get(name);
+        if (result instanceof Object[]) {
+            Object[] previous = (Object[]) result;
+            Object[] incArr = new Object[previous.length+1];
+            System.arraycopy(previous,0,incArr,0,previous.length);
+            incArr[previous.length] = value;
+            this._variables.put(name, incArr);
+        } else {
+            Object[] newArr = new Object[2];
+            newArr[0] = result;
+            newArr[1] = value;
+            this._variables.put(name, newArr);
+        }
+    }
+
+    @Override
     public final void setVariable(String name, Object value) {
         if (value != null) {
             this._variables.put(name, value);

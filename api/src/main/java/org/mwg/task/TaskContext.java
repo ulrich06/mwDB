@@ -20,10 +20,12 @@ public interface TaskContext {
 
     void setVariable(String name, Object value);
 
+    void addToVariable(String name, Object value);
+
     Object getPreviousResult();
 
     void setResult(Object actionResult);
-    
+
     void next();
 
     void clean();
