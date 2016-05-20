@@ -9,6 +9,7 @@ public class ActionTimeTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .time(10)
                 .then(new TaskAction() {
@@ -18,6 +19,7 @@ public class ActionTimeTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 }

@@ -11,6 +11,7 @@ public class ActionFromTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .from("uselessPayload")
                 .then(new TaskAction() {
@@ -20,10 +21,12 @@ public class ActionFromTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void testFromNodes() {
+        initGraph();
         graph.all(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
@@ -57,10 +60,12 @@ public class ActionFromTest extends AbstractActionTest {
                 Assert.assertArrayEquals(expected,resultName);
             }
         });
+        removeGraph();
     }
 
     @Test
     public void testFromNode() {
+        initGraph();
         graph.find(0, 0, "roots", "name=root", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
@@ -85,6 +90,7 @@ public class ActionFromTest extends AbstractActionTest {
                 Assert.assertEquals("root",name);
             }
         });
+        removeGraph();
     }
 
 

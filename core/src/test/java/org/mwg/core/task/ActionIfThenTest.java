@@ -13,6 +13,7 @@ public class ActionIfThenTest extends AbstractActionTest{
 
     @Test
     public void test() {
+        initGraph();
         boolean[] result = {false,false};
 
         Task modifyResult0 = graph.newTask()
@@ -49,10 +50,12 @@ public class ActionIfThenTest extends AbstractActionTest{
 
         Assert.assertEquals(true,result[0]);
         Assert.assertEquals(false,result[1]);
+        removeGraph();
     }
 
     @Test
     public void testChainAfterIfThen() {
+        initGraph();
         Task addVarInContext = graph.newTask().from(5).asVar("variable").then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
@@ -72,10 +75,12 @@ public class ActionIfThenTest extends AbstractActionTest{
                 Assert.assertEquals(5,(int)val);
             }
         }).execute();
+        removeGraph();
     }
 
     @Test
     public void accessContextVariableInThenTask() {
+        initGraph();
         Task accessVar = graph.newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
@@ -90,5 +95,6 @@ public class ActionIfThenTest extends AbstractActionTest{
                 return true;
             }
         },accessVar).execute();
+        removeGraph();
     }
 }

@@ -13,7 +13,7 @@ public class ActionForeachParTest extends AbstractActionTest {
 
     @Test
     public void test() {
-
+        initGraph();
         final long[] i = {0};
         graph.newTask()
                 .from(new long[]{1, 2, 3})
@@ -74,6 +74,7 @@ public class ActionForeachParTest extends AbstractActionTest {
             }
         }).execute();
 
+        removeGraph();
     }
 
 }

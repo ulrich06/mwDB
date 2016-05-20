@@ -10,6 +10,7 @@ public class ActionFromIndexAllTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .from("uselessPayload")
                 .fromIndexAll("nodes")
@@ -22,6 +23,7 @@ public class ActionFromIndexAllTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 }

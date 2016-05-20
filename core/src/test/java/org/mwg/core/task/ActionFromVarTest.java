@@ -10,6 +10,7 @@ public class ActionFromVarTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .asVar("x")
@@ -24,6 +25,7 @@ public class ActionFromVarTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 }
