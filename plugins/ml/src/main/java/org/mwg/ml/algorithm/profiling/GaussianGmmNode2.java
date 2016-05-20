@@ -378,28 +378,30 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
             callback.on(null);
         }
 
+        ArrayList<GaussianGmmNode2> leaves=new ArrayList<>();
+
         Task creationTask = graph().newTask().then(new TaskAction() {
             @Override
             public void eval(TaskContext context) {
-                Object[] evaluates = (Object[]) context.getVariable("leaves");
-                System.out.println("resolved: " + evaluates.length + " nodes");
+
+                System.out.println("resolved: " + leaves.size() + " nodes");
 
                 Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
                 for (int i = 0; i < nbfeature; i++) {
                     covBackup.set(i, i, err[i] * err[i]);
                 }
 
-                int[] totals = new int[evaluates.length];
+                int[] totals = new int[leaves.size()];
                 int globalTotal = 0;
 
-                MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[evaluates.length];
-                for (int i = 0; i < evaluates.length; i++) {
-                    totals[i] = ((GaussianGmmNode2)evaluates[i]).getTotal();
+                MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.size()];
+                for (int i = 0; i < leaves.size(); i++) {
+                    totals[i] = leaves.get(i).getTotal();
                     globalTotal += totals[i];
-                    double[] avg = ((GaussianGmmNode2)evaluates[i]).getAvg();
+                    double[] avg = leaves.get(i).getAvg();
                     Matrix cov;
                     if (totals[i] > 2) {
-                        distributions[i] = new MultivariateNormalDistribution(avg, ((GaussianGmmNode2)evaluates[i]).getCovarianceMatrix(avg));
+                        distributions[i] = new MultivariateNormalDistribution(avg, leaves.get(i).getCovarianceMatrix(avg));
                     } else {
                         distributions[i] = new MultivariateNormalDistribution(avg, covBackup); //this can be optimized later by inverting covBackup only once
                     }
@@ -419,11 +421,11 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
 
                 for (int i = 0; i < result.length; i++) {
                     if (((GaussianGmmNode2) result[i]).getLevel() == level) {
-                        context.addToVariable("leaves",result[i]);
+                        leaves.add((GaussianGmmNode2) result[i]);
                     } else {
                         long[] relations = (long[]) result[i].get(INTERNAL_SUBGAUSSIAN_KEY);
                         if (relations == null || relations.length == 0) {
-                            context.addToVariable("leaves",result[i]);
+                            leaves.add((GaussianGmmNode2) result[i]);
                         } else {
                             for (int j = 0; j < relations.length; j++) {
                                 toSolve.add(relations[j]);
@@ -465,9 +467,8 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
                     }
                 }, traverse);
 
-        Object[] leaves = new Object[0];
 
-        Task mainTask = graph().newTask().from(leaves).asVar("leaves").from(new Node[]{this}).asVar("starterNodes").wait(traverse).wait(creationTask);
+        Task mainTask = graph().newTask().from(new Node[]{this}).asVar("starterNodes").wait(traverse).wait(creationTask);
         mainTask.execute();
 
 
@@ -507,11 +508,6 @@ public class GaussianGmmNode2 extends AbstractMLNode implements ProfilingNode {
             set(INTERNAL_TOTAL_KEY, total);
             set(INTERNAL_WEIGHT_KEY, weight);
             set(INTERNAL_SUM_KEY, sum);
-            if (createNode && level > 0) {
-                createLevel(values, level - 1, width);
-                checkAndCompress();
-            }
-
         } else {
             double[] sum;
             double[] min;
