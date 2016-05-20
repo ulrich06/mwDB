@@ -42,7 +42,22 @@ module.exports = function (grunt) {
                 }
             }
         },
-
+        concatDev: {
+            options: {
+                separator: '\n'
+            },
+            dist: {
+                src: [
+                    '<%= dir.target_test_js %>/generated-sources/src/main/jre.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/api.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/core.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/junit.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/test.js',
+                    '<%= dir.source_test_ts %>/testsRunnerDev.js'
+                ],
+                dest: '<%= dir.target_test_js %>/allDev.js'
+            }
+        },
         concat: {
             options: {
                 separator: '\n'
@@ -57,6 +72,17 @@ module.exports = function (grunt) {
                     '<%= dir.source_test_ts %>/testsRunner.js'
                 ],
                 dest: '<%= dir.target_test_js %>/all.js'
+            },
+            dev: {
+                src: [
+                    '<%= dir.target_test_js %>/generated-sources/src/main/jre.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/api.js',
+                    '<%= dir.target_test_js %>/generated-sources/src/main/core.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/junit.js',
+                    '<%= dir.target_test_js %>/generated-test-sources/src/main/test.js',
+                    '<%= dir.source_test_ts %>/testsRunnerDev.js'
+                ],
+                dest: '<%= dir.target_test_js %>/allDev.js'
             }
         },
 
@@ -74,12 +100,14 @@ module.exports = function (grunt) {
                     summary: true
                 }
             }
-        },
-    });
+        }
+        ,
+    })
+    ;
     // ----- Setup tasks
 
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
-    grunt.registerTask('default', ['typescript:compile', 'typescript:compile_test','concat', 'jasmine']);
+    grunt.registerTask('default', ['typescript:compile', 'typescript:compile_test', 'concat', 'jasmine']);
 };
