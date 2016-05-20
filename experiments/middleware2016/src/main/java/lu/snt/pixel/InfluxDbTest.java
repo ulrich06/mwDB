@@ -1,4 +1,4 @@
-package lu.snt.vldb;
+package lu.snt.pixel;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;

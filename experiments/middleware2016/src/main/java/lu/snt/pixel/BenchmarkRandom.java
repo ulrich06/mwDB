@@ -1,4 +1,4 @@
-package lu.snt.vldb;
+package lu.snt.pixel;
 
 
 import org.uncommons.maths.random.CMWC4096RNG;

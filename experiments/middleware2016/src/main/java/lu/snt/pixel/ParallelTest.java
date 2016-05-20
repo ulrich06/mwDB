@@ -1,4 +1,4 @@
-package lu.snt.vldb;
+package lu.snt.pixel;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,18 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>lu.snt.vldb</groupId>
-    <artifactId>vldbexperiment</artifactId>
+    <artifactId>pixelexperiment</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>VLDB time and universes experiments</name>
-    <description>Experiments for VLDB conference</description>
+    <name>Pixel time and universes experiments</name>
+    <description>Experiments over Pixel</description>
 
     <properties>
         <jodatime.version>2.5</jodatime.version>
         <junit.version>4.11</junit.version>
         <log4j.version>1.2.17</log4j.version>
-        <kmf.version>4.27.1-SNAPSHOT</kmf.version>
     </properties>
 
 
@@ -25,21 +24,31 @@
             <artifactId>influxdb-java</artifactId>
             <version>2.1</version>
         </dependency>
+
         <dependency>
-            <groupId>org.kevoree.modeling</groupId>
-            <artifactId>microframework</artifactId>
-            <version>${kmf.version}</version>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>api</artifactId>
+            <version>1-SNAPSHOT</version>
         </dependency>
+
         <dependency>
-            <groupId>org.kevoree.modeling.plugin</groupId>
-            <artifactId>rocksdb</artifactId>
-            <version>4.27.0</version>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
-            <groupId>org.kevoree.modeling.plugin</groupId>
+            <groupId>org.kevoree.mwg.plugins</groupId>
+            <artifactId>ml</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.kevoree.mwg.plugins</groupId>
             <artifactId>leveldb</artifactId>
-            <version>4.27.0</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>org.uncommons.maths</groupId>
             <artifactId>uncommons-maths</artifactId>
@@ -67,7 +76,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>lu.snt.vldb.StairTest</mainClass>
+                            <mainClass>lu.snt.pixel.StairTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -76,8 +85,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

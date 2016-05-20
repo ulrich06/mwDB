@@ -1,4 +1,4 @@
-package lu.snt.vldb;
+package lu.snt.pixel;
 
 /**
  * Created by assaad on 11/02/16.
