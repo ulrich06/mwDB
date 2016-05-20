@@ -140,11 +140,13 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         for (int i = 0; i < 5; i++) {
+            /*
             if (i == 1) {
                 Assert.assertTrue(PrimitiveHelper.equals(chunk.get(i).toString(), chunk2.get(i).toString()));
             } else {
                 Assert.assertTrue(chunk.get(i).equals(chunk2.get(i)));
-            }
+            }*/
+            Assert.assertEquals(chunk.get(0), chunk2.get(0));
         }
 
         //init chunk selectWith arrays
@@ -205,7 +207,7 @@ public class StateChunkTest implements ChunkListener {
         }
 
         for (int i = 0; i < 10; i++) {
-            Assert.assertTrue(chunk.get(1000 + i).equals(i));
+            Assert.assertEquals(chunk.get(1000 + i), i);
         }
 
         StateChunk chunk3 = factory.create(this, null, chunk);
@@ -436,8 +438,7 @@ public class StateChunkTest implements ChunkListener {
 
         // add something new instead of replacing something -> triggers the shallow copy of the clone
         chunk2.set(11, Type.STRING, "newString");
-        Assert.assertTrue(chunk2.get(11).equals("newString"));
-
+        Assert.assertEquals(chunk2.get(11), "newString");
 
         free(chunk);
         free(chunk2);
