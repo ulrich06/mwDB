@@ -11,6 +11,7 @@ public class ActionMapTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .map(new TaskFunctionMap() {
@@ -29,6 +30,7 @@ public class ActionMapTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 }

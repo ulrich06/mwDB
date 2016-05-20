@@ -11,6 +11,7 @@ public class ActionSelectTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
@@ -26,10 +27,12 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void test2() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
@@ -45,10 +48,12 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void test3() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
@@ -64,6 +69,7 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 

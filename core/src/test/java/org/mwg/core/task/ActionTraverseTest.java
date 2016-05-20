@@ -12,6 +12,7 @@ public class ActionTraverseTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .traverse("children")
@@ -24,10 +25,12 @@ public class ActionTraverseTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void testTraverseIndex() {
+        initGraph();
         Node node1 = graph.newNode(0, 0);
         node1.setProperty("name", Type.STRING, "node1");
         node1.setProperty("value", Type.INT, 1);
@@ -121,6 +124,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals("node3", n[2].get("name"));
                     }
                 }).execute();
+        removeGraph();
     }
 
 }

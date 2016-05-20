@@ -9,7 +9,8 @@ public class ActionWorldTest extends AbstractActionTest {
 
     @Test
     public void test() {
-        super.graph.newTask()
+        initGraph();
+        graph.newTask()
                 .world(10)
                 .then(new TaskAction() {
                     @Override
@@ -18,6 +19,7 @@ public class ActionWorldTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 }

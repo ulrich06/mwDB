@@ -9,8 +9,8 @@ public class ActionAsVarTest extends AbstractActionTest {
 
     @Test
     public void test() {
-        graph
-                .newTask()
+        initGraph();
+        graph.newTask()
                 .from("hello")
                 .asVar("myVar")
                 .then(new TaskAction() {
@@ -21,6 +21,8 @@ public class ActionAsVarTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+
+        removeGraph();
     }
 
 }

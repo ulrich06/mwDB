@@ -10,6 +10,7 @@ public class ActionWithoutTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .selectWithout("name", "n0")
@@ -32,6 +33,7 @@ public class ActionWithoutTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
 
     }
 
