@@ -3,6 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
@@ -17,7 +18,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .select(new TaskFunctionSelect() {
                     @Override
                     public boolean select(Node node) {
-                        return node.get("name").equals("root");
+                        return PrimitiveHelper.equals(node.get("name").toString(), "root");
                     }
                 })
                 .then(new TaskAction() {

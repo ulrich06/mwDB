@@ -27,6 +27,7 @@ public class ActionFromTest extends AbstractActionTest {
     @Test
     public void testFromNodes() {
         initGraph();
+        final ActionFromTest selfPointer = this;
         graph.all(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
@@ -36,7 +37,7 @@ public class ActionFromTest extends AbstractActionTest {
                         (String) result[1].get("name"),
                         (String) result[2].get("name")};
 
-                graph.newTask()
+                selfPointer.graph.newTask()
                         .from(result)
                         .then(new TaskAction() {
                             @Override
@@ -66,12 +67,13 @@ public class ActionFromTest extends AbstractActionTest {
     @Test
     public void testFromNode() {
         initGraph();
+        final ActionFromTest selfPointer = this;
         graph.find(0, 0, "roots", "name=root", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
                 Assert.assertEquals(1,result.length);
 
-                graph.newTask()
+                selfPointer.graph.newTask()
                         .from(result[0])
                         .then(new TaskAction() {
                             @Override
