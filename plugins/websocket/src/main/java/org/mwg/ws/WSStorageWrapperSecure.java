@@ -2,42 +2,29 @@ package org.mwg.ws;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.attribute.ExchangeAttributes;
-import io.undertow.client.UndertowClient;
 import io.undertow.connector.ByteBufferPool;
 import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.server.handlers.LearningPushHandler;
-import io.undertow.server.handlers.resource.PathResourceManager;
-import io.undertow.server.session.InMemorySessionManager;
-import io.undertow.server.session.SessionAttachmentHandler;
-import io.undertow.server.session.SessionCookieConfig;
-import io.undertow.util.Headers;
-import io.undertow.util.StatusCodes;
 import io.undertow.websockets.WebSocketConnectionCallback;
-import io.undertow.websockets.core.AbstractReceiveListener;
-import io.undertow.websockets.core.BufferedTextMessage;
-import io.undertow.websockets.core.WebSocketChannel;
+import io.undertow.websockets.client.WebSocketClient;
+import io.undertow.websockets.core.*;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
-import org.xnio.*;
-import org.xnio.ssl.SslConnection;
+import org.xnio.OptionMap;
+import org.xnio.Options;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 import org.xnio.ssl.XnioSsl;
 
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyStore;
 
-import static io.undertow.Handlers.predicate;
-import static io.undertow.Handlers.resource;
-import static io.undertow.predicate.Predicates.secure;
-
 public class WSStorageWrapperSecure implements WebSocketConnectionCallback{
+    private Undertow server;
     @Override
     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
         System.out.println("connection");
@@ -55,19 +42,16 @@ public class WSStorageWrapperSecure implements WebSocketConnectionCallback{
                 "WS-Server-Keystore-16".toCharArray(),loadKeyStore("server.truststore","WS-Server-Truststore-16".toCharArray()),
                 null);
 
-        Undertow server = Undertow.builder()
-                .addHttpsListener(8443, "0.0.0.0", sslContext)
-//                .setHandler(Handlers.websocket(this))
-                .setHandler(new SessionAttachmentHandler(new LearningPushHandler(100, -1, Handlers.header(predicate(secure(), resource(new PathResourceManager(Paths.get(System.getProperty("example.directory", System.getProperty("user.home"))), 100))
-                        .setDirectoryListingEnabled(true), new HttpHandler() {
-                    @Override
-                    public void handleRequest(HttpServerExchange exchange) throws Exception {
-                        exchange.getResponseHeaders().add(Headers.LOCATION, "https://" + exchange.getHostName() + ":" + (exchange.getHostPort() + 363) + exchange.getRelativePath());
-                        exchange.setStatusCode(StatusCodes.TEMPORARY_REDIRECT);
-                    }
-                }), "x-undertow-transport", ExchangeAttributes.transportProtocol())), new InMemorySessionManager("test"), new SessionCookieConfig()))
+        server = Undertow.builder()
+                .addHttpsListener(8443, "0.0.0.0", NaiveSSLContext.getInstance("TLS"))
+                .setHandler(Handlers.websocket(this))
+//                .setHandlerStow-transport", ExchangeAttributes.transportProtocol())), new InMemorySessionManager("test"), new SessionCookieConfig()))
                 .build();
 
+        //server.start();
+    }
+
+    public void start() {
         server.start();
     }
 
@@ -110,14 +94,16 @@ public class WSStorageWrapperSecure implements WebSocketConnectionCallback{
     }
 
     public static void main(String[] args) throws Exception {
-        WSStorageWrapperSecure server = new WSStorageWrapperSecure();
+//        WSStorageWrapperSecure server = new WSStorageWrapperSecure();
+//        server.start();
 
-        SSLContext clientSslContext = createSSLContext(loadKeyStore("client.keystore","WS-Client-Keystore-16".toCharArray()),
-                "WS-Client-Keystore-16".toCharArray(), loadKeyStore("client.truststore","WS-Client-Truststore-16".toCharArray()),null);
+//        SSLContext clientSslContext = createSSLContext(loadKeyStore("client.keystore","WS-Client-Keystore-16".toCharArray()),
+//                "WS-Client-Keystore-16".toCharArray(), loadKeyStore("client.truststore","WS-Client-Truststore-16".toCharArray()),null);
 
 
+        SSLContext clientSslContext = Http2Server.createSSLContext(Http2Server.loadKeyStore("client.keystore"), Http2Server.loadKeyStore("client.truststore"));
         try {
-            /*XnioWorker _worker;
+            XnioWorker _worker;
             Xnio xnio2 = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
             XnioSsl xnioSsl = new UndertowXnioSsl(xnio2, OptionMap.EMPTY, clientSslContext);
             _worker = xnio2.createWorker(OptionMap.builder()
@@ -131,86 +117,29 @@ public class WSStorageWrapperSecure implements WebSocketConnectionCallback{
                     .getMap());
             ByteBufferPool _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
             WebSocketClient.ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
-                    .connectionBuilder(_worker, _buffer, new URI("wss://" + "0.0.0.0" + ":" + 8443)).setSsl(xnioSsl);
+                    .connectionBuilder(_worker, _buffer, new URI("wss://localhost:8443")).setSsl(xnioSsl);
 
-            builder.connect().get();*/
+            builder.connect().get();
 
-
-            XnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY,clientSslContext);
-            XnioWorker worker;
-            worker = Xnio.getInstance().createWorker(OptionMap.builder()
-                    .set(Options.WORKER_IO_THREADS, 2)
-                    .set(Options.CONNECTION_HIGH_WATER, 1_000_000)
-                    .set(Options.CONNECTION_LOW_WATER, 1_000_000)
-                    .set(Options.WORKER_TASK_CORE_THREADS, 30)
-                    .set(Options.WORKER_TASK_MAX_THREADS, 30)
-                    .set(Options.TCP_NODELAY, true)
-                    .set(Options.CORK, true)
-                    .getMap());
-            ByteBufferPool buffer = new DefaultByteBufferPool(true, 1024 * 1024);
-
-
-
-
-
-            ssl.openSslConnection(worker, new InetSocketAddress(8443), new ChannelListener<SslConnection>() {
+            WebSocketChannel channel = builder.connect().get();
+            channel.getReceiveSetter().set(new AbstractReceiveListener() {
                 @Override
-                public void handleEvent(SslConnection channel) {
-                    System.out.println(channel.getIoThread().isAlive());
-                    try {
-                        channel.startHandshake();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
+                protected void onText(WebSocketChannel webSocketChannel, StreamSourceFrameChannel messageChannel) throws IOException {
+                    System.out.println("toto");
                 }
-            },OptionMap.EMPTY).addNotifier(new IoFuture.HandlingNotifier<SslConnection, String>() {
+            });
+            channel.resumeReceives();
+            WebSockets.sendText("Toto", channel, new WebSocketCallback<Void>() {
                 @Override
-                public void handleCancelled(String attachment) {
-                    System.err.println("1-Cancelled");
+                public void complete(WebSocketChannel channel, Void context) {
+                    System.err.println("Complete complete");
                 }
 
                 @Override
-                public void handleFailed(IOException exception, String attachment) {
-                    System.err.println("2-Failed");
-                    exception.printStackTrace();
+                public void onError(WebSocketChannel channel, Void context, Throwable throwable) {
+                    System.err.println("Error error");
                 }
-
-                @Override
-                public void handleDone(SslConnection data, String attachment) {
-                    System.out.println("2-Done");
-                    try {
-                        data.startHandshake();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            },"Toto");
-
-            UndertowClient.getInstance().connect();
-
-            /*builder.connect().addNotifier(new IoFuture.HandlingNotifier<WebSocketChannel, String>() {
-                @Override
-                public void handleCancelled(String attachement) {
-                    System.err.println("Cancelled");
-                }
-
-                @Override
-                public void handleFailed(IOException exception, String attachment) {
-                    System.err.println("Failed");
-                    exception.printStackTrace();
-                }
-
-                @Override
-                public void handleDone(WebSocketChannel data, String attachment) {
-                    System.out.println("Done");
-                }
-            },"Titi");*/
-
-
-
+            });
 
         }
         catch (Exception e) {

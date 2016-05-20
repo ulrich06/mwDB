@@ -124,6 +124,7 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     }
 
     private class WSListener extends AbstractReceiveListener {
+
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
             ByteBuffer[] data = message.getData().getResource();
