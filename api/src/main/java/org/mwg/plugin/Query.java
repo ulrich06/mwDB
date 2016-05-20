@@ -34,6 +34,18 @@ public class Query {
         size++;
     }
 
+    /** @native ts
+     this.sort();
+     this._hash = 0;
+     for (var i = 0; i < this.size; i++) {
+     this._hash = ((this._hash * 32) - this._hash) + this.attributes[i];
+     if (this.values[i] != null) {
+     for (var j = 0; j < this.values[i].length; j++) {
+     this._hash = ((this._hash * 32) - this._hash) + this.values[i].charCodeAt(j);
+     }
+     }
+     }
+     */
     public void compute() {
         sort();
         _hash = 0;

@@ -133,7 +133,7 @@ class MWGResolver implements Resolver {
                                             selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                             callback.on(null);
                                         } else {
-                                            final long closestWorld = resolve_world((WorldOrderChunk) theGlobalWorldOrder, (WorldOrderChunk) theNodeWorldOrder, time, world);
+                                            final long closestWorld = selfPointer.resolve_world((WorldOrderChunk) theGlobalWorldOrder, (WorldOrderChunk) theNodeWorldOrder, time, world);
                                             selfPointer.getOrLoadAndMark(CoreConstants.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                                 @Override
                                                 public void on(Chunk theNodeSuperTimeTree) {
@@ -182,7 +182,7 @@ class MWGResolver implements Resolver {
                                                                                 long extraCode = castedNodeWorldOrder.extra();
                                                                                 NodeFactory resolvedFactory = null;
                                                                                 if (extraCode != Constants.NULL_LONG) {
-                                                                                    resolvedFactory = ((CoreGraph) _graph).factoryByCode(extraCode);
+                                                                                    resolvedFactory = ((CoreGraph) selfPointer._graph).factoryByCode(extraCode);
                                                                                 }
 
                                                                                 long[] initPreviouslyResolved = new long[6];
@@ -197,9 +197,9 @@ class MWGResolver implements Resolver {
 
                                                                                 org.mwg.Node resolvedNode;
                                                                                 if (resolvedFactory == null) {
-                                                                                    resolvedNode = new CoreNode(world, time, id, _graph, initPreviouslyResolved);
+                                                                                    resolvedNode = new CoreNode(world, time, id, selfPointer._graph, initPreviouslyResolved);
                                                                                 } else {
-                                                                                    resolvedNode = resolvedFactory.create(world, time, id, _graph, initPreviouslyResolved);
+                                                                                    resolvedNode = resolvedFactory.create(world, time, id, selfPointer._graph, initPreviouslyResolved);
                                                                                 }
                                                                                 selfPointer._tracker.monitor(resolvedNode);
                                                                                 callback.on((A) resolvedNode);
@@ -851,6 +851,7 @@ class MWGResolver implements Resolver {
                 CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG,
                 CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, node.id()
         };
+        final MWGResolver selfPointer = this;
         getOrLoadAndMarkAll(new byte[]{CoreConstants.WORLD_ORDER_CHUNK, CoreConstants.WORLD_ORDER_CHUNK}, keys, new Callback<Chunk[]>() {
             @Override
             public void on(Chunk[] orders) {
@@ -896,7 +897,7 @@ class MWGResolver implements Resolver {
                     }
                 }
                 //create request concat keys
-                resolveTimepointsFromWorlds(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds[0], collectedIndex, callback);
+                selfPointer.resolveTimepointsFromWorlds(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds[0], collectedIndex, callback);
             }
         });
     }
@@ -961,7 +962,7 @@ class MWGResolver implements Resolver {
                         selfPointer._space.unmarkChunk(timeTree);
                     }
                     //now we have superTimes, lets convert them to all times
-                    resolveTimepointsFromSuperTimes(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedSuperTimesAssociatedWorlds[0], collectedSuperTimes[0], insert_index[0], callback);
+                    selfPointer.resolveTimepointsFromSuperTimes(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedSuperTimesAssociatedWorlds[0], collectedSuperTimes[0], insert_index[0], callback);
                 }
             }
         });

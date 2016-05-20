@@ -312,7 +312,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         }
         if (entry == -1) {
             if (internalState._elementCount + 1 > internalState.threshold) {
-                int newLength = (internalState._elementDataSize == 0 ? 1 : internalState._elementDataSize << 1);
+                int newLength = (internalState._elementDataSize == 0 ? 1 : internalState._elementDataSize * 2);
                 long[] newElementK = new long[newLength];
                 Object[] newElementV = new Object[newLength];
                 byte[] newElementType = new byte[newLength];
@@ -539,7 +539,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     isFirstElem = false;
                     int stateChunkSize = Base64.decodeToIntWithBounds(payload, 0, cursor);
                     newNumberElement = stateChunkSize;
-                    int newStateChunkSize = (stateChunkSize == 0 ? 1 : stateChunkSize << 1);
+                    int newStateChunkSize = (stateChunkSize == 0 ? 1 : stateChunkSize * 2);
                     //init map element
                     newElementK = new long[newStateChunkSize];
                     newElementV = new Object[newStateChunkSize];

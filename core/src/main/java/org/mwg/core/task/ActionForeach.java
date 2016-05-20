@@ -19,6 +19,7 @@ class ActionForeach implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
+        final ActionForeach selfPointer = this;
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
@@ -33,7 +34,7 @@ class ActionForeach implements TaskAction {
                     context.next();
                 } else {
                     //recursive call
-                    _subTask.executeThenAsync(context, castedResult[nextCursot], this);
+                    selfPointer._subTask.executeThenAsync(context, castedResult[nextCursot], this);
                 }
             }
         });
@@ -43,7 +44,7 @@ class ActionForeach implements TaskAction {
      * @native ts
      * var result : any[] = [];
      * for(var p in elem){
-     * result.push(p);
+     * result.push(elem[p]);
      * }
      * return result;
      */

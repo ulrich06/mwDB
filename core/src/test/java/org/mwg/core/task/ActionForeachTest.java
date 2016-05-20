@@ -14,7 +14,7 @@ public class ActionForeachTest extends AbstractActionTest {
 
     @Test
     public void testForeachWhere() {
-
+        initGraph();
         final long[] i = {0};
         graph.newTask()
                 .from(new long[]{1, 2, 3})
@@ -75,11 +75,13 @@ public class ActionForeachTest extends AbstractActionTest {
             }
         }).execute();
 
+        removeGraph();
     }
 
 
     @Test
     public void testForeach() {
+        initGraph();
         long[] toTest = {1, 2, 3, 4, 5};
         int[] index = {0};
 
@@ -108,10 +110,12 @@ public class ActionForeachTest extends AbstractActionTest {
                 Assert.assertEquals("node2", result[2].get("name"));
             }
         }).execute();
+        removeGraph();
     }
 
     @Test
     public void testForEachMergeVariables() {
+        initGraph();
         final int[] index = {0};
         org.mwg.task.Task forEachTask = graph.newTask().then(new TaskAction() {
             @Override
@@ -144,6 +148,7 @@ public class ActionForeachTest extends AbstractActionTest {
                 Assert.assertEquals("root", result);
             }
         }).execute();
+        removeGraph();
     }
 
 }

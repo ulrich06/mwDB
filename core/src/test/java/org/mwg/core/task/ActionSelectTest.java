@@ -3,6 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
@@ -11,12 +12,13 @@ public class ActionSelectTest extends AbstractActionTest {
 
     @Test
     public void test() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
                     public boolean select(Node node) {
-                        return node.get("name").equals("root");
+                        return PrimitiveHelper.equals(node.get("name").toString(), "root");
                     }
                 })
                 .then(new TaskAction() {
@@ -26,10 +28,12 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void test2() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
@@ -45,10 +49,12 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
     @Test
     public void test3() {
+        initGraph();
         graph.newTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
@@ -64,6 +70,7 @@ public class ActionSelectTest extends AbstractActionTest {
                     }
                 })
                 .execute();
+        removeGraph();
     }
 
 

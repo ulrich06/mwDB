@@ -149,7 +149,7 @@ public class ArrayStringLongMap implements StringLongMap {
             //if need to reHash (too small or too much collisions)
             if ((internalState._elementCount + 1) > internalState._threshold) {
                 //rehashCapacity(state.elementDataSize);
-                int newCapacity = internalState._stateSize << 1;
+                int newCapacity = internalState._stateSize * 2;
                 String[] newElementK = new String[newCapacity];
                 long[] newElementV = new long[newCapacity];
                 System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._stateSize);
