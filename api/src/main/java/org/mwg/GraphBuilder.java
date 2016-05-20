@@ -73,8 +73,10 @@ public class GraphBuilder {
 
     /**
      * @native ts
-     * //TODO !!!
-     * return null;
+     * if (org.mwg.GraphBuilder.internalBuilder == null) {
+     * org.mwg.GraphBuilder.internalBuilder = new org.mwg.core.Builder();
+     * }
+     * return org.mwg.GraphBuilder.internalBuilder.newGraph(this._storage, this._scheduler, this._factories, this._gc, this._offHeap, this._memorySize, this._saveBatchSize);
      */
     public Graph build() {
         if (internalBuilder == null) {

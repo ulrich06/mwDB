@@ -9,7 +9,7 @@ public class ActionWorldTest extends AbstractActionTest {
 
     @Test
     public void test() {
-        graph.newTask()
+        super.graph.newTask()
                 .world(10)
                 .then(new TaskAction() {
                     @Override

@@ -643,7 +643,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     private boolean internal_insert(long p_key) {
         if ((_size + 1) > _threshold) {
-            int length = (_size == 0 ? 1 : _size << 1);
+            int length = (_size == 0 ? 1 : _size * 2);
             reallocate(length);
         }
         int newIndex = _size;

@@ -98,7 +98,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
                     if (capacity == 0) {
                         newCapacity = 1;
                     } else {
-                        newCapacity = capacity << 1;
+                        newCapacity = capacity * 2;
                     }
                     long[] tempResult = new long[newCapacity];
                     System.arraycopy(result, 0, tempResult, 0, result.length);
@@ -146,7 +146,7 @@ public class ArrayLongLongArrayMap implements LongLongArrayMap {
         if (toInsert) {
             //no reHash in case of remove
             if ((internalState._elementCount + 1) > internalState._threshold) {
-                int newCapacity = internalState._stateSize << 1;
+                int newCapacity = internalState._stateSize * 2;
                 long[] newElementK = new long[newCapacity];
                 long[] newElementV = new long[newCapacity];
                 System.arraycopy(internalState._elementK, 0, newElementK, 0, internalState._stateSize);

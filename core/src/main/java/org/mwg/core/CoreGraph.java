@@ -182,7 +182,7 @@ class CoreGraph implements org.mwg.Graph {
                             return;
                         }
                     }
-                    final Buffer connectionKeys = newBuffer();
+                    final Buffer connectionKeys = selfPointer.newBuffer();
                     //preload ObjKeyGenerator
                     BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     connectionKeys.write(CoreConstants.BUFFER_SEP);
@@ -518,7 +518,7 @@ class CoreGraph implements org.mwg.Graph {
                     if (indexId == CoreConstants.NULL_LONG) {
                         if (createIfNull) {
                             //insert null
-                            org.mwg.Node newIndexNode = newNode(world, time);
+                            org.mwg.Node newIndexNode = selfPointer.newNode(world, time);
                             newIndexNode.map(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);

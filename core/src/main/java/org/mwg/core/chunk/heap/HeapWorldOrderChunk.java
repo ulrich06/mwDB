@@ -196,7 +196,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     }
 
     private void rehashCapacity(int capacity, InternalState previousState) {
-        int length = (capacity == 0 ? 1 : capacity << 1);
+        int length = (capacity == 0 ? 1 : capacity * 2);
         long[] newElementKV = new long[length * 2];
         System.arraycopy(previousState.elementKV, 0, newElementKV, 0, previousState.elementKV.length);
         int[] newElementNext = new int[length];
@@ -325,7 +325,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
                     if (size == 0) {
                         capacity = 1;
                     } else {
-                        capacity = size << 1;
+                        capacity = size * 2; // << 1
                     }
                     long[] newElementKV = new long[(int) (capacity * 2)];
                     int[] newElementNext = new int[(int) capacity];
