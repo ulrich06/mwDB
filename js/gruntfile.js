@@ -85,29 +85,33 @@ module.exports = function (grunt) {
                 dest: '<%= dir.target_test_js %>/allDev.js'
             }
         },
-
-        // ------- Unit tests with code coverage
-        //  See https://github.com/gruntjs/grunt-contrib-jasmine
-        jasmine: {
-            run: {
-                // the code to be tested
-                //src: ['<%= dir.target_test_js %>/**/*.js'],
+        jasmine_nodejs: {
+            test: {
+                // target specific options
                 options: {
-                    // the tests
-                    specs: '<%= dir.target_test_js %>/all.js',
-                    keepRunner: true,
-                    display: 'none', //full, short, none
-                    summary: true
-                }
+                    specNameSuffix: "all.js",
+                    stopOnFailure: false,
+                    reporters: {
+                        console: {
+                            colors: 2,        // (0|false)|(1|true)|2
+                            cleanStack: 1,       // (0|false)|(1|true)|2|3
+                            verbosity: 2,        // (0|false)|1|2|3|(4|true)
+                            listStyle: "indent", // "flat"|"indent"
+                            activity: true
+                        }
+                    }
+                },
+                // spec files
+                specs: ['<%= dir.target_test_js %>/**'],
+                helpers: []
             }
         }
-        ,
     })
     ;
     // ----- Setup tasks
 
     grunt.loadNpmTasks('grunt-typescript');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
-    grunt.registerTask('default', ['typescript:compile', 'typescript:compile_test', 'concat', 'jasmine']);
+    grunt.loadNpmTasks('grunt-jasmine-nodejs');
+    grunt.registerTask('default', ['typescript:compile', 'typescript:compile_test', 'concat', 'jasmine_nodejs']);
 };
