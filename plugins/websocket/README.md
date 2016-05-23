@@ -41,7 +41,8 @@ Currently the plugin allow to have one machine that produce data and another one
 
 #To do
 **Last update on 04 May 2016**
-- [ ] Secure websocket (info: we plan to use [ACME](https://tools.ietf.org/html/draft-ietf-acme-acme-01) protocol, maybe using [ACME4J](https://github.com/shred/acme4j)
+- [x] Secure websocket (info: we plan to use [ACME](https://tools.ietf.org/html/draft-ietf-acme-acme-01) protocol, maybe using [ACME4J](https://github.com/shred/acme4j)
+- [ ] Manage peers connection/disconnection with ID: the Set cannot work because the equals/hash class of WebChannel are not overrided
 - [ ] Add a strategy to Manage re-connection of a client
 - [ ] Add a strategy to notify client on modification
 - [ ] Force the client to reload some data from the server
