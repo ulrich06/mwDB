@@ -7,7 +7,7 @@ import java.util.Random;
  */
 public class KMeans {
 
-    public int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations,  double[] minD, double[] maxD) {
+    public int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations,  double[] div) {
         int[][] result = new int[numOfCluster][];
         int features= data[0].length;
         int[] totals= new int[numOfCluster];
@@ -19,18 +19,6 @@ public class KMeans {
         for(int i=0;i<numOfCluster;i++){
             System.arraycopy(data[i], 0, centroids[i], 0, features);
         }
-
-        //To normalize data
-        double[] div = new double[features];
-        for(int i=0;i<div.length;i++){
-            if(maxD==null||maxD==minD){
-                // div[i]=err[i]*err[i];
-            }
-            else {
-                div[i]=(maxD[i]-minD[i])*(maxD[i]-minD[i]);
-            }
-        }
-
 
 
         for(int iter=0;iter<numOfIterations;iter++){
