@@ -23,10 +23,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     //Getters and setters
     public final static String NAME = "GaussianGmm";
-    public static final String MIN_KEY = "min";
-    public static final String MAX_KEY = "max";
-    public static final String AVG_KEY = "avg";
-    public static final String COV_KEY = "cov";
+    public static final String MIN= "min";
+    public static final String MAX = "max";
+    public static final String AVG = "avg";
+    public static final String COV = "cov";
 
 
     //Mixture model params
@@ -94,13 +94,13 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     @Override
     public byte type(String attributeName) {
-        if (attributeName.equals(AVG_KEY)) {
+        if (attributeName.equals(AVG)) {
             return Type.DOUBLE_ARRAY;
-        } else if (attributeName.equals(MIN_KEY)) {
+        } else if (attributeName.equals(MIN)) {
             return Type.DOUBLE_ARRAY;
-        } else if (attributeName.equals(MAX_KEY)) {
+        } else if (attributeName.equals(MAX)) {
             return Type.DOUBLE_ARRAY;
-        } else if (attributeName.equals(COV_KEY)) {
+        } else if (attributeName.equals(COV)) {
             return Type.DOUBLE_ARRAY;
         } else if (attributeName.equals(PRECISION_KEY)) {
             return Type.DOUBLE_ARRAY;
@@ -111,15 +111,15 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     @Override
     public Object get(String attributeName) {
-        if (attributeName.equals(AVG_KEY)) {
+        if (attributeName.equals(AVG)) {
             return getAvg();
-        } else if (attributeName.equals(MIN_KEY)) {
+        } else if (attributeName.equals(MIN)) {
             return getMin();
-        } else if (attributeName.equals(MAX_KEY)) {
+        } else if (attributeName.equals(MAX)) {
             return getMax();
-        } else if (attributeName.equals(MAX_KEY)) {
+        } else if (attributeName.equals(MAX)) {
             return getMax();
-        } else if (attributeName.equals(COV_KEY)) {
+        } else if (attributeName.equals(COV)) {
             return getCovariance(getAvg());
         } else {
             return super.get(attributeName);
@@ -191,7 +191,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         double min = Double.MAX_VALUE;
         int index = 0;
         for (int i = 0; i < result.length; i++) {
-            distances[i] = distance(features, ((GaussianGmmNode) result[i]).getAvg());
+            distances[i] = distance(features, ((GaussianGmmNode) result[i]).getAvg(), precisions);
             if (distances[i] < min) {
                 min = distances[i];
                 index = i;
@@ -272,7 +272,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                     //Cluster the different gaussians
                     KMeans clusteringEngine = new KMeans();
-                    int[][] clusters = clusteringEngine.getClusterIds(data, width, compressionIter, getMin(), getMax());
+                    int[][] clusters = clusteringEngine.getClusterIds(data, width, compressionIter, precisions);
 
                     //Select the ones which will remain as head by the maximum weight
                     GaussianGmmNode[] mainClusters = new GaussianGmmNode[width];
@@ -386,88 +386,57 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void generateDistributions(int level, double[] err, Callback<ProbaDistribution> callback) {
+    public void generateDistributions(int level, Callback<ProbaDistribution> callback) {
         int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
         }
 
-        ArrayList<GaussianGmmNode> leaves = new ArrayList<>();
+        NodeState resolved = this._resolver.resolveState(this, true);
 
-        Task creationTask = graph().newTask().then(context -> {
-            //System.out.println("resolved: " + leaves.size() + " nodes");
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        if (initialPrecision == null) {
+            initialPrecision = new double[nbfeature];
+            for (int i = 0; i < nbfeature; i++) {
+                initialPrecision[i] = 1;
+            }
+        }
+        final double[] err = initialPrecision;
 
+        Task deepTraverseTask = graph().newTask();
+
+        deepTraverseTask.from(new Node[]{this});
+        for (int i = 0; i < this.getLevel() - level; i++) {
+            deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN_KEY);
+        }
+        deepTraverseTask.then(context -> {
+
+            Node[] leaves = (Node[]) context.getPreviousResult();   // to check
             Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
             for (int i = 0; i < nbfeature; i++) {
-                covBackup.set(i, i, err[i] * err[i]);
+                covBackup.set(i, i, err[i]);
             }
 
-            int[] totals = new int[leaves.size()];
+            int[] totals = new int[leaves.length];
             int globalTotal = 0;
 
-            MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.size()];
-            for (int i = 0; i < leaves.size(); i++) {
-                totals[i] = leaves.get(i).getTotal();
+            MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.length];
+            for (int i = 0; i < leaves.length; i++) {
+                GaussianGmmNode temp = ((GaussianGmmNode) leaves[i]);
+                totals[i] = temp.getTotal();
                 globalTotal += totals[i];
-                double[] avg = leaves.get(i).getAvg();
+                double[] avg = temp.getAvg();
                 if (totals[i] > 2) {
-                    distributions[i] = new MultivariateNormalDistribution(avg, leaves.get(i).getCovarianceMatrix(avg));
+                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg));
                 } else {
                     distributions[i] = new MultivariateNormalDistribution(avg, covBackup); //this can be optimized later by inverting covBackup only once
                 }
             }
             callback.on(new ProbaDistribution(totals, distributions, globalTotal));
+
         });
 
-
-        Task traverse = graph().newTask();
-        traverse.fromVar("starterNodes").then(context -> {
-            Node[] result = (Node[]) context.getVariable("starterNodes");
-            Set<Long> toSolve = new HashSet<>();
-
-            for (int i = 0; i < result.length; i++) {
-                if (((GaussianGmmNode) result[i]).getLevel() == level) {
-                    leaves.add((GaussianGmmNode) result[i]);
-                } else {
-                    long[] relations = (long[]) result[i].get(INTERNAL_SUBGAUSSIAN_KEY);
-                    if (relations == null || relations.length == 0) {
-                        leaves.add((GaussianGmmNode) result[i]);
-                    } else {
-                        for (int j = 0; j < relations.length; j++) {
-                            toSolve.add(relations[j]);
-                        }
-                    }
-                }
-            }
-
-
-            Node[] children = new Node[toSolve.size()];
-            CountDownLatch countDownLatch = new CountDownLatch(toSolve.size());
-            int i = 0;
-            for (long id : toSolve) {
-                final int ii = i;
-                //TODO free here after lookup
-                graph().lookup(world(), time(), id, result1 -> {
-                    children[ii] = result1;
-                    countDownLatch.countDown();
-                });
-                i++;
-            }
-            try {
-                countDownLatch.await();
-                context.setVariable("starterNodes", children);
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-        })
-
-                .ifThen(context -> ((Node[]) context.getVariable("starterNodes")).length > 0, traverse);
-
-
-        Task mainTask = graph().newTask().from(new Node[]{this}).asVar("starterNodes").wait(traverse).wait(creationTask);
-        mainTask.execute();
+        deepTraverseTask.execute();
 
 
     }
@@ -769,10 +738,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    private double distance(double[] features, double[] avg) {
+    private double distance(double[] features, double[] avg, double[] precisions) {
         double res = 0;
         for (int i = 0; i < features.length; i++) {
-            res += (features[i] - avg[i]) * (features[i] - avg[i]);
+            res += (features[i] - avg[i]) * (features[i] - avg[i])/precisions[i];
         }
         return Math.sqrt(res);
     }
