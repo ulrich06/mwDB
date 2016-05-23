@@ -57,6 +57,8 @@ public class Query {
                 }
             }
         }
+        //
+        //_hash = _hash % Constants.END_OF_TIME;
     }
 
     private void sort() {

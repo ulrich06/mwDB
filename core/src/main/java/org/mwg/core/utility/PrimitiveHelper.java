@@ -57,7 +57,7 @@ public class PrimitiveHelper {
         crc ^= crc >>> 16;
 
         //To check later if we can replace by somthing better
-        crc = crc & 0x7FFFFFFF; //convert positive
+        crc = crc & 0x7FFFFFFFFFFFFFFFL; //convert positive
         crc = crc % max;           // return between 0 and max
 
         return crc;
@@ -115,7 +115,7 @@ public class PrimitiveHelper {
         crc ^= crc >>> 13;
 
         //To check later if we can replace by somthing better
-        crc = crc & 0x7FFFFFFF; //convert positive
+        crc = crc & 0x7FFFFFFFFFFFFFFFL; //convert positive
         crc = crc % max;           // return between 0 and max
 
         return crc;
@@ -215,7 +215,7 @@ public class PrimitiveHelper {
      * if (target.length == 0) return hash;
      * for (var i = 0; i < target.length; i++) {
      * var charC = target.charCodeAt(i);
-     * hash = ((hash << 5) - hash) + charC;
+     * hash = ((hash * 32) - hash) + charC;
      * hash = hash & hash; // Convert to 32bit integer
      * }
      * return hash;
