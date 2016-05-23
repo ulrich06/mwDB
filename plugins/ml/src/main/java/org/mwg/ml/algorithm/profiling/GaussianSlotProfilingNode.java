@@ -154,7 +154,6 @@ public class GaussianSlotProfilingNode extends AbstractMLNode implements Profili
 
 
     //Public specific getters and setters
-    public static final String FEATURES_KEY = "FEATURES";
 
     //Internal state keys
     private static final String INTERNAL_FEATURES_NUMBER = "_featuresNb";

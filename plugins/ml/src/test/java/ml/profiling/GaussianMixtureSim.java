@@ -23,7 +23,8 @@ public class GaussianMixtureSim {
                 String command;
 
                 GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                node1.configMixture(2, 3);
+                node1.set(GaussianGmmNode.LEVEL_KEY,2);
+                node1.set(GaussianGmmNode.WIDTH_KEY,3);
 
                 while (!exit) {
                     Scanner scanIn = new Scanner(System.in);
