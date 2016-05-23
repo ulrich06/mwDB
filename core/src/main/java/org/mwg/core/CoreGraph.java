@@ -350,12 +350,14 @@ class CoreGraph implements org.mwg.Graph {
                 Chunk loopChunk = dirtyIterator.next();
                 if (loopChunk != null && (loopChunk.flags() & CoreConstants.DIRTY_BIT) == CoreConstants.DIRTY_BIT) {
                     //Save chunk Key
-                    if (isFirst) {
-                        isFirst = false;
-                    } else {
-                        stream.write(CoreConstants.BUFFER_SEP);
+                    if (!isNoop) {
+                        if (isFirst) {
+                            isFirst = false;
+                        } else {
+                            stream.write(CoreConstants.BUFFER_SEP);
+                        }
+                        BufferBuilder.keyToBuffer(stream, loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
                     }
-                    BufferBuilder.keyToBuffer(stream, loopChunk.chunkType(), loopChunk.world(), loopChunk.time(), loopChunk.id());
                     //Save chunk payload
                     stream.write(CoreConstants.BUFFER_SEP);
                     try {

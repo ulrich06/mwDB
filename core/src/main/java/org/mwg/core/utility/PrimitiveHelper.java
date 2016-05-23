@@ -32,10 +32,8 @@ public class PrimitiveHelper {
         crc ^= crc >>> 13;
         crc *= PRIME3;
         crc ^= crc >>> 16;
-
-        //To check later if we can replace by somthing better
         crc = crc & 0x7FFFFFFF; //convert positive
-        crc = crc % max;           // return between 0 and max
+        crc = crc % max;        // return between 0 and max
 
         return (int) crc;
     }

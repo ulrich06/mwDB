@@ -98,6 +98,15 @@ public interface Task {
     Task traverse(String relationName);
 
     /**
+     * Traverse the specified relation if not empty, otherwise keep leaf nodes
+     * If it is followed by {@link #asVar(String)} method, the element are stored in an array
+     *
+     * @param relationName relation to traverse if not empty
+     * @return this task to chain actions (fluent API)
+     */
+    Task traverseOrKeep(String relationName);
+
+    /**
      * Traverse a relation indexed by {@code indexName} and retrieve specific node thanks to the {@code query}
      *
      * @param indexName index name of indexed relation

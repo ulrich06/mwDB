@@ -97,6 +97,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task traverseOrKeep(String relationName) {
+        addTask(new ActionTraverseOrKeep(relationName));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task traverseIndex(String indexName, String query) {
         addTask(new ActionTraverseIndex(indexName, query));
         return this;

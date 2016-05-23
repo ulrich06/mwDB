@@ -11,9 +11,6 @@ import org.mwg.core.utility.Unsafe;
 
 public class SuperTimeTest {
 
-    /**
-     * @ignore ts
-     */
     @Test
     public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
@@ -55,7 +52,7 @@ public class SuperTimeTest {
                     });
                 }
 
-                ChunkSpace space = ((org.mwg.core.CoreGraph) graph).space();
+                ChunkSpace space = (graph).space();
 
                 TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(CoreConstants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
                 Assert.assertTrue(superTimeTree != null);
@@ -125,6 +122,7 @@ public class SuperTimeTest {
                 });
 
                 graph.disconnect(null);
+
             }
         });
     }
