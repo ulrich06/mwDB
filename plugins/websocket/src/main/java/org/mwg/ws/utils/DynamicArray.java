@@ -1,4 +1,4 @@
-package org.mwg.utils;
+package org.mwg.ws.utils;
 
 
 public interface DynamicArray<T> {

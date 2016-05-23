@@ -1,6 +1,7 @@
 package org.mwg.ws;
 
 import io.undertow.connector.ByteBufferPool;
+import io.undertow.protocols.ssl.UndertowXnioSsl;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient;
 import io.undertow.websockets.core.*;
@@ -11,16 +12,15 @@ import org.mwg.core.utility.Base64;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
-import org.mwg.utils.DynamicArray;
-import org.mwg.utils.impl.DynamicArrayImpl;
-import org.xnio.OptionMap;
-import org.xnio.Options;
-import org.xnio.Xnio;
-import org.xnio.XnioWorker;
+import org.mwg.ws.utils.DynamicArray;
+import org.mwg.ws.utils.impl.DynamicArrayImpl;
+import org.xnio.*;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntUnaryOperator;
 
@@ -38,12 +38,18 @@ public class WSStorageClient implements Storage {
 
     private String _url;
     private int _port;
+    private SSLContext _sslContext;
 
     public WSStorageClient(String URL, int port) {
         _nextIdMessages = new AtomicInteger(0);
         _callBacks = new DynamicArrayImpl<>(INITIAL_SIZE);
         _url = URL;
         _port = port;
+    }
+
+    public WSStorageClient(String URL, int port, SSLContext context) {
+        this(URL,port);
+        _sslContext = context;
     }
 
 
@@ -107,9 +113,24 @@ public class WSStorageClient implements Storage {
                     .set(Options.CORK, true)
                     .getMap());
             ByteBufferPool _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
+            String scheme = (_sslContext == null)? "ws" : "wss";
             WebSocketClient.ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
-                    .connectionBuilder(_worker, _buffer, new URI("ws://" + _url + ":" + _port));
-            _channel = builder.connect().get();
+                    .connectionBuilder(_worker, _buffer, new URI(scheme + "://" + _url + ":" + _port));
+
+            if(_sslContext != null) {
+                UndertowXnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY, _sslContext);
+                builder.setSsl(ssl);
+            }
+
+            IoFuture<WebSocketChannel> futureChannel = builder.connect();
+            futureChannel.await(30, TimeUnit.SECONDS);
+            if(futureChannel.getStatus() != IoFuture.Status.DONE) {
+                System.err.println("Error during connexion with websocket");
+                if(callback != null) {
+                    callback.on((short) -1);
+                }
+            }
+            _channel = futureChannel.get();
             _channel.getReceiveSetter().set(new MessageReceiver());
             _channel.resumeReceives();
             _graph = graph;

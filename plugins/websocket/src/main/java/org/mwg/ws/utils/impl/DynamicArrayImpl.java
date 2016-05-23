@@ -1,6 +1,6 @@
-package org.mwg.utils.impl;
+package org.mwg.ws.utils.impl;
 
-import org.mwg.utils.DynamicArray;
+import org.mwg.ws.utils.DynamicArray;
 
 public class DynamicArrayImpl<T> implements DynamicArray<T> {
     private Object[] _data;

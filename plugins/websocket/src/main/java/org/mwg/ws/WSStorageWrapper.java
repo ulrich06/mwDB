@@ -18,6 +18,7 @@ import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -41,6 +42,13 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
         this._wrapped = _wrapped;
         HttpHandler handler = Handlers.websocket(this);
         _server = Undertow.builder().addHttpListener(port,"0.0.0.0").setHandler(handler).build();
+        _peers = new HashSet<>();
+    }
+
+    public WSStorageWrapper(Storage _wrapped, int port, SSLContext sslContext) {
+        this._wrapped = _wrapped;
+        HttpHandler handler = Handlers.websocket(this);
+        _server = Undertow.builder().addHttpsListener(port,"0.0.0.0",sslContext).setHandler(handler).build();
         _peers = new HashSet<>();
     }
 
@@ -116,6 +124,13 @@ public class WSStorageWrapper implements Storage, WebSocketConnectionCallback{
     @Override
     public void disconnect(Short prefix, Callback<Boolean> callback) {
         if(_graph != null) {
+            for(WebSocketChannel channel : _peers) {
+                try {
+                    channel.sendClose();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             _server.stop();
             _graph = null;
             _prefix = -1;

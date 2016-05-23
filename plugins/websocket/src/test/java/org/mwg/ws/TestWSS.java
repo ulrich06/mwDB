@@ -14,12 +14,12 @@ import org.xnio.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.mwg.utils.SSLContextFactory.createSSLContext;
-import static org.mwg.utils.SSLContextFactory.loadKeyStore;
+import static org.mwg.ws.utils.SSLContextFactory.createSSLContext;
+
 
 /**
  * Created by ludovicmouline on 23/05/16.
@@ -28,8 +28,14 @@ public class TestWSS {
 
     public static void main(String[] args) throws Exception{
 
+        System.out.println(Arrays.toString("".toCharArray()));
+        String serverKeyStore = TestWSS.class.getClassLoader().getResource("server.keystore").getPath();
+        String serverTrustStore = TestWSS.class.getClassLoader().getResource("server.truststore").getPath();
 
-       Undertow server = Undertow.builder().addHttpsListener(7778, "localhost", createSSLContext(loadKeyStore("server.keystore"),loadKeyStore("server.truststore")))
+        String clientKeyStore = TestWSS.class.getClassLoader().getResource("client.keystore").getPath();
+        String clientTrustStore = TestWSS.class.getClassLoader().getResource("client.truststore").getPath();
+
+        Undertow server = Undertow.builder().addHttpsListener(7778, "localhost", createSSLContext(serverKeyStore,"password","JKS",serverTrustStore,"password","JKS"))
                 .setHandler(Handlers.websocket(new WebSocketConnectionCallback() {
                     @Override
                     public void onConnect(WebSocketHttpExchange exchange, WebSocketChannel channel) {
@@ -45,6 +51,8 @@ public class TestWSS {
                 .build();
         server.start();
 
+        //client
+
         Xnio xnio = Xnio.getInstance();
         XnioWorker worker = xnio.createWorker(OptionMap.builder()
                 .set(Options.WORKER_IO_THREADS, 2)
@@ -55,14 +63,13 @@ public class TestWSS {
                 .set(Options.TCP_NODELAY, true)
                 .set(Options.CORK, true)
                 .getMap());
-//        ByteBufferPool buffer = new DefaultByteBufferPool(true, 8192 * 3, 1000, 10, 100);
         ByteBufferPool buffer = new DefaultByteBufferPool(true, 1024 * 1024);
 
-        UndertowXnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY, createSSLContext(loadKeyStore("client.keystore"),loadKeyStore("client.truststore")));
+        UndertowXnioSsl ssl = new UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY, createSSLContext(clientKeyStore,"password","JKS",clientTrustStore,"password","JKS"));
         final WebSocketClient.ConnectionBuilder connectionBuilder = WebSocketClient.connectionBuilder(worker, buffer, new URI("wss://localhost:7778"))
                 .setSsl(ssl);
         IoFuture<WebSocketChannel> future = connectionBuilder.connect();
-        future.await(4, TimeUnit.SECONDS);
+        future.await(/*4, TimeUnit.SECONDS*/);
         final WebSocketChannel webSocketChannel = future.get();
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -97,4 +104,5 @@ public class TestWSS {
             }
         });
     }
+
 }
