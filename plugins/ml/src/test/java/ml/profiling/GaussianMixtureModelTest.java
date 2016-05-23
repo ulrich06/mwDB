@@ -23,7 +23,8 @@ public class GaussianMixtureModelTest {
                 Random rand = new Random();
 
                 GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                node1.configMixture(1, 100);
+                node1.set(GaussianGmmNode.LEVEL_KEY,1);
+                node1.set(GaussianGmmNode.WIDTH_KEY,100);
 
                 for (int i = 0; i < 220; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]

@@ -23,14 +23,14 @@ public class GaussianProbaTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNode= (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianGmmNode gaussianNode = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
                 double eps = 1e-7;
 
 
                 int total = 16;
                 double[][] train = new double[total][1];
                 Random rand = new Random();
-                gaussianNode.set(GaussianGmmNode.FROM,"f1");
+                gaussianNode.set(GaussianGmmNode.FROM, "f1");
 
                 double sum = 0;
                 double sumsquare = 0;
@@ -43,7 +43,7 @@ public class GaussianProbaTest {
                     gaussianNode.jump(i, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
-                            gaussianNode.set("f1",train[finalI][0]);
+                            gaussianNode.set("f1", train[finalI][0]);
                             gaussianNode.learn(new Callback<Boolean>() {
                                 @Override
                                 public void on(Boolean result) {
@@ -77,7 +77,6 @@ public class GaussianProbaTest {
                 });
 
 
-
             }
         });
 
@@ -92,7 +91,7 @@ public class GaussianProbaTest {
 
                 GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
-                gaussianNodeLive.set(GaussianGmmNode.FROM,"f1;f2");
+                gaussianNodeLive.set(GaussianGmmNode.FROM, "f1;f2");
 
                 int test = 100;
                 int feat = 2;
@@ -106,8 +105,8 @@ public class GaussianProbaTest {
                         v[j] = random.nextDouble() * (1 + 100 * j);
                         b[i][j] = v[j];
                     }
-                    gaussianNodeLive.set("f1",b[i][0]);
-                    gaussianNodeLive.set("f2",b[i][1]);
+                    gaussianNodeLive.set("f1", b[i][0]);
+                    gaussianNodeLive.set("f2", b[i][1]);
 
                     gaussianNodeLive.learn(new Callback<Boolean>() {
                         @Override
@@ -117,8 +116,8 @@ public class GaussianProbaTest {
                     });
                 }
 
-                double[] ravg=gaussianNodeLive.getAvg();
-                double[][] rcovData=gaussianNodeLive.getCovariance(ravg);
+                double[] ravg = gaussianNodeLive.getAvg();
+                double[][] rcovData = gaussianNodeLive.getCovariance(ravg);
 
 
                 //Test probability calculation.
@@ -130,7 +129,6 @@ public class GaussianProbaTest {
 
                 double y = gaussianNodeLive.getProbability(v, null, false);
                 //System.out.println("live: " + y);
-
 
 
                 Assert.assertTrue(Math.abs(d - y) < eps);
@@ -153,8 +151,8 @@ public class GaussianProbaTest {
                 GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
                 GaussianGmmNode node2 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
-                node1.set(GaussianGmmNode.FROM,"f1;f2;f3");
-                node2.set(GaussianGmmNode.FROM,"f1;f2;f3;f4");
+                node1.set(GaussianGmmNode.FROM, "f1;f2;f3");
+                node2.set(GaussianGmmNode.FROM, "f1;f2;f3;f4");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]
@@ -166,14 +164,14 @@ public class GaussianProbaTest {
                     datan[2] = data[2];
                     datan[3] = 0 * data[0] + 0 * data[1] + 0 * data[2];
 
-                    node1.set("f1",data[0]);
-                    node1.set("f2",data[1]);
-                    node1.set("f3",data[2]);
+                    node1.set("f1", data[0]);
+                    node1.set("f2", data[1]);
+                    node1.set("f3", data[2]);
 
-                    node2.set("f1",datan[0]);
-                    node2.set("f2",datan[1]);
-                    node2.set("f3",datan[2]);
-                    node2.set("f4",datan[3]);
+                    node2.set("f1", datan[0]);
+                    node2.set("f2", datan[1]);
+                    node2.set("f3", datan[2]);
+                    node2.set("f4", datan[3]);
 
 
                     node1.learn(new Callback<Boolean>() {
@@ -194,8 +192,8 @@ public class GaussianProbaTest {
                 double[] avg = node1.getAvg();
                 double[] avg2 = node2.getAvg();
 
-                printd(avg);
-                printd(avg2);
+                //printd(avg);
+                //printd(avg2);
 
                 data[0] = 10;
                 data[1] = 100;
@@ -208,8 +206,9 @@ public class GaussianProbaTest {
 
                 double p = node1.getProbability(avg, null, false);
                 double p2 = node2.getProbability(avg2, null, false);
-                System.out.println("p1: " + p);
-                System.out.println("p2: " + p2);
+                Assert.assertTrue(Math.abs(p - p2) < 1e-5);
+                //System.out.println("p1: " + p);
+                // System.out.println("p2: " + p2);
 
 
             }
