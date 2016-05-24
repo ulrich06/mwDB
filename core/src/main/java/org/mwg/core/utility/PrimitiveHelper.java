@@ -11,31 +11,31 @@ public class PrimitiveHelper {
 
     /**
      * @native ts
-     * public static PRIME1 : Long = Long.fromNumber(2654435761, true);
+     * public static PRIME1 : Long = Long.fromNumber(2654435761, false);
      */
     private static final long PRIME1 = 2654435761L;
 
     /**
      * @native ts
-     * public static PRIME2 : Long = Long.fromNumber(2246822519, true);
+     * public static PRIME2 : Long = Long.fromNumber(2246822519, false);
      */
     private static final long PRIME2 = 2246822519L;
 
     /**
      * @native ts
-     * public static PRIME3 : Long = Long.fromNumber(3266489917, true);
+     * public static PRIME3 : Long = Long.fromNumber(3266489917, false);
      */
     private static final long PRIME3 = 3266489917L;
 
     /**
      * @native ts
-     * public static PRIME4 : Long = Long.fromNumber(668265263, true);
+     * public static PRIME4 : Long = Long.fromNumber(668265263, false);
      */
     private static final long PRIME4 = 668265263L;
 
     /**
      * @native ts
-     * public static PRIME5 : Long = Long.fromNumber(0x165667b1, true);
+     * public static PRIME5 : Long = Long.fromNumber(0x165667b1, false);
      */
     private static final long PRIME5 = 0x165667b1;
 
@@ -113,9 +113,9 @@ public class PrimitiveHelper {
      * crc = crc.xor(crc.shiftRightUnsigned(13));
      * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
      * crc = crc.xor(crc.shiftRightUnsigned(16));
-     * var res = crc.toNumber();
-     * res = res % max;
-     * return res;
+     * crc = (crc.isNegative()?crc.mul(-1):crc);
+     * crc = crc.mod(max);
+     * return crc.toNumber();
      */
     public static long longHash(long number, long max) {
         if (max <= 0) {
@@ -138,16 +138,70 @@ public class PrimitiveHelper {
         crc *= PRIME3;
         crc ^= crc >>> 16;
 
+        /*
         //To check later if we can replace by somthing better
         crc = crc & 0x7FFFFFFFFFFFFFFFL; //convert positive
         crc = crc % max;           // return between 0 and max
+        */
+        crc = (crc < 0 ? crc * -1 : crc); // positive
+        crc = crc % max;
 
         return crc;
     }
 
     /**
      * @native ts
-     * return Long.UZERO.toNumber();
+     * if (max <= 0) {
+     * throw new Error("Max must be > 0");
+     * }
+     * var v1 = org.mwg.core.utility.PrimitiveHelper.PRIME5;
+     * var v2 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2).add(org.mwg.core.utility.PrimitiveHelper.len);
+     * var v3 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * var v4 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
+     *
+     * v1 = v1.shiftLeft(13).or(v1.shiftRightUnsigned(51)).add(Long.fromNumber(p1, false));
+     * v2 = v2.shiftLeft(11).or(v2.shiftRightUnsigned(53)).add(Long.fromNumber(p2, false));
+     * v3 = v3.shiftLeft(17).or(v3.shiftRightUnsigned(47)).add(Long.fromNumber(p3, false));
+     * v4 = v4.shiftLeft(19).or(v4.shiftRightUnsigned(45)).add(Long.fromNumber(p0, false));
+     *
+     * v1 = v1.add(v1.shiftLeft(17).or(v1.shiftRightUnsigned(47)));
+     * v2 = v2.add(v2.shiftLeft(19).or(v2.shiftRightUnsigned(45)));
+     * v3 = v3.add(v3.shiftLeft(13).or(v3.shiftRightUnsigned(51)));
+     * v4 = v4.add(v4.shiftLeft(11).or(v4.shiftRightUnsigned(53)));
+     *
+     * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p1, false));
+     * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p2, false));
+     * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p3, false));
+     * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(org.mwg.core.utility.PrimitiveHelper.PRIME5);
+     *
+     * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     *
+     * v1 = v1.add(v1.shiftLeft(11).or(v1.shiftRightUnsigned(53)));
+     * v2 = v2.add(v2.shiftLeft(17).or(v2.shiftRightUnsigned(47)));
+     * v3 = v3.add(v3.shiftLeft(19).or(v3.shiftRightUnsigned(45)));
+     * v4 = v4.add(v4.shiftLeft(13).or(v4.shiftRightUnsigned(51)));
+     *
+     * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     *
+     * var crc = v1;
+     * crc = crc.add(v2.shiftLeft(3).or(v2.shiftRightUnsigned(61)));
+     * crc = crc.add(v3.shiftLeft(6).or(v3.shiftRightUnsigned(58)));
+     * crc = crc.add(v4.shiftLeft(9).or(v4.shiftRightUnsigned(55)));
+     * crc = crc.xor(crc.shiftRightUnsigned(11));
+     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.PRIME3.add(org.mwg.core.utility.PrimitiveHelper.len).mul(org.mwg.core.utility.PrimitiveHelper.PRIME1));
+     * crc = crc.xor(crc.shiftRightUnsigned(15));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * crc = crc.xor(crc.shiftRightUnsigned(13));
+     *
+     * crc = (crc.isNegative()?crc.mul(-1):crc);
+     * crc = crc.mod(max);
+     * return crc.toNumber();
      */
     public static long tripleHash(byte p0, long p1, long p2, long p3, long max) {
         if (max <= 0) {
@@ -245,14 +299,14 @@ public class PrimitiveHelper {
 
     /**
      * @native ts
-     * var hash = 0;
-     * if (target.length == 0) return hash;
+     * var hash = Long.ZERO;
+     * if (target.length == 0) return hash.toNumber();
      * for (var i = 0; i < target.length; i++) {
      * var charC = target.charCodeAt(i);
-     * hash = ((hash * 32) - hash) + charC;
-     * hash = hash & hash; // Convert to 32bit integer
+     * hash = hash.mul(32).sub(hash).add(Long.fromValue(charC));
+     * hash = hash.and(hash); // Convert to 32bit integer
      * }
-     * return hash;
+     * return hash.toNumber();
      */
     public static int stringHash(String target) {
         return target.hashCode();

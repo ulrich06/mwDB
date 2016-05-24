@@ -114,7 +114,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.longHash(CoreConstants.END_OF_TIME, CoreConstants.END_OF_TIME);
         //System.out.println("longHash_3Test: " + hash);
         Assert.assertTrue(hash < CoreConstants.END_OF_TIME);
-        Assert.assertTrue(hash == 1774254865);
+        Assert.assertTrue(hash == 673163482434621L);
     }
 
     @Test
@@ -122,15 +122,15 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.longHash(CoreConstants.END_OF_TIME, 10000);
         //System.out.println("longHash_4Test: " + hash);
         Assert.assertTrue(hash < 10000);
-        Assert.assertTrue(hash == 4865);
+        Assert.assertTrue(hash == 271);
     }
 
     @Test
     public void longHash_5Test() {
         long hash = PrimitiveHelper.longHash(-156487, 10000);
-        //System.out.println("longHash_5Test: " + hash);
+        System.out.println("longHash_5Test: " + hash);
         Assert.assertTrue(hash < 10000);
-        Assert.assertTrue(hash == 4958);
+        Assert.assertTrue(hash == 9854);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.longHash(0, 10000);
         //System.out.println("longHash_6Test: " + hash);
         Assert.assertTrue(hash < 10000);
-        Assert.assertTrue(hash == 1069);
+        Assert.assertTrue(hash == 8147);
     }
 
 
@@ -148,7 +148,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0x0F, 1, 2, 3, CoreConstants.END_OF_TIME);
         //System.out.println("tripleHash_3Test: " + hash);
         Assert.assertTrue(hash < CoreConstants.END_OF_TIME);
-        Assert.assertTrue(hash == 1704198370);
+        Assert.assertTrue(hash == 3894355925664350L);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0x0F, 1, -1, 3, CoreConstants.END_OF_TIME);
         //System.out.println("tripleHash_4Test: " + hash);
         Assert.assertTrue(hash < CoreConstants.END_OF_TIME);
-        Assert.assertTrue(hash == 1604847523);
+        Assert.assertTrue(hash == 2577890368030743L);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0x0F, 1, 2, 0, CoreConstants.END_OF_TIME);
         //System.out.println("tripleHash_5Test: " + hash);
         Assert.assertTrue(hash < CoreConstants.END_OF_TIME);
-        Assert.assertTrue(hash == 1515372612);
+        Assert.assertTrue(hash == 942405386945610L);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0x0F, 0, 0, 0, CoreConstants.END_OF_TIME);
         //System.out.println("tripleHash_6Test: " + hash);
         Assert.assertTrue(hash < CoreConstants.END_OF_TIME);
-        Assert.assertTrue(hash == 2729735);
+        Assert.assertTrue(hash == 4257371302504537L);
     }
 
     @Test
@@ -180,7 +180,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0xFF, -1, -1, -1, 200);
         //System.out.println("tripleHash_6Test: " + hash);
         Assert.assertTrue(hash < 200);
-        Assert.assertTrue(hash == 143);
+        Assert.assertTrue(hash == 39);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class PrimitiveHelperTest {
         long hash = PrimitiveHelper.tripleHash((byte)0xE8, 16, 500000, -132654987, 5000);
         //System.out.println("tripleHash_6Test: " + hash);
         Assert.assertTrue(hash < 5000);
-        Assert.assertTrue(hash == 1471);
+        Assert.assertTrue(hash == 4247);
     }
 
 
