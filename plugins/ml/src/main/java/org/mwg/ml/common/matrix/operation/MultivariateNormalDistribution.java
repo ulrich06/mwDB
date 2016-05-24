@@ -6,6 +6,8 @@ import org.mwg.ml.common.matrix.Matrix;
  * Created by assaad on 25/03/16.
  */
 public class MultivariateNormalDistribution {
+    double[] min;
+    double[] max;
     double[] means;
     Matrix inv;
     Matrix covariance;
@@ -23,6 +25,12 @@ public class MultivariateNormalDistribution {
         rank=pinvsvd.getRank();
     }
 
+    public void setMin(double[] min){
+        this.min=min;
+    }
+    public void setMax(double[] max){
+        this.max=max;
+    }
 
 
     public static Matrix getCovariance(double[] sum, double[] sumsquares, int total) {

@@ -95,6 +95,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      */
     protected void addValueBootstrap(double value[], double result) {
         addValueToBuffer(value, result); //In bootstrap - no need to account for length
+        updateModelParameters(value, result);
 
         if (getNumValuesInBuffer() >= getMaxBufferLength()) {
             //Predict for each value in the buffer. Calculate percentage of errors.
@@ -103,8 +104,6 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
                 setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
             }
         }
-
-        updateModelParameters(value, result);
     }
 
     /**

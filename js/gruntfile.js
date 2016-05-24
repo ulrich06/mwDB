@@ -97,7 +97,7 @@ module.exports = function (grunt) {
                             cleanStack: 1,       // (0|false)|(1|true)|2|3
                             verbosity: 2,        // (0|false)|1|2|3|(4|true)
                             listStyle: "indent", // "flat"|"indent"
-                            activity: true
+                            activity: false
                         }
                     }
                 },
