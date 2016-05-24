@@ -26,6 +26,12 @@ public class Constants {
 
     public static final char QUERY_KV_SEP = '=';
 
+    public static final char TASK_SEP = '.';
+
+    public static final char TASK_PARAM_OPEN = '(';
+
+    public static final char TASK_PARAM_CLOSE = ')';
+
     /**
      * @native ts
      * return param != undefined && param != null;

@@ -29,6 +29,23 @@ public class ActionTraverseTest extends AbstractActionTest {
     }
 
     @Test
+    public void testParse() {
+        initGraph();
+        graph.newTask()
+                .parse("fromIndexAll(nodes).traverse(children)")
+                .then(new TaskAction() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Node[] lastResult = (Node[]) context.getPreviousResult();
+                        Assert.assertEquals(lastResult[0].get("name"), "n0");
+                        Assert.assertEquals(lastResult[1].get("name"), "n1");
+                    }
+                })
+                .execute();
+        removeGraph();
+    }
+
+    @Test
     public void testTraverseIndex() {
         initGraph();
         Node node1 = graph.newNode(0, 0);
@@ -51,7 +68,6 @@ public class ActionTraverseTest extends AbstractActionTest {
                 root.index("childrenIndexed", node1, "name", null);
                 root.index("childrenIndexed", node2, "name", null);
                 root.index("childrenIndexed", node3, "name", null);
-
 
                 root.jump(12, new Callback<Node>() {
                     @Override

@@ -1,8 +1,10 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.core.CoreConstants;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
@@ -21,7 +23,7 @@ public class CoreTask implements org.mwg.task.Task {
         this._graph = p_graph;
     }
 
-    private void addTask(TaskAction task) {
+    private void addAction(TaskAction task) {
         if (_actionCursor == _actions.length) {
             TaskAction[] temp_actions = new TaskAction[_actions.length * 2];
             System.arraycopy(_actions, 0, temp_actions, 0, _actions.length);
@@ -33,55 +35,55 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final org.mwg.task.Task world(long world) {
-        addTask(new ActionWorld(world));
+        addAction(new ActionWorld(world));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task time(long time) {
-        addTask(new ActionTime(time));
+        addAction(new ActionTime(time));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task fromIndex(String indexName, String query) {
-        addTask(new ActionFromIndex(indexName, query));
+        addAction(new ActionFromIndex(indexName, query));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task fromIndexAll(String indexName) {
-        addTask(new ActionFromIndexAll(indexName));
+        addAction(new ActionFromIndexAll(indexName));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task selectWith(String name, String pattern) {
-        addTask(new ActionWith(name, Pattern.compile(pattern)));
+        addAction(new ActionWith(name, Pattern.compile(pattern)));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task selectWithout(String name, String pattern) {
-        addTask(new ActionWithout(name, Pattern.compile(pattern)));
+        addAction(new ActionWithout(name, Pattern.compile(pattern)));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task asVar(String variableName) {
-        addTask(new ActionAsVar(variableName));
+        addAction(new ActionAsVar(variableName));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task fromVar(String variableName) {
-        addTask(new ActionFromVar(variableName));
+        addAction(new ActionFromVar(variableName));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task select(TaskFunctionSelect filter) {
-        addTask(new ActionSelect(filter));
+        addAction(new ActionSelect(filter));
         return this;
     }
 
@@ -92,31 +94,31 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final org.mwg.task.Task traverse(String relationName) {
-        addTask(new ActionTraverse(relationName));
+        addAction(new ActionTraverse(relationName));
         return this;
     }
 
     @Override
     public Task traverseOrKeep(String relationName) {
-        addTask(new ActionTraverseOrKeep(relationName));
+        addAction(new ActionTraverseOrKeep(relationName));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task traverseIndex(String indexName, String query) {
-        addTask(new ActionTraverseIndex(indexName, query));
+        addAction(new ActionTraverseIndex(indexName, query));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task traverseIndexAll(String indexName) {
-        addTask(new ActionTraverseIndex(indexName, null));
+        addAction(new ActionTraverseIndex(indexName, null));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task map(TaskFunctionMap mapFunction) {
-        addTask(new ActionMap(mapFunction));
+        addAction(new ActionMap(mapFunction));
         return this;
     }
 
@@ -137,38 +139,38 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final org.mwg.task.Task from(Object inputValue) {
-        addTask(new ActionFrom(protect(inputValue)));
+        addAction(new ActionFrom(protect(inputValue)));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task wait(org.mwg.task.Task subTask) {
-        addTask(new ActionTrigger(subTask));
+        addAction(new ActionTrigger(subTask));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task ifThen(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        addTask(new ActionIfThen(cond, then));
+        addAction(new ActionIfThen(cond, then));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task whileDo(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        //addTask(new ActionWhileDo(cond, then));
+        //addAction(new ActionWhileDo(cond, then));
         //return this;
         throw new RuntimeException("Not implemented yet");
     }
 
     @Override
     public final org.mwg.task.Task then(TaskAction p_action) {
-        addTask(new ActionWrapper(p_action));
+        addAction(new ActionWrapper(p_action));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task thenAsync(TaskAction p_action) {
-        addTask(p_action);
+        addAction(p_action);
         return this;
     }
 
@@ -189,19 +191,19 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final org.mwg.task.Task foreach(org.mwg.task.Task subTask) {
-        addTask(new ActionForeach(subTask));
+        addAction(new ActionForeach(subTask));
         return this;
     }
 
     @Override
     public final org.mwg.task.Task foreachPar(org.mwg.task.Task subTask) {
-        addTask(new ActionForeachPar(subTask));
+        addAction(new ActionForeachPar(subTask));
         return this;
     }
 
     @Override
     public Task save() {
-        addTask(new ActionSave());
+        addAction(new ActionSave());
         return this;
     }
 
@@ -242,6 +244,92 @@ public class CoreTask implements org.mwg.task.Task {
                 first.eval(context);
             }
         });
+    }
+
+
+    @Override
+    public Task action(String name, String flatParams) {
+        TaskActionFactory actionFactory = _graph.actions().get(name);
+        if (actionFactory == null) {
+            throw new RuntimeException("Unknown task action: " + name);
+        }
+        int paramsCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
+        String[] params = new String[paramsCapacity];
+        int paramsIndex = 0;
+        int cursor = 0;
+        int flatSize = flatParams.length();
+        int previous = 0;
+        while (cursor < flatSize) {
+            char current = flatParams.charAt(cursor);
+            if (current == Constants.QUERY_SEP) {
+                String param = flatParams.substring(previous, cursor);
+                if (param.length() > 0) {
+                    if (paramsIndex >= paramsCapacity) {
+                        int newParamsCapacity = paramsCapacity * 2;
+                        String[] newParams = new String[newParamsCapacity];
+                        System.arraycopy(params, 0, newParams, 0, paramsCapacity);
+                        params = newParams;
+                        paramsCapacity = newParamsCapacity;
+                    }
+                    params[paramsIndex] = param;
+                    paramsIndex++;
+                }
+                previous = cursor + 1;
+            }
+            cursor++;
+        }
+        //add last param
+        String param = flatParams.substring(previous, cursor);
+        if (param.length() > 0) {
+            if (paramsIndex >= paramsCapacity) {
+                int newParamsCapacity = paramsCapacity * 2;
+                String[] newParams = new String[newParamsCapacity];
+                System.arraycopy(params, 0, newParams, 0, paramsCapacity);
+                params = newParams;
+                paramsCapacity = newParamsCapacity;
+            }
+            params[paramsIndex] = param;
+            paramsIndex++;
+        }
+        //schrink
+        if (paramsIndex < params.length) {
+            String[] shrinked = new String[paramsIndex];
+            System.arraycopy(params, 0, shrinked, 0, paramsIndex);
+            params = shrinked;
+        }
+        //add the action to the action
+        addAction(actionFactory.create(params));
+        return this;
+    }
+
+    @Override
+    public Task parse(final String flat) {
+        int cursor = 0;
+        int flatSize = flat.length();
+        int previous = 0;
+        String actionName = null;
+        while (cursor < flatSize) {
+            char current = flat.charAt(cursor);
+            switch (current) {
+                case Constants.TASK_SEP:
+                    actionName = null;
+                    previous = cursor + 1;
+                    break;
+                case Constants.TASK_PARAM_OPEN:
+                    actionName = flat.substring(previous, cursor);
+                    previous = cursor + 1;
+                    break;
+                case Constants.TASK_PARAM_CLOSE:
+                    //ADD LAST PARAM
+                    action(actionName, flat.substring(previous, cursor));
+                    actionName = null;
+                    previous = cursor + 1;
+                    //ADD TASK
+                    break;
+            }
+            cursor++;
+        }
+        return this;
     }
 
     private Object protect(Object input) {

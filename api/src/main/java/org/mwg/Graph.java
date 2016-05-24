@@ -5,6 +5,7 @@ import org.mwg.struct.Buffer;
 import org.mwg.plugin.Resolver;
 import org.mwg.plugin.Scheduler;
 import org.mwg.task.Task;
+import org.mwg.task.TaskActionRegistry;
 
 /**
  * Graph is the main structure of mwDB.
@@ -166,5 +167,12 @@ public interface Graph {
     Task newTask();
 
     ChunkSpace space();
+
+    /**
+     * Retrieve the shared action registry of Actions executed by task
+     *
+     * @return shared global action registry
+     */
+    TaskActionRegistry actions();
 
 }

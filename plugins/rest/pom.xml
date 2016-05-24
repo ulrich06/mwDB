@@ -2,15 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>org.kevoree.modeling.plugin</groupId>
+    <groupId>org.kevoree.mwg.plugins</groupId>
     <artifactId>rest</artifactId>
-    <version>4.27.0-SNAPSHOT</version>
-    <name>KMF :: Plugin :: Rest</name>
+    <version>1.0-SNAPSHOT</version>
+    <name>mwg :: Plugins :: Rest</name>
 
     <properties>
-        <kmf.version>4.26.1-SNAPSHOT</kmf.version>
-        <undertow.version>1.3.6.Final</undertow.version>
+        <undertow.version>1.3.22.Final</undertow.version>
     </properties>
 
     <licenses>
@@ -22,9 +20,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.kevoree.modeling</groupId>
-            <artifactId>org.kevoree.modeling.microframework</artifactId>
-            <version>${kmf.version}</version>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>api</artifactId>
+            <version>1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.undertow</groupId>
@@ -38,23 +36,22 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mashape.unirest</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>1.4.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -62,71 +59,12 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <compilerArguments>
+                        <profile>compact1</profile>
+                    </compilerArguments>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>OSS-public</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>OSS-public</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <distributionManagement>
-        <repository>
-            <id>kevoree.oss.release</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>kevoree.oss.snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <developers>
-        <developer>
-            <name>Francois Fouquet</name>
-            <id>francois.fouquet</id>
-            <email>fouquet.f@gmail.com</email>
-            <roles>
-                <role>admin</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+2</timezone>
-        </developer>
-    </developers>
-
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-
-    <scm>
-        <connection>scm:git:git@github.com:kevoree-modeling/plugin_rest.git</connection>
-        <developerConnection>scm:git:git@github.com:kevoree-modeling/plugin_rest.git</developerConnection>
-        <url>http://github.com/kevoree-modeling/plugin_rest.git</url>
-    </scm>
 
 </project>

@@ -2,6 +2,7 @@ package org.mwg.core;
 
 import org.mwg.*;
 import org.mwg.core.task.CoreTask;
+import org.mwg.core.task.CoreTaskActionRegistry;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.*;
@@ -11,6 +12,7 @@ import org.mwg.core.chunk.*;
 import org.mwg.core.utility.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.Task;
+import org.mwg.task.TaskActionRegistry;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,6 +39,8 @@ class CoreGraph implements org.mwg.Graph {
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
 
+    private TaskActionRegistry _registry;
+
     CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
         //subElements set
         this._storage = p_storage;
@@ -56,6 +60,7 @@ class CoreGraph implements org.mwg.Graph {
         //variables init
         this._isConnected = new AtomicBoolean(false);
         this._lock = new AtomicBoolean(false);
+        this._registry = new CoreTaskActionRegistry();
     }
 
     @Override
@@ -556,4 +561,8 @@ class CoreGraph implements org.mwg.Graph {
         return _space;
     }
 
+    @Override
+    public TaskActionRegistry actions() {
+        return _registry;
+    }
 }

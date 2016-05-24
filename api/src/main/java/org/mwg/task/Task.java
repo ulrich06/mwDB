@@ -205,5 +205,8 @@ public interface Task {
      */
     void executeThenAsync(final TaskContext parentContext, final Object initialResult, final TaskAction finalAction);
 
+    Task parse(String flat);
 
+    Task action(String name, String params);
+    
 }
