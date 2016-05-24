@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
+import org.mwg.core.utility.ReadOnlyStorage;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
@@ -11,10 +12,13 @@ import org.mwg.plugin.Storage;
 public class Builder implements GraphBuilder.InternalBuilder {
 
     @Override
-    public org.mwg.Graph newGraph(Storage p_storage, Scheduler p_scheduler, NodeFactory[] p_factories, boolean p_usingGC, boolean p_usingOffHeapMemory, long p_memorySize, long p_autoSaveSize) {
+    public org.mwg.Graph newGraph(Storage p_storage, boolean p_readOnly, Scheduler p_scheduler, NodeFactory[] p_factories, boolean p_usingGC, boolean p_usingOffHeapMemory, long p_memorySize, long p_autoSaveSize) {
         Storage storage = p_storage;
         if (storage == null) {
             storage = new NoopStorage();
+        }
+        if (p_readOnly) {
+            storage = new ReadOnlyStorage(storage);
         }
         Scheduler scheduler = p_scheduler;
         if (scheduler == null) {
@@ -54,6 +58,6 @@ public class Builder implements GraphBuilder.InternalBuilder {
             return new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
         }
     }
-    
+
 }
 

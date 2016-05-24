@@ -5,6 +5,7 @@ import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
+import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
@@ -21,10 +22,16 @@ public class LevelDBStorage implements Storage {
     private DB db;
     private boolean isConnected;
     private Graph graph;
+    private boolean useNative = true;
 
     public LevelDBStorage(String storagePath) {
         this.isConnected = false;
         this.storagePath = storagePath;
+    }
+
+    public LevelDBStorage useNative(boolean p_useNative) {
+        this.useNative = p_useNative;
+        return this;
     }
 
     @Override
@@ -122,7 +129,6 @@ public class LevelDBStorage implements Storage {
         }
     }
 
-
     @Override
     public void connect(Graph graph, Callback<Short> callback) {
         if (isConnected) {
@@ -133,7 +139,9 @@ public class LevelDBStorage implements Storage {
         }
         this.graph = graph;
         //by default activate snappy compression of bytes
-        Options options = new Options().createIfMissing(true).compressionType(CompressionType.SNAPPY);
+        Options options = new Options()
+                .createIfMissing(true)
+                .compressionType(CompressionType.SNAPPY);
         File location = new File(storagePath);
         if (!location.exists()) {
             location.mkdirs();
@@ -141,7 +149,13 @@ public class LevelDBStorage implements Storage {
         File targetDB = new File(location, "data");
         targetDB.mkdirs();
         try {
-            db = JniDBFactory.factory.open(targetDB, options);
+
+            if (useNative) {
+                db = JniDBFactory.factory.open(targetDB, options);
+            } else {
+                db = Iq80DBFactory.factory.open(targetDB, options);
+            }
+
             isConnected = true;
             byte[] current = db.get(prefixKey);
             if (current == null) {
