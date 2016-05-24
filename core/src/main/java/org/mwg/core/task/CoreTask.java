@@ -256,7 +256,7 @@ public class CoreTask implements org.mwg.task.Task {
                 isAllNode = isAllNode && (cloned[i] instanceof AbstractNode);
             }
             if (isAllNode) {
-                Node[] typedResult = new AbstractNode[cloned.length];
+                Node[] typedResult = new Node[cloned.length];
                 System.arraycopy(cloned, 0, typedResult, 0, cloned.length);
                 return typedResult;
             }

@@ -446,7 +446,7 @@ class CoreGraph implements org.mwg.Graph {
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(new AbstractNode[0]);
+                        callback.on(new Node[0]);
                     }
                 } else {
                     foundIndex.findAt(CoreConstants.INDEX_ATTRIBUTE, world, time, query, new Callback<org.mwg.Node[]>() {
@@ -470,7 +470,7 @@ class CoreGraph implements org.mwg.Graph {
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(new AbstractNode[0]);
+                        callback.on(new Node[0]);
                     }
                 } else {
                     foundIndex.allAt(CoreConstants.INDEX_ATTRIBUTE, world, time, new Callback<org.mwg.Node[]>() {

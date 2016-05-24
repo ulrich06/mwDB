@@ -19,57 +19,56 @@ class ActionSelect implements TaskAction {
     public final void eval(final TaskContext context) {
         final Object previousResult = context.getPreviousResult();
         if (previousResult != null) {
-            if (previousResult instanceof AbstractNode[]) {
-                context.setResult(filterNodeArray((AbstractNode[]) previousResult));
-            } else if (previousResult instanceof Object[]) {
+            if (previousResult instanceof Object[]) {
                 context.setResult(filterArray((Object[]) previousResult));
+            } else if (previousResult instanceof AbstractNode) {
+                if (_filter.select((Node) previousResult)) {
+                    context.setResult(previousResult);
+                } else {
+                    context.setResult(new Node[0]);
+                }
+            } else {
+                context.setResult(previousResult); //no map transform
             }
         }
         context.next();
     }
 
     private Object[] filterArray(Object[] current) {
+        boolean onlyContainsNodes = true;
         Object[] filteredResult = new Object[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof AbstractNode[]) {
-                Node[] filteredNodes = filterNodeArray((AbstractNode[]) current[i]);
-                if (filteredNodes != null && filteredNodes.length > 0) {
-                    filteredResult[cursor] = filteredNodes;
+            if (current[i] instanceof Object[]) {
+                onlyContainsNodes = false;
+                Object[] filtered = filterArray((Object[]) current[i]);
+                if (filtered != null && filtered.length > 0) {
+                    filteredResult[cursor] = filtered;
                     cursor++;
                 }
-            } else if (current[i] instanceof Object[]) {
-                Object[] filteredObjs = filterArray((Object[]) current[i]);
-                if (filteredObjs != null && filteredObjs.length > 0) {
-                    filteredResult[cursor] = filteredObjs;
-                    cursor++;
-                }
-            }
-            if (current[i] != null && current[i] instanceof AbstractNode) {
+            } else if (current[i] != null && current[i] instanceof AbstractNode) {
                 if (_filter.select((Node) current[i])) {
                     filteredResult[cursor] = current[i];
                     cursor++;
                 }
-            }
-        }
-        return filteredResult;
-    }
-
-    private Node[] filterNodeArray(Node[] current) {
-        Node[] filtered = new AbstractNode[current.length];
-        int cursor = 0;
-        for (int i = 0; i < current.length; i++) {
-            if (current[i] != null && _filter.select(current[i])) {
-                filtered[cursor] = current[i];
+            } else {
+                onlyContainsNodes = false;
+                filteredResult[cursor] = current[i];
                 cursor++;
             }
         }
-        if (cursor != current.length) {
-            Node[] filtered_2 = new AbstractNode[cursor];
-            System.arraycopy(filtered, 0, filtered_2, 0, cursor);
-            return filtered_2;
+        if (onlyContainsNodes) {
+            Node[] finalNodes = new Node[cursor];
+            System.arraycopy(filteredResult, 0, finalNodes, 0, cursor);
+            return finalNodes;
         } else {
-            return filtered;
+            if (cursor == filteredResult.length) {
+                return filteredResult;
+            } else {
+                Object[] shrinkedResult = new Object[cursor];
+                System.arraycopy(filteredResult, 0, shrinkedResult, 0, cursor);
+                return shrinkedResult;
+            }
         }
     }
 

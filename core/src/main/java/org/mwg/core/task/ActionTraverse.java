@@ -23,9 +23,7 @@ class ActionTraverse implements TaskAction {
         if (previousResult != null) {
             //dry execute to count waiter
             Set<Long> toLoad = new HashSet<Long>();
-            if (previousResult instanceof AbstractNode[]) {
-                collectNodeArray((AbstractNode[]) previousResult, toLoad);
-            } else if (previousResult instanceof Object[]) {
+            if (previousResult instanceof Object[]) {
                 collectArray((Object[]) previousResult, toLoad);
             } else if (previousResult instanceof AbstractNode) {
                 Node loop = (Node) previousResult;
@@ -38,7 +36,7 @@ class ActionTraverse implements TaskAction {
                 }
             }
             DeferCounter deferCounter = context.graph().counter(toLoad.size());
-            final Node[] resultNodes = new AbstractNode[toLoad.size()]; //toDo change abstractNode type
+            final Node[] resultNodes = new Node[toLoad.size()];
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {
                 context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {
@@ -63,27 +61,11 @@ class ActionTraverse implements TaskAction {
 
     private void collectArray(Object[] current, Set<Long> toLoad) {
         for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof AbstractNode[]) {
-                collectNodeArray((AbstractNode[]) current[i], toLoad);
-            } else if (current[i] instanceof Object[]) {
+            if (current[i] instanceof Object[]) {
                 collectArray((Object[]) current[i], toLoad);
             } else if (current[i] instanceof AbstractNode) {
                 Node loop = (Node) current[i];
                 Object rel = loop.get(_name);
-                if (rel != null && rel instanceof long[]) {
-                    long[] interResult = (long[]) rel;
-                    for (int j = 0; j < interResult.length; j++) {
-                        toLoad.add(interResult[j]);
-                    }
-                }
-            }
-        }
-    }
-
-    private void collectNodeArray(Node[] current, Set<Long> toLoad) {
-        for (int i = 0; i < current.length; i++) {
-            if (current[i] != null) {
-                Object rel = current[i].get(_name);
                 if (rel != null && rel instanceof long[]) {
                     long[] interResult = (long[]) rel;
                     for (int j = 0; j < interResult.length; j++) {

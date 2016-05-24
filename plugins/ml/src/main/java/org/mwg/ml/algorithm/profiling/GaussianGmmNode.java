@@ -163,7 +163,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         Task traverse = graph().newTask();
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(context -> {
-            AbstractNode[] result = (AbstractNode[]) context.getPreviousResult();
+            Node[] result = (Node[]) context.getPreviousResult();
             GaussianGmmNode parent = (GaussianGmmNode) context.getVariable("starterNode");
             GaussianGmmNode resultChild = filter(result, values, precisions, threshold);
             if (resultChild != null) {
@@ -183,7 +183,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     //ToDo need to be replaced by gaussian distances !!
-    private GaussianGmmNode filter(final AbstractNode[] result, final double[] features, final double[] precisions, final double threshold) {
+    private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, final double threshold) {
         if (result == null || result.length == 0) {
             return null;
         }
