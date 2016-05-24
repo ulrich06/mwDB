@@ -9,7 +9,10 @@ import java.util.TreeMap;
  * Created by assaad on 23/03/16.
  */
 public class HashCollision {
-    public void hashing() {
+    public static void main(String[] arg){
+        hashing();
+    }
+    public static void hashing() {
         byte x;
         long p1, p2, p3;
 
@@ -19,7 +22,7 @@ public class HashCollision {
         Random rand = new Random();
         long max = 1000000000;
 
-        long trials = 1000000;
+        long trials = 10000000;
 
         for (long i = 0; i < trials; i++) {
             long yrand = rand.nextLong() % max;
