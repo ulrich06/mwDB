@@ -41,3 +41,13 @@ GraphBuilder
     .withStorage(new LevelDBStorage("data"))
     .build();
 ```
+
+## Configuration
+
+In addition to the storage path, this plugin can be configure to use or not a native implementation.
+By default the native x86 or ARM LevelDB will be use.
+To configure a pure Java solution, please use the following code snippet.
+
+```
+new LevelDBStorage("/path/data").useNative(false)
+```
