@@ -22,6 +22,22 @@
             <artifactId>leveldbjni-all</artifactId>
             <version>${leveldb.version}</version>
         </dependency>
+
+        <!-- Not native storage -->
+
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb</artifactId>
+            <version>0.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>

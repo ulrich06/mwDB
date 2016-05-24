@@ -17,11 +17,12 @@ public class GraphBuilder {
     private boolean _gc = false;
     private long _memorySize = -1;
     private long _saveBatchSize = -1;
+    private boolean _readOnly = false;
 
     private static InternalBuilder internalBuilder = null;
 
     public interface InternalBuilder {
-        Graph newGraph(Storage storage, Scheduler scheduler, NodeFactory[] factories, boolean usingGC, boolean usingOffHeapMemory, long memorySize, long autoSaveSize);
+        Graph newGraph(Storage storage, boolean readOnly, Scheduler scheduler, NodeFactory[] factories, boolean usingGC, boolean usingOffHeapMemory, long memorySize, long autoSaveSize);
     }
 
     private GraphBuilder() {
@@ -30,6 +31,11 @@ public class GraphBuilder {
 
     public GraphBuilder withStorage(Storage p_storage) {
         this._storage = p_storage;
+        return this;
+    }
+
+    public GraphBuilder readOnly() {
+        _readOnly = true;
         return this;
     }
 
@@ -76,7 +82,7 @@ public class GraphBuilder {
      * if (org.mwg.GraphBuilder.internalBuilder == null) {
      * org.mwg.GraphBuilder.internalBuilder = new org.mwg.core.Builder();
      * }
-     * return org.mwg.GraphBuilder.internalBuilder.newGraph(this._storage, this._scheduler, this._factories, this._gc, this._offHeap, this._memorySize, this._saveBatchSize);
+     * return org.mwg.GraphBuilder.internalBuilder.newGraph(this._storage, this._readOnly, this._scheduler, this._factories, this._gc, this._offHeap, this._memorySize, this._saveBatchSize);
      */
     public Graph build() {
         if (internalBuilder == null) {
@@ -88,7 +94,7 @@ public class GraphBuilder {
                 }
             }
         }
-        return internalBuilder.newGraph(_storage, _scheduler, _factories, _gc, _offHeap, _memorySize, _saveBatchSize);
+        return internalBuilder.newGraph(_storage, _readOnly, _scheduler, _factories, _gc, _offHeap, _memorySize, _saveBatchSize);
     }
 
 }
