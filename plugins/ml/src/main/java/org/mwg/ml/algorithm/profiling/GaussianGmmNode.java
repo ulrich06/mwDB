@@ -390,6 +390,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
+            return;
         }
 
         NodeState resolved = this._resolver.resolveState(this, true);
@@ -428,6 +429,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 double[] avg = temp.getAvg();
                 if (totals[i] > 2) {
                     distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg));
+                    distributions[i].setMin(temp.getMin());
+                    distributions[i].setMax(temp.getMax());
                 } else {
                     distributions[i] = new MultivariateNormalDistribution(avg, covBackup); //this can be optimized later by inverting covBackup only once
                 }
@@ -445,12 +448,14 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public String toString() {
         double[] avg = getAvg();
         StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
-        NumberFormat formatter = new DecimalFormat("#0.0");
-        for (int i = 0; i < avg.length; i++) {
-            sb.append(formatter.format(avg[i]));
-            sb.append(" ");
+        if(avg!=null) {
+            NumberFormat formatter = new DecimalFormat("#0.0");
+            for (int i = 0; i < avg.length; i++) {
+                sb.append(formatter.format(avg[i]));
+                sb.append(" ");
+            }
+            sb.append(", total: ").append(getTotal());
         }
-        sb.append(", total: ").append(getTotal());
         return sb.toString();
     }
 
