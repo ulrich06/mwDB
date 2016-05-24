@@ -1,10 +1,10 @@
-# KMF Storage Plugin: RocksDB backend
+# ManyWorldGraph (aka mwg) Storage Plugin: RocksDB backend
 
-This KMF plugin aims at offering an efficient file based storage, embeddable directly in your JVM-based application. 
+This plugin aims at offering an efficient file based storage, embeddable directly in your JVM-based application.
 This backend is also available for Android usages.
-RocksDB offers a very efficient storage that can handle billions of KMF elements on a single machine based storage.
+RocksDB offers a very efficient storage that can handle billions of mwg nodes on a single machine based storage.
 This plugin does not rely on an external server.
-This feature both boost the performance by avoiding network or Inter-Processus communications and in addition sipplify a lot the configuration because only require a target directory to persist model on disk.
+This feature both boost the performance by avoiding network or Inter-Processus communications and in addition simplify a lot the configuration because only require a target directory to persist graph on disk.
 
 ## Last versions:
 
@@ -20,7 +20,7 @@ Simply add the following dependency to your maven project:
 
 ``` xml
 <dependency>
-    <groupId>org.kevoree.modeling.plugin</groupId>
+    <groupId>org.kevoree.mwg.plugins</groupId>
     <artifactId>rocksdb</artifactId>
     <version>REPLACE_BY_LAST_VERSION</version>
 </dependency>
@@ -28,22 +28,15 @@ Simply add the following dependency to your maven project:
 
 ## Usage
 
-The RocksDBPlugin is the main entry point for this plugin.
-Simply reference the full qualified name of the storage (should be an existant directory).
+As any mwg plugin, the **LevelDBStorage** should be inserted during the build step of the graph.
+Simply reference the full qualified name of the storage (should be an existing directory).
+Relative storage work as well and will be based on the current execution path.
 
 ```java
-import org.kevoree.modeling.cdn.KContentDeliveryDriver;
 import org.mwg.RocksDBStorage;
 
-KContentDeliveryDriver rocksDBDriver = 
-	new RocksDBPlugin("/opt/kmf_storage");
-model = new MyModel(
-    DataManagerBuilder.create()
-    .withContentDeliveryDriver(rocksDBDriver)
-    .build()
-    );
+GraphBuilder
+    .builder()
+    .withStorage(new RocksDBStorage("data"))
+    .build();
 ```
-
-To have more information about KMF Storage Plugin using, please visit the following tutorial step:
-
-https://github.com/kevoree-modeling/tutorial/tree/master/step2_persistence
