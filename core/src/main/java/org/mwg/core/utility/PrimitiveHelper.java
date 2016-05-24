@@ -8,14 +8,68 @@ import java.util.Iterator;
 import java.util.List;
 
 public class PrimitiveHelper {
+
+    /**
+     * @native ts
+     * public static PRIME1 : Long = Long.fromNumber(2654435761, true);
+     */
     private static final long PRIME1 = 2654435761L;
+
+    /**
+     * @native ts
+     * public static PRIME2 : Long = Long.fromNumber(2246822519, true);
+     */
     private static final long PRIME2 = 2246822519L;
+
+    /**
+     * @native ts
+     * public static PRIME3 : Long = Long.fromNumber(3266489917, true);
+     */
     private static final long PRIME3 = 3266489917L;
-    private static final long PRIME4 = 668265263;
+
+    /**
+     * @native ts
+     * public static PRIME4 : Long = Long.fromNumber(668265263, true);
+     */
+    private static final long PRIME4 = 668265263L;
+
+    /**
+     * @native ts
+     * public static PRIME5 : Long = Long.fromNumber(0x165667b1, true);
+     */
     private static final long PRIME5 = 0x165667b1;
+
     private static final int len = 24;
 
+
+    /**
+     * @native ts
+     * if (max <= 0) {
+     * throw new Error("Max must be > 0");
+     * }
+     * var crc = org.mwg.core.utility.PrimitiveHelper.PRIME5;
+     * crc = crc.add(number);
+     * crc = crc.add(crc.shiftLeft(17));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
+     * crc = crc.add(number);
+     * crc = crc.add(crc.shiftLeft(17));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
+     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.len);
+     * crc = crc.xor(crc.shiftRightUnsigned(15));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * crc = crc.add(number);
+     * crc = crc.xor(crc.shiftRightUnsigned(13));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * crc = crc.xor(crc.shiftRightUnsigned(16));
+     * return (crc.getLowBits() & 0x7FFFFFFF) % max;
+     */
     public static int intHash(int number, int max) {
+        if (max <= 0) {
+            throw new IllegalArgumentException("Max must be > 0");
+        }
+
         long crc = PRIME5;
         crc += number;
         crc += crc << 17;
@@ -38,7 +92,35 @@ public class PrimitiveHelper {
         return (int) crc;
     }
 
+    /**
+     * @native ts
+     * if (max <= 0) {
+     * throw new Error("Max must be > 0");
+     * }
+     * var crc = org.mwg.core.utility.PrimitiveHelper.PRIME5;
+     * crc = crc.add(number);
+     * crc = crc.add(crc.shiftLeft(17));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
+     * crc = crc.add(number);
+     * crc = crc.add(crc.shiftLeft(17));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
+     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.len);
+     * crc = crc.xor(crc.shiftRightUnsigned(15));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
+     * crc = crc.add(number);
+     * crc = crc.xor(crc.shiftRightUnsigned(13));
+     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
+     * crc = crc.xor(crc.shiftRightUnsigned(16));
+     * var res = crc.toNumber();
+     * res = res % max;
+     * return res;
+     */
     public static long longHash(long number, long max) {
+        if (max <= 0) {
+            throw new IllegalArgumentException("Max must be > 0");
+        }
         long crc = PRIME5;
         crc += number;
         crc += crc << 17;
@@ -63,7 +145,14 @@ public class PrimitiveHelper {
         return crc;
     }
 
+    /**
+     * @native ts
+     * return Long.UZERO.toNumber();
+     */
     public static long tripleHash(byte p0, long p1, long p2, long p3, long max) {
+        if (max <= 0) {
+            throw new IllegalArgumentException("Max must be > 0");
+        }
 
         long v1 = PRIME5;
         long v2 = v1 * PRIME2 + len;
@@ -121,61 +210,6 @@ public class PrimitiveHelper {
         return crc;
     }
 
-    /*
-    public static int tripleHash(long p1, long p2, long p3) {
-
-        long v1 = PRIME5;
-        long v2 = v1 * PRIME2 + len;
-        long v3 = v2 * PRIME3;
-        long v4 = v3 * PRIME4;
-
-        long crc;
-
-        v1 = ((v1 << 13) | (v1 >>> 51)) + p1;
-        v2 = ((v2 << 11) | (v2 >>> 53)) + p2;
-        v3 = ((v3 << 17) | (v3 >>> 47)) + p3;
-        v4 = ((v4 << 19) | (v4 >>> 45));
-
-        v1 += ((v1 << 17) | (v1 >>> 47));
-        v2 += ((v2 << 19) | (v2 >>> 45));
-        v3 += ((v3 << 13) | (v3 >>> 51));
-        v4 += ((v4 << 11) | (v4 >>> 53));
-
-        v1 *= PRIME1;
-        v2 *= PRIME1;
-        v3 *= PRIME1;
-        v4 *= PRIME1;
-
-        v1 += p1;
-        v2 += p2;
-        v3 += p3;
-        v4 += PRIME5;
-
-        v1 *= PRIME2;
-        v2 *= PRIME2;
-        v3 *= PRIME2;
-        v4 *= PRIME2;
-
-        v1 += ((v1 << 11) | (v1 >>> 53));
-        v2 += ((v2 << 17) | (v2 >>> 47));
-        v3 += ((v3 << 19) | (v3 >>> 45));
-        v4 += ((v4 << 13) | (v4 >>> 51));
-
-        v1 *= PRIME3;
-        v2 *= PRIME3;
-        v3 *= PRIME3;
-        v4 *= PRIME3;
-
-        crc = v1 + ((v2 << 3) | (v2 >>> 61)) + ((v3 << 6) | (v3 >>> 58)) + ((v4 << 9) | (v4 >>> 55));
-        crc ^= crc >>> 11;
-        crc += (PRIME4 + len) * PRIME1;
-        crc ^= crc >>> 15;
-        crc *= PRIME2;
-        crc ^= crc >>> 13;
-
-        return (int) crc;
-
-    }*/
 
     /**
      * @native ts
