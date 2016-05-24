@@ -22,13 +22,23 @@ public class AbstractLinearRegressionTest {
     final double eps = 0.000001;
 
     protected  class RegressionJumpCallback implements Callback<AbstractLinearRegressionNode> {
+        final String features[];
+
+        public RegressionJumpCallback(String featureNames[]){
+            this.features = featureNames;
+        }
+
+        public RegressionJumpCallback(){
+            this(new String[]{FEATURE});
+        }
+
         double coefs[] = new double[0];
         double intercept = Double.NaN;
         double bufferError = Double.NaN;
         boolean bootstrapMode = true;
         double l2Reg = Double.NaN;
 
-        public double value;
+        public double value[];
         public double response;
 
         Callback<Boolean> cb = new Callback<Boolean>() {
@@ -40,7 +50,9 @@ public class AbstractLinearRegressionTest {
 
         @Override
         public void on(AbstractLinearRegressionNode result) {
-            result.set(FEATURE, value);
+            for (int i=0;i<features.length;i++){
+                result.set(features[i], value[i]);
+            }
             result.learn(response, cb);
             coefs = result.getCoefficients();
             intercept = result.getIntercept();
@@ -66,7 +78,7 @@ public class AbstractLinearRegressionTest {
 
         for (int i = 0; i < rounds; i++) {
             double x = rng.nextDouble() * 10;
-            rjc.value = x;
+            rjc.value = new double[]{x};
             rjc.response = 2*x+1;
             lrNode.jump(i, rjc);
         }
@@ -79,7 +91,7 @@ public class AbstractLinearRegressionTest {
         RegressionJumpCallback rjc = new RegressionJumpCallback();
         for (int i = 0; i < dummyDataset1.length; i++) {
             assertTrue(rjc.bootstrapMode);
-            rjc.value = dummyDataset1[i][swapResponse?1:0];
+            rjc.value = new double[]{dummyDataset1[i][swapResponse?1:0]};
             rjc.response = dummyDataset1[i][swapResponse?0:1];
             lrNode.jump(i, rjc);
         }

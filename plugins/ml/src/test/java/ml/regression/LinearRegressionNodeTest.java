@@ -73,7 +73,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
                 standardSettings(lrNode);
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, false);
 
-                rjc.value = 6;
+                rjc.value = new double[]{6};
                 rjc.response = 1013;
                 lrNode.jump(dummyDataset1.length, rjc);
                 assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bootstrapMode);
