@@ -10,7 +10,7 @@ import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.NoopScheduler;
 
-public class DemoTest {
+public class GetPostTest {
 
     @Test
     public void test() throws Exception {
@@ -24,9 +24,7 @@ public class DemoTest {
                 subProcessLoop.set("name", "process" + i);
                 subProcessLoop.set("load", i);
                 nodeLoop.add("processes", subProcessLoop);
-
                 graph.index("nodes", nodeLoop, "name", null);
-
             }
             RestGateway gateway = RestGateway.expose(graph, 8050);
             gateway.start();
