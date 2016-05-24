@@ -57,65 +57,67 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
      */
     @Test
     public void noDelaySwitchResponse() {
-        Random rng = new Random(1);
+        for (int cs = 0; cs < NUM_SWITCHES; cs++){
+            final int correctSwitch = cs; //Have to make it final for inner class access
+            final int LIGHT_ON_LX = 500;
+            final int LIGHT_OFF_LX = 0;
+            final int NUM_OF_TRIALS = NUM_SWITCHES; //One swipe
 
-        final int correctSwitch = rng.nextInt(NUM_SWITCHES);
-        final int LIGHT_ON_LX = 500;
-        final int LIGHT_OFF_LX = 0;
-        final int NUM_OF_TRIALS = NUM_SWITCHES; //One swipe
+            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
+                    lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, NUM_OF_TRIALS);
+                    lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
 
-        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new Callback<Boolean>() {
-            @Override
-            public void on(Boolean result) {
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
-                lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, NUM_OF_TRIALS);
-                lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
-                lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
-                lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
+                    double switchValues[] = new double[NUM_SWITCHES];
+                    for (int i=0;i<NUM_SWITCHES;i++){
+                        switchValues[i] = 0;
+                    }
 
-                double switchValues[] = new double[NUM_SWITCHES];
-                for (int i=0;i<NUM_SWITCHES;i++){
-                    switchValues[i] = 0;
+                    RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
+                    for (int i = 0; i < NUM_OF_TRIALS; i++) {
+                        int chosenSwitch = i % NUM_SWITCHES;
+                        switchValues[chosenSwitch] = 1;
+                        rjc.value = switchValues;
+                        rjc.response = (chosenSwitch==correctSwitch)?LIGHT_ON_LX:LIGHT_OFF_LX;
+                        lrNode.jump(2*i, rjc);
+                        switchValues[chosenSwitch] = 0;
+                        rjc.value = switchValues;
+                        rjc.response = 0;
+                        lrNode.jump(2*i+1, rjc);
+                        //We don't care about bootstrap mode here
+                    }
+                    String errorString = ""+rjc.intercept;
+                    for (int i=0;i<NUM_SWITCHES;i++){
+                        errorString += " +"+rjc.coefs[i]+"*s"+i;
+                    }
+                    errorString += "\t"+rjc.bufferError+"\t"+rjc.l2Reg;
+                    System.out.println(errorString);
+                    lrNode.jump(2*NUM_OF_TRIALS, rjc); //Just in case correct switch is the last one.
+                    // In that case it will cause going to bootstrap. 1 timestamp to get out.
+                    assertFalse(errorString, rjc.bootstrapMode);
+
+                    lrNode.free();
+                    graph.disconnect(null);
+
+                    for (int i=0;i<NUM_SWITCHES;i++) {
+                        assertTrue(errorString,Math.abs(rjc.coefs[i] - ((i==correctSwitch)?LIGHT_ON_LX:LIGHT_OFF_LX)) < 1e-4);
+                    }
+                    assertTrue(errorString,Math.abs(rjc.intercept) < 1e-4);
+                    assertTrue(errorString,rjc.bufferError < 1e-4);
+                    assertTrue(errorString,rjc.l2Reg < 1e-4);
                 }
-
-                RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
-                for (int i = 0; i < NUM_OF_TRIALS; i++) {
-                    int chosenSwitch = i % NUM_SWITCHES;
-                    switchValues[chosenSwitch] = 1;
-                    rjc.value = switchValues;
-                    rjc.response = (chosenSwitch==correctSwitch)?500:0;
-                    lrNode.jump(2*i, rjc);
-                    switchValues[chosenSwitch] = 0;
-                    rjc.value = switchValues;
-                    rjc.response = 0;
-                    lrNode.jump(2*i+1, rjc);
-                    //We don't care about bootstrap mode here
-                }
-                String errorString = ""+rjc.intercept;
-                for (int i=0;i<NUM_SWITCHES;i++){
-                    errorString += " +"+rjc.coefs[i]+"*s"+i;
-                }
-                errorString += "\t"+rjc.bufferError+"\t"+rjc.l2Reg;
-                System.out.println(errorString);
-                assertFalse(errorString, rjc.bootstrapMode);
-
-                lrNode.free();
-                graph.disconnect(null);
-
-                for (int i=0;i<NUM_SWITCHES;i++) {
-                    assertTrue(errorString,Math.abs(rjc.coefs[i] - ((i==correctSwitch)?500:0)) < 1e-4);
-                }
-                assertTrue(errorString,Math.abs(rjc.intercept) < 1e-4);
-                assertTrue(errorString,rjc.bufferError < 1e-4);
-                assertTrue(errorString,rjc.l2Reg < 1e-4);
-            }
-        });
+            });
+        }
     }
 
 
     /**
-     * Just slightly more complicated version. Now the switches do not go back.
+     * Just slightly more complicated version. Now the switches do not go back to off.
      *
      * Simplifications:
      * - When the light is off, the light level is 0.
@@ -127,63 +129,224 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
      *
      * Later tests will add more realistic assumptions.
      */
-    @Test
-    public void noDelayRandomizedSwitchResponse() {
+    //@Test
+    public void noDelayRandomClickingSwitchResponse() {
+        Random rng = new Random(1);
+        for (int cs = 0; cs < NUM_SWITCHES; cs++) {
+            final int correctSwitch = cs; //Have to make it final for inner class access
+
+            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
+                    lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 2*NUM_SWITCHES);
+                    lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
+
+                    double switchValues[] = new double[NUM_SWITCHES];
+                    for (int i=0;i<NUM_SWITCHES;i++){
+                        switchValues[i] = 0;
+                    }
+
+                    RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
+                    boolean triedCorrectSwitch = false;
+                    int index = 0;
+                    while(!triedCorrectSwitch) {
+                        int chosenSwitch = rng.nextInt(NUM_SWITCHES);
+                        triedCorrectSwitch = (chosenSwitch==correctSwitch);
+                        switchValues[chosenSwitch] = (switchValues[chosenSwitch]==0)?1:0;
+                        rjc.value = switchValues;
+                        rjc.response = (switchValues[correctSwitch] == 1)?500:0;
+                        System.out.println(switchValues[chosenSwitch]+"\t"+chosenSwitch+"\t"+rjc.response);
+                        lrNode.jump(index, rjc);
+                        index++;
+                    }
+                    String errorString = ""+rjc.intercept;
+                    for (int i=0;i<NUM_SWITCHES;i++){
+                        errorString += " + "+rjc.coefs[i]+"*s"+i;
+                    }
+                    errorString += "\t"+rjc.bufferError+"\t"+rjc.l2Reg;
+                    System.out.println(errorString);
+                    //TODO Should I implement jumping in and out of bootstrap mode at the same time?
+                    lrNode.jump(index, rjc);
+                    //assertFalse(errorString, rjc.bootstrapMode);
+
+                    lrNode.free();
+                    graph.disconnect(null);
+
+                    for (int i=0;i<NUM_SWITCHES;i++) {
+                        assertTrue(errorString,Math.abs(rjc.coefs[i] - ((i==correctSwitch)?500:0)) < 1e-4);
+                    }
+                    assertTrue(errorString,Math.abs(rjc.intercept) < 1e-4);
+                    assertTrue(errorString,rjc.bufferError < 1e-4);
+                    assertTrue(errorString,rjc.l2Reg < 1e-4);
+                }
+            });
+        }
+    }
+
+
+    /**
+     * Adding more assumptions. Now light level is a bit randomized.
+     *
+     * Simplifications:
+     * - When the light is off, the light level is uniformly distributed between 0-30 Lx.
+     * - When the light is on, the light level is uniformly distributed between 450-550 Lx.
+     * - There is no lag. Once switch is on, the light turns on immediately.
+     * - User turn switches on or off randomly. Initially all switches are off.
+     *
+     * When correct switch is tried at least once, it should be enough to detect the proper configuration.
+     *
+     * Later tests will add more realistic assumptions.
+     */
+    //@Test
+    public void noDelayRandomLightLevelSwitchResponse() {
         Random rng = new Random(1);
 
-        final int correctSwitch = rng.nextInt(NUM_SWITCHES);
-        System.out.println("Correct switch: "+correctSwitch);
-        final int LIGHT_ON_LX = 500;
-        final int LIGHT_OFF_LX = 0;
+        for (int cs = 0; cs < NUM_SWITCHES; cs++) {
+            final int correctSwitch = cs; //Have to make it final for inner class access
 
-        Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
-        graph.connect(new Callback<Boolean>() {
-            @Override
-            public void on(Boolean result) {
-                LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
-                lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, 2*NUM_SWITCHES);
-                lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
-                lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
-                lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
+            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
+                    lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, NUM_SWITCHES);
+                    lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
 
-                double switchValues[] = new double[NUM_SWITCHES];
-                for (int i=0;i<NUM_SWITCHES;i++){
-                    switchValues[i] = 0;
-                }
+                    double switchValues[] = new double[NUM_SWITCHES];
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        switchValues[i] = 0;
+                    }
 
-                RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
-                boolean triedCorrectSwitch = false;
-                int index = 0;
-                while(!triedCorrectSwitch) {
-                    int chosenSwitch = rng.nextInt(NUM_SWITCHES);
-                    triedCorrectSwitch = (chosenSwitch==correctSwitch);
-                    switchValues[chosenSwitch] = (switchValues[chosenSwitch]==0)?1:0;
-                    rjc.value = switchValues;
-                    rjc.response = (switchValues[correctSwitch] == 1)?500:0;
-                    System.out.println(switchValues[chosenSwitch]+"\t"+chosenSwitch+"\t"+rjc.response);
+                    RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
+                    boolean triedCorrectSwitch = false;
+                    int index = 0;
+                    while (!triedCorrectSwitch) {
+                        int chosenSwitch = rng.nextInt(NUM_SWITCHES);
+                        triedCorrectSwitch = (chosenSwitch == correctSwitch);
+                        switchValues[chosenSwitch] = (switchValues[chosenSwitch] == 0) ? 1 : 0;
+                        rjc.value = switchValues;
+                        rjc.response = (switchValues[correctSwitch] == 1) ? (rng.nextDouble() * 100 + 450) : (rng.nextDouble() * 30);
+                        lrNode.jump(index, rjc);
+                        index++;
+                    }
+                    String errorString = "" + rjc.intercept;
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        errorString += " + " + rjc.coefs[i] + "*s" + i;
+                    }
+                    errorString += "\t" + rjc.bufferError + "\t" + rjc.l2Reg;
+                    System.out.println(errorString);
+                    //TODO Should I implement jumping in and out of bootstrap mode at the same time?
                     lrNode.jump(index, rjc);
-                    index++;
-                }
-                String errorString = ""+rjc.intercept;
-                for (int i=0;i<NUM_SWITCHES;i++){
-                    errorString += " + "+rjc.coefs[i]+"*s"+i;
-                }
-                errorString += "\t"+rjc.bufferError+"\t"+rjc.l2Reg;
-                System.out.println(errorString);
-                //TODO Should I implement jumping in and out of bootstrap mode at the same time?
-                //lrNode.jump(index, rjc);
-                //assertFalse(errorString, rjc.bootstrapMode);
+                    assertFalse(errorString, rjc.bootstrapMode);
 
-                lrNode.free();
-                graph.disconnect(null);
+                    lrNode.free();
+                    graph.disconnect(null);
 
-                for (int i=0;i<NUM_SWITCHES;i++) {
-                    assertTrue(errorString,Math.abs(rjc.coefs[i] - ((i==correctSwitch)?500:0)) < 1e-4);
+                    //One coefficient needs to be dominating
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        if (i == correctSwitch){
+                            assertTrue(errorString, rjc.coefs[i] > 450);
+                        }else{
+                            assertTrue(errorString, rjc.coefs[i] < 15);
+                        }
+                    }
+                    assertTrue(errorString, Math.abs(rjc.intercept) < 5);
+                    assertTrue(errorString, rjc.bufferError < 1e-4);
+                    assertTrue(errorString, rjc.l2Reg < 1e-4);
                 }
-                assertTrue(errorString,Math.abs(rjc.intercept) < 1e-4);
-                assertTrue(errorString,rjc.bufferError < 1e-4);
-                assertTrue(errorString,rjc.l2Reg < 1e-4);
-            }
-        });
+            });
+        }
+    }
+
+    /**
+     * Adding even more assumptions.
+     *
+     * Simplifications:
+     * - When the light is off, the light level is uniformly distributed between 0-30 Lx.
+     * - When the light is on, the light level is uniformly distributed between 450-550 Lx.
+     * - There is a lag of 1 timeframe between turning on the switch and light level being reported.
+     * - User turn switches on or off randomly. Initially all switches are off.
+     *
+     * When correct switch is tried at least once, it should be enough to detect the proper configuration.
+     *
+     * Later tests will add more realistic assumptions.
+     */
+    //@Test
+    public void delayedRandomLightLevelSwitchResponse() {
+        Random rng = new Random(1);
+
+        for (int cs = 0; cs < NUM_SWITCHES; cs++) {
+            final int correctSwitch = cs; //Have to make it final for inner class access
+
+            final int LAG = 1; //Timeframes between turning the switch and seeing light change
+            final int AFTER_TIMEFRAMES = 7; //Timeframes when everything is working normally after light level is reported
+
+            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
+                    lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, (LAG+AFTER_TIMEFRAMES) * NUM_SWITCHES);
+                    lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
+                    lrNode.set(AbstractMLNode.FROM, SWITCHES_STRING);
+
+                    double switchValues[] = new double[NUM_SWITCHES];
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        switchValues[i] = 0;
+                    }
+
+                    RegressionJumpCallback rjc = new RegressionJumpCallback(FEATURES);
+                    boolean triedCorrectSwitch = false;
+                    int index = 0;
+                    while (!triedCorrectSwitch) {
+                        int chosenSwitch = rng.nextInt(NUM_SWITCHES);
+                        triedCorrectSwitch = (chosenSwitch == correctSwitch);
+                        switchValues[chosenSwitch] = (switchValues[chosenSwitch] == 0) ? 1 : 0;
+                        rjc.value = switchValues;
+                        //New values, old response
+                        for (int i=0;i<LAG;i++){
+                            lrNode.jump(index, rjc);
+                            index++;
+                        }
+                        rjc.response = (switchValues[correctSwitch] == 1) ? (rng.nextDouble() * 100 + 450) : (rng.nextDouble() * 30);
+                        //New values & new response
+                        for (int i=0;i<AFTER_TIMEFRAMES;i++){
+                            lrNode.jump(index, rjc);
+                            index++;
+                        }
+                    }
+                    String errorString = "" + rjc.intercept;
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        errorString += " + " + rjc.coefs[i] + "*s" + i;
+                    }
+                    errorString += "\t" + rjc.bufferError + "\t" + rjc.l2Reg;
+                    System.out.println(errorString);
+                    //TODO Should I implement jumping in and out of bootstrap mode at the same time?
+                    //assertFalse(errorString, rjc.bootstrapMode);
+
+                    lrNode.free();
+                    graph.disconnect(null);
+
+                    //One coefficient needs to be dominating
+                    for (int i = 0; i < NUM_SWITCHES; i++) {
+                        if (i == correctSwitch){
+                            assertTrue(errorString, rjc.coefs[i] > 370);
+                        }else{
+                            assertTrue(errorString, rjc.coefs[i] < 15);
+                        }
+                    }
+                    assertTrue(errorString, Math.abs(rjc.intercept) < 5);
+                    //assertTrue(errorString, rjc.bufferError < 1e-4); //there can be quite a lot of buffer error, actually
+                    assertTrue(errorString, rjc.l2Reg < 1e-4);
+                }
+            });
+        }
     }
 }
