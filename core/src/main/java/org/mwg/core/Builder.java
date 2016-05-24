@@ -54,7 +54,6 @@ public class Builder implements GraphBuilder.InternalBuilder {
             return new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
         }
     }
-
-
+    
 }
 
