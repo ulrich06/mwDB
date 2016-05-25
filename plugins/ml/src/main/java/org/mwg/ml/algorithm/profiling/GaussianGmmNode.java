@@ -23,7 +23,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     //Getters and setters
     public final static String NAME = "GaussianGmm";
-    public static final String MIN= "min";
+    public static final String MIN = "min";
     public static final String MAX = "max";
     public static final String AVG = "avg";
     public static final String COV = "cov";
@@ -139,6 +139,9 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     //ToDO temporal hack to avoid features extractions - to remove later
     public void learnVector(double[] values, Callback<Boolean> callback) {
 
+        //graph().save(null);
+        //System.out.println("BEFORE LEARN: "+graph().space().available());
+
         NodeState resolved = this._resolver.resolveState(this, true);
         final int width = resolved.getFromKeyWithDefault(WIDTH_KEY, WIDTH_DEF);
         final int compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
@@ -161,6 +164,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         });
 
 
+
         Task traverse = graph().newTask();
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(context -> {
             Node[] result = (Node[]) context.getPreviousResult();
@@ -179,6 +183,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         Task mainTask = graph().newTask().from(this).asVar("starterNode").wait(traverse).wait(creationTask);
         mainTask.executeThen(context -> callback.on(true));
+
+
+        //graph().save(null);
+        //System.out.println("AFTER LEARN: "+graph().space().available());
     }
 
 
@@ -191,7 +199,11 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         double min = Double.MAX_VALUE;
         int index = 0;
         for (int i = 0; i < result.length; i++) {
-            distances[i] = distance(features, ((GaussianGmmNode) result[i]).getAvg(), precisions);
+            GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
+            if(temp==null){
+                int x=0;
+            }
+            distances[i] = distance(features, temp.getAvg(), precisions);
             if (distances[i] < min) {
                 min = distances[i];
                 index = i;
@@ -245,11 +257,17 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
     private void createLevel(double[] values, final int level, final int width, final int compressionFactor, final int compressionIter, final double[] precisions) {
+        //graph().save(null);
+        //System.out.println("BEFORE Create level: "+graph().space().available());
+
         GaussianGmmNode g = (GaussianGmmNode) graph().newTypedNode(this.world(), this.time(), "GaussianGmm");
         g.set(LEVEL_KEY, level);
         g.internallearn(values, width, compressionFactor, compressionIter, precisions, false); //dirac
-
         super.add(INTERNAL_SUBGAUSSIAN_KEY, g);
+        g.free();
+
+        //graph().save(null);
+        //System.out.println("AFTER Create level: "+graph().space().available());
     }
 
     private void checkAndCompress(final int width, final int compressionFactor, final int compressionIter, final double[] precisions) {
@@ -258,6 +276,9 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
         if (subgaussians != null && subgaussians.length >= compressionFactor * width) {
+
+            //graph().save(null);
+            //System.out.println("BEFORE compress: "+graph().space().available());
             //Compress here
             super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
                 @Override
@@ -305,6 +326,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                                 if (g != mainClusters[i]) {
                                     mainClusters[i].move(g);
                                     selfPointer.remove(INTERNAL_SUBGAUSSIAN_KEY, g);
+                                    g.free();
                                 }
                             }
                             mainClusters[i].checkAndCompress(width, compressionFactor, compressionIter, precisions);
@@ -314,6 +336,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     for (int i = 0; i < result.length; i++) {
                         result[i].free();
                     }
+                    //graph().save(null);
+                    //System.out.println("AFTER compress: "+graph().space().available());
 
                 }
             });
@@ -448,7 +472,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public String toString() {
         double[] avg = getAvg();
         StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
-        if(avg!=null) {
+        if (avg != null) {
             NumberFormat formatter = new DecimalFormat("#0.0");
             for (int i = 0; i < avg.length; i++) {
                 sb.append(formatter.format(avg[i]));
@@ -746,7 +770,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     private double distance(double[] features, double[] avg, double[] precisions) {
         double res = 0;
         for (int i = 0; i < features.length; i++) {
-            res += (features[i] - avg[i]) * (features[i] - avg[i])/precisions[i];
+            res += (features[i] - avg[i]) * (features[i] - avg[i]) / precisions[i];
         }
         return Math.sqrt(res);
     }
