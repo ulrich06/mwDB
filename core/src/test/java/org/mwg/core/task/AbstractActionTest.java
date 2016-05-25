@@ -2,7 +2,7 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.mwg.*;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 
 public abstract class AbstractActionTest {
 

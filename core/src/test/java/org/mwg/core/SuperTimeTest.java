@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.Node;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.offheap.*;

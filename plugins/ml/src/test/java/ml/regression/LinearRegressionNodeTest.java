@@ -2,14 +2,8 @@ package ml.regression;
 
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.core.NoopScheduler;
-import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
-import org.mwg.ml.common.AbstractMLNode;
-
-import java.util.Random;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;

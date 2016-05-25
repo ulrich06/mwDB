@@ -6,6 +6,7 @@ import org.mwg.*;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 

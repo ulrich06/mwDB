@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
 import org.mwg.ml.common.AbstractMLNode;

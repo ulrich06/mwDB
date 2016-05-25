@@ -41,6 +41,15 @@ public class CoreTaskActionRegistry implements TaskActionRegistry {
                 return new ActionFromIndexAll(params[0]);
             }
         });
+        add("fromIndex", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("fromIndex action need two parameter");
+                }
+                return new ActionFromIndex(params[0], params[1]);
+            }
+        });
         add("with", new TaskActionFactory() {
             @Override
             public TaskAction create(String[] params) {

@@ -7,6 +7,7 @@ import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.Unsafe;
 
 public class FlagTest {

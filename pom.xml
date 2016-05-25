@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mwdb</groupId>
-    <artifactId>root</artifactId>
+    <artifactId>mwdb</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>mwg</name>
@@ -71,6 +71,15 @@
             <name>Ludovic MOULINE</name>
             <id>ludovic.mouline</id>
             <email>ludovic.mouline@uni.lu</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Andrey BOYTSOV</name>
+            <id>andrey.boytsov</id>
+            <email>andrey.boytsov@uni.lu</email>
             <roles>
                 <role>developer</role>
             </roles>

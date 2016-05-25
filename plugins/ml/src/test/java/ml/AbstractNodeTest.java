@@ -3,9 +3,8 @@ package ml;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.common.AbstractMLNode;
-import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeFactory;
 
 public class AbstractNodeTest implements NodeFactory {

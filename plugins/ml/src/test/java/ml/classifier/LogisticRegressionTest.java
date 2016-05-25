@@ -12,9 +12,8 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
-import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.common.AbstractMLNode;
 
 import java.util.Random;

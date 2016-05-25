@@ -16,8 +16,7 @@ public interface Scheduler {
      * Starts the scheduler (i.e.: the execution of tasks).
      */
     void start();
-
-
+    
     /**
      * Terminates the scheduler (i.e.: the execution of tasks).
      */

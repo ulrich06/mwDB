@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.ReadOnlyStorage;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;

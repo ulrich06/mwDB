@@ -1,4 +1,4 @@
-package org.mwg.core;
+package org.mwg.core.scheduler;
 
 import org.mwg.plugin.Job;
 import org.mwg.plugin.Scheduler;
