@@ -34,17 +34,18 @@ public class Query {
         size++;
     }
 
-    /** @native ts
-     this.sort();
-     this._hash = 0;
-     for (var i = 0; i < this.size; i++) {
-     this._hash = ((this._hash * 32) - this._hash) + this.attributes[i];
-     if (this.values[i] != null) {
-     for (var j = 0; j < this.values[i].length; j++) {
-     this._hash = ((this._hash * 32) - this._hash) + this.values[i].charCodeAt(j);
-     }
-     }
-     }
+    /**
+     * @native ts
+     * this.sort();
+     * this._hash = 0;
+     * for (var i = 0; i < this.size; i++) {
+     * this._hash = ((this._hash * 32) - this._hash) + this.attributes[i];
+     * if (this.values[i] != null) {
+     * for (var j = 0; j < this.values[i].length; j++) {
+     * this._hash = ((this._hash * 32) - this._hash) + this.values[i].charCodeAt(j);
+     * }
+     * }
+     * }
      */
     public void compute() {
         sort();
@@ -87,7 +88,7 @@ public class Query {
         while (cursor < query.length()) {
             if (query.charAt(cursor) == Constants.QUERY_KV_SEP) {
                 if (lastElemStart != -1) {
-                    currentKey = p_resolver.stringToLongKey(query.substring(lastElemStart, cursor).trim());
+                    currentKey = p_resolver.stringToLongKey(query.substring(lastElemStart, cursor).trim(), false);
                 }
                 lastElemStart = cursor + 1;
             } else if (query.charAt(cursor) == Constants.QUERY_SEP) {

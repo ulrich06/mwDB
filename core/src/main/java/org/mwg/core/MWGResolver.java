@@ -2,6 +2,7 @@ package org.mwg.core;
 
 import org.mwg.*;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.DataHasher;
 import org.mwg.struct.*;
 import org.mwg.plugin.*;
 import org.mwg.core.chunk.*;
@@ -1039,24 +1040,25 @@ class MWGResolver implements Resolver {
     }
 
     @Override
-    public long stringToLongKey(String name) {
-        StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
-        if (dictionaryIndex == null) {
-            dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_LONG_MAP);
+    public long stringToLongKey(String name, boolean insertIfNotExists) {
+        long hash = DataHasher.hash(name.getBytes());
+        if (insertIfNotExists) {
+            StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
+            if (dictionaryIndex == null) {
+                dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_LONG_MAP);
+            }
+            if (!dictionaryIndex.containsHash(hash)) {
+                dictionaryIndex.put(name, hash);
+            }
         }
-        long encodedKey = dictionaryIndex.getValue(name);
-        if (encodedKey == CoreConstants.NULL_LONG) {
-            dictionaryIndex.put(name, CoreConstants.NULL_LONG);
-            encodedKey = dictionaryIndex.getValue(name);
-        }
-        return encodedKey;
+        return hash;
     }
 
     @Override
-    public String longKeyToString(long key) {
+    public String hashToString(long key) {
         StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
         if (dictionaryIndex != null) {
-            return dictionaryIndex.getKey(key);
+            return dictionaryIndex.getByHash(key);
         }
         return null;
     }

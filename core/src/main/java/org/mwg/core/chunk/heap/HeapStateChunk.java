@@ -224,12 +224,12 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
      * if(p_elemType == org.mwg.Type.DOUBLE_ARRAY){ if(!(p_unsafe_elem instanceof Float64Array)){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * if(p_elemType == org.mwg.Type.LONG_ARRAY){ if(!(p_unsafe_elem instanceof Float64Array)){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * if(p_elemType == org.mwg.Type.INT_ARRAY){ if(!(p_unsafe_elem instanceof Int32Array)){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
-
+     * <p>
      * if(p_elemType == org.mwg.Type.STRING_LONG_MAP){ if(!(typeof p_unsafe_elem === 'object')){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * if(p_elemType == org.mwg.Type.LONG_LONG_MAP){ if(!(typeof p_unsafe_elem === 'boolean')){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * if(p_elemType == org.mwg.Type.LONG_LONG_ARRAY_MAP){ if(!(typeof p_unsafe_elem === 'boolean')){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
-
-
+     * <p>
+     * <p>
      * }
      * this.internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
      */
@@ -240,7 +240,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
-        internal_set(_space.graph().resolver().stringToLongKey(key), p_elemType, p_unsafe_elem, true);
+        internal_set(_space.graph().resolver().stringToLongKey(key, true), p_elemType, p_unsafe_elem, true);
     }
 
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
@@ -434,7 +434,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public Object getFromKey(String key) {
-        return get(_space.graph().resolver().stringToLongKey(key));
+        return get(_space.graph().resolver().stringToLongKey(key, false));
     }
 
     @Override
@@ -467,7 +467,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public byte getTypeFromKey(String key) {
-        return getType(_space.graph().resolver().stringToLongKey(key));
+        return getType(_space.graph().resolver().stringToLongKey(key, false));
     }
 
     @Override
@@ -493,7 +493,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public Object getOrCreateFromKey(String key, byte elemType) {
-        return getOrCreate(_space.graph().resolver().stringToLongKey(key), elemType);
+        return getOrCreate(_space.graph().resolver().stringToLongKey(key, true), elemType);
     }
 
     @Override
@@ -501,7 +501,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         final InternalState currentState = this.state;
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {
-                callBack.on(resolver.longKeyToString(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
+                callBack.on(resolver.hashToString(currentState._elementK[i]), currentState._elementType[i], currentState._elementV[i]);
             }
         }
     }

@@ -243,7 +243,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             consistencyCheck();
             for (int i = 0; i < OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT); i++) {
                 if (OffHeapLongArray.get(elementType_ptr, i) != CoreConstants.OFFHEAP_NULL_PTR) {
-                    callBack.on(resolver.longKeyToString(OffHeapLongArray.get(elementK_ptr, i)),
+                    callBack.on(resolver.hashToString(OffHeapLongArray.get(elementK_ptr, i)),
                             (int) OffHeapLongArray.get(elementType_ptr, i),
                             internal_getElementV(i) /*OffHeapLongArray.get(elementV_ptr, i)*/);
                 }
@@ -850,7 +850,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public void setFromKey(String key, byte elemType, Object elem) {
-        set(_space.graph().resolver().stringToLongKey(key), elemType, elem);
+        set(_space.graph().resolver().stringToLongKey(key, true), elemType, elem);
     }
 
     private void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
@@ -1153,7 +1153,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public Object getFromKey(String key) {
-        return get(_space.graph().resolver().stringToLongKey(key));
+        return get(_space.graph().resolver().stringToLongKey(key, false));
     }
 
     @Override
@@ -1265,7 +1265,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public Object getOrCreateFromKey(String key, byte elemType) {
-        return getOrCreate(_space.graph().resolver().stringToLongKey(key), elemType);
+        return getOrCreate(_space.graph().resolver().stringToLongKey(key, true), elemType);
     }
 
     @Override
@@ -1288,7 +1288,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public byte getTypeFromKey(String key) {
-        return getType(_space.graph().resolver().stringToLongKey(key));
+        return getType(_space.graph().resolver().stringToLongKey(key, false));
     }
 
     private static long incrementCopyOnWriteCounter(long root_addr) {

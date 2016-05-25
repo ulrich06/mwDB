@@ -1,6 +1,7 @@
 package org.mwg.core.utility;
 
 public class DataHasher {
+
     private static final long[] byteTable = createLookupTable();
     private static final long HSTART = 0xBB40E64DA205B064L;
     private static final long HMULT = 7664345821815920749L;
@@ -28,4 +29,5 @@ public class DataHasher {
         }
         return byteTable;
     }
+
 }

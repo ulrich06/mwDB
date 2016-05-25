@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.Constants;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.DataHasher;
 import org.mwg.plugin.Chunk;
 import org.mwg.struct.StringLongMap;
 import org.mwg.struct.StringLongMapCallBack;
@@ -86,9 +87,9 @@ public class StringLongMapTest implements ChunkListener {
         Assert.assertTrue(2 == map.getValue("Hello1"));
 
         map.put("DictionaryUsage", Constants.NULL_LONG);
-        Assert.assertTrue(2 == map.getValue("DictionaryUsage"));
+        Assert.assertTrue(Constants.NULL_LONG == map.getValue("DictionaryUsage"));
 
-        Assert.assertTrue(PrimitiveHelper.equals("Hello", map.getKey(0)));
+        Assert.assertTrue(PrimitiveHelper.equals("Hello", map.getByHash(DataHasher.hash("Hello".getBytes()))));
 
         Assert.assertTrue(dirtyCount == 5);
 
@@ -105,7 +106,7 @@ public class StringLongMapTest implements ChunkListener {
         });
         Assert.assertTrue(1 == values[0]);
         Assert.assertTrue(2 == values[1]);
-        Assert.assertTrue(2 == values[2]);
+        Assert.assertTrue(Constants.NULL_LONG == values[2]);
         Assert.assertTrue(PrimitiveHelper.equals("Hello", keys[0]));
         Assert.assertTrue(PrimitiveHelper.equals("Hello1", keys[1]));
         Assert.assertTrue(PrimitiveHelper.equals("DictionaryUsage", keys[2]));

@@ -16,23 +16,6 @@ public class PrimitiveHelperTest {
     public static final int MAX_INT = 2147483647;
 
     /* MAX TESTS */
-    @Test
-    public void intHash_0Test() {
-        try {
-            PrimitiveHelper.intHash(1, 0);
-            Assert.fail("This should have thrown an exception");
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void intHash_1Test() {
-        try {
-            PrimitiveHelper.intHash(1, MIN_INT);
-            Assert.fail("This should have thrown an exception");
-        } catch (Exception e) {
-        }
-    }
 
     @Test
     public void longHash_0Test() {
@@ -72,39 +55,6 @@ public class PrimitiveHelperTest {
 
 
     /* HASH TESTS */
-
-    @Test
-    public void intHash_3Test() {
-        int hash = PrimitiveHelper.intHash(MAX_INT, MAX_INT);
-        //System.out.println("intHash_3Test: " + hash);
-        Assert.assertTrue(hash < MAX_INT);
-        Assert.assertTrue(hash == 1963394006);
-    }
-
-    @Test
-    public void intHash_4Test() {
-        int hash = PrimitiveHelper.intHash(MAX_INT, 10000);
-        //System.out.println("intHash_4Test: " + hash);
-        Assert.assertTrue(hash < 10000);
-        Assert.assertTrue(hash == 4006);
-    }
-
-    @Test
-    public void intHash_5Test() {
-        int hash = PrimitiveHelper.intHash(-156487, 50);
-        //System.out.println("intHash_6Test: " + hash);
-        Assert.assertTrue(hash < 50);
-        Assert.assertTrue(hash == 8);
-    }
-
-    @Test
-    public void intHash_6Test() {
-        int hash = PrimitiveHelper.intHash(0, MAX_INT);
-        //System.out.println("zeroMaxIntHash: " + hash);
-        Assert.assertTrue(hash < MAX_INT);
-        Assert.assertTrue(hash == 441401069);
-
-    }
 
 
     @Test
@@ -186,28 +136,6 @@ public class PrimitiveHelperTest {
         //System.out.println("tripleHash_8Test: " + hash);
         Assert.assertTrue(hash < 5000);
         Assert.assertTrue(hash == 1380);
-    }
-
-
-    @Test
-    public void stringHash_1Test() {
-        long hash = PrimitiveHelper.stringHash("");
-        //System.out.println("stringHash_1Test: " + hash);
-        Assert.assertTrue(hash == 0);
-    }
-
-    @Test
-    public void stringHash_2Test() {
-        long hash = PrimitiveHelper.stringHash("bqsdkjhbb231651qdvKLBCEU234567890");
-        //System.out.println("stringHash_2Test: " + hash);
-        Assert.assertTrue(hash == 1670031106);
-    }
-
-    @Test
-    public void stringHash_3Test() {
-        long hash = PrimitiveHelper.stringHash("+/.?SQBIYZA DIZHDZ97H7é&rbubSAi \"E");
-        //System.out.println("stringHash_3Test: " + hash);
-        Assert.assertTrue(hash == 2128192626);
     }
 
     /*

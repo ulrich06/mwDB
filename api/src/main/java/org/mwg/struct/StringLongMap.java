@@ -3,8 +3,10 @@ package org.mwg.struct;
 public interface StringLongMap extends Map {
 
     long getValue(String key);
-    
-    String getKey(long index);
+
+    String getByHash(long index);
+
+    boolean containsHash(long index);
 
     /**
      * Add the tuple key/value to the map.

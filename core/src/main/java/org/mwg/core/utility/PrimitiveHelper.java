@@ -39,65 +39,7 @@ public class PrimitiveHelper {
      */
     private static final long PRIME5 = 0x165667b1;
 
-    /**
-     * @native ts
-     * public static STRING_PRIME : Long = Long.fromNumber(1125899906842597, false);
-     */
-    private static final long STRING_PRIME = 1125899906842597L;
-
-
     private static final int len = 24;
-
-
-    /**
-     * @native ts
-     * if (max <= 0) {
-     * throw new Error("Max must be > 0");
-     * }
-     * var crc = org.mwg.core.utility.PrimitiveHelper.PRIME5;
-     * crc = crc.add(number);
-     * crc = crc.add(crc.shiftLeft(17));
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
-     * crc = crc.add(number);
-     * crc = crc.add(crc.shiftLeft(17));
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1);
-     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.len);
-     * crc = crc.xor(crc.shiftRightUnsigned(15));
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
-     * crc = crc.add(number);
-     * crc = crc.xor(crc.shiftRightUnsigned(13));
-     * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
-     * crc = crc.xor(crc.shiftRightUnsigned(16));
-     * return (crc.getLowBits() & 0x7FFFFFFF) % max;
-     */
-    public static int intHash(int number, int max) {
-        if (max <= 0) {
-            throw new IllegalArgumentException("Max must be > 0");
-        }
-
-        long crc = PRIME5;
-        crc += number;
-        crc += crc << 17;
-        crc *= PRIME4;
-        crc *= PRIME1;
-        crc += number;
-        crc += crc << 17;
-        crc *= PRIME4;
-        crc *= PRIME1;
-        crc += len;
-        crc ^= crc >>> 15;
-        crc *= PRIME2;
-        crc += number;
-        crc ^= crc >>> 13;
-        crc *= PRIME3;
-        crc ^= crc >>> 16;
-        crc = crc & 0x7FFFFFFF; //convert positive
-        crc = crc % max;        // return between 0 and max
-
-        return (int) crc;
-    }
 
     /**
      * @native ts
@@ -311,20 +253,6 @@ public class PrimitiveHelper {
 
     /**
      * @native ts
-     * var hash = 0;
-     * for (var i = 0; i < target.length; i++) {
-     * var charC = target.charCodeAt(i);
-     * hash = ((hash<<5)-hash)+charC;
-     * hash = hash & hash;
-     * }
-     * return hash;
-     */
-    public static long stringHash(String target) {
-        return target.hashCode();
-    }
-
-    /**
-     * @native ts
      * return param != undefined && param != null;
      */
     public static boolean isDefined(Object param) {
@@ -406,7 +334,6 @@ public class PrimitiveHelper {
             return false;
         }
     }
-
 
 
 }
