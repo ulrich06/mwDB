@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * boing,boing,boing....
  */
 
+/** @ignore ts
+ */
 public class TrampolineScheduler implements Scheduler {
 
 
