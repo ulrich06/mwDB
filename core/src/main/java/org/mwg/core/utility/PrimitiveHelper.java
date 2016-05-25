@@ -107,37 +107,30 @@ public class PrimitiveHelper {
      * var v2 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2).add(org.mwg.core.utility.PrimitiveHelper.len);
      * var v3 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
      * var v4 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME4);
-     * <p>
      * v1 = v1.shiftLeft(13).or(v1.shiftRightUnsigned(51)).add(Long.fromNumber(p1, false));
      * v2 = v2.shiftLeft(11).or(v2.shiftRightUnsigned(53)).add(Long.fromNumber(p2, false));
      * v3 = v3.shiftLeft(17).or(v3.shiftRightUnsigned(47)).add(Long.fromNumber(p3, false));
      * v4 = v4.shiftLeft(19).or(v4.shiftRightUnsigned(45)).add(Long.fromNumber(p0, false));
-     * <p>
      * v1 = v1.add(v1.shiftLeft(17).or(v1.shiftRightUnsigned(47)));
      * v2 = v2.add(v2.shiftLeft(19).or(v2.shiftRightUnsigned(45)));
      * v3 = v3.add(v3.shiftLeft(13).or(v3.shiftRightUnsigned(51)));
      * v4 = v4.add(v4.shiftLeft(11).or(v4.shiftRightUnsigned(53)));
-     * <p>
      * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p1, false));
      * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p2, false));
      * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(Long.fromNumber(p3, false));
      * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME1).add(org.mwg.core.utility.PrimitiveHelper.PRIME5);
-     * <p>
      * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
      * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
      * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
      * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
-     * <p>
      * v1 = v1.add(v1.shiftLeft(11).or(v1.shiftRightUnsigned(53)));
      * v2 = v2.add(v2.shiftLeft(17).or(v2.shiftRightUnsigned(47)));
      * v3 = v3.add(v3.shiftLeft(19).or(v3.shiftRightUnsigned(45)));
      * v4 = v4.add(v4.shiftLeft(13).or(v4.shiftRightUnsigned(51)));
-     * <p>
      * v1 = v1.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
      * v2 = v2.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
      * v3 = v3.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
      * v4 = v4.mul(org.mwg.core.utility.PrimitiveHelper.PRIME3);
-     * <p>
      * var crc = v1;
      * crc = crc.add(v2.shiftLeft(3).or(v2.shiftRightUnsigned(61)));
      * crc = crc.add(v3.shiftLeft(6).or(v3.shiftRightUnsigned(58)));
@@ -147,7 +140,6 @@ public class PrimitiveHelper {
      * crc = crc.xor(crc.shiftRightUnsigned(15));
      * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
      * crc = crc.xor(crc.shiftRightUnsigned(13));
-     * <p>
      * crc = (crc.isNegative()?crc.mul(-1):crc);
      * crc = crc.mod(max);
      * return crc.toNumber();
