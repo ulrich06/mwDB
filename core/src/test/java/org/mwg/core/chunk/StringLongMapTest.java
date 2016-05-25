@@ -89,7 +89,7 @@ public class StringLongMapTest implements ChunkListener {
         map.put("DictionaryUsage", Constants.NULL_LONG);
         Assert.assertTrue(Constants.NULL_LONG == map.getValue("DictionaryUsage"));
 
-        Assert.assertTrue(PrimitiveHelper.equals("Hello", map.getByHash(DataHasher.hash("Hello".getBytes()))));
+        Assert.assertTrue(PrimitiveHelper.equals("Hello", map.getByHash(DataHasher.hash("Hello"))));
 
         Assert.assertTrue(dirtyCount == 5);
 

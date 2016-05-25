@@ -78,7 +78,7 @@ public class ArrayStringLongMap implements StringLongMap {
         if (internalState._stateSize == 0) {
             return CoreConstants.NULL_LONG;
         }
-        final long keyHash = DataHasher.hash(key.getBytes());
+        final long keyHash = DataHasher.hash(key);
         long hashIndex = PrimitiveHelper.longHash(keyHash, internalState._stateSize);
         int m = internalState._elementHash[(int) hashIndex];
         while (m >= 0) {
@@ -152,7 +152,7 @@ public class ArrayStringLongMap implements StringLongMap {
             state = state.clone();
             aligned = true;
         }
-        final long keyHash = DataHasher.hash(key.getBytes());
+        final long keyHash = DataHasher.hash(key);
         int entry = -1;
         long hashIndex = -1;
         InternalState internalState = state;

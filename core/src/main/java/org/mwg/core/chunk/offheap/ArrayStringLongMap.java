@@ -98,7 +98,7 @@ public class ArrayStringLongMap implements StringLongMap {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
         consistencyCheck();
 
-        final long hashedKey = DataHasher.hash(key.getBytes());
+        final long hashedKey = DataHasher.hash(key);
         final long hashIndex = PrimitiveHelper.longHash(hashedKey, OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         long result = CoreConstants.NULL_LONG;
@@ -260,7 +260,7 @@ public class ArrayStringLongMap implements StringLongMap {
         }
 
         //compute the hash of the key
-        long hashedKey = DataHasher.hash(key.getBytes());
+        long hashedKey = DataHasher.hash(key);
 
         long entry = -1;
         long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);

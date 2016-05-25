@@ -6,6 +6,18 @@ public class DataHasher {
     private static final long HSTART = 0xBB40E64DA205B064L;
     private static final long HMULT = 7664345821815920749L;
 
+    public static long hash(String data) {
+        long h = HSTART;
+        final long hmult = HMULT;
+        final long[] ht = byteTable;
+        int dataLength = data.length();
+        for (int i = 0; i < dataLength; i++) {
+            h = (h * hmult) ^ ht[data.codePointAt(i) & 0xff];
+        }
+        return h;
+    }
+
+    /*
     public static long hash(byte[] data) {
         long h = HSTART;
         final long hmult = HMULT;
@@ -14,7 +26,7 @@ public class DataHasher {
             h = (h * hmult) ^ ht[data[i] & 0xff];
         }
         return h;
-    }
+    }*/
 
     private static final long[] createLookupTable() {
         long[] byteTable = new long[256];
