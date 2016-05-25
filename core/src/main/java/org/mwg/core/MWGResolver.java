@@ -46,6 +46,8 @@ class MWGResolver implements Resolver {
         this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id());
         this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], node.id());
         WorldOrderChunk worldOrderChunk = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id());
+        //mark global world order chunk
+        this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         return worldOrderChunk.extra();
     }
 

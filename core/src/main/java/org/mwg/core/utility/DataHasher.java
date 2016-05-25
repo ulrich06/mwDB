@@ -42,8 +42,4 @@ public class DataHasher {
         return byteTable;
     }
 
-    public static void main(String[] args) {
-
-    }
-
 }
