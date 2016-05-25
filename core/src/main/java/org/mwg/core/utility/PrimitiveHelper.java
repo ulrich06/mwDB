@@ -39,6 +39,13 @@ public class PrimitiveHelper {
      */
     private static final long PRIME5 = 0x165667b1;
 
+    /**
+     * @native ts
+     * public static STRING_PRIME : Long = Long.fromNumber(1125899906842597, false);
+     */
+    private static final long STRING_PRIME = 1125899906842597L;
+
+
     private static final int len = 24;
 
 
@@ -194,7 +201,7 @@ public class PrimitiveHelper {
      * crc = crc.add(v3.shiftLeft(6).or(v3.shiftRightUnsigned(58)));
      * crc = crc.add(v4.shiftLeft(9).or(v4.shiftRightUnsigned(55)));
      * crc = crc.xor(crc.shiftRightUnsigned(11));
-     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.PRIME3.add(org.mwg.core.utility.PrimitiveHelper.len).mul(org.mwg.core.utility.PrimitiveHelper.PRIME1));
+     * crc = crc.add(org.mwg.core.utility.PrimitiveHelper.PRIME4.add(org.mwg.core.utility.PrimitiveHelper.len).mul(org.mwg.core.utility.PrimitiveHelper.PRIME1));
      * crc = crc.xor(crc.shiftRightUnsigned(15));
      * crc = crc.mul(org.mwg.core.utility.PrimitiveHelper.PRIME2);
      * crc = crc.xor(crc.shiftRightUnsigned(13));
@@ -257,9 +264,14 @@ public class PrimitiveHelper {
         crc *= PRIME2;
         crc ^= crc >>> 13;
 
+        /*
         //To check later if we can replace by somthing better
         crc = crc & 0x7FFFFFFFFFFFFFFFL; //convert positive
         crc = crc % max;           // return between 0 and max
+        */
+
+        crc = (crc < 0 ? crc * -1 : crc); // positive
+        crc = crc % max;
 
         return crc;
     }
@@ -299,16 +311,15 @@ public class PrimitiveHelper {
 
     /**
      * @native ts
-     * var hash = Long.ZERO;
-     * if (target.length == 0) return hash.toNumber();
+     * var hash = 0;
      * for (var i = 0; i < target.length; i++) {
      * var charC = target.charCodeAt(i);
-     * hash = hash.mul(32).sub(hash).add(Long.fromValue(charC));
-     * hash = hash.and(hash); // Convert to 32bit integer
+     * hash = ((hash<<5)-hash)+charC;
+     * hash = hash & hash;
      * }
-     * return hash.toNumber();
+     * return hash;
      */
-    public static int stringHash(String target) {
+    public static long stringHash(String target) {
         return target.hashCode();
     }
 

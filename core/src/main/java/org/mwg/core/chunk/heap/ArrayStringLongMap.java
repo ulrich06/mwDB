@@ -79,8 +79,8 @@ public class ArrayStringLongMap implements StringLongMap {
         if (internalState._stateSize == 0) {
             return CoreConstants.NULL_LONG;
         }
-        int hashIndex = PrimitiveHelper.intHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
-        int m = internalState._elementHash[hashIndex];
+        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
+        int m = internalState._elementHash[(int)hashIndex];
         while (m >= 0) {
             if (PrimitiveHelper.equals(key, internalState._elementK[m])) {
                 return internalState._elementV[m];
@@ -132,11 +132,11 @@ public class ArrayStringLongMap implements StringLongMap {
             aligned = true;
         }
         int entry = -1;
-        int hashIndex = -1;
+        long hashIndex = -1;
         InternalState internalState = state;
         if (internalState._stateSize > 0) {
-            hashIndex = PrimitiveHelper.intHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
-            int m = internalState._elementHash[hashIndex];
+            hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
+            int m = internalState._elementHash[(int)hashIndex];
             while (m >= 0) {
                 if (PrimitiveHelper.equals(key, internalState._elementK[m])) {
                     entry = m;
@@ -163,18 +163,18 @@ public class ArrayStringLongMap implements StringLongMap {
                 //rehashEveryThing
                 for (int i = 0; i < internalState._elementCount; i++) {
                     if (internalState._elementK[i] != null) { //there is a real value
-                        int newHashIndex = PrimitiveHelper.intHash(PrimitiveHelper.stringHash(internalState._elementK[i]), newCapacity);
-                        int currentHashedIndex = newElementHash[newHashIndex];
+                        long newHashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(internalState._elementK[i]), newCapacity);
+                        int currentHashedIndex = newElementHash[(int)newHashIndex];
                         if (currentHashedIndex != -1) {
                             newElementNext[i] = currentHashedIndex;
                         }
-                        newElementHash[newHashIndex] = i;
+                        newElementHash[(int)newHashIndex] = i;
                     }
                 }
                 //setPrimitiveType value for all
                 internalState = new InternalState(newCapacity, newElementK, newElementV, newElementNext, newElementHash, internalState._elementCount);
                 state = internalState;
-                hashIndex = PrimitiveHelper.intHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
+                hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), internalState._stateSize);
             }
             int newIndex = internalState._elementCount;
             internalState._elementK[newIndex] = key;
@@ -184,12 +184,12 @@ public class ArrayStringLongMap implements StringLongMap {
                 internalState._elementV[newIndex] = value;
             }
 
-            int currentHashedElemIndex = internalState._elementHash[hashIndex];
+            int currentHashedElemIndex = internalState._elementHash[(int)hashIndex];
             if (currentHashedElemIndex != -1) {
                 internalState._elementNext[newIndex] = currentHashedElemIndex;
             }
             //now the object is reachable to other thread everything should be ready
-            internalState._elementHash[hashIndex] = newIndex;
+            internalState._elementHash[(int)hashIndex] = newIndex;
             internalState._elementCount = internalState._elementCount + 1;
             _listener.declareDirty(null);
         } else {
