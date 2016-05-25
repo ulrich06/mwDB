@@ -279,7 +279,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
                 int last = -1;
                 while (m >= 0) {
                     Chunk currentM = this._values[m];
-                    if (currentM != null && victimWorld == currentM.world() && victimTime == currentM.time() && victimObj == currentM.id()) {
+                    if (currentM != null && victimType == currentM.chunkType() && victimWorld == currentM.world() && victimTime == currentM.time() && victimObj == currentM.id()) {
                         break;
                     }
                     last = m;
@@ -290,7 +290,11 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
                     int previousNext = _elementNext[m];
                     _elementHash[indexVictim] = previousNext;
                 } else {
-                    _elementNext[last] = _elementNext[m];
+                    if (m == -1) {
+                        _elementNext[last] = -1;
+                    } else {
+                        _elementNext[last] = _elementNext[m];
+                    }
                 }
                 _elementNext[m] = -1;//flag to dropped value
                 //UNREF victim value object
