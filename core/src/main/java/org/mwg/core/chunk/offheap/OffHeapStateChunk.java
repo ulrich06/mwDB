@@ -237,7 +237,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     }
 
     @Override
-    public final void each(StateChunkCallback2 callBack, Resolver resolver) {
+    public final void each(StateChunkCallback callBack, Resolver resolver) {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ;
         try {
             consistencyCheck();
