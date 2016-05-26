@@ -3,7 +3,7 @@ package org.mwg.core;
 import org.mwg.*;
 import org.mwg.Graph;
 import org.mwg.core.chunk.StateChunk;
-import org.mwg.core.chunk.StateChunkCallback;
+import org.mwg.core.chunk.StateChunkCallback2;
 import org.mwg.plugin.AbstractNode;
 
 class CoreNode extends AbstractNode {
@@ -25,7 +25,7 @@ class CoreNode extends AbstractNode {
         if (state != null) {
             builder.append(",\"data\": {");
             final boolean[] isFirst = {true};
-            state.each(new StateChunkCallback() {
+            state.each(new StateChunkCallback2() {
                 @Override
                 public void on(String attributeName, int elemType, Object elem) {
                     if (elem != null) {
