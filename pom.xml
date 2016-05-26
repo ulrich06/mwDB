@@ -90,10 +90,7 @@
     <modules>
         <module>api</module>
         <module>core</module>
-
-        <!--
-        <module>js</module>
-        -->
+        <module>corejs</module>
 
         <!-- Plugins -->
         <module>plugins/importer</module>
