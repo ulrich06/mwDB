@@ -14,9 +14,8 @@ public class Base64Test {
 
     @Test
     public void typeEncoding() {
-        testLong(6164069494951896018L);
+        testLong(DataHasher.hash("GaussianGmm"));
     }
-
 
     @Test
     public void endOfTimeEncodingTest() {
