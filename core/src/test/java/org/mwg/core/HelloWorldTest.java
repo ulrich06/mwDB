@@ -111,6 +111,7 @@ public class HelloWorldTest {
                     }
                 });
 
+
                 node1.remove("children", node0);
                 Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
 

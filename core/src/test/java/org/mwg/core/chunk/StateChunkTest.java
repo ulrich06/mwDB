@@ -227,14 +227,13 @@ public class StateChunkTest implements ChunkListener {
         free(chunk);
 
 
-
         //test previously saved
-
+/*
         Buffer toLoad = BufferBuilder.newHeapBuffer();
         toLoad.writeAll("I|El+/hmxUe,O,A".getBytes()); //test empty collection
         StateChunk chunk4 = factory.create(this, toLoad, null);
         free(chunk4);
-
+*/
     }
 
     /**

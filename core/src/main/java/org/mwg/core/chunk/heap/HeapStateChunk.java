@@ -494,7 +494,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     }
 
     @Override
-    public final void each(StateChunkCallBack callBack, Resolver resolver) {
+    public final void each(StateChunkCallback callBack, Resolver resolver) {
         final InternalState currentState = this.state;
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {

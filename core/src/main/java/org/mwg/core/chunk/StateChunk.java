@@ -6,6 +6,6 @@ import org.mwg.plugin.Resolver;
 
 public interface StateChunk extends Chunk, NodeState {
 
-    void each(StateChunkCallBack callBack, Resolver resolver);
+    void each(StateChunkCallback callBack, Resolver resolver);
 
 }
