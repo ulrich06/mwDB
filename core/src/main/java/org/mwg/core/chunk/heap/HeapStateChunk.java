@@ -548,7 +548,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         String currentMapStringKey = null;
 
         while (cursor < payloadSize) {
-            if (payload.read(cursor) == CoreConstants.CHUNK_SEP) {
+            byte current = payload.read(cursor);
+            if (current == CoreConstants.CHUNK_SEP) {
                 if (isFirstElem) {
                     //initial the map
                     isFirstElem = false;
@@ -657,7 +658,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     currentMapLongKey = CoreConstants.NULL_LONG;
                     currentMapStringKey = null;
                 }
-            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
+            } else if (current == CoreConstants.CHUNK_SUB_SEP) { //SEPARATION BETWEEN KEY,TYPE,VALUE
                 if (currentChunkElemKey == CoreConstants.NULL_LONG) {
                     currentChunkElemKey = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
@@ -665,7 +666,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     currentChunkElemType = (byte) Base64.decodeToIntWithBounds(payload, previousStart, cursor);
                     previousStart = cursor + 1;
                 }
-            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
+            } else if (current == CoreConstants.CHUNK_SUB_SUB_SEP) { //SEPARATION BETWEEN ARRAY VALUES AND MAP KEY/VALUE TUPLES
                 if (currentSubSize == -1) {
                     currentSubSize = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                     //init array or maps
@@ -728,7 +729,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     }
                 }
                 previousStart = cursor + 1;
-            } else if (payload.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SUB_SEP) {
+            } else if (current == CoreConstants.CHUNK_SUB_SUB_SUB_SEP) {
                 switch (currentChunkElemType) {
                     case Type.STRING_LONG_MAP:
                         if (currentMapStringKey == null) {
@@ -789,15 +790,27 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     break;
                 /** Arrays */
                 case Type.DOUBLE_ARRAY:
-                    currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    if (currentDoubleArr == null) {
+                        currentDoubleArr = new double[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                    } else {
+                        currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                    }
                     toInsert = currentDoubleArr;
                     break;
                 case Type.LONG_ARRAY:
-                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    if (currentLongArr == null) {
+                        currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                    } else {
+                        currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    }
                     toInsert = currentLongArr;
                     break;
                 case Type.INT_ARRAY:
-                    currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    if(currentIntArr == null){
+                        currentIntArr = new int[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                    } else {
+                        currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                    }
                     toInsert = currentIntArr;
                     break;
                 /** Maps */
@@ -836,8 +849,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
             }
         }
         //set the state
-        InternalState newState = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement, false);
-        this.state = newState;
+        this.state = new InternalState(newStateCapacity, newElementK, newElementV, newElementNext, newElementHash, newElementType, newNumberElement, false);
+        ;
         this.inLoadMode = false;
     }
 

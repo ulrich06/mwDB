@@ -38,6 +38,7 @@ public class StateChunkTest implements ChunkListener {
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
+
     }
 
 
@@ -97,7 +98,7 @@ public class StateChunkTest implements ChunkListener {
 
         byte[] data = buffer.data();
         //C|A,I,D
-        byte[] expected = new byte[]{(byte)"C".codePointAt(0),(byte)"|".codePointAt(0),(byte)"A".codePointAt(0),(byte)",".codePointAt(0),(byte)"I".codePointAt(0),(byte)",".codePointAt(0),(byte)"D".codePointAt(0)};
+        byte[] expected = new byte[]{(byte) "C".codePointAt(0), (byte) "|".codePointAt(0), (byte) "A".codePointAt(0), (byte) ",".codePointAt(0), (byte) "I".codePointAt(0), (byte) ",".codePointAt(0), (byte) "D".codePointAt(0)};
         Assert.assertEquals(expected.length, data.length);
         for (int i = 0; i < data.length; i++) {
             Assert.assertEquals(expected[i], data[i]);
@@ -118,6 +119,8 @@ public class StateChunkTest implements ChunkListener {
     }
 
     private void saveLoadTest(StateChunkFactory factory) {
+
+
         //reset nb count
         nbCount = 0;
 
@@ -142,12 +145,6 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         for (int i = 0; i < 5; i++) {
-            /*
-            if (i == 1) {
-                Assert.assertTrue(PrimitiveHelper.equals(chunk.get(i).toString(), chunk2.get(i).toString()));
-            } else {
-                Assert.assertTrue(chunk.get(i).equals(chunk2.get(i)));
-            }*/
             Assert.assertEquals(chunk.get(0), chunk2.get(0));
         }
 
@@ -228,6 +225,15 @@ public class StateChunkTest implements ChunkListener {
         free(chunk3);
         free(chunk2);
         free(chunk);
+
+
+
+        //test previously saved
+
+        Buffer toLoad = BufferBuilder.newHeapBuffer();
+        toLoad.writeAll("I|El+/hmxUe,O,A".getBytes()); //test empty collection
+        StateChunk chunk4 = factory.create(this, toLoad, null);
+        free(chunk4);
 
     }
 
