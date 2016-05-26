@@ -13,6 +13,12 @@ public class Base64Test {
     }
 
     @Test
+    public void typeEncoding() {
+        testLong(DataHasher.hash("GaussianGmm"));
+    }
+
+
+    @Test
     public void endOfTimeEncodingTest() {
         testLong(Constants.END_OF_TIME);
     }
