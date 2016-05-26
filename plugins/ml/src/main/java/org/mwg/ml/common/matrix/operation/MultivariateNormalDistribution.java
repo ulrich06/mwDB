@@ -17,19 +17,22 @@ public class MultivariateNormalDistribution {
 
     public MultivariateNormalDistribution(double[] means, Matrix cov) {
         this.means = means;
-        this.covariance =cov;
-        pinvsvd = new PInvSVD();
-        pinvsvd.factor(covariance,false);
-        inv=pinvsvd.getPInv();
-        det=pinvsvd.getDeterminant(); //todo test if we need to do 1/det
-        rank=pinvsvd.getRank();
+        if (cov != null) {
+            this.covariance = cov;
+            pinvsvd = new PInvSVD();
+            pinvsvd.factor(covariance, false);
+            inv = pinvsvd.getPInv();
+            det = pinvsvd.getDeterminant(); //todo test if we need to do 1/det
+            rank = pinvsvd.getRank();
+        }
     }
 
-    public void setMin(double[] min){
-        this.min=min;
+    public void setMin(double[] min) {
+        this.min = min;
     }
-    public void setMax(double[] max){
-        this.max=max;
+
+    public void setMax(double[] max) {
+        this.max = max;
     }
 
 
@@ -73,7 +76,7 @@ public class MultivariateNormalDistribution {
         }
 
         int features = sum.length;
-        double[] avg= new double[features];
+        double[] avg = new double[features];
 
         for (int i = 0; i < features; i++) {
             avg[i] = sum[i] / total;
@@ -92,41 +95,46 @@ public class MultivariateNormalDistribution {
                 count++;
             }
         }
-        Matrix cov= new Matrix(covariances, features, features);
-        return new MultivariateNormalDistribution(avg,cov);
+        Matrix cov = new Matrix(covariances, features, features);
+        return new MultivariateNormalDistribution(avg, cov);
     }
 
 
-
-
-
     public double density(double[] features, boolean normalizeOnAvg) {
-        if(normalizeOnAvg){
+        if (normalizeOnAvg) {
             return getExponentTerm(features);
-        }
-        else{
+        } else {
             return Math.pow(2 * Math.PI, -0.5 * rank) *
                     Math.pow(det, -0.5) * getExponentTerm(features);
         }
     }
 
     private double getExponentTerm(double[] features) {
-        double[] f= features.clone();
+        double[] f = features.clone();
 
-        for(int i=0;i<features.length;i++){
-          f[i]=f[i]- means[i];
+        for (int i = 0; i < features.length; i++) {
+            f[i] = f[i] - means[i];
         }
 
-        Matrix ft = new Matrix(f,1,f.length);
-        Matrix ftt = new Matrix(f,f.length,1);
+        Matrix ft = new Matrix(f, 1, f.length);
+        Matrix ftt = new Matrix(f, f.length, 1);
 
 
+        Matrix res = Matrix.multiply(ft, inv);
+        Matrix res2 = Matrix.multiply(res, ftt);
 
-        Matrix res= Matrix.multiply(ft,inv);
-        Matrix res2= Matrix.multiply(res,ftt);
-
-        double d=Math.exp(-0.5 *res2.get(0,0));
+        double d = Math.exp(-0.5 * res2.get(0, 0));
 
         return d;
+    }
+
+    public MultivariateNormalDistribution clone(double[] avg) {
+        MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null);
+        res.pinvsvd = this.pinvsvd;
+        res.inv = this.inv;
+        res.det = this.det; //todo test if we need to do 1/det
+        res.rank = this.rank;
+
+        return res;
     }
 }

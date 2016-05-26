@@ -112,7 +112,7 @@ public class GaussianNodeTest {
                     @Override
                     public void on(GaussianGmmNode result) {
                         double[] a = result.getAvg();
-                        double[][] c = result.getCovariance(a);
+                        double[][] c = result.getCovariance(a,null);
                         if (c != null) {
                             for (int i = 0; i < a.length; i++) {
                                 avgLive[i] = a[i];

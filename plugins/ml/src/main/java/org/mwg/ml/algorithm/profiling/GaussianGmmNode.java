@@ -121,7 +121,17 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         } else if (attributeName.equals(MAX)) {
             return getMax();
         } else if (attributeName.equals(COV)) {
-            return getCovariance(getAvg());
+            NodeState resolved = this._resolver.resolveState(this, true);
+
+            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+            int nbfeature= this.getNumberOfFeatures();
+            if (initialPrecision == null) {
+                initialPrecision = new double[nbfeature];
+                for (int i = 0; i < nbfeature; i++) {
+                    initialPrecision[i] = 1;
+                }
+            }
+            return getCovariance(getAvg(),initialPrecision);
         } else {
             return super.get(attributeName);
         }
@@ -166,24 +176,6 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(context -> {
             Node[] result = (Node[]) context.getPreviousResult();
             GaussianGmmNode parent = (GaussianGmmNode) context.getVariable("starterNode");
-
-            if(result.length!=0&&result[0]==null) {
-                long [] ids = (long [])parent.get(INTERNAL_SUBGAUSSIAN_KEY);
-
-                graph().lookup(this.world(), this.time(), this.id(), new Callback<Node>() {
-                    @Override
-                    public void on(Node result) {
-                        System.out.println(result);
-                    }
-                });
-
-                graph().lookup(0, Constants.END_OF_TIME, ids[2], new Callback<Node>() {
-                    @Override
-                    public void on(Node result) {
-                        System.out.println(result);
-                    }
-                });
-            }
             GaussianGmmNode resultChild = filter(result, values, precisions, threshold);
             if (resultChild != null) {
                 parent.internallearn(values, width, compressionFactor, compressionIter, precisions, false);
@@ -439,6 +431,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             for (int i = 0; i < nbfeature; i++) {
                 covBackup.set(i, i, err[i]);
             }
+            MultivariateNormalDistribution mvnBackup=new MultivariateNormalDistribution(null,covBackup);
 
             int[] totals = new int[leaves.length];
             int globalTotal = 0;
@@ -450,11 +443,11 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 globalTotal += totals[i];
                 double[] avg = temp.getAvg();
                 if (totals[i] > 2) {
-                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg));
+                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg,err));
                     distributions[i].setMin(temp.getMin());
                     distributions[i].setMax(temp.getMax());
                 } else {
-                    distributions[i] = new MultivariateNormalDistribution(avg, covBackup); //this can be optimized later by inverting covBackup only once
+                    distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                 }
             }
             callback.on(new ProbaDistribution(totals, distributions, globalTotal));
@@ -669,9 +662,12 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     }
 
-    public double[][] getCovariance(double[] avg) {
+    public double[][] getCovariance(double[] avg, double[] err) {
         if (avg == null) {
             return null;
+        }
+        if(err==null){
+            err=new double[avg.length];
         }
         int features = avg.length;
 
@@ -691,6 +687,9 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 for (int j = i; j < features; j++) {
                     covariances[i][j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
                     covariances[j][i] = covariances[i][j];
+                    if(covariances[i][i]<err[i]){
+                        covariances[i][i]=err[i];
+                    }
                     count++;
                 }
             }
@@ -700,12 +699,15 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
     }
 
-    public Matrix getCovarianceMatrix(double[] avg) {
+    public Matrix getCovarianceMatrix(double[] avg,double[] err) {
         int features = avg.length;
 
         int total = getTotal();
         if (total == 0) {
             return null;
+        }
+        if(err==null){
+            err=new double[avg.length];
         }
         if (total > 1) {
             double[] covariances = new double[features * features];
@@ -720,6 +722,9 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     covariances[i * features + j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
                     covariances[j * features + i] = covariances[i * features + j];
                     count++;
+                    if(covariances[i*features+i]<err[i]){
+                        covariances[i*features+i]=err[i];
+                    }
                 }
             }
             return new Matrix(covariances, features, features);

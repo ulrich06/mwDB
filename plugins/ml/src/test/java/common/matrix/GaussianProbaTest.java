@@ -62,7 +62,7 @@ public class GaussianProbaTest {
                     @Override
                     public void on(GaussianGmmNode result) {
                         double[] avgBatch = result.getAvg();
-                        double[][] covBatch = result.getCovariance(avgBatch);
+                        double[][] covBatch = result.getCovariance(avgBatch,null);
 
                         //System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
                         //System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
@@ -117,7 +117,7 @@ public class GaussianProbaTest {
                 }
 
                 double[] ravg = gaussianNodeLive.getAvg();
-                double[][] rcovData = gaussianNodeLive.getCovariance(ravg);
+                double[][] rcovData = gaussianNodeLive.getCovariance(ravg,null);
 
 
                 //Test probability calculation.
