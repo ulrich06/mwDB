@@ -107,7 +107,7 @@ class CoreGraph implements org.mwg.Graph {
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
 
-        long extraCode = _resolver.stringToLongKey(nodeType, false);
+        long extraCode = _resolver.stringToHash(nodeType, false);
         NodeFactory resolvedFactory = factoryByCode(extraCode);
         AbstractNode newNode;
         if (resolvedFactory == null) {
@@ -251,7 +251,7 @@ class CoreGraph implements org.mwg.Graph {
                                     final NodeFactory[] localFactories = selfPointer._factories;
                                     if (localFactories != null) {
                                         for (int i = 0; i < localFactories.length; i++) {
-                                            final long encodedFactoryKey = selfPointer._resolver.stringToLongKey(localFactories[i].name(), false);
+                                            final long encodedFactoryKey = selfPointer._resolver.stringToHash(localFactories[i].name(), false); //type are not inserted into the global dictionary
                                             selfPointer._factoryNames.put(encodedFactoryKey, i);
                                         }
                                     }
@@ -494,7 +494,7 @@ class CoreGraph implements org.mwg.Graph {
 
     private void getIndexOrCreate(long world, long time, String indexName, Callback<org.mwg.Node> callback, boolean createIfNull) {
         final CoreGraph selfPointer = this;
-        final long indexNameCoded = this._resolver.stringToLongKey(indexName, createIfNull);
+        final long indexNameCoded = this._resolver.stringToHash(indexName, createIfNull);
         this._resolver.lookup(world, time, CoreConstants.END_OF_TIME, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node globalIndexNodeUnsafe) {

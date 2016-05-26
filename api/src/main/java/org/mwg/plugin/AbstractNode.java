@@ -71,7 +71,7 @@ public abstract class AbstractNode implements Node {
     public Object get(String propertyName) {
         NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.get(this._resolver.stringToLongKey(propertyName, false));
+            return resolved.get(this._resolver.stringToHash(propertyName, false));
         }
         return null;
     }
@@ -125,7 +125,7 @@ public abstract class AbstractNode implements Node {
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         NodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            preciseState.set(this._resolver.stringToLongKey(propertyName, true), propertyType, propertyValue);
+            preciseState.set(this._resolver.stringToHash(propertyName, true), propertyType, propertyValue);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -135,7 +135,7 @@ public abstract class AbstractNode implements Node {
     public Map map(String propertyName, byte propertyType) {
         NodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            return (Map) preciseState.getOrCreate(this._resolver.stringToLongKey(propertyName, true), propertyType);
+            return (Map) preciseState.getOrCreate(this._resolver.stringToHash(propertyName, true), propertyType);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -145,7 +145,7 @@ public abstract class AbstractNode implements Node {
     public byte type(String propertyName) {
         NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.getType(this._resolver.stringToLongKey(propertyName, false));
+            return resolved.getType(this._resolver.stringToHash(propertyName, false));
         }
         return -1;
     }
@@ -162,7 +162,7 @@ public abstract class AbstractNode implements Node {
         }
         final NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName, false));
+            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToHash(relationName, false));
             if (flatRefs == null || flatRefs.length == 0) {
                 callback.on(new Node[0]);
             } else {
@@ -200,7 +200,7 @@ public abstract class AbstractNode implements Node {
     @Override
     public void add(String relationName, Node relatedNode) {
         NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName, true);
+        long relationKey = this._resolver.stringToHash(relationName, true);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous == null) {
@@ -221,7 +221,7 @@ public abstract class AbstractNode implements Node {
     @Override
     public void remove(String relationName, Node relatedNode) {
         NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName, false);
+        long relationKey = this._resolver.stringToHash(relationName, false);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous != null) {
@@ -284,7 +284,7 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName, false));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
@@ -369,7 +369,7 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName, false));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
@@ -418,11 +418,11 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToLongKey(indexName, true), Type.LONG_LONG_ARRAY_MAP);
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToHash(indexName, true), Type.LONG_LONG_ARRAY_MAP);
         Query flatQuery = new Query();
         NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
         for (int i = 0; i < keyAttributes.length; i++) {
-            long attKey = this._resolver.stringToLongKey(keyAttributes[i], true);
+            long attKey = this._resolver.stringToHash(keyAttributes[i], true);
             Object attValue = toIndexNodeState.get(attKey);
             if (attValue != null) {
                 flatQuery.add(attKey, attValue.toString());
@@ -446,12 +446,12 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName, false));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             Query flatQuery = new Query();
             NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
             for (int i = 0; i < keyAttributes.length; i++) {
-                long attKey = this._resolver.stringToLongKey(keyAttributes[i], false);
+                long attKey = this._resolver.stringToHash(keyAttributes[i], false);
                 Object attValue = toIndexNodeState.get(attKey);
                 if (attValue != null) {
                     flatQuery.add(attKey, attValue.toString());
@@ -474,7 +474,7 @@ public abstract class AbstractNode implements Node {
         } else {
             NodeState preciseState = this._resolver.resolveState(this, false);
             if (preciseState != null) {
-                preciseState.set(this._resolver.stringToLongKey(propertyName, true), propertyType, propertyValue);
+                preciseState.set(this._resolver.stringToHash(propertyName, true), propertyType, propertyValue);
             } else {
                 throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }

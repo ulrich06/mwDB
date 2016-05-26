@@ -23,7 +23,7 @@ public class NoopStorage implements Storage {
 
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
-        System.err.println("WARNING: POTENTIAL DATA LOSSES, NOOP STORAGE don't save");
+        //System.err.println("WARNING: POTENTIAL DATA LOSSES, NOOP STORAGE don't save");
         if (PrimitiveHelper.isDefined(callback)) {
             callback.on(true);
         }

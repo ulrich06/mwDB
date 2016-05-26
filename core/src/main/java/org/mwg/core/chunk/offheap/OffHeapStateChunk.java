@@ -850,7 +850,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public void setFromKey(String key, byte elemType, Object elem) {
-        set(_space.graph().resolver().stringToLongKey(key, true), elemType, elem);
+        set(_space.graph().resolver().stringToHash(key, true), elemType, elem);
     }
 
     private void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
@@ -1153,7 +1153,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public Object getFromKey(String key) {
-        return get(_space.graph().resolver().stringToLongKey(key, false));
+        return get(_space.graph().resolver().stringToHash(key, false));
     }
 
     @Override
@@ -1265,7 +1265,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public Object getOrCreateFromKey(String key, byte elemType) {
-        return getOrCreate(_space.graph().resolver().stringToLongKey(key, true), elemType);
+        return getOrCreate(_space.graph().resolver().stringToHash(key, true), elemType);
     }
 
     @Override
@@ -1288,7 +1288,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
     @Override
     public byte getTypeFromKey(String key) {
-        return getType(_space.graph().resolver().stringToLongKey(key, false));
+        return getType(_space.graph().resolver().stringToHash(key, false));
     }
 
     private static long incrementCopyOnWriteCounter(long root_addr) {

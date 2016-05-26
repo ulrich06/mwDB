@@ -1042,7 +1042,7 @@ class MWGResolver implements Resolver {
     }
 
     @Override
-    public long stringToLongKey(String name, boolean insertIfNotExists) {
+    public long stringToHash(String name, boolean insertIfNotExists) {
         long hash = DataHasher.hash(name);
         if (insertIfNotExists) {
             StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);

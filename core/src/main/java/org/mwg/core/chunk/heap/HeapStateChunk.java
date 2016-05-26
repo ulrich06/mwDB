@@ -240,7 +240,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
-        internal_set(_space.graph().resolver().stringToLongKey(key, true), p_elemType, p_unsafe_elem, true);
+        internal_set(_space.graph().resolver().stringToHash(key, true), p_elemType, p_unsafe_elem, true);
     }
 
     private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
@@ -434,7 +434,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public Object getFromKey(String key) {
-        return get(_space.graph().resolver().stringToLongKey(key, false));
+        return get(_space.graph().resolver().stringToHash(key, false));
     }
 
     @Override
@@ -467,7 +467,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public byte getTypeFromKey(String key) {
-        return getType(_space.graph().resolver().stringToLongKey(key, false));
+        return getType(_space.graph().resolver().stringToHash(key, false));
     }
 
     @Override
@@ -493,7 +493,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public Object getOrCreateFromKey(String key, byte elemType) {
-        return getOrCreate(_space.graph().resolver().stringToLongKey(key, true), elemType);
+        return getOrCreate(_space.graph().resolver().stringToHash(key, true), elemType);
     }
 
     @Override

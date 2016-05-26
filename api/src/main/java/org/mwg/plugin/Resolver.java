@@ -102,7 +102,7 @@ public interface Resolver {
      * @param insertIfNotExists indicate if the string has to be inserted if not existing in the global dictionary
      * @return The unique long identifier for the string.
      */
-    long stringToLongKey(String name, boolean insertIfNotExists);
+    long stringToHash(String name, boolean insertIfNotExists);
 
     /**
      * Returns the String associated to a hash.
