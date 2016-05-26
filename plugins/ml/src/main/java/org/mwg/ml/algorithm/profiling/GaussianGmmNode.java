@@ -52,6 +52,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
 
+
     //Factory of the class integrated
     public static class Factory implements NodeFactory {
 
@@ -171,7 +172,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(context -> {
             Node[] result = (Node[]) context.getPreviousResult();
             GaussianGmmNode parent = (GaussianGmmNode) context.getVariable("starterNode");
-            GaussianGmmNode resultChild = filter(result, values, precisions, threshold);
+            GaussianGmmNode resultChild = filter(result, values, precisions, threshold,(parent.getLevel()-1.0)/2.0);
             if (resultChild != null) {
                 parent.internallearn(values, width, compressionFactor, compressionIter, precisions, false);
                 context.setVariable("continueLoop", true);
@@ -189,7 +190,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     //ToDo need to be replaced by gaussian distances !!
-    private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, final double threshold) {
+    private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, final double threshold, double level) {
         if (result == null || result.length == 0) {
             return null;
         }
@@ -204,7 +205,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 index = i;
             }
         }
-        if (min < threshold) {
+        if (min < threshold+level) {
             return ((GaussianGmmNode) result[index]);
         } else {
             return null;
@@ -265,7 +266,6 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
         if (subgaussians != null && subgaussians.length >= compressionFactor * width) {
-
             super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
                 @Override
                 //result.length hold the original subgaussian number, and width is after compression
