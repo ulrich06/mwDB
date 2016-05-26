@@ -79,10 +79,7 @@ public class KMeans {
         double min=Double.MAX_VALUE;
         int pos=0;
         for(int i=0;i<centroids.length;i++){
-            double d=0;
-            for(int j=0;j<values.length;j++){
-                d+=(centroids[i][j]-values[j])*(centroids[i][j]-values[j])/div[j];
-            }
+            double d=GaussianGmmNode.distance(values,centroids[i],div);
             if(d<min){
                 min=d;
                 pos=i;
@@ -90,4 +87,6 @@ public class KMeans {
         }
         return pos;
     }
+
+
 }

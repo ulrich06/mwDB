@@ -39,8 +39,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public static final int COMPRESSION_FACTOR_DEF = 2;
     public static final String COMPRESSION_ITER_KEY = "_compressioniter"; //Number of time to iterate K-means before finding the best compression
     public static final int COMPRESSION_ITER_DEF = 10;
-    public static final String THRESHOLD_KEY = "_threshold";  //Min threshold required for check inside, otherwise it is considered as a new subdomain
-    public static final double THRESHOLD_DEF = 0.01;
+    public static final String THRESHOLD_KEY = "_threshold";  //Factor of distance before check inside fail
+    public static final double THRESHOLD_DEF = 3;
 
     public static final String PRECISION_KEY = "_precision"; //Default covariance matrix for a dirac function
 
@@ -80,12 +80,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         } else if (propertyName.equals(COMPRESSION_FACTOR_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
         } else if (propertyName.equals(THRESHOLD_KEY)) {
-            double x = (double) propertyValue;
-            if (x > 0 && x < 1) {
-                super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-            } else {
-                throw new RuntimeException("Threshold should be > 0 and < 1");
-            }
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(PRECISION_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE_ARRAY);
         } else {
@@ -203,9 +198,6 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         int index = 0;
         for (int i = 0; i < result.length; i++) {
             GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
-            if(temp==null){
-                int x=0;
-            }
             distances[i] = distance(features, temp.getAvg(), precisions);
             if (distances[i] < min) {
                 min = distances[i];
@@ -770,11 +762,15 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    private double distance(double[] features, double[] avg, double[] precisions) {
-        double res = 0;
+    public static double distance(double[] features, double[] avg, double[] precisions) {
+        double max = 0;
+        double temp;
         for (int i = 0; i < features.length; i++) {
-            res += (features[i] - avg[i]) * (features[i] - avg[i]) / precisions[i];
+            temp= (features[i] - avg[i]) * (features[i] - avg[i]) / precisions[i];
+            if(temp>max){
+                max=temp;
+            }
         }
-        return Math.sqrt(res);
+        return Math.sqrt(max);
     }
 }
