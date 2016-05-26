@@ -1,5 +1,7 @@
 package org.mwg.core.utility;
 
+import org.mwg.Constants;
+
 public class DataHasher {
 
     /**
@@ -42,7 +44,7 @@ public class DataHasher {
      * for (var i = 0; i < dataLength; i++) {
      * h = h.mul(org.mwg.core.utility.DataHasher.HMULT).xor(org.mwg.core.utility.DataHasher.byteTable[data.charCodeAt(i) & 0xff]);
      * }
-     * return h.toNumber();
+     * return h.mod(org.mwg.core.CoreConstants.END_OF_TIME).toNumber();
      */
     public static long hash(String data) {
         long h = HSTART;
@@ -52,7 +54,7 @@ public class DataHasher {
         for (int i = 0; i < dataLength; i++) {
             h = (h * hmult) ^ ht[data.codePointAt(i) & 0xff];
         }
-        return h;
+        return h % Constants.END_OF_TIME;
     }
 
     /**
