@@ -14,7 +14,7 @@ public class Base64Test {
 
     @Test
     public void typeEncoding() {
-        testLong(DataHasher.hash("GaussianGmm"));
+        testLong(6164069494951896018L);
     }
 
 
