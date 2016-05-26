@@ -13,14 +13,14 @@ public class DataHasherTest {
     @Test
     public void dataHash_1Test() {
         long hash = DataHasher.hash(CoreConstants.END_OF_TIME + "");
-        System.out.println("dataHash_1Test: " + hash);
+        //System.out.println("dataHash_1Test: " + hash);
         Assert.assertTrue(hash == 1749261374604296L);
     }
 
     @Test
     public void dataHash_2Test() {
         long hash = DataHasher.hash(CoreConstants.BEGINNING_OF_TIME + "");
-        System.out.println("dataHash_2Test: " + hash);
+        //System.out.println("dataHash_2Test: " + hash);
         Assert.assertTrue(hash == -7914587012082605L);
     }
 
