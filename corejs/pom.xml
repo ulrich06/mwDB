@@ -8,7 +8,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <java2typescript.plugin.version>49</java2typescript.plugin.version>
+        <java2typescript.plugin.version>50-SNAPSHOT</java2typescript.plugin.version>
     </properties>
 
     <dependencies>
@@ -101,8 +101,22 @@
                                 <exec executable="npm">
                                     <arg value="install"/>
                                 </exec>
+                                <exec executable="node_modules/typescript/bin/tsc">
+                                    <arg value="--sourceMap"/>
+                                    <arg value="--target"/>
+                                    <arg value="ES5"/>
+                                    <arg value="${basedir}/target/generated-sources/src/main/core.ts"/>
+                                    <arg value="--out"/>
+                                    <arg value="${basedir}/target/classes"/>
+                                </exec>
+
+
+                                <!--
                                 <exec executable="node_modules/grunt-cli/bin/grunt" failonerror="true" />
-                                <java jar="${basedir}/compiler.jar" fork="true" failonerror="true">
+                                -->
+
+
+                                <java jar="${basedir}/lib/compiler.jar" fork="true" failonerror="true">
                                     <arg value="--js"/>
                                     <arg value="${basedir}/target/classes/mwg.js"/>
                                     <arg value="--js_output_file"/>
