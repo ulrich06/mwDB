@@ -6,9 +6,26 @@ import org.mwg.ml.common.matrix.Matrix;
  * Created by assaad on 25/03/16.
  */
 public class MultivariateNormalDistribution {
+    public double[] getMin() {
+        return min;
+    }
+
+    public double[] getMax() {
+        return max;
+    }
+
+    public double[] getAvg() {
+        return means;
+    }
+
+    public double[] getCovDiag(){
+        return covDiag;
+    }
+
     double[] min;
     double[] max;
     double[] means;
+    double[] covDiag;
     Matrix inv;
     Matrix covariance;
     PInvSVD pinvsvd;
@@ -19,10 +36,14 @@ public class MultivariateNormalDistribution {
         this.means = means;
         if (cov != null) {
             this.covariance = cov;
+            covDiag=new double[cov.rows()];
+            for(int i=0;i<covDiag.length;i++){
+                covDiag[i]=cov.get(i,i);
+            }
             pinvsvd = new PInvSVD();
             pinvsvd.factor(covariance, false);
             inv = pinvsvd.getPInv();
-            det = pinvsvd.getDeterminant(); //todo test if we need to do 1/det
+            det = pinvsvd.getDeterminant();
             rank = pinvsvd.getRank();
         }
     }
@@ -34,6 +55,8 @@ public class MultivariateNormalDistribution {
     public void setMax(double[] max) {
         this.max = max;
     }
+
+
 
 
     public static Matrix getCovariance(double[] sum, double[] sumsquares, int total) {
@@ -132,9 +155,9 @@ public class MultivariateNormalDistribution {
         MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null);
         res.pinvsvd = this.pinvsvd;
         res.inv = this.inv;
-        res.det = this.det; //todo test if we need to do 1/det
+        res.det = this.det;
         res.rank = this.rank;
-
+        res.covDiag=this.covDiag;
         return res;
     }
 }

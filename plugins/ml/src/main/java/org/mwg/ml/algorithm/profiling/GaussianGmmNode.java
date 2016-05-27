@@ -217,6 +217,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     }
 
+    public void query(int level, double[] inputVectormin, boolean[] inputselector, Callback<ProbaDistribution> callback) {
+
+    }
+
     public int getLevel() {
         return this._resolver.resolveState(this, true).getFromKeyWithDefault(LEVEL_KEY, LEVEL_DEF);
     }
