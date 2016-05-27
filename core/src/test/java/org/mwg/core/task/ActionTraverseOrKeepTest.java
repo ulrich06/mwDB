@@ -2,10 +2,8 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.Callback;
 import org.mwg.Node;
-import org.mwg.Type;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 public class ActionTraverseOrKeepTest extends AbstractActionTest {
@@ -17,7 +15,7 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
                 .fromIndexAll("nodes")
                 .traverseOrKeep("children")
                 .traverseOrKeep("children")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] lastResult = (Node[]) context.getPreviousResult();

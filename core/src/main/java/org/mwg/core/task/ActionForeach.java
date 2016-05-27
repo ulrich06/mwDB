@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ class ActionForeach implements TaskAction {
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
-        _subTask.executeThenAsync(context, castedResult[0], new TaskAction() {
+        _subTask.executeThenAsync(context, castedResult[0], new Action() {
             @Override
             public void eval(final TaskContext subTaskFinalContext) {
                 int current = cursor.getAndIncrement();

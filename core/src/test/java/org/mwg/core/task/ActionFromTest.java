@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 public class ActionFromTest extends AbstractActionTest {
@@ -14,7 +14,7 @@ public class ActionFromTest extends AbstractActionTest {
         initGraph();
         graph.newTask()
                 .from("uselessPayload")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(context.getPreviousResult(), "uselessPayload");
@@ -39,7 +39,7 @@ public class ActionFromTest extends AbstractActionTest {
 
                 selfPointer.graph.newTask()
                         .from(result)
-                        .then(new TaskAction() {
+                        .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task
@@ -75,7 +75,7 @@ public class ActionFromTest extends AbstractActionTest {
 
                 selfPointer.graph.newTask()
                         .from(result[0])
-                        .then(new TaskAction() {
+                        .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task

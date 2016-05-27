@@ -163,20 +163,20 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task then(TaskAction p_action) {
-        addAction(new ActionWrapper(p_action));
+    public final org.mwg.task.Task then(Action p_action) {
+        addAction(new ActionWrapper(p_action, true));
         return this;
     }
 
     @Override
-    public final org.mwg.task.Task thenAsync(TaskAction p_action) {
-        addAction(p_action);
+    public final org.mwg.task.Task thenAsync(Action p_action) {
+        addAction(new ActionWrapper(p_action, false));
         return this;
     }
 
     @Override
     public final <T> org.mwg.task.Task foreachThen(Callback<T> action) {
-        org.mwg.task.Task task = _graph.newTask().then(new TaskAction() {
+        org.mwg.task.Task task = _graph.newTask().then(new Action() {
             @Override
             public void eval(org.mwg.task.TaskContext context) {
                 Object previousResult = context.getPreviousResult();
@@ -213,16 +213,22 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final void executeThen(TaskAction p_action) {
-        executeThenAsync(null, null, new ActionWrapper(p_action));
+    public final void executeThen(Action p_action) {
+        executeThenAsync(null, null, new Action() {
+            @Override
+            public void eval(TaskContext context) {
+                p_action.eval(new TaskContextWrapper(context));
+                context.next();
+            }
+        });
     }
 
     @Override
-    public final void executeThenAsync(final org.mwg.task.TaskContext parent, final Object initialResult, final TaskAction p_finalAction) {
+    public final void executeThenAsync(final org.mwg.task.TaskContext parent, final Object initialResult, final Action p_finalAction) {
         final TaskAction[] final_actions = new TaskAction[_actionCursor + 2];
         System.arraycopy(_actions, 0, final_actions, 0, _actionCursor);
         if (p_finalAction != null) {
-            final_actions[_actionCursor] = p_finalAction;
+            final_actions[_actionCursor] = new ActionWrapper(p_finalAction, false);
         } else {
             final_actions[_actionCursor] = new ActionNoop();
         }

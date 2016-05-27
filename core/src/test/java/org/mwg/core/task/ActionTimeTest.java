@@ -2,7 +2,7 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 public class ActionTimeTest extends AbstractActionTest {
@@ -12,7 +12,7 @@ public class ActionTimeTest extends AbstractActionTest {
         initGraph();
         graph.newTask()
                 .time(10)
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(context.getTime(), 10);

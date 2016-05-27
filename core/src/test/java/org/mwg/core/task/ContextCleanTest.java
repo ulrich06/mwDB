@@ -6,7 +6,7 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
 
@@ -20,7 +20,7 @@ public class ContextCleanTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                graph.newTask().then(new TaskAction() {
+                graph.newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         retention[0] = context;
@@ -60,7 +60,7 @@ public class ContextCleanTest {
                                 return true;
                             }
                         })
-                        .then(new TaskAction() {
+                        .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 retention[0] = context;
@@ -72,7 +72,7 @@ public class ContextCleanTest {
                                 flat[0] += result.toString();
                             }
                         })
-                        .executeThen(new TaskAction() {
+                        .executeThen(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 retention[1] = context;

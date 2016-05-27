@@ -101,8 +101,8 @@
                                 <exec executable="npm">
                                     <arg value="install"/>
                                 </exec>
-                                <exec executable="node_modules/grunt-cli/bin/grunt"/>
-                                <java jar="${basedir}/compiler.jar" fork='true'>
+                                <exec executable="node_modules/grunt-cli/bin/grunt" failonerror="true" />
+                                <java jar="${basedir}/compiler.jar" fork="true" failonerror="true">
                                     <arg value="--js"/>
                                     <arg value="${basedir}/target/classes/mwg.js"/>
                                     <arg value="--js_output_file"/>

@@ -52,7 +52,7 @@ public class TestTMP {
 
                 n1.add("fils",n4);
 
-                Task creationTask = graph.newTask().then(new TaskAction() {
+                Task creationTask = graph.newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node node = (Node) context.getVariable("starterNode");
@@ -63,7 +63,7 @@ public class TestTMP {
 
                 final int[] recursionNb = new int[]{0};
                 Task traverse = graph.newTask();
-                traverse.then(new TaskAction() {
+                traverse.then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         recursionNb[0]++;
@@ -103,7 +103,7 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = graph.newTask().from(root).asVar("starterNode").wait(traverse).then(new TaskAction() {
+                Task mainTask = graph.newTask().from(root).asVar("starterNode").wait(traverse).then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         //call callbask

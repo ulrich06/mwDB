@@ -17,7 +17,7 @@ public class ActionIfThenTest extends AbstractActionTest{
         boolean[] result = {false,false};
 
         Task modifyResult0 = graph.newTask()
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         result[0] = true;
@@ -25,7 +25,7 @@ public class ActionIfThenTest extends AbstractActionTest{
                 });
 
         Task modifyResult1 = graph.newTask()
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         result[0] = true;
@@ -56,7 +56,7 @@ public class ActionIfThenTest extends AbstractActionTest{
     @Test
     public void testChainAfterIfThen() {
         initGraph();
-        Task addVarInContext = graph.newTask().from(5).asVar("variable").then(new TaskAction() {
+        Task addVarInContext = graph.newTask().from(5).asVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 //empty action
@@ -68,7 +68,7 @@ public class ActionIfThenTest extends AbstractActionTest{
             public boolean eval(TaskContext context) {
                 return true;
             }
-        },addVarInContext).fromVar("variable").then(new TaskAction() {
+        },addVarInContext).fromVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Integer val = (Integer) context.getPreviousResult();
@@ -81,7 +81,7 @@ public class ActionIfThenTest extends AbstractActionTest{
     @Test
     public void accessContextVariableInThenTask() {
         initGraph();
-        Task accessVar = graph.newTask().then(new TaskAction() {
+        Task accessVar = graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Integer variable = (Integer) context.getVariable("variable");
