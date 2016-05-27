@@ -24,7 +24,8 @@ class ActionForeach implements TaskAction {
         final Object[] castedResult = convert(context.getPreviousResult());
         AtomicInteger cursor = new AtomicInteger(0);
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
-        _subTask.executeThenAsync(context, castedResult[0], new Action() {
+        Action[] recursiveAction = new Action[1];
+        recursiveAction[0] = new Action() {
             @Override
             public void eval(final TaskContext subTaskFinalContext) {
                 int current = cursor.getAndIncrement();
@@ -35,10 +36,11 @@ class ActionForeach implements TaskAction {
                     context.next();
                 } else {
                     //recursive call
-                    selfPointer._subTask.executeThenAsync(context, castedResult[nextCursot], this);
+                    selfPointer._subTask.executeThenAsync(context, castedResult[nextCursot], recursiveAction[0]);
                 }
             }
-        });
+        };
+        _subTask.executeThenAsync(context, castedResult[0], recursiveAction[0]);
     }
 
     /**
