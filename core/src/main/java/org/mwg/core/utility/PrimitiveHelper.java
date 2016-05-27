@@ -255,7 +255,7 @@ public class PrimitiveHelper {
      * @native ts
      * if(Array.isArray(elem)){
      * for(var p in elem){
-     * callback.on(p);
+     * callback(elem[p]);
      * }
      * return true;
      * }
