@@ -14,7 +14,6 @@ public class ProbaDistribution {
 
 
     public ProbaDistribution(int total[], MultivariateNormalDistribution[] distributions, int global){
-        System.out.println("Number of distributions: "+distributions.length+" , votes: "+global);
         this.total=total;
         this.distributions=distributions;
         this.global=global;
@@ -32,6 +31,7 @@ public class ProbaDistribution {
 
 
     public double[] calculateArray(double[][] features, ProgressReporter reporter){
+        reporter.updateGraphInfo("Number of distributions: "+distributions.length+" , values: "+global);
         double result[]=new double[features.length];
         double calibration=0;
         for(int i=0;i<features.length;i++){
@@ -50,7 +50,7 @@ public class ProbaDistribution {
             for (int i = 0; i < features.length; i++) {
                 result[i] = result[i] / calibration;
             }
-            System.out.println("Calibration: "+calibration);
+            //System.out.println("Calibration: "+calibration);
         }
         return result;
     }

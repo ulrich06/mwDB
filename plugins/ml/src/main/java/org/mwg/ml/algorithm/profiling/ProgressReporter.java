@@ -6,4 +6,5 @@ package org.mwg.ml.algorithm.profiling;
 public interface ProgressReporter {
     void updateProgress(int value);
     boolean isCancelled();
+    void updateGraphInfo(String info);
 }
