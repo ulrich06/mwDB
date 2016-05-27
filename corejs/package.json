@@ -2,6 +2,7 @@
   "name": "mwg",
   "version": "1.0.0-SNAPSHOT",
   "devDependencies": {
-    "typescript":"*"
+    "typescript":"*",
+    "jasmine":"*"
   }
 }

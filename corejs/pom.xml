@@ -104,17 +104,34 @@
                                 <exec executable="node_modules/typescript/bin/tsc">
                                     <arg value="--sourceMap"/>
                                     <arg value="--target"/>
-                                    <arg value="ES5"/>
+                                    <arg value="es5"/>
                                     <arg value="${basedir}/target/generated-sources/src/main/core.ts"/>
                                     <arg value="--out"/>
-                                    <arg value="${basedir}/target/classes"/>
+                                    <arg value="${basedir}/target/classes/mwg.js"/>
+                                </exec>
+
+                                <exec executable="node_modules/typescript/bin/tsc">
+                                    <arg value="--target"/>
+                                    <arg value="es5"/>
+                                    <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
+                                    <arg value="--out"/>
+                                    <arg value="${basedir}/target/test-classes/mwg.test.js"/>
                                 </exec>
 
 
-                                <!--
-                                <exec executable="node_modules/grunt-cli/bin/grunt" failonerror="true" />
-                                -->
+                                <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
+                                    <filelist dir="${basedir}/target/test-classes"  files="mwg.test.js"/>
+                                    <filelist dir="${basedir}/target/generated-test-sources/src/main/" files="testsRunner.js"/>
+                                </concat>
 
+                                <concat destfile="${basedir}/target/test-classes/test.all.dev.js" force="no">
+                                    <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
+                                    <filelist dir="${basedir}/target/generated-test-sources/src/main/" files="testsRunnerDev.js"/>
+                                </concat>
+
+                                <exec executable="node">
+                                    <arg value="test.js"/>
+                                </exec>
 
                                 <java jar="${basedir}/lib/compiler.jar" fork="true" failonerror="true">
                                     <arg value="--js"/>
@@ -122,6 +139,7 @@
                                     <arg value="--js_output_file"/>
                                     <arg value="${basedir}/target/classes/mwg.min.js"/>
                                 </java>
+
                             </target>
                         </configuration>
                         <goals>
