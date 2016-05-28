@@ -199,13 +199,14 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         int index = 0;
         for (int i = 0; i < result.length; i++) {
             GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
-            distances[i] = distance(features, temp.getAvg(), precisions);
+            double[] avg=temp.getAvg();
+            distances[i] = distance(features, avg, temp.getCovarianceArray(avg,precisions));
             if (distances[i] < min) {
                 min = distances[i];
                 index = i;
             }
         }
-        if (min < threshold+level) {
+        if (min < threshold) {
             return ((GaussianGmmNode) result[index]);
         } else {
             return null;
@@ -657,6 +658,42 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
 
     }
+
+
+    public double[] getCovarianceArray(double[] avg, double[] err) {
+        if (avg == null) {
+            return err;
+        }
+        if(err==null){
+            err=new double[avg.length];
+        }
+        int features = avg.length;
+
+        int total = getTotal();
+        if (total == 0) {
+            return null;
+        }
+        if (total > 1) {
+            double[] covariances = new double[features];
+            double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
+
+            double correction = total;
+            correction = correction / (total - 1);
+
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                covariances[i] = (sumsquares[count] / total - avg[i] * avg[i]) * correction;
+                if (covariances[i] < err[i]) {
+                    covariances[i] = err[i];
+                }
+                count+=features-i;
+            }
+            return covariances;
+        } else {
+            return err;
+        }
+    }
+
 
     public double[][] getCovariance(double[] avg, double[] err) {
         if (avg == null) {
