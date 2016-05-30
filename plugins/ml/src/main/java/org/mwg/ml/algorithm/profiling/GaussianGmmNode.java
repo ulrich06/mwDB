@@ -199,13 +199,14 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         int index = 0;
         for (int i = 0; i < result.length; i++) {
             GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
-            distances[i] = distance(features, temp.getAvg(), precisions);
+            double[] avg=temp.getAvg();
+            distances[i] = distance(features, avg, temp.getCovarianceArray(avg,precisions));
             if (distances[i] < min) {
                 min = distances[i];
                 index = i;
             }
         }
-        if (min < threshold+level) {
+        if (min < threshold) {
             return ((GaussianGmmNode) result[index]);
         } else {
             return null;
@@ -214,6 +215,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     @Override
     public void predict(Callback<double[]> callback) {
+
+    }
+
+    public void query(int level, double[] inputVectormin, boolean[] inputselector, Callback<ProbaDistribution> callback) {
 
     }
 
@@ -423,7 +428,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             for (int i = 0; i < nbfeature; i++) {
                 covBackup.set(i, i, err[i]);
             }
-            MultivariateNormalDistribution mvnBackup=new MultivariateNormalDistribution(null,covBackup);
+            MultivariateNormalDistribution mvnBackup=new MultivariateNormalDistribution(null,covBackup,false);
 
             int[] totals = new int[leaves.length];
             int globalTotal = 0;
@@ -435,7 +440,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 globalTotal += totals[i];
                 double[] avg = temp.getAvg();
                 if (totals[i] > 2) {
-                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg,err));
+                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg,err),false);
                     distributions[i].setMin(temp.getMin());
                     distributions[i].setMax(temp.getMax());
                 } else {
@@ -599,7 +604,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg) {
         double[] sum = (double[]) super.get(INTERNAL_SUM_KEY);
         double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal());
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal(),false);
         if (mnd == null) {
             //todo handle dirac to be replaced later
             return 0;
@@ -613,7 +618,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         double[] sum = (double[]) super.get(INTERNAL_SUM_KEY);
         double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal());
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal(),false);
 
         if (mnd == null) {
             //todo handle dirac to be replaced later
@@ -653,6 +658,42 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
 
     }
+
+
+    public double[] getCovarianceArray(double[] avg, double[] err) {
+        if (avg == null) {
+            return err;
+        }
+        if(err==null){
+            err=new double[avg.length];
+        }
+        int features = avg.length;
+
+        int total = getTotal();
+        if (total == 0) {
+            return null;
+        }
+        if (total > 1) {
+            double[] covariances = new double[features];
+            double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
+
+            double correction = total;
+            correction = correction / (total - 1);
+
+            int count = 0;
+            for (int i = 0; i < features; i++) {
+                covariances[i] = (sumsquares[count] / total - avg[i] * avg[i]) * correction;
+                if (covariances[i] < err[i]) {
+                    covariances[i] = err[i];
+                }
+                count+=features-i;
+            }
+            return covariances;
+        } else {
+            return err;
+        }
+    }
+
 
     public double[][] getCovariance(double[] avg, double[] err) {
         if (avg == null) {
