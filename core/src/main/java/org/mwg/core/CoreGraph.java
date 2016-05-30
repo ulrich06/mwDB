@@ -33,8 +33,9 @@ class CoreGraph implements org.mwg.Graph {
     boolean offHeapBuffer = false;
 
     private Short _prefix = null;
-    private KeyCalculator _nodeKeyCalculator = null;
-    private KeyCalculator _worldKeyCalculator = null;
+
+    private GenChunk _nodeKeyCalculator = null;
+    private GenChunk _worldKeyCalculator = null;
 
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
@@ -65,7 +66,7 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public long diverge(long world) {
-        long childWorld = this._worldKeyCalculator.nextKey();
+        long childWorld = this._worldKeyCalculator.newKey();
         this._resolver.initWorld(world, childWorld);
         return childWorld;
     }
@@ -86,7 +87,7 @@ class CoreGraph implements org.mwg.Graph {
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
 
-        org.mwg.Node newNode = new CoreNode(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+        org.mwg.Node newNode = new CoreNode(world, time, this._nodeKeyCalculator.newKey(), this, initPreviouslyResolved);
         this._resolver.initNode(newNode, Constants.NULL_LONG);
         return newNode;
     }
@@ -112,9 +113,9 @@ class CoreGraph implements org.mwg.Graph {
         AbstractNode newNode;
         if (resolvedFactory == null) {
             System.out.println("WARNING: UnKnow NodeType " + nodeType + ", missing plugin configuration in the builder ? Using generic node as a fallback");
-            newNode = new CoreNode(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+            newNode = new CoreNode(world, time, this._nodeKeyCalculator.newKey(), this, initPreviouslyResolved);
         } else {
-            newNode = (AbstractNode) resolvedFactory.create(world, time, this._nodeKeyCalculator.nextKey(), this, initPreviouslyResolved);
+            newNode = (AbstractNode) resolvedFactory.create(world, time, this._nodeKeyCalculator.newKey(), this, initPreviouslyResolved);
         }
         this._resolver.initNode(newNode, extraCode);
         return newNode;
@@ -234,16 +235,18 @@ class CoreGraph implements org.mwg.Graph {
                                     selfPointer._space.putAndMark(globalDictionaryChunk);
 
                                     if (view2.size() > 0) {
-                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(view2, 0, view2.size()));
+                                        selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, view2, null);
                                     } else {
-                                        selfPointer._worldKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                        selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, null, null);
                                     }
+                                    selfPointer._space.putAndMark(selfPointer._worldKeyCalculator);
 
                                     if (view1.size() > 0) {
-                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, Base64.decodeToLongWithBounds(view1, 0, view1.size()));
+                                        selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, view1, null);
                                     } else {
-                                        selfPointer._nodeKeyCalculator = new KeyCalculator(graphPrefix, 0);
+                                        selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, null, null);
                                     }
+                                    selfPointer._space.putAndMark(selfPointer._nodeKeyCalculator);
 
                                     //init the resolver
                                     selfPointer._resolver.init(selfPointer);
@@ -375,6 +378,8 @@ class CoreGraph implements org.mwg.Graph {
                     }
                 }
             }
+
+            /*
             //save obj key gen key
             stream.write(CoreConstants.BUFFER_SEP);
             BufferBuilder.keyToBuffer(stream, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
@@ -387,6 +392,7 @@ class CoreGraph implements org.mwg.Graph {
             //save world key gen payload
             stream.write(CoreConstants.BUFFER_SEP);
             Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), stream);
+            */
 
             //shrink in case of i != full size
             this._storage.put(stream, new Callback<Boolean>() {

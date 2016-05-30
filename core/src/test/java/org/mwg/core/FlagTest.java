@@ -52,25 +52,25 @@ public class FlagTest {
                 node_t0.set("name", "MyName");
 
                 long availableCacheSlot = graph.space().available();
-                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (2 + (1 * 4)));
+                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (4 + (1 * 4)));
                 node_t0.free();
                 availableCacheSlot = graph.space().available();
-                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (2 + (1 * 4)));
+                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (4 + (1 * 4)));
                 graph.save(null);
                 availableCacheSlot = graph.space().available();
-                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (2 + (0 * 4)));
+                Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (4 + (0 * 4)));
 
                 long newWorld = graph.diverge(0);
                 graph.lookup(newWorld, 0, node_id, new Callback<Node>() {
                     @Override
                     public void on(Node n0_w1) {
                         long availableCacheSlot_w1 = graph.space().available();
-                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (2 + (1 * 4))); //chunk should be tagged again
+                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (4 + (1 * 4))); //chunk should be tagged again
                         counter[0]++;
 
                         n0_w1.free();
                         availableCacheSlot_w1 = graph.space().available();
-                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (2 + (0 * 4))); //immediatly free because transient modification
+                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (4 + (0 * 4))); //immediatly free because transient modification
 
                     }
                 });
@@ -79,18 +79,18 @@ public class FlagTest {
                     @Override
                     public void on(Node n0_w1_bis) {
                         long availableCacheSlot_w1 = graph.space().available();
-                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (2 + (1 * 4))); //chunk should be tagged again
+                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (4 + (1 * 4))); //chunk should be tagged again
                         counter[0]++;
 
                         n0_w1_bis.set("name", "MyDivergedName");
 
                         n0_w1_bis.free();
                         availableCacheSlot_w1 = graph.space().available();
-                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (2 + (1 * 4)));
+                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (4 + (1 * 4)));
 
                         graph.save(null);
                         availableCacheSlot_w1 = graph.space().available();
-                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (2 + (0 * 4)));
+                        Assert.assertEquals(availableCacheSlot_w1, selfPointer.cacheSize - (4 + (0 * 4)));
 
                     }
                 });

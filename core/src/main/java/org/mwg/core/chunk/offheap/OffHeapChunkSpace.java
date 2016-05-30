@@ -221,6 +221,8 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 return new OffHeapTimeTreeChunk(this, addr, null);
             case ChunkType.WORLD_ORDER_CHUNK:
                 return new OffHeapWorldOrderChunk(this, addr, null);
+            case ChunkType.GEN_CHUNK:
+                return new OffHeapGenChunk(this, addr, null);
             default:
                 return null;
         }
@@ -435,6 +437,8 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                     case ChunkType.WORLD_ORDER_CHUNK:
                         OffHeapWorldOrderChunk.free(currentVictimPtr);
                         break;
+                    case ChunkType.GEN_CHUNK:
+                        OffHeapGenChunk.free(currentVictimPtr);
                 }
             }
             OffHeapLongArray.set(_elementValues, currentVictimIndex, elemPtr);
