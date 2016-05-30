@@ -1,4 +1,4 @@
-package org.mwg.core.utility;
+package org.mwg.plugin;
 
 import org.mwg.struct.Buffer;
 
@@ -336,8 +336,7 @@ public class Base64 {
         }
         buffer.write(Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
     }
-
-
+    
     /**
      * Encodes a int in a base-64 string. Sign is encoded on bit 0 of the long => LS bit of the right-most char of the string. 1 for negative; 0 otherwise.
      *
@@ -351,7 +350,7 @@ public class Base64 {
             tmp = -tmp;
         }
         for (int i = 29; i >= 5; i -= 6) {
-            if (!(PrimitiveHelper.equals(result, "") && ((tmp >> i) & 0x3F) == 0)) {
+            if (result.length() != 0 && ((tmp >> i) & 0x3F) == 0) {
                 result += Base64.encodeArray[(tmp >> i) & 0x3F];
             }
         }
@@ -487,7 +486,7 @@ public class Base64 {
         }
         return result;
     }*/
-    public static void encodeDoubleToBuffer(double d, org.mwg.struct.Buffer buffer) {
+    public static void encodeDoubleToBuffer(double d, Buffer buffer) {
         long l = Double.doubleToLongBits(d);
         //encode sign + exp
         buffer.write(Base64.encodeArray[(int) (l >> 58) & 0x3F]);

@@ -1,5 +1,6 @@
 package org.mwg.plugin;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.struct.Buffer;
 
@@ -19,6 +20,11 @@ public interface ChunkSpace {
      * Insert the chunk into the space and mark it before asVar used
      */
     Chunk putAndMark(Chunk elem);
+
+    /**
+     * Get and mark chunk for the association of keys, if not present in cache, load it from configured storage
+     */
+    void getOrLoadAndMark(byte type, long world, long time, long id, Callback<Chunk> callback);
 
     /**
      * UnMark chunk for the association of keys

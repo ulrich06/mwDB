@@ -1,6 +1,7 @@
 package org.mwg;
 
 import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.plugin.Resolver;
 import org.mwg.plugin.Scheduler;
@@ -167,6 +168,8 @@ public interface Graph {
     Task newTask();
 
     ChunkSpace space();
+
+    Storage storage();
 
     /**
      * Retrieve the shared action registry of Actions executed by task

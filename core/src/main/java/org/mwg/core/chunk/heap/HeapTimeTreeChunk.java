@@ -1,11 +1,12 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.Unsafe;
 
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
@@ -294,7 +295,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     @Override
     public final byte chunkType() {
-        return CoreConstants.TIME_TREE_CHUNK;
+        return ChunkType.TIME_TREE_CHUNK;
     }
 
     @Override

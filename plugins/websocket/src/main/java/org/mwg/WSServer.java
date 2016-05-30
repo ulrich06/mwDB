@@ -5,6 +5,10 @@ import io.undertow.Undertow;
 import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
+import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkSpace;
+import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -41,11 +45,110 @@ public class WSServer implements WebSocketConnectionCallback {
         peers.add(webSocketChannel);
     }
 
-    private void processMessage(org.mwg.struct.Buffer in) {
-        //TODO
+    private void send(ByteBuffer buffer, final WebSocketChannel channel) {
+        WebSockets.sendBinary(buffer, channel, new WebSocketCallback<Void>() {
+            @Override
+            public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
+                //TODO process
+            }
+
+            @Override
+            public void onError(WebSocketChannel webSocketChannel, Void aVoid, Throwable throwable) {
+                //TODO process
+            }
+        });
+    }
 
 
-        //TODO  in.free();!
+    //multi thread process
+    private void processMessage(final byte[] payload, final WebSocketChannel channel) {
+        if (payload.length == 0) {
+            return;
+        }
+        switch (payload[0]) {
+            case WSConstants.REQ_GET:
+                //sift 4 bytes
+                final Buffer buffer = graph.newBuffer();
+                final byte[] sliced = new byte[payload.length - 5];
+                System.arraycopy(payload, 5, sliced, 0, payload.length - 5);
+                buffer.writeAll(sliced);
+                BufferIterator it = buffer.iterator();
+                int nbWait = 0;
+                while (it.hasNext()) {
+                    nbWait++;
+                    it.next();
+                }
+                it = buffer.iterator();
+                DeferCounter defer = graph.counter(nbWait);
+                byte[][] results = new byte[nbWait][];
+                int index = 0;
+                while (it.hasNext()) {
+                    final int toSet = index;
+                    index++;
+                    final Buffer sub = it.next();
+                    //now we have the tuple, it the space :-)
+                    final WSTuple tuple = WSTuple.build(sub);
+                    graph.space().getOrLoadAndMark(tuple.type, tuple.world, tuple.time, tuple.id, new Callback<Chunk>() {
+                        @Override
+                        public void on(Chunk memoryChunk) {
+                            if (memoryChunk != null) {
+                                final Buffer toSaveBuffer = graph.newBuffer();
+                                memoryChunk.save(toSaveBuffer);
+                                graph.space().unmarkChunk(memoryChunk);
+                                byte[] toSendData = toSaveBuffer.data();
+                                toSaveBuffer.free();
+                                results[toSet] = toSendData;
+                            } else {
+                                results[toSet] = null;
+                            }
+                            defer.count();
+                        }
+                    });
+                }
+                int finalNbWait = nbWait;
+                defer.then(new Callback() {
+                    @Override
+                    public void on(Object result) {
+                        int finalSize = 0;
+                        for (int i = 0; i < finalNbWait; i++) {
+                            if (i != 0) {
+                                finalSize++;
+                            }
+                            if (results[i] != null) {
+                                finalSize = finalSize + results[i].length;
+                            }
+                        }
+                        finalSize = finalSize + 5;
+                        byte[] finalResult = new byte[finalSize];
+                        finalResult[0] = WSConstants.RESP_GET;
+                        finalResult[1] = payload[1];
+                        finalResult[2] = payload[2];
+                        finalResult[3] = payload[3];
+                        finalResult[4] = payload[4];
+                        int insertIndex = 5;
+                        for (int i = 0; i < finalNbWait; i++) {
+                            if (i != 0) {
+                                finalResult[insertIndex] = Constants.BUFFER_SEP;
+                                insertIndex++;
+                            }
+                            if (results[i] != null) {
+                                byte[] subResult = results[i];
+                                System.arraycopy(subResult, 0, finalResult, insertIndex, subResult.length);
+                                insertIndex = insertIndex + subResult.length;
+                            }
+                        }
+                        send(ByteBuffer.wrap(finalResult), channel);
+                    }
+                });
+                buffer.free();
+                break;
+            case WSConstants.REQ_REMOVE:
+                break;
+            case WSConstants.REQ_PUT:
+                break;
+            default:
+                //NOOP
+        }
     }
 
     private class PeerInternalListener extends AbstractReceiveListener {
@@ -53,17 +156,13 @@ public class WSServer implements WebSocketConnectionCallback {
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
             ByteBuffer byteBuffer = WebSockets.mergeBuffers(message.getData().getResource());
-            org.mwg.struct.Buffer graphBuffer = graph.newBuffer();
-            graphBuffer.writeAll(byteBuffer.array());
-            processMessage(graphBuffer);
+            processMessage(byteBuffer.array(), channel);
             super.onFullBinaryMessage(channel, message);
         }
 
         @Override
         protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) throws IOException {
-            org.mwg.struct.Buffer graphBuffer = graph.newBuffer();
-            graphBuffer.writeAll(message.getData().getBytes());
-            processMessage(graphBuffer);
+            processMessage(message.getData().getBytes(), channel);
             super.onFullTextMessage(channel, message);
         }
 
@@ -72,6 +171,7 @@ public class WSServer implements WebSocketConnectionCallback {
             peers.remove(webSocketChannel);
             super.onClose(webSocketChannel, channel);
         }
+
     }
 
 

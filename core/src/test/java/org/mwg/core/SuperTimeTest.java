@@ -9,6 +9,7 @@ import org.mwg.plugin.ChunkSpace;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.ChunkType;
 
 public class SuperTimeTest {
 
@@ -55,7 +56,7 @@ public class SuperTimeTest {
 
                 ChunkSpace space = (graph).space();
 
-                TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(CoreConstants.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
+                TimeTreeChunk superTimeTree = (TimeTreeChunk) space.getAndMark(ChunkType.TIME_TREE_CHUNK, 0, Constants.NULL_LONG, node_t0.id());
                 Assert.assertTrue(superTimeTree != null);
                 long superTimeTreeSize = superTimeTree.size();
                 Assert.assertTrue(superTimeTreeSize == 1); // TimeTree is not splitted

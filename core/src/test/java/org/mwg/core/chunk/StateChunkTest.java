@@ -23,7 +23,6 @@ public class StateChunkTest implements ChunkListener {
         StateChunk create(ChunkListener listener, Buffer payload, Chunk origin);
     }
 
-
     @Test
     public void heapStateChunkTest() {
         StateChunkFactory factory = new StateChunkFactory() {
@@ -33,14 +32,11 @@ public class StateChunkTest implements ChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
-
         saveLoadTest(factory);
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
-
     }
-
 
     /**
      * @ignore ts
@@ -226,6 +222,18 @@ public class StateChunkTest implements ChunkListener {
         free(chunk2);
         free(chunk);
 
+        //create an empty
+        StateChunk chunk4 = factory.create(this, null, null);
+        chunk4.set(0, Type.LONG_ARRAY, new long[0]);
+        Buffer saved4 = BufferBuilder.newHeapBuffer();
+        chunk4.save(saved4);
+
+        StateChunk chunk5 = factory.create(this, saved4, null);
+        Assert.assertEquals(((long[]) chunk5.get(0)).length, 0);
+
+        free(chunk5);
+        free(chunk4);
+        saved4.free();
 
         //test previously saved
 /*

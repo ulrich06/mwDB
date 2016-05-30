@@ -1,11 +1,14 @@
 
 package org.mwg.core.chunk.offheap;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.plugin.Chunk;
 import org.mwg.plugin.ChunkIterator;
 import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -181,14 +184,42 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         return null;
     }
 
+    @Override
+    public void getOrLoadAndMark(byte type, long world, long time, long id, Callback<Chunk> callback) {
+        Chunk fromMemory = getAndMark(type, world, time, id);
+        if (fromMemory != null) {
+            callback.on(fromMemory);
+        } else {
+            Buffer keys = graph().newBuffer();
+            BufferBuilder.keyToBuffer(keys, type, world, time, id);
+            graph().storage().get(keys, new Callback<Buffer>() {
+                @Override
+                public void on(Buffer result) {
+                    if (result != null) {
+                        Chunk loadedChunk_0 = create(type, world, time, id, result, null);
+                        result.free();
+                        Chunk loadedChunk = putAndMark(loadedChunk_0);
+                        if (loadedChunk != loadedChunk_0) {
+                            freeChunk(loadedChunk_0);
+                        }
+                        callback.on(loadedChunk);
+                    } else {
+                        keys.free();
+                        callback.on(null);
+                    }
+                }
+            });
+        }
+    }
+
     private OffHeapChunk internal_create(long addr) {
         byte chunkType = (byte) OffHeapLongArray.get(addr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
         switch (chunkType) {
-            case CoreConstants.STATE_CHUNK:
+            case ChunkType.STATE_CHUNK:
                 return new OffHeapStateChunk(this, addr, null, null);
-            case CoreConstants.TIME_TREE_CHUNK:
+            case ChunkType.TIME_TREE_CHUNK:
                 return new OffHeapTimeTreeChunk(this, addr, null);
-            case CoreConstants.WORLD_ORDER_CHUNK:
+            case ChunkType.WORLD_ORDER_CHUNK:
                 return new OffHeapWorldOrderChunk(this, addr, null);
             default:
                 return null;
@@ -271,14 +302,17 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public Chunk create(byte p_type, long p_world, long p_time, long p_id, Buffer initialPayload, Chunk previousChunk) {
         OffHeapChunk newChunk = null;
         switch (p_type) {
-            case CoreConstants.STATE_CHUNK:
+            case ChunkType.STATE_CHUNK:
                 newChunk = new OffHeapStateChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload, previousChunk);
                 break;
-            case CoreConstants.WORLD_ORDER_CHUNK:
+            case ChunkType.WORLD_ORDER_CHUNK:
                 newChunk = new OffHeapWorldOrderChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
                 break;
-            case CoreConstants.TIME_TREE_CHUNK:
+            case ChunkType.TIME_TREE_CHUNK:
                 newChunk = new OffHeapTimeTreeChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
+                break;
+            case ChunkType.GEN_CHUNK:
+                newChunk = new OffHeapGenChunk(this, CoreConstants.OFFHEAP_NULL_PTR, initialPayload);
                 break;
         }
         if (newChunk != null) {
@@ -392,13 +426,13 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 //FREE VICTIM FROM MEMORY
                 byte chunkType = (byte) OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
                 switch (chunkType) {
-                    case CoreConstants.STATE_CHUNK:
+                    case ChunkType.STATE_CHUNK:
                         OffHeapStateChunk.free(currentVictimPtr);
                         break;
-                    case CoreConstants.TIME_TREE_CHUNK:
+                    case ChunkType.TIME_TREE_CHUNK:
                         OffHeapTimeTreeChunk.free(currentVictimPtr);
                         break;
-                    case CoreConstants.WORLD_ORDER_CHUNK:
+                    case ChunkType.WORLD_ORDER_CHUNK:
                         OffHeapWorldOrderChunk.free(currentVictimPtr);
                         break;
                 }
@@ -532,14 +566,17 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
             if (previousPtr != CoreConstants.OFFHEAP_NULL_PTR) {
                 byte chunkType = (byte) OffHeapLongArray.get(previousPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
                 switch (chunkType) {
-                    case CoreConstants.STATE_CHUNK:
+                    case ChunkType.STATE_CHUNK:
                         OffHeapStateChunk.free(previousPtr);
                         break;
-                    case CoreConstants.TIME_TREE_CHUNK:
+                    case ChunkType.TIME_TREE_CHUNK:
                         OffHeapTimeTreeChunk.free(previousPtr);
                         break;
-                    case CoreConstants.WORLD_ORDER_CHUNK:
+                    case ChunkType.WORLD_ORDER_CHUNK:
                         OffHeapWorldOrderChunk.free(previousPtr);
+                        break;
+                    case ChunkType.GEN_CHUNK:
+                        OffHeapGenChunk.free(previousPtr);
                         break;
                 }
             }
@@ -556,14 +593,17 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     public void freeChunk(Chunk chunk) {
         OffHeapChunk casted = (OffHeapChunk) chunk;
         switch (casted.chunkType()) {
-            case CoreConstants.STATE_CHUNK:
+            case ChunkType.STATE_CHUNK:
                 OffHeapStateChunk.free(casted.addr());
                 break;
-            case CoreConstants.TIME_TREE_CHUNK:
+            case ChunkType.TIME_TREE_CHUNK:
                 OffHeapTimeTreeChunk.free(casted.addr());
                 break;
-            case CoreConstants.WORLD_ORDER_CHUNK:
+            case ChunkType.WORLD_ORDER_CHUNK:
                 OffHeapWorldOrderChunk.free(casted.addr());
+                break;
+            case ChunkType.GEN_CHUNK:
+                OffHeapGenChunk.free(casted.addr());
                 break;
         }
     }

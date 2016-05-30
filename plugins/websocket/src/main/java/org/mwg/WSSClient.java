@@ -11,8 +11,8 @@ import org.xnio.*;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class WSSClient implements Storage {
@@ -23,47 +23,55 @@ public class WSSClient implements Storage {
 
     private Graph graph;
 
-    private BlockingQueue<Byte> keyPool;
-
-    private Callback[] callbacks;
+    private Map<Integer, Callback<Buffer>> callbacks;
 
     public WSSClient(String p_url) {
         this.url = p_url;
-        keyPool = new ArrayBlockingQueue<Byte>(Byte.MAX_VALUE - Byte.MIN_VALUE);
-        for (byte i = Byte.MIN_VALUE; i < Byte.MAX_VALUE; i++) {
-            keyPool.add(i);
-        }
-        keyPool.add(Byte.MAX_VALUE);
-        callbacks = new Callback[Byte.MAX_VALUE - Byte.MIN_VALUE];
+        this.callbacks = new HashMap<Integer, Callback<Buffer>>();
     }
 
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
         if (channel == null) {
-            throw new RuntimeException("Please connect your websocket client first.");
+            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
         }
+        byte[] payload = keys.data();
+        int hash = callback.hashCode();
+        callbacks.put(hash, callback);
 
-        Short.MAX_VALUE
 
-
-        byte[] keys_payload = keys.data();
-        ByteBuffer buffer = ByteBuffer.allocate(keys_payload.length + 2);
-        buffer.put(WSConstants.REQ_GET);
-        try {
-            buffer.put(keyPool.take());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        byte[] ex_payload = new byte[payload.length + 5];
+        ex_payload[0] = WSConstants.REQ_GET;
+        ex_payload[1] = (byte) ((hash & 0xFF000000) >> 24);
+        ex_payload[2] = (byte) ((hash & 0x00FF0000) >> 16);
+        ex_payload[3] = (byte) ((hash & 0x0000FF00) >> 8);
+        ex_payload[4] = (byte) ((hash & 0x000000FF) >> 0);
+        System.arraycopy(payload,0,ex_payload,5,payload.length);
+        send(ByteBuffer.wrap(ex_payload));
     }
 
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
-
+        if (channel == null) {
+            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
+        }
+        byte[] payload = stream.data();
+        ByteBuffer buffer = ByteBuffer.allocate(payload.length + 1);
+        buffer.put(WSConstants.REQ_PUT);
+        buffer.put(payload);
+        send(buffer);
     }
 
     @Override
     public void remove(Buffer keys, Callback<Boolean> callback) {
-
+        if (channel == null) {
+            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
+        }
+        byte[] payload = keys.data();
+        ByteBuffer buffer = ByteBuffer.allocate(payload.length + 1);
+        buffer.put(WSConstants.REQ_REMOVE);
+        buffer.put(payload);
+        send(buffer);
     }
 
     @Override
@@ -73,9 +81,7 @@ public class WSSClient implements Storage {
                 callback.on(null);
             }
         }
-
         this.graph = p_graph;
-
         try {
             XnioWorker _worker;
             Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
@@ -124,42 +130,78 @@ public class WSSClient implements Storage {
             send(buffer);
         }*/
 
+        callback.on(new Short("10"));//todo change this
+
     }
 
     @Override
     public void disconnect(Short prefix, Callback<Boolean> callback) {
-
+        try {
+            channel.sendClose();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            callback.on(true);
+        }
     }
 
-    private void send(Buffer buffer) {
-        ByteBuffer wrapped = ByteBuffer.wrap(buffer.data());
-        buffer.free();
-        WebSockets.sendBinary(wrapped, channel, new WebSocketCallback<Void>() {
+    private void send(ByteBuffer buffer) {
+        WebSockets.sendBinary(buffer, channel, new WebSocketCallback<Void>() {
             @Override
             public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
                 //TODO process
+                System.out.println("Yes");
             }
 
             @Override
             public void onError(WebSocketChannel webSocketChannel, Void aVoid, Throwable throwable) {
                 //TODO process
+                System.out.println("Error");
             }
         });
+    }
+
+    //pass to a thread pool
+    private void processMessage(byte[] buffer) {
+        switch (buffer[0]) {
+            case WSConstants.RESP_GET:
+                //read 4 bytes
+                if (buffer.length >= 5) {
+                    int hash = buffer[1] << 24 | (buffer[2] & 0xFF) << 16 | (buffer[3] & 0xFF) << 8 | (buffer[4] & 0xFF);;
+                    Callback<Buffer> callback = callbacks.get(hash);
+                    if (callback != null) {
+                        callbacks.remove(hash);
+
+                        Buffer bufferResult = graph.newBuffer();
+                        byte[] shrinked = new byte[buffer.length - 5];
+                        System.arraycopy(buffer, 5, shrinked, 0, buffer.length - 5);
+                        bufferResult.writeAll(shrinked);
+                        callback.on(bufferResult);
+
+                    }
+                }
+
+
+                break;
+            case WSConstants.REQ_UPDATE:
+                //TODO
+                break;
+        }
     }
 
     private class MessageReceiver extends AbstractReceiveListener {
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
-            //TODO
+            ByteBuffer byteBuffer = WebSockets.mergeBuffers(message.getData().getResource());
+            processMessage(byteBuffer.array());
             super.onFullBinaryMessage(channel, message);
         }
 
         @Override
         protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) throws IOException {
-            //TODO
+            processMessage(message.getData().getBytes());
             super.onFullTextMessage(channel, message);
         }
     }
-
 
 }

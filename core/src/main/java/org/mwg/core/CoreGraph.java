@@ -9,7 +9,7 @@ import org.mwg.plugin.*;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
 import org.mwg.core.chunk.*;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.Task;
 import org.mwg.task.TaskActionRegistry;
@@ -189,16 +189,16 @@ class CoreGraph implements org.mwg.Graph {
                     }
                     final Buffer connectionKeys = selfPointer.newBuffer();
                     //preload ObjKeyGenerator
-                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload WorldKeyGenerator
-                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
+                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
                     connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload GlobalWorldOrder
-                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
                     connectionKeys.write(CoreConstants.BUFFER_SEP);
                     //preload GlobalDictionary
-                    BufferBuilder.keyToBuffer(connectionKeys, CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
                     connectionKeys.write(CoreConstants.BUFFER_SEP);
                     selfPointer._storage.get(connectionKeys, new Callback<Buffer>() {
                         @Override
@@ -218,18 +218,18 @@ class CoreGraph implements org.mwg.Graph {
 
                                     WorldOrderChunk globalWorldOrder;
                                     if (view3.size() > 0) {
-                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
+                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
                                     } else {
-                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
+                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
                                     }
                                     selfPointer._space.putAndMark(globalWorldOrder);
 
                                     //init the global dictionary chunk
                                     StateChunk globalDictionaryChunk;
                                     if (view4.size() > 0) {
-                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
+                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
                                     } else {
-                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
+                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
                                     }
                                     selfPointer._space.putAndMark(globalDictionaryChunk);
 
@@ -377,13 +377,13 @@ class CoreGraph implements org.mwg.Graph {
             }
             //save obj key gen key
             stream.write(CoreConstants.BUFFER_SEP);
-            BufferBuilder.keyToBuffer(stream, CoreConstants.KEY_GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
+            BufferBuilder.keyToBuffer(stream, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
             //save obj key gen payload
             stream.write(CoreConstants.BUFFER_SEP);
             Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), stream);
             //save world key gen key
             stream.write(CoreConstants.BUFFER_SEP);
-            BufferBuilder.keyToBuffer(stream, CoreConstants.KEY_GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
+            BufferBuilder.keyToBuffer(stream, ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
             //save world key gen payload
             stream.write(CoreConstants.BUFFER_SEP);
             Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), stream);
@@ -564,5 +564,10 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public TaskActionRegistry actions() {
         return _registry;
+    }
+
+    @Override
+    public Storage storage() {
+        return _storage;
     }
 }

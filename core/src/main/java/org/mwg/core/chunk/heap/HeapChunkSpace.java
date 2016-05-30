@@ -1,11 +1,14 @@
 
 package org.mwg.core.chunk.heap;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.plugin.Chunk;
 import org.mwg.plugin.ChunkIterator;
 import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -171,6 +174,38 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
     }
 
     @Override
+    public void getOrLoadAndMark(byte type, long world, long time, long id, Callback<Chunk> callback) {
+        Chunk fromMemory = getAndMark(type, world, time, id);
+        if (fromMemory != null) {
+            callback.on(fromMemory);
+        } else {
+            Buffer keys = graph().newBuffer();
+            BufferBuilder.keyToBuffer(keys, type, world, time, id);
+            graph().storage().get(keys, new Callback<Buffer>() {
+                @Override
+                public void on(Buffer result) {
+                    if (result != null) {
+                        Chunk loadedChunk_0 = create(type, world, time, id, result, null);
+                        result.free();
+                        if (loadedChunk_0 == null) {
+                            callback.on(null);
+                        } else {
+                            Chunk loadedChunk = putAndMark(loadedChunk_0);
+                            if (loadedChunk != loadedChunk_0) {
+                                freeChunk(loadedChunk_0);
+                            }
+                            callback.on(loadedChunk);
+                        }
+                    } else {
+                        keys.free();
+                        callback.on(null);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
     public void unmark(byte type, long world, long time, long id) {
         int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
         int m = this._elementHash[index];
@@ -219,12 +254,14 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
     @Override
     public Chunk create(byte p_type, long p_world, long p_time, long p_id, Buffer p_initialPayload, Chunk origin) {
         switch (p_type) {
-            case CoreConstants.STATE_CHUNK:
+            case ChunkType.STATE_CHUNK:
                 return new HeapStateChunk(p_world, p_time, p_id, this, p_initialPayload, origin);
-            case CoreConstants.WORLD_ORDER_CHUNK:
+            case ChunkType.WORLD_ORDER_CHUNK:
                 return new HeapWorldOrderChunk(p_world, p_time, p_id, this, p_initialPayload);
-            case CoreConstants.TIME_TREE_CHUNK:
+            case ChunkType.TIME_TREE_CHUNK:
                 return new HeapTimeTreeChunk(p_world, p_time, p_id, this, p_initialPayload);
+            case ChunkType.GEN_CHUNK:
+                return new HeapGenChunk(p_world, p_time, p_id, this, p_initialPayload);
         }
         return null;
     }

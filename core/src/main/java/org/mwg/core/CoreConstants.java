@@ -7,15 +7,6 @@ public class CoreConstants extends org.mwg.Constants {
      */
 
     /**
-     * Chunk Save/Load special chars
-     */
-    /**
-     * @native ts
-     * public static KEY_SEP : number = ";".charCodeAt(0);
-     */
-    public static final byte KEY_SEP = ';';
-
-    /**
      * @native ts
      * public static CHUNK_SEP : number = "|".charCodeAt(0);
      */
@@ -47,17 +38,6 @@ public class CoreConstants extends org.mwg.Constants {
 
     //public static final short REMOVED_BIT_INDEX = 1;
     //public static final int REMOVED_BIT = 1 << REMOVED_BIT_INDEX;
-
-    /**
-     * ChunkTypes
-     */
-    public static final byte STATE_CHUNK = 0;
-
-    public static final byte TIME_TREE_CHUNK = 1;
-
-    public static final byte WORLD_ORDER_CHUNK = 2;
-
-    public static final byte KEY_GEN_CHUNK = 3;
 
     /**
      * Node constants

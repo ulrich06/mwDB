@@ -1,11 +1,12 @@
 package org.mwg.core.chunk.offheap;
 
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.Buffer;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 
 /**
@@ -75,7 +76,6 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
         }
-
     }
 
     @Override
@@ -138,7 +138,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
     @Override
     public final byte chunkType() {
-        return CoreConstants.TIME_TREE_CHUNK;
+        return ChunkType.TIME_TREE_CHUNK;
     }
 
     @Override

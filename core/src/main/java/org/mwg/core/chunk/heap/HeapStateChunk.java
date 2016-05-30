@@ -4,10 +4,11 @@ import org.mwg.Type;
 import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
 import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.*;
 import org.mwg.plugin.Resolver;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
@@ -175,7 +176,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 
     @Override
     public final byte chunkType() {
-        return CoreConstants.STATE_CHUNK;
+        return ChunkType.STATE_CHUNK;
     }
 
     @Override

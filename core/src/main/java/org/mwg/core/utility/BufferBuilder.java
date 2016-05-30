@@ -1,7 +1,7 @@
 package org.mwg.core.utility;
 
 import org.mwg.core.CoreConstants;
-
+import org.mwg.plugin.Base64;
 public class BufferBuilder {
 
     private BufferBuilder() {

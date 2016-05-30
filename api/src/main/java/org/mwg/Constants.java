@@ -54,5 +54,14 @@ public class Constants {
      */
     public static final byte BUFFER_SEP = '#';
 
+    /**
+     * Chunk Save/Load special chars
+     */
+    /**
+     * @native ts
+     * public static KEY_SEP : number = ";".charCodeAt(0);
+     */
+    public static final byte KEY_SEP = ';';
+
 }
 

@@ -7,6 +7,7 @@ import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
 import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.ChunkType;
 
 public class ChunkSpaceTest {
     @Test
@@ -37,14 +38,17 @@ public class ChunkSpaceTest {
 
 
     public void test(ChunkSpace space) {
-        StateChunk stateChunk = (StateChunk) space.create(CoreConstants.STATE_CHUNK, 0, 0, 0, null, null);
+        StateChunk stateChunk = (StateChunk) space.create(ChunkType.STATE_CHUNK, 0, 0, 0, null, null);
         space.putAndMark(stateChunk);
 
-        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) space.create(CoreConstants.WORLD_ORDER_CHUNK, 0, 0, 1, null, null);
+        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) space.create(ChunkType.WORLD_ORDER_CHUNK, 0, 0, 1, null, null);
         space.putAndMark(worldOrderChunk);
 
-        TimeTreeChunk timeTreeChunk = (TimeTreeChunk) space.create(CoreConstants.TIME_TREE_CHUNK, 0, 0, 2, null, null);
+        TimeTreeChunk timeTreeChunk = (TimeTreeChunk) space.create(ChunkType.TIME_TREE_CHUNK, 0, 0, 2, null, null);
         space.putAndMark(timeTreeChunk);
+
+        GenChunk genChunk = (GenChunk) space.create(ChunkType.GEN_CHUNK, 1, 1, 1, null, null);
+        space.putAndMark(genChunk);
 
         space.free();
     }
