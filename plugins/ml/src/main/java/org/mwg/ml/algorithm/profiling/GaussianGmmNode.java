@@ -767,7 +767,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     public double[] getCovarianceArray(double[] avg, double[] err) {
         if (avg == null) {
-            return err;
+            return err.clone();
         }
         if (err == null) {
             err = new double[avg.length];
@@ -795,7 +795,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
             return covariances;
         } else {
-            return err;
+            return err.clone();
         }
     }
 
