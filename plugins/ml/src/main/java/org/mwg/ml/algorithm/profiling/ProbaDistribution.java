@@ -26,6 +26,9 @@ public class ProbaDistribution {
                 result+=distributions[j].density(features,false)*total[j]/global;
             }
         }
+        if(result>1){
+            result=1;
+        }
         return result;
     }
 

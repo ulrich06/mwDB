@@ -106,7 +106,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
         }
         double sums[] = getSums(classNum);
         double sumSquares[] = getSumSquares(classNum);
-        MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total);
+        MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total,false);
         return distr.density(value, true);//TODO Normalize on average? Does not matter (comparing anyway)
         //But normalization leaves less chance for underflow
     }

@@ -32,7 +32,7 @@ public class MultivariateNormalDistribution {
     int rank;
     double det;
 
-    public MultivariateNormalDistribution(double[] means, Matrix cov) {
+    public MultivariateNormalDistribution(double[] means, Matrix cov, boolean allowSingular) {
         this.means = means;
         if (cov != null) {
             this.covariance = cov;
@@ -40,11 +40,58 @@ public class MultivariateNormalDistribution {
             for(int i=0;i<covDiag.length;i++){
                 covDiag[i]=cov.get(i,i);
             }
-            pinvsvd = new PInvSVD();
-            pinvsvd.factor(covariance, false);
-            inv = pinvsvd.getPInv();
-            det = pinvsvd.getDeterminant();
-            rank = pinvsvd.getRank();
+            this.pinvsvd = new PInvSVD();
+            this.pinvsvd.factor(covariance, false);
+            this.inv = pinvsvd.getPInv();
+            this.det = pinvsvd.getDeterminant();
+            this.rank = pinvsvd.getRank();
+
+            if(!allowSingular && this.rank<cov.rows()){
+                this.covariance=cov.clone();
+                double[] temp=new double[covDiag.length];
+                for(int i=0;i<covDiag.length;i++){
+                    temp[i]=Math.sqrt(covDiag[i]);
+                }
+
+                for(int i=0;i<covDiag.length;i++){
+                    for(int j=i+1;j<covDiag.length;j++){
+                        double d=this.covariance.get(i,j)-0.001*temp[i]*temp[j];
+                        this.covariance.set(i,j,d);
+                        this.covariance.set(j,i,d);
+                    }
+                }
+                pinvsvd = new PInvSVD();
+                pinvsvd.factor(this.covariance, false);
+                inv = pinvsvd.getPInv();
+                det = pinvsvd.getDeterminant();
+                rank = pinvsvd.getRank();
+            }
+
+
+
+            //Solve complete covariance dependence
+         /*   if(this.rank<means.length){
+                this.covariance=cov.clone();
+                double[] temp=new double[covDiag.length];
+                for(int i=0;i<covDiag.length;i++){
+                    temp[i]=Math.sqrt(covDiag[i]);
+                }
+
+                for(int i=0;i<covDiag.length;i++){
+                    for(int j=i+1;j<covDiag.length;j++){
+                        double d=this.covariance.get(i,j)-0.001*temp[i]*temp[j];
+                        this.covariance.set(i,j,d);
+                        this.covariance.set(j,i,d);
+                    }
+                }
+                pinvsvd = new PInvSVD();
+                pinvsvd.factor(this.covariance, false);
+                inv = pinvsvd.getPInv();
+                det = pinvsvd.getDeterminant();
+                rank = pinvsvd.getRank();
+            }*/
+
+
         }
     }
 
@@ -93,7 +140,7 @@ public class MultivariateNormalDistribution {
     //Sum squares is a n(n+1)/2 vector of sumsquares of features, in upper-triangle row shapes
     //Example:   for (int i = 0; i < features; i++) {    for (int j = i; j < features; j++) {  sumsquares[count] + = x[i] * x[j];  count++; } }
     //Total is the number of observations
-    public static MultivariateNormalDistribution getDistribution(double[] sum, double[] sumsquares, int total) {
+    public static MultivariateNormalDistribution getDistribution(double[] sum, double[] sumsquares, int total, boolean allowSingular) {
         if (total < 2) {
             return null;
         }
@@ -119,7 +166,7 @@ public class MultivariateNormalDistribution {
             }
         }
         Matrix cov = new Matrix(covariances, features, features);
-        return new MultivariateNormalDistribution(avg, cov);
+        return new MultivariateNormalDistribution(avg, cov,allowSingular);
     }
 
 
@@ -152,7 +199,7 @@ public class MultivariateNormalDistribution {
     }
 
     public MultivariateNormalDistribution clone(double[] avg) {
-        MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null);
+        MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null,false);
         res.pinvsvd = this.pinvsvd;
         res.inv = this.inv;
         res.det = this.det;

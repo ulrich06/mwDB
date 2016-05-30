@@ -428,7 +428,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             for (int i = 0; i < nbfeature; i++) {
                 covBackup.set(i, i, err[i]);
             }
-            MultivariateNormalDistribution mvnBackup=new MultivariateNormalDistribution(null,covBackup);
+            MultivariateNormalDistribution mvnBackup=new MultivariateNormalDistribution(null,covBackup,false);
 
             int[] totals = new int[leaves.length];
             int globalTotal = 0;
@@ -440,7 +440,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 globalTotal += totals[i];
                 double[] avg = temp.getAvg();
                 if (totals[i] > 2) {
-                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg,err));
+                    distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg,err),false);
                     distributions[i].setMin(temp.getMin());
                     distributions[i].setMax(temp.getMax());
                 } else {
@@ -604,7 +604,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public double getProbability(double[] featArray, double[] err, boolean normalizeOnAvg) {
         double[] sum = (double[]) super.get(INTERNAL_SUM_KEY);
         double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal());
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal(),false);
         if (mnd == null) {
             //todo handle dirac to be replaced later
             return 0;
@@ -618,7 +618,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         double[] sum = (double[]) super.get(INTERNAL_SUM_KEY);
         double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal());
+        MultivariateNormalDistribution mnd = MultivariateNormalDistribution.getDistribution(sum, sumsquares, getTotal(),false);
 
         if (mnd == null) {
             //todo handle dirac to be replaced later
