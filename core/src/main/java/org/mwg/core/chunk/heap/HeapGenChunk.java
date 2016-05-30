@@ -53,7 +53,7 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
 
     /**
      * @native ts
-     * private _prefix: string;
+     * private _prefix: Long;
      */
     private final long _prefix;
 
@@ -67,7 +67,7 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
      * this._space = p_space;
      * this._flags = 0;
      * this._marks = 0;
-     * this._prefix = "0x" + p_id.toString(org.mwg.Constants.PREFIX_SIZE);
+     * this._prefix = Long.fromNumber(p_id).shiftLeft((org.mwg.Constants.LONG_SIZE - org.mwg.Constants.PREFIX_SIZE));
      * this._currentIndex = new java.util.concurrent.atomic.AtomicLong(0);
      * this.load(initialPayload);
      */
@@ -80,7 +80,8 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
         this._flags = 0;
         this._marks = 0;
 
-        this._prefix = p_id << Constants.LONG_SIZE - Constants.PREFIX_SIZE;
+        //moves the prefix 53-size(short) times to the left;
+        this._prefix = p_id << (Constants.LONG_SIZE - Constants.PREFIX_SIZE);
         this._currentIndex = new AtomicLong(0);
         load(initialPayload);
 
@@ -107,10 +108,10 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
      * var previousIndex = this._currentIndex.get();
      * this._currentIndex.compareAndSet(previousIndex,previousIndex+1);
      * this.internal_set_dirty();
-     * var indexHex = this._currentIndex.get().toString(org.mwg.Constants.PREFIX_SIZE);
-     * var objectKey = parseInt(this._prefix + "000000000".substring(0,9-indexHex.length) + indexHex, org.mwg.Constants.PREFIX_SIZE);
+     * var newIndex = this._currentIndex.get();
+     * var objectKey = this._prefix.add(newIndex).toNumber();
      * if (objectKey >= org.mwg.Constants.NULL_LONG) {
-     * throw new Error("Object Index exceeds teh maximum JavaScript number capacity. (2^"+org.mwg.Constants.LONG_SIZE+")");
+     * throw new Error("Object Index exceeds the maximum JavaScript number capacity. (2^"+org.mwg.Constants.LONG_SIZE+")");
      * }
      * return objectKey;
      */
@@ -120,7 +121,7 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
         if (_currentIndex.get() == Constants.KEY_PREFIX_MASK) {
             throw new IndexOutOfBoundsException("Object Index could not be created because it exceeded the capacity of the current prefix. Ask for a new prefix.");
         }
-        //moves the prefix 53-size(short) times to the left;
+
         long objectKey = _prefix + nextIndex;
         internal_set_dirty();
         if (objectKey >= Constants.END_OF_TIME) {
