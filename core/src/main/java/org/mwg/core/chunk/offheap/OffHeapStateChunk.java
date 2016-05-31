@@ -389,6 +389,11 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
         }
     }
 
+    @Override
+    public void merge(Buffer buffer) {
+        //TODO
+    }
+
     private void load(Buffer buffer) {
         if (buffer == null || buffer.size() == 0) {
             return;
@@ -825,7 +830,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 break;
         }
     }
-
 
     @Override
     public final long flags() {

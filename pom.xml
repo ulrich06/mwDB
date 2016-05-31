@@ -91,7 +91,7 @@
         <module>api</module>
         <module>core</module>
 
-        <!--<module>corejs</module>-->
+        <module>corejs</module>
 
         <!-- Plugins -->
         <module>plugins/importer</module>
@@ -102,8 +102,7 @@
         <module>plugins/ml</module>
         <module>plugins/rest</module>
 
-
-        <!-- <module>plugins/websocket</module> -->
+        <module>plugins/websocket</module>
 
     </modules>
 

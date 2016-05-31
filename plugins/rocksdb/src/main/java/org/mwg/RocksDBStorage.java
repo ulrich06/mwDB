@@ -1,5 +1,6 @@
 package org.mwg;
 
+import org.mwg.plugin.Base64;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
@@ -107,7 +108,7 @@ public class RocksDBStorage implements Storage {
     }
 
     @Override
-    public void disconnect(Short prefix, Callback<Boolean> callback) {
+    public void disconnect(Callback<Boolean> callback) {
         //TODO write the prefix
         try {
             WriteOptions options = new WriteOptions();
@@ -131,7 +132,7 @@ public class RocksDBStorage implements Storage {
     private static final byte[] prefixKey = "prefix".getBytes();
 
     @Override
-    public void connect(Graph graph, Callback<Short> callback) {
+    public void connect(Graph graph, Callback<Boolean> callback) {
         if (_isConnected) {
             if (callback != null) {
                 callback.on(null);
@@ -152,15 +153,8 @@ public class RocksDBStorage implements Storage {
         try {
             _db = RocksDB.open(_options, targetDB.getAbsolutePath());
             _isConnected = true;
-
-            byte[] current = _db.get(prefixKey);
-            if (current == null) {
-                current = new String("0").getBytes();
-            }
-            Short currentPrefix = Short.parseShort(new String(current));
-            _db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
             if (callback != null) {
-                callback.on(currentPrefix);
+                callback.on(true);
             }
         } catch (RocksDBException e) {
             e.printStackTrace();
@@ -170,4 +164,31 @@ public class RocksDBStorage implements Storage {
         }
     }
 
+    @Override
+    public void lock(Callback<Buffer> callback) {
+        try {
+            byte[] current = _db.get(prefixKey);
+            if (current == null) {
+                current = new String("0").getBytes();
+            }
+            Short currentPrefix = Short.parseShort(new String(current));
+            _db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
+            if (callback != null) {
+                Buffer newBuf = _graph.newBuffer();
+                Base64.encodeIntToBuffer(currentPrefix,newBuf);
+                callback.on(newBuf);
+            }
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+            if (callback != null) {
+                callback.on(null);
+            }
+        }
+    }
+
+    @Override
+    public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        //noop
+        callback.on(true);
+    }
 }

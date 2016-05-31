@@ -9,7 +9,6 @@ import org.mwg.plugin.*;
 import org.mwg.struct.*;
 import org.mwg.core.chunk.heap.ArrayLongLongMap;
 import org.mwg.core.chunk.*;
-import org.mwg.plugin.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.Task;
 import org.mwg.task.TaskActionRegistry;
@@ -178,103 +177,101 @@ class CoreGraph implements org.mwg.Graph {
             //first connect the scheduler
             this._scheduler.start();
             final CoreGraph selfPointer = this;
-            this._storage.connect(this, new Callback<Short>() {
+            this._storage.connect(this, new Callback<Boolean>() {
                 @Override
-                public void on(Short graphPrefix) {
-                    _prefix = graphPrefix;
-                    if (_prefix == null) {
-                        if (PrimitiveHelper.isDefined(callback)) {
-                            callback.on(false);
-                            return;
-                        }
-                    }
-                    final Buffer connectionKeys = selfPointer.newBuffer();
-                    //preload ObjKeyGenerator
-                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix);
-                    connectionKeys.write(CoreConstants.BUFFER_SEP);
-                    //preload WorldKeyGenerator
-                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix);
-                    connectionKeys.write(CoreConstants.BUFFER_SEP);
-                    //preload GlobalWorldOrder
-                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
-                    connectionKeys.write(CoreConstants.BUFFER_SEP);
-                    //preload GlobalDictionary
-                    BufferBuilder.keyToBuffer(connectionKeys, ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
-                    connectionKeys.write(CoreConstants.BUFFER_SEP);
-                    selfPointer._storage.get(connectionKeys, new Callback<Buffer>() {
+                public void on(Boolean connection) {
+                    selfPointer._storage.lock(new Callback<Buffer>() {
                         @Override
-                        public void on(Buffer payloads) {
-                            connectionKeys.free();
-                            if (payloads != null) {
+                        public void on(Buffer prefixBuf) {
+                            _prefix = (short) Base64.decodeToIntWithBounds(prefixBuf, 0, prefixBuf.size());
+                            prefixBuf.free();
+                            final Buffer connectionKeys = selfPointer.newBuffer();
+                            //preload ObjKeyGenerator
+                            BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, _prefix);
+                            connectionKeys.write(CoreConstants.BUFFER_SEP);
+                            //preload WorldKeyGenerator
+                            BufferBuilder.keyToBuffer(connectionKeys, ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, _prefix);
+                            connectionKeys.write(CoreConstants.BUFFER_SEP);
+                            //preload GlobalWorldOrder
+                            BufferBuilder.keyToBuffer(connectionKeys, ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+                            connectionKeys.write(CoreConstants.BUFFER_SEP);
+                            //preload GlobalDictionary
+                            BufferBuilder.keyToBuffer(connectionKeys, ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+                            connectionKeys.write(CoreConstants.BUFFER_SEP);
+                            selfPointer._storage.get(connectionKeys, new Callback<Buffer>() {
+                                @Override
+                                public void on(Buffer payloads) {
+                                    connectionKeys.free();
+                                    if (payloads != null) {
+                                        BufferIterator it = payloads.iterator();
+                                        Buffer view1 = it.next();
+                                        Buffer view2 = it.next();
+                                        Buffer view3 = it.next();
+                                        Buffer view4 = it.next();
 
-                                BufferIterator it = payloads.iterator();
-                                Buffer view1 = it.next();
-                                Buffer view2 = it.next();
-                                Buffer view3 = it.next();
-                                Buffer view4 = it.next();
+                                        Boolean noError = true;
+                                        try {
+                                            //init the global universe tree (mandatory for synchronious create)
 
-                                Boolean noError = true;
-                                try {
-                                    //init the global universe tree (mandatory for synchronious create)
+                                            WorldOrderChunk globalWorldOrder;
+                                            if (view3.size() > 0) {
+                                                globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
+                                            } else {
+                                                globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
+                                            }
+                                            selfPointer._space.putAndMark(globalWorldOrder);
 
-                                    WorldOrderChunk globalWorldOrder;
-                                    if (view3.size() > 0) {
-                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
+                                            //init the global dictionary chunk
+                                            StateChunk globalDictionaryChunk;
+                                            if (view4.size() > 0) {
+                                                globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
+                                            } else {
+                                                globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
+                                            }
+                                            selfPointer._space.putAndMark(globalDictionaryChunk);
+
+                                            if (view2.size() > 0) {
+                                                selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, _prefix, view2, null);
+                                            } else {
+                                                selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, _prefix, null, null);
+                                            }
+                                            selfPointer._space.putAndMark(selfPointer._worldKeyCalculator);
+
+                                            if (view1.size() > 0) {
+                                                selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, _prefix, view1, null);
+                                            } else {
+                                                selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, _prefix, null, null);
+                                            }
+                                            selfPointer._space.putAndMark(selfPointer._nodeKeyCalculator);
+
+                                            //init the resolver
+                                            selfPointer._resolver.init(selfPointer);
+
+                                            final NodeFactory[] localFactories = selfPointer._factories;
+                                            if (localFactories != null) {
+                                                for (int i = 0; i < localFactories.length; i++) {
+                                                    final long encodedFactoryKey = selfPointer._resolver.stringToHash(localFactories[i].name(), false); //type are not inserted into the global dictionary
+                                                    selfPointer._factoryNames.put(encodedFactoryKey, i);
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            noError = false;
+                                        }
+                                        payloads.free();
+                                        selfPointer._lock.set(true);
+                                        if (PrimitiveHelper.isDefined(callback)) {
+                                            callback.on(noError);
+                                        }
                                     } else {
-                                        globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
-                                    }
-                                    selfPointer._space.putAndMark(globalWorldOrder);
-
-                                    //init the global dictionary chunk
-                                    StateChunk globalDictionaryChunk;
-                                    if (view4.size() > 0) {
-                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
-                                    } else {
-                                        globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
-                                    }
-                                    selfPointer._space.putAndMark(globalDictionaryChunk);
-
-                                    if (view2.size() > 0) {
-                                        selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, view2, null);
-                                    } else {
-                                        selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, graphPrefix, null, null);
-                                    }
-                                    selfPointer._space.putAndMark(selfPointer._worldKeyCalculator);
-
-                                    if (view1.size() > 0) {
-                                        selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, view1, null);
-                                    } else {
-                                        selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, graphPrefix, null, null);
-                                    }
-                                    selfPointer._space.putAndMark(selfPointer._nodeKeyCalculator);
-
-                                    //init the resolver
-                                    selfPointer._resolver.init(selfPointer);
-
-                                    final NodeFactory[] localFactories = selfPointer._factories;
-                                    if (localFactories != null) {
-                                        for (int i = 0; i < localFactories.length; i++) {
-                                            final long encodedFactoryKey = selfPointer._resolver.stringToHash(localFactories[i].name(), false); //type are not inserted into the global dictionary
-                                            selfPointer._factoryNames.put(encodedFactoryKey, i);
+                                        selfPointer._lock.set(true);
+                                        if (PrimitiveHelper.isDefined(callback)) {
+                                            callback.on(false);
                                         }
                                     }
 
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    noError = false;
                                 }
-                                payloads.free();
-                                selfPointer._lock.set(true);
-                                if (PrimitiveHelper.isDefined(callback)) {
-                                    callback.on(noError);
-                                }
-                            } else {
-                                selfPointer._lock.set(true);
-                                if (PrimitiveHelper.isDefined(callback)) {
-                                    callback.on(false);
-                                }
-                            }
-
+                            });
                         }
                     });
                 }
@@ -302,13 +299,23 @@ class CoreGraph implements org.mwg.Graph {
                 public void on(Boolean result) {
                     selfPointer._space.free();
                     if (selfPointer._storage != null) {
-                        selfPointer._storage.disconnect(selfPointer._prefix, new Callback<Boolean>() {
+
+                        final Buffer prefixBuf = selfPointer.newBuffer();
+                        Base64.encodeIntToBuffer(selfPointer._prefix, prefixBuf);
+
+                        selfPointer._storage.unlock(prefixBuf, new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
-                                selfPointer._lock.set(true);
-                                if (PrimitiveHelper.isDefined(callback)) {
-                                    callback.on(result);
-                                }
+                                prefixBuf.free();
+                                selfPointer._storage.disconnect(new Callback<Boolean>() {
+                                    @Override
+                                    public void on(Boolean result) {
+                                        selfPointer._lock.set(true);
+                                        if (PrimitiveHelper.isDefined(callback)) {
+                                            callback.on(result);
+                                        }
+                                    }
+                                });
                             }
                         });
                     } else {
@@ -349,9 +356,7 @@ class CoreGraph implements org.mwg.Graph {
                 callback.on(null);
             }
         } else {
-
-            boolean isNoop = this._storage instanceof NoopStorage;
-
+            boolean isNoop = this._storage instanceof BlackHoleStorage;
             Buffer stream = newBuffer();
             boolean isFirst = true;
             while (dirtyIterator.hasNext()) {
@@ -378,22 +383,6 @@ class CoreGraph implements org.mwg.Graph {
                     }
                 }
             }
-
-            /*
-            //save obj key gen key
-            stream.write(CoreConstants.BUFFER_SEP);
-            BufferBuilder.keyToBuffer(stream, ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, this._nodeKeyCalculator.prefix());
-            //save obj key gen payload
-            stream.write(CoreConstants.BUFFER_SEP);
-            Base64.encodeLongToBuffer(this._nodeKeyCalculator.lastComputedIndex(), stream);
-            //save world key gen key
-            stream.write(CoreConstants.BUFFER_SEP);
-            BufferBuilder.keyToBuffer(stream, ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, this._worldKeyCalculator.prefix());
-            //save world key gen payload
-            stream.write(CoreConstants.BUFFER_SEP);
-            Base64.encodeLongToBuffer(this._worldKeyCalculator.lastComputedIndex(), stream);
-            */
-
             //shrink in case of i != full size
             this._storage.put(stream, new Callback<Boolean>() {
                 @Override

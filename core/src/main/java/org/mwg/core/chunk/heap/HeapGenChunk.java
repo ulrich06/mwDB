@@ -100,6 +100,18 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
         Base64.encodeLongToBuffer(_currentIndex.get(), buffer);
     }
 
+    @Override
+    public void merge(Buffer buffer) {
+        long previous;
+        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
+        do {
+            previous = _currentIndex.get();
+        } while (!_currentIndex.compareAndSet(previous, toInsert));
+        if (toInsert != previous) {
+            internal_set_dirty();
+        }
+    }
+
     /**
      * @native ts
      * if (this._currentIndex.get() == org.mwg.Constants.KEY_PREFIX_MASK) {

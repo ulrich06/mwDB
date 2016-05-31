@@ -3,18 +3,18 @@ package org.mwg;
 import org.mwg.plugin.Base64;
 import org.mwg.struct.Buffer;
 
-public class WSTuple {
+class ChunkKey {
 
-    public byte type;
+    byte type;
 
-    public long world;
+    long world;
 
-    public long time;
+    long time;
 
-    public long id;
+    long id;
 
-    public static WSTuple build(Buffer buffer) {
-        WSTuple tuple = new WSTuple();
+    static ChunkKey build(Buffer buffer) {
+        ChunkKey tuple = new ChunkKey();
         long cursor = 0;
         long length = buffer.size();
         long previous = 0;

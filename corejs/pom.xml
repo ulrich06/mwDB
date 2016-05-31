@@ -102,6 +102,7 @@
                                     <arg value="install"/>
                                 </exec>
                                 <exec executable="node_modules/typescript/bin/tsc">
+                                    <arg value="-d"/>
                                     <arg value="--sourceMap"/>
                                     <arg value="--target"/>
                                     <arg value="es5"/>
@@ -117,7 +118,6 @@
                                     <arg value="--out"/>
                                     <arg value="${basedir}/target/test-classes/mwg.test.js"/>
                                 </exec>
-
 
                                 <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
                                     <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>

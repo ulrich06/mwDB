@@ -504,6 +504,11 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         }
     }
 
+    @Override
+    public void merge(Buffer buffer) {
+        //TODO
+    }
+
     private void load(Buffer payload) {
         if (payload == null || payload.size() == 0) {
             return;
@@ -807,7 +812,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     toInsert = currentLongArr;
                     break;
                 case Type.INT_ARRAY:
-                    if(currentIntArr == null){
+                    if (currentIntArr == null) {
                         currentIntArr = new int[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
                     } else {
                         currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);

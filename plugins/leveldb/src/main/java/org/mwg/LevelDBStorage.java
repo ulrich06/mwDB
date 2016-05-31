@@ -6,6 +6,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.impl.Iq80DBFactory;
+import org.mwg.plugin.Base64;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
@@ -114,7 +115,7 @@ public class LevelDBStorage implements Storage {
     }
 
     @Override
-    public void disconnect(Short prefix, Callback<Boolean> callback) {
+    public void disconnect(Callback<Boolean> callback) {
         try {
             db.close();
             db = null;
@@ -130,7 +131,7 @@ public class LevelDBStorage implements Storage {
     }
 
     @Override
-    public void connect(Graph graph, Callback<Short> callback) {
+    public void connect(Graph graph, Callback<Boolean> callback) {
         if (isConnected) {
             if (callback != null) {
                 callback.on(null);
@@ -149,22 +150,14 @@ public class LevelDBStorage implements Storage {
         File targetDB = new File(location, "data");
         targetDB.mkdirs();
         try {
-
             if (useNative) {
                 db = JniDBFactory.factory.open(targetDB, options);
             } else {
                 db = Iq80DBFactory.factory.open(targetDB, options);
             }
-
             isConnected = true;
-            byte[] current = db.get(prefixKey);
-            if (current == null) {
-                current = new String("0").getBytes();
-            }
-            Short currentPrefix = Short.parseShort(new String(current));
-            db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
             if (callback != null) {
-                callback.on(currentPrefix);
+                callback.on(true);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -174,4 +167,23 @@ public class LevelDBStorage implements Storage {
         }
     }
 
+    @Override
+    public void lock(Callback<Buffer> callback) {
+        byte[] current = db.get(prefixKey);
+        if (current == null) {
+            current = new String("0").getBytes();
+        }
+        Short currentPrefix = Short.parseShort(new String(current));
+        db.put(prefixKey, ((currentPrefix + 1) + "").getBytes());
+        if (callback != null) {
+            Buffer newBuf = graph.newBuffer();
+            Base64.encodeIntToBuffer(currentPrefix, newBuf);
+            callback.on(newBuf);
+        }
+    }
+
+    @Override
+    public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        callback.on(true);
+    }
 }

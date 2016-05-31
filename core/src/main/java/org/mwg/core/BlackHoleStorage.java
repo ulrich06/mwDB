@@ -1,14 +1,17 @@
 package org.mwg.core;
 
 import org.mwg.*;
+import org.mwg.plugin.Base64;
 import org.mwg.struct.Buffer;
 import org.mwg.plugin.Storage;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.struct.BufferIterator;
 
-public class NoopStorage implements Storage {
+public class BlackHoleStorage implements Storage {
 
     private Graph _graph;
+
+    private short prefix = 0;
 
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
@@ -16,6 +19,7 @@ public class NoopStorage implements Storage {
         BufferIterator it = keys.iterator();
         while (it.hasNext()) {
             Buffer tempView = it.next();
+            //do nothing with the view, redirect to BlackHole...
             result.write(CoreConstants.BUFFER_SEP);
         }
         callback.on(result);
@@ -35,13 +39,26 @@ public class NoopStorage implements Storage {
     }
 
     @Override
-    public void connect(org.mwg.Graph graph, Callback<Short> callback) {
+    public void connect(Graph graph, Callback<Boolean> callback) {
         _graph = graph;
-        callback.on((short)0);
+        callback.on(true);
     }
 
     @Override
-    public void disconnect(Short prefix, Callback<Boolean> callback) {
+    public void lock(Callback<Buffer> callback) {
+        Buffer buffer = _graph.newBuffer();
+        Base64.encodeIntToBuffer(prefix, buffer);
+        prefix++;
+        callback.on(buffer);
+    }
+
+    @Override
+    public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        callback.on(true);
+    }
+
+    @Override
+    public void disconnect(Callback<Boolean> callback) {
         _graph = null;
         callback.on(true);
     }

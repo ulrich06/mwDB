@@ -18,4 +18,6 @@ public interface Chunk {
 
     void save(Buffer buffer);
 
+    void merge(Buffer buffer);
+
 }

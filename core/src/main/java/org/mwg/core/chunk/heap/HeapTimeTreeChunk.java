@@ -244,6 +244,32 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     }
 
     @Override
+    public void merge(Buffer buffer) {
+        lock();
+        boolean isDirty = false;
+        try {
+            long cursor = 0;
+            long previous = 0;
+            long payloadSize = buffer.size();
+            while (cursor < payloadSize) {
+                byte current = buffer.read(cursor);
+                if (current == CoreConstants.CHUNK_SUB_SEP) {
+                    isDirty = isDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                    previous = cursor + 1;
+                }
+                cursor++;
+            }
+            isDirty = isDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        } finally {
+            //free the lock
+            unlock();
+            if (isDirty) {
+                this.internal_set_dirty();
+            }
+        }
+    }
+
+    @Override
     public synchronized final long previousOrEqual(long key) {
         //lock and load fromVar main memory
         lock();

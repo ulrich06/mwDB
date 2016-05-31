@@ -16,7 +16,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
     public org.mwg.Graph newGraph(Storage p_storage, boolean p_readOnly, Scheduler p_scheduler, NodeFactory[] p_factories, boolean p_usingGC, boolean p_usingOffHeapMemory, long p_memorySize, long p_autoSaveSize) {
         Storage storage = p_storage;
         if (storage == null) {
-            storage = new NoopStorage();
+            storage = new BlackHoleStorage();
         }
         if (p_readOnly) {
             storage = new ReadOnlyStorage(storage);

@@ -51,6 +51,18 @@ public class OffHeapGenChunk implements GenChunk, OffHeapChunk {
         }
     }
 
+    @Override
+    public void merge(Buffer buffer) {
+        long previous;
+        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
+        do {
+            previous = OffHeapLongArray.get(rootPtr, INDEX_CURRENT);
+        } while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_CURRENT, previous, toInsert));
+        if (toInsert != previous) {
+            internal_set_dirty();
+        }
+    }
+
     public static void free(long addr) {
         OffHeapLongArray.free(addr);
     }

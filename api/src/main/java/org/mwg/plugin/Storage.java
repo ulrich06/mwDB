@@ -42,16 +42,30 @@ public interface Storage {
      * Connects the storage
      *
      * @param graph    Graph this storage is attached to
-     * @param callback Called when the connection process is complete. The parameter will be a short a prefix if the operation succeeded, null otherwise.
+     * @param callback Called when the connection process is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
-    void connect(Graph graph, Callback<Short> callback);
+    void connect(Graph graph, Callback<Boolean> callback);
+
+    /**
+     * Lock a reserved number (to be used as a prefix).
+     *
+     * @param callback Called when the connection process is complete. The parameter will be new lock, null in case of error.
+     */
+    void lock(Callback<Buffer> callback);
+
+    /**
+     * Unlock a previously reserved lock
+     *
+     * @param previousLock the previously reserved lock number
+     * @param callback     Called when the connection process is complete. The parameter will be true if the operation succeeded, false otherwise.
+     */
+    void unlock(Buffer previousLock, Callback<Boolean> callback);
 
     /**
      * Disconnects the storage
      *
-     * @param prefix   previously used prefix, associated during the connexion phase.
      * @param callback Called when the disconnection process is complete. The parameter will be true if the operation succeeded, false otherwise.
      */
-    void disconnect(Short prefix, Callback<Boolean> callback);
+    void disconnect(Callback<Boolean> callback);
 
 }

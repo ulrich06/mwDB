@@ -276,7 +276,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
     }
 
     @Override
-    public final void unsafe_insert(long p_key){
+    public final void unsafe_insert(long p_key) {
         ptrConsistency();
         internal_insert(p_key);
     }
@@ -624,6 +624,36 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             cursor++;
         }
         internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+    }
+
+    @Override
+    public void merge(Buffer buffer) {
+        boolean toDeclareDirty = false;
+        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
+        try {
+            ptrConsistency();
+            //loop
+            long cursor = 0;
+            long previous = 0;
+            long payloadSize = buffer.size();
+            while (cursor < payloadSize) {
+                byte current = buffer.read(cursor);
+                if (current == CoreConstants.CHUNK_SUB_SEP) {
+                    toDeclareDirty = toDeclareDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                    previous = cursor + 1;
+                }
+                cursor++;
+            }
+            toDeclareDirty = toDeclareDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
+        }
+        if (toDeclareDirty) {
+            internal_set_dirty();
+        }
     }
 
 }

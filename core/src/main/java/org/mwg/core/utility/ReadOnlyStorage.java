@@ -29,12 +29,22 @@ public class ReadOnlyStorage implements Storage {
     }
 
     @Override
-    public void connect(Graph graph, Callback<Short> callback) {
+    public void connect(Graph graph, Callback<Boolean> callback) {
         wrapped.connect(graph, callback);
     }
 
     @Override
-    public void disconnect(Short prefix, Callback<Boolean> callback) {
-        wrapped.disconnect(prefix, callback);
+    public void disconnect(Callback<Boolean> callback) {
+        wrapped.disconnect(callback);
+    }
+
+    @Override
+    public void lock(Callback<Buffer> callback) {
+        wrapped.lock(callback);
+    }
+
+    @Override
+    public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        wrapped.unlock(previousLock, callback);
     }
 }

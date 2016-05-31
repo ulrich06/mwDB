@@ -437,6 +437,16 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         return _lru.size();
     }
 
+    public void printMarked() {
+        for (int i = 0; i < _values.length; i++) {
+            if(_values[i] != null){
+                if (_values[i].marks() != 0) {
+                    System.out.println(_values[i].chunkType()+","+_values[i].world()+","+_values[i].time()+","+_values[i].id());
+                }
+            }
+        }
+    }
+
 }
 
 

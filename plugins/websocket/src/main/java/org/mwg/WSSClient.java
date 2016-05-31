@@ -4,8 +4,10 @@ import io.undertow.connector.ByteBufferPool;
 import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient;
 import io.undertow.websockets.core.*;
+import org.mwg.plugin.Base64;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
 import org.xnio.*;
 
 import java.io.IOException;
@@ -23,62 +25,43 @@ public class WSSClient implements Storage {
 
     private Graph graph;
 
-    private Map<Integer, Callback<Buffer>> callbacks;
+    private Map<Integer, Callback> callbacks;
 
     public WSSClient(String p_url) {
         this.url = p_url;
-        this.callbacks = new HashMap<Integer, Callback<Buffer>>();
+        this.callbacks = new HashMap<Integer, Callback>();
     }
 
     @Override
     public void get(Buffer keys, Callback<Buffer> callback) {
-        if (channel == null) {
-            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
-        }
-        byte[] payload = keys.data();
-        int hash = callback.hashCode();
-        callbacks.put(hash, callback);
-
-
-        byte[] ex_payload = new byte[payload.length + 5];
-        ex_payload[0] = WSConstants.REQ_GET;
-        ex_payload[1] = (byte) ((hash & 0xFF000000) >> 24);
-        ex_payload[2] = (byte) ((hash & 0x00FF0000) >> 16);
-        ex_payload[3] = (byte) ((hash & 0x0000FF00) >> 8);
-        ex_payload[4] = (byte) ((hash & 0x000000FF) >> 0);
-        System.arraycopy(payload,0,ex_payload,5,payload.length);
-        send(ByteBuffer.wrap(ex_payload));
+        send_rpc_req(WSConstants.REQ_GET, keys, callback);
     }
 
     @Override
     public void put(Buffer stream, Callback<Boolean> callback) {
-        if (channel == null) {
-            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
-        }
-        byte[] payload = stream.data();
-        ByteBuffer buffer = ByteBuffer.allocate(payload.length + 1);
-        buffer.put(WSConstants.REQ_PUT);
-        buffer.put(payload);
-        send(buffer);
+        send_rpc_req(WSConstants.REQ_PUT, stream, callback);
     }
 
     @Override
     public void remove(Buffer keys, Callback<Boolean> callback) {
-        if (channel == null) {
-            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
-        }
-        byte[] payload = keys.data();
-        ByteBuffer buffer = ByteBuffer.allocate(payload.length + 1);
-        buffer.put(WSConstants.REQ_REMOVE);
-        buffer.put(payload);
-        send(buffer);
+        send_rpc_req(WSConstants.REQ_REMOVE, keys, callback);
     }
 
     @Override
-    public void connect(final Graph p_graph, final Callback<Short> callback) {
+    public void lock(Callback<Buffer> callback) {
+        send_rpc_req(WSConstants.REQ_LOCK, null, callback);
+    }
+
+    @Override
+    public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        send_rpc_req(WSConstants.REQ_UNLOCK, previousLock, callback);
+    }
+
+    @Override
+    public void connect(final Graph p_graph, final Callback<Boolean> callback) {
         if (channel != null) {
             if (callback != null) {
-                callback.on(null);
+                callback.on(true);//already connected
             }
         }
         this.graph = p_graph;
@@ -116,26 +99,19 @@ public class WSSClient implements Storage {
             channel = futureChannel.get();
             channel.getReceiveSetter().set(new MessageReceiver());
             channel.resumeReceives();
+            if (callback != null) {
+                callback.on(true);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Error during connection to " + url + ":" + e.getMessage());
+            if (callback != null) {
+                callback.on(false);
+            }
+            e.printStackTrace();
         }
-
-        /*
-        if (callback != null) {
-            Buffer buffer = _graph.newBuffer();
-            buffer.write(WSMessageType.RQST_PREFIX);
-            int msgID = nextMessageID();
-            Base64.encodeIntToBuffer(msgID, buffer);
-            _callBacks.put(msgID, callback);
-            send(buffer);
-        }*/
-
-        callback.on(new Short("10"));//todo change this
-
     }
 
     @Override
-    public void disconnect(Short prefix, Callback<Boolean> callback) {
+    public void disconnect(Callback<Boolean> callback) {
         try {
             channel.sendClose();
         } catch (IOException e) {
@@ -145,63 +121,79 @@ public class WSSClient implements Storage {
         }
     }
 
-    private void send(ByteBuffer buffer) {
-        WebSockets.sendBinary(buffer, channel, new WebSocketCallback<Void>() {
-            @Override
-            public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
-                //TODO process
-                System.out.println("Yes");
-            }
-
-            @Override
-            public void onError(WebSocketChannel webSocketChannel, Void aVoid, Throwable throwable) {
-                //TODO process
-                System.out.println("Error");
-            }
-        });
-    }
-
-    //pass to a thread pool
-    private void processMessage(byte[] buffer) {
-        switch (buffer[0]) {
-            case WSConstants.RESP_GET:
-                //read 4 bytes
-                if (buffer.length >= 5) {
-                    int hash = buffer[1] << 24 | (buffer[2] & 0xFF) << 16 | (buffer[3] & 0xFF) << 8 | (buffer[4] & 0xFF);;
-                    Callback<Buffer> callback = callbacks.get(hash);
-                    if (callback != null) {
-                        callbacks.remove(hash);
-
-                        Buffer bufferResult = graph.newBuffer();
-                        byte[] shrinked = new byte[buffer.length - 5];
-                        System.arraycopy(buffer, 5, shrinked, 0, buffer.length - 5);
-                        bufferResult.writeAll(shrinked);
-                        callback.on(bufferResult);
-
-                    }
-                }
-
-
-                break;
-            case WSConstants.REQ_UPDATE:
-                //TODO
-                break;
-        }
-    }
-
     private class MessageReceiver extends AbstractReceiveListener {
         @Override
         protected void onFullBinaryMessage(WebSocketChannel channel, BufferedBinaryMessage message) throws IOException {
             ByteBuffer byteBuffer = WebSockets.mergeBuffers(message.getData().getResource());
-            processMessage(byteBuffer.array());
+            process_rpc_resp(byteBuffer.array());
             super.onFullBinaryMessage(channel, message);
         }
 
         @Override
         protected void onFullTextMessage(WebSocketChannel channel, BufferedTextMessage message) throws IOException {
-            processMessage(message.getData().getBytes());
+            process_rpc_resp(message.getData().getBytes());
             super.onFullTextMessage(channel, message);
         }
+    }
+
+    private void send_rpc_req(byte code, Buffer payload, Callback callback) {
+        if (channel == null) {
+            throw new RuntimeException(WSConstants.DISCONNECTED_ERROR);
+        }
+        Buffer buffer = graph.newBuffer();
+        buffer.write(code);
+        buffer.write(Constants.BUFFER_SEP);
+        int hash = callback.hashCode();
+        callbacks.put(hash, callback);
+        Base64.encodeIntToBuffer(hash, buffer);
+        buffer.write(Constants.BUFFER_SEP);
+        if (payload != null) {
+            buffer.writeAll(payload.data());
+        }
+        ByteBuffer wrapped = ByteBuffer.wrap(buffer.data());
+        buffer.free();
+        WebSockets.sendBinary(wrapped, channel, new WebSocketCallback<Void>() {
+            @Override
+            public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
+
+            }
+
+            @Override
+            public void onError(WebSocketChannel webSocketChannel, Void aVoid, Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+    private void process_rpc_resp(byte[] payload) {
+        Buffer payloadBuf = graph.newBuffer();
+        payloadBuf.writeAll(payload);
+        BufferIterator it = payloadBuf.iterator();
+        Buffer codeView = it.next();
+        Buffer callbackCodeView = it.next();
+        if (codeView != null && callbackCodeView != null && codeView.size() != 0) {
+            int callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
+            Callback resolvedCallback = callbacks.get(callbackCode);
+            if (resolvedCallback != null) {
+                byte firstCode = codeView.read(0);
+                if (firstCode == WSConstants.RESP_LOCK || firstCode == WSConstants.RESP_GET) {
+                    Buffer newBuf = graph.newBuffer();//will be free by the core
+                    boolean isFirst = true;
+                    while (it.hasNext()) {
+                        if (isFirst) {
+                            isFirst = false;
+                        } else {
+                            newBuf.write(Constants.BUFFER_SEP);
+                        }
+                        newBuf.writeAll(it.next().data());
+                    }
+                    resolvedCallback.on(newBuf);
+                } else {
+                    resolvedCallback.on(true);
+                }
+            }
+        }
+        payloadBuf.free();
     }
 
 }

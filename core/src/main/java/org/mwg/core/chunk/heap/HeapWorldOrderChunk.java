@@ -285,6 +285,46 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         }
     }
 
+    //TODO lock once to optimise the merge
+    @Override
+    public void merge(Buffer buffer) {
+        long cursor = 0;
+        long bufferSize = buffer.size();
+        boolean initDone = false;
+        long previousStart = 0;
+        long loopKey = CoreConstants.NULL_LONG;
+        while (cursor < bufferSize) {
+            if (buffer.read(cursor) == CoreConstants.CHUNK_SEP) {
+                if (!initDone) {
+                    initDone = true;
+                } else {
+                    //extra char read
+                    _extra = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
+                }
+                previousStart = cursor + 1;
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SEP) {
+                if (loopKey != CoreConstants.NULL_LONG) {
+                    long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
+
+                    put(loopKey, loopValue);//TODO optimize this
+
+                    //reset key for next round
+                    loopKey = CoreConstants.NULL_LONG;
+                }
+                previousStart = cursor + 1;
+            } else if (buffer.read(cursor) == CoreConstants.CHUNK_SUB_SUB_SEP) {
+                loopKey = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
+                previousStart = cursor + 1;
+            }
+            //loop in all case
+            cursor++;
+        }
+        if (loopKey != CoreConstants.NULL_LONG) {
+            long loopValue = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
+            put(loopKey, loopValue);//TODO optimize this
+        }
+    }
+
     private int findNonNullKeyEntry(long key, int index, InternalState internalState) {
         int m = internalState.elementHash[index];
         while (m >= 0) {

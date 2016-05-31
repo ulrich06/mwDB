@@ -15,27 +15,38 @@ public class WSServerTest {
                 node.set("name", "hello");
                 graph.index("nodes", node, "name", null);
 
+                System.out.println(node);
+
                 WSServer graphServer = new WSServer(graph, 8050);
                 graphServer.start();
 
                 Graph graph2 = GraphBuilder.builder().withMemorySize(10000).withAutoSave(1000).withStorage(new WSSClient("ws://localhost:8050")).build();
-                graph2.connect(new Callback<Boolean>() {
+                graph2.connect(result1 -> graph2.all(0, 0, "nodes", new Callback<Node[]>() {
                     @Override
-                    public void on(Boolean result) {
-                        System.out.println("connected");
-                        graph2.all(0, 0, "nodes", new Callback<Node[]>() {
+                    public void on(Node[] result1) {
+                        System.out.println(result1[0]);
+
+                        Node newNode = graph2.newNode(0, 0);
+                        newNode.set("name", "hello2");
+                        graph2.index("nodes", node, "name", null);
+                        graph2.save(new Callback<Boolean>() {
                             @Override
-                            public void on(Node[] result) {
-                                System.out.println(result[0]);
+                            public void on(Boolean result) {
+                                System.out.println("Saved");
                             }
                         });
+
+                        System.out.println(newNode);
+
                     }
-                });
+                }));
+
+                /*
                 try {
                     Thread.sleep(10000000000000L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
         });
 
