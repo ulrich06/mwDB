@@ -540,9 +540,9 @@ declare module org {
                 put(stream: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 remove(keys: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 connect(graph: org.mwg.Graph, callback: org.mwg.Callback<boolean>): void;
-                lock(callback: org.mwg.Callback<number>): void;
-                unlock(previousLock: number, callback: org.mwg.Callback<boolean>): void;
-                disconnect(prefix: number, callback: org.mwg.Callback<boolean>): void;
+                lock(callback: org.mwg.Callback<org.mwg.struct.Buffer>): void;
+                unlock(previousLock: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
+                disconnect(callback: org.mwg.Callback<boolean>): void;
             }
         }
         module struct {
@@ -695,13 +695,14 @@ declare module org {
         module core {
             class BlackHoleStorage implements org.mwg.plugin.Storage {
                 private _graph;
+                private prefix;
                 get(keys: org.mwg.struct.Buffer, callback: org.mwg.Callback<org.mwg.struct.Buffer>): void;
                 put(stream: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 remove(keys: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 connect(graph: org.mwg.Graph, callback: org.mwg.Callback<boolean>): void;
-                lock(callback: org.mwg.Callback<number>): void;
-                unlock(previousLock: number, callback: org.mwg.Callback<boolean>): void;
-                disconnect(prefix: number, callback: org.mwg.Callback<boolean>): void;
+                lock(callback: org.mwg.Callback<org.mwg.struct.Buffer>): void;
+                unlock(previousLock: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
+                disconnect(callback: org.mwg.Callback<boolean>): void;
             }
             class Builder implements org.mwg.GraphBuilder.InternalBuilder {
                 newGraph(p_storage: org.mwg.plugin.Storage, p_readOnly: boolean, p_scheduler: org.mwg.plugin.Scheduler, p_factories: org.mwg.plugin.NodeFactory[], p_usingGC: boolean, p_usingOffHeapMemory: boolean, p_memorySize: number, p_autoSaveSize: number): org.mwg.Graph;
@@ -844,6 +845,7 @@ declare module org {
                         free(): void;
                         size(): number;
                         available(): number;
+                        printMarked(): void;
                     }
                     module HeapChunkSpace {
                         class InternalDirtyStateList implements org.mwg.plugin.ChunkIterator {
@@ -1512,9 +1514,9 @@ declare module org {
                     put(stream: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                     remove(keys: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                     connect(graph: org.mwg.Graph, callback: org.mwg.Callback<boolean>): void;
-                    disconnect(prefix: number, callback: org.mwg.Callback<boolean>): void;
-                    lock(callback: org.mwg.Callback<number>): void;
-                    unlock(previousLock: number, callback: org.mwg.Callback<boolean>): void;
+                    disconnect(callback: org.mwg.Callback<boolean>): void;
+                    lock(callback: org.mwg.Callback<org.mwg.struct.Buffer>): void;
+                    unlock(previousLock: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 }
             }
         }

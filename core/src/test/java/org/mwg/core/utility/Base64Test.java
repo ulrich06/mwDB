@@ -43,8 +43,12 @@ public class Base64Test {
         testLong(68719476737l);
     }
 
-    private void testLong(long val) {
+    @Test
+    public void hasTest() {
+        testLong(-365393685203911L);
+    }
 
+    private void testLong(long val) {
 
 
         Buffer buffer = BufferBuilder.newHeapBuffer();
@@ -177,8 +181,8 @@ public class Base64Test {
 
     private void boolArrayInnerTest(boolean[] array) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
-        Base64.encodeBoolArrayToBuffer(array,buffer);
-        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer,0,buffer.size(), array.length);
+        Base64.encodeBoolArrayToBuffer(array, buffer);
+        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer, 0, buffer.size(), array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertTrue(array.length == dec.length);
         for (int i = 0; i < array.length; i++) {

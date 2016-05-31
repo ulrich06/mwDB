@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class WSSClient implements Storage {
+public class WSClient implements Storage {
 
     private final String url;
 
@@ -27,7 +27,7 @@ public class WSSClient implements Storage {
 
     private Map<Integer, Callback> callbacks;
 
-    public WSSClient(String p_url) {
+    public WSClient(String p_url) {
         this.url = p_url;
         this.callbacks = new HashMap<Integer, Callback>();
     }
@@ -146,8 +146,8 @@ public class WSSClient implements Storage {
         int hash = callback.hashCode();
         callbacks.put(hash, callback);
         Base64.encodeIntToBuffer(hash, buffer);
-        buffer.write(Constants.BUFFER_SEP);
         if (payload != null) {
+            buffer.write(Constants.BUFFER_SEP);
             buffer.writeAll(payload.data());
         }
         ByteBuffer wrapped = ByteBuffer.wrap(buffer.data());

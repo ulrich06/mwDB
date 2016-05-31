@@ -770,9 +770,8 @@ class MWGResolver implements Resolver {
                             newResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                             castedNode._previousResolveds.set(newResolveds);
                         } else {
-                            //TODO check potentially marking bug (bad mark retention here...)
-                            hasToCleanTimeTree = true;
-                            _space.unmarkChunk(nodeTimeTree); //double unMark
+                            hasToCleanTimeTree = true;//simple unMark
+                            _space.unmarkChunk(nodeTimeTree); //double unMark, left tree is not used anymore
 
                             //let's store the new state if necessary
                             long[] newResolveds = new long[6];

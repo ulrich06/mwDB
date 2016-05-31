@@ -24,7 +24,6 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
      */
     private final int _maxEntries;
     private final int _saveBatchSize;
-    // TODO here I think the AtomicInteger is needed -> ok
     private final AtomicInteger _elementCount;
     private final Stack _lru;
     private Graph _graph;
@@ -439,9 +438,9 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
     public void printMarked() {
         for (int i = 0; i < _values.length; i++) {
-            if(_values[i] != null){
+            if (_values[i] != null) {
                 if (_values[i].marks() != 0) {
-                    System.out.println(_values[i].chunkType()+","+_values[i].world()+","+_values[i].time()+","+_values[i].id());
+                    System.out.println(_values[i].chunkType() + "," + _values[i].world() + "," + _values[i].time() + "," + _values[i].id());
                 }
             }
         }

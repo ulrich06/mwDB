@@ -20,7 +20,7 @@ public class WSServerTest {
                 WSServer graphServer = new WSServer(graph, 8050);
                 graphServer.start();
 
-                Graph graph2 = GraphBuilder.builder().withMemorySize(10000).withAutoSave(1000).withStorage(new WSSClient("ws://localhost:8050")).build();
+                Graph graph2 = GraphBuilder.builder().withMemorySize(10000).withAutoSave(1000).withStorage(new WSClient("ws://localhost:8050")).build();
                 graph2.connect(result1 -> graph2.all(0, 0, "nodes", new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result1) {
@@ -41,12 +41,12 @@ public class WSServerTest {
                     }
                 }));
 
-                /*
+
                 try {
                     Thread.sleep(10000000000000L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }*/
+                }
             }
         });
 
