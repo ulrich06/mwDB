@@ -13,62 +13,85 @@ public class ProbaDistribution {
     int global;
 
 
-    public ProbaDistribution(int total[], MultivariateNormalDistribution[] distributions, int global){
-        this.total=total;
-        this.distributions=distributions;
-        this.global=global;
+    public ProbaDistribution(int total[], MultivariateNormalDistribution[] distributions, int global) {
+        this.total = total;
+        this.distributions = distributions;
+        this.global = global;
     }
 
-    public double calculate(double[] features){
-        double result=0;
-        for(int j=0;j<distributions.length;j++){
-            if(GaussianGmmNode.distance(features,distributions[j].getAvg(),distributions[j].getCovDiag())<5){
-                result+=distributions[j].density(features,false)*total[j]/global;
+    public double calculate(double[] features) {
+        double result = 0;
+        if (total != null) {
+            for (int j = 0; j < distributions.length; j++) {
+                if (GaussianGmmNode.distance(features, distributions[j].getAvg(), distributions[j].getCovDiag()) < 5) {
+                    result += distributions[j].density(features, false) * total[j] / global;
+                }
+            }
+        } else {
+            for (int j = 0; j < distributions.length; j++) {
+                if (GaussianGmmNode.distance(features, distributions[j].getAvg(), distributions[j].getCovDiag()) < 5) {
+                    result += distributions[j].density(features, false) / global;
+                }
             }
         }
-        if(result>1){
-            result=1;
+        if (result > 1) {
+            result = 1;
         }
         return result;
     }
 
 
-    public double[] calculateArray(double[][] features, ProgressReporter reporter){
-        reporter.updateGraphInfo("Number of distributions: "+distributions.length+" , values: "+global);
+    public double[] calculateArray(double[][] features, ProgressReporter reporter) {
+        if (reporter != null) {
+            reporter.updateGraphInfo("Number of distributions: " + distributions.length + " , values: " + global);
+        }
 
-        double result[]=new double[features.length];
-        double calibration=0;
-        for(int i=0;i<features.length;i++){
-            result[i]=calculate(features[i]);
-            calibration+=result[i];
-            if(reporter!=null){
+        double result[] = new double[features.length];
+        double calibration = 0;
+        for (int i = 0; i < features.length; i++) {
+            result[i] = calculate(features[i]);
+            calibration += result[i];
+            if (reporter != null) {
                 double progress = i * (1.0 / (features.length));
                 progress = progress * 50 + 50;
-                reporter.updateProgress((int)progress);
-                if(reporter.isCancelled()){
+                reporter.updateProgress((int) progress);
+                if (reporter.isCancelled()) {
                     return null;
                 }
             }
         }
 
-        double deviation=0;
-        double equidist=1.0/features.length;
+        // double deviation=0;
+        // double equidist=1.0/features.length;
 
-        if(calibration!=0) {
+        if (calibration != 0) {
             for (int i = 0; i < features.length; i++) {
                 result[i] = result[i] / calibration;
-                deviation+=Math.abs(result[i]-equidist);
+                // deviation+=Math.abs(result[i]-equidist);
             }
-            deviation=deviation/features.length;
-            double percent =deviation*100.0/equidist;
-            System.out.println("Number of distributions: "+distributions.length+" Deviation avg: "+deviation+" over "+ equidist+" percent: "+percent+" %");
+            //deviation=deviation/features.length;
+            //double percent =deviation*100.0/equidist;
+            //System.out.println("Number of distributions: "+distributions.length+" Deviation avg: "+deviation+" over "+ equidist+" percent: "+percent+" %");
         }
         return result;
     }
 
 
+    public double compareProbaDistribution(ProbaDistribution other, double[][] features) {
+        double error = 0;
+        double[] res1 = this.calculateArray(features, null);
+        double[] res2 = other.calculateArray(features, null);
 
-    public NDimentionalArray ParallelCalculate(double[][] space, ProgressReporter progressReporter){
+        for (int i = 0; i < res1.length; i++) {
+            error += Math.abs(res1[i] - res2[i]);
+        }
+        error = error / res1.length;
+
+        return error;
+    }
+
+
+    public NDimentionalArray ParallelCalculate(double[][] space, ProgressReporter progressReporter) {
         NDimentionalArray result = new NDimentionalArray();
 
         try {
