@@ -501,7 +501,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void generateDistributions(int level, Callback<ProbaDistribution> callback) {
+   /* public void generateDistributions(int level, Callback<ProbaDistribution> callback) {
         int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
@@ -556,9 +556,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         });
 
         deepTraverseTask.execute();
-
-
-    }
+    }*/
 
     @Override
     public String toString() {
