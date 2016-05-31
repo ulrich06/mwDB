@@ -623,8 +623,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     if (d < threshold) {
                         reccursive=true;
                         newLev.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, createNode);
-                        newLev.free();
                     }
+                    newLev.free();
                 }
             }
             //Otherwise, get previously stored values
@@ -805,7 +805,6 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             return err.clone();
         }
     }
-
 
     public double[][] getCovariance(double[] avg, double[] err) {
         if (avg == null) {
