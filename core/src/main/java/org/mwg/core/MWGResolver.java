@@ -772,6 +772,7 @@ class MWGResolver implements Resolver {
                         } else {
                             //TODO check potentially marking bug (bad mark retention here...)
                             hasToCleanTimeTree = true;
+                            _space.unmarkChunk(nodeTimeTree); //double unMark
 
                             //let's store the new state if necessary
                             long[] newResolveds = new long[6];
