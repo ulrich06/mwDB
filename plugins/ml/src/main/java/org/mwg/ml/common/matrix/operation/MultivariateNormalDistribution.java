@@ -55,7 +55,7 @@ public class MultivariateNormalDistribution {
 
                 for(int i=0;i<covDiag.length;i++){
                     for(int j=i+1;j<covDiag.length;j++){
-                        double d=this.covariance.get(i,j)-0.001*temp[i]*temp[j];
+                        double d=this.covariance.get(i,j)-0.0001*temp[i]*temp[j];
                         this.covariance.set(i,j,d);
                         this.covariance.set(j,i,d);
                     }

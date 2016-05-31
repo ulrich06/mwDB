@@ -35,6 +35,7 @@ public class ProbaDistribution {
 
     public double[] calculateArray(double[][] features, ProgressReporter reporter){
         reporter.updateGraphInfo("Number of distributions: "+distributions.length+" , values: "+global);
+
         double result[]=new double[features.length];
         double calibration=0;
         for(int i=0;i<features.length;i++){
@@ -49,11 +50,18 @@ public class ProbaDistribution {
                 }
             }
         }
+
+        double deviation=0;
+        double equidist=1.0/features.length;
+
         if(calibration!=0) {
             for (int i = 0; i < features.length; i++) {
                 result[i] = result[i] / calibration;
+                deviation+=Math.abs(result[i]-equidist);
             }
-            //System.out.println("Calibration: "+calibration);
+            deviation=deviation/features.length;
+            double percent =deviation*100.0/equidist;
+            System.out.println("Number of distributions: "+distributions.length+" Deviation avg: "+deviation+" over "+ equidist+" percent: "+percent+" %");
         }
         return result;
     }
