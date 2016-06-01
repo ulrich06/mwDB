@@ -1,5 +1,6 @@
 package org.mwg;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -21,7 +22,7 @@ public class WSServerTest {
                 node.set("name", "hello");
                 graph.index("nodes", node, "name", null);
 
-                System.out.println(node);
+                Assert.assertEquals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"hello\"}", node.toString());
 
                 WSServer graphServer = new WSServer(graph, 8050);
                 graphServer.start();
@@ -32,19 +33,18 @@ public class WSServerTest {
                 graph2.connect(result1 -> graph2.all(0, 0, "nodes", new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result1) {
-                        System.out.println(result1[0]);
 
                         Node newNode = graph2.newNode(0, 0);
                         newNode.set("name", "hello2");
 
-                        System.out.println(newNode);
+                        Assert.assertEquals("{\"world\":0,\"time\":0,\"id\":137438953473,\"name\":\"hello2\"}", newNode.toString());
 
                         graph2.index("nodes", newNode, "name", null);
 
                         graph2.all(0, 0, "nodes", new Callback<Node[]>() {
                             @Override
                             public void on(Node[] result) {
-                                System.out.println(result.length);
+                                Assert.assertEquals(2, result.length);
                             }
                         });
 
@@ -56,8 +56,9 @@ public class WSServerTest {
                                 graph.all(0, 0, "nodes", new Callback<Node[]>() {
                                     @Override
                                     public void on(Node[] result) {
-                                        System.out.println(result[0].toString());
-                                        System.out.println(result[1].toString());
+                                        Assert.assertEquals(2, result.length);
+                                        Assert.assertEquals(result[0].toString(), "{\"world\":0,\"time\":0,\"id\":1,\"name\":\"hello\"}");
+                                        Assert.assertEquals(result[1].toString(), "{\"world\":0,\"time\":0,\"id\":137438953473,\"name\":\"hello2\"}");
 
                                         latch.countDown();
 
