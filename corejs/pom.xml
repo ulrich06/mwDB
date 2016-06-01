@@ -8,7 +8,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <java2typescript.plugin.version>50</java2typescript.plugin.version>
+        <java2typescript.plugin.version>51</java2typescript.plugin.version>
     </properties>
 
     <dependencies>

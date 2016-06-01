@@ -16,10 +16,10 @@
     <target name="other.run" depends="sys.check" if="isOther">
         <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
 
-        <exec executable="npm" dir="${basedir}/target">
+        <exec executable="npm" dir="${basedir}/target" failonerror="true">
             <arg value="install"/>
         </exec>
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
@@ -29,7 +29,7 @@
             <arg value="${basedir}/target/classes/mwg.js"/>
         </exec>
 
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
@@ -51,7 +51,7 @@
 
         <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
 
-        <exec executable="node" dir="${basedir}/target">
+        <exec executable="node" dir="${basedir}/target" failonerror="true">
             <arg value="test.js"/>
         </exec>
 
@@ -70,7 +70,8 @@
         <exec executable="cmd" dir="${basedir}/target" failonerror="true">
             <arg line="/c npm install" />
         </exec>
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
+            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc" />
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
@@ -79,8 +80,8 @@
             <arg value="--out"/>
             <arg value="${basedir}/target/classes/mwg.js"/>
         </exec>
-
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
+            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc" />
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
@@ -102,7 +103,7 @@
 
         <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
 
-        <exec executable="node" dir="${basedir}/target">
+        <exec executable="node" dir="${basedir}/target" failonerror="true">
             <arg value="test.js"/>
         </exec>
 
