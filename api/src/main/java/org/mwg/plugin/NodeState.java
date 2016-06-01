@@ -98,4 +98,13 @@ public interface NodeState {
      */
     byte getTypeFromKey(String key);
 
+
+    /**
+     * Iterate over NodeState elements
+     *
+     * @param callBack
+     */
+    void each(NodeStateCallback callBack);
+
+
 }

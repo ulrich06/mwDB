@@ -95,7 +95,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         this._extra = CoreConstants.NULL_LONG;
 
         this._listener = p_listener;
-        if (initialPayload != null) {
+        if (initialPayload != null && initialPayload.size() > 0) {
             load(initialPayload);
         } else {
             int initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
@@ -220,7 +220,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
             }
         }
         //setPrimitiveType value for all
-        state = new InternalState(length, newElementKV, newElementNext, newElementHash, state.elementCount);
+        state = new InternalState(length, newElementKV, newElementNext, newElementHash, previousState.elementCount);
     }
 
     @Override
@@ -252,6 +252,9 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     @Override
     public final synchronized void put(long key, long value) {
         InternalState internalState = state;
+        if (internalState == null) {
+            internalState = new InternalState(0, new long[0], new int[0], new int[0], 0);
+        }
         int entry = -1;
         int index = -1;
         if (internalState.elementDataSize != 0) {

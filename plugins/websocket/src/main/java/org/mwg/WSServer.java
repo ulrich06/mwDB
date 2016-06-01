@@ -80,14 +80,14 @@ public class WSServer implements WebSocketConnectionCallback {
         final Buffer callbackCodeView = it.next();
         if (codeView != null && callbackCodeView != null && codeView.size() != 0) {
             byte firstCodeView = codeView.read(0);
-            //build keys list
-            final List<ChunkKey> keys = new ArrayList<ChunkKey>();
-            while (it.hasNext()) {
-                keys.add(ChunkKey.build(it.next()));
-            }
             //compute resp prefix
             switch (firstCodeView) {
                 case WSConstants.REQ_GET:
+                    //build keys list
+                    final List<ChunkKey> keys = new ArrayList<ChunkKey>();
+                    while (it.hasNext()) {
+                        keys.add(ChunkKey.build(it.next()));
+                    }
                     process_get(keys.toArray(new ChunkKey[keys.size()]), streamResult -> {
                         Buffer concat = graph.newBuffer();
                         concat.write(WSConstants.RESP_GET);
@@ -166,6 +166,7 @@ public class WSServer implements WebSocketConnectionCallback {
                 public void on(Chunk memoryChunk) {
                     if (memoryChunk != null) {
                         memoryChunk.merge(values[finalI]);
+                        graph.space().unmarkChunk(memoryChunk);
                     }
                     defer.count();
                 }

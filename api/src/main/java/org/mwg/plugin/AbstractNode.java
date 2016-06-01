@@ -468,6 +468,106 @@ public abstract class AbstractNode implements Node {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{\"world\":");
+        builder.append(world());
+        builder.append(",\"time\":");
+        builder.append(time());
+        builder.append(",\"id\":");
+        builder.append(id());
+        NodeState state = this._resolver.resolveState(this, true);
+        if (state != null) {
+            builder.append(",\"data\": {");
+            final boolean[] isFirst = {true};
+            state.each(new NodeStateCallback() {
+                @Override
+                public void on(long attributeKey, int elemType, Object elem) {
+                    if (elem != null) {
+                        if (isFirst[0]) {
+                            isFirst[0] = false;
+                        } else {
+                            builder.append(",");
+                        }
+                        builder.append("\"");
+                        builder.append(_resolver.hashToString(attributeKey));
+                        builder.append("\": ");
+                        switch (elemType) {
+                            /** Primitive types */
+                            case Type.BOOL: {
+                                if ((boolean) elem) {
+                                    builder.append("0");
+                                } else {
+                                    builder.append("1");
+                                }
+                                break;
+                            }
+                            case Type.STRING: {
+                                builder.append("\"");
+                                builder.append(elem);
+                                builder.append("\"");
+                                break;
+                            }
+                            case Type.LONG: {
+                                builder.append(elem);
+                                break;
+                            }
+                            case Type.INT: {
+                                builder.append(elem);
+                                break;
+                            }
+                            case Type.DOUBLE: {
+                                builder.append(elem);
+                                break;
+                            }
+                            /** Array types */
+                            case Type.DOUBLE_ARRAY: {
+                                builder.append("[");
+                                double[] castedArr = (double[]) elem;
+                                for (int j = 0; j < castedArr.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case Type.LONG_ARRAY: {
+                                builder.append("[");
+                                long[] castedArr2 = (long[]) elem;
+                                for (int j = 0; j < castedArr2.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr2[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case Type.INT_ARRAY: {
+                                builder.append("[");
+                                int[] castedArr3 = (int[]) elem;
+                                for (int j = 0; j < castedArr3.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr3[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            builder.append("}}");
+        }
+        return builder.toString();
+    }
+
+
     public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
         if (propertyType != propertyTargetType) {
             throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));

@@ -34,7 +34,7 @@ public class OffHeapGenChunk implements GenChunk, OffHeapChunk {
         //init
         if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             rootPtr = previousAddr;
-        } else if (initialPayload != null) {
+        } else if (initialPayload != null && initialPayload.size() > 0) {
             rootPtr = OffHeapLongArray.allocate(7);
             load(initialPayload);
         } else {

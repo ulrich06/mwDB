@@ -53,7 +53,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         //init
         if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             addr = previousAddr;
-        } else if (initialPayload != null) {
+        } else if (initialPayload != null && initialPayload.size() > 0) {
             addr = OffHeapLongArray.allocate(14);
             load(initialPayload);
         } else {

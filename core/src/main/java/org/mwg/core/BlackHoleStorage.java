@@ -17,10 +17,16 @@ public class BlackHoleStorage implements Storage {
     public void get(Buffer keys, Callback<Buffer> callback) {
         Buffer result = _graph.newBuffer();
         BufferIterator it = keys.iterator();
+        boolean isFirst = true;
+
         while (it.hasNext()) {
             Buffer tempView = it.next();
             //do nothing with the view, redirect to BlackHole...
-            result.write(CoreConstants.BUFFER_SEP);
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                result.write(CoreConstants.BUFFER_SEP);
+            }
         }
         callback.on(result);
     }

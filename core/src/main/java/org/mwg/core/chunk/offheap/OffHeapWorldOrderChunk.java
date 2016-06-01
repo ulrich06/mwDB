@@ -58,9 +58,10 @@ public class OffHeapWorldOrderChunk implements WorldOrderChunk, OffHeapChunk {
             elementV_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_V);
             elementHash_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_HASH);
             elementNext_ptr = OffHeapLongArray.get(this.rootPtr, INDEX_ELEMENT_NEXT);
-        } else if (initialString != null) {
+        } else if (initialString != null && initialString.size() > 0) {
             this.rootPtr = OffHeapLongArray.allocate(ROOT_SIZE);
             load(initialString);
+            OffHeapLongArray.set(this.rootPtr, INDEX_LOCK, 0);
         } else {
             this.rootPtr = OffHeapLongArray.allocate(ROOT_SIZE);
             long initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;

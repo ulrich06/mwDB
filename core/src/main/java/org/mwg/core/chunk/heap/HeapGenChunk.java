@@ -88,7 +88,7 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
     }
 
     private void load(Buffer payload) {
-        if (payload != null) {
+        if (payload != null && payload.size() > 0) {
             _currentIndex.compareAndSet(_currentIndex.get(), Base64.decodeToLongWithBounds(payload, 0, payload.size()));
         } else {
             _currentIndex.compareAndSet(_currentIndex.get(), 0);
