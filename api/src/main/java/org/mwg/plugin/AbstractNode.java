@@ -468,6 +468,14 @@ public abstract class AbstractNode implements Node {
         }
     }
 
+    /**
+     * @native ts
+     * return isNaN(toTest);
+     */
+    private boolean isNaN(double toTest) {
+        return Double.NaN == toTest;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -520,7 +528,7 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.DOUBLE: {
-                                if ((double) elem != Double.NaN) {
+                                if (isNaN((Double) elem)) {
                                     builder.append(",\"");
                                     builder.append(_resolver.hashToString(attributeKey));
                                     builder.append("\":");
