@@ -483,12 +483,12 @@ public abstract class AbstractNode implements Node {
                 @Override
                 public void on(long attributeKey, int elemType, Object elem) {
                     if (elem != null) {
-                        builder.append(",\"");
-                        builder.append(_resolver.hashToString(attributeKey));
-                        builder.append("\":");
                         switch (elemType) {
                             /** Primitive types */
                             case Type.BOOL: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 if ((boolean) elem) {
                                     builder.append("0");
                                 } else {
@@ -497,25 +497,42 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.STRING: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append("\"");
                                 builder.append(elem);
                                 builder.append("\"");
                                 break;
                             }
                             case Type.LONG: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append(elem);
                                 break;
                             }
                             case Type.INT: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append(elem);
                                 break;
                             }
                             case Type.DOUBLE: {
-                                builder.append(elem);
+                                if ((double) elem != Double.NaN) {
+                                    builder.append(",\"");
+                                    builder.append(_resolver.hashToString(attributeKey));
+                                    builder.append("\":");
+                                    builder.append(elem);
+                                }
                                 break;
                             }
                             /** Array types */
                             case Type.DOUBLE_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append("[");
                                 double[] castedArr = (double[]) elem;
                                 for (int j = 0; j < castedArr.length; j++) {
@@ -528,6 +545,9 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.LONG_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append("[");
                                 long[] castedArr2 = (long[]) elem;
                                 for (int j = 0; j < castedArr2.length; j++) {
@@ -540,6 +560,9 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.INT_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
                                 builder.append("[");
                                 int[] castedArr3 = (int[]) elem;
                                 for (int j = 0; j < castedArr3.length; j++) {
