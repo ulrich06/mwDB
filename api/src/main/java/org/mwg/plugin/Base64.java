@@ -6,20 +6,7 @@ import org.mwg.struct.Buffer;
  * @native ts
  * private static dictionary : number[] = ['A'.charCodeAt(0), 'B'.charCodeAt(0), 'C'.charCodeAt(0), 'D'.charCodeAt(0), 'E'.charCodeAt(0), 'F'.charCodeAt(0), 'G'.charCodeAt(0), 'H'.charCodeAt(0), 'I'.charCodeAt(0), 'J'.charCodeAt(0), 'K'.charCodeAt(0), 'L'.charCodeAt(0), 'M'.charCodeAt(0), 'N'.charCodeAt(0), 'O'.charCodeAt(0), 'P'.charCodeAt(0), 'Q'.charCodeAt(0), 'R'.charCodeAt(0), 'S'.charCodeAt(0), 'T'.charCodeAt(0), 'U'.charCodeAt(0), 'V'.charCodeAt(0), 'W'.charCodeAt(0), 'X'.charCodeAt(0), 'Y'.charCodeAt(0), 'Z'.charCodeAt(0), 'a'.charCodeAt(0), 'b'.charCodeAt(0), 'c'.charCodeAt(0), 'd'.charCodeAt(0), 'e'.charCodeAt(0), 'f'.charCodeAt(0), 'g'.charCodeAt(0), 'h'.charCodeAt(0), 'i'.charCodeAt(0), 'j'.charCodeAt(0), 'k'.charCodeAt(0), 'l'.charCodeAt(0), 'm'.charCodeAt(0), 'n'.charCodeAt(0), 'o'.charCodeAt(0), 'p'.charCodeAt(0), 'q'.charCodeAt(0), 'r'.charCodeAt(0), 's'.charCodeAt(0), 't'.charCodeAt(0), 'u'.charCodeAt(0), 'v'.charCodeAt(0), 'w'.charCodeAt(0), 'x'.charCodeAt(0), 'y'.charCodeAt(0), 'z'.charCodeAt(0), '0'.charCodeAt(0), '1'.charCodeAt(0), '2'.charCodeAt(0), '3'.charCodeAt(0), '4'.charCodeAt(0), '5'.charCodeAt(0), '6'.charCodeAt(0), '7'.charCodeAt(0), '8'.charCodeAt(0), '9'.charCodeAt(0), '+'.charCodeAt(0), '/'.charCodeAt(0)];
  * private static powTwo = {0:1,1:2,2:4,3:8,4:16,5:32,6:64,7:128,8:256,9:512,10:1024,11:2048,12:4096,13:8192,14:16384,15:32768,16:65536,17:131072,18:262144,19:524288,20:1048576,21:2097152,22:4194304,23:8388608,24:16777216,25:33554432,26:67108864,27:134217728,28:268435456,29:536870912,30:1073741824,31:2147483648,32:4294967296,33:8589934592,34:17179869184,35:34359738368,36:68719476736,37:137438953472,38:274877906944,39:549755813888,40:1099511627776,41:2199023255552,42:4398046511104,43:8796093022208,44:17592186044416,45:35184372088832,46:70368744177664,47:140737488355328,48:281474976710656,49:562949953421312,50:1125899906842624,51:2251799813685248,52:4503599627370496,53:9007199254740992};
- * public static encodeLong(l:number) {
- * var result = "";
- * var tmp = l;
- * if(l < 0) {
- * tmp = -tmp;
- * }
- * for (var i = 47; i >= 5; i -= 6) {
- * if (!(result === "" && ((tmp / Base64.powTwo[i]) & 0x3F) == 0)) {
- * result += Base64.dictionary[(tmp / Base64.powTwo[i]) & 0x3F];
- * }
- * }
- * result += Base64.dictionary[(tmp & 0x1F)*2 + (l<0?1:0)];
- * return result;
- * }
+ * private static longIndexes : Long[] = [Long.fromNumber(0), Long.fromNumber(1), Long.fromNumber(2), Long.fromNumber(3), Long.fromNumber(4), Long.fromNumber(5), Long.fromNumber(6), Long.fromNumber(7), Long.fromNumber(8), Long.fromNumber(9), Long.fromNumber(10), Long.fromNumber(11), Long.fromNumber(12), Long.fromNumber(13), Long.fromNumber(14), Long.fromNumber(15), Long.fromNumber(16), Long.fromNumber(17), Long.fromNumber(18), Long.fromNumber(19), Long.fromNumber(20), Long.fromNumber(21), Long.fromNumber(22), Long.fromNumber(23), Long.fromNumber(24), Long.fromNumber(25), Long.fromNumber(26), Long.fromNumber(27), Long.fromNumber(28), Long.fromNumber(29), Long.fromNumber(30), Long.fromNumber(31), Long.fromNumber(32), Long.fromNumber(33), Long.fromNumber(34), Long.fromNumber(35), Long.fromNumber(36), Long.fromNumber(37), Long.fromNumber(38), Long.fromNumber(39), Long.fromNumber(40), Long.fromNumber(41), Long.fromNumber(42), Long.fromNumber(43), Long.fromNumber(44), Long.fromNumber(45), Long.fromNumber(46), Long.fromNumber(47), Long.fromNumber(48), Long.fromNumber(49), Long.fromNumber(50), Long.fromNumber(51), Long.fromNumber(52), Long.fromNumber(53), Long.fromNumber(54), Long.fromNumber(55), Long.fromNumber(56), Long.fromNumber(57), Long.fromNumber(58), Long.fromNumber(59), Long.fromNumber(60), Long.fromNumber(61), Long.fromNumber(62), Long.fromNumber(63)];
  * public static encodeLongToBuffer(l:number, buffer:org.mwg.struct.Buffer) {
  * var empty=true;
  * var tmp = l;
@@ -33,20 +20,6 @@ import org.mwg.struct.Buffer;
  * }
  * }
  * buffer.write(Base64.dictionary[(tmp & 0x1F)*2 + (l<0?1:0)]);
- * }
- * public static encodeInt(l:number) {
- * var result = "";
- * var tmp = l;
- * if(l < 0) {
- * tmp = -tmp;
- * }
- * for (var i = 29; i >= 5; i -= 6) {
- * if (!(result === "" && ((tmp / Base64.powTwo[i]) & 0x3F) == 0)) {
- * result += Base64.dictionary[(tmp / Base64.powTwo[i]) & 0x3F];
- * }
- * }
- * result += Base64.dictionary[(tmp & 0x1F)*2 + (l<0?1:0)];
- * return result;
  * }
  * public static encodeIntToBuffer(l:number, buffer:org.mwg.struct.Buffer) {
  * var empty=true;
@@ -66,15 +39,15 @@ import org.mwg.struct.Buffer;
  * return Base64.decodeToLongWithBounds(s, 0, s.size());
  * }
  * public static decodeToLongWithBounds(s:org.mwg.struct.Buffer, offsetBegin:number, offsetEnd:number) {
- * var result = 0;
- * result += (Base64.dictionary.indexOf(s.read((offsetEnd - 1))) & 0xFF) / 2;
+ * var result = Long.ZERO;
+ * result = result.add(Base64.longIndexes[Base64.dictionary.indexOf(s.read((offsetEnd - 1))) & 0xFF].shiftRightUnsigned(1));
  * for (var i = 1; i < (offsetEnd - offsetBegin); i++) {
- * result += (Base64.dictionary.indexOf(s.read((offsetEnd - 1) - i)) & 0xFF) * Base64.powTwo[(6 * i)-1];
+ * result = result.add(Base64.longIndexes[Base64.dictionary.indexOf(s.read((offsetEnd - 1) - i)) & 0xFF].shiftLeft((6 * i)-1));
  * }
  * if (((Base64.dictionary.indexOf(s.read((offsetEnd - 1))) & 0xFF) & 0x1) != 0) {
- * result = -result;
+ * result = result.mul(-1);
  * }
- * return result;
+ * return result.toNumber();
  * }
  * public static decodeToInt(s : org.mwg.struct.Buffer) {
  * return Base64.decodeToIntWithBounds(s, 0, s.size());
@@ -89,31 +62,6 @@ import org.mwg.struct.Buffer;
  * result = -result;
  * }
  * return result;
- * }
- * public static encodeDouble(d : number) {
- * var result = "";
- * var floatArr = new Float64Array(1);
- * var bytes = new Uint8Array(floatArr.buffer);
- * floatArr[0] = d;
- * var exponent = (((bytes[7] & 0x7f) * 16) | (bytes[6] / 16)) - 0x3ff;
- * var signAndExp = (((bytes[7] / 128) & 0x1) * 2048) + (exponent + 1023);
- * //encode sign + exp
- * result += Base64.dictionary[(signAndExp / 64) & 0x3F];
- * result += Base64.dictionary[signAndExp & 0x3F];
- * result += Base64.dictionary[bytes[6] & 0x0F];
- * result += Base64.dictionary[(bytes[5] / 4) & 0x3F];
- * result += Base64.dictionary[((bytes[5] & 0x3) * 16) | (bytes[4] / 16)];
- * result += Base64.dictionary[((bytes[4] & 0x0F) * 4) | (bytes[3] / 64)];
- * result += Base64.dictionary[(bytes[3] & 0x3F)];
- * result += Base64.dictionary[(bytes[2] / 4) & 0x3F];
- * result += Base64.dictionary[((bytes[2] & 0x3) * 16) | (bytes[1] / 16)];
- * result += Base64.dictionary[((bytes[1] & 0x0F) * 4) | (bytes[0] / 64)];
- * result += Base64.dictionary[(bytes[0] & 0x3F)];
- * var i = result.length-1;
- * while(i >= 3 && result.charAt(i) == 'A') {
- * i--;
- * }
- * return result.substr(0,i+1);
  * }
  * public static encodeDoubleToBuffer(d : number, buffer : org.mwg.struct.Buffer) {
  * var result = [];
@@ -156,18 +104,6 @@ import org.mwg.struct.Buffer;
  * }
  * return (exp != 0) ? sign * Math.pow(2, exp - 1023) * (1 + (mantissaBits / Math.pow(2, 52))) : sign * Math.pow(2, -1022) * (0 + (mantissaBits / Math.pow(2, 52)));
  * }
- * public static encodeBoolArray(boolArr : Array<boolean>) {
- * var result = "";
- * var tmpVal = 0;
- * for (var i = 0; i < boolArr.length; i++) {
- * tmpVal = tmpVal | ((boolArr[i] ? 1 : 0) * Base64.powTwo[i % 6]);
- * if (i % 6 == 5 || i == (boolArr.length - 1)) {
- * result += Base64.dictionary[tmpVal];
- * tmpVal = 0;
- * }
- * }
- * return result;
- * }
  * public static encodeBoolArrayToBuffer(boolArr : Array<boolean>, buffer : org.mwg.struct.Buffer) {
  * var tmpVal = 0;
  * for (var i = 0; i < boolArr.length; i++) {
@@ -194,33 +130,6 @@ import org.mwg.struct.Buffer;
  * }
  * }
  * return resultTmp;
- * }
- * public static encodeString(s : string) {
- * var result = "";
- * var sLength = s.length;
- * var currentSourceChar : number;
- * var currentEncodedChar = 0;
- * var freeBitsInCurrentChar = 6;
- * for(var charIdx = 0; charIdx < sLength; charIdx++) {
- * currentSourceChar = s.charCodeAt(charIdx);
- * if(freeBitsInCurrentChar == 6) {
- * result += Base64.dictionary[(currentSourceChar / 4) & 0x3F];
- * currentEncodedChar = (currentSourceChar & 0x3) * 16;
- * freeBitsInCurrentChar = 4;
- * } else if(freeBitsInCurrentChar == 4) {
- * result += Base64.dictionary[(currentEncodedChar | ((currentSourceChar / 16) & 0xF)) & 0x3F];
- * currentEncodedChar = (currentSourceChar & 0xF) * 4;
- * freeBitsInCurrentChar = 2;
- * } else if(freeBitsInCurrentChar == 2) {
- * result += Base64.dictionary[(currentEncodedChar | ((currentSourceChar / 64) & 0x3)) & 0x3F];
- * result += Base64.dictionary[currentSourceChar & 0x3F];
- * freeBitsInCurrentChar = 6;
- * }
- * }
- * if(freeBitsInCurrentChar != 6) {
- * result += Base64.dictionary[currentEncodedChar];
- * }
- * return result;
  * }
  * public static encodeStringToBuffer(s : string, buffer : org.mwg.struct.Buffer) {
  * var sLength = s.length;
@@ -336,7 +245,7 @@ public class Base64 {
         }
         buffer.write(Base64.encodeArray[(int) ((tmp & 0x1F) << 1) + (l < 0 ? 1 : 0)]);
     }
-    
+
     /**
      * Encodes a int in a base-64 string. Sign is encoded on bit 0 of the long => LS bit of the right-most char of the string. 1 for negative; 0 otherwise.
      *
