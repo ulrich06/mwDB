@@ -65,7 +65,7 @@ public class IndexTest {
                     public void on(org.mwg.Node[] allNodes) {
                         counter[0]++;
                         Assert.assertTrue(allNodes.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", allNodes[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName\"}", allNodes[0].toString()));
                     }
                 });
 
@@ -75,7 +75,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertEquals(1, kNode.length);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName\"}", kNode[0].toString()));
                     }
                 });
 
@@ -108,7 +108,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(kNode.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName\"}", kNode[0].toString()));
                     }
                 });
 
@@ -119,7 +119,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(kNode.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"name\":\"MyName\",\"version\":\"1.0\"}", kNode[0].toString()));
                     }
                 });
 
@@ -131,7 +131,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(kNode.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"name\":\"MyName\",\"version\":\"1.0\"}", kNode[0].toString()));
                     }
                 });
 
@@ -171,7 +171,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(kNode.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"name\":\"MyName\",\"version\":\"1.0\"}", kNode[0].toString()));
                     }
                 });
 
@@ -191,7 +191,7 @@ public class IndexTest {
                         counter[0]++;
                         Assert.assertTrue(kNode != null);
                         Assert.assertTrue(kNode.length == 1);
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"data\": {\"name\": \"MyName\",\"version\": \"1.0\"}}", kNode[0].toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":3,\"name\":\"MyName\",\"version\":\"1.0\"}", kNode[0].toString()));
                     }
                 });
 

@@ -72,15 +72,15 @@ public class TimelineTest {
                     @Override
                     public void on(org.mwg.Node node_t1) {
                         counter[0]++;
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t1.toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName\"}", node_t1.toString()));
                         Assert.assertTrue(node_t1.timeDephasing() == 1); //node hasField a dephasing of 1 selectWith last known state
                         node_t1.forcePhase(); // force the object to move to timepoint 1
                         Assert.assertTrue(node_t1.timeDephasing() == 0); //node should be in phase now
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t1.toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName\"}", node_t1.toString()));
 
                         node_t1.setProperty("name", Type.STRING, "MyName@t1");
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"data\": {\"name\": \"MyName@t1\"}}", node_t1.toString()));
-                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName\"}}", node_t0.toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName@t1\"}", node_t1.toString()));
+                        Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName\"}", node_t0.toString()));
 
                         node_t1.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                             @Override
@@ -106,7 +106,7 @@ public class TimelineTest {
                         graph.lookup(newWorld, 2, node_t0.id(), new Callback<org.mwg.Node>() {
                             @Override
                             public void on(Node node_t1_w0) {
-                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"data\": {\"name\": \"MyName@t1\"}}", node_t1_w0.toString()));
+                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"name\":\"MyName@t1\"}", node_t1_w0.toString()));
                                 Assert.assertTrue(node_t1_w0.timeDephasing() == 1);
 
                                 node_t1_w0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
@@ -119,7 +119,7 @@ public class TimelineTest {
                                     }
                                 });
                                 node_t1_w0.setProperty("name", Type.STRING, "MyName@t1@w1");
-                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"data\": {\"name\": \"MyName@t1@w1\"}}", node_t1_w0.toString()));
+                                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":1,\"time\":2,\"id\":1,\"name\":\"MyName@t1@w1\"}", node_t1_w0.toString()));
                                 //test the new timeline
                                 node_t1_w0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                                     @Override

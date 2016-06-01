@@ -479,20 +479,13 @@ public abstract class AbstractNode implements Node {
         builder.append(id());
         NodeState state = this._resolver.resolveState(this, true);
         if (state != null) {
-            builder.append(",\"data\": {");
-            final boolean[] isFirst = {true};
             state.each(new NodeStateCallback() {
                 @Override
                 public void on(long attributeKey, int elemType, Object elem) {
                     if (elem != null) {
-                        if (isFirst[0]) {
-                            isFirst[0] = false;
-                        } else {
-                            builder.append(",");
-                        }
-                        builder.append("\"");
+                        builder.append(",\"");
                         builder.append(_resolver.hashToString(attributeKey));
-                        builder.append("\": ");
+                        builder.append("\":");
                         switch (elemType) {
                             /** Primitive types */
                             case Type.BOOL: {
@@ -562,7 +555,7 @@ public abstract class AbstractNode implements Node {
                     }
                 }
             });
-            builder.append("}}");
+            builder.append("}");
         }
         return builder.toString();
     }
