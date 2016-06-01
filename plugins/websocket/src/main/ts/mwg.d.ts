@@ -418,28 +418,25 @@ declare module org {
                 all(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
+                toString(): string;
                 setPropertyWithType(propertyName: string, propertyType: number, propertyValue: any, propertyTargetType: number): void;
             }
             class Base64 {
                 private static dictionary;
                 private static powTwo;
-                static encodeLong(l: number): string;
+                private static longIndexes;
                 static encodeLongToBuffer(l: number, buffer: org.mwg.struct.Buffer): void;
-                static encodeInt(l: number): string;
                 static encodeIntToBuffer(l: number, buffer: org.mwg.struct.Buffer): void;
                 static decodeToLong(s: org.mwg.struct.Buffer): number;
                 static decodeToLongWithBounds(s: org.mwg.struct.Buffer, offsetBegin: number, offsetEnd: number): number;
                 static decodeToInt(s: org.mwg.struct.Buffer): number;
                 static decodeToIntWithBounds(s: org.mwg.struct.Buffer, offsetBegin: number, offsetEnd: number): number;
-                static encodeDouble(d: number): string;
                 static encodeDoubleToBuffer(d: number, buffer: org.mwg.struct.Buffer): void;
                 static decodeToDouble(s: org.mwg.struct.Buffer): number;
                 static decodeToDoubleWithBounds(s: org.mwg.struct.Buffer, offsetBegin: number, offsetEnd: number): number;
-                static encodeBoolArray(boolArr: Array<boolean>): string;
                 static encodeBoolArrayToBuffer(boolArr: Array<boolean>, buffer: org.mwg.struct.Buffer): void;
                 static decodeBoolArray(s: org.mwg.struct.Buffer, arraySize: number): any[];
                 static decodeToBoolArrayWithBounds(s: org.mwg.struct.Buffer, offsetBegin: number, offsetEnd: number, arraySize: number): any[];
-                static encodeString(s: string): string;
                 static encodeStringToBuffer(s: string, buffer: org.mwg.struct.Buffer): void;
                 static decodeString(s: org.mwg.struct.Buffer): string;
                 static decodeToStringWithBounds(s: org.mwg.struct.Buffer, offsetBegin: number, offsetEnd: number): string;
@@ -503,6 +500,10 @@ declare module org {
                 getOrCreateFromKey(key: string, elemType: number): any;
                 getType(index: number): number;
                 getTypeFromKey(key: string): number;
+                each(callBack: org.mwg.plugin.NodeStateCallback): void;
+            }
+            interface NodeStateCallback {
+                (attributeKey: number, elemType: number, elem: any): void;
             }
             class Query {
                 private _hash;
@@ -916,9 +917,9 @@ declare module org {
                         getTypeFromKey(key: string): number;
                         getOrCreate(p_elementIndex: number, elemType: number): any;
                         getOrCreateFromKey(key: string, elemType: number): any;
-                        each(callBack: org.mwg.core.chunk.StateChunkCallback, resolver: org.mwg.plugin.Resolver): void;
+                        each(callBack: org.mwg.plugin.NodeStateCallback): void;
                         merge(buffer: org.mwg.struct.Buffer): void;
-                        private load(payload);
+                        private load(payload, isMerge);
                         save(buffer: org.mwg.struct.Buffer): void;
                         private internal_set_dirty();
                         flags(): number;
@@ -1077,10 +1078,6 @@ declare module org {
                     size(): number;
                 }
                 interface StateChunk extends org.mwg.plugin.Chunk, org.mwg.plugin.NodeState {
-                    each(callBack: org.mwg.core.chunk.StateChunkCallback, resolver: org.mwg.plugin.Resolver): void;
-                }
-                interface StateChunkCallback {
-                    (attributeName: string, elemType: number, elem: any): void;
                 }
                 interface TimeTreeChunk extends org.mwg.core.chunk.LongTree, org.mwg.plugin.Chunk {
                 }
@@ -1172,7 +1169,6 @@ declare module org {
             }
             class CoreNode extends org.mwg.plugin.AbstractNode {
                 constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
-                toString(): string;
             }
             class MWGResolver implements org.mwg.plugin.Resolver {
                 private _storage;

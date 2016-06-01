@@ -65,7 +65,8 @@
                             <target>
                                 <copy file="${basedir}/src/main/ts/mwg.ws.ts" todir="${basedir}/target/generated-sources"/>
 
-                                <!-- Auto update this -->
+                                <!-- Auto update for dev purpose -->
+                                <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts" todir="${basedir}/src/main/ts"/>
                                 <copy file="${basedir}/src/main/ts/mwg.d.ts" todir="${basedir}/target/generated-sources"/>
 
                                 <copy file="${basedir}/src/main/ts/package.json" todir="${basedir}/target/generated-sources"/>
@@ -84,6 +85,13 @@
                                     <arg value="--out"/>
                                     <arg value="${basedir}/target/classes/mwg.ws.js"/>
                                 </exec>
+
+                                <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
+                                    <arg value="--js"/>
+                                    <arg value="${basedir}/target/classes/mwg.ws.js"/>
+                                    <arg value="--js_output_file"/>
+                                    <arg value="${basedir}/target/classes/mwg.ws.min.js"/>
+                                </java>
 
                             </target>
 

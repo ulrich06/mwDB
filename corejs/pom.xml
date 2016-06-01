@@ -98,10 +98,13 @@
                         <phase>compile</phase>
                         <configuration>
                             <target>
-                                <exec executable="npm">
+
+                                <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
+
+                                <exec executable="npm" dir="${basedir}/target">
                                     <arg value="install"/>
                                 </exec>
-                                <exec executable="node_modules/typescript/bin/tsc">
+                                <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
                                     <arg value="-d"/>
                                     <arg value="--sourceMap"/>
                                     <arg value="--target"/>
@@ -111,7 +114,7 @@
                                     <arg value="${basedir}/target/classes/mwg.js"/>
                                 </exec>
 
-                                <exec executable="node_modules/typescript/bin/tsc">
+                                <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
                                     <arg value="--target"/>
                                     <arg value="es5"/>
                                     <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
@@ -131,7 +134,9 @@
                                               files="testsRunnerDev.js"/>
                                 </concat>
 
-                                <exec executable="node">
+                                <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
+
+                                <exec executable="node" dir="${basedir}/target">
                                     <arg value="test.js"/>
                                 </exec>
 
