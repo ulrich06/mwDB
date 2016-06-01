@@ -7,6 +7,20 @@ import java.util.concurrent.CountDownLatch;
 
 public class WSServerTest {
 
+    public static void main(String[] args) {
+        Graph graph = GraphBuilder.builder()
+                .withMemorySize(10000)
+                .withAutoSave(1000)
+                .withOffHeapMemory()
+                .build();
+        graph.connect(result -> {
+            WSServer graphServer = new WSServer(graph, 8050);
+            graphServer.start();
+            System.out.println("Connected!");
+        });
+    }
+
+
     @Test
     public void test() {
 
@@ -48,7 +62,6 @@ public class WSServerTest {
                             }
                         });
 
-
                         graph2.save(new Callback<Boolean>() {
                             @Override
                             public void on(Boolean result) {
@@ -59,9 +72,7 @@ public class WSServerTest {
                                         Assert.assertEquals(2, result.length);
                                         Assert.assertEquals(result[0].toString(), "{\"world\":0,\"time\":0,\"id\":1,\"name\":\"hello\"}");
                                         Assert.assertEquals(result[1].toString(), "{\"world\":0,\"time\":0,\"id\":137438953473,\"name\":\"hello2\"}");
-
                                         latch.countDown();
-
                                     }
                                 });
 

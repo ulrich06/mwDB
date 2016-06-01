@@ -1,0 +1,23 @@
+<html>
+<head>
+    <script src="../../../corejs/target/classes/mwg.js"></script>
+    <script src="../target/classes/mwg.ws.js"></script>
+    <script>
+        var graph = org.mwg.GraphBuilder.builder().withStorage(new org.mwg.plugin.WSClient("ws://localhost:8050")).build();
+        graph.connect(function () {
+            var node_a = graph.newNode(0, 0);
+            node_a.set("name", "n_" + Date.now());
+            graph.index("nodes", node_a, "name", function (res) {
+                graph.save(function (res) {
+                    graph.all(0, 0, "nodes", function (nodes) {
+                        for (i in nodes) {
+                            console.log(nodes[i].toString());
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+</head>
+</html>
