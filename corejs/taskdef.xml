@@ -14,10 +14,12 @@
         </condition>
     </target>
     <target name="other.run" depends="sys.check" if="isOther">
-        <exec executable="npm">
+        <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
+
+        <exec executable="npm" dir="${basedir}/target">
             <arg value="install"/>
         </exec>
-        <exec executable="node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
@@ -27,7 +29,7 @@
             <arg value="${basedir}/target/classes/mwg.js"/>
         </exec>
 
-        <exec executable="node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
@@ -47,7 +49,9 @@
                       files="testsRunnerDev.js"/>
         </concat>
 
-        <exec executable="node">
+        <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
+
+        <exec executable="node" dir="${basedir}/target">
             <arg value="test.js"/>
         </exec>
 
@@ -60,10 +64,13 @@
     </target>
 
     <target name="win.run" depends="sys.check" if="isWindows">
-        <exec executable="cmd" dir="${project.basedir}" failonerror="true">
+
+        <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
+
+        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
             <arg line="/c npm install" />
         </exec>
-        <exec executable="node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
@@ -73,7 +80,7 @@
             <arg value="${basedir}/target/classes/mwg.js"/>
         </exec>
 
-        <exec executable="node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
@@ -93,7 +100,9 @@
                       files="testsRunnerDev.js"/>
         </concat>
 
-        <exec executable="node">
+        <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
+
+        <exec executable="node" dir="${basedir}/target">
             <arg value="test.js"/>
         </exec>
 
