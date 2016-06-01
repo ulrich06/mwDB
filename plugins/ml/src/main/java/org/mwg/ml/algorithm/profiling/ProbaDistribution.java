@@ -77,16 +77,21 @@ public class ProbaDistribution {
     }
 
 
-    public double compareProbaDistribution(ProbaDistribution other, double[][] features) {
-        double error = 0;
+    public double[] compareProbaDistribution(ProbaDistribution other, double[][] features) {
+        double[] error = new double[2];
         double[] res1 = this.calculateArray(features, null);
         double[] res2 = other.calculateArray(features, null);
 
-        for (int i = 0; i < res1.length; i++) {
-            error += Math.abs(res1[i] - res2[i]);
-        }
-        error = error / res1.length;
+        double temp=0;
 
+        for (int i = 0; i < res1.length; i++) {
+            temp=Math.abs(res1[i] - res2[i]);
+            error[0] += temp ;
+            if(temp>error[1]){
+                error[1]=temp;
+            }
+        }
+        error[0] = error[0] / res1.length;
         return error;
     }
 

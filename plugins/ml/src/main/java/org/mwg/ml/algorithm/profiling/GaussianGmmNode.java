@@ -35,7 +35,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public static final String WIDTH_KEY = "_width";  // Nuber of children after compressing, note that Factor x wodth is the max per level tolerated before compressing
     public static final int WIDTH_DEF = 10;
     public static final String COMPRESSION_FACTOR_KEY = "_compression";  // Factor of subnodes allowed before starting compression. For ex: 2 => 2x Width before compressing to width
-    public static final int COMPRESSION_FACTOR_DEF = 2;
+    public static final double COMPRESSION_FACTOR_DEF = 2;
     public static final String COMPRESSION_ITER_KEY = "_compressioniter"; //Number of time to iterate K-means before finding the best compression
     public static final int COMPRESSION_ITER_DEF = 10;
     public static final String THRESHOLD_KEY = "_threshold";  //Factor of distance before check inside fail
@@ -78,7 +78,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         } else if (propertyName.equals(WIDTH_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
         } else if (propertyName.equals(COMPRESSION_FACTOR_KEY)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(THRESHOLD_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(PRECISION_KEY)) {
@@ -146,7 +146,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     public void learnVector(double[] values, Callback<Boolean> callback) {
         NodeState resolved = this._resolver.resolveState(this, true);
         final int width = resolved.getFromKeyWithDefault(WIDTH_KEY, WIDTH_DEF);
-        final int compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
+        final double compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
         final int compressionIter = resolved.getFromKeyWithDefault(COMPRESSION_ITER_KEY, COMPRESSION_ITER_DEF);
         double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
         if (initialPrecision == null) {
@@ -188,7 +188,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     private boolean checkInside(final double[] min, final double[] max, final double[] precisions, double threshold, double level) {
-        threshold = threshold + level * 0.8;
+        threshold = threshold + level*0.707 ;
 
         double[] avg = getAvg();
         boolean result = true;
@@ -207,7 +207,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     //ToDo need to be replaced by gaussian distances !!
     private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, double threshold, double level) {
-        threshold = threshold + level * 0.8;
+        threshold = threshold + level*0.707 ;
 
 
         if (result == null || result.length == 0) {
@@ -273,7 +273,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
     }
 
-    private GaussianGmmNode createLevel(double[] values, final int level, final int width, final int compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
+    private GaussianGmmNode createLevel(double[] values, final int level, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
         GaussianGmmNode g = (GaussianGmmNode) graph().newTypedNode(this.world(), this.time(), "GaussianGmm");
         g.set(LEVEL_KEY, level);
         g.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false); //dirac
@@ -281,7 +281,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         return g;
     }
 
-    private void checkAndCompress(final int width, final int compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
+    private void checkAndCompress(final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
 
         final Node selfPointer = this;
 
@@ -574,7 +574,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    private void internallearn(final double[] values, final int width, final int compressionFactor, final int compressionIter, final double[] precisions, double threshold, final boolean createNode) {
+    private void internallearn(final double[] values, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, double threshold, final boolean createNode) {
         int features = values.length;
 
         boolean reccursive=false;
