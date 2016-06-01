@@ -1,0 +1,82 @@
+<project default="all" basedir=".">
+
+    <target name="all" depends="other.run, win.run">
+    </target>
+
+    <target name="sys.check">
+        <condition property="isWindows">
+            <os family="windows"/>
+        </condition>
+        <condition property="isOther">
+            <not>
+                <os family="windows"/>
+            </not>
+        </condition>
+    </target>
+    <target name="other.run" depends="sys.check" if="isOther">
+        <copy file="${basedir}/src/main/ts/mwg.ws.ts" todir="${basedir}/target/generated-sources"/>
+
+        <!-- Auto update for dev purpose -->
+        <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts" todir="${basedir}/src/main/ts"/>
+        <copy file="${basedir}/src/main/ts/mwg.d.ts" todir="${basedir}/target/generated-sources"/>
+
+        <copy file="${basedir}/src/main/ts/package.json" todir="${basedir}/target"/>
+        <copy file="${basedir}/src/main/ts/reconnecting-websocket.ts" todir="${basedir}/target/generated-sources"/>
+
+        <exec executable="npm" dir="${basedir}/target">
+            <arg value="install"/>
+        </exec>
+
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+            <arg value="-d"/>
+            <arg value="--sourceMap"/>
+            <arg value="--target"/>
+            <arg value="es5"/>
+            <arg value="${basedir}/target/generated-sources/mwg.ws.ts"/>
+            <arg value="--out"/>
+            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+        </exec>
+
+        <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
+            <arg value="--js"/>
+            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+            <arg value="--js_output_file"/>
+            <arg value="${basedir}/target/classes/mwg.ws.min.js"/>
+        </java>
+    </target>
+
+    <target name="win.run" depends="sys.check" if="isWindows">
+        <copy file="${basedir}/src/main/ts/mwg.ws.ts" todir="${basedir}/target/generated-sources"/>
+
+        <!-- Auto update for dev purpose -->
+        <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts" todir="${basedir}/src/main/ts"/>
+        <copy file="${basedir}/src/main/ts/mwg.d.ts" todir="${basedir}/target/generated-sources"/>
+
+        <copy file="${basedir}/src/main/ts/package.json" todir="${basedir}/target"/>
+        <copy file="${basedir}/src/main/ts/reconnecting-websocket.ts" todir="${basedir}/target/generated-sources"/>
+
+        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
+            <arg line="/c npm install" />
+        </exec>
+
+        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
+            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc" />
+            <arg value="-d"/>
+            <arg value="--sourceMap"/>
+            <arg value="--target"/>
+            <arg value="es5"/>
+            <arg value="${basedir}/target/generated-sources/mwg.ws.ts"/>
+            <arg value="--out"/>
+            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+        </exec>
+
+        <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
+            <arg value="--js"/>
+            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+            <arg value="--js_output_file"/>
+            <arg value="${basedir}/target/classes/mwg.ws.min.js"/>
+        </java>
+
+    </target>
+
+</project>
