@@ -260,7 +260,7 @@ class MWGResolver implements Resolver {
         if (cached != null) {
             callback.on(cached);
         } else {
-            Buffer buffer = _graph.newBuffer();
+            Buffer buffer = selfPointer._graph.newBuffer();
             BufferBuilder.keyToBuffer(buffer, type, world, time, id);
             this._storage.get(buffer, new Callback<Buffer>() {
                 @Override

@@ -169,6 +169,9 @@ public class LevelDBStorage implements Storage {
 
     @Override
     public void lock(Callback<Buffer> callback) {
+        if (!isConnected) {
+            throw new RuntimeException(_connectedError);
+        }
         byte[] current = db.get(prefixKey);
         if (current == null) {
             current = new String("0").getBytes();
@@ -184,6 +187,9 @@ public class LevelDBStorage implements Storage {
 
     @Override
     public void unlock(Buffer previousLock, Callback<Boolean> callback) {
+        if (!isConnected) {
+            throw new RuntimeException(_connectedError);
+        }
         callback.on(true);
     }
 }
