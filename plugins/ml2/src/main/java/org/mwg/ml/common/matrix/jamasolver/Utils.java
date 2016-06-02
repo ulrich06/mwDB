@@ -24,37 +24,4 @@ public class Utils {
         }
         return r;
     }
-
-    public static double[][] convertToArray(Matrix mat) {
-        double[][] res = new double[mat.rows()][mat.columns()];
-        for (int i = 0; i < mat.rows(); i++) {
-            for (int j = 0; j < mat.columns(); j++) {
-                res[i][j] = mat.get(i, j);
-            }
-        }
-        return res;
-    }
-
-    public static Matrix convertToMatrix(double[][] matrix) {
-
-        Matrix mat = new Matrix(null, matrix.length, matrix[0].length);
-
-        for (int i = 0; i < mat.rows(); i++) {
-            for (int j = 0; j < mat.columns(); j++) {
-                mat.set(i, j, matrix[i][j]);
-            }
-        }
-        return mat;
-    }
-
-    public static Matrix convertToMatrixArg(double[][] matrix, int m, int n) {
-        Matrix mat = new Matrix(null, m, n);
-
-        for (int i = 0; i < mat.rows(); i++) {
-            for (int j = 0; j < mat.columns(); j++) {
-                mat.set(i, j, matrix[i][j]);
-            }
-        }
-        return mat;
-    }
 }
