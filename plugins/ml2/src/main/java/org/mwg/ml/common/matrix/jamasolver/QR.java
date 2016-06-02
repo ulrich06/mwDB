@@ -29,7 +29,7 @@ public class QR {
    /** Array for internal storage of decomposition.
    @serial internal array storage.
    */
-   private double[][] QR;
+   private Matrix QR;
 
    /** Row and column dimensions.
    @serial column dimension.
@@ -53,7 +53,7 @@ public class QR {
 
    public QR(Matrix A) {
       // Initialize.
-      QR = Utils.convertToArray(A);
+      QR = A.clone();
       m = A.rows();
       n = A.columns();
       Rdiag = new double[n];
@@ -63,28 +63,28 @@ public class QR {
          // Compute 2-norm of k-th column without under/overflow.
          double nrm = 0;
          for (int i = k; i < m; i++) {
-            nrm = Utils.hypot(nrm,QR[i][k]);
+            nrm = Utils.hypot(nrm,QR.get(i,k));
          }
 
          if (nrm != 0.0) {
             // Form k-th Householder vector.
-            if (QR[k][k] < 0) {
+            if (QR.get(k,k) < 0) {
                nrm = -nrm;
             }
             for (int i = k; i < m; i++) {
-               QR[i][k] /= nrm;
+               QR.set(i,k, QR.get(i,k) / nrm);
             }
-            QR[k][k] += 1.0;
+            QR.add(k,k, 1.0);
 
             // Apply transformation to remaining columns.
             for (int j = k+1; j < n; j++) {
                double s = 0.0; 
                for (int i = k; i < m; i++) {
-                  s += QR[i][k]*QR[i][j];
+                  s += QR.get(i,k)*QR.get(i,j);
                }
-               s = -s/QR[k][k];
+               s = -s/QR.get(k,k);
                for (int i = k; i < m; i++) {
-                  QR[i][j] += s*QR[i][k];
+                  QR.add(i,j, s*QR.get(i,k));
                }
             }
          }
@@ -117,7 +117,7 @@ public class QR {
       for (int i = 0; i < m; i++) {
          for (int j = 0; j < n; j++) {
             if (i >= j) {
-               H.set(i,j, QR[i][j]);
+               H.set(i,j, QR.get(i,j));
             } else {
                H.set(i,j,0.0);
             }
@@ -135,7 +135,7 @@ public class QR {
       for (int i = 0; i < n; i++) {
          for (int j = 0; j < n; j++) {
             if (i < j) {
-               R.set(i,j,QR[i][j]);
+               R.set(i,j,QR.get(i,j));
             } else if (i == j) {
                R.set(i,j,Rdiag[i]);
             } else {
@@ -158,14 +158,14 @@ public class QR {
          }
          Q.set(k,k, 1.0);
          for (int j = k; j < n; j++) {
-            if (QR[k][k] != 0) {
+            if (QR.get(k,k) != 0) {
                double s = 0.0;
                for (int i = k; i < m; i++) {
-                  s += QR[i][k]*Q.get(i,j);
+                  s += QR.get(i,k)*Q.get(i,j);
                }
-               s = -s/QR[k][k];
+               s = -s/QR.get(k,k);
                for (int i = k; i < m; i++) {
-                  Q.add(i,j, s*QR[i][k]);
+                  Q.add(i,j, s*QR.get(i,k));
                }
             }
          }
@@ -189,36 +189,35 @@ public class QR {
       }
       
       // Copy right hand side
-      int nx = B.columns();
-      double[][] X = Utils.convertToArray(B);
+      int nx = B.columns();      
+      Matrix X = B.clone();
 
       // Compute Y = transpose(Q)*B
       for (int k = 0; k < n; k++) {
          for (int j = 0; j < nx; j++) {
             double s = 0.0; 
             for (int i = k; i < m; i++) {
-               s += QR[i][k]*X[i][j];
+               s += QR.get(i,k)*X.get(i,j);
             }
-            s = -s/QR[k][k];
+            s = -s/QR.get(k,k);
             for (int i = k; i < m; i++) {
-               X[i][j] += s*QR[i][k];
+               X.add(i,j,s*QR.get(i,k));
             }
          }
       }
       // Solve R*X = Y;
       for (int k = n-1; k >= 0; k--) {
          for (int j = 0; j < nx; j++) {
-            X[k][j] /= Rdiag[k];
+            X.set(k,j,X.get(k,j) /Rdiag[k]);
          }
          for (int i = 0; i < k; i++) {
             for (int j = 0; j < nx; j++) {
-               X[i][j] -= X[k][j]*QR[i][k];
+               X.add(i,j, -X.get(k,j)*QR.get(i,k));
             }
          }
       }
 
-      Matrix res = Utils.convertToMatrix(X);
-      return (getMatrix(res,0,n-1,0,nx-1));
+      return (getMatrix(X,0,n-1,0,nx-1));
    }
 
    private static Matrix getMatrix (Matrix B, int i0, int i1, int j0, int j1) {
@@ -235,6 +234,4 @@ public class QR {
       }
       return X;
    }
-
-  private static final long serialVersionUID = 1;
 }
