@@ -32,10 +32,15 @@ public class StateChunkTest implements ChunkListener {
                 return new HeapStateChunk(Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, listener, payload, origin);
             }
         };
+
         saveLoadTest(factory);
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
+
+       // loadTest(factory);
+
+
     }
 
     /**
@@ -64,6 +69,8 @@ public class StateChunkTest implements ChunkListener {
         protectionTest(factory);
         typeSwitchTest(factory);
         cloneTest(factory);
+
+        // loadTest(factory);
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -360,6 +367,17 @@ public class StateChunkTest implements ChunkListener {
         free(chunk);
 
     }
+
+    /*
+    private void loadTest(StateChunkFactory factory) {
+        Buffer buffer = BufferBuilder.newHeapBuffer();
+        buffer.writeAll("O|El+/hmxUe,O,A|DxGmw37/h,M,G:QJHuw:QPER+:QVBVSI".getBytes());
+        StateChunk chunk = factory.create(this, buffer, null);
+
+        buffer.free();
+        free(chunk);
+    }*/
+
 
     private void cloneTest(StateChunkFactory factory) {
         StateChunk chunk = factory.create(this, null, null);

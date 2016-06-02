@@ -609,17 +609,29 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 break;
                             /** Arrays */
                             case Type.DOUBLE_ARRAY:
-                                currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                if (currentDoubleArr == null) {
+                                    currentDoubleArr = new double[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                                } else {
+                                    currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
+                                }
                                 toInsert = currentDoubleArr;
                                 break;
 
                             case Type.LONG_ARRAY:
-                                currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                if (currentLongArr == null) {
+                                    currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                                } else {
+                                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                }
                                 toInsert = currentLongArr;
                                 break;
 
                             case Type.INT_ARRAY:
-                                currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                if (currentIntArr == null) {
+                                    currentIntArr = new int[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
+                                } else {
+                                    currentIntArr[currentSubIndex] = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                }
                                 toInsert = currentIntArr;
                                 break;
                             /** Maps */

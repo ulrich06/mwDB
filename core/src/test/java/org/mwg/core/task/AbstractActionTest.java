@@ -44,9 +44,9 @@ public abstract class AbstractActionTest {
         graph.disconnect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Assert.assertEquals(true,result);
+                Assert.assertEquals(true, result);
             }
         });
     }
-    
+
 }
