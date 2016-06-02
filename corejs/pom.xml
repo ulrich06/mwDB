@@ -14,10 +14,6 @@
         <relativePath>..</relativePath>
     </parent>
 
-    <properties>
-        <java2typescript.plugin.version>51</java2typescript.plugin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.kevoree.mwg</groupId>

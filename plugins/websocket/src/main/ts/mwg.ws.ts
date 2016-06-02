@@ -84,7 +84,7 @@ module org {
                     if (codeView != null && codeView.size() != 0) {
                         var firstCode = codeView.read(0);
                         if(firstCode == this.REQ_UPDATE){
-                            console.log("NOTIFY UPDATE"); //TODO
+                            //console.log("NOTIFY UPDATE"); //TODO
                         } else {
                             var callbackCodeView = it.next();
                             if(callbackCodeView != null){

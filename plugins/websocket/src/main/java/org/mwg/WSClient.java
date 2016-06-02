@@ -193,7 +193,7 @@ public class WSClient implements Storage {
                     }
                 }
                 //now ask for ta get query ... TODO
-                System.out.println("Notification!"); //TODO
+                //System.out.println("Notification!"); //TODO
             } else {
                 Buffer callbackCodeView = it.next();
                 if (callbackCodeView != null) {

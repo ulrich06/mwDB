@@ -54,7 +54,7 @@
             });
             renderer.run();
 
-            var mwg = org.mwg.GraphBuilder.builder().withStorage(new org.mwg.plugin.WSClient("ws://localhost:8050")).build();
+            var mwg = org.mwg.GraphBuilder.builder().withStorage(new org.mwg.plugin.WSClient("ws://kloud4:8050")).build();
             mwg.connect(function () {
 
                 mwg.all(0, 0, "nodes", function (nodes) {

@@ -1,0 +1,7 @@
+{
+  "name": "mwg.ml",
+  "version": "1.0.0-SNAPSHOT",
+  "devDependencies": {
+    "typescript":"*"
+  }
+}

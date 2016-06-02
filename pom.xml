@@ -28,6 +28,10 @@
         <version>7</version>
     </parent>
 
+    <properties>
+        <java2typescript.plugin.version>51</java2typescript.plugin.version>
+    </properties>
+
     <developers>
         <developer>
             <name>Francois Fouquet</name>
@@ -110,6 +114,8 @@
         <module>plugins/importer</module>
         <module>plugins/leveldb</module>
         <module>plugins/ml</module>
+        <module>plugins/ml2</module>
+
         <module>plugins/rest</module>
         <module>plugins/websocket</module>
         <!--
