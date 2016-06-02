@@ -87,6 +87,20 @@
         </developer>
     </developers>
 
+    <profiles>
+        <profile>
+            <id>notWindowsActivation</id>
+            <activation>
+                <os>
+                    <family>!windows</family>
+                </os>
+            </activation>
+            <modules>
+                <module>plugins/rocksdb</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <modules>
         <module>api</module>
         <module>core</module>
@@ -95,7 +109,6 @@
 
         <!-- Plugins -->
         <module>plugins/importer</module>
-        <module>plugins/rocksdb</module>
         <module>plugins/leveldb</module>
 
         <module>plugins/ml</module>
