@@ -67,7 +67,7 @@ public abstract class AbstractMLNode extends AbstractNode {
      * @native ts
      * return parseFloat(payload);
      */
-    public double parseDouble(String payload){
+    public double parseDouble(String payload) {
         return Double.parseDouble(payload);
     }
 
