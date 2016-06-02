@@ -81,26 +81,32 @@ module org {
                     payloadBuf.writeAll(payload);
                     var it = payloadBuf.iterator();
                     var codeView = it.next();
-                    var callbackCodeView = it.next();
-                    if (codeView != null && callbackCodeView != null && codeView.size() != 0) {
-                        var callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
-                        var resolvedCallback = this.callbacks.get(callbackCode);
-                        if (resolvedCallback != null) {
-                            var firstCode = codeView.read(0);
-                            if (firstCode == this.RESP_GET || firstCode == this.RESP_LOCK) {
-                                var newBuf = this.graph.newBuffer();
-                                var isFirst = true;
-                                while (it.hasNext()) {
-                                    if (isFirst) {
-                                        isFirst = false;
+                    if (codeView != null && codeView.size() != 0) {
+                        var firstCode = codeView.read(0);
+                        if(firstCode == this.REQ_UPDATE){
+                            console.log("NOTIFY UPDATE"); //TODO
+                        } else {
+                            var callbackCodeView = it.next();
+                            if(callbackCodeView != null){
+                                var callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
+                                var resolvedCallback = this.callbacks.get(callbackCode);
+                                if (resolvedCallback != null) {
+                                    if (firstCode == this.RESP_GET || firstCode == this.RESP_LOCK) {
+                                        var newBuf = this.graph.newBuffer();
+                                        var isFirst = true;
+                                        while (it.hasNext()) {
+                                            if (isFirst) {
+                                                isFirst = false;
+                                            } else {
+                                                newBuf.write(org.mwg.Constants.BUFFER_SEP);
+                                            }
+                                            newBuf.writeAll(it.next().data());
+                                        }
+                                        resolvedCallback(newBuf);
                                     } else {
-                                        newBuf.write(org.mwg.Constants.BUFFER_SEP);
+                                        resolvedCallback(true);
                                     }
-                                    newBuf.writeAll(it.next().data());
                                 }
-                                resolvedCallback(newBuf);
-                            } else {
-                                resolvedCallback(true);
                             }
                         }
                     }

@@ -72,7 +72,7 @@ public class SVD implements SVDDecompose {
         // Find workspace requirements
         iwork = new int[8 * Math.min(m, n)];
 
-        // Query optimal workspace
+        // CoreQuery optimal workspace
         double[] worksize = new double[1];
         int[] info = new int[1];
         _blas.dgesdd(job.netlib(), m, n, new double[0],

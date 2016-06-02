@@ -5,6 +5,7 @@ import io.undertow.server.DefaultByteBufferPool;
 import io.undertow.websockets.client.WebSocketClient;
 import io.undertow.websockets.core.*;
 import org.mwg.plugin.Base64;
+import org.mwg.plugin.Chunk;
 import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
@@ -78,7 +79,6 @@ public class WSClient implements Storage {
                     .set(Options.CORK, true)
                     .getMap());
             ByteBufferPool _buffer = new DefaultByteBufferPool(true, 1024 * 1024);
-            //String scheme =  (_sslContext == null)? "ws" : "wss";
             WebSocketClient.ConnectionBuilder builder = io.undertow.websockets.client.WebSocketClient
                     .connectionBuilder(_worker, _buffer, new URI(url));
 
@@ -89,7 +89,7 @@ public class WSClient implements Storage {
             }*/
 
             IoFuture<WebSocketChannel> futureChannel = builder.connect();
-            futureChannel.await(30, TimeUnit.SECONDS); //Todo change this magic number!!!
+            futureChannel.await(5, TimeUnit.SECONDS); //Todo change this magic number!!!
             if (futureChannel.getStatus() != IoFuture.Status.DONE) {
                 System.err.println("Error during connexion with webSocket");
                 if (callback != null) {
@@ -170,26 +170,52 @@ public class WSClient implements Storage {
         payloadBuf.writeAll(payload);
         BufferIterator it = payloadBuf.iterator();
         Buffer codeView = it.next();
-        Buffer callbackCodeView = it.next();
-        if (codeView != null && callbackCodeView != null && codeView.size() != 0) {
-            int callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
-            Callback resolvedCallback = callbacks.get(callbackCode);
-            if (resolvedCallback != null) {
-                byte firstCode = codeView.read(0);
-                if (firstCode == WSConstants.RESP_LOCK || firstCode == WSConstants.RESP_GET) {
-                    Buffer newBuf = graph.newBuffer();//will be free by the core
-                    boolean isFirst = true;
-                    while (it.hasNext()) {
-                        if (isFirst) {
-                            isFirst = false;
-                        } else {
-                            newBuf.write(Constants.BUFFER_SEP);
+        if (codeView != null && codeView.size() != 0) {
+            final byte firstCode = codeView.read(0);
+            if (firstCode == WSConstants.REQ_UPDATE) {
+                Buffer updateBuf = graph.newBuffer();
+                boolean isFirst = true;
+                while (it.hasNext()) {
+                    Buffer view = it.next();
+                    ChunkKey key = ChunkKey.build(view);
+                    if (key != null) {
+                        Chunk ch = graph.space().getAndMark(key.type, key.world, key.time, key.id);
+                        if (ch != null) {
+                            graph.space().unmarkChunk(ch);
+                            //ok we keep it, ask for update
+                            if (isFirst) {
+                                isFirst = false;
+                            } else {
+                                updateBuf.write(Constants.BUFFER_SEP);
+                            }
+                            updateBuf.writeAll(view.data());
                         }
-                        newBuf.writeAll(it.next().data());
                     }
-                    resolvedCallback.on(newBuf);
-                } else {
-                    resolvedCallback.on(true);
+                }
+                //now ask for ta get query ... TODO
+                System.out.println("Notification!"); //TODO
+            } else {
+                Buffer callbackCodeView = it.next();
+                if (callbackCodeView != null) {
+                    int callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
+                    Callback resolvedCallback = callbacks.get(callbackCode);
+                    if (resolvedCallback != null) {
+                        if (firstCode == WSConstants.RESP_LOCK || firstCode == WSConstants.RESP_GET) {
+                            Buffer newBuf = graph.newBuffer();//will be free by the core
+                            boolean isFirst = true;
+                            while (it.hasNext()) {
+                                if (isFirst) {
+                                    isFirst = false;
+                                } else {
+                                    newBuf.write(Constants.BUFFER_SEP);
+                                }
+                                newBuf.writeAll(it.next().data());
+                            }
+                            resolvedCallback.on(newBuf);
+                        } else {
+                            resolvedCallback.on(true);
+                        }
+                    }
                 }
             }
         }

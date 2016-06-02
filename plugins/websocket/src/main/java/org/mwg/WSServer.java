@@ -97,7 +97,7 @@ public class WSServer implements WebSocketConnectionCallback {
                         concat.writeAll(streamResult.data());
                         streamResult.free();
                         payload.free();
-                        send_rpc_resp(concat, channel);
+                        send_resp(concat, channel);
                     });
                     break;
                 case WSConstants.REQ_LOCK:
@@ -110,7 +110,7 @@ public class WSServer implements WebSocketConnectionCallback {
                         concat.writeAll(result.data());
                         result.free();
                         payload.free();
-                        send_rpc_resp(concat, channel);
+                        send_resp(concat, channel);
                     });
                     break;
                 case WSConstants.REQ_UNLOCK:
@@ -120,7 +120,7 @@ public class WSServer implements WebSocketConnectionCallback {
                         concat.write(Constants.BUFFER_SEP);
                         concat.writeAll(callbackCodeView.data());
                         payload.free();
-                        send_rpc_resp(concat, channel);
+                        send_resp(concat, channel);
                     });
                     break;
                 case WSConstants.REQ_PUT:
@@ -134,13 +134,31 @@ public class WSServer implements WebSocketConnectionCallback {
                             flatValues.add(valueView);
                         }
                     }
-                    process_put(flatKeys.toArray(new ChunkKey[flatKeys.size()]), flatValues.toArray(new Buffer[flatValues.size()]), result -> {
+                    final ChunkKey[] collectedKeys = flatKeys.toArray(new ChunkKey[flatKeys.size()]);
+                    process_put(collectedKeys, flatValues.toArray(new Buffer[flatValues.size()]), result -> {
                         Buffer concat = graph.newBuffer();
                         concat.write(WSConstants.RESP_UNLOCK);
                         concat.write(Constants.BUFFER_SEP);
                         concat.writeAll(callbackCodeView.data());
                         payload.free();
-                        send_rpc_resp(concat, channel);
+                        send_resp(concat, channel);
+                        //for all other channel
+                        WebSocketChannel[] others = this.peers.toArray(new WebSocketChannel[this.peers.size()]);
+
+                        Buffer notificationBuffer = graph.newBuffer();
+                        notificationBuffer.write(WSConstants.REQ_UPDATE);
+                        for (int i = 0; i < collectedKeys.length; i++) {
+                            notificationBuffer.write(Constants.BUFFER_SEP);
+                            collectedKeys[i].write(notificationBuffer);
+                        }
+                        byte[] notificationMsg = notificationBuffer.data();
+                        notificationBuffer.free();
+                        for (int i = 0; i < others.length; i++) {
+                            if (!others[i].equals(channel)) {
+                                //send notification
+                                send_flat_resp(notificationMsg, others[i]);
+                            }
+                        }
                     });
                     break;
             }
@@ -210,13 +228,29 @@ public class WSServer implements WebSocketConnectionCallback {
         }
     }
 
-    private void send_rpc_resp(Buffer stream, final WebSocketChannel channel) {
+    private void send_resp(Buffer stream, final WebSocketChannel channel) {
         ByteBuffer finalBuf = ByteBuffer.wrap(stream.data());
         stream.free();
         WebSockets.sendBinary(finalBuf, channel, new WebSocketCallback<Void>() {
             @Override
             public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
                 //TODO process
+
+            }
+
+            @Override
+            public void onError(WebSocketChannel webSocketChannel, Void aVoid, Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+    private void send_flat_resp(byte[] flat, final WebSocketChannel channel) {
+        WebSockets.sendBinary(ByteBuffer.wrap(flat), channel, new WebSocketCallback<Void>() {
+            @Override
+            public void complete(WebSocketChannel webSocketChannel, Void aVoid) {
+                //TODO process
+
             }
 
             @Override

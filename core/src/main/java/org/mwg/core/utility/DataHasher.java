@@ -58,6 +58,27 @@ public class DataHasher {
     }
 
     /**
+     * @native ts
+     * var h = org.mwg.core.utility.DataHasher.HSTART;
+     * var dataLength = data.length;
+     * for (var i = 0; i < dataLength; i++) {
+     * h = h.mul(org.mwg.core.utility.DataHasher.HMULT).xor(org.mwg.core.utility.DataHasher.byteTable[data[i] & 0xff]);
+     * }
+     * return h.mod(org.mwg.core.CoreConstants.END_OF_TIME).toNumber();
+     */
+    public static long hashBytes(byte[] data) {
+        long h = HSTART;
+        final long hmult = HMULT;
+        final long[] ht = byteTable;
+        int dataLength = data.length;
+        for (int i = 0; i < dataLength; i++) {
+            h = (h * hmult) ^ ht[data[i] & 0xff];
+        }
+        return h % Constants.END_OF_TIME;
+    }
+
+
+    /**
      * @ignore ts
      */
     private static final long[] createLookupTable() {

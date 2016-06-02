@@ -17,9 +17,24 @@ public class WSServerTest {
             WSServer graphServer = new WSServer(graph, 8050);
             graphServer.start();
             System.out.println("Connected!");
+
+
+            Node root = graph.newNode(0, 0);
+            root.set("name", "root");
+
+            Node n0 = graph.newNode(0, 0);
+            n0.set("name", "n0");
+
+            Node n1 = graph.newNode(0, 0);
+            n1.set("name", "n0");
+
+            root.add("children", n0);
+            root.add("children", n1);
+
+            graph.index("nodes", root, "name", null);
+
         });
     }
-
 
     @Test
     public void test() {

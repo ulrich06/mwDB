@@ -59,4 +59,14 @@ class ChunkKey {
         return tuple;
     }
 
+    public void write(org.mwg.struct.Buffer buffer) {
+        buffer.write(type);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(world, buffer);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(time, buffer);
+        buffer.write(Constants.KEY_SEP);
+        Base64.encodeLongToBuffer(id, buffer);
+    }
+
 }

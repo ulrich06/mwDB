@@ -127,10 +127,10 @@ public interface Node {
      * Indexes are special relationships for quick access to referred nodes based on some of their attributes values.<br>
      * Index names must be unique within the indexed relation names.
      *
-     * @param indexName     The name of the index (should be unique per relation).
-     * @param nodeToIndex   The node to de-index.
+     * @param indexName         The name of the index (should be unique per relation).
+     * @param nodeToIndex       The node to de-index.
      * @param flatKeyAttributes The list of attribute names (flat string seperated by a ',') to be used as keys for de-indexing (order does not matter)
-     * @param callback      Called when the node has been de-index. The boolean value specifies the success of the operation.
+     * @param callback          Called when the node has been de-index. The boolean value specifies the success of the operation.
      */
     void unindex(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
@@ -145,16 +145,12 @@ public interface Node {
     void find(String indexName, String query, Callback<Node[]> callback);
 
     /**
-     * Retrieves nodes fromVar an index that satisfies a query in a particular world and time.<br>
-     * The query is composed by &lt;key, value&gt; tuples, separated by commas.
+     * Retrieves nodes from a local index that satisfies the query object passed as parameter.<br>
      *
-     * @param indexName The name of the index (should be unique per relation)
-     * @param query     The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
-     * @param callback  Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
-     * @param world     The world id in which the search must be performed.
-     * @param time      The timepoint at which the search must be performed.
+     * @param query    The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
+     * @param callback Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
-    void findAt(String indexName, long world, long time, String query, Callback<Node[]> callback);
+    void findQuery(Query query, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes in a particular index at the current node world and the current node time
@@ -167,12 +163,12 @@ public interface Node {
     /**
      * Retrieves all nodes in a particular index and in a particular world and time
      *
-     * @param indexName The name of the index
-     * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
+     * @param indexName The name of the index
+     * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      */
-    void allAt(String indexName, long world, long time, Callback<Node[]> callback);
+    void allAt(long world, long time, String indexName, Callback<Node[]> callback);
 
     /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.

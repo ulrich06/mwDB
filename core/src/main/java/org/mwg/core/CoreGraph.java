@@ -349,6 +349,11 @@ class CoreGraph implements org.mwg.Graph {
         return new CoreTask(this);
     }
 
+    @Override
+    public Query newQuery() {
+        return new CoreQuery(_resolver);
+    }
+
     private void saveDirtyList(final ChunkIterator dirtyIterator, final Callback<Boolean> callback) {
         if (dirtyIterator.size() == 0) {
             dirtyIterator.free();
@@ -449,7 +454,42 @@ class CoreGraph implements org.mwg.Graph {
                         callback.on(new Node[0]);
                     }
                 } else {
-                    foundIndex.findAt(CoreConstants.INDEX_ATTRIBUTE, world, time, query, new Callback<org.mwg.Node[]>() {
+                    foundIndex.find(CoreConstants.INDEX_ATTRIBUTE, query, new Callback<org.mwg.Node[]>() {
+                        @Override
+                        public void on(org.mwg.Node[] collectedNodes) {
+                            foundIndex.free();
+                            if (PrimitiveHelper.isDefined(callback)) {
+                                callback.on(collectedNodes);
+                            }
+                        }
+                    });
+                }
+            }
+        }, false);
+    }
+
+    @Override
+    public void findQuery(Query query, Callback<Node[]> callback) {
+        if (query.world() == Constants.NULL_LONG) {
+            throw new RuntimeException("Please fill world parameter in query before first usage!");
+        }
+        if (query.time() == Constants.NULL_LONG) {
+            throw new RuntimeException("Please fill time parameter in query before first usage!");
+        }
+        if (query.indexName() == null) {
+            throw new RuntimeException("Please fill indexName parameter in query before first usage!");
+        }
+
+        getIndexOrCreate(query.world(), query.time(), query.indexName(), new Callback<org.mwg.Node>() {
+            @Override
+            public void on(org.mwg.Node foundIndex) {
+                if (foundIndex == null) {
+                    if (PrimitiveHelper.isDefined(callback)) {
+                        callback.on(new Node[0]);
+                    }
+                } else {
+                    query.setIndexName(CoreConstants.INDEX_ATTRIBUTE);
+                    foundIndex.findQuery(query, new Callback<org.mwg.Node[]>() {
                         @Override
                         public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
@@ -473,7 +513,7 @@ class CoreGraph implements org.mwg.Graph {
                         callback.on(new Node[0]);
                     }
                 } else {
-                    foundIndex.allAt(CoreConstants.INDEX_ATTRIBUTE, world, time, new Callback<org.mwg.Node[]>() {
+                    foundIndex.allAt(world, time, CoreConstants.INDEX_ATTRIBUTE, new Callback<org.mwg.Node[]>() {
                         @Override
                         public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
@@ -485,6 +525,11 @@ class CoreGraph implements org.mwg.Graph {
                 }
             }
         }, false);
+    }
+
+    @Override
+    public void namedIndex(long world, long time, String indexName, Callback<Node> callback) {
+        getIndexOrCreate(world, time, indexName, callback, false);
     }
 
     private void getIndexOrCreate(long world, long time, String indexName, Callback<org.mwg.Node> callback, boolean createIfNull) {

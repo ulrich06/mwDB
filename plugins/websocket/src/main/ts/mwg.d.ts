@@ -319,11 +319,14 @@ declare module org {
             index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             all(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            namedIndex(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
             counter(expectedEventsCount: number): org.mwg.DeferCounter;
             resolver(): org.mwg.plugin.Resolver;
             scheduler(): org.mwg.plugin.Scheduler;
             newBuffer(): org.mwg.struct.Buffer;
+            newQuery(): org.mwg.Query;
             newTask(): org.mwg.task.Task;
             space(): org.mwg.plugin.ChunkSpace;
             storage(): org.mwg.plugin.Storage;
@@ -372,9 +375,9 @@ declare module org {
             index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            findAt(indexName: string, world: number, time: number, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             all(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            allAt(indexName: string, world: number, time: number, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            allAt(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             timeDephasing(): number;
             forcePhase(): void;
             timepoints(beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
@@ -412,12 +415,13 @@ declare module org {
                 forcePhase(): void;
                 timepoints(beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
                 jump<A extends org.mwg.Node>(targetTime: number, callback: org.mwg.Callback<A>): void;
-                findAt(indexName: string, world: number, time: number, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                allAt(indexName: string, world: number, time: number, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                allAt(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 all(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
+                private isNaN(toTest);
                 toString(): string;
                 setPropertyWithType(propertyName: string, propertyType: number, propertyValue: any, propertyTargetType: number): void;
             }
@@ -505,18 +509,6 @@ declare module org {
             interface NodeStateCallback {
                 (attributeKey: number, elemType: number, elem: any): void;
             }
-            class Query {
-                private _hash;
-                private capacity;
-                attributes: Float64Array;
-                values: string[];
-                size: number;
-                hash(): number;
-                add(att: number, val: string): void;
-                compute(): void;
-                private sort();
-                static parseQuery(query: string, p_resolver: org.mwg.plugin.Resolver): org.mwg.plugin.Query;
-            }
             interface Resolver {
                 init(graph: org.mwg.Graph): void;
                 initNode(node: org.mwg.Node, typeCode: number): void;
@@ -545,6 +537,19 @@ declare module org {
                 unlock(previousLock: org.mwg.struct.Buffer, callback: org.mwg.Callback<boolean>): void;
                 disconnect(callback: org.mwg.Callback<boolean>): void;
             }
+        }
+        interface Query {
+            parseString(flatQuery: string): org.mwg.Query;
+            add(attributeName: string, value: string): org.mwg.Query;
+            setWorld(initialWorld: number): org.mwg.Query;
+            world(): number;
+            setTime(initialTime: number): org.mwg.Query;
+            time(): number;
+            setIndexName(indexName: string): org.mwg.Query;
+            indexName(): string;
+            hash(): number;
+            attributes(): Float64Array;
+            values(): string[];
         }
         module struct {
             interface Buffer {
@@ -1154,11 +1159,14 @@ declare module org {
                 disconnect(callback: org.mwg.Callback<any>): void;
                 newBuffer(): org.mwg.struct.Buffer;
                 newTask(): org.mwg.task.Task;
+                newQuery(): org.mwg.Query;
                 private saveDirtyList(dirtyIterator, callback);
                 index(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 all(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                namedIndex(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
                 private getIndexOrCreate(world, time, indexName, callback, createIfNull);
                 counter(expectedCountCalls: number): org.mwg.DeferCounter;
                 resolver(): org.mwg.plugin.Resolver;
@@ -1169,6 +1177,31 @@ declare module org {
             }
             class CoreNode extends org.mwg.plugin.AbstractNode {
                 constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
+            }
+            class CoreQuery implements org.mwg.Query {
+                private _resolver;
+                private capacity;
+                private _attributes;
+                private _values;
+                private size;
+                private _hash;
+                private _world;
+                private _time;
+                private _indexName;
+                constructor(p_resolver: org.mwg.plugin.Resolver);
+                parseString(flatQuery: string): org.mwg.Query;
+                add(attributeName: string, value: string): org.mwg.Query;
+                setWorld(initialWorld: number): org.mwg.Query;
+                world(): number;
+                setTime(initialTime: number): org.mwg.Query;
+                time(): number;
+                setIndexName(indexName: string): org.mwg.Query;
+                indexName(): string;
+                hash(): number;
+                attributes(): Float64Array;
+                values(): string[];
+                private internal_add(att, val);
+                private compute();
             }
             class MWGResolver implements org.mwg.plugin.Resolver {
                 private _storage;
@@ -1474,6 +1507,7 @@ declare module org {
                     private static HSTART;
                     private static HMULT;
                     static hash(data: string): number;
+                    static hashBytes(data: Int8Array): number;
                 }
                 class HeapBuffer extends org.mwg.core.utility.AbstractBuffer {
                     private buffer;

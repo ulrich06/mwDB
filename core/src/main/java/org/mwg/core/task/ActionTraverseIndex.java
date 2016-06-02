@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.Node;
+import org.mwg.Query;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.struct.LongLongArrayMap;
@@ -38,7 +39,12 @@ class ActionTraverseIndex implements TaskAction {
             for (int i = 0; i < toLoad.length; i++) {
                 Node node = toLoad[i];
                 if (_query != null) {
-                    node.findAt(_indexName, context.getWorld(), context.getTime(), _query, new Callback<Node[]>() {
+                    Query queryObj = node.graph().newQuery();
+                    queryObj.setWorld(context.getWorld());
+                    queryObj.setTime(context.getTime());
+                    queryObj.parseString(_query);
+                    queryObj.setIndexName(_indexName);
+                    node.findQuery(queryObj, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {
@@ -50,7 +56,7 @@ class ActionTraverseIndex implements TaskAction {
                         }
                     });
                 } else {
-                    node.allAt(_indexName, context.getWorld(), context.getTime(), new Callback<Node[]>() {
+                    node.allAt(context.getWorld(), context.getTime(), _indexName, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {

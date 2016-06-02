@@ -51,7 +51,7 @@
  * - David Doran
  */
 module WebSocketHelper {
-    
+
     export class ReconnectingWebSocket {
         //These can be altered by calling code
         public debug:boolean = false;

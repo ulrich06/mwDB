@@ -69,7 +69,7 @@ public class QR {
 
         int lwork;
 
-        // Query optimal workspace. First for computing the factorization
+        // CoreQuery optimal workspace. First for computing the factorization
         {
             work = new double[1];
             int[] info = new int[1];

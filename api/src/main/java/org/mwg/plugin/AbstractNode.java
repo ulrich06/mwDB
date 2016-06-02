@@ -279,16 +279,28 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void findAt(String indexName, long world, long time, String query, Callback<Node[]> callback) {
+    public void findQuery(Query query, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
+        String indexName = query.indexName();
+        if (indexName == null) {
+            throw new RuntimeException("Please specify indexName in query before first use!");
+        }
+        long queryWorld = query.world();
+        if (queryWorld == Constants.NULL_LONG) ;
+        {
+            queryWorld = world();
+        }
+        long queryTime = query.time();
+        if (queryTime == Constants.NULL_LONG) {
+            queryTime = time();
+        }
         LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
-            final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
-            final long[] foundId = indexMap.get(flatQuery.hash());
+            final long[] foundId = indexMap.get(query.hash());
             if (foundId == null) {
                 callback.on(new org.mwg.plugin.AbstractNode[0]);
                 return;
@@ -297,9 +309,8 @@ public abstract class AbstractNode implements Node {
             final DeferCounter waiter = _graph.counter(foundId.length);
             //TODO replace by a par lookup
             final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
-
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(world, time, foundId[i], new Callback<org.mwg.Node>() {
+                selfPointer._resolver.lookup(queryWorld, queryTime, foundId[i], new Callback<org.mwg.Node>() {
                     @Override
                     public void on(org.mwg.Node resolvedNode) {
                         if (resolvedNode != null) {
@@ -320,9 +331,9 @@ public abstract class AbstractNode implements Node {
                         org.mwg.Node resolvedNode = resolved[i];
                         NodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
                         boolean exact = true;
-                        for (int j = 0; j < flatQuery.size; j++) {
-                            Object obj = resolvedState.get(flatQuery.attributes[j]);
-                            if (flatQuery.values[j] == null) {
+                        for (int j = 0; j < query.attributes().length; j++) {
+                            Object obj = resolvedState.get(query.attributes()[j]);
+                            if (query.values()[j] == null) {
                                 if (obj != null) {
                                     exact = false;
                                     break;
@@ -332,7 +343,7 @@ public abstract class AbstractNode implements Node {
                                     exact = false;
                                     break;
                                 } else {
-                                    if (!Constants.equals(flatQuery.values[j], obj.toString())) {
+                                    if (!Constants.equals(query.values()[j], obj.toString())) {
                                         exact = false;
                                         break;
                                     }
@@ -360,11 +371,16 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void find(String indexName, String query, Callback<Node[]> callback) {
-        findAt(indexName, time(), world(), query, callback);
+        Query queryObj = _graph.newQuery();
+        queryObj.setWorld(world());
+        queryObj.setTime(time());
+        queryObj.setIndexName(indexName);
+        queryObj.parseString(query);
+        findQuery(queryObj, callback);
     }
 
     @Override
-    public void allAt(String indexName, long world, long time, Callback<Node[]> callback) {
+    public void allAt(long world, long time, String indexName, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -408,7 +424,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void all(String indexName, Callback<Node[]> callback) {
-        allAt(indexName, world(), time(), callback);
+        allAt(world(), time(), indexName, callback);
     }
 
     @Override
@@ -419,21 +435,19 @@ public abstract class AbstractNode implements Node {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
         LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToHash(indexName, true), Type.LONG_LONG_ARRAY_MAP);
-        Query flatQuery = new Query();
+        Query flatQuery = _graph.newQuery();
         NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
         for (int i = 0; i < keyAttributes.length; i++) {
-            long attKey = this._resolver.stringToHash(keyAttributes[i], true);
-            Object attValue = toIndexNodeState.get(attKey);
+            String attKey = keyAttributes[i];
+            Object attValue = toIndexNodeState.getFromKey(attKey);
             if (attValue != null) {
-                flatQuery.add(attKey, attValue.toString());
+                flatQuery.add(keyAttributes[i], attValue.toString());
             } else {
-                flatQuery.add(attKey, null);
+                flatQuery.add(keyAttributes[i], null);
             }
         }
-        flatQuery.compute();
         //TODO AUTOMATIC UPDATE
         indexMap.put(flatQuery.hash(), nodeToIndex.id());
-
         if (Constants.isDefined(callback)) {
             callback.on(true);
         }
@@ -448,18 +462,17 @@ public abstract class AbstractNode implements Node {
         }
         LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
-            Query flatQuery = new Query();
+            Query flatQuery = _graph.newQuery();
             NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
             for (int i = 0; i < keyAttributes.length; i++) {
-                long attKey = this._resolver.stringToHash(keyAttributes[i], false);
-                Object attValue = toIndexNodeState.get(attKey);
+                String attKey = keyAttributes[i];
+                Object attValue = toIndexNodeState.getFromKey(attKey);
                 if (attValue != null) {
                     flatQuery.add(attKey, attValue.toString());
                 } else {
                     flatQuery.add(attKey, null);
                 }
             }
-            flatQuery.compute();
             //TODO AUTOMATIC UPDATE
             indexMap.remove(flatQuery.hash(), nodeToIndex.id());
         }
