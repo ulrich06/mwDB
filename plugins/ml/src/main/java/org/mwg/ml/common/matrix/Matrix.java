@@ -162,19 +162,19 @@ public class Matrix {
 
 
     public static Matrix multiply(Matrix matA, Matrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1d, matA, TransposeType.NOTRANSPOSE, 0d, matB);
+        return defaultEngine().multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1d, matA, TransposeType.NOTRANSPOSE, 0d, matB);
     }
 
     public static Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(transA, alpha, matA, transB, beta, matB);
+        return defaultEngine().multiplyTransposeAlphaBeta(transA, alpha, matA, transB, beta, matB);
     }
 
     public static Matrix invert(Matrix mat, boolean invertInPlace) {
-        return _defaultEngine.invert(mat, invertInPlace);
+        return defaultEngine().invert(mat, invertInPlace);
     }
 
     public static Matrix pinv(Matrix mat, boolean invertInPlace) {
-        return _defaultEngine.pinv(mat, invertInPlace);
+        return defaultEngine().pinv(mat, invertInPlace);
     }
 
 
