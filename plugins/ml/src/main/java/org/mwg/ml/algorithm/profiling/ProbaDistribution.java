@@ -77,6 +77,17 @@ public class ProbaDistribution {
     }
 
 
+
+    public double addUpProbabilities(double[][] features){
+        double res=0;
+        for(int i=0;i<features.length;i++){
+            res+=calculate(features[i]);
+        }
+        return res;
+    }
+
+
+
     public double[] compareProbaDistribution(ProbaDistribution other, double[][] features) {
         double[] error = new double[2];
         double[] res1 = this.calculateArray(features, null);

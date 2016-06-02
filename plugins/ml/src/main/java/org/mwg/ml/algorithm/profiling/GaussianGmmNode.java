@@ -560,7 +560,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
     @Override
     public String toString() {
-        double[] avg = getAvg();
+        return (String) get("name");
+       /* double[] avg = getAvg();
         StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
         if (avg != null) {
             NumberFormat formatter = new DecimalFormat("#0.0");
@@ -570,7 +571,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
             sb.append(", total: ").append(getTotal());
         }
-        return sb.toString();
+        return sb.toString();*/
     }
 
 
