@@ -44,7 +44,7 @@ public abstract class AbstractActionTest {
         graph.disconnect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Assert.assertEquals("Error during graph disconnection",true,result);
+                Assert.assertEquals(true,result);
             }
         });
     }

@@ -32,7 +32,7 @@ public class Type {
 
     /**
      * Convert a type that represent a byte to a readable String representation
-     *
+     *l
      * @param p_type byte encoding a particular type
      * @return readable string representation of the type
      */
