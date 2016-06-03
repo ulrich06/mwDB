@@ -15,6 +15,7 @@ public class IndexTest {
     @Test
     public void heapTest() {
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
+        testRelation(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -30,11 +31,53 @@ public class IndexTest {
         Unsafe.DEBUG_MODE = true;
 
         test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(100).build());
+        testRelation(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).withAutoSave(100).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapLongArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
+    }
+
+    private void testRelation(Graph graph) {
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                org.mwg.Node node_t0 = graph.newNode(0, 0);
+                node_t0.setProperty("name", Type.STRING, "MyName");
+
+                org.mwg.Node node_t1 = graph.newNode(0, 0);
+                node_t1.setProperty("name", Type.STRING, "MyName2");
+
+                node_t1.add("children", node_t0);
+                graph.index("bigram", node_t1, "children", null);
+
+                graph.all(0, 0, "bigram", new Callback<Node[]>() {
+                    @Override
+                    public void on(Node[] result) {
+                        Assert.assertEquals(result.length, 1);
+                        Assert.assertEquals(result[0].id(), node_t1.id());
+                    }
+                });
+
+
+                Query q = graph.newQuery();
+                q.setIndexName("bigram");
+                q.setTime(0);
+                q.setWorld(0);
+                q.add("children", new long[]{node_t0.id()});
+                graph.findQuery(q, new Callback<Node[]>() {
+                    @Override
+                    public void on(Node[] result) {
+                        Assert.assertEquals(result.length, 1);
+                        Assert.assertEquals(result[0].id(), node_t1.id());
+                    }
+                });
+
+
+                graph.disconnect(null);
+            }
+        });
     }
 
     private void test(Graph graph) {
