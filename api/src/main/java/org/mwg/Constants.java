@@ -48,6 +48,19 @@ public class Constants {
         return src.equals(other);
     }
 
+    public static boolean longArrayEquals(long[] src, long[] other) {
+        if (src.length != other.length) {
+            return false;
+        }
+        for (int i = 0; i < src.length; i++) {
+            if (src[i] != other[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     /**
      * @native ts
      * public static BUFFER_SEP : number = "#".charCodeAt(0);

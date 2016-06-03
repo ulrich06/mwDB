@@ -302,6 +302,7 @@ declare module org {
             static KEY_SEP: number;
             static isDefined(param: any): boolean;
             static equals(src: string, other: string): boolean;
+            static longArrayEquals(src: Float64Array, other: Float64Array): boolean;
         }
         interface DeferCounter {
             count(): void;
@@ -540,7 +541,7 @@ declare module org {
         }
         interface Query {
             parseString(flatQuery: string): org.mwg.Query;
-            add(attributeName: string, value: string): org.mwg.Query;
+            add(attributeName: string, value: any): org.mwg.Query;
             setWorld(initialWorld: number): org.mwg.Query;
             world(): number;
             setTime(initialTime: number): org.mwg.Query;
@@ -549,7 +550,7 @@ declare module org {
             indexName(): string;
             hash(): number;
             attributes(): Float64Array;
-            values(): string[];
+            values(): any[];
         }
         module struct {
             interface Buffer {
@@ -1190,7 +1191,7 @@ declare module org {
                 private _indexName;
                 constructor(p_resolver: org.mwg.plugin.Resolver);
                 parseString(flatQuery: string): org.mwg.Query;
-                add(attributeName: string, value: string): org.mwg.Query;
+                add(attributeName: string, value: any): org.mwg.Query;
                 setWorld(initialWorld: number): org.mwg.Query;
                 world(): number;
                 setTime(initialTime: number): org.mwg.Query;
@@ -1199,7 +1200,7 @@ declare module org {
                 indexName(): string;
                 hash(): number;
                 attributes(): Float64Array;
-                values(): string[];
+                values(): any[];
                 private internal_add(att, val);
                 private compute();
             }

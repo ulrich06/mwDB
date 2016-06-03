@@ -343,9 +343,21 @@ public abstract class AbstractNode implements Node {
                                     exact = false;
                                     break;
                                 } else {
-                                    if (!Constants.equals(query.values()[j], obj.toString())) {
-                                        exact = false;
-                                        break;
+                                    if (obj instanceof long[]) {
+                                        if (query.values()[j] instanceof long[]) {
+                                            if (!Constants.longArrayEquals((long[]) query.values()[j], (long[]) obj)) {
+                                                exact = false;
+                                                break;
+                                            }
+                                        } else {
+                                            exact = false;
+                                            break;
+                                        }
+                                    } else {
+                                        if (!Constants.equals(query.values()[j].toString(), obj.toString())) {
+                                            exact = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -441,7 +453,7 @@ public abstract class AbstractNode implements Node {
             String attKey = keyAttributes[i];
             Object attValue = toIndexNodeState.getFromKey(attKey);
             if (attValue != null) {
-                flatQuery.add(keyAttributes[i], attValue.toString());
+                flatQuery.add(keyAttributes[i], attValue);
             } else {
                 flatQuery.add(keyAttributes[i], null);
             }

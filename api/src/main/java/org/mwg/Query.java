@@ -4,7 +4,7 @@ public interface Query {
 
     Query parseString(String flatQuery);
 
-    Query add(String attributeName, String value);
+    Query add(String attributeName, Object value);
 
     Query setWorld(long initialWorld);
 
@@ -22,7 +22,7 @@ public interface Query {
 
     long[] attributes();
 
-    String[] values();
+    Object[] values();
 
 }
 

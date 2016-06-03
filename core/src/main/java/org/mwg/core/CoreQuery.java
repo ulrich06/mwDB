@@ -14,7 +14,7 @@ public class CoreQuery implements Query {
 
     private int capacity = 1;
     private long[] _attributes = new long[capacity];
-    private String[] _values = new String[capacity];
+    private Object[] _values = new Object[capacity];
     private int size = 0;
     private Long _hash;
 
@@ -55,7 +55,7 @@ public class CoreQuery implements Query {
     }
 
     @Override
-    public Query add(String attributeName, String value) {
+    public Query add(String attributeName, Object value) {
         internal_add(_resolver.stringToHash(attributeName.trim(), false), value);
         return this;
     }
@@ -106,11 +106,11 @@ public class CoreQuery implements Query {
     }
 
     @Override
-    public String[] values() {
+    public Object[] values() {
         return this._values;
     }
 
-    private void internal_add(long att, String val) {
+    private void internal_add(long att, Object val) {
         if (size == capacity) {
             //init
             int temp_capacity = capacity * 2;
@@ -126,7 +126,7 @@ public class CoreQuery implements Query {
 
         }
         _attributes[size] = att;
-        _values[size] = val.trim();
+        _values[size] = val;
         size++;
     }
 
@@ -136,7 +136,7 @@ public class CoreQuery implements Query {
             for (int j = 1; j <= i; j++) {
                 if (_attributes[j - 1] > _attributes[j]) {
                     long tempK = _attributes[j - 1];
-                    String tempV = _values[j - 1];
+                    Object tempV = _values[j - 1];
                     _attributes[j - 1] = _attributes[j];
                     _values[j - 1] = _values[j];
                     _attributes[j] = tempK;
@@ -148,8 +148,16 @@ public class CoreQuery implements Query {
         Buffer buf = BufferBuilder.newHeapBuffer();
         for (int i = 0; i < size; i++) {
             Base64.encodeLongToBuffer(_attributes[i], buf);
-            if (_values[i] != null) {
-                Base64.encodeStringToBuffer(_values[i], buf);
+            Object loopValue = _values[i];
+            if (loopValue != null) {
+                if (loopValue instanceof long[]) {
+                    long[] castedRelation = (long[]) loopValue;
+                    for (int j = 0; j < castedRelation.length; j++) {
+                        Base64.encodeLongToBuffer(castedRelation[j], buf);
+                    }
+                } else {
+                    Base64.encodeStringToBuffer(_values[i].toString(), buf);
+                }
             }
         }
         _hash = DataHasher.hashBytes(buf.data());
