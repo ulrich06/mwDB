@@ -6,6 +6,7 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 /**
  * Created by assaad on 03/06/16.
@@ -16,9 +17,15 @@ public class MultiplyTest {
 
 
     @Test
-    public void MatrixMult() {
+    public void MatrixMultBlas() {
         InternalManualMult(new BlasMatrixEngine());
     }
+
+    @Test
+    public void MatrixMultJama() {
+        InternalManualMult(new JamaMatrixEngine());
+    }
+    
 
     public Matrix manualMultpily(Matrix matA, Matrix matB) {
         Matrix matC = new Matrix(null, matA.rows(), matB.columns());
