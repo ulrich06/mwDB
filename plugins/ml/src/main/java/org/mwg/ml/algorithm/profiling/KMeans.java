@@ -79,13 +79,25 @@ public class KMeans {
         double min=Double.MAX_VALUE;
         int pos=0;
         for(int i=0;i<centroids.length;i++){
-            double d=GaussianGmmNode.distance(values,centroids[i],div);
+            double d=distance(values,centroids[i],div);
             if(d<min){
                 min=d;
                 pos=i;
             }
         }
         return pos;
+    }
+
+    public static double distance(double[] features, double[] avg, double[] precisions) {
+        double max = 0;
+        double temp;
+        for (int i = 0; i < features.length; i++) {
+            temp = (features[i] - avg[i]) * (features[i] - avg[i]) / precisions[i];
+            if (temp > max) {
+                max = temp;
+            }
+        }
+        return Math.sqrt(max);
     }
 
 
