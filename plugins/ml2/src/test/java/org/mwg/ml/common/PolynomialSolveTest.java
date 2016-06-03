@@ -22,19 +22,10 @@ public class PolynomialSolveTest {
             res[i] = PolynomialFit.extrapolate(t[i], coef);
         }
 
-        BlasMatrixEngine blasengine = (BlasMatrixEngine) Matrix.defaultEngine();
-        blasengine.setBlas(new F2JBlas());
-
-
         PolynomialFit pf = new PolynomialFit(coef.length - 1);
-        long timestart, timeend;
 
-        timestart = System.nanoTime();
         pf.fit(t, res);
         double[] blasCoef = pf.getCoef();
-        timeend = System.nanoTime();
-        //System.out.println("Polynomial solving done in: " + ((double) (timeend - timestart)) / 1000000 + " ms");
-
 
         for (int i = 0; i < coef.length; i++) {
             Assert.assertTrue(Math.abs(blasCoef[i] - coef[i]) < eps);
