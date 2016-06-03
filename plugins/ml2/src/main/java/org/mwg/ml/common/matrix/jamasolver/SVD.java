@@ -522,9 +522,11 @@ public class SVD implements SVDDecompose {
 
     @Override
     public Matrix getSMatrix() {
-        Matrix X = new Matrix(null, m, n);
-        for (int i = 0; i < n; i++) {
-            X.set(i, i, this.s[i]);
+        Matrix X = new Matrix(null, Math.min(m,n), n);
+        for (int i = 0; i < this.s.length; i++) {
+            if(i<m&&i<n) {
+                X.set(i, i, this.s[i]);
+            }
         }
         return X;
     }

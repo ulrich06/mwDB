@@ -117,7 +117,7 @@ public class JamaMatrixEngine implements MatrixEngine {
 
     @Override
     public SVDDecompose decomposeSVD(Matrix matA, boolean workInPlace) {
-        return null;
+        return new SVD(matA);
     }
 
 

@@ -7,6 +7,7 @@ import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 
 public class OpsTest {
@@ -14,6 +15,16 @@ public class OpsTest {
     @Test
     public void decompose_blas() {
         MatrixEngine engine = new BlasMatrixEngine();
+        MatrixSVD(engine);
+        MatrixInvert(engine);
+        MatrixLU(engine);
+        MatrixQR(engine);
+        MatrixPseudoInv(engine);
+    }
+
+    @Test
+    public void decompose_jama() {
+        MatrixEngine engine = new JamaMatrixEngine();
         MatrixSVD(engine);
         MatrixInvert(engine);
         MatrixLU(engine);
@@ -88,12 +99,11 @@ public class OpsTest {
 
 
     public void MatrixPseudoInv(MatrixEngine engine) {
-        int m = 3;
-        int n = 2;
-        double eps = 1e-7;
+        int m = 7;
+        int n = 7;
+        double eps = 1e-6;
 
-        double[] dataA = {4, 3, 6, 3, 2, 4};
-        Matrix matA = new Matrix(dataA, m, n);
+        Matrix matA = Matrix.random(m,n,0,100);
         Matrix res = engine.pinv(matA, false);
         Matrix id = Matrix.multiply(res, matA);
 
@@ -112,8 +122,8 @@ public class OpsTest {
 
 
     public void MatrixSVD(MatrixEngine engine) {
-        int m = 20;
-        int n = 30;
+        int m = 30;
+        int n = 20;
         double eps = 1e-7;
 
         Matrix matA = Matrix.random(m, n, 0, 100);
