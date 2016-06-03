@@ -9,9 +9,11 @@ import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
-
 public class OpsTest {
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void decompose_blas() {
         MatrixEngine engine = new BlasMatrixEngine();
@@ -103,7 +105,7 @@ public class OpsTest {
         int n = 7;
         double eps = 1e-6;
 
-        Matrix matA = Matrix.random(m,n,0,100);
+        Matrix matA = Matrix.random(m, n, 0, 100);
         Matrix res = engine.pinv(matA, false);
         Matrix id = Matrix.multiply(res, matA);
 

@@ -8,14 +8,11 @@ import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
-/**
- * Created by assaad on 03/06/16.
- */
 public class MultiplyTest {
 
-
-
-
+    /**
+     * @ignore ts
+     */
     @Test
     public void MatrixMultBlas() {
         InternalManualMult(new BlasMatrixEngine());
@@ -25,7 +22,6 @@ public class MultiplyTest {
     public void MatrixMultJama() {
         InternalManualMult(new JamaMatrixEngine());
     }
-    
 
     public Matrix manualMultpily(Matrix matA, Matrix matB) {
         Matrix matC = new Matrix(null, matA.rows(), matB.columns());
@@ -39,10 +35,8 @@ public class MultiplyTest {
         }
 
         return matC;
-
     }
-
-
+    
     public void InternalManualMult(MatrixEngine engine) {
         //Test matrix mult
         int r = 50;
@@ -52,7 +46,7 @@ public class MultiplyTest {
         Matrix matB = Matrix.random(o, p, 0, 100);
 
 
-        Matrix result = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE,1,matA,TransposeType.NOTRANSPOSE,1,matB);
+        Matrix result = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1, matA, TransposeType.NOTRANSPOSE, 1, matB);
         Matrix matD = manualMultpily(matA, matB);
 
         double eps = 1e-7;
