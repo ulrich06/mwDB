@@ -9,9 +9,6 @@ import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.PolynomialNode;
 
-/**
- * Created by assaad on 08/04/16.
- */
 public class PolynomialNodeTest {
     private static final int size = 100;
     private static final double precision = 0.5;
@@ -22,15 +19,12 @@ public class PolynomialNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-
                 /*
                 try {
                     BlasMatrixEngine bme = (BlasMatrixEngine) Matrix.defaultEngine();
                     bme.setBlas(new F2JBlas());
                 } catch (Exception ignored) {
                 }*/
-
-
                 long[] times = new long[size];
                 double[] values = new double[size];
                 //test degree 0
