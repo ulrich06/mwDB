@@ -108,23 +108,13 @@ public class BlasMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix solveQR(Matrix matA, Matrix matB, boolean workInPlace, TransposeType transB) {
-        if (workInPlace) {
-            QR solver = QR.factorize(matA, true, _blas);
-            Matrix coef = new Matrix(null, matA.columns(), matB.columns());
-            if (transB != TransposeType.NOTRANSPOSE) {
-                matB = Matrix.transpose(matB);
-            }
-            solver.solve(matB, coef);
-            return coef;
-        } else {
-            QR solver = QR.factorize(matA.clone(), true, _blas);
-            Matrix coef = new Matrix(null, matA.columns(), matB.columns());
-            if (transB != TransposeType.NOTRANSPOSE) {
-                matB = Matrix.transpose(matB);
-            }
-            solver.solve(matB.clone(), coef);
-            return coef;
+        QR solver = QR.factorize(matA, workInPlace, _blas);
+        Matrix coef = new Matrix(null, matA.columns(), matB.columns());
+        if (transB != TransposeType.NOTRANSPOSE) {
+            matB = Matrix.transpose(matB);
         }
+        solver.solve(matB, coef);
+        return coef;
     }
 
     @Override

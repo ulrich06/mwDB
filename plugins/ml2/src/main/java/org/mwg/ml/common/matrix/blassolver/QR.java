@@ -136,29 +136,42 @@ public class QR {
 
     public void solve(Matrix B, Matrix X) {
         int BnumCols = B.columns();
-        Matrix Y = new Matrix(null, m, 1);
-        Matrix Z;
+
+        Matrix temp=Matrix.multiplyTransposeAlphaBeta(TransposeType.TRANSPOSE,1.0,Q,TransposeType.NOTRANSPOSE,1.0,B);
 
         // solve each column one by one
         for (int colB = 0; colB < BnumCols; colB++) {
+            for (int i = n - 1; i >= 0; i--) {
+                double sum = temp.get(i,colB);
+                for (int j = i + 1; j < n; j++) {
+                    sum -= R.get(i, j) * temp.get(j,colB);
+                }
+                double res=sum / R.get(i, i);
+                temp.set(i,colB, res);
+                X.set(i,colB,res);
+            }
+
+            /*
             // make a copy of this column in the vector
             for (int i = 0; i < m; i++) {
-                Y.setAtIndex(i, B.get(i, colB));
+                Y.set(i,0, B.get(i, colB));
             }
             // Solve Qa=b
             // a = Q'b
             Z = Matrix.multiplyTransposeAlphaBeta(TransposeType.TRANSPOSE, 1.0, Q, TransposeType.NOTRANSPOSE, 1.0, Y);
 
             // solve for Rx = b using the standard upper triangular blassolver
-            solveU(R, Z.data(), n, m);
+            solveU(R, Z.data(), n);
             // save the results
             for (int i = 0; i < n; i++) {
                 X.set(i, colB, Z.getAtIndex(i));
-            }
+            }*/
         }
+
+
     }
 
-    private void solveU(Matrix U, double[] b, int n, int m) {
+   /* private void solveU(Matrix U, double[] b, int n) {
         for (int i = n - 1; i >= 0; i--) {
             double sum = b[i];
             for (int j = i + 1; j < n; j++) {
@@ -166,7 +179,7 @@ public class QR {
             }
             b[i] = sum / U.get(i, i);
         }
-    }
+    }*/
 
 
     /**
