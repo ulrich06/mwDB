@@ -16,10 +16,6 @@ import org.mwg.ml.common.matrix.Matrix;
    returns false.
 */
 
-
-/**
- * @ignore ts
- */
 public class QR {
 
 /* ------------------------

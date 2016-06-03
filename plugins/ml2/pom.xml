@@ -130,20 +130,6 @@
                 <artifactId>mavenplugin</artifactId>
                 <version>${java2typescript.plugin.version}</version>
                 <executions>
-                    <!--
-                    <execution>
-                        <id>compile-api</id>
-                        <goals>
-                            <goal>java2ts</goal>
-                        </goals>
-                        <configuration>
-                            <name>api</name>
-                            <copyJRE>true</copyJRE>
-                            <source>${basedir}/../api/src/main/java</source>
-                            <target>${basedir}/target/generated-sources</target>
-                        </configuration>
-                    </execution>
-                    -->
                     <execution>
                         <id>compile-core</id>
                         <goals>
@@ -159,7 +145,6 @@
                             <target>${basedir}/target/generated-sources</target>
                         </configuration>
                     </execution>
-                    <!--
                     <execution>
                         <id>compile-test</id>
                         <goals>
@@ -170,13 +155,12 @@
                             <copyJRE>false</copyJRE>
                             <copyJunit>true</copyJunit>
                             <moduleImports>
-                                <moduleImport>../../../generated-sources/src/main/core.ts</moduleImport>
+                                <moduleImport>../../../generated-sources/src/main/mwg.ml.ts</moduleImport>
                             </moduleImports>
-                            <source>${basedir}/../core/src/test/java</source>
+                            <source>${basedir}/src/test/java</source>
                             <target>${basedir}/target/generated-test-sources</target>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
             <plugin>

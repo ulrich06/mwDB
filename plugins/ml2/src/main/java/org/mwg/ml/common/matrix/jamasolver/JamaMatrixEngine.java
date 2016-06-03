@@ -6,9 +6,6 @@ import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.TransposeType;
 
-/**
- * @ignore ts
- */
 public class JamaMatrixEngine implements MatrixEngine {
 
     @Override
@@ -85,12 +82,12 @@ public class JamaMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix invert(Matrix mat, boolean invertInPlace) {
-        return solve(mat, mat.identity(mat.rows(),mat.rows()));
+        return solve(mat, Matrix.identity(mat.rows(),mat.rows()));
     }
 
     @Override
     public Matrix pinv(Matrix mat, boolean invertInPlace) {
-        return solve(mat, mat.identity(mat.rows(),mat.rows()));
+        return solve(mat, Matrix.identity(mat.rows(),mat.rows()));
     }
 
     @Override

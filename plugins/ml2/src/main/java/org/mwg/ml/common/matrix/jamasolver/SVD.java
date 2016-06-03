@@ -19,9 +19,6 @@ import org.mwg.ml.common.matrix.SVDDecompose;
  * rank can be computed from this decomposition.
  */
 
-/**
- * @ignore ts
- */
 public class SVD implements SVDDecompose {
 
 /* ------------------------
@@ -103,7 +100,7 @@ public class SVD implements SVDDecompose {
                 s[k] = -s[k];
             }
             for (int j = k + 1; j < n; j++) {
-                if ((k < nct) & (s[k] != 0.0)) {
+                if ((k < nct) && (s[k] != 0.0)) {
 
                     // Apply the transformation.
 
@@ -122,7 +119,7 @@ public class SVD implements SVDDecompose {
 
                 e[j] = A.get(k, j);
             }
-            if (wantu & (k < nct)) {
+            if (wantu && (k < nct)) {
 
                 // Place the transformation in U for subsequent back
                 // multiplication.
@@ -150,7 +147,7 @@ public class SVD implements SVDDecompose {
                     e[k + 1] += 1.0;
                 }
                 e[k] = -e[k];
-                if ((k + 1 < m) & (e[k] != 0.0)) {
+                if ((k + 1 < m) && (e[k] != 0.0)) {
 
                     // Apply the transformation.
 
@@ -236,7 +233,7 @@ public class SVD implements SVDDecompose {
 
         if (wantv) {
             for (int k = n - 1; k >= 0; k--) {
-                if ((k < nrt) & (e[k] != 0.0)) {
+                if ((k < nrt) && (e[k] != 0.0)) {
                     for (int j = k + 1; j < nu; j++) {
                         double t = 0;
                         for (int i = k + 1; i < n; i++) {
@@ -381,7 +378,7 @@ public class SVD implements SVDDecompose {
                     double b = ((spm1 + sp) * (spm1 - sp) + epm1 * epm1) / 2.0;
                     double c = (sp * epm1) * (sp * epm1);
                     double shift = 0.0;
-                    if ((b != 0.0) | (c != 0.0)) {
+                    if ((b != 0.0) || (c != 0.0)) {
                         shift = Math.sqrt(b * b + c);
                         if (b < 0.0) {
                             shift = -shift;

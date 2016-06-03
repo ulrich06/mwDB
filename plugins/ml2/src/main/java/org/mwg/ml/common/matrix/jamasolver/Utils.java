@@ -2,9 +2,6 @@ package org.mwg.ml.common.matrix.jamasolver;
 
 import org.mwg.ml.common.matrix.Matrix;
 
-/**
- * @ignore ts
- */
 public class Utils {
 
     /**

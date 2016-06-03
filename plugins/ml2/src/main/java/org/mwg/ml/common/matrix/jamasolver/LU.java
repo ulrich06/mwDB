@@ -16,10 +16,6 @@ import org.mwg.ml.common.matrix.Matrix;
  * linear equations.  This will fail if isNonsingular() returns false.
  */
 
-
-/**
- * @ignore ts
- */
 public class LU {
 
 /* ------------------------
@@ -116,7 +112,7 @@ public class LU {
 
             // Compute multipliers.
 
-            if (j < m & LU.get(j,j) != 0.0) {
+            if (j < m && LU.get(j,j) != 0.0) {
                 for (int i = j + 1; i < m; i++) {
                     LU.set(i,j, LU.get(i,j)/LU.get(j,j));
                 }

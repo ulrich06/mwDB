@@ -29,6 +29,16 @@
             <arg value="--out"/>
             <arg value="${basedir}/target/classes/mwg.ml.js"/>
         </exec>
+
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
+            <arg value="--target"/>
+            <arg value="es5"/>
+            <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
+            <arg value="--out"/>
+            <arg value="${basedir}/target/test-classes/mwg.test.js"/>
+        </exec>
+
+
         <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
             <arg value="--js"/>
             <arg value="${basedir}/target/classes/mwg.ml.js"/>

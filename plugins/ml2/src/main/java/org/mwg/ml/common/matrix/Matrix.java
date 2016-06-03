@@ -152,7 +152,7 @@ public class Matrix {
     /**
      * @native ts
      * if(Matrix._defaultEngine == null){
-     * Matrix._defaultEngine = null;
+     * Matrix._defaultEngine = new org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine();
      * }
      * return Matrix._defaultEngine;
      */
