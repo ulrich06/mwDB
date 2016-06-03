@@ -115,7 +115,7 @@ public class CoreQuery implements Query {
             //init
             int temp_capacity = capacity * 2;
             long[] temp_attributes = new long[temp_capacity];
-            String[] temp_values = new String[temp_capacity];
+            Object[] temp_values = new Object[temp_capacity];
             //copy
             System.arraycopy(_attributes, 0, temp_attributes, 0, capacity);
             System.arraycopy(_values, 0, temp_values, 0, capacity);
