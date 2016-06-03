@@ -115,6 +115,7 @@
         <module>plugins/leveldb</module>
         <module>plugins/ml</module>
         <module>plugins/ml2</module>
+        <module>plugins/mljs</module>
 
         <module>plugins/rest</module>
         <module>plugins/websocket</module>

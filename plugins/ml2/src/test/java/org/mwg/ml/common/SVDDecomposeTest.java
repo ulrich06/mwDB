@@ -7,13 +7,22 @@ import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.ml.common.matrix.blassolver.SVD;
+import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 
 public class SVDDecomposeTest {
 
+    /**
+     * @ignore ts
+     */
     @Test
     public void decompose_blas() {
         internal_decompose(new BlasMatrixEngine());
+    }
+
+    @Test
+    public void decompose_jama() {
+        internal_decompose(new JamaMatrixEngine());
     }
 
     public void internal_decompose(MatrixEngine engine) {

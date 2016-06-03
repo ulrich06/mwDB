@@ -15,8 +15,9 @@
     </target>
     <target name="other.run" depends="sys.check" if="isOther">
 
-        <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts" todir="${basedir}/target/generated-sources/src/main"/>
-        <copy file="${basedir}/src/main/ts/package.json" todir="${basedir}/target"/>
+        <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts"
+              todir="${basedir}/target/generated-sources/src/main"/>
+        <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
         <exec executable="npm" dir="${basedir}/target">
             <arg value="install"/>
         </exec>
@@ -38,6 +39,23 @@
             <arg value="${basedir}/target/test-classes/mwg.test.js"/>
         </exec>
 
+        <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
+            <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
+            <filelist dir="${basedir}/target/generated-test-sources/src/main/"
+                      files="testsRunner.js"/>
+        </concat>
+
+        <concat destfile="${basedir}/target/test-classes/test.all.dev.js" force="no">
+            <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
+            <filelist dir="${basedir}/target/generated-test-sources/src/main/"
+                      files="testsRunnerDev.js"/>
+        </concat>
+
+        <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
+
+        <exec executable="node" dir="${basedir}/target" failonerror="true">
+            <arg value="test.js"/>
+        </exec>
 
         <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
             <arg value="--js"/>
