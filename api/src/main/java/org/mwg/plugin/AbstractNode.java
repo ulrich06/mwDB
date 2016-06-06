@@ -289,8 +289,7 @@ public abstract class AbstractNode implements Node {
             throw new RuntimeException("Please specify indexName in query before first use!");
         }
         long queryWorld = query.world();
-        if (queryWorld == Constants.NULL_LONG) ;
-        {
+        if (queryWorld == Constants.NULL_LONG) {
             queryWorld = world();
         }
         long queryTime = query.time();
