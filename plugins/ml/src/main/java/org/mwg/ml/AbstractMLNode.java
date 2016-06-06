@@ -2,6 +2,7 @@ package org.mwg.ml;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
@@ -17,6 +18,11 @@ public abstract class AbstractMLNode extends AbstractNode {
 
     public AbstractMLNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
+    }
+
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
