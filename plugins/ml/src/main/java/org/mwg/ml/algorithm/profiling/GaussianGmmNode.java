@@ -500,7 +500,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
                     if (totals[i] > 2) {
-                        distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg, err), false);
+                        distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovariance(avg, err), false);
                         distributions[i].setMin(temp.getMin());
                         distributions[i].setMax(temp.getMax());
                     } else {
@@ -560,7 +560,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
                     if (totals[i] > 2) {
-                        distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovarianceMatrix(avg, err), false);
+                        distributions[i] = new MultivariateNormalDistribution(avg, temp.getCovariance(avg, err), false);
                         distributions[i].setMin(temp.getMin());
                         distributions[i].setMax(temp.getMax());
                     } else {
@@ -824,44 +824,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
     }
 
-    public double[][] getCovariance(double[] avg, double[] err) {
-        if (avg == null) {
-            return null;
-        }
-        if (err == null) {
-            err = new double[avg.length];
-        }
-        int features = avg.length;
 
-        int total = getTotal();
-        if (total == 0) {
-            return null;
-        }
-        if (total > 1) {
-            double[][] covariances = new double[features][features];
-            double[] sumsquares = (double[]) super.get(INTERNAL_SUMSQUARE_KEY);
-
-            double correction = total;
-            correction = correction / (total - 1);
-
-            int count = 0;
-            for (int i = 0; i < features; i++) {
-                for (int j = i; j < features; j++) {
-                    covariances[i][j] = (sumsquares[count] / total - avg[i] * avg[j]) * correction;
-                    covariances[j][i] = covariances[i][j];
-                    if (covariances[i][i] < err[i]) {
-                        covariances[i][i] = err[i];
-                    }
-                    count++;
-                }
-            }
-            return covariances;
-        } else {
-            return null;
-        }
-    }
-
-    public Matrix getCovarianceMatrix(double[] avg, double[] err) {
+    public Matrix getCovariance(double[] avg, double[] err) {
         int features = avg.length;
 
         int total = getTotal();

@@ -113,13 +113,13 @@ public class GaussianNodeTest {
                     @Override
                     public void on(GaussianGmmNode result) {
                         double[] a = result.getAvg();
-                        double[][] c = result.getCovariance(a,null);
+                        Matrix c = result.getCovariance(a,null);
                         if (c != null) {
                             for (int i = 0; i < a.length; i++) {
                                 avgLive[i] = a[i];
                                 covLive[i]=new double[a.length];
                                 for (int j = 0; j < a.length; j++) {
-                                    covLive[i][j] = c[i][j];
+                                    covLive[i][j] = c.get(i,j);
                                 }
                             }
                         }
