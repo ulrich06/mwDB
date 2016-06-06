@@ -1,4 +1,4 @@
-package ml.profiling;
+package org.mwg.ml.profiling;
 
 import org.junit.Assert;
 import org.junit.Test;

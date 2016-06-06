@@ -1,4 +1,4 @@
-package ml.profiling;
+package ml;
 
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
