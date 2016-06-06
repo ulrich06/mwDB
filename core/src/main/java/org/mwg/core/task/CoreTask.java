@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
@@ -76,7 +77,9 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task select(TaskFunctionSelect filter) {
-        addTask(new ActionSelect(filter));
+        if(PrimitiveHelper.isDefined(filter)) {
+            addTask(new ActionSelect(filter));
+        }
         return this;
     }
 
@@ -105,7 +108,9 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task map(TaskFunctionMap mapFunction) {
-        addTask(new ActionMap(mapFunction));
+        if(PrimitiveHelper.isDefined(mapFunction)) {
+            addTask(new ActionMap(mapFunction));
+        }
         return this;
     }
 
@@ -132,7 +137,7 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task wait(org.mwg.task.Task subTask) {
-        if(subTask != null) {
+        if(PrimitiveHelper.isDefined(subTask)) {
             addTask(new ActionTrigger(subTask));
         }
         return this;
@@ -140,7 +145,9 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task ifThen(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        addTask(new ActionIfThen(cond, then));
+        if(PrimitiveHelper.isDefined(cond) && PrimitiveHelper.isDefined(then)) {
+            addTask(new ActionIfThen(cond, then));
+        }
         return this;
     }
 
@@ -153,13 +160,17 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task then(TaskAction p_action) {
-        addTask(new ActionWrapper(p_action));
+        if(PrimitiveHelper.isDefined(p_action)) {
+            addTask(new ActionWrapper(p_action));
+        }
         return this;
     }
 
     @Override
     public org.mwg.task.Task thenAsync(TaskAction p_action) {
-        addTask(p_action);
+        if(PrimitiveHelper.isDefined(p_action)) {
+            addTask(p_action);
+        }
         return this;
     }
 
@@ -179,7 +190,7 @@ public class CoreTask implements org.mwg.task.Task {
             @Override
             public void eval(org.mwg.task.TaskContext context) {
                 Object previousResult = context.getPreviousResult();
-                if (previousResult != null) {
+                if (previousResult != null && action != null) {
                     action.on((T) previousResult);
                 }
             }
@@ -190,13 +201,17 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task foreach(org.mwg.task.Task subTask) {
-        addTask(new ActionForeach(subTask));
+        if(PrimitiveHelper.isDefined(subTask)) {
+            addTask(new ActionForeach(subTask));
+        }
         return this;
     }
 
     @Override
     public org.mwg.task.Task foreachPar(org.mwg.task.Task subTask) {
-        addTask(new ActionForeachPar(subTask));
+        if(PrimitiveHelper.isDefined(subTask)) {
+            addTask(new ActionForeachPar(subTask));
+        }
         return this;
     }
 
