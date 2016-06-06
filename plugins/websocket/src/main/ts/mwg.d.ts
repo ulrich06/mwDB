@@ -638,6 +638,8 @@ declare module org {
                 save(): org.mwg.task.Task;
                 execute(): void;
                 executeThen(action: org.mwg.task.Action): void;
+                newContext(): org.mwg.task.TaskContext;
+                executeWith(initialContext: org.mwg.task.TaskContext): void;
                 executeThenAsync(parentContext: org.mwg.task.TaskContext, initialResult: any, finalAction: org.mwg.task.Action): void;
                 parse(flat: string): org.mwg.task.Task;
                 action(name: string, params: string): org.mwg.task.Task;
@@ -1397,6 +1399,8 @@ declare module org {
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
                     execute(): void;
+                    newContext(): org.mwg.task.TaskContext;
+                    executeWith(initialContext: org.mwg.task.TaskContext): void;
                     executeThen(p_action: org.mwg.task.Action): void;
                     executeThenAsync(parent: org.mwg.task.TaskContext, initialResult: any, p_finalAction: org.mwg.task.Action): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;

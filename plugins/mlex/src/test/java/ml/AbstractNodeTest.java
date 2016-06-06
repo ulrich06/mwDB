@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.common.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.plugin.NodeFactory;
 
 public class AbstractNodeTest implements NodeFactory {

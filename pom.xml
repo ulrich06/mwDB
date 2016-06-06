@@ -117,7 +117,7 @@
 
         <module>plugins/ml</module>
         <module>plugins/mljs</module>
-        <module>plugins/mlex</module>
+        <!--<module>plugins/mlex</module>-->
 
         <module>plugins/rest</module>
         <module>plugins/websocket</module>

@@ -30,9 +30,12 @@ public class Type {
     public static final byte LONG_LONG_ARRAY_MAP = 10;
     public static final byte STRING_LONG_MAP = 11;
 
+    public static final byte REF = 12;
+    public static final byte DEP_REF = 13;
+
     /**
      * Convert a type that represent a byte to a readable String representation
-     *l
+     *
      * @param p_type byte encoding a particular type
      * @return readable string representation of the type
      */

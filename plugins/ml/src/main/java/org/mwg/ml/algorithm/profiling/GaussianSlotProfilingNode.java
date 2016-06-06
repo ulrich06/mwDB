@@ -5,7 +5,7 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.algorithm.ProfilingNode;
+import org.mwg.ml.ProfilingNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 

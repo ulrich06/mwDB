@@ -2,8 +2,8 @@ package ml.classifier;
 
 import org.mwg.Callback;
 import org.mwg.Type;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractMLNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 /**

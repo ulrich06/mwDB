@@ -2,6 +2,7 @@ package org.mwg.ml;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 
@@ -17,6 +18,11 @@ public abstract class AbstractMLNode extends AbstractNode {
 
     public AbstractMLNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
+    }
+
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
@@ -38,18 +44,9 @@ public abstract class AbstractMLNode extends AbstractNode {
     }
 
 
-    //ToDo ouch this is hurting eyes for performance
-    public void setTrainingVector(double[] vec) {
-        String setFrom = "";
-        for (int i = 0; i < vec.length; i++) {
-            set("f" + i, vec[i]);
-            setFrom = setFrom + "f" + i + FROM_SEPARATOR;
-        }
-        set(FROM, setFrom);
-    }
 
     public void extractFeatures(Callback<double[]> callback) {
-        String query = (String) super.get(FROM);
+     /*   String query = (String) super.get(FROM);
         double[] result;
         if (query != null) {
             String[] split = query.split(FROM_SEPARATOR);
@@ -60,7 +57,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             callback.on(result);
         } else {
             callback.on(null);
-        }
+        }*/
     }
 
     /**

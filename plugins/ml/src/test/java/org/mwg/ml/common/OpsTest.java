@@ -11,9 +11,7 @@ import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 public class OpsTest {
 
-    /**
-     * @ignore ts
-     */
+
     @Test
     public void decompose_blas() {
         MatrixEngine engine = new BlasMatrixEngine();
