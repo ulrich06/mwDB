@@ -2,8 +2,8 @@ package org.mwg.ml.common.matrix.blassolver;
 
 
 import org.mwg.ml.common.matrix.Matrix;
-import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
 import org.mwg.ml.common.matrix.TransposeType;
+import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 
 public class LU {
 
@@ -11,7 +11,7 @@ public class LU {
      * Holds the LU factors
      */
     private Matrix LU;
-    private KBlas _blas;
+    private Blas _blas;
 
     public Matrix getLU() {
         return LU;
@@ -33,7 +33,7 @@ public class LU {
      * @param m Number of rows
      * @param n Number of columns
      */
-    public LU(int m, int n, KBlas blas) {
+    public LU(int m, int n, Blas blas) {
         this._blas = blas;
         LU = new Matrix(null, m, n);
         piv = new int[Math.min(m, n)];
@@ -45,7 +45,7 @@ public class LU {
      * @param A Matrix to decompose. Not modified
      * @return The current decomposition
      */
-    public static LU factorize(Matrix A, KBlas blas) {
+    public static LU factorize(Matrix A, Blas blas) {
         return new LU(A.rows(), A.columns(), blas).factor(A, false);
     }
 
@@ -114,10 +114,10 @@ public class LU {
         return lower;
     }
 
+    /*
     public Matrix getP() {
         return Matrix.fromPartialPivots(piv, true);
-    }
-
+    }*/
 
     public Matrix getU() {
         int numRows = LU.rows() < LU.columns() ? LU.rows() : LU.columns();

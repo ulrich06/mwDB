@@ -1,6 +1,4 @@
-/// <reference path="mwg.ml.d.ts" />
-
-var emlapack;
+declare var Module;
 
 module org {
     export module mwg {
@@ -10,43 +8,61 @@ module org {
                     export module blassolver {
                         export module blas {
                             export class JSBlas implements org.mwg.ml.common.matrix.blassolver.blas.Blas {
+                                private netlib;
+
+                                constructor() {
+                                    this.netlib = Module;
+                                }
 
                                 dgemm(transA:org.mwg.ml.common.matrix.TransposeType, transB:org.mwg.ml.common.matrix.TransposeType, m:number, n:number, k:number, alpha:number, matA:Float64Array, offsetA:number, ldA:number, matB:Float64Array, offsetB:number, ldB:number, beta:number, matC:Float64Array, offsetC:number, ldC:number):void {
-                                    var ptransa = emlapack._malloc(1),
-                                        ptransb = emlapack._malloc(1),
-                                        pm = emlapack._malloc(4),
-                                        pn = emlapack._malloc(4),
-                                        pk = emlapack._malloc(4),
-                                        palpha = emlapack._malloc(8),
-                                        pa = emlapack._malloc(8 * matA.length),
-                                        plda = emlapack._malloc(4),
-                                        pb = emlapack._malloc(8 * matB.length),
-                                        pldb = emlapack._malloc(4),
-                                        pbeta = emlapack._malloc(8),
-                                        pc = emlapack._malloc(8 * matC.length),
-                                        pldc = emlapack._malloc(4);
+                                    var ptransa = this.netlib._malloc(1),
+                                        ptransb = this.netlib._malloc(1),
+                                        pm = this.netlib._malloc(4),
+                                        pn = this.netlib._malloc(4),
+                                        pk = this.netlib._malloc(4),
+                                        palpha = this.netlib._malloc(8),
+                                        pa = this.netlib._malloc(8 * matA.length),
+                                        plda = this.netlib._malloc(4),
+                                        pb = this.netlib._malloc(8 * matB.length),
+                                        pldb = this.netlib._malloc(4),
+                                        pbeta = this.netlib._malloc(8),
+                                        pc = this.netlib._malloc(8 * matC.length),
+                                        pldc = this.netlib._malloc(4);
 
-                                    emlapack.setValue(ptransa, org.mwg.ml.common.matrix.blassolver.blas.BlasHelper.transTypeToChar(transA).charCodeAt(0), 'i8');
-                                    emlapack.setValue(ptransb, org.mwg.ml.common.matrix.blassolver.blas.BlasHelper.transTypeToChar(transB).charCodeAt(0), 'i8');
-                                    emlapack.setValue(pm, m, 'i32');
-                                    emlapack.setValue(pn, n, 'i32');
-                                    emlapack.setValue(pk, k, 'i32');
-                                    emlapack.setValue(palpha, alpha, 'double');
-                                    emlapack.setValue(plda, ldA, 'i32');
-                                    emlapack.setValue(pldb, ldB, 'i32');
-                                    emlapack.setValue(pbeta, beta, 'double');
-                                    emlapack.setValue(pldc, ldC, 'i32');
+                                    this.netlib.setValue(ptransa, org.mwg.ml.common.matrix.blassolver.blas.BlasHelper.transTypeToChar(transA).charCodeAt(0), 'i8');
+                                    this.netlib.setValue(ptransb, org.mwg.ml.common.matrix.blassolver.blas.BlasHelper.transTypeToChar(transB).charCodeAt(0), 'i8');
+                                    this.netlib.setValue(pm, m, 'i32');
+                                    this.netlib.setValue(pn, n, 'i32');
+                                    this.netlib.setValue(pk, k, 'i32');
+                                    this.netlib.setValue(palpha, alpha, 'double');
+                                    this.netlib.setValue(plda, ldA, 'i32');
+                                    this.netlib.setValue(pldb, ldB, 'i32');
+                                    this.netlib.setValue(pbeta, beta, 'double');
+                                    this.netlib.setValue(pldc, ldC, 'i32');
 
-                                    var a = new Float64Array(emlapack.HEAPF64.buffer, pa, matA.length);
-                                    var b = new Float64Array(emlapack.HEAPF64.buffer, pb, matB.length);
-                                    var c = new Float64Array(emlapack.HEAPF64.buffer, pc, matC.length);
+                                    var a = new Float64Array(this.netlib.HEAPF64.buffer, pa, matA.length);
+                                    var b = new Float64Array(this.netlib.HEAPF64.buffer, pb, matB.length);
+                                    var c = new Float64Array(this.netlib.HEAPF64.buffer, pc, matC.length);
                                     a.set(matA);
                                     b.set(matB);
                                     c.set(matC);
-                                    var dgemm = emlapack.cwrap('f2c_dgemm', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgemm = this.netlib.cwrap('f2c_dgemm', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgemm(ptransa, ptransb, pm, pn, pk, palpha, pa, plda, pb, pldb, pbeta, pc, pldc);
                                     matC.set(c);
 
+                                    this.netlib._free(ptransa);
+                                    this.netlib._free(ptransb);
+                                    this.netlib._free(pm);
+                                    this.netlib._free(pn);
+                                    this.netlib._free(pk);
+                                    this.netlib._free(palpha);
+                                    this.netlib._free(pa);
+                                    this.netlib._free(plda);
+                                    this.netlib._free(pb);
+                                    this.netlib._free(pldb);
+                                    this.netlib._free(pbeta);
+                                    this.netlib._free(pc);
+                                    this.netlib._free(pldc);
                                 }
 
                                 dgetrs(transA:org.mwg.ml.common.matrix.TransposeType, dim:number, nrhs:number, matA:Float64Array, offsetA:number, ldA:number, ipiv:Int32Array, offsetIpiv:number, matB:Float64Array, offsetB:number, ldB:number, info:Int32Array):void {

@@ -2,8 +2,8 @@ package org.mwg.ml.common.matrix.blassolver;
 
 
 import org.mwg.ml.common.matrix.Matrix;
-import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
 import org.mwg.ml.common.matrix.TransposeType;
+import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 
 public class QR {
 
@@ -12,7 +12,7 @@ public class QR {
      */
     private Matrix Q;
     private Matrix R;
-    private KBlas _blas;
+    private Blas _blas;
 
     /**
      * Factorisation sizes
@@ -36,7 +36,7 @@ public class QR {
      *                columns
      * @param columns Number of columns
      */
-    public QR(int rows, int columns, KBlas blas) {
+    public QR(int rows, int columns, Blas blas) {
         this._blas = blas;
         if (columns > rows)
             throw new RuntimeException("n > m");
@@ -55,7 +55,7 @@ public class QR {
      * @param A Matrix to decompose. Not modified
      * @return Newly allocated decomposition
      */
-    public static QR factorize(Matrix A, boolean workInPlace, KBlas blas) {
+    public static QR factorize(Matrix A, boolean workInPlace, Blas blas) {
         return new QR(A.rows(), A.columns(), blas).factor(A, workInPlace);
     }
 
@@ -129,7 +129,6 @@ public class QR {
 
         return this;
     }
-
 
     public void solve(Matrix B, Matrix X) {
         int BnumCols = B.columns();

@@ -18,7 +18,7 @@ public class MultivariateNormalDistribution {
         return means;
     }
 
-    public double[] getCovDiag(){
+    public double[] getCovDiag() {
         return covDiag;
     }
 
@@ -36,9 +36,9 @@ public class MultivariateNormalDistribution {
         this.means = means;
         if (cov != null) {
             this.covariance = cov;
-            covDiag=new double[cov.rows()];
-            for(int i=0;i<covDiag.length;i++){
-                covDiag[i]=cov.get(i,i);
+            covDiag = new double[cov.rows()];
+            for (int i = 0; i < covDiag.length; i++) {
+                covDiag[i] = cov.get(i, i);
             }
             this.pinvsvd = new PInvSVD();
             this.pinvsvd.factor(covariance, false);
@@ -46,18 +46,18 @@ public class MultivariateNormalDistribution {
             this.det = pinvsvd.getDeterminant();
             this.rank = pinvsvd.getRank();
 
-            if(!allowSingular && this.rank<cov.rows()){
-                this.covariance=cov.clone();
-                double[] temp=new double[covDiag.length];
-                for(int i=0;i<covDiag.length;i++){
-                    temp[i]=Math.sqrt(covDiag[i]);
+            if (!allowSingular && this.rank < cov.rows()) {
+                this.covariance = cov.clone();
+                double[] temp = new double[covDiag.length];
+                for (int i = 0; i < covDiag.length; i++) {
+                    temp[i] = Math.sqrt(covDiag[i]);
                 }
 
-                for(int i=0;i<covDiag.length;i++){
-                    for(int j=i+1;j<covDiag.length;j++){
-                        double d=this.covariance.get(i,j)-0.0001*temp[i]*temp[j];
-                        this.covariance.set(i,j,d);
-                        this.covariance.set(j,i,d);
+                for (int i = 0; i < covDiag.length; i++) {
+                    for (int j = i + 1; j < covDiag.length; j++) {
+                        double d = this.covariance.get(i, j) - 0.0001 * temp[i] * temp[j];
+                        this.covariance.set(i, j, d);
+                        this.covariance.set(j, i, d);
                     }
                 }
                 pinvsvd = new PInvSVD();
@@ -66,7 +66,6 @@ public class MultivariateNormalDistribution {
                 det = pinvsvd.getDeterminant();
                 rank = pinvsvd.getRank();
             }
-
 
 
             //Solve complete covariance dependence
@@ -102,8 +101,6 @@ public class MultivariateNormalDistribution {
     public void setMax(double[] max) {
         this.max = max;
     }
-
-
 
 
     public static Matrix getCovariance(double[] sum, double[] sumsquares, int total) {
@@ -166,7 +163,7 @@ public class MultivariateNormalDistribution {
             }
         }
         Matrix cov = new Matrix(covariances, features, features);
-        return new MultivariateNormalDistribution(avg, cov,allowSingular);
+        return new MultivariateNormalDistribution(avg, cov, allowSingular);
     }
 
 
@@ -180,7 +177,10 @@ public class MultivariateNormalDistribution {
     }
 
     private double getExponentTerm(double[] features) {
-        double[] f = features.clone();
+
+        double[] f = new double[features.length];
+        System.arraycopy(features, 0, f, 0, features.length);
+        //double[] f = features.clone();
 
         for (int i = 0; i < features.length; i++) {
             f[i] = f[i] - means[i];
@@ -199,12 +199,12 @@ public class MultivariateNormalDistribution {
     }
 
     public MultivariateNormalDistribution clone(double[] avg) {
-        MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null,false);
+        MultivariateNormalDistribution res = new MultivariateNormalDistribution(avg, null, false);
         res.pinvsvd = this.pinvsvd;
         res.inv = this.inv;
         res.det = this.det;
         res.rank = this.rank;
-        res.covDiag=this.covDiag;
+        res.covDiag = this.covDiag;
         return res;
     }
 }

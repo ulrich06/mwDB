@@ -7,10 +7,6 @@
     <version>1-SNAPSHOT</version>
     <name>mwg :: Plugins :: ML</name>
 
-    <properties>
-        <nd4j.version>0.4-rc3.8</nd4j.version>
-    </properties>
-
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
@@ -24,31 +20,6 @@
             <artifactId>api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.fommil.netlib</groupId>
-            <artifactId>all</artifactId>
-            <version>1.1.2</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.f2j</groupId>
-            <artifactId>arpack_combined_all</artifactId>
-            <version>0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6</version>
-            <scope>test</scope>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-jcublas-7.5</artifactId>
-            <version>${nd4j.version}</version>
-        </dependency>
-        -->
-
         <!-- Test -->
         <dependency>
             <groupId>org.kevoree.mwg</groupId>
@@ -63,11 +34,93 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kevoree.mwg.plugins</groupId>
-            <artifactId>leveldb</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
+            <!-- WORKAROUND: https://github.com/sbt/sbt/issues/861 -->
+            <groupId>net.sourceforge.f2j</groupId>
+            <artifactId>arpack_combined_all</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>core</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-osx-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-linux-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-linux-i686</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-win-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-win-i686</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-linux-armhf</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-osx-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-linux-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-linux-i686</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-linux-armhf</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-win-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_system-win-i686</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.f2j</groupId>
+            <artifactId>arpack_combined_all</artifactId>
+            <version>0.1</version>
         </dependency>
     </dependencies>
-    
+
 </project>

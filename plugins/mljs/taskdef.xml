@@ -48,22 +48,10 @@
             <arg value="${basedir}/target/test-classes/mwg.test.js"/>
         </exec>
 
-        <!-- Compile Netlib Blas -->
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true" dir="${basedir}/target/generated-sources/src/main">
-            <arg value="-d"/>
-            <arg value="--sourceMap"/>
-            <arg value="--target"/>
-            <arg value="es5"/>
-            <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.blas.ts"/>
-            <arg value="--out"/>
-            <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js"/>
-        </exec>
-
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.d.ts" todir="${basedir}/target/classes"/>
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js" todir="${basedir}/target/classes"/>
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js.map" todir="${basedir}/target/classes"/>
-
         <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
+
+            <filelist dir="${basedir}/src" files="netlib.js2"/>
+            <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/../../corejs/target/classes" files="mwg.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
@@ -74,6 +62,9 @@
 
         <concat destfile="${basedir}/target/test-classes/test.all.dev.js" force="no">
 
+            <filelist dir="${basedir}/src" files="netlib.js2"/>
+            <filelist dir="${basedir}/src" files="spacer.js"/>
+
             <filelist dir="${basedir}/../../corejs/target/classes" files="mwg.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
@@ -83,6 +74,8 @@
         </concat>
 
         <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
+
+        <echo message="Execute js tests"/>
 
         <exec executable="node" dir="${basedir}/target" failonerror="true">
             <arg value="test.js"/>

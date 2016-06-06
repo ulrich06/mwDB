@@ -22,6 +22,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
     }
 
 
+    /*
     private static class LRUCache extends LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> {
 
         final int cacheSize;
@@ -36,18 +37,10 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
             return size() >= cacheSize;
         }
 
-    }
-
-    private static LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> cached = new LRUCache(100);
-
+    }*/
 
     public static synchronized org.mwg.ml.common.mathexp.MathExpressionEngine parse(String p_expression) {
-        org.mwg.ml.common.mathexp.MathExpressionEngine cachedEngine = cached.get(p_expression);
-        if (cachedEngine != null) {
-            return cachedEngine;
-        }
         org.mwg.ml.common.mathexp.MathExpressionEngine newEngine = new MathExpressionEngine(p_expression);
-        cached.put(p_expression, newEngine);
         return newEngine;
     }
 
@@ -218,14 +211,14 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                 String tokenName = castedFreeToken.content().trim();
                                 Object resolved;
                                 String cleanName;
-                                if (tokenName.startsWith("{") && tokenName.endsWith("}")) {
+                                if (tokenName.length() > 0 && tokenName.charAt(0) == '{' && tokenName.charAt(tokenName.length() - 1) == '}') {
                                     resolved = context.get(castedFreeToken.content().substring(1, tokenName.length() - 1));
                                     cleanName = castedFreeToken.content().substring(1, tokenName.length() - 1);
                                 } else {
                                     resolved = context.get(castedFreeToken.content());
                                     cleanName = castedFreeToken.content();
                                 }
-                                if (cleanName.startsWith("$")) {
+                                if (cleanName.length() > 0 && cleanName.charAt(0) == '$') {
                                     cleanName = cleanName.substring(1);
                                 }
                                 if (resolved != null) {

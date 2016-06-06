@@ -1,11 +1,13 @@
 package org.mwg.ml.algorithm.regression;
 
-import org.mwg.*;
-import org.mwg.ml.RegressionNode;
-import org.mwg.ml.common.AbstractMLNode;
-import org.mwg.plugin.NodeFactory;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.Node;
+import org.mwg.Type;
+import org.mwg.ml.algorithm.RegressionNode;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.matrix.operation.PolynomialFit;
-import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 public class PolynomialNode extends AbstractMLNode implements RegressionNode {
@@ -18,7 +20,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         NodeState previousState = unphasedState(); //past state, not cloned
 
         long timeOrigin = previousState.time();
-        long time = time();
+        long nodeTime = time();
         double precision = (double) previousState.getFromKey(PRECISION_KEY);
         double[] weight = (double[]) previousState.getFromKey(INTERNAL_WEIGHT_KEY);
 
@@ -34,11 +36,10 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             return;
         }
 
-
         // For the second time point, test and check for the step in time
 
         Long stp = (Long) previousState.getFromKey(INTERNAL_STEP_KEY);
-        long lastTime = time - timeOrigin;
+        long lastTime = nodeTime - timeOrigin;
         if (stp == null || stp == 0) {
 
             if (lastTime == 0) {
@@ -57,7 +58,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         //Then, first step, check if the current model already fits the new value:
         int deg = weight.length - 1;
         int num = (int) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
-        double t = (time - timeOrigin);
+        double t = (nodeTime - timeOrigin);
         t = t / stp;
         double maxError = maxErr(precision, deg);
 
@@ -74,7 +75,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         int factor;
 
         //The difference between inserting in the future or in the past
-        if (time > previousTime) {
+        if (nodeTime > previousTime) {
             factor = 1;
         } else {
             factor = 3;
@@ -95,7 +96,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 times[i] = i * inc;
                 values[i] = PolynomialFit.extrapolate(times[i], weight);
             }
-            times[factor * num] = (time - timeOrigin) / stp;
+            times[factor * num] = (nodeTime - timeOrigin) / stp;
             values[factor * num] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);
@@ -111,8 +112,8 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
 
         //It does not fit, create a new state and split the polynomial, different splits if we are dealing with the future or with the past
-        if (time > previousTime) {
-            long newstep = time - previousTime;
+        if (nodeTime > previousTime) {
+            long newstep = nodeTime - previousTime;
             NodeState phasedState = newState(previousTime); //force clone
             double[] values = new double[2];
             double pt = previousTime - timeOrigin;

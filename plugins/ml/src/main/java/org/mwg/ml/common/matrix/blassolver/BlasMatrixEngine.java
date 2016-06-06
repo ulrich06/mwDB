@@ -3,28 +3,29 @@ package org.mwg.ml.common.matrix.blassolver;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.SVDDecompose;
-import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
 import org.mwg.ml.common.matrix.TransposeType;
+import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
 import org.mwg.ml.common.matrix.operation.PInvSVD;
 
-/**
- * @ignore ts
- */
 public class BlasMatrixEngine implements MatrixEngine {
 
-    private KBlas _blas;
+    private Blas _blas;
 
+    /**
+     * @native ts
+     * this._blas = new org.mwg.ml.common.matrix.blassolver.blas.JSBlas();
+     */
     public BlasMatrixEngine() {
         // _blas = new F2JBlas();
         _blas = new NetlibBlas();
     }
 
-    public void setBlas(KBlas p_blas) {
+    public void setBlas(Blas p_blas) {
         this._blas = p_blas;
     }
 
-    public KBlas getBlas() {
+    public Blas getBlas() {
         return _blas;
     }
 
@@ -55,8 +56,6 @@ public class BlasMatrixEngine implements MatrixEngine {
                     dimC[1] = matB.rows();
                 }
             }
-
-
             Matrix matC = new Matrix(null, dimC[0], dimC[1]);
             _blas.dgemm(transA, transB, matC.rows(), matC.columns(), k, alpha, matA.data(), 0, matA.rows(), matB.data(), 0, matB.rows(), beta, matC.data(), 0, matC.rows());
             return matC;
@@ -70,7 +69,6 @@ public class BlasMatrixEngine implements MatrixEngine {
         if (mat.rows() != mat.columns()) {
             return null;
         }
-
         if (invertInPlace) {
             LU alg = new LU(mat.rows(), mat.columns(), _blas);
             Matrix result = new Matrix(null, mat.rows(), mat.columns());
@@ -108,12 +106,12 @@ public class BlasMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix solveQR(Matrix matA, Matrix matB, boolean workInPlace, TransposeType transB) {
-        QR solver = QR.factorize(matA.clone(), workInPlace, _blas);
+        QR solver = QR.factorize(matA, workInPlace, _blas);
         Matrix coef = new Matrix(null, matA.columns(), matB.columns());
         if (transB != TransposeType.NOTRANSPOSE) {
             matB = Matrix.transpose(matB);
         }
-        solver.solve(matB.clone(), coef);
+        solver.solve(matB, coef);
         return coef;
     }
 

@@ -1,13 +1,16 @@
 package org.mwg.ml.common.matrix.blassolver.blas;
 
-import com.github.fommil.netlib.LAPACK;
 import com.github.fommil.netlib.BLAS;
+import com.github.fommil.netlib.LAPACK;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.netlib.util.intW;
 
 
 //Native netlib blas, the fastest possible
-public class NetlibBlas implements KBlas {
+/**
+ * @ignore ts
+ */
+public class NetlibBlas implements Blas {
 
     private BLAS blas;
     private LAPACK lapack;
@@ -19,13 +22,13 @@ public class NetlibBlas implements KBlas {
 
     @Override
     public void dgemm(TransposeType paramString1, TransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
-        blas.dgemm(transTypeToChar(paramString1), transTypeToChar(paramString2), paramInt1, paramInt2, paramInt3, paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
+        blas.dgemm(BlasHelper.transTypeToChar(paramString1), BlasHelper.transTypeToChar(paramString2), paramInt1, paramInt2, paramInt3, paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);
     }
 
     @Override
     public void dgetrs(TransposeType paramString, int paramInt1, int paramInt2, double[] paramArrayOfDouble1, int paramInt3, int paramInt4, int[] paramArrayOfInt, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, int[] paramintW) {
         intW newint = new intW(paramintW[0]);
-        lapack.dgetrs(transTypeToChar(paramString), paramInt1, paramInt2, paramArrayOfDouble1, paramInt3, paramInt4, paramArrayOfInt, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, newint);
+        lapack.dgetrs(BlasHelper.transTypeToChar(paramString), paramInt1, paramInt2, paramArrayOfDouble1, paramInt3, paramInt4, paramArrayOfInt, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, newint);
         paramintW[0] = newint.val;
     }
 
@@ -76,21 +79,6 @@ public class NetlibBlas implements KBlas {
     @Override
     public void disconnect() {
         blas = null;
-    }
-
-    private static final String TRANSPOSE_TYPE_CONJUCATE = "c";
-
-    private static final String TRANSPOSE_TYPE_NOTRANSPOSE = "n";
-
-    private static final String TRANSPOSE_TYPE_TRANSPOSE = "t";
-
-    private static String transTypeToChar(TransposeType type) {
-        if (type.equals(TransposeType.NOTRANSPOSE)) {
-            return TRANSPOSE_TYPE_NOTRANSPOSE;
-        } else if (type.equals(TransposeType.TRANSPOSE)) {
-            return TRANSPOSE_TYPE_TRANSPOSE;
-        }
-        return null;
     }
 
 }

@@ -56,8 +56,9 @@
                             <name>mwg.ml</name>
                             <moduleImports>
                                 <moduleImport>mwg.d.ts</moduleImport>
+                                <moduleImport>mwg.ml.blas.ts</moduleImport>
                             </moduleImports>
-                            <source>${basedir}/../ml2/src/main/java</source>
+                            <source>${basedir}/../ml/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>
                         </configuration>
                     </execution>
@@ -73,7 +74,7 @@
                             <moduleImports>
                                 <moduleImport>../../../generated-sources/src/main/mwg.ml.ts</moduleImport>
                             </moduleImports>
-                            <source>${basedir}/../ml2/src/test/java</source>
+                            <source>${basedir}/../ml/src/test/java</source>
                             <target>${basedir}/target/generated-test-sources</target>
                         </configuration>
                     </execution>

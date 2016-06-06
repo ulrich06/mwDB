@@ -2,7 +2,7 @@ package org.mwg.ml.common.matrix.blassolver;
 
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.SVDDecompose;
-import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 
 /**
  * Computes singular value decompositions
@@ -44,7 +44,7 @@ public class SVD implements SVDDecompose {
      */
     private final Matrix U, Vt;
 
-    private KBlas _blas;
+    private Blas _blas;
 
 
     /**
@@ -53,7 +53,7 @@ public class SVD implements SVDDecompose {
      * @param m Number of rows
      * @param n Number of columns
      */
-    public SVD(int m, int n, KBlas blas) {
+    public SVD(int m, int n, Blas blas) {
         this.m = m;
         this.n = n;
         this._blas = blas;
@@ -128,7 +128,10 @@ public class SVD implements SVDDecompose {
                     Math.max(1, n), work, work.length, iwork, info);
         }
         else {
-            _blas.dgesdd(job.netlib(), m, n, A.data().clone(),
+            double[] Adata = A.data();
+            double[] cloned = new double[Adata.length];
+            System.arraycopy(Adata,0,cloned,0,Adata.length);
+            _blas.dgesdd(job.netlib(), m, n, cloned,
                     Math.max(1, m), S, vectors ? U.data() : new double[0],
                     Math.max(1, m), vectors ? Vt.data() : new double[0],
                     Math.max(1, n), work, work.length, iwork, info);
