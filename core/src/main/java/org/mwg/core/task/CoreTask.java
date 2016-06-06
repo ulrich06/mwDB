@@ -213,6 +213,16 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public TaskContext newContext() {
+        return new CoreTaskContext(null, null, _graph, new TaskAction[0]);
+    }
+
+    @Override
+    public void executeWith(TaskContext initialContext) {
+        executeThenAsync(initialContext, null, null);
+    }
+
+    @Override
     public final void executeThen(Action p_action) {
         executeThenAsync(null, null, new Action() {
             @Override

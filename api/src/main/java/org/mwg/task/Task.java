@@ -196,6 +196,11 @@ public interface Task {
      */
     void executeThen(Action action);
 
+
+    TaskContext newContext();
+
+    void executeWith(TaskContext initialContext);
+
     /**
      * Schedule and execute the current task program. However
      *
