@@ -9,7 +9,7 @@ import org.netlib.util.intW;
 /**
  * @ignore ts
  */
-public class F2JBlas implements KBlas {
+public class F2JBlas implements Blas {
     @Override
     public void dgemm(TransposeType paramString1, TransposeType paramString2, int paramInt1, int paramInt2, int paramInt3, double paramDouble1, double[] paramArrayOfDouble1, int paramInt4, int paramInt5, double[] paramArrayOfDouble2, int paramInt6, int paramInt7, double paramDouble2, double[] paramArrayOfDouble3, int paramInt8, int paramInt9) {
         Dgemm.dgemm(transTypeToChar(paramString1), transTypeToChar(paramString2), paramInt1, paramInt2, paramInt3, paramDouble1, paramArrayOfDouble1, paramInt4, paramInt5, paramArrayOfDouble2, paramInt6, paramInt7, paramDouble2, paramArrayOfDouble3, paramInt8, paramInt9);

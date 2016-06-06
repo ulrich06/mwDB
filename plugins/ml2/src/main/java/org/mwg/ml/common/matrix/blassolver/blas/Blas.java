@@ -2,10 +2,7 @@ package org.mwg.ml.common.matrix.blassolver.blas;
 
 import org.mwg.ml.common.matrix.TransposeType;
 
-/**
- * @ignore ts
- */
-public interface KBlas {
+public interface Blas {
 
     /**
      * Matrix multiplications

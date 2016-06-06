@@ -27,15 +27,19 @@
             <arg value="install"/>
         </exec>
 
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" dir="${basedir}/target/generated-sources">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-sources/mwg.ws.ts"/>
             <arg value="--out"/>
-            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+            <arg value="${basedir}/target/generated-sources/mwg.ws.js"/>
         </exec>
+
+        <copy file="${basedir}/target/generated-sources/mwg.ws.d.ts" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ws.js" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ws.js.map" todir="${basedir}/target/classes"/>
 
         <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
             <arg value="--js"/>
@@ -56,19 +60,23 @@
         <copy file="${basedir}/src/main/ts/reconnecting-websocket.ts" todir="${basedir}/target/generated-sources"/>
 
         <exec executable="cmd" dir="${basedir}/target" failonerror="true">
-            <arg line="/c npm install" />
+            <arg line="/c npm install"/>
         </exec>
 
-        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
-            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc" />
+        <exec executable="cmd" dir="${basedir}/target/generated-sources">
+            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc"/>
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-sources/mwg.ws.ts"/>
             <arg value="--out"/>
-            <arg value="${basedir}/target/classes/mwg.ws.js"/>
+            <arg value="${basedir}/target/generated-sources/mwg.ws.js"/>
         </exec>
+
+        <copy file="${basedir}/target/generated-sources/mwg.ws.d.ts" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ws.js" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ws.js.map" todir="${basedir}/target/classes"/>
 
         <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
             <arg value="--js"/>

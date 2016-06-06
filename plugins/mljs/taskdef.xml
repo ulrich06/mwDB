@@ -18,18 +18,27 @@
         <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts"
               todir="${basedir}/target/generated-sources/src/main"/>
         <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
+
+        <copy file="${basedir}/src/mwg.ml.blas.ts" todir="${basedir}/target/generated-sources/src/main"/>
+
         <exec executable="npm" dir="${basedir}/target">
             <arg value="install"/>
         </exec>
-        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc">
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc"
+              dir="${basedir}/target/generated-sources/src/main">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
             <arg value="es5"/>
             <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.ts"/>
             <arg value="--out"/>
-            <arg value="${basedir}/target/classes/mwg.ml.js"/>
+            <arg value="mwg.ml.js"/>
         </exec>
+
+        <!-- Copy Result -->
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.d.ts" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js.map" todir="${basedir}/target/classes"/>
 
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="--target"/>
@@ -38,6 +47,21 @@
             <arg value="--out"/>
             <arg value="${basedir}/target/test-classes/mwg.test.js"/>
         </exec>
+
+        <!-- Compile Netlib Blas -->
+        <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true" dir="${basedir}/target/generated-sources/src/main">
+            <arg value="-d"/>
+            <arg value="--sourceMap"/>
+            <arg value="--target"/>
+            <arg value="es5"/>
+            <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.blas.ts"/>
+            <arg value="--out"/>
+            <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js"/>
+        </exec>
+
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.d.ts" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.blas.js.map" todir="${basedir}/target/classes"/>
 
         <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
             <filelist dir="${basedir}/../../corejs/target/classes" files="mwg.js"/>
@@ -72,39 +96,8 @@
         </java>
     </target>
 
-    <!-- TODO update -->
     <target name="win.run" depends="sys.check" if="isWindows">
-        <copy file="${basedir}/src/main/ts/mwg.ws.ts" todir="${basedir}/target/generated-sources"/>
-
-        <!-- Auto update for dev purpose -->
-        <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts" todir="${basedir}/src/main/ts"/>
-        <copy file="${basedir}/src/main/ts/mwg.d.ts" todir="${basedir}/target/generated-sources"/>
-
-        <copy file="${basedir}/src/main/ts/package.json" todir="${basedir}/target"/>
-        <copy file="${basedir}/src/main/ts/reconnecting-websocket.ts" todir="${basedir}/target/generated-sources"/>
-
-        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
-            <arg line="/c npm install"/>
-        </exec>
-
-        <exec executable="cmd" dir="${basedir}/target" failonerror="true">
-            <arg line="/c node ${basedir}/target/node_modules/typescript/bin/tsc"/>
-            <arg value="-d"/>
-            <arg value="--sourceMap"/>
-            <arg value="--target"/>
-            <arg value="es5"/>
-            <arg value="${basedir}/target/generated-sources/mwg.ws.ts"/>
-            <arg value="--out"/>
-            <arg value="${basedir}/target/classes/mwg.ws.js"/>
-        </exec>
-
-        <java jar="${basedir}/../../corejs/lib/compiler.jar" fork="true" failonerror="true">
-            <arg value="--js"/>
-            <arg value="${basedir}/target/classes/mwg.ws.js"/>
-            <arg value="--js_output_file"/>
-            <arg value="${basedir}/target/classes/mwg.ws.min.js"/>
-        </java>
-
+        <!-- TODO update -->
     </target>
 
 </project>

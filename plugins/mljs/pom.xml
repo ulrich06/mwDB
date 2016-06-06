@@ -55,7 +55,7 @@
                         <configuration>
                             <name>mwg.ml</name>
                             <moduleImports>
-                                <moduleImport>./mwg.d.ts</moduleImport>
+                                <moduleImport>mwg.d.ts</moduleImport>
                             </moduleImports>
                             <source>${basedir}/../ml2/src/main/java</source>
                             <target>${basedir}/target/generated-sources</target>

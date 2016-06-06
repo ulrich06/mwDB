@@ -4,7 +4,7 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.MatrixEngine;
 import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.TransposeType;
-import org.mwg.ml.common.matrix.blassolver.blas.KBlas;
+import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
 import org.mwg.ml.common.matrix.operation.PInvSVD;
 
@@ -13,18 +13,18 @@ import org.mwg.ml.common.matrix.operation.PInvSVD;
  */
 public class BlasMatrixEngine implements MatrixEngine {
 
-    private KBlas _blas;
+    private Blas _blas;
 
     public BlasMatrixEngine() {
         // _blas = new F2JBlas();
         _blas = new NetlibBlas();
     }
 
-    public void setBlas(KBlas p_blas) {
+    public void setBlas(Blas p_blas) {
         this._blas = p_blas;
     }
 
-    public KBlas getBlas() {
+    public Blas getBlas() {
         return _blas;
     }
 
