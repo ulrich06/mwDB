@@ -3,7 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class ActionForeachParTest extends AbstractActionTest {
         final long[] i = {0};
         graph.newTask()
                 .from(new long[]{1, 2, 3})
-                .foreachPar(graph.newTask().then(new TaskAction() {
+                .foreachPar(graph.newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         i[0]++;
@@ -25,7 +25,7 @@ public class ActionForeachParTest extends AbstractActionTest {
                         context.setResult(context.getPreviousResult());//propagate result
                     }
                 }))
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Object[] result = (Object[]) context.getPreviousResult();
@@ -37,12 +37,12 @@ public class ActionForeachParTest extends AbstractActionTest {
                 })
                 .execute();
 
-        graph.newTask().fromIndexAll("nodes").foreachPar(graph.newTask().then(new TaskAction() {
+        graph.newTask().fromIndexAll("nodes").foreachPar(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
             }
-        })).then(new TaskAction() {
+        })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object[] result = (Object[]) context.getPreviousResult();
@@ -58,12 +58,12 @@ public class ActionForeachParTest extends AbstractActionTest {
         paramIterable.add("n0");
         paramIterable.add("n1");
         paramIterable.add("root");
-        graph.newTask().from(paramIterable).foreachPar(graph.newTask().then(new TaskAction() {
+        graph.newTask().from(paramIterable).foreachPar(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
             }
-        })).then(new TaskAction() {
+        })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object[] result = (Object[]) context.getPreviousResult();

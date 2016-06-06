@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class ActionForeachTest extends AbstractActionTest {
         final long[] i = {0};
         graph.newTask()
                 .from(new long[]{1, 2, 3})
-                .foreach(graph.newTask().then(new TaskAction() {
+                .foreach(graph.newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         i[0]++;
@@ -26,7 +26,7 @@ public class ActionForeachTest extends AbstractActionTest {
                         context.setResult(context.getPreviousResult());//propagate result
                     }
                 }))
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Object[] result = (Object[]) context.getPreviousResult();
@@ -38,12 +38,12 @@ public class ActionForeachTest extends AbstractActionTest {
                 })
                 .execute();
 
-        graph.newTask().fromIndexAll("nodes").foreach(graph.newTask().then(new TaskAction() {
+        graph.newTask().fromIndexAll("nodes").foreach(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
             }
-        })).then(new TaskAction() {
+        })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object[] result = (Object[]) context.getPreviousResult();
@@ -59,12 +59,12 @@ public class ActionForeachTest extends AbstractActionTest {
         paramIterable.add("n0");
         paramIterable.add("n1");
         paramIterable.add("root");
-        graph.newTask().from(paramIterable).foreach(graph.newTask().then(new TaskAction() {
+        graph.newTask().from(paramIterable).foreach(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.getPreviousResult());
             }
-        })).then(new TaskAction() {
+        })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object[] result = (Object[]) context.getPreviousResult();
@@ -100,7 +100,7 @@ public class ActionForeachTest extends AbstractActionTest {
                 object.set("name", "node" + index[0]);
                 index[0]++;
             }
-        }).fromIndexAll("nodes").then(new TaskAction() {
+        }).fromIndexAll("nodes").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Node[] result = (Node[]) context.getPreviousResult();
@@ -117,7 +117,7 @@ public class ActionForeachTest extends AbstractActionTest {
     public void testForEachMergeVariables() {
         initGraph();
         final int[] index = {0};
-        org.mwg.task.Task forEachTask = graph.newTask().then(new TaskAction() {
+        org.mwg.task.Task forEachTask = graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setVariable("param" + index[0]++, context.getPreviousResult());
@@ -129,19 +129,19 @@ public class ActionForeachTest extends AbstractActionTest {
         paramIterable.add("n0");
         paramIterable.add("n1");
         paramIterable.add("root");
-        graph.newTask().from(paramIterable).foreach(forEachTask).fromVar("param0").then(new TaskAction() {
+        graph.newTask().from(paramIterable).foreach(forEachTask).fromVar("param0").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();
                 Assert.assertEquals("n0", result);
             }
-        }).fromVar("param1").then(new TaskAction() {
+        }).fromVar("param1").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();
                 Assert.assertEquals("n1", result);
             }
-        }).fromVar("param2").then(new TaskAction() {
+        }).fromVar("param2").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Object result = (String) context.getPreviousResult();

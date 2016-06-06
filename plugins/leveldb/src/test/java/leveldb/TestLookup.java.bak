@@ -1,0 +1,41 @@
+package leveldb;
+
+import org.mwg.*;
+import org.mwg.core.scheduler.NoopScheduler;
+
+import java.util.ArrayList;
+
+public class TestLookup {
+    private static Graph graph; //MWDB graph
+    public static Node profiler;
+
+    public static void main(String[] arg) {
+        graph = GraphBuilder
+                .builder()
+                .withMemorySize(100000)
+                .withAutoSave(10000)
+                .withStorage(new LevelDBStorage("/Users/duke/Desktop/toDrop"))
+                .withScheduler(new NoopScheduler())
+                .build();
+
+        graph.connect(result -> {
+            profiler = graph.newNode(0, 0);
+
+            int max = 300000;
+            ArrayList<Long> ids = new ArrayList<Long>();
+            for (int i = 0; i < max; i++) {
+                Node sub = graph.newNode(0, 0);
+                ids.add(sub.id());
+                sub.free();
+            }
+
+            graph.lookup(0, 0, ids.get(20000), new Callback<Node>() {
+                @Override
+                public void on(Node result) {
+                    System.out.println(result.id());
+                }
+            });
+
+        });
+    }
+}

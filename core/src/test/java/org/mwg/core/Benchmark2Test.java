@@ -5,6 +5,7 @@ import org.mwg.*;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.scheduler.NoopScheduler;
 
 public class Benchmark2Test {
 

@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionConditional;
 
@@ -16,7 +17,7 @@ class ActionIfThen implements TaskAction {
     @Override
     public void eval(TaskContext context) {
         if (_condition.eval(context)) {
-            _action.executeThenAsync(context, context.getPreviousResult(), new TaskAction() {
+            _action.executeThenAsync(context, context.getPreviousResult(), new Action() {
                 @Override
                 public void eval(TaskContext subTaskFinalContext) {
                     context.setResult(subTaskFinalContext);

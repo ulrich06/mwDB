@@ -19,7 +19,7 @@ public class WorldOrderChunkTest implements ChunkListener {
     private interface WorldOrderChunkFactory {
         WorldOrderChunk create(Buffer initialPayload);
     }
-
+    
     @Test
     public void heapTest() {
         final ChunkListener selfPointer = this;

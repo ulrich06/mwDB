@@ -8,5 +8,5 @@ import org.mwg.plugin.Chunk;
 public interface OffHeapChunk extends Chunk {
 
     long addr();
-    
+
 }

@@ -4,9 +4,8 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
-import org.mwg.ml.ProfilingNode;
-import org.mwg.ml.common.AbstractMLNode;
-import org.mwg.plugin.AbstractNode;
+import org.mwg.ml.AbstractMLNode;
+import org.mwg.ml.algorithm.ProfilingNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -154,7 +153,6 @@ public class GaussianSlotProfilingNode extends AbstractMLNode implements Profili
 
 
     //Public specific getters and setters
-    public static final String FEATURES_KEY = "FEATURES";
 
     //Internal state keys
     private static final String INTERNAL_FEATURES_NUMBER = "_featuresNb";

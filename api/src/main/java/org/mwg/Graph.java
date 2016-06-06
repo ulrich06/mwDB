@@ -1,10 +1,9 @@
 package org.mwg;
 
-import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.*;
 import org.mwg.struct.Buffer;
-import org.mwg.plugin.Resolver;
-import org.mwg.plugin.Scheduler;
 import org.mwg.task.Task;
+import org.mwg.task.TaskActionRegistry;
 
 /**
  * Graph is the main structure of mwDB.
@@ -105,7 +104,7 @@ public interface Graph {
     void unindex(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
-     * Retrieves nodes fromVar an index that satisfies the query.<br>
+     * Retrieves nodes from an index that satisfies the query.<br>
      * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
      * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>
      * e.g: "name=john,age=30"
@@ -119,14 +118,32 @@ public interface Graph {
     void find(long world, long time, String indexName, String query, Callback<Node[]> callback);
 
     /**
+     * Retrieves nodes from a global index that satisfies the query object passed as parameter.<br>
+     *
+     * @param query    The query to satisfy
+     * @param callback Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
+     */
+    void findQuery(Query query, Callback<Node[]> callback);
+
+    /**
      * Retrieves all nodes registered in a particular index.
      *
-     * @param world     The world fromVar which the index must be retrieved.
+     * @param world     The world from which the index must be retrieved.
      * @param time      The timepoint at which the index must be retrieved.
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
      */
     void all(long world, long time, String indexName, Callback<Node[]> callback);
+
+    /**
+     * Retrieve the back-end node behind a named index.
+     *
+     * @param world     The world from which the index must be retrieved.
+     * @param time      The timepoint at which the index must be retrieved.
+     * @param indexName The unique identifier of the index.
+     * @param callback  Called when the retrieval is complete. Returns the retrieved index node, null otherwise.
+     */
+    void namedIndex(long world, long time, String indexName, Callback<Node> callback);
 
     /**
      * Utility method to create a waiter based on a counter
@@ -158,6 +175,13 @@ public interface Graph {
     Buffer newBuffer();
 
     /**
+     * Create a new query that can be executed on the graph.
+     *
+     * @return newly created query
+     */
+    Query newQuery();
+
+    /**
      * Create a new task object to manipulate Graph in an easy way
      * By default, the world and the time of the task is 0
      *
@@ -166,5 +190,14 @@ public interface Graph {
     Task newTask();
 
     ChunkSpace space();
+
+    Storage storage();
+
+    /**
+     * Retrieve the shared action registry of Actions executed by task
+     *
+     * @return shared global action registry
+     */
+    TaskActionRegistry actions();
 
 }

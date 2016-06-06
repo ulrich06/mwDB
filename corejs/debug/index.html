@@ -1,0 +1,29 @@
+<html>
+<head>
+    <script src="../target/classes/mwg.min.js"></script>
+    <script>
+        var graph = org.mwg.GraphBuilder.builder().build();
+        graph.connect(function(){
+            console.log("Connected!");
+            var node_a = graph.newNode(0,0);
+            node_a.set("name","n0");
+
+            var node_b = graph.newNode(0,0);
+            node_b.set("name","n1");
+
+            graph.index("nodes",node_a,"name",function(isDone){
+                console.log(isDone);
+            });
+            graph.index("nodes",node_b,"name",function(isDone){
+                console.log(isDone);
+            });
+
+            graph.all(0,0,"nodes",function(nodes){
+                console.log(nodes[0].toString());
+                console.log(nodes[1].toString());
+            });
+
+        });
+    </script>
+</head>
+</html>

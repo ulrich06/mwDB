@@ -2,6 +2,7 @@ package org.mwg.core;
 
 import org.mwg.*;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.DataHasher;
 import org.mwg.struct.*;
 import org.mwg.plugin.*;
 import org.mwg.core.chunk.*;
@@ -32,7 +33,7 @@ class MWGResolver implements Resolver {
     @Override
     public final void init(org.mwg.Graph graph) {
         _graph = graph;
-        dictionary = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+        dictionary = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
     }
 
     @Override
@@ -41,16 +42,18 @@ class MWGResolver implements Resolver {
         if (initPreviouslyResolved == null) {
             throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR + " node id: " + node.id());
         }
-        this._space.getAndMark(CoreConstants.STATE_CHUNK, node.world(), node.time(), node.id());
-        this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id());
-        this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, node.world(), initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], node.id());
-        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id());
+        this._space.getAndMark(ChunkType.STATE_CHUNK, node.world(), node.time(), node.id());
+        this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id());
+        this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, node.world(), initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], node.id());
+        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id());
+        //mark global world order chunk
+        this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         return worldOrderChunk.extra();
     }
 
     @Override
     public final void initNode(org.mwg.Node node, long codeType) {
-        StateChunk cacheEntry_0 = (StateChunk) this._space.create(CoreConstants.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
+        StateChunk cacheEntry_0 = (StateChunk) this._space.create(ChunkType.STATE_CHUNK, node.world(), node.time(), node.id(), null, null);
         //put and mark
         StateChunk cacheEntry = (StateChunk) this._space.putAndMark(cacheEntry_0);
         if (cacheEntry_0 != cacheEntry) {
@@ -59,21 +62,21 @@ class MWGResolver implements Resolver {
         //declare dirty now because potentially no insert could be done
         this._space.declareDirty(cacheEntry);
         //initiate superTime management
-        TimeTreeChunk superTimeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
+        TimeTreeChunk superTimeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, node.world(), Constants.NULL_LONG, node.id(), null, null);
         TimeTreeChunk superTimeTree = (TimeTreeChunk) this._space.putAndMark(superTimeTree_0);
         if (superTimeTree != superTimeTree_0) {
             this._space.freeChunk(superTimeTree_0);
         }
         superTimeTree.insert(node.time());
         //initiate time management
-        TimeTreeChunk timeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, node.world(), node.time(), node.id(), null, null);
+        TimeTreeChunk timeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, node.world(), node.time(), node.id(), null, null);
         TimeTreeChunk timeTree = (TimeTreeChunk) this._space.putAndMark(timeTree_0);
         if (timeTree_0 != timeTree) {
             this._space.freeChunk(timeTree_0);
         }
         timeTree.insert(node.time());
         //initiate universe management
-        WorldOrderChunk objectWorldOrder_0 = (WorldOrderChunk) this._space.create(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id(), null, null);
+        WorldOrderChunk objectWorldOrder_0 = (WorldOrderChunk) this._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id(), null, null);
         WorldOrderChunk objectWorldOrder = (WorldOrderChunk) this._space.putAndMark(objectWorldOrder_0);
         if (objectWorldOrder_0 != objectWorldOrder) {
             this._space.freeChunk(objectWorldOrder_0);
@@ -81,14 +84,14 @@ class MWGResolver implements Resolver {
         objectWorldOrder.put(node.world(), node.time());
         objectWorldOrder.setExtra(codeType);
         //mark the global
-        this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         //monitor the node object
         this._tracker.monitor(node);
     }
 
     @Override
     public final void initWorld(long parentWorld, long childWorld) {
-        WorldOrderChunk worldOrder = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
+        WorldOrderChunk worldOrder = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         worldOrder.put(childWorld, parentWorld);
         this._space.unmarkChunk(worldOrder);
     }
@@ -102,11 +105,11 @@ class MWGResolver implements Resolver {
             previous = casted._previousResolveds.get();
         } while (!casted._previousResolveds.compareAndSet(previous, null));
         if (previous != null) {
-            this._space.unmark(CoreConstants.STATE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previous[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);//FREE OBJECT CHUNK
-            this._space.unmark(CoreConstants.TIME_TREE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);//FREE TIME TREE
-            this._space.unmark(CoreConstants.TIME_TREE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previous[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);//FREE TIME TREE
-            this._space.unmark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, nodeId); //FREE OBJECT UNIVERSE MAP
-            this._space.unmark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG); //FREE GLOBAL UNIVERSE MAP
+            this._space.unmark(ChunkType.STATE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previous[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);//FREE OBJECT CHUNK
+            this._space.unmark(ChunkType.TIME_TREE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);//FREE TIME TREE
+            this._space.unmark(ChunkType.TIME_TREE_CHUNK, previous[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previous[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);//FREE TIME TREE
+            this._space.unmark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, nodeId); //FREE OBJECT UNIVERSE MAP
+            this._space.unmark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG); //FREE GLOBAL UNIVERSE MAP
         }
     }
 
@@ -122,11 +125,11 @@ class MWGResolver implements Resolver {
             @Override
             public void run() {
                 try {
-                    selfPointer.getOrLoadAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new Callback<Chunk>() {
+                    selfPointer.getOrLoadAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new Callback<Chunk>() {
                         @Override
                         public void on(Chunk theGlobalWorldOrder) {
                             if (theGlobalWorldOrder != null) {
-                                selfPointer.getOrLoadAndMark(CoreConstants.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, id, new Callback<Chunk>() {
+                                selfPointer.getOrLoadAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                     @Override
                                     public void on(Chunk theNodeWorldOrder) {
                                         if (theNodeWorldOrder == null) {
@@ -134,7 +137,7 @@ class MWGResolver implements Resolver {
                                             callback.on(null);
                                         } else {
                                             final long closestWorld = selfPointer.resolve_world((WorldOrderChunk) theGlobalWorldOrder, (WorldOrderChunk) theNodeWorldOrder, time, world);
-                                            selfPointer.getOrLoadAndMark(CoreConstants.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new Callback<Chunk>() {
+                                            selfPointer.getOrLoadAndMark(ChunkType.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                                 @Override
                                                 public void on(Chunk theNodeSuperTimeTree) {
                                                     if (theNodeSuperTimeTree == null) {
@@ -150,7 +153,7 @@ class MWGResolver implements Resolver {
                                                             callback.on(null);
                                                             return;
                                                         }
-                                                        selfPointer.getOrLoadAndMark(CoreConstants.TIME_TREE_CHUNK, closestWorld, closestSuperTime, id, new Callback<Chunk>() {
+                                                        selfPointer.getOrLoadAndMark(ChunkType.TIME_TREE_CHUNK, closestWorld, closestSuperTime, id, new Callback<Chunk>() {
                                                             @Override
                                                             public void on(Chunk theNodeTimeTree) {
                                                                 if (theNodeTimeTree == null) {
@@ -168,7 +171,7 @@ class MWGResolver implements Resolver {
                                                                         callback.on(null);
                                                                         return;
                                                                     }
-                                                                    selfPointer.getOrLoadAndMark(CoreConstants.STATE_CHUNK, closestWorld, closestTime, id, new Callback<Chunk>() {
+                                                                    selfPointer.getOrLoadAndMark(ChunkType.STATE_CHUNK, closestWorld, closestTime, id, new Callback<Chunk>() {
                                                                         @Override
                                                                         public void on(Chunk theObjectChunk) {
                                                                             if (theObjectChunk == null) {
@@ -257,7 +260,7 @@ class MWGResolver implements Resolver {
         if (cached != null) {
             callback.on(cached);
         } else {
-            Buffer buffer = _graph.newBuffer();
+            Buffer buffer = selfPointer._graph.newBuffer();
             BufferBuilder.keyToBuffer(buffer, type, world, time, id);
             this._storage.get(buffer, new Callback<Buffer>() {
                 @Override
@@ -343,7 +346,7 @@ class MWGResolver implements Resolver {
     public NodeState newState(org.mwg.Node node, long world, long time) {
 
         //Retrieve Node needed chunks
-        WorldOrderChunk nodeWorldOrder = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, node.id());
+        WorldOrderChunk nodeWorldOrder = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, node.id());
         if (nodeWorldOrder == null) {
             return null;
         }
@@ -369,14 +372,14 @@ class MWGResolver implements Resolver {
             //check if anything as moved
             if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] == world && previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] == time) {
                 //no new state to create
-                resultState = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, world, time, nodeId);
+                resultState = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, world, time, nodeId);
                 this._space.unmarkChunk(resultState);
                 this._space.unmarkChunk(nodeWorldOrder);
                 return resultState;
             }
 
             //first we create and insert the empty state
-            Chunk resultState_0 = this._space.create(CoreConstants.STATE_CHUNK, world, time, nodeId, null, null);
+            Chunk resultState_0 = this._space.create(ChunkType.STATE_CHUNK, world, time, nodeId, null, null);
             resultState = (StateChunk) _space.putAndMark(resultState_0);
             if (resultState_0 != resultState) {
                 _space.freeChunk(resultState_0);
@@ -385,12 +388,12 @@ class MWGResolver implements Resolver {
             if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] == world || nodeWorldOrder.get(world) != CoreConstants.NULL_LONG) {
 
                 //let's go for the resolution now
-                TimeTreeChunk nodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], CoreConstants.NULL_LONG, nodeId);
+                TimeTreeChunk nodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], CoreConstants.NULL_LONG, nodeId);
                 if (nodeSuperTimeTree == null) {
                     this._space.unmarkChunk(nodeWorldOrder);
                     return null;
                 }
-                TimeTreeChunk nodeTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
+                TimeTreeChunk nodeTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
                 if (nodeTimeTree == null) {
                     this._space.unmarkChunk(nodeSuperTimeTree);
                     this._space.unmarkChunk(nodeWorldOrder);
@@ -420,7 +423,7 @@ class MWGResolver implements Resolver {
                         }
                     });
 
-                    TimeTreeChunk rightTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, world, medianPoint[0], nodeId, null, null);
+                    TimeTreeChunk rightTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, world, medianPoint[0], nodeId, null, null);
                     TimeTreeChunk rightTree = (TimeTreeChunk) this._space.putAndMark(rightTree_0);
                     if (rightTree_0 != rightTree) {
                         this._space.freeChunk(rightTree_0);
@@ -493,7 +496,7 @@ class MWGResolver implements Resolver {
             } else {
 
                 //create a new node superTimeTree
-                TimeTreeChunk newSuperTimeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, world, CoreConstants.NULL_LONG, nodeId, null, null);
+                TimeTreeChunk newSuperTimeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, world, CoreConstants.NULL_LONG, nodeId, null, null);
                 TimeTreeChunk newSuperTimeTree = (TimeTreeChunk) this._space.putAndMark(newSuperTimeTree_0);
                 if (newSuperTimeTree != newSuperTimeTree_0) {
                     this._space.freeChunk(newSuperTimeTree_0);
@@ -501,7 +504,7 @@ class MWGResolver implements Resolver {
                 newSuperTimeTree.insert(time);
 
                 //create a new node timeTree
-                TimeTreeChunk newTimeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, world, time, nodeId, null, null);
+                TimeTreeChunk newTimeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, world, time, nodeId, null, null);
                 TimeTreeChunk newTimeTree = (TimeTreeChunk) this._space.putAndMark(newTimeTree_0);
                 if (newTimeTree != newTimeTree_0) {
                     this._space.freeChunk(newTimeTree_0);
@@ -524,14 +527,14 @@ class MWGResolver implements Resolver {
                 castedNode._previousResolveds.set(newResolveds);
 
                 //unMark previous super Tree
-                _space.unmark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
+                _space.unmark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], Constants.NULL_LONG, nodeId);
                 //unMark previous time Tree
-                _space.unmark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
+                _space.unmark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
 
             }
 
             //unMark previous state, for the newly created one
-            _space.unmark(CoreConstants.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+            _space.unmark(ChunkType.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
             _space.unmarkChunk(nodeWorldOrder);
 
         } catch (Throwable e) {
@@ -556,23 +559,23 @@ class MWGResolver implements Resolver {
         final long nodeId = node.id();
         //OPTIMIZATION #1: NO DEPHASING
         if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] == nodeWorld && previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] == nodeTime) {
-            StateChunk currentEntry = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
+            StateChunk currentEntry = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
             if (currentEntry != null) {
                 this._space.unmarkChunk(currentEntry);
                 return currentEntry;
             }
         }
         //Retrieve Node needed chunks
-        WorldOrderChunk nodeWorldOrder = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, nodeId);
+        WorldOrderChunk nodeWorldOrder = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, nodeId);
         if (nodeWorldOrder == null) {
             return null;
         }
-        TimeTreeChunk nodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], CoreConstants.NULL_LONG, nodeId);
+        TimeTreeChunk nodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], CoreConstants.NULL_LONG, nodeId);
         if (nodeSuperTimeTree == null) {
             this._space.unmarkChunk(nodeWorldOrder);
             return null;
         }
-        TimeTreeChunk nodeTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
+        TimeTreeChunk nodeTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX], nodeId);
         if (nodeTimeTree == null) {
             this._space.unmarkChunk(nodeSuperTimeTree);
             this._space.unmarkChunk(nodeWorldOrder);
@@ -583,7 +586,7 @@ class MWGResolver implements Resolver {
         long nodeTimeTreeMagic = nodeTimeTree.magic();
         //OPTIMIZATION #2: SAME DEPHASING
         if (allowDephasing && (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] == nodeWorldOrderMagic) && (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] == nodeSuperTimeTreeMagic) && (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] == nodeTimeTreeMagic)) {
-            StateChunk currentNodeState = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+            StateChunk currentNodeState = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
             this._space.unmarkChunk(nodeWorldOrder);
             this._space.unmarkChunk(nodeSuperTimeTree);
             this._space.unmarkChunk(nodeTimeTree);
@@ -594,7 +597,7 @@ class MWGResolver implements Resolver {
             return currentNodeState;
         }
         //NOMINAL CASE, MAGIC NUMBER ARE NOT VALID ANYMORE
-        WorldOrderChunk globalWorldOrder = (WorldOrderChunk) this._space.getAndMark(CoreConstants.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG);
+        WorldOrderChunk globalWorldOrder = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, CoreConstants.NULL_LONG);
         if (globalWorldOrder == null) {
             this._space.unmarkChunk(nodeWorldOrder);
             this._space.unmarkChunk(nodeSuperTimeTree);
@@ -606,7 +609,7 @@ class MWGResolver implements Resolver {
         //OK NOW WE HAVE THE TOKEN globally FOR the node ID
         //OPTIMIZATION #1: NO DEPHASING
         if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] == nodeWorld && previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX] == nodeTime) {
-            StateChunk currentEntry = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
+            StateChunk currentEntry = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, nodeWorld, nodeTime, nodeId);
             if (currentEntry != null) {
                 this._space.unmarkChunk(globalWorldOrder);
                 this._space.unmarkChunk(nodeWorldOrder);
@@ -644,7 +647,7 @@ class MWGResolver implements Resolver {
                 resolvedWorld = resolve_world(globalWorldOrder, nodeWorldOrder, nodeTime, nodeWorld);
                 if (resolvedWorld != previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX]) {
                     //we have to update the superTree
-                    TimeTreeChunk tempNodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, resolvedWorld, CoreConstants.NULL_LONG, nodeId);
+                    TimeTreeChunk tempNodeSuperTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, resolvedWorld, CoreConstants.NULL_LONG, nodeId);
                     if (tempNodeSuperTimeTree == null) {
                         throw new RuntimeException("Simultaneous rePhasing leading to cache miss!!!");
                     }
@@ -657,7 +660,7 @@ class MWGResolver implements Resolver {
                 resolvedSuperTime = nodeSuperTimeTree.previousOrEqual(nodeTime);
                 if (previousResolveds[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_INDEX] != resolvedSuperTime) {
                     //we have to update the timeTree
-                    TimeTreeChunk tempNodeTimeTree = (TimeTreeChunk) this._space.getAndMark(CoreConstants.TIME_TREE_CHUNK, resolvedWorld, resolvedSuperTime, nodeId);
+                    TimeTreeChunk tempNodeTimeTree = (TimeTreeChunk) this._space.getAndMark(ChunkType.TIME_TREE_CHUNK, resolvedWorld, resolvedSuperTime, nodeId);
                     if (tempNodeTimeTree == null) {
                         throw new RuntimeException("Simultaneous rephasing leading to cache miss!!!");
                     }
@@ -682,13 +685,13 @@ class MWGResolver implements Resolver {
             boolean timeTreeMoved = resolvedTime != previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX];
             //so we are dePhase
             if (allowDephasing) {
-                resultStateChunk = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
+                resultStateChunk = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
                 if (resultStateChunk == null) {
                     throw new RuntimeException("Simultaneous rePhasing leading to cache miss!!!");
                 }
                 boolean refreshNodeCache = false;
                 if (worldMoved || timeTreeMoved) {
-                    _space.unmark(CoreConstants.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
+                    _space.unmark(ChunkType.STATE_CHUNK, previousResolveds[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX], previousResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_INDEX], nodeId);
                     refreshNodeCache = true;
                 } else {
                     if (superTimeTreeMoved) {
@@ -707,9 +710,9 @@ class MWGResolver implements Resolver {
                     castedNode._previousResolveds.set(newResolveds);
                 }
             } else {
-                StateChunk previousNodeState = (StateChunk) this._space.getAndMark(CoreConstants.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
+                StateChunk previousNodeState = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, resolvedWorld, resolvedTime, nodeId);
                 //clone the chunk
-                resultStateChunk = (StateChunk) this._space.create(CoreConstants.STATE_CHUNK, nodeWorld, nodeTime, nodeId, null, previousNodeState);
+                resultStateChunk = (StateChunk) this._space.create(ChunkType.STATE_CHUNK, nodeWorld, nodeTime, nodeId, null, previousNodeState);
                 this._space.putAndMark(resultStateChunk);
                 this._space.declareDirty(resultStateChunk);
                 //free the method mark
@@ -739,7 +742,7 @@ class MWGResolver implements Resolver {
                                 medianPoint[0] = t;
                             }
                         });
-                        TimeTreeChunk rightTree = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
+                        TimeTreeChunk rightTree = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, nodeWorld, medianPoint[0], nodeId, null, null);
                         rightTree = (TimeTreeChunk) this._space.putAndMark(rightTree);
                         //TODO second iterate that can be avoided, however we need the median point to create the right tree
                         //we iterate over the tree selectWithout boundaries for values, but selectWith boundaries for number of collected times
@@ -767,8 +770,8 @@ class MWGResolver implements Resolver {
                             newResolveds[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = nodeTimeTree.magic();
                             castedNode._previousResolveds.set(newResolveds);
                         } else {
-                            //TODO check potentially marking bug (bad mark retention here...)
-                            hasToCleanTimeTree = true;
+                            hasToCleanTimeTree = true;//simple unMark
+                            _space.unmarkChunk(nodeTimeTree); //double unMark, left tree is not used anymore
 
                             //let's store the new state if necessary
                             long[] newResolveds = new long[6];
@@ -795,14 +798,14 @@ class MWGResolver implements Resolver {
                     }
                 } else {
                     //create a new node superTimeTree
-                    TimeTreeChunk newSuperTimeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, nodeWorld, CoreConstants.NULL_LONG, nodeId, null, null);
+                    TimeTreeChunk newSuperTimeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, nodeWorld, CoreConstants.NULL_LONG, nodeId, null, null);
                     TimeTreeChunk newSuperTimeTree = (TimeTreeChunk) this._space.putAndMark(newSuperTimeTree_0);
                     if (newSuperTimeTree_0 != newSuperTimeTree) {
                         this._space.freeChunk(newSuperTimeTree_0);
                     }
                     newSuperTimeTree.insert(nodeTime);
                     //create a new node timeTree
-                    TimeTreeChunk newTimeTree_0 = (TimeTreeChunk) this._space.create(CoreConstants.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
+                    TimeTreeChunk newTimeTree_0 = (TimeTreeChunk) this._space.create(ChunkType.TIME_TREE_CHUNK, nodeWorld, nodeTime, nodeId, null, null);
                     TimeTreeChunk newTimeTree = (TimeTreeChunk) this._space.putAndMark(newTimeTree_0);
                     if (newTimeTree_0 != newTimeTree) {
                         this._space.freeChunk(newTimeTree_0);
@@ -852,7 +855,7 @@ class MWGResolver implements Resolver {
                 CoreConstants.NULL_LONG, CoreConstants.NULL_LONG, node.id()
         };
         final MWGResolver selfPointer = this;
-        getOrLoadAndMarkAll(new byte[]{CoreConstants.WORLD_ORDER_CHUNK, CoreConstants.WORLD_ORDER_CHUNK}, keys, new Callback<Chunk[]>() {
+        getOrLoadAndMarkAll(new byte[]{ChunkType.WORLD_ORDER_CHUNK, ChunkType.WORLD_ORDER_CHUNK}, keys, new Callback<Chunk[]>() {
             @Override
             public void on(Chunk[] orders) {
                 if (orders == null || orders.length != 2) {
@@ -910,7 +913,7 @@ class MWGResolver implements Resolver {
             timeTreeKeys[i * 3] = collectedWorlds[i];
             timeTreeKeys[i * 3 + 1] = CoreConstants.NULL_LONG;
             timeTreeKeys[i * 3 + 2] = node.id();
-            types[i] = CoreConstants.TIME_TREE_CHUNK;
+            types[i] = ChunkType.TIME_TREE_CHUNK;
         }
         getOrLoadAndMarkAll(types, timeTreeKeys, new Callback<Chunk[]>() {
             @Override
@@ -976,7 +979,7 @@ class MWGResolver implements Resolver {
             timeTreeKeys[i * 3] = collectedWorlds[i];
             timeTreeKeys[i * 3 + 1] = collectedSuperTimes[i];
             timeTreeKeys[i * 3 + 2] = node.id();
-            types[i] = CoreConstants.TIME_TREE_CHUNK;
+            types[i] = ChunkType.TIME_TREE_CHUNK;
         }
         getOrLoadAndMarkAll(types, timeTreeKeys, new Callback<Chunk[]>() {
             @Override
@@ -1039,24 +1042,25 @@ class MWGResolver implements Resolver {
     }
 
     @Override
-    public long stringToLongKey(String name) {
-        StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
-        if (dictionaryIndex == null) {
-            dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_LONG_MAP);
+    public long stringToHash(String name, boolean insertIfNotExists) {
+        long hash = DataHasher.hash(name);
+        if (insertIfNotExists) {
+            StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
+            if (dictionaryIndex == null) {
+                dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_LONG_MAP);
+            }
+            if (!dictionaryIndex.containsHash(hash)) {
+                dictionaryIndex.put(name, hash);
+            }
         }
-        long encodedKey = dictionaryIndex.getValue(name);
-        if (encodedKey == CoreConstants.NULL_LONG) {
-            dictionaryIndex.put(name, CoreConstants.NULL_LONG);
-            encodedKey = dictionaryIndex.getValue(name);
-        }
-        return encodedKey;
+        return hash;
     }
 
     @Override
-    public String longKeyToString(long key) {
+    public String hashToString(long key) {
         StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
         if (dictionaryIndex != null) {
-            return dictionaryIndex.getKey(key);
+            return dictionaryIndex.getByHash(key);
         }
         return null;
     }

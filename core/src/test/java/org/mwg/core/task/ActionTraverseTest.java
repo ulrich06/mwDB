@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
 import org.mwg.Type;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 public class ActionTraverseTest extends AbstractActionTest {
@@ -16,7 +16,24 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask()
                 .fromIndexAll("nodes")
                 .traverse("children")
-                .then(new TaskAction() {
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Node[] lastResult = (Node[]) context.getPreviousResult();
+                        Assert.assertEquals(lastResult[0].get("name"), "n0");
+                        Assert.assertEquals(lastResult[1].get("name"), "n1");
+                    }
+                })
+                .execute();
+        removeGraph();
+    }
+
+    @Test
+    public void testParse() {
+        initGraph();
+        graph.newTask()
+                .parse("fromIndexAll(nodes).traverse(children)")
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] lastResult = (Node[]) context.getPreviousResult();
@@ -52,7 +69,6 @@ public class ActionTraverseTest extends AbstractActionTest {
                 root.index("childrenIndexed", node2, "name", null);
                 root.index("childrenIndexed", node3, "name", null);
 
-
                 root.jump(12, new Callback<Node>() {
                     @Override
                     public void on(Node result) {
@@ -66,7 +82,7 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask()
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] n = (Node[]) context.getPreviousResult();
@@ -78,7 +94,7 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask()
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node3")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] n = (Node[]) context.getPreviousResult();
@@ -89,7 +105,7 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask().time(12)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] n = (Node[]) context.getPreviousResult();
@@ -101,7 +117,7 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask()
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] n = (Node[]) context.getPreviousResult();
@@ -114,7 +130,7 @@ public class ActionTraverseTest extends AbstractActionTest {
         graph.newTask().time(13)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] n = (Node[]) context.getPreviousResult();

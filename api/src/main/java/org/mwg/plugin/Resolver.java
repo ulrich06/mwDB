@@ -96,19 +96,20 @@ public interface Resolver {
     void resolveTimepoints(Node node, long beginningOfSearch, long endOfSearch, Callback<long[]> callback);
 
     /**
-     * Maps a String to a unique long. Can be reversed using {@link #longKeyToString(long)}.
+     * Maps a String to a unique long. Can be reversed using {@link #hashToString(long)}.
      *
-     * @param name The string value to be mapped.
+     * @param name              The string value to be mapped.
+     * @param insertIfNotExists indicate if the string has to be inserted if not existing in the global dictionary
      * @return The unique long identifier for the string.
      */
-    long stringToLongKey(String name);
+    long stringToHash(String name, boolean insertIfNotExists);
 
     /**
-     * Returns the String associated to a long key.
+     * Returns the String associated to a hash.
      *
      * @param key The long key.
      * @return The string value associated to the long key.
      */
-    String longKeyToString(long key);
+    String hashToString(long key);
 
 }

@@ -2,119 +2,123 @@ package org.mwg.ml.common.matrix.jamasolver;
 
 import org.mwg.ml.common.matrix.Matrix;
 
-/** LU Decomposition.
-   <P>
-   For an m-by-n matrix A with m >= n, the LU decomposition is an m-by-n
-   unit lower triangular matrix L, an n-by-n upper triangular matrix U,
-   and a permutation vector piv of length m so that A(piv,:) = L*U.
-   If m < n, then L is m-by-m and U is m-by-n.
-   <P>
-   The LU decompostion with pivoting always exists, even if the matrix is
-   singular, so the constructor will never fail.  The primary use of the
-   LU decomposition is in the solution of square systems of simultaneous
-   linear equations.  This will fail if isNonsingular() returns false.
-   */
+/**
+ * LU Decomposition.
+ * <p>
+ * For an m-by-n matrix A with m >= n, the LU decomposition is an m-by-n
+ * unit lower triangular matrix L, an n-by-n upper triangular matrix U,
+ * and a permutation vector piv of length m so that A(piv,:) = L*U.
+ * If m < n, then L is m-by-m and U is m-by-n.
+ * <p>
+ * The LU decompostion with pivoting always exists, even if the matrix is
+ * singular, so the constructor will never fail.  The primary use of the
+ * LU decomposition is in the solution of square systems of simultaneous
+ * linear equations.  This will fail if isNonsingular() returns false.
+ */
 
-public class LU implements java.io.Serializable {
+public class LU {
 
 /* ------------------------
    Class variables
  * ------------------------ */
 
-   /** Array for internal storage of decomposition.
-   @serial internal array storage.
-   */
-   private double[][] LU;
+    /** Array for internal storage of decomposition.
+     @serial internal array storage.
+     */
+    private Matrix LU;
 
-   /** Row and column dimensions, and pivot sign.
-   @serial column dimension.
-   @serial row dimension.
-   @serial pivot sign.
-   */
-   private int m, n, pivsign; 
+    /** Row and column dimensions, and pivot sign.
+     @serial column dimension.
+     @serial row dimension.
+     @serial pivot sign.
+     */
+    private int m, n, pivsign;
 
-   /** Internal storage of pivot vector.
-   @serial pivot vector.
-   */
-   private int[] piv;
+    /** Internal storage of pivot vector.
+     @serial pivot vector.
+     */
+    private int[] piv;
 
 /* ------------------------
    Constructor
  * ------------------------ */
 
-   /** LU Decomposition
-       Structure to access L, U and piv.
-   @param  A Rectangular matrix
-   */
+    /** LU Decomposition
+     Structure to access L, U and piv.
+     @param  A Rectangular matrix
+     */
 
-   public LU(Matrix A) {
+    public LU(Matrix A) {
 
-   // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
+        // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
+        LU = A.clone();
+        m = A.rows();
+        n = A.columns();
+        piv = new int[m];
+        for (int i = 0; i < m; i++) {
+            piv[i] = i;
+        }
+        pivsign = 1;
+        
+        double[] LUcolj = new double[m];
 
+        // Outer loop.
 
-      LU = Utils.convertToArray(A);
-      m = A.rows();
-      n = A.columns();
-      piv = new int[m];
-      for (int i = 0; i < m; i++) {
-         piv[i] = i;
-      }
-      pivsign = 1;
-      double[] LUrowi;
-      double[] LUcolj = new double[m];
+        for (int j = 0; j < n; j++) {
 
-      // Outer loop.
+            // Make a copy of the j-th column to localize references.
 
-      for (int j = 0; j < n; j++) {
-
-         // Make a copy of the j-th column to localize references.
-
-         for (int i = 0; i < m; i++) {
-            LUcolj[i] = LU[i][j];
-         }
-
-         // Apply previous transformations.
-
-         for (int i = 0; i < m; i++) {
-            LUrowi = LU[i];
-
-            // Most of the time is spent in the following dot product.
-
-            int kmax = Math.min(i,j);
-            double s = 0.0;
-            for (int k = 0; k < kmax; k++) {
-               s += LUrowi[k]*LUcolj[k];
+            for (int i = 0; i < m; i++) {
+                LUcolj[i] = LU.get(i,j);
             }
 
-            LUrowi[j] = LUcolj[i] -= s;
-         }
-   
-         // Find pivot and exchange if necessary.
+            // Apply previous transformations.
 
-         int p = j;
-         for (int i = j+1; i < m; i++) {
-            if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
-               p = i;
-            }
-         }
-         if (p != j) {
-            for (int k = 0; k < n; k++) {
-               double t = LU[p][k]; LU[p][k] = LU[j][k]; LU[j][k] = t;
-            }
-            int k = piv[p]; piv[p] = piv[j]; piv[j] = k;
-            pivsign = -pivsign;
-         }
+            for (int i = 0; i < m; i++) {
+                
 
-         // Compute multipliers.
-         
-         if (j < m & LU[j][j] != 0.0) {
-            for (int i = j+1; i < m; i++) {
-               LU[i][j] /= LU[j][j];
+                // Most of the time is spent in the following dot product.
+
+                int kmax = Math.min(i, j);
+                double s = 0.0;
+                for (int k = 0; k < kmax; k++) {
+                    s += LU.get(i,k) * LUcolj[k];
+                }
+
+                LUcolj[i] -= s;
+                LU.set(i,j,LUcolj[i]);
             }
-         }
-      }
-   }
+
+            // Find pivot and exchange if necessary.
+
+            int p = j;
+            for (int i = j + 1; i < m; i++) {
+                if (Math.abs(LUcolj[i]) > Math.abs(LUcolj[p])) {
+                    p = i;
+                }
+            }
+            if (p != j) {
+                for (int k = 0; k < n; k++) {
+                    double t = LU.get(p,k);
+                    LU.set(p,k, LU.get(j,k));
+                    LU.set(j,k, t);
+                }
+                int k = piv[p];
+                piv[p] = piv[j];
+                piv[j] = k;
+                pivsign = -pivsign;
+            }
+
+            // Compute multipliers.
+
+            if (j < m && LU.get(j,j) != 0.0) {
+                for (int i = j + 1; i < m; i++) {
+                    LU.set(i,j, LU.get(i,j)/LU.get(j,j));
+                }
+            }
+        }
+    }
 
 /* ------------------------
    Temporary, experimental code.
@@ -147,7 +151,7 @@ public class LU implements java.io.Serializable {
          // Find pivot.
          int p = k;
          for (int i = k+1; i < m; i++) {
-            if (Math.abs(LU[i][k]) > Math.abs(LU[p][k])) {
+            if (Math.abs(LU.get(i,k)) > Math.abs(LU[p][k])) {
                p = i;
             }
          }
@@ -160,11 +164,11 @@ public class LU implements java.io.Serializable {
             pivsign = -pivsign;
          }
          // Compute multipliers and eliminate k-th column.
-         if (LU[k][k] != 0.0) {
+         if (LU.get(k,k) != 0.0) {
             for (int i = k+1; i < m; i++) {
-               LU[i][k] /= LU[k][k];
+               LU.get(i,k) /= LU.get(k,k);
                for (int j = k+1; j < n; j++) {
-                  LU[i][j] -= LU[i][k]*LU[k][j];
+                  LU.get(i,j) -= LU.get(i,k)*LU[k][j];
                }
             }
          }
@@ -179,154 +183,152 @@ public class LU implements java.io.Serializable {
    Public Methods
  * ------------------------ */
 
-   /** Is the matrix nonsingular?
-   @return     true if U, and hence A, is nonsingular.
-   */
+    /** Is the matrix nonsingular?
+     @return true if U, and hence A, is nonsingular.
+     */
 
-   public boolean isNonsingular () {
-      for (int j = 0; j < n; j++) {
-         if (LU[j][j] == 0)
-            return false;
-      }
-      return true;
-   }
+    public boolean isNonsingular() {
+        for (int j = 0; j < n; j++) {
+            if (LU.get(j,j) == 0)
+                return false;
+        }
+        return true;
+    }
 
-   /** Return lower triangular factor
-   @return     L
-   */
+    /** Return lower triangular factor
+     @return L
+     */
 
-   public Matrix getL () {
-      Matrix L= new Matrix(null,m,n);
-      for (int i = 0; i < m; i++) {
-         for (int j = 0; j < n; j++) {
-            if (i > j) {
-               L.set(i,j,LU[i][j]);
-            } else if (i == j) {
-               L.set(i,j, 1.0);
-            } else {
-               L.set(i,j, 0.0);
+    public Matrix getL() {
+        Matrix L = new Matrix(null, m, n);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i > j) {
+                    L.set(i, j, LU.get(i,j));
+                } else if (i == j) {
+                    L.set(i, j, 1.0);
+                } else {
+                    L.set(i, j, 0.0);
+                }
             }
-         }
-      }
-      return L;
-   }
+        }
+        return L;
+    }
 
-   /** Return upper triangular factor
-   @return     U
-   */
+    /** Return upper triangular factor
+     @return U
+     */
 
-   public Matrix getU () {
-      Matrix U= new Matrix(null,n,n);
-      for (int i = 0; i < n; i++) {
-         for (int j = 0; j < n; j++) {
-            if (i <= j) {
-               U.set(i,j,LU[i][j]);
-            } else {
-               U.set(i,j,0.0);
+    public Matrix getU() {
+        Matrix U = new Matrix(null, n, n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i <= j) {
+                    U.set(i, j, LU.get(i,j));
+                } else {
+                    U.set(i, j, 0.0);
+                }
             }
-         }
-      }
-      return U;
-   }
+        }
+        return U;
+    }
 
-   /** Return pivot permutation vector
-   @return     piv
-   */
+    /** Return pivot permutation vector
+     @return piv
+     */
 
-   public int[] getPivot () {
-      int[] p = new int[m];
-      for (int i = 0; i < m; i++) {
-         p[i] = piv[i];
-      }
-      return p;
-   }
+    public int[] getPivot() {
+        int[] p = new int[m];
+        for (int i = 0; i < m; i++) {
+            p[i] = piv[i];
+        }
+        return p;
+    }
 
-   /** Return pivot permutation vector as a one-dimensional double array
-   @return     (double) piv
-   */
+    /** Return pivot permutation vector as a one-dimensional double array
+     @return (double) piv
+     */
 
-   public double[] getDoublePivot () {
-      double[] vals = new double[m];
-      for (int i = 0; i < m; i++) {
-         vals[i] = (double) piv[i];
-      }
-      return vals;
-   }
+    public double[] getDoublePivot() {
+        double[] vals = new double[m];
+        for (int i = 0; i < m; i++) {
+            vals[i] = (double) piv[i];
+        }
+        return vals;
+    }
 
-   /** Determinant
-   @return     det(A)
-   @exception  IllegalArgumentException  Matrix must be square
-   */
+    /** Determinant
+     @return det(A)
+     @exception IllegalArgumentException  Matrix must be square
+     */
 
-   public double det () {
-      if (m != n) {
-         throw new IllegalArgumentException("Matrix must be square.");
-      }
-      double d = (double) pivsign;
-      for (int j = 0; j < n; j++) {
-         d *= LU[j][j];
-      }
-      return d;
-   }
+    public double det() {
+        if (m != n) {
+            throw new IllegalArgumentException("Matrix must be square.");
+        }
+        double d = (double) pivsign;
+        for (int j = 0; j < n; j++) {
+            d *= LU.get(j,j);
+        }
+        return d;
+    }
 
-   /** Solve A*X = B
-   @param  B   A Matrix with as many rows as A and any number of columns.
-   @return     X so that L*U*X = B(piv,:)
-   @exception  IllegalArgumentException Matrix row dimensions must agree.
-   @exception  RuntimeException  Matrix is singular.
-   */
+    /** Solve A*X = B
+     @param  B   A Matrix with as many rows as A and any number of columns.
+     @return X so that L*U*X = B(piv,:)
+     @exception IllegalArgumentException Matrix row dimensions must agree.
+     @exception RuntimeException  Matrix is singular.
+     */
 
-   public Matrix solve (Matrix B) {
-      if (B.rows() != m) {
-         throw new IllegalArgumentException("Matrix row dimensions must agree.");
-      }
-      if (!this.isNonsingular()) {
-         throw new RuntimeException("Matrix is singular.");
-      }
+    public Matrix solve(Matrix B) {
+        if (B.rows() != m) {
+            throw new IllegalArgumentException("Matrix row dimensions must agree.");
+        }
+        if (!this.isNonsingular()) {
+            throw new RuntimeException("Matrix is singular.");
+        }
 
-      // Copy right hand side with pivoting
-      int nx = B.columns();
+        // Copy right hand side with pivoting
+        int nx = B.columns();
 
-      double[][] X = getMatrix(B,piv,0,nx-1);
-
+        Matrix X = getMatrix(B, piv, 0, nx - 1);
 
 
-      // Solve L*Y = B(piv,:)
-      for (int k = 0; k < n; k++) {
-         for (int i = k+1; i < n; i++) {
+        // Solve L*Y = B(piv,:)
+        for (int k = 0; k < n; k++) {
+            for (int i = k + 1; i < n; i++) {
+                for (int j = 0; j < nx; j++) {
+                    X.add(i,j, -X.get(k,j)* LU.get(i,k));
+                }
+            }
+        }
+        // Solve U*X = Y;
+        for (int k = n - 1; k >= 0; k--) {
             for (int j = 0; j < nx; j++) {
-               X[i][j] -= X[k][j]*LU[i][k];
+                X.set(k,j, X.get(k,j) / LU.get(k,k));
             }
-         }
-      }
-      // Solve U*X = Y;
-      for (int k = n-1; k >= 0; k--) {
-         for (int j = 0; j < nx; j++) {
-            X[k][j] /= LU[k][k];
-         }
-         for (int i = 0; i < k; i++) {
-            for (int j = 0; j < nx; j++) {
-               X[i][j] -= X[k][j]*LU[i][k];
+            for (int i = 0; i < k; i++) {
+                for (int j = 0; j < nx; j++) {
+                    X.add(i,j,-X.get(k,j) * LU.get(i,k));
+                }
             }
-         }
-      }
-      return Utils.convertToMatrix(X);
-   }
-  private static final long serialVersionUID = 1;
+        }
+        return X;
+    }
 
 
-   private double[][] getMatrix (Matrix A, int[] r, int j0, int j1) {
-      double[][] B = new double[r.length][j1-j0+1];
-      try {
-         for (int i = 0; i < r.length; i++) {
-            for (int j = j0; j <= j1; j++) {
-               B[i][j-j0] = A.get(r[i],j);
+    private Matrix getMatrix(Matrix A, int[] r, int j0, int j1) {
+        Matrix B=new Matrix(null,r.length,j1 - j0 + 1);
+        try {
+            for (int i = 0; i < r.length; i++) {
+                for (int j = j0; j <= j1; j++) {
+                    B.set(i,j - j0, A.get(r[i], j));
+                }
             }
-         }
-      } catch(ArrayIndexOutOfBoundsException e) {
-         throw new ArrayIndexOutOfBoundsException("Submatrix indices");
-      }
-      return B;
-   }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new ArrayIndexOutOfBoundsException("Submatrix indices");
+        }
+        return B;
+    }
 
 }

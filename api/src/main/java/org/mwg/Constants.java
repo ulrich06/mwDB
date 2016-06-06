@@ -26,6 +26,12 @@ public class Constants {
 
     public static final char QUERY_KV_SEP = '=';
 
+    public static final char TASK_SEP = '.';
+
+    public static final char TASK_PARAM_OPEN = '(';
+
+    public static final char TASK_PARAM_CLOSE = ')';
+
     /**
      * @native ts
      * return param != undefined && param != null;
@@ -42,11 +48,33 @@ public class Constants {
         return src.equals(other);
     }
 
+    public static boolean longArrayEquals(long[] src, long[] other) {
+        if (src.length != other.length) {
+            return false;
+        }
+        for (int i = 0; i < src.length; i++) {
+            if (src[i] != other[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     /**
      * @native ts
      * public static BUFFER_SEP : number = "#".charCodeAt(0);
      */
     public static final byte BUFFER_SEP = '#';
+
+    /**
+     * Chunk Save/Load special chars
+     */
+    /**
+     * @native ts
+     * public static KEY_SEP : number = ";".charCodeAt(0);
+     */
+    public static final byte KEY_SEP = ';';
 
 }
 

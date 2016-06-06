@@ -1,5 +1,6 @@
 package org.mwg.core.chunk.offheap;
 
+import org.mwg.core.utility.DataHasher;
 import org.mwg.struct.StringLongMap;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
@@ -97,17 +98,43 @@ public class ArrayStringLongMap implements StringLongMap {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
         consistencyCheck();
 
-        long hashedKey = PrimitiveHelper.stringHash(key);
-        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
+        final long hashedKey = DataHasher.hash(key);
+        final long hashIndex = PrimitiveHelper.longHash(hashedKey, OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         long result = CoreConstants.NULL_LONG;
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             //optimization to avoid string comparison for all collisions
             if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
-                if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
-                    result = OffHeapLongArray.get(elementV_ptr + 8, m);
-                    break;
-                }
+                //if (PrimitiveHelper.equals(key, OffHeapStringArray.get(elementK_ptr, m))) {
+                result = OffHeapLongArray.get(elementV_ptr + 8, m);
+                break;
+                //}
+            }
+            m = OffHeapLongArray.get(elementNext_ptr, m);
+        }
+        //UNLOCK
+        if (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 1, 0)) {
+            throw new RuntimeException("CAS error !!!");
+        }
+
+        return result;
+    }
+
+
+    @Override
+    public String getByHash(long hashedKey) {
+        //LOCK
+        while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
+        consistencyCheck();
+
+        final long hashIndex = PrimitiveHelper.longHash(hashedKey, OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        String result = null;
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
+            //optimization to avoid string comparison for all collisions
+            if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
+                result = OffHeapStringArray.get(elementK_ptr, m);
+                break;
             }
             m = OffHeapLongArray.get(elementNext_ptr, m);
         }
@@ -121,21 +148,29 @@ public class ArrayStringLongMap implements StringLongMap {
     }
 
     @Override
-    public String getKey(long index) {
+    public boolean containsHash(long hashedKey) {
         //LOCK
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 0, 1)) ;
         consistencyCheck();
 
-        long capacity = OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY);
-        String resultKey = null;
-        if (index < capacity) {
-            resultKey = OffHeapStringArray.get(elementK_ptr, index);
+        final long hashIndex = PrimitiveHelper.longHash(hashedKey, OffHeapLongArray.get(this.root_array_ptr, INDEX_CAPACITY));
+        long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
+        boolean result = false;
+        while (m != CoreConstants.OFFHEAP_NULL_PTR) {
+            //optimization to avoid string comparison for all collisions
+            if (OffHeapLongArray.get(elementK_H_ptr, m) == hashedKey) {
+                result = true;
+                break;
+            }
+            m = OffHeapLongArray.get(elementNext_ptr, m);
         }
+
         //UNLOCK
         if (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_ELEMENT_LOCK, 1, 0)) {
             throw new RuntimeException("CAS error !!!");
         }
-        return resultKey;
+
+        return result;
     }
 
     @Override
@@ -225,12 +260,12 @@ public class ArrayStringLongMap implements StringLongMap {
         }
 
         //compute the hash of the key
-        long hashedKey = PrimitiveHelper.stringHash(key);
+        long hashedKey = DataHasher.hash(key);
 
         long entry = -1;
         long capacity = OffHeapLongArray.get(root_array_ptr, INDEX_CAPACITY);
         long count = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_COUNT);
-        long hashIndex = PrimitiveHelper.longHash(PrimitiveHelper.stringHash(key), capacity);
+        long hashIndex = PrimitiveHelper.longHash(hashedKey, capacity);
         long m = OffHeapLongArray.get(elementHash_ptr, hashIndex);
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             //optimization to avoid string comparison for all collisions
@@ -282,15 +317,11 @@ public class ArrayStringLongMap implements StringLongMap {
                 OffHeapLongArray.set(root_array_ptr, INDEX_THRESHOLD, (long) (newCapacity * CoreConstants.MAP_LOAD_FACTOR));
                 hashIndex = PrimitiveHelper.longHash(hashedKey, capacity);
             }
-            //set K and associated K_H
+            //set K, associated K_H and V
             OffHeapStringArray.set(elementK_ptr, count, key);
             OffHeapLongArray.set(elementK_H_ptr, count, hashedKey);
-            //set value or index if null
-            if (value == CoreConstants.NULL_LONG) {
-                OffHeapLongArray.set(elementV_ptr + 8, count, count);
-            } else {
-                OffHeapLongArray.set(elementV_ptr + 8, count, value);
-            }
+            OffHeapLongArray.set(elementV_ptr + 8, count, value);
+
             long currentHashedElemIndex = OffHeapLongArray.get(elementHash_ptr, hashIndex);
             if (currentHashedElemIndex != -1) {
                 OffHeapLongArray.set(elementNext_ptr, count, currentHashedElemIndex);

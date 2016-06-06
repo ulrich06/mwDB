@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
 import org.mwg.core.utility.PrimitiveHelper;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
 
@@ -21,7 +21,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         return PrimitiveHelper.equals(node.get("name").toString(), "root");
                     }
                 })
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(((Node[]) context.getPreviousResult())[0].get("name"), "root");
@@ -42,7 +42,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         return false;
                     }
                 })
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(((Node[]) context.getPreviousResult()).length, 0);
@@ -63,7 +63,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         return true;
                     }
                 })
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(((Node[]) context.getPreviousResult()).length, 3);

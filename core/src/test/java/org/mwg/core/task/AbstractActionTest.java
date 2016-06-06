@@ -2,7 +2,7 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.mwg.*;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 
 public abstract class AbstractActionTest {
 
@@ -44,9 +44,9 @@ public abstract class AbstractActionTest {
         graph.disconnect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Assert.assertEquals("Error during graph disconnection",true,result);
+                Assert.assertEquals(true, result);
             }
         });
     }
-    
+
 }

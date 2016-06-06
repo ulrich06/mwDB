@@ -3,7 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
 
@@ -20,7 +20,7 @@ public class ActionMapTest extends AbstractActionTest {
                         return node.get("name");
                     }
                 })
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Object[] names = (Object[]) context.getPreviousResult();

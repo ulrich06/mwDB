@@ -6,6 +6,7 @@ import org.mwg.*;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
 
@@ -70,25 +71,25 @@ public class HelloWorldTest {
 
                 //check the simple json print
 
-                String flatNode0 = "{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName2\",\"value\": \"MyValue\"}}";
+                String flatNode0 = "{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName2\",\"value\":\"MyValue\"}";
 
                 Assert.assertTrue(flatNode0.length() == node0.toString().length());
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"data\": {\"name\": \"MyName2\",\"value\": \"MyValue\"}}", node0.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":1,\"name\":\"MyName2\",\"value\":\"MyValue\"}", node0.toString()));
 
                 //Create a new node
                 org.mwg.Node node1 = graph.newNode(0, 0);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2}", node1.toString()));
 
                 //attach the new node
                 node1.add("children", node0);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1]}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"children\":[1]}", node1.toString()));
 
                 node1.add("children", node0);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1]}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"children\":[1,1]}", node1.toString()));
 
                 org.mwg.Node node2 = graph.newNode(0, 0);
                 node1.add("children", node2);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,1,3]}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"children\":[1,1,3]}", node1.toString()));
 
                 long[] refValuesThree = (long[]) node1.get("children");
                 Assert.assertTrue(refValuesThree.length == 3);
@@ -110,14 +111,15 @@ public class HelloWorldTest {
                     }
                 });
 
-                node1.remove("children", node0);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [1,3]}}", node1.toString()));
 
                 node1.remove("children", node0);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {\"children\": [3]}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"children\":[1,3]}", node1.toString()));
+
+                node1.remove("children", node0);
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"children\":[3]}", node1.toString()));
 
                 node1.remove("children", node2);
-                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2,\"data\": {}}", node1.toString()));
+                Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":0,\"id\":2}", node1.toString()));
 
                 long[] refValuesNull = (long[]) node1.get("children");
                 Assert.assertNull(refValuesNull);

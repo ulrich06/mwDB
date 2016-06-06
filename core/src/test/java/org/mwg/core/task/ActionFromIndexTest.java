@@ -3,7 +3,7 @@ package org.mwg.core.task;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 public class ActionFromIndexTest extends AbstractActionTest {
@@ -14,7 +14,7 @@ public class ActionFromIndexTest extends AbstractActionTest {
         graph.newTask()
                 .from("uselessPayload")
                 .fromIndex("nodes", "name=n0")
-                .then(new TaskAction() {
+                .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(((Node[]) context.getPreviousResult())[0].get("name"), "n0");

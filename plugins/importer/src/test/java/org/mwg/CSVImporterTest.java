@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.mwg.csv.CSVImporter;
 import org.mwg.csv.KField;
 import org.mwg.csv.KNodeResolver;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 
 import java.io.File;
 import java.util.Map;

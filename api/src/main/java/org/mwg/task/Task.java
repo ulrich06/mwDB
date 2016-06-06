@@ -98,6 +98,15 @@ public interface Task {
     Task traverse(String relationName);
 
     /**
+     * Traverse the specified relation if not empty, otherwise keep leaf nodes
+     * If it is followed by {@link #asVar(String)} method, the element are stored in an array
+     *
+     * @param relationName relation to traverse if not empty
+     * @return this task to chain actions (fluent API)
+     */
+    Task traverseOrKeep(String relationName);
+
+    /**
      * Traverse a relation indexed by {@code indexName} and retrieve specific node thanks to the {@code query}
      *
      * @param indexName index name of indexed relation
@@ -168,9 +177,9 @@ public interface Task {
 
     Task whileDo(TaskFunctionConditional cond, Task then);
 
-    Task then(TaskAction action);
+    Task then(Action action);
 
-    Task thenAsync(TaskAction action);
+    Task thenAsync(Action action);
 
     Task save();
 
@@ -185,7 +194,12 @@ public interface Task {
      *
      * @param action last action the execution before the clean procedure
      */
-    void executeThen(TaskAction action);
+    void executeThen(Action action);
+
+
+    TaskContext newContext();
+
+    void executeWith(TaskContext initialContext);
 
     /**
      * Schedule and execute the current task program. However
@@ -194,7 +208,10 @@ public interface Task {
      * @param initialResult initial content if any, null otherwise
      * @param finalAction   last action the execution before the clean procedure. Warning this last action will be executed in asynchronous mode. Therefore, no objects of the task will be freed before the call the method next on the parameter context.
      */
-    void executeThenAsync(final TaskContext parentContext, final Object initialResult, final TaskAction finalAction);
+    void executeThenAsync(final TaskContext parentContext, final Object initialResult, final Action finalAction);
 
+    Task parse(String flat);
+
+    Task action(String name, String params);
 
 }

@@ -1,11 +1,12 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.core.CoreConstants;
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.Unsafe;
 
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
@@ -243,6 +244,32 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
     }
 
     @Override
+    public void merge(Buffer buffer) {
+        lock();
+        boolean isDirty = false;
+        try {
+            long cursor = 0;
+            long previous = 0;
+            long payloadSize = buffer.size();
+            while (cursor < payloadSize) {
+                byte current = buffer.read(cursor);
+                if (current == CoreConstants.CHUNK_SUB_SEP) {
+                    isDirty = isDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                    previous = cursor + 1;
+                }
+                cursor++;
+            }
+            isDirty = isDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        } finally {
+            //free the lock
+            unlock();
+            if (isDirty) {
+                this.internal_set_dirty();
+            }
+        }
+    }
+
+    @Override
     public synchronized final long previousOrEqual(long key) {
         //lock and load fromVar main memory
         lock();
@@ -294,7 +321,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
     @Override
     public final byte chunkType() {
-        return CoreConstants.TIME_TREE_CHUNK;
+        return ChunkType.TIME_TREE_CHUNK;
     }
 
     @Override

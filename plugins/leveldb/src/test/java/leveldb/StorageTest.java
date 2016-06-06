@@ -14,7 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.chunk.offheap.*;
-import org.mwg.core.NoopScheduler;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.Unsafe;
 
 public class StorageTest {

@@ -4,12 +4,18 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Constants;
 import org.mwg.struct.Buffer;
+import org.mwg.plugin.Base64;
 
 public class Base64Test {
 
     @Test
     public void beginingOfTimeEncodingTest() {
         testLong(Constants.BEGINNING_OF_TIME);
+    }
+
+    @Test
+    public void typeEncoding() {
+        testLong(DataHasher.hash("GaussianGmm"));
     }
 
     @Test
@@ -37,8 +43,12 @@ public class Base64Test {
         testLong(68719476737l);
     }
 
-    private void testLong(long val) {
+    @Test
+    public void hashTest() {
+        testLong(-365393685203911L);
+    }
 
+    private void testLong(long val) {
 
 
         Buffer buffer = BufferBuilder.newHeapBuffer();
@@ -46,15 +56,6 @@ public class Base64Test {
         long dec = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
         Assert.assertEquals(val, dec);
 
-        /*
-        //System.out.println("Encode");
-        StringBuilder buffer = new StringBuilder();
-        Base64.encodeLongToBuffer(val, buffer);
-        //System.out.println("Decode");
-        dec = Base64.decodeToLong(buffer.toString());
-        //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec);
-        */
     }
 
 
@@ -76,15 +77,6 @@ public class Base64Test {
         Assert.assertEquals(val, dec);
         buffer.free();
 
-        /*
-        //System.out.println("Encode");
-        StringBuilder buffer = new StringBuilder();
-        Base64.encodeIntToBuffer(val, buffer);
-        //System.out.println("Decode");
-        dec = Base64.decodeToInt(buffer.toString());
-        //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec);
-        */
     }
 
 
@@ -145,15 +137,6 @@ public class Base64Test {
         Assert.assertTrue(val == dec);
         buffer.free();
 
-        /*
-        //System.out.println("Encode");
-        StringBuilder buffer = new StringBuilder();
-        Base64.encodeDoubleToBuffer(val, buffer);
-        //System.out.println("Decode");
-        dec = Base64.decodeToDouble(buffer.toString());
-        //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec, 0);
-        */
     }
 
 
@@ -171,8 +154,8 @@ public class Base64Test {
 
     private void boolArrayInnerTest(boolean[] array) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
-        Base64.encodeBoolArrayToBuffer(array,buffer);
-        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer,0,buffer.size(), array.length);
+        Base64.encodeBoolArrayToBuffer(array, buffer);
+        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer, 0, buffer.size(), array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertTrue(array.length == dec.length);
         for (int i = 0; i < array.length; i++) {
@@ -182,69 +165,4 @@ public class Base64Test {
     }
 
 
-   /* @Test
-    public void emptyStringEncodingTest() { testString(""); }
-
-    @Test
-    public void l1StringEncodingTest() { testString("a"); }
-
-    @Test
-    public void l2StringEncodingTest() { testString("ab"); }
-
-    @Test
-    public void l3StringEncodingTest() { testString("abc"); }
-
-    @Test
-    public void l4StringEncodingTest() { testString("abcd"); }
-
-    private void testString(String val) {
-        //System.out.println("Encode");
-        String enc = Base64.encodeString(val);
-        //System.out.println("Decode");
-        String dec = Base64.decodeToString(enc);
-        //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec);
-
-        //System.out.println("Encode");
-        StringBuilder buffer = new StringBuilder();
-        Base64.encodeStringToBuffer(val, buffer);
-        //System.out.println("Decode");
-        dec = Base64.decodeToString(buffer.toString());
-        //System.out.println(val + " -> " + enc + " -> " + dec);
-        Assert.assertEquals(val, dec);
-    }
-*/
-
-    /*
-
-        private String printBits(Long val) {
-            String toString = Long.toBinaryString(val);
-            String res = "";
-
-            for(int i = 0; i < 64-toString.length(); i++) {
-                res += "0";
-            }
-            return res + toString;
-        }
-
-
-        public static void main(String[] args) {
-            String res = "";
-            int i = 0;
-            for(char c= 'A'; c <='Z'; c++) {
-                res += "\""+c+"\":" + i + ", "; i++;
-            }
-            for(char c= 'a'; c <='z'; c++) {
-                res += "\""+c+"\":" + i + ", "; i++;
-            }
-            for(char c= '0'; c <='9'; c++) {
-                res += "\""+c+"\":" + i + ", "; i++;
-            }
-            res += "\"+\":" + i + ", "; i++;
-            res += "\"/\":" + i;
-            System.out.println(res);
-        }
-
-
-        */
 }

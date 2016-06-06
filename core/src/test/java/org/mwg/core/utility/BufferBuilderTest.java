@@ -23,7 +23,6 @@ public class BufferBuilderTest {
             Assert.assertEquals(data[i], res[i]);
         }
 
-
         //write more data than the capacity
         buffer.writeAll(data2);
         res = buffer.data();
@@ -32,7 +31,7 @@ public class BufferBuilderTest {
             Assert.assertEquals(data[i], res[i]);
         }
         for (int i = 0; i < data2.length; i++) {
-            Assert.assertEquals("error for index " + i, data2[i], res[i + data.length]);
+            Assert.assertEquals(data2[i], res[i + data.length]);
         }
 
         //write less data than the capacity
@@ -43,21 +42,36 @@ public class BufferBuilderTest {
             Assert.assertEquals(data[i], res[i]);
         }
         for (int i = 0; i < data2.length; i++) {
-            Assert.assertEquals("error for index " + i, data2[i], res[i + data.length]);
+            Assert.assertEquals(data2[i], res[i + data.length]);
         }
         for (int i = 0; i < data.length; i++) {
-            Assert.assertEquals("error for index " + i, data[i], res[i + data.length + data2.length]);
+            Assert.assertEquals(data[i], res[i + data.length + data2.length]);
 
         }
 
     }
 
     private void testIterator(org.mwg.struct.Buffer buffer) {
-        buffer.writeAll("123".getBytes());
+        byte[] one = new byte[3];
+        one[0] = (byte) "1".codePointAt(0);
+        one[1] = (byte) "2".codePointAt(0);
+        one[2] = (byte) "3".codePointAt(0);
+
+        byte[] two = new byte[3];
+        two[0] = (byte) "5".codePointAt(0);
+        two[1] = (byte) "6".codePointAt(0);
+        two[2] = (byte) "7".codePointAt(0);
+
+        byte[] three = new byte[2];
+        three[0] = (byte) "8".codePointAt(0);
+        three[1] = (byte) "9".codePointAt(0);
+
+
+        buffer.writeAll(one);
         buffer.write(BUFFER_SEP);
-        buffer.writeAll("567".getBytes());
+        buffer.writeAll(two);
         buffer.write(BUFFER_SEP);
-        buffer.writeAll("89".getBytes());
+        buffer.writeAll(three);
 
         BufferIterator it = buffer.iterator();
         Assert.assertEquals(it.hasNext(), true);
@@ -66,26 +80,26 @@ public class BufferBuilderTest {
         Assert.assertNotNull(view1);
         Assert.assertEquals(view1.size(), 3);
         byte[] view1flat = view1.data();
-        view1flat[0] = "123".getBytes()[0];
-        view1flat[1] = "123".getBytes()[1];
-        view1flat[2] = "123".getBytes()[2];
+        view1flat[0] = one[0];
+        view1flat[1] = one[1];
+        view1flat[2] = one[2];
         Assert.assertEquals(it.hasNext(), true);
 
         Buffer view2 = it.next();
         Assert.assertNotNull(view2);
         Assert.assertEquals(view2.size(), 3);
         byte[] view2flat = view2.data();
-        view2flat[0] = "567".getBytes()[0];
-        view2flat[1] = "567".getBytes()[1];
-        view2flat[2] = "567".getBytes()[2];
+        view2flat[0] = two[0];
+        view2flat[1] = two[1];
+        view2flat[2] = two[2];
         Assert.assertEquals(it.hasNext(), true);
 
         Buffer view3 = it.next();
         Assert.assertNotNull(view3);
         Assert.assertEquals(view3.size(), 2);
         byte[] view3flat = view3.data();
-        view3flat[0] = "89".getBytes()[0];
-        view3flat[1] = "89".getBytes()[1];
+        view3flat[0] = three[0];
+        view3flat[1] = three[1];
         Assert.assertEquals(it.hasNext(), false);
     }
 
@@ -108,7 +122,7 @@ public class BufferBuilderTest {
         Assert.assertNotNull(view3);
         Assert.assertEquals(view3.size(), 0);
 
-        Assert.assertEquals(false,it.hasNext());
+        Assert.assertEquals(false, it.hasNext());
 
     }
 
@@ -156,16 +170,16 @@ public class BufferBuilderTest {
         testIterator2(BufferBuilder.newOffHeapBuffer());
     }
 
-    public void testIterator2(Buffer buffer){
-        byte[] bytes = new byte[]{12,11, BUFFER_SEP,87, BUFFER_SEP,87,45};
+    public void testIterator2(Buffer buffer) {
+        byte[] bytes = new byte[]{12, 11, BUFFER_SEP, 87, BUFFER_SEP, 87, 45};
         buffer.writeAll(bytes);
         BufferIterator it = buffer.iterator();
 
-        Assert.assertArrayEquals(new byte[]{12,11},it.next().data());
-        Assert.assertArrayEquals(new byte[]{87},it.next().data());
-        Assert.assertArrayEquals(new byte[]{87,45},it.next().data());
+        Assert.assertArrayEquals(new byte[]{12, 11}, it.next().data());
+        Assert.assertArrayEquals(new byte[]{87}, it.next().data());
+        Assert.assertArrayEquals(new byte[]{87, 45}, it.next().data());
 
-        Assert.assertEquals(false,it.hasNext());
+        Assert.assertEquals(false, it.hasNext());
     }
 
     @Test
@@ -179,7 +193,7 @@ public class BufferBuilderTest {
     }
 
     public void testOneElementBuffer(Buffer oneElementBuffer) {
-        byte[] bytesOneElementBuffer = new byte[] {15, CoreConstants.BUFFER_SEP,16,CoreConstants.BUFFER_SEP,17};
+        byte[] bytesOneElementBuffer = new byte[]{15, CoreConstants.BUFFER_SEP, 16, CoreConstants.BUFFER_SEP, 17};
 
         oneElementBuffer.writeAll(bytesOneElementBuffer);
 
@@ -189,7 +203,7 @@ public class BufferBuilderTest {
         Assert.assertArrayEquals(new byte[]{16}, itOneElementBuffer.next().data());
         Assert.assertArrayEquals(new byte[]{17}, itOneElementBuffer.next().data());
 
-        Assert.assertEquals(false,itOneElementBuffer.hasNext());
+        Assert.assertEquals(false, itOneElementBuffer.hasNext());
     }
 
     @Test
@@ -203,34 +217,34 @@ public class BufferBuilderTest {
     }
 
     public void testEmptyBuffer(Buffer buffer) {
-        byte[] bytes = new byte[] {BUFFER_SEP, BUFFER_SEP, BUFFER_SEP,15,BUFFER_SEP,BUFFER_SEP};
+        byte[] bytes = new byte[]{BUFFER_SEP, BUFFER_SEP, BUFFER_SEP, 15, BUFFER_SEP, BUFFER_SEP};
         buffer.writeAll(bytes);
 
         BufferIterator it = buffer.iterator();
 
         BufferView next = (BufferView) it.next();
-        Assert.assertArrayEquals(new byte[0],next.data());
-        Assert.assertEquals(0,next.size());
+        Assert.assertArrayEquals(new byte[0], next.data());
+        Assert.assertEquals(0, next.size());
 
         next = (BufferView) it.next();
-        Assert.assertArrayEquals(new byte[0],next.data());
-        Assert.assertEquals(0,next.size());
+        Assert.assertArrayEquals(new byte[0], next.data());
+        Assert.assertEquals(0, next.size());
 
         next = (BufferView) it.next();
-        Assert.assertArrayEquals(new byte[0],next.data());
-        Assert.assertEquals(0,next.size());
+        Assert.assertArrayEquals(new byte[0], next.data());
+        Assert.assertEquals(0, next.size());
 
-        Assert.assertArrayEquals(new byte[]{15},it.next().data());
-
-        next = (BufferView) it.next();
-        Assert.assertArrayEquals(new byte[0],next.data());
-        Assert.assertEquals(0,next.size());
+        Assert.assertArrayEquals(new byte[]{15}, it.next().data());
 
         next = (BufferView) it.next();
-        Assert.assertArrayEquals(new byte[0],next.data());
-        Assert.assertEquals(0,next.size());
+        Assert.assertArrayEquals(new byte[0], next.data());
+        Assert.assertEquals(0, next.size());
 
-        Assert.assertEquals(false,it.hasNext());
+        next = (BufferView) it.next();
+        Assert.assertArrayEquals(new byte[0], next.data());
+        Assert.assertEquals(0, next.size());
+
+        Assert.assertEquals(false, it.hasNext());
 
     }
 
@@ -245,7 +259,7 @@ public class BufferBuilderTest {
     }
 
     public void testRead(Buffer buffer) {
-        byte[] bytes = new byte[] {BUFFER_SEP, BUFFER_SEP};
+        byte[] bytes = new byte[]{BUFFER_SEP, BUFFER_SEP};
         buffer.writeAll(bytes);
 
         BufferIterator it = buffer.iterator();
@@ -259,23 +273,23 @@ public class BufferBuilderTest {
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         } finally {
-            Assert.assertEquals(true,catched);
+            Assert.assertEquals(true, catched);
         }
 
     }
 
     @Test
-    public void testIteratorOnLimitSize(){
+    public void testIteratorOnLimitSize() {
         byte[] bytes = new byte[]{47, 47, 47, 47, 43, 59, 73, 65, 65, 65, 65, 65, 69, 35, 0, 103};
         Buffer buffer = BufferBuilder.newHeapBuffer();
 
         buffer.writeAll(bytes);
         BufferIterator it = buffer.iterator();
 
-        Assert.assertArrayEquals(new byte[]{47, 47, 47, 47, 43, 59, 73, 65, 65, 65, 65, 65, 69},it.next().data());
-        Assert.assertArrayEquals(new byte[]{0, 103},it.next().data());
+        Assert.assertArrayEquals(new byte[]{47, 47, 47, 47, 43, 59, 73, 65, 65, 65, 65, 65, 69}, it.next().data());
+        Assert.assertArrayEquals(new byte[]{0, 103}, it.next().data());
 
-        Assert.assertEquals(false,it.hasNext());
+        Assert.assertEquals(false, it.hasNext());
     }
 
 }

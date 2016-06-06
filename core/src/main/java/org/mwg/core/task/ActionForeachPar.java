@@ -3,11 +3,8 @@ package org.mwg.core.task;
 import org.mwg.*;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
+import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 class ActionForeachPar implements TaskAction {
 
@@ -31,7 +28,7 @@ class ActionForeachPar implements TaskAction {
         });
         for (int i = 0; i < castedResult.length; i++) {
             final int finalI = i;
-            _subTask.executeThenAsync(context, castedResult[finalI], new TaskAction() {
+            _subTask.executeThenAsync(context, castedResult[finalI], new Action() {
                 @Override
                 public void eval(final TaskContext subTaskFinalContext) {
                     results[finalI] = subTaskFinalContext;

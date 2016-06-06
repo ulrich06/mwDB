@@ -71,7 +71,7 @@ public abstract class AbstractNode implements Node {
     public Object get(String propertyName) {
         NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.get(this._resolver.stringToLongKey(propertyName));
+            return resolved.get(this._resolver.stringToHash(propertyName, false));
         }
         return null;
     }
@@ -125,7 +125,7 @@ public abstract class AbstractNode implements Node {
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         NodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            preciseState.set(this._resolver.stringToLongKey(propertyName), propertyType, propertyValue);
+            preciseState.set(this._resolver.stringToHash(propertyName, true), propertyType, propertyValue);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -135,7 +135,7 @@ public abstract class AbstractNode implements Node {
     public Map map(String propertyName, byte propertyType) {
         NodeState preciseState = this._resolver.resolveState(this, false);
         if (preciseState != null) {
-            return (Map) preciseState.getOrCreate(this._resolver.stringToLongKey(propertyName), propertyType);
+            return (Map) preciseState.getOrCreate(this._resolver.stringToHash(propertyName, true), propertyType);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -145,7 +145,7 @@ public abstract class AbstractNode implements Node {
     public byte type(String propertyName) {
         NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            return resolved.getType(this._resolver.stringToLongKey(propertyName));
+            return resolved.getType(this._resolver.stringToHash(propertyName, false));
         }
         return -1;
     }
@@ -162,11 +162,11 @@ public abstract class AbstractNode implements Node {
         }
         final NodeState resolved = this._resolver.resolveState(this, true);
         if (resolved != null) {
-            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToLongKey(relationName));
+            final long[] flatRefs = (long[]) resolved.get(this._resolver.stringToHash(relationName, false));
             if (flatRefs == null || flatRefs.length == 0) {
-                callback.on(new AbstractNode[0]);
+                callback.on(new Node[0]);
             } else {
-                final Node[] result = new AbstractNode[flatRefs.length];
+                final Node[] result = new Node[flatRefs.length];
                 final DeferCounter counter = _graph.counter(flatRefs.length);
                 final int[] resultIndex = new int[1];
                 for (int i = 0; i < flatRefs.length; i++) {
@@ -187,7 +187,7 @@ public abstract class AbstractNode implements Node {
                         if (resultIndex[0] == result.length) {
                             callback.on(result);
                         } else {
-                            Node[] toSend = new AbstractNode[resultIndex[0]];
+                            Node[] toSend = new Node[resultIndex[0]];
                             System.arraycopy(result, 0, toSend, 0, toSend.length);
                             callback.on(toSend);
                         }
@@ -200,7 +200,7 @@ public abstract class AbstractNode implements Node {
     @Override
     public void add(String relationName, Node relatedNode) {
         NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName);
+        long relationKey = this._resolver.stringToHash(relationName, true);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous == null) {
@@ -221,7 +221,7 @@ public abstract class AbstractNode implements Node {
     @Override
     public void remove(String relationName, Node relatedNode) {
         NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToLongKey(relationName);
+        long relationKey = this._resolver.stringToHash(relationName, false);
         if (preciseState != null) {
             long[] previous = (long[]) preciseState.get(relationKey);
             if (previous != null) {
@@ -279,16 +279,27 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void findAt(String indexName, long world, long time, String query, Callback<Node[]> callback) {
+    public void findQuery(Query query, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        String indexName = query.indexName();
+        if (indexName == null) {
+            throw new RuntimeException("Please specify indexName in query before first use!");
+        }
+        long queryWorld = query.world();
+        if (queryWorld == Constants.NULL_LONG) {
+            queryWorld = world();
+        }
+        long queryTime = query.time();
+        if (queryTime == Constants.NULL_LONG) {
+            queryTime = time();
+        }
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
-            final Query flatQuery = Query.parseQuery(query, selfPointer._resolver);
-            final long[] foundId = indexMap.get(flatQuery.hash());
+            final long[] foundId = indexMap.get(query.hash());
             if (foundId == null) {
                 callback.on(new org.mwg.plugin.AbstractNode[0]);
                 return;
@@ -297,9 +308,8 @@ public abstract class AbstractNode implements Node {
             final DeferCounter waiter = _graph.counter(foundId.length);
             //TODO replace by a par lookup
             final AtomicInteger nextResolvedTabIndex = new AtomicInteger(0);
-
             for (int i = 0; i < foundId.length; i++) {
-                selfPointer._resolver.lookup(world, time, foundId[i], new Callback<org.mwg.Node>() {
+                selfPointer._resolver.lookup(queryWorld, queryTime, foundId[i], new Callback<org.mwg.Node>() {
                     @Override
                     public void on(org.mwg.Node resolvedNode) {
                         if (resolvedNode != null) {
@@ -320,9 +330,9 @@ public abstract class AbstractNode implements Node {
                         org.mwg.Node resolvedNode = resolved[i];
                         NodeState resolvedState = selfPointer._resolver.resolveState(resolvedNode, true);
                         boolean exact = true;
-                        for (int j = 0; j < flatQuery.size; j++) {
-                            Object obj = resolvedState.get(flatQuery.attributes[j]);
-                            if (flatQuery.values[j] == null) {
+                        for (int j = 0; j < query.attributes().length; j++) {
+                            Object obj = resolvedState.get(query.attributes()[j]);
+                            if (query.values()[j] == null) {
                                 if (obj != null) {
                                     exact = false;
                                     break;
@@ -332,9 +342,21 @@ public abstract class AbstractNode implements Node {
                                     exact = false;
                                     break;
                                 } else {
-                                    if (!Constants.equals(flatQuery.values[j], obj.toString())) {
-                                        exact = false;
-                                        break;
+                                    if (obj instanceof long[]) {
+                                        if (query.values()[j] instanceof long[]) {
+                                            if (!Constants.longArrayEquals((long[]) query.values()[j], (long[]) obj)) {
+                                                exact = false;
+                                                break;
+                                            }
+                                        } else {
+                                            exact = false;
+                                            break;
+                                        }
+                                    } else {
+                                        if (!Constants.equals(query.values()[j].toString(), obj.toString())) {
+                                            exact = false;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -360,16 +382,21 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void find(String indexName, String query, Callback<Node[]> callback) {
-        findAt(indexName, time(), world(), query, callback);
+        Query queryObj = _graph.newQuery();
+        queryObj.setWorld(world());
+        queryObj.setTime(time());
+        queryObj.setIndexName(indexName);
+        queryObj.parseString(query);
+        findQuery(queryObj, callback);
     }
 
     @Override
-    public void allAt(String indexName, long world, long time, Callback<Node[]> callback) {
+    public void allAt(long world, long time, String indexName, Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
@@ -408,7 +435,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void all(String indexName, Callback<Node[]> callback) {
-        allAt(indexName, world(), time(), callback);
+        allAt(world(), time(), indexName, callback);
     }
 
     @Override
@@ -418,22 +445,20 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToLongKey(indexName), Type.LONG_LONG_ARRAY_MAP);
-        Query flatQuery = new Query();
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.getOrCreate(this._resolver.stringToHash(indexName, true), Type.LONG_LONG_ARRAY_MAP);
+        Query flatQuery = _graph.newQuery();
         NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
         for (int i = 0; i < keyAttributes.length; i++) {
-            long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
-            Object attValue = toIndexNodeState.get(attKey);
+            String attKey = keyAttributes[i];
+            Object attValue = toIndexNodeState.getFromKey(attKey);
             if (attValue != null) {
-                flatQuery.add(attKey, attValue.toString());
+                flatQuery.add(keyAttributes[i], attValue);
             } else {
-                flatQuery.add(attKey, null);
+                flatQuery.add(keyAttributes[i], null);
             }
         }
-        flatQuery.compute();
         //TODO AUTOMATIC UPDATE
         indexMap.put(flatQuery.hash(), nodeToIndex.id());
-
         if (Constants.isDefined(callback)) {
             callback.on(true);
         }
@@ -446,20 +471,19 @@ public abstract class AbstractNode implements Node {
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToLongKey(indexName));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
-            Query flatQuery = new Query();
+            Query flatQuery = _graph.newQuery();
             NodeState toIndexNodeState = this._resolver.resolveState(nodeToIndex, true);
             for (int i = 0; i < keyAttributes.length; i++) {
-                long attKey = this._resolver.stringToLongKey(keyAttributes[i]);
-                Object attValue = toIndexNodeState.get(attKey);
+                String attKey = keyAttributes[i];
+                Object attValue = toIndexNodeState.getFromKey(attKey);
                 if (attValue != null) {
                     flatQuery.add(attKey, attValue.toString());
                 } else {
                     flatQuery.add(attKey, null);
                 }
             }
-            flatQuery.compute();
             //TODO AUTOMATIC UPDATE
             indexMap.remove(flatQuery.hash(), nodeToIndex.id());
         }
@@ -468,13 +492,137 @@ public abstract class AbstractNode implements Node {
         }
     }
 
+    /**
+     * @native ts
+     * return isNaN(toTest);
+     */
+    private boolean isNaN(double toTest) {
+        return Double.NaN == toTest;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{\"world\":");
+        builder.append(world());
+        builder.append(",\"time\":");
+        builder.append(time());
+        builder.append(",\"id\":");
+        builder.append(id());
+        NodeState state = this._resolver.resolveState(this, true);
+        if (state != null) {
+            state.each(new NodeStateCallback() {
+                @Override
+                public void on(long attributeKey, int elemType, Object elem) {
+                    if (elem != null) {
+                        switch (elemType) {
+                            /** Primitive types */
+                            case Type.BOOL: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                if ((boolean) elem) {
+                                    builder.append("0");
+                                } else {
+                                    builder.append("1");
+                                }
+                                break;
+                            }
+                            case Type.STRING: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append("\"");
+                                builder.append(elem);
+                                builder.append("\"");
+                                break;
+                            }
+                            case Type.LONG: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append(elem);
+                                break;
+                            }
+                            case Type.INT: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append(elem);
+                                break;
+                            }
+                            case Type.DOUBLE: {
+                                if (isNaN((Double) elem)) {
+                                    builder.append(",\"");
+                                    builder.append(_resolver.hashToString(attributeKey));
+                                    builder.append("\":");
+                                    builder.append(elem);
+                                }
+                                break;
+                            }
+                            /** Array types */
+                            case Type.DOUBLE_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append("[");
+                                double[] castedArr = (double[]) elem;
+                                for (int j = 0; j < castedArr.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case Type.LONG_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append("[");
+                                long[] castedArr2 = (long[]) elem;
+                                for (int j = 0; j < castedArr2.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr2[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                            case Type.INT_ARRAY: {
+                                builder.append(",\"");
+                                builder.append(_resolver.hashToString(attributeKey));
+                                builder.append("\":");
+                                builder.append("[");
+                                int[] castedArr3 = (int[]) elem;
+                                for (int j = 0; j < castedArr3.length; j++) {
+                                    if (j != 0) {
+                                        builder.append(",");
+                                    }
+                                    builder.append(castedArr3[j]);
+                                }
+                                builder.append("]");
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            builder.append("}");
+        }
+        return builder.toString();
+    }
+
+
     public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
         if (propertyType != propertyTargetType) {
             throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));
         } else {
             NodeState preciseState = this._resolver.resolveState(this, false);
             if (preciseState != null) {
-                preciseState.set(this._resolver.stringToLongKey(propertyName), propertyType, propertyValue);
+                preciseState.set(this._resolver.stringToHash(propertyName, true), propertyType, propertyValue);
             } else {
                 throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }

@@ -1,11 +1,12 @@
 package org.mwg.core.chunk.offheap;
 
+import org.mwg.plugin.ChunkType;
 import org.mwg.struct.Buffer;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
-import org.mwg.core.utility.Base64;
+import org.mwg.plugin.Base64;
 import org.mwg.core.utility.PrimitiveHelper;
 
 /**
@@ -52,7 +53,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         //init
         if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             addr = previousAddr;
-        } else if (initialPayload != null) {
+        } else if (initialPayload != null && initialPayload.size() > 0) {
             addr = OffHeapLongArray.allocate(14);
             load(initialPayload);
         } else {
@@ -75,7 +76,6 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             OffHeapLongArray.set(addr, INDEX_THRESHOLD, (long) (capacity * CoreConstants.MAP_LOAD_FACTOR));
             OffHeapLongArray.set(addr, INDEX_MAGIC, 0);
         }
-
     }
 
     @Override
@@ -138,7 +138,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
     @Override
     public final byte chunkType() {
-        return CoreConstants.TIME_TREE_CHUNK;
+        return ChunkType.TIME_TREE_CHUNK;
     }
 
     @Override
@@ -276,7 +276,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
     }
 
     @Override
-    public final void unsafe_insert(long p_key){
+    public final void unsafe_insert(long p_key) {
         ptrConsistency();
         internal_insert(p_key);
     }
@@ -624,6 +624,36 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             cursor++;
         }
         internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+    }
+
+    @Override
+    public void merge(Buffer buffer) {
+        boolean toDeclareDirty = false;
+        while (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 0, 1)) ;
+        try {
+            ptrConsistency();
+            //loop
+            long cursor = 0;
+            long previous = 0;
+            long payloadSize = buffer.size();
+            while (cursor < payloadSize) {
+                byte current = buffer.read(cursor);
+                if (current == CoreConstants.CHUNK_SUB_SEP) {
+                    toDeclareDirty = toDeclareDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+                    previous = cursor + 1;
+                }
+                cursor++;
+            }
+            toDeclareDirty = toDeclareDirty || internal_insert(Base64.decodeToLongWithBounds(buffer, previous, cursor));
+        } finally {
+            //Free OffHeap lock
+            if (!OffHeapLongArray.compareAndSwap(addr, INDEX_LOCK, 1, 0)) {
+                throw new RuntimeException("CAS Error !!!");
+            }
+        }
+        if (toDeclareDirty) {
+            internal_set_dirty();
+        }
     }
 
 }

@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.mwdb</groupId>
-    <artifactId>root</artifactId>
+    <groupId>org.kevoree.mwg</groupId>
+    <artifactId>mwg</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1-SNAPSHOT</version>
     <name>mwg</name>
     <url>https://github.com/kevoree-modeling/mwDB</url>
-    <description>Many-World Database</description>
+    <description>Many-World Graph Database</description>
 
     <licenses>
         <license>
@@ -27,6 +27,10 @@
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
+
+    <properties>
+        <java2typescript.plugin.version>53</java2typescript.plugin.version>
+    </properties>
 
     <developers>
         <developer>
@@ -76,38 +80,58 @@
             </roles>
             <timezone>+2</timezone>
         </developer>
+        <developer>
+            <name>Andrey BOYTSOV</name>
+            <id>andrey.boytsov</id>
+            <email>andrey.boytsov@uni.lu</email>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
     </developers>
+
+    <profiles>
+        <profile>
+            <id>notWindowsActivation</id>
+            <activation>
+                <os>
+                    <family>!windows</family>
+                </os>
+            </activation>
+            <modules>
+                <module>plugins/rocksdb</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <modules>
         <module>api</module>
         <module>core</module>
+        <module>corejs</module>
 
-        <!-- <module>js</module> -->
-
+        <!-- Plugins -->
         <module>plugins/importer</module>
-        <module>plugins/rocksdb</module>
         <module>plugins/leveldb</module>
+        
 
-        <!-- <module>plugins/debug</module> -->
         <module>plugins/ml</module>
+        <module>plugins/mljs</module>
+        <module>plugins/mlex</module>
 
+        <module>plugins/rest</module>
+        <module>plugins/websocket</module>
+        <!--
+        <module>plugins/debug</module>
+        -->
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -120,16 +144,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <compilerArguments>
+                        <profile>compact1</profile>
+                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.8</version>
+                <version>1.9</version>
                 <configuration>
                     <verbose>false</verbose>
                 </configuration>
@@ -148,18 +175,6 @@
                                 <include>*.java</include>
                             </includes>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.kevoree.maventools</groupId>
-                <artifactId>org.kevoree.maventools.settings.ci</artifactId>
-                <version>2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>set</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

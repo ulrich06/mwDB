@@ -52,7 +52,7 @@ public class PInvSVD {
             if( S.get(i,i) > maxSingular )
                 maxSingular = S.get(i,i);
         }
-        double tau = Math.pow(2,-50)*Math.max(A.columns(),A.rows())*maxSingular;
+        double tau = Math.pow(2,-46)*Math.max(A.columns(),A.rows())*maxSingular;
 
         rank=0;
         det=1;

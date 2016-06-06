@@ -1,8 +1,10 @@
-# KMF Plugin: Rest Gateway
+# Many World Graph Plugin: Rest Gateway
 
 ### Introduction
 
-This addon, designed for any KMF offers a generic way to interact with model (read/write) using a classic but efficient **REST API**.
+
+
+This plugin, designed for any KMF offers a generic way to interact with model (read/write) using a classic but efficient **REST API**.
 This addon is implemented as a server that can be embedded in any Java project (JS version to come in NodeJS soon).
 
 The goal of such Rest Server is to offers a **standard way to interact with model** for devices that cann't run for technical reasons KMF API.
@@ -18,6 +20,14 @@ In a nutshell, HTTP Path are mapped to KMF Queries to retreive or select KMF Obj
 In particular this REST offers the ability to manipulated model according to time and universes of KMF.
 It interesting to notice that every REST HTTP get and put request start by two long attribute `/0/10` the first one is the universe ID (virtually a working space) the second is simply a timestamp to reflect the time of the measurement. The KMF semamtic will return the closest well know time in case of GET and will update the current time for the 
 
+## Last versions:
+
+- 1.0 compatible with mwg API 1.x
+
+## Changelog
+
+- 1.0 use Undertow in version 1.3.22.Final
+
 ### Compilation
 
 No particular dependency to compile, tested on Java 8.
@@ -32,46 +42,61 @@ Simply add the plugin to your Maven project.
 
 ```xml
         <dependency>
-            <groupId>org.kevoree.modeling.plugin</groupId>
+            <groupId>org.kevoree.mwg.plugins</groupId>
             <artifactId>rest</artifactId>
-            <version>4.27.0</version>
+            <version>REPLACE_BY_LAST_VERSION</version>
         </dependency>
 ```
 
 Then in you main or any kind of place of your Java platform, wrap the model into a Rest Gateway server and start it.
 
 ```java
-RestGateway gateway = RestGateway.expose(cloudModel, 8050);
+int httpPort = 8050;
+RestGateway gateway = RestGateway.expose(graph, httpPort);
 gateway.start();
 ```
 
 Replace the 8050 by the expected port where you want to expose your HTTP server.
 
+When your application is stopped, don't forget to stop as well the server using:
+
+```java
+gateway.stop();
+```
+
 ### Reference Rest API
 
 The REST API allows two kind of operations: GET and PUT
-Both share the same **PATH** schema.
+Both share the same **PATH** schema as the following:
 
 ```
-/<UNIVERSE_ID>/<TIME_ID>/<QUERY_1>/<QUERY_2>... /<QUERY_N>
+/<QUERY_1>/<QUERY_2>... /<QUERY_N>?world=<WORLD_ID>&time=<TIME>
 ```
 
-In short, the PATH allows to select a set of KMF objects.
-QUERY are FILTERS which are assembled such as PIPE in UNIX system.
-Therefore, first the PATH describe the reference UNIVERSE AND TIME that should be use to traverse the KMF Model.
-Later, QUERY elements, allows to collect object through the use of index (starting by @) or filters.
+In short, the PATH allows to select a set of mwg nodes.
+QUERY are FILTERS which are assembled such as PIPE in UNIX system and each filter follow the TASK api of mwg.
+Therefore, query parameters describe the reference WORLD AND TIME that should be use to traverse the KMF Model.
 
-In all following examples we will consider the following very simple meta model to illustrate snippets.
+In all following examples we will consider the following very simple graph to illustrate snippets.
 
 ```java
-class Node {
-    get name: String with index
-    get load: Continuous
-    rel processes: Process
-}
-class Process {
-    get name: String
-    get load: Continuous
+Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+graph.connect(o -> {
+    for (int i = 0; i < 10; i++) {
+        //Create a node named nodeX
+        Node nodeLoop = graph.newNode(0, i);
+        nodeLoop.set("name", "node" + i);
+        nodeLoop.set("load", i);
+        //Attach a subNode process
+        Node subProcessLoop = graph.newNode(0, i);
+        subProcessLoop.set("name", "process" + i);
+        subProcessLoop.set("load", i);
+        nodeLoop.add("processes", subProcessLoop);
+        //Index the node in the index names using his attribute name
+        graph.index("nodes", nodeLoop, "name", null);
+    }
+    RestGateway gateway = RestGateway.expose(graph, 8050);
+    gateway.start();
 }
 ```
 
@@ -80,41 +105,48 @@ class Process {
 The **HTTP GET** operation allows to retrieve a JSON array composed by selected objects.
 Therefore the following
 
-```
-http://localhost:8050/0/10/@Node
+```http
+http://localhost:8050/fromIndexAll(nodes)?time=10
 ```
 
-results in:
+results would be:
 
 ```json
 [
-{"universe":0,"time":10,"uuid":1,"data":{"name":"node0","load":0.0}},
-{"universe":0,"time":10,"uuid":2,"data":{"name":"node1","load":1.0}},
-{"universe":0,"time":10,"uuid":3,"data":{"name":"node2","load":2.0}}
+{"world":0,"data":{"processes":[2],"load":0,"name":"node0"},"time":10,"id":1},
+{"world":0,"data":{"processes":[5],"load":1,"name":"node1"},"time":10,"id":4},
+{"world":0,"data":{"processes":[7],"load":2,"name":"node2"},"time":10,"id":6},
+{"world":0,"data":{"processes":[9],"load":3,"name":"node3"},"time":10,"id":8},
+{"world":0,"data":{"processes":[11],"load":4,"name":"node4"},"time":10,"id":10},
+{"world":0,"data":{"processes":[13],"load":5,"name":"node5"},"time":10,"id":12},
+{"world":0,"data":{"processes":[15],"load":6,"name":"node6"},"time":10,"id":14},
+{"world":0,"data":{"processes":[17],"load":7,"name":"node7"},"time":10,"id":16},
+{"world":0,"data":{"processes":[19],"load":8,"name":"node8"},"time":10,"id":18},
+{"world":0,"data":{"processes":[21],"load":9,"name":"node9"},"time":10,"id":20}
 ]
 ```
 
 However, the following line will select one particular object:
 
 ```
-http://localhost:8050/0/10/@Node[name=node1]
+http://localhost:8050/fromIndexAll(nodes)/with(name,node1)?time=10
 ```
 
 will return: 
 
 ```json
 [
-{"universe":0,"time":10,"uuid":2,"data":{"name":"node1","load":1.0}}
+{"world":0,"data":{"processes":[5],"load":1,"name":"node1"},"time":10,"id":4}
 ]
 ```
 
 on Unix machine this can be test using the `curl` command such as:
 
 ```sh
-curl "http://localhost:8050/0/1/@Node%5Bname=node1%5D"
+curl "http://localhost:8050/fromIndexAll(nodes)/with(name,node1)?time=10"
 ```
 
-`%5B == [`, remember that URL should be encoded for special characters
+remember that URL should be encoded for special characters
 
 ##### PIPED FILTERS
 
@@ -122,34 +154,34 @@ As KMF Query, FILTERS can be piped il order to filter result from the server sid
 For instance the following query:
 
 ```sh
-curl http://localhost:8050/0/10/@Node[name=node1]/processes[name=process*]
+curl http://localhost:8050/fromIndexAll(nodes)/traverse(processes)/with(name,process9)?time=10
 ```
 
-Will collect sub processes of of node1, beginning by the name process.
-Please read the KMF Query section in order to have all potential query.
+Will collect sub processes of of all nodes and select the process named process9.
+Please read the mwg KTask section in order to have all potential task actions.
 
 ##### POST OPERATIONS
 
-The HTTP post operation can be leverage to put data into the model.
-Similarly to GET operation, the PATH select objects that will be modified, and the POST payload, describe as key/values.
+The HTTP post operation can be leverage to put data into the graph.
+Similarly to GET operation, the PATH select nodes that will be modified, and the POST payload, describe as key/values.
 This set of ket/values will be injected on all selected objects.
 This can be executed through the next command:
 
 ```sh
-curl --data "load=42" "http://localhost:8050/0/1/@Node%5Bname=node1%5D"
+curl --data "load=42" "http://localhost:8050/fromIndexAll(nodes)/with(name,node1)?time=10"
 ```
 
 Now the following command:
 
 ```json
-curl "http://localho`st:8050/0/1/@Node%5Bname=node1%5D"
+curl "http://localhost:8050/fromIndexAll(nodes)/with(name,node1)?time=10"
 ```
 
 Will reply:
 
 ```json
 [
-{"universe":0,"time":1,"uuid":2,"data":{"name":"node1","load":42.0}}
+{"world":0,"data":{"processes":[5],"load":"42","name":"node1"},"time":10,"id":4}
 ]
 ```
 

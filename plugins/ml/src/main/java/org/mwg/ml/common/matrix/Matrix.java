@@ -147,34 +147,36 @@ public class Matrix {
 
     }
 
+    private static MatrixEngine _defaultEngine = null;
 
-    /**
-     * Matrix engine
-     */
     /**
      * @native ts
+     * if(Matrix._defaultEngine == null){
+     * Matrix._defaultEngine = new org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine();
+     * }
+     * return Matrix._defaultEngine;
      */
-    private static MatrixEngine _defaultEngine = new BlasMatrixEngine();
-
     public static MatrixEngine defaultEngine() {
+        if (_defaultEngine == null) {
+            _defaultEngine = new BlasMatrixEngine();
+        }
         return _defaultEngine;
     }
 
-
     public static Matrix multiply(Matrix matA, Matrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1d, matA, TransposeType.NOTRANSPOSE, 0d, matB);
+        return defaultEngine().multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1d, matA, TransposeType.NOTRANSPOSE, 1d, matB);
     }
 
     public static Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB) {
-        return _defaultEngine.multiplyTransposeAlphaBeta(transA, alpha, matA, transB, beta, matB);
+        return defaultEngine().multiplyTransposeAlphaBeta(transA, alpha, matA, transB, beta, matB);
     }
 
     public static Matrix invert(Matrix mat, boolean invertInPlace) {
-        return _defaultEngine.invert(mat, invertInPlace);
+        return defaultEngine().invert(mat, invertInPlace);
     }
 
     public static Matrix pinv(Matrix mat, boolean invertInPlace) {
-        return _defaultEngine.pinv(mat, invertInPlace);
+        return defaultEngine().pinv(mat, invertInPlace);
     }
 
 
@@ -309,6 +311,7 @@ public class Matrix {
     }
 
 
+    /*
     public static Matrix fromPartialPivots(int[] pivots, boolean transposed) {
         int[] permutations = new int[pivots.length];
         for (int i = 0; i < pivots.length; i++) {
@@ -345,7 +348,7 @@ public class Matrix {
             }
         }
         return m;
-    }
+    }*/
 
     public static boolean testDimensionsAB(TransposeType transA, TransposeType transB, Matrix matA, Matrix matB) {
         if (transA.equals(TransposeType.NOTRANSPOSE)) {

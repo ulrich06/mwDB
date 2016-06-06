@@ -9,11 +9,10 @@ import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.core.utility.Unsafe;
-
-import java.lang.reflect.Array;
 
 public class NodeFactoryTest implements NodeFactory {
 

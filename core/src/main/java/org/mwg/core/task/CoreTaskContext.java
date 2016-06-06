@@ -7,8 +7,6 @@ import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -85,6 +83,27 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
+    public final void addToVariable(String name, Object value) {
+        Object result = this._variables.get(name);
+        if (result == null) {
+            Object[] newArr = new Object[1];
+            newArr[0] = value;
+            this._variables.put(name, newArr);
+        } else if (result instanceof Object[]) {
+            Object[] previous = (Object[]) result;
+            Object[] incArr = new Object[previous.length + 1];
+            System.arraycopy(previous, 0, incArr, 0, previous.length);
+            incArr[previous.length] = value;
+            this._variables.put(name, incArr);
+        } else {
+            Object[] newArr = new Object[2];
+            newArr[0] = result;
+            newArr[1] = value;
+            this._variables.put(name, newArr);
+        }
+    }
+
+    @Override
     public final void setVariable(String name, Object value) {
         if (value != null) {
             this._variables.put(name, value);
@@ -104,14 +123,22 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
                 return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
             } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
                 org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
-                List<Object> result = new ArrayList<Object>();
+                Object[] result = new Object[contexts.length];
+                int result_index = 0;
                 for (int i = 0; i < contexts.length; i++) {
                     Object currentLoop = contexts[i].getPreviousResult();
                     if (currentLoop != null) {
-                        result.add(currentLoop);
+                        result[result_index] = currentLoop;
+                        result_index++;
                     }
                 }
-                return result.toArray(new Object[result.size()]);
+                if (contexts.length == result_index) {
+                    return result;
+                } else {
+                    Object[] shrinked = new Object[result_index];
+                    System.arraycopy(result, 0, shrinked, 0, result_index);
+                    return shrinked;
+                }
             } else {
                 return previousResult;
             }
