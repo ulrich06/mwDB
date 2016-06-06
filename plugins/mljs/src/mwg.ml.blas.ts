@@ -119,7 +119,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dgetrs = this.netlib.cwrap('f2c_dgetrs', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgetrs = this.netlib.cwrap('dgetrs_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgetrs(ptransA, pdim, pnrhs, pmatA, poffsetA, pldA, pipiv, poffsetIpiv, pmatB, poffsetB, pldB, pinfo);
 
 
@@ -180,7 +180,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dgetri = this.netlib.cwrap('f2c_dgetri', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgetri = this.netlib.cwrap('dgetri_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgetri(pdim, pmatA, poffsetA, pldA, pipiv, poffsetIpiv, pwork, poffsetWork, pldWork, pinfo);
 
 
@@ -232,7 +232,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dgetrf = this.netlib.cwrap('f2c_dgetrf', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgetrf = this.netlib.cwrap('dgetrf_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgetrf(prows, pcolumns, pmatA, poffsetA, pldA, pipiv, poffsetIpiv, pinfo);
 
 
@@ -292,7 +292,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dorgqr = this.netlib.cwrap('f2c_dorgqr', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dorgqr = this.netlib.cwrap('dorgqr_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dorgqr(pm, pn, pk, pmatA, poffsetA, pldA, ptaw, poffsetTaw, pwork, poffsetWork, plWork, pinfo);
 
 
@@ -355,7 +355,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dgeqrf = this.netlib.cwrap('f2c_dgeqrf', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgeqrf = this.netlib.cwrap('dgeqrf_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgeqrf(pm, pn, pmatA, poffsetA, pldA, ptaw, poffsetTaw, pwork, poffsetwork, plWork, pinfo);
 
 
@@ -432,7 +432,7 @@ module org {
                                     iipinfo.set(info);
 
 
-                                    var dgesdd = this.netlib.cwrap('dgesdd', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    var dgesdd = this.netlib.cwrap('dgesdd_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
                                     dgesdd(pjobz, pm, pn, pdata, plda, ps, pu, pldu, pvt, pldvt, pwork, plength, piwork, pinfo);
 
 
