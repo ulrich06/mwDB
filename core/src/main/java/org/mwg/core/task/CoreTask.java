@@ -132,7 +132,9 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public org.mwg.task.Task wait(org.mwg.task.Task subTask) {
-        addTask(new ActionTrigger(subTask));
+        if(subTask != null) {
+            addTask(new ActionTrigger(subTask));
+        }
         return this;
     }
 
