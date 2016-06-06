@@ -83,8 +83,7 @@ public class GaussianNodeTest {
                     gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
                         @Override
                         public void on(GaussianGmmNode result) {
-                            result.setTrainingVector(train[finalI]);
-                            result.learn(new Callback<Boolean>() {
+                            result.learnVector(train[finalI],new Callback<Boolean>() {
                                 @Override
                                 public void on(Boolean result) {
 
@@ -132,9 +131,7 @@ public class GaussianNodeTest {
                 Assert.assertTrue(Matrix.compare(avgLive, ravg, eps));
                 Assert.assertTrue(Matrix.compareArray(covLive, rcovData, eps));
 
-
                 gaussianNodeLive.free();
-
                 graph.disconnect(null);
             }
         });

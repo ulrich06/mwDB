@@ -44,18 +44,9 @@ public abstract class AbstractMLNode extends AbstractNode {
     }
 
 
-    //ToDo ouch this is hurting eyes for performance
-    public void setTrainingVector(double[] vec) {
-        String setFrom = "";
-        for (int i = 0; i < vec.length; i++) {
-            set("f" + i, vec[i]);
-            setFrom = setFrom + "f" + i + FROM_SEPARATOR;
-        }
-        set(FROM, setFrom);
-    }
 
     public void extractFeatures(Callback<double[]> callback) {
-        String query = (String) super.get(FROM);
+     /*   String query = (String) super.get(FROM);
         double[] result;
         if (query != null) {
             String[] split = query.split(FROM_SEPARATOR);
@@ -66,7 +57,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             callback.on(result);
         } else {
             callback.on(null);
-        }
+        }*/
     }
 
     /**
