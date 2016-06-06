@@ -69,11 +69,12 @@ public class GaussianNodeTest {
                 double eps = 1e-7;
 
 
-                double[][] train = new double[16][7];
+                double[][] train = new double[16][];
 
                 int time = 0;
                 int k = 0;
                 for (int i = 0; i < 16; i++) {
+                    train[i]=new double[7];
                     for (int j = 0; j < 7; j++) {
                         train[i][j] = longleyData[k];
                         k++;
@@ -97,6 +98,7 @@ public class GaussianNodeTest {
                 double[][] rcovData = new double[7][7];
                 k = 0;
                 for (int i = 0; i < 7; i++) {
+                    rcovData[i]=new double[7];
                     for (int j = 0; j < 7; j++) {
                         rcovData[i][j] = rData[k];
                         k++;
@@ -116,6 +118,7 @@ public class GaussianNodeTest {
                         if (c != null) {
                             for (int i = 0; i < a.length; i++) {
                                 avgLive[i] = a[i];
+                                covLive[i]=new double[a.length];
                                 for (int j = 0; j < a.length; j++) {
                                     covLive[i][j] = c[i][j];
                                 }
