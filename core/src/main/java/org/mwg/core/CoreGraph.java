@@ -93,6 +93,9 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public org.mwg.Node newTypedNode(long world, long time, String nodeType) {
+        if(nodeType == null) {
+            throw  new NullPointerException("nodeType should not be null");
+        }
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
@@ -122,6 +125,9 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public Node cloneNode(Node origin) {
+        if(origin == null) {
+            throw new NullPointerException("origin node should not be null");
+        }
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
@@ -405,6 +411,15 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void index(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
+        if(indexName == null) {
+            throw new NullPointerException("indexName should not be null");
+        }
+        if(toIndexNode == null) {
+            throw new NullPointerException("toIndexNode should not be null");
+        }
+        if(flatKeyAttributes == null) {
+            throw new NullPointerException("flatKeyAttributes should not be null");
+        }
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
@@ -426,6 +441,15 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void unindex(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
+        if(indexName == null) {
+            throw new NullPointerException("indexName should not be null");
+        }
+        if(toIndexNode == null) {
+            throw new NullPointerException("toIndexNode should not be null");
+        }
+        if(flatKeyAttributes == null) {
+            throw new NullPointerException("flatKeyAttributes should not be null");
+        }
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
@@ -446,6 +470,12 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void find(long world, long time, String indexName, String query, Callback<org.mwg.Node[]> callback) {
+        if(indexName == null) {
+            throw new NullPointerException("indexName should not be null");
+        }
+        if(query == null) {
+            throw new NullPointerException("query should not be null");
+        }
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
@@ -470,6 +500,9 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void findQuery(Query query, Callback<Node[]> callback) {
+        if(query == null) {
+            throw new NullPointerException("query should not be null");
+        }
         if (query.world() == Constants.NULL_LONG) {
             throw new RuntimeException("Please fill world parameter in query before first usage!");
         }
@@ -505,6 +538,9 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void all(long world, long time, String indexName, Callback<org.mwg.Node[]> callback) {
+        if(indexName == null) {
+            throw new NullPointerException("indexName should not be null");
+        }
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
@@ -529,6 +565,9 @@ class CoreGraph implements org.mwg.Graph {
 
     @Override
     public void namedIndex(long world, long time, String indexName, Callback<Node> callback) {
+        if(indexName == null) {
+            throw new NullPointerException("indexName should not be null");
+        }
         getIndexOrCreate(world, time, indexName, callback, false);
     }
 

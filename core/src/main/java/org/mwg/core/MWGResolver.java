@@ -205,7 +205,9 @@ class MWGResolver implements Resolver {
                                                                                     resolvedNode = resolvedFactory.create(world, time, id, selfPointer._graph, initPreviouslyResolved);
                                                                                 }
                                                                                 selfPointer._tracker.monitor(resolvedNode);
-                                                                                callback.on((A) resolvedNode);
+                                                                                if(callback != null) {
+                                                                                    callback.on((A) resolvedNode);
+                                                                                }
                                                                             }
                                                                         }
                                                                     });

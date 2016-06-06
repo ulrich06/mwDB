@@ -12,7 +12,7 @@ import org.mwg.Node;
 import java.util.concurrent.CountDownLatch;
 
 public class RobustnessTests {
-    Graph _graph;
+    private Graph _graph;
 
     @Before
     public void initGraph() {
