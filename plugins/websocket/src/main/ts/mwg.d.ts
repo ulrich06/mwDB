@@ -20,6 +20,9 @@ declare module java {
         class Thread {
             static sleep(time: number): void;
         }
+        class Double {
+            static MAX_VALUE: number;
+        }
     }
     namespace util {
         namespace concurrent {
