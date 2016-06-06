@@ -70,8 +70,6 @@ public class BlasMatrixEngine implements MatrixEngine {
             return null;
         }
         if (invertInPlace) {
-            LU alg = new LU(mat.rows(), mat.columns(), _blas);
-            Matrix result = new Matrix(null, mat.rows(), mat.columns());
             LU dlu = new LU(mat.rows(), mat.columns(), _blas);
             if (dlu.invert(mat)) {
                 return mat;
@@ -80,11 +78,9 @@ public class BlasMatrixEngine implements MatrixEngine {
             }
 
         } else {
-            LU alg = new LU(mat.rows(), mat.columns(), _blas);
             Matrix result = new Matrix(null, mat.rows(), mat.columns());
             Matrix A_temp = new Matrix(null, mat.rows(), mat.columns());
             System.arraycopy(mat.data(), 0, A_temp.data(), 0, mat.columns() * mat.rows());
-
             LU dlu = new LU(A_temp.rows(), A_temp.columns(), _blas);
             if (dlu.invert(A_temp)) {
                 result.setData(A_temp.data());
@@ -97,7 +93,6 @@ public class BlasMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix pinv(Matrix mat, boolean invertInPlace) {
-        SVD svd = new SVD(mat.rows(), mat.columns(), _blas);
         PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(mat, invertInPlace);
         return pinvsvd.getPInv();
