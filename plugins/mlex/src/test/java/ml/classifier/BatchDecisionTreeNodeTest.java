@@ -7,7 +7,7 @@ import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
-import org.mwg.ml.common.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Random;

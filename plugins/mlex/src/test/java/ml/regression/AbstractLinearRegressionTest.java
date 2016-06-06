@@ -4,7 +4,7 @@ import org.mwg.Callback;
 import org.mwg.Type;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
-import org.mwg.ml.common.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 
 import java.util.Random;
 
