@@ -11,9 +11,9 @@ import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 public class OpsTest {
 
-    int exec=1000;
+    int exec=100;
     boolean enablebench=false;
-    int dim=3;
+    int dim=20;
 
     @Test
     public void decompose_blas() {
@@ -67,7 +67,7 @@ public class OpsTest {
             }
             long res = System.currentTimeMillis() - start;
             System.out.println("NETLIB PseudoInv "+ res);
-            System.out.println();
+            System.out.println("");
         }
 
     }
