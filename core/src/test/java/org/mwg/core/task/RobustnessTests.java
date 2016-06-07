@@ -4,54 +4,44 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mwg.Callback;
-import org.mwg.Graph;
-import org.mwg.GraphBuilder;
-import org.mwg.Node;
+import org.mwg.*;
+import org.mwg.task.TaskContext;
+import org.mwg.task.TaskFunctionConditional;
 
-import java.util.concurrent.CountDownLatch;
 
 public class RobustnessTests {
     private Graph _graph;
 
     @Before
     public void initGraph() {
-        CountDownLatch latch = new CountDownLatch(1);
-
         _graph = GraphBuilder.builder().build();
         _graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Node root = _graph.newNode(0,0);
-                root.set("name","root");
+                Node root = _graph.newNode(0, 0);
+                root.set("name", "root");
 
-                Node n1 = _graph.newNode(0,0);
-                n1.set("name","n1");
+                Node n1 = _graph.newNode(0, 0);
+                n1.set("name", "n1");
 
-                Node n2 = _graph.newNode(0,0);
-                n2.set("name","n2");
+                Node n2 = _graph.newNode(0, 0);
+                n2.set("name", "n2");
 
-                Node n3 = _graph.newNode(0,0);
-                n3.set("name","n3");
+                Node n3 = _graph.newNode(0, 0);
+                n3.set("name", "n3");
 
-                root.add("child",n1);
-                root.add("child",n2);
-                root.add("child",n3);
+                root.add("child", n1);
+                root.add("child", n2);
+                root.add("child", n3);
 
                 _graph.index("rootIndex", root, "name", new Callback<Boolean>() {
                     @Override
                     public void on(Boolean result) {
-                        latch.countDown();
                     }
                 });
-        }
+            }
         });
 
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @After
@@ -81,9 +71,8 @@ public class RobustnessTests {
         try {
             _graph.newTask().from(1).asVar(null).execute();
         }
-        catch (NullPointerException npe){
+        catch (RuntimeException npe){
             exceptionCaught = true;
-            Assert.assertEquals("variableName should not be null",npe.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -95,9 +84,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().fromVar(null).execute();
-        } catch (NullPointerException npe) {
+        } catch (RuntimeException npe) {
             exceptionCaught = true;
-            Assert.assertEquals("variableName should not be null",npe.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -106,12 +94,11 @@ public class RobustnessTests {
 
     @Test
     public void robustnessFrom() {
-        boolean exceptionCaught = true;
+        boolean exceptionCaught = false;
         try {
             _graph.newTask().from(null).execute();
-        } catch (NullPointerException npe) {
+        } catch (RuntimeException npe) {
             exceptionCaught = true;
-            Assert.assertEquals("variableName should not be null",npe.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -124,9 +111,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().fromIndex(null,"name=root").execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("indexName should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -136,8 +122,7 @@ public class RobustnessTests {
         exceptionCaught = false;
         try {
             _graph.newTask().fromIndex("rootIndex",null).execute();
-        } catch (NullPointerException e) {
-            Assert.assertEquals("query should not be null",e.getMessage());
+        } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
@@ -151,9 +136,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().fromIndexAll(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("indexName should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -165,12 +149,10 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().selectWith("child",null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("pattern should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
-            e.printStackTrace();
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -180,12 +162,10 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().selectWithout("child",null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("pattern should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
-            e.printStackTrace();
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -195,12 +175,10 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().select(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("filter should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
-            e.printStackTrace();
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -210,12 +188,10 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().selectWhere(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("filter should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
-            e.printStackTrace();
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -225,9 +201,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().traverseIndex(null,"name=root").execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("indexName should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -239,9 +214,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().traverseIndexAll(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("indexName should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -253,9 +227,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().map(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("mapFunction should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -267,9 +240,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().foreach(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("subTask should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -281,9 +253,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().foreachPar(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("subTask should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -295,9 +266,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().foreachThen(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("action should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -309,9 +279,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().wait(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("subTask should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -324,9 +293,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().ifThen(null,_graph.newTask()).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("condition should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -335,10 +303,14 @@ public class RobustnessTests {
         //subTask null
         exceptionCaught = false;
         try {
-            _graph.newTask().ifThen(context -> true,null).execute();
-        } catch (NullPointerException e) {
+            _graph.newTask().ifThen(new TaskFunctionConditional() {
+                @Override
+                public boolean eval(TaskContext context) {
+                    return true;
+                }
+            }, null).execute();
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("subTask should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -350,9 +322,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().then(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("action should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -364,9 +335,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().thenAsync(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("action should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -378,9 +348,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().parse(null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("flat should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -393,9 +362,8 @@ public class RobustnessTests {
         boolean exceptionCaught = false;
         try {
             _graph.newTask().action(null,"").execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("name should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -405,9 +373,8 @@ public class RobustnessTests {
         exceptionCaught = false;
         try {
             _graph.newTask().action("",null).execute();
-        } catch (NullPointerException e) {
+        } catch (RuntimeException e) {
             exceptionCaught = true;
-            Assert.assertEquals("flatParams should not be null",e.getMessage());
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }

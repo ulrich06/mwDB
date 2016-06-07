@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mwg.*;
 
-import java.util.concurrent.CountDownLatch;
 
 public class GraphRobustness {
 
@@ -16,18 +15,12 @@ public class GraphRobustness {
     @Before
     public void initGraph() {
         _graph = GraphBuilder.builder().build();
-        CountDownLatch latch = new CountDownLatch(1);
         _graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                latch.countDown();
             }
         });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
     }
 
     @After
@@ -41,11 +34,10 @@ public class GraphRobustness {
         try {
             Node n = _graph.newTypedNode(0,0,null);
             n.free();
-        } catch (NullPointerException e) {
-            Assert.assertEquals("nodeType should not be null",e.getMessage());
+        } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -56,11 +48,10 @@ public class GraphRobustness {
         try {
             Node n = _graph.cloneNode(null);
             n.free();
-        } catch (NullPointerException e) {
-            Assert.assertEquals("origin node should not be null",e.getMessage());
+        } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
         Assert.assertEquals(true,exceptionCaught);
     }
@@ -74,7 +65,6 @@ public class GraphRobustness {
             n1.free();
         } catch (Exception e) {
             exceptionCaught = true;
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
         }
         Assert.assertEquals(false,exceptionCaught);
     }
@@ -88,7 +78,6 @@ public class GraphRobustness {
             n1.free();
         } catch (Exception e) {
             exceptionCaught = true;
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
         }
         Assert.assertEquals(false,exceptionCaught);
     }
@@ -96,24 +85,17 @@ public class GraphRobustness {
     @Test
     public void robustnessConnect() {
         boolean[] exceptionCaught = new boolean[1];
-        CountDownLatch latch = new CountDownLatch(1);
         _graph.disconnect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 try {
                     _graph.connect(null);
-                    latch.countDown();
                 } catch (Exception e) {
-                    Assert.fail("Unexpected exception thrown: " + e.getMessage());
                     exceptionCaught[0] = true;
                 }
             }
         });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         Assert.assertEquals(false, exceptionCaught[0]);
     }
 
@@ -123,7 +105,6 @@ public class GraphRobustness {
         try {
             _graph.disconnect(null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
             exceptionCaught = true;
         }
 
@@ -135,6 +116,8 @@ public class GraphRobustness {
         Node node = _graph.newNode(0,0);
         node.set("name","n1");
 
+        boolean exceptionCaught = false;
+
         //indexName null
         try {
             _graph.index(null, node, "name", new Callback<Boolean>() {
@@ -143,12 +126,15 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("indexName should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
+        Assert.assertEquals(true,exceptionCaught);
+
+        exceptionCaught = false;
         //nodeToIndex null
         try {
             _graph.index("indexName", null, "name", new Callback<Boolean>() {
@@ -157,13 +143,15 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("toIndexNode should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown: ");
         }
+        Assert.assertEquals(true,exceptionCaught);
 
         //flatKeyAttributes null
+        exceptionCaught = false;
         try {
             _graph.index("name", node, null, new Callback<Boolean>() {
                 @Override
@@ -171,17 +159,18 @@ public class GraphRobustness {
 
                 }
             });
-        } catch(NullPointerException e) {
-            Assert.assertEquals("flatKeyAttributes should not be null",e.getMessage());
+        } catch(RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown: ");
         }
+        Assert.assertEquals(true,exceptionCaught);
 
         //callback null
         try{
             _graph.index("name",node,"name",null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
         node.free();
@@ -192,6 +181,8 @@ public class GraphRobustness {
         Node node = _graph.newNode(0,0);
         node.set("name","n1");
 
+        boolean exceptionCaught = false;
+
         //indexName null
         try {
             _graph.unindex(null, node, "name", new Callback<Boolean>() {
@@ -200,12 +191,14 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("indexName should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertEquals(true,exceptionCaught);
 
+        exceptionCaught = false;
         //nodeToIndex null
         try {
             _graph.unindex("indexName", null, "name", new Callback<Boolean>() {
@@ -214,13 +207,15 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("toIndexNode should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
 
         //flatKeyAttributes null
+        exceptionCaught = false;
         try {
             _graph.unindex("name", node, null, new Callback<Boolean>() {
                 @Override
@@ -228,17 +223,18 @@ public class GraphRobustness {
 
                 }
             });
-        } catch(NullPointerException e) {
-            Assert.assertEquals("flatKeyAttributes should not be null",e.getMessage());
+        } catch(RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
 
         //callback null
         try{
             _graph.unindex("name",node,"name",null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
         node.free();
@@ -251,6 +247,7 @@ public class GraphRobustness {
         _graph.index("indexName",node,"name=root",null);
 
         //indexName
+        boolean exceptionCaught = false;
         try{
             _graph.find(0, 0, null, "name=root", new Callback<Node[]>() {
                 @Override
@@ -258,14 +255,16 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("indexName should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown: ");
         }
+        Assert.assertTrue(exceptionCaught);
 
 
         //query
+        exceptionCaught = false;
         try {
             _graph.find(0, 0, "indexName", null, new Callback<Node[]>() {
                 @Override
@@ -273,17 +272,18 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("query should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
 
         //callback
         try {
             _graph.find(0, 0, "indexName", "name=root", null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
         node.free();
@@ -291,6 +291,7 @@ public class GraphRobustness {
 
     @Test
     public void robustnessFindQuery() {
+        boolean exceptionCaught = false;
         try {
             _graph.findQuery(null, new Callback<Node[]>() {
                 @Override
@@ -298,11 +299,13 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException npe) {
-            Assert.assertEquals("query should not be null",npe.getMessage());
+        } catch (RuntimeException npe) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
+
 
         try {
             Query q = _graph.newQuery();
@@ -311,7 +314,7 @@ public class GraphRobustness {
             q.setIndexName("indexName");
             _graph.findQuery(q,null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
     }
 
@@ -322,6 +325,7 @@ public class GraphRobustness {
         _graph.index("indexName",node,"name=root",null);
 
         //indexName
+        boolean exceptionCaught = false;
         try{
             _graph.all(0, 0, null, new Callback<Node[]>() {
                 @Override
@@ -329,18 +333,19 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("indexName should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
 
 
         //callback
         try {
             _graph.all(0, 0, "indexName", null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
         node.free();
@@ -353,6 +358,7 @@ public class GraphRobustness {
         _graph.index("indexName",node,"name=root",null);
 
         //indexName
+        boolean exceptionCaught = false;
         try{
             _graph.namedIndex(0, 0, null, new Callback<Node>() {
                 @Override
@@ -360,18 +366,19 @@ public class GraphRobustness {
 
                 }
             });
-        } catch (NullPointerException e) {
-            Assert.assertEquals("indexName should not be null",e.getMessage());
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
+        Assert.assertTrue(exceptionCaught);
 
 
         //callback
         try {
             _graph.namedIndex(0, 0, "indexName", null);
         } catch (Exception e) {
-            Assert.fail("Unexpected exception thrown: " + e.getMessage());
+            Assert.fail("Unexpected exception thrown");
         }
 
         node.free();
