@@ -13,7 +13,7 @@ public class OpsTest {
 
     int exec=100;
     boolean enablebench=false;
-    int dim=20;
+    int dim=100;
 
     @Test
     public void decompose_blas() {

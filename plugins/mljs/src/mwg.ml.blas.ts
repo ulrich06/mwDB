@@ -58,8 +58,8 @@ module org {
                                     dgemm(ptransA, ptransB, pm, pn, pk, palpha, pmatA, pldA, pmatB, pldB, pbeta, pmatC, pldC);
 
 
-                                    matA.set(ddpmatA);
-                                    matB.set(ddpmatB);
+                                   // matA.set(ddpmatA);
+                                   // matB.set(ddpmatB);
                                     matC.set(ddpmatC);
 
 
@@ -120,8 +120,8 @@ module org {
 
 
 
-                                    matA.set(ddpmatA);
-                                    ipiv.set(iipipiv);
+                                  //  matA.set(ddpmatA);
+                                   // ipiv.set(iipipiv);
                                     matB.set(ddpmatB);
                                     info.set(iipinfo);
 
@@ -177,7 +177,7 @@ module org {
 
 
                                     matA.set(ddpmatA);
-                                    ipiv.set(iipipiv);
+                                    //ipiv.set(iipipiv);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
 
@@ -283,7 +283,7 @@ module org {
 
 
                                     matA.set(ddpmatA);
-                                    taw.set(ddptaw);
+                                    //taw.set(ddptaw);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
 
