@@ -12,20 +12,13 @@ public class GraphRobustness {
 
     private Graph _graph;
 
-    @Before
-    public void initGraph() {
+    public GraphRobustness(){
         _graph = GraphBuilder.builder().build();
         _graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
             }
         });
-
-    }
-
-    @After
-    public void deleteGraph() {
-        _graph.disconnect(null);
     }
 
     @Test
@@ -85,6 +78,7 @@ public class GraphRobustness {
     @Test
     public void robustnessConnect() {
         boolean[] exceptionCaught = new boolean[1];
+        exceptionCaught[0]=false;
         _graph.disconnect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -104,6 +98,12 @@ public class GraphRobustness {
         boolean exceptionCaught = false;
         try {
             _graph.disconnect(null);
+            _graph.connect(new Callback<Boolean>() {
+                @Override
+                public void on(Boolean result) {
+                }
+            });
+
         } catch (Exception e) {
             exceptionCaught = true;
         }
