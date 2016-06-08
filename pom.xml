@@ -29,7 +29,7 @@
     </parent>
 
     <properties>
-        <java2typescript.plugin.version>56-SNAPSHOT</java2typescript.plugin.version>
+        <java2typescript.plugin.version>56</java2typescript.plugin.version>
     </properties>
 
     <developers>
