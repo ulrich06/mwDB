@@ -48,7 +48,7 @@ Modules
 =============
 
 * Core **(https://github.com/kevoree-modeling/mwDB/tree/master/core)**
-* CoreJS **(https://github.com/kevoree-modeling/mwDB/tree/master/js)**
+* CoreJS **(https://github.com/kevoree-modeling/mwDB/tree/master/corejs)**
 * Plugins **(https://github.com/kevoree-modeling/mwDB/tree/master/plugins)**
 
 

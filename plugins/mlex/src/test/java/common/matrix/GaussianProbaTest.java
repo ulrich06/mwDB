@@ -9,6 +9,7 @@ import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
+import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 
 import java.util.Random;
@@ -30,7 +31,6 @@ public class GaussianProbaTest {
                 int total = 16;
                 double[][] train = new double[total][1];
                 Random rand = new Random();
-                gaussianNode.set(GaussianGmmNode.FROM, "f1");
 
                 double sum = 0;
                 double sumsquare = 0;
@@ -43,8 +43,7 @@ public class GaussianProbaTest {
                     gaussianNode.jump(i, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
-                            gaussianNode.set("f1", train[finalI][0]);
-                            gaussianNode.learn(new Callback<Boolean>() {
+                            gaussianNode.learnVector(train[finalI],new Callback<Boolean>() {
                                 @Override
                                 public void on(Boolean result) {
 
@@ -62,12 +61,12 @@ public class GaussianProbaTest {
                     @Override
                     public void on(GaussianGmmNode result) {
                         double[] avgBatch = result.getAvg();
-                        double[][] covBatch = result.getCovariance(avgBatch,null);
+                        Matrix covBatch = result.getCovariance(avgBatch,null);
 
                         //System.out.println("Avg: " + avgBatch[0] + " " + sum / total);
                         //System.out.println("Var: " + covBatch[0][0] + " " + Gaussian1D.getCovariance(sum, sumsquare, total));
                         Assert.assertTrue(Math.abs(avgBatch[0] - finalSum / total) < eps);
-                        Assert.assertTrue(Math.abs(covBatch[0][0] - Gaussian1D.getCovariance(finalSum, finalSumsquare, total)) < eps);
+                        Assert.assertTrue(Math.abs(covBatch.get(0,0) - Gaussian1D.getCovariance(finalSum, finalSumsquare, total)) < eps);
 
                         double testvec = rand.nextDouble() * 100;
                         //System.out.println("Prob: " + Gaussian1D.getDensity(sum, sumsquare, total, testvec) + " " + gaussianNodeBatch.getProbability(new double[]{testvec}, null, false));
@@ -117,11 +116,19 @@ public class GaussianProbaTest {
                 }
 
                 double[] ravg = gaussianNodeLive.getAvg();
-                double[][] rcovData = gaussianNodeLive.getCovariance(ravg,null);
+                Matrix rcovData = gaussianNodeLive.getCovariance(ravg,null);
 
+
+                double[][] temp=new double[rcovData.rows()][];
+                for(int i=0;i<rcovData.rows();i++){
+                    temp[i]=new double[rcovData.columns()];
+                    for(int j=0;j<rcovData.columns();j++){
+                        temp[i][j]=rcovData.get(i,j);
+                    }
+                }
 
                 //Test probability calculation.
-                MultivariateNormalDistribution apache = new MultivariateNormalDistribution(ravg, rcovData);
+                MultivariateNormalDistribution apache = new MultivariateNormalDistribution(ravg, temp);
 
                 double eps = 1e-8;
                 double d = apache.density(v);

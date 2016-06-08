@@ -93,9 +93,10 @@ public class BlasMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix pinv(Matrix mat, boolean invertInPlace) {
-        PInvSVD pinvsvd = new PInvSVD();
+        return solve(mat, Matrix.identity(mat.rows(),mat.rows()));
+        /*PInvSVD pinvsvd = new PInvSVD();
         pinvsvd.factor(mat, invertInPlace);
-        return pinvsvd.getPInv();
+        return pinvsvd.getPInv();*/
 
     }
 
@@ -143,6 +144,13 @@ public class BlasMatrixEngine implements MatrixEngine {
             dlu.transSolve(matB, transB);
             return matB;
         }
+
+
+    }
+
+    public  Matrix solve (Matrix A, Matrix B) {
+        return (A.rows() == A.columns() ? (new LU(A.rows(),A.columns(),_blas).factor(A,false)).solve(B) :
+                solveQR(A, B, false, TransposeType.NOTRANSPOSE));
     }
 
 

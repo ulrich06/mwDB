@@ -1,6 +1,8 @@
 package org.mwg.task;
 
 import org.mwg.Callback;
+import org.mwg.Node;
+import org.mwg.Type;
 
 public interface Task {
 
@@ -222,5 +224,75 @@ public interface Task {
     Task parse(String flat);
 
     Task action(String name, String params);
+
+
+    /**
+     * Below is all the task that you can apply on a node. That means that the previous result must be a node or
+     * an array of node
+     *
+     * Semantic (except the two ones for node creation): if the previous result is null, the below action are
+     * ignored and the next action is called. If the previous result is neither a node nor an array of nodes,
+     * a RuntimeException is thrown.
+     */
+
+
+    /**
+     * Create a new node on the [world,time] of the context
+     *
+     * @return this task to chain actions (fluent API)
+     */
+    Task createNode();
+
+    /**
+     * Create a new node on a specific [world,time]
+     *
+     * @return this task to chain actions (fluent API)
+     */
+    Task createNodeOn(long world,long time);
+
+    /**
+     * Sets the value of an attribute of a node or an array of nodes
+     * The node (or the array) should be init in the previous task
+     *
+     *
+     * @param propertyName The name of the attribute. Must be unique per node.
+     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     */
+    Task nodeSet(String propertyName, Object propertyValue);
+
+    /**
+     * Sets the value of an attribute of a node or an array of nodes
+     * The node (or the array) should be init in the previous task
+     *
+     * @param propertyName The name of the attribute. Must be unique per node.
+     * @param propertyType The type of the attribute. Must be one of {@link Type} int value.
+     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     */
+    Task nodeSetProperty(String propertyName, byte propertyType, Object propertyValue);
+
+    /**
+     * Removes an attribute from a node or an array of nodes.
+     * The node (or the array) should be init in the previous task
+     *
+     * @param propertyName The name of the attribute to remove.
+     */
+    Task nodeRemoveProperty(String propertyName);
+
+    /**
+     * Adds a node to a relation of a node or of an array of nodes.
+     *
+     * @param relationName The name of the relation.
+     * @param relatedNode The node to insert in the relation.
+     */
+    Task nodeAdd(String relationName, Node relatedNode);
+
+    /**
+     * Removes a node from a relation of a node or of an array of nodes.
+     *
+     * @param relationName The name of the relation.
+     * @param relatedNode The node to remove.
+     */
+    Task nodeRemove(String relationName, Node relatedNode);
+
 
 }

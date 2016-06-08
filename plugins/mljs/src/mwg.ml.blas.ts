@@ -69,8 +69,8 @@ module org {
 
                                     this.c_dgemm(ptransA, ptransB, pm, pn, pk, palpha, pmatA, pldA, pmatB, pldB, pbeta, pmatC, pldC);
 
-                                    matA.set(ddpmatA);
-                                    matB.set(ddpmatB);
+                                   // matA.set(ddpmatA);
+                                   // matB.set(ddpmatB);
                                     matC.set(ddpmatC);
 
                                     this.netlib._free(ptransA);
@@ -124,8 +124,8 @@ module org {
 
                                     this.c_dgetrs(ptransA, pdim, pnrhs, pmatA, pldA, pipiv, pmatB, pldB, pinfo);
 
-                                    matA.set(ddpmatA);
-                                    ipiv.set(iipipiv);
+                                  //  matA.set(ddpmatA);
+                                   // ipiv.set(iipipiv);
                                     matB.set(ddpmatB);
                                     info.set(iipinfo);
 
@@ -173,7 +173,7 @@ module org {
                                     this.c_dgetri(pdim, pmatA, pldA, pipiv, pwork, pldWork, pinfo);
 
                                     matA.set(ddpmatA);
-                                    ipiv.set(iipipiv);
+                                    //ipiv.set(iipipiv);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
 
@@ -265,7 +265,7 @@ module org {
                                     this.c_dorgqr(pm, pn, pk, pmatA, pldA, ptaw, pwork, plWork, pinfo);
 
                                     matA.set(ddpmatA);
-                                    taw.set(ddptaw);
+                                    //taw.set(ddptaw);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
 

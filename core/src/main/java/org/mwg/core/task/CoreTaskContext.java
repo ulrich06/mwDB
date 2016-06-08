@@ -6,12 +6,13 @@ import org.mwg.Node;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
+import org.mwg.task.TaskContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class CoreTaskContext implements org.mwg.task.TaskContext {
+public class CoreTaskContext implements org.mwg.task.TaskContext {
 
     private final Map<String, Object> _variables;
     private final Object[] _results;
@@ -23,7 +24,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
     private long _world;
     private long _time;
 
-    CoreTaskContext(final org.mwg.task.TaskContext p_parentContext, final Object p_initialResult, final Graph p_graph, final TaskAction[] p_actions) {
+    public CoreTaskContext(final org.mwg.task.TaskContext p_parentContext, final Object p_initialResult, final Graph p_graph, final TaskAction[] p_actions) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
@@ -147,10 +148,10 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void setResult(Object actionResult) {
-        if (actionResult instanceof org.mwg.core.task.CoreTaskContext) {
-            mergeVariables((org.mwg.task.TaskContext) actionResult);
-        } else if (actionResult instanceof org.mwg.core.task.CoreTaskContext[]) {
-            for (org.mwg.task.TaskContext taskContext : (org.mwg.core.task.CoreTaskContext[]) actionResult) {
+        if (actionResult instanceof CoreTaskContext || actionResult instanceof TaskContextWrapper) {
+            mergeVariables((TaskContext) actionResult);
+        } else if (actionResult instanceof CoreTaskContext[] || actionResult instanceof TaskContextWrapper[]) {
+            for (org.mwg.task.TaskContext taskContext : (TaskContext[]) actionResult) {
                 mergeVariables(taskContext);
             }
         }
@@ -158,7 +159,7 @@ class CoreTaskContext implements org.mwg.task.TaskContext {
         this._results[i] = actionResult;
     }
 
-    private void mergeVariables(org.mwg.task.TaskContext actionResult) {
+    private void mergeVariables(TaskContext actionResult) {
         String[] variables = actionResult.getVariablesKeys();
         for (String variableName : variables) {
             this.setVariable(variableName, actionResult.getVariable(variableName));

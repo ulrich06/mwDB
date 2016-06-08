@@ -11,6 +11,9 @@ import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 public class OpsTest {
 
+    int exec=100;
+    boolean enablebench=false;
+    int dim=100;
 
     @Test
     public void decompose_blas() {
@@ -20,6 +23,53 @@ public class OpsTest {
         MatrixLU(engine);
         MatrixQR(engine);
         MatrixPseudoInv(engine);
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixSVD(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("NETLIB SVD "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixInvert(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("NETLIB Invert "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixLU(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("NETLIB LU "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixQR(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("NETLIB QR "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixPseudoInv(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("NETLIB PseudoInv "+ res);
+            System.out.println("");
+        }
+
     }
 
     @Test
@@ -30,19 +80,66 @@ public class OpsTest {
         MatrixLU(engine);
         MatrixQR(engine);
         MatrixPseudoInv(engine);
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixSVD(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("JAMA SVD "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixInvert(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("JAMA Invert "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixLU(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("JAMA LU "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixQR(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("JAMA QR "+ res);
+        }
+
+        if(enablebench) {
+            long start = System.currentTimeMillis();
+            for (int z = 0; z < exec; z++) {
+                MatrixPseudoInv(engine);
+            }
+            long res = System.currentTimeMillis() - start;
+            System.out.println("JAMA PseudoInv "+ res);
+        }
     }
 
 
     public void MatrixInvert(MatrixEngine engine) {
-        int m = 100;
         double eps = 1e-7;
 
-        Matrix matA = Matrix.random(m, m, 0, 100);
+        Matrix matA = Matrix.random(dim, dim, 0, 100);
         Matrix res = engine.invert(matA, false);
+
+
         Matrix id = Matrix.multiply(matA, res);
 
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < m; j++) {
+
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
                 double x;
                 if (i == j) {
                     x = 1;
@@ -55,15 +152,15 @@ public class OpsTest {
     }
 
     public void MatrixLU(MatrixEngine engine) {
-        int m = 20;
-        int n = 20;
-        int p = 20;
+        int m = dim;
+        int n = dim;
+        int p = dim;
         double eps = 1e-7;
 
         Matrix matA = Matrix.random(m, n, 0, 100);
         Matrix matB = Matrix.random(m, p, 0, 100);
 
-        Matrix res = engine.solveQR(matA, matB, false, TransposeType.NOTRANSPOSE);
+        Matrix res = engine.solveLU(matA, matB, false, TransposeType.NOTRANSPOSE);
         Matrix temp = Matrix.multiply(matA, res);
 
         for (int i = 0; i < m; i++) {
@@ -75,16 +172,14 @@ public class OpsTest {
 
 
     public void MatrixQR(MatrixEngine engine) {
-        int m = 7;
-        int n = 7;
-        int p = 2;
+        int m = dim;
+        int n = dim;
+        int p = dim;
         double eps = 1e-7;
 
         Matrix matA = Matrix.random(m, n, 0, 100);
         Matrix matB = Matrix.random(m, p, 0, 100);
 
-        //Matrix matA = new Matrix(new double[]{1,20,3,4,5,  6,7, 20 ,5, 1 ,  8,9,10,11,12},m,n);
-        //Matrix matB =  new Matrix(new double[]{5,6,7,8,10,1,2,3,5,4},m,p);
 
         Matrix res = engine.solveQR(matA, matB, false, TransposeType.NOTRANSPOSE);
         Matrix temp = Matrix.multiply(matA, res);
@@ -99,8 +194,8 @@ public class OpsTest {
 
 
     public void MatrixPseudoInv(MatrixEngine engine) {
-        int m = 7;
-        int n = 7;
+        int m = dim;
+        int n = dim;
         double eps = 1e-6;
 
         Matrix matA = Matrix.random(m, n, 0, 100);
@@ -122,8 +217,8 @@ public class OpsTest {
 
 
     public void MatrixSVD(MatrixEngine engine) {
-        int m = 30;
-        int n = 20;
+        int m = dim;
+        int n = dim;
         double eps = 1e-7;
 
         Matrix matA = Matrix.random(m, n, 0, 100);
