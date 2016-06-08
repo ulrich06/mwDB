@@ -5,6 +5,7 @@ import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.task.node.*;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.*;
@@ -469,4 +470,77 @@ public class CoreTask implements org.mwg.task.Task {
         return input;
     }
 
+
+    /**
+     * Tasks related to a node or an array of node
+     */
+
+    @Override
+    public Task createNode() {
+        addAction(new ActionCreateNode(CoreConstants.NULL_LONG,CoreConstants.NULL_LONG));
+        return this;
+    }
+
+    @Override
+    public Task createNodeOn(long world, long time) {
+        addAction(new ActionCreateNode(world,time));
+        return this;
+    }
+
+    @Override
+    public Task nodeSet(String propertyName, Object propertyValue) {
+        if(propertyName == null) {
+            throw new RuntimeException("propertyName should not be null");
+        }
+        if(propertyValue == null) {
+            throw new RuntimeException("propertyValue should not be null");
+        }
+        addAction(new ActionNodeSet(propertyName,propertyValue));
+        return this;
+    }
+
+    @Override
+    public Task nodeSetProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if(propertyName == null) {
+            throw new RuntimeException("propertyName should not be null");
+        }
+        if(propertyValue == null) {
+            throw new RuntimeException("propertyValue should not be null");
+        }
+        addAction(new ActionNodeSetProperty(propertyName,propertyType,propertyValue));
+        return this;
+    }
+
+    @Override
+    public Task nodeRemoveProperty(String propertyName) {
+        if(propertyName == null) {
+            throw new RuntimeException("propertyName should not be null");
+        }
+        addAction(new ActionRemoveProperty(propertyName));
+        return this;
+    }
+
+    @Override
+    public Task nodeAdd(String relationName, Node relatedNode) {
+        if(relationName == null) {
+            throw new RuntimeException("relationName should not be null");
+        }
+        if(relatedNode == null) {
+            throw new RuntimeException("relatedNode should not be null");
+        }
+        addAction(new ActionAdd(relationName,relatedNode));
+        return this;
+    }
+
+    @Override
+    public Task nodeRemove(String relationName, Node relatedNode) {
+        if(relationName == null) {
+            throw new RuntimeException("relationName should not be null");
+        }
+        if(relatedNode == null) {
+            throw new RuntimeException("relatedNode should not be null");
+        }
+        addAction(new ActionNodeRemove(relationName,relatedNode));
+        return this;
+    }
 }

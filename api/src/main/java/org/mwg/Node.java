@@ -78,7 +78,7 @@ public interface Node {
     Map map(String propertyName, byte propertyType);
 
     /**
-     * Removes an attribute fromVar the node.
+     * Removes an attribute from the node.
      *
      * @param propertyName The name of the attribute to remove.
      */
@@ -93,20 +93,19 @@ public interface Node {
     void rel(String relationName, Callback<Node[]> callback);
 
     /**
-     * Adds a node to a traverseIndex.<br>
+     * Adds a node to a relation.<br>
      * If the relationship doesn't exist, it is created on the fly.<br>
-     * The traverseIndex name must be unique in the node.
      *
-     * @param relationName The name of the traverseIndex in which to add the node.
-     * @param relatedNode  The node to insert in the traverseIndex.
+     * @param relationName The name of the relation in which the node is added.
+     * @param relatedNode  The node to insert in the relation.
      */
     void add(String relationName, Node relatedNode);
 
     /**
-     * Removes a node fromVar a traverseIndex.
+     * Removes a node from a relation.
      *
-     * @param relationName The name of the traverseIndex.
-     * @param relatedNode  The node to remove fromVar the traverseIndex.
+     * @param relationName The name of the relation.
+     * @param relatedNode  The node to remove.
      */
     void remove(String relationName, Node relatedNode);
 

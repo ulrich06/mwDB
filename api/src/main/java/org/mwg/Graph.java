@@ -1,9 +1,13 @@
 package org.mwg;
 
-import org.mwg.plugin.*;
+import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.Resolver;
+import org.mwg.plugin.Scheduler;
+import org.mwg.plugin.Storage;
 import org.mwg.struct.Buffer;
 import org.mwg.task.Task;
 import org.mwg.task.TaskActionRegistry;
+import org.mwg.task.TaskContext;
 
 /**
  * Graph is the main structure of mwDB.
@@ -189,6 +193,14 @@ public interface Graph {
      */
     Task newTask();
 
+    /**
+     * PROPOSITION
+     * Create a new task context that we can give to initialize a task
+     *
+     * @return newly created task context object
+     */
+    TaskContext newTaskContext();
+
     ChunkSpace space();
 
     Storage storage();
@@ -199,5 +211,7 @@ public interface Graph {
      * @return shared global action registry
      */
     TaskActionRegistry actions();
+
+
 
 }

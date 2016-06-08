@@ -381,6 +381,119 @@ public class RobustnessTests {
         Assert.assertEquals(true,exceptionCaught);
     }
 
+    @Test
+    public void robustnessNodeSet(){
+        //propertyName
+        boolean exceptionCaught = false;
+        try {
+            _graph.newTask().nodeSet(null,"").execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+
+        //propertyValue
+        exceptionCaught = false;
+        try {
+            _graph.newTask().nodeSet("",null).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+    }
+
+    @Test
+    public void robustnessNodeSetProperty(){
+        //propertyName
+        boolean exceptionCaught = false;
+        try {
+            _graph.newTask().nodeSetProperty(null,Type.STRING,"").execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+
+        //propertyValue
+        exceptionCaught = false;
+        try {
+            _graph.newTask().nodeSetProperty("",Type.STRING,null).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+    }
+
+    @Test
+    public void robustnessNodeRemoveProperty(){
+        boolean exceptionCaught = false;
+        try {
+            _graph.newTask().nodeRemoveProperty(null).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+    }
+
+    @Test
+    public void robustnessNodeAdd(){
+        //relationName
+        boolean exceptionCaught = false;
+        try {
+            _graph.newTask().nodeAdd(null,_graph.newNode(0,0)).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+
+        //relatedNode
+        exceptionCaught = false;
+        try {
+            _graph.newTask().nodeAdd("",null).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+    }
+
+    @Test
+    public void robustnessNodeRemove(){
+        //relationName
+        boolean exceptionCaught = false;
+        try {
+            _graph.newTask().nodeRemove(null,_graph.newNode(0,0)).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+
+        //relatedNode
+        exceptionCaught = false;
+        try {
+            _graph.newTask().nodeRemove("",null).execute();
+        } catch (RuntimeException e) {
+            exceptionCaught = true;
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown");
+        }
+        Assert.assertEquals(true,exceptionCaught);
+    }
+
 
 
 

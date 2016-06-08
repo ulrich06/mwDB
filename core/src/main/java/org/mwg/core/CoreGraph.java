@@ -3,6 +3,7 @@ package org.mwg.core;
 import org.mwg.*;
 import org.mwg.core.task.CoreTask;
 import org.mwg.core.task.CoreTaskActionRegistry;
+import org.mwg.core.task.CoreTaskContext;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.*;
@@ -11,7 +12,9 @@ import org.mwg.core.chunk.heap.ArrayLongLongMap;
 import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.task.Task;
+import org.mwg.task.TaskAction;
 import org.mwg.task.TaskActionRegistry;
+import org.mwg.task.TaskContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -353,6 +356,13 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public Task newTask() {
         return new CoreTask(this);
+    }
+
+
+    @Override
+    public TaskContext newTaskContext() {
+         //todo check if ok
+        return new CoreTaskContext(null,null,this,new TaskAction[0]);
     }
 
     @Override
