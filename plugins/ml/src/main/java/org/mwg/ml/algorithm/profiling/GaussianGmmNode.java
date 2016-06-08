@@ -193,7 +193,9 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         mainTask.executeThen(new Action() {
             @Override
             public void eval(TaskContext context) {
-                callback.on(true);
+                if(callback!=null) {
+                    callback.on(true);
+                }
             }
         });
     }

@@ -12,8 +12,11 @@ public class KMeans {
         int features= data[0].length;
         int[] totals= new int[numOfCluster];
 
+        double[][] centroids = new double[numOfCluster][];
+        for(int i=0;i<numOfCluster;i++){
+            centroids[i]=new double[features];
+        }
 
-        double[][] centroids = new double[numOfCluster][features];
         int[] categories=new int[data.length];
 
         for(int i=0;i<numOfCluster;i++){
