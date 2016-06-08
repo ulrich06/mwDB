@@ -400,6 +400,7 @@ declare module org {
                 _resolver: org.mwg.plugin.Resolver;
                 _previousResolveds: java.util.concurrent.atomic.AtomicReference<Float64Array>;
                 constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
+                init(): void;
                 unphasedState(): org.mwg.plugin.NodeState;
                 phasedState(): org.mwg.plugin.NodeState;
                 newState(time: number): org.mwg.plugin.NodeState;

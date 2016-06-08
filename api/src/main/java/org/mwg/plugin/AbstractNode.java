@@ -35,6 +35,14 @@ public abstract class AbstractNode implements Node {
         this._previousResolveds.set(currentResolution);
     }
 
+    /**
+     * This method should be overridden to init the object
+     */
+    public void init() {
+        //noop
+    }
+
+
     protected NodeState unphasedState() {
         return this._resolver.resolveState(this, true);
     }

@@ -87,6 +87,8 @@ class MWGResolver implements Resolver {
         this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG);
         //monitor the node object
         this._tracker.monitor(node);
+        //last step call the user code
+        ((AbstractNode) node).init();
     }
 
     @Override
@@ -205,7 +207,7 @@ class MWGResolver implements Resolver {
                                                                                     resolvedNode = resolvedFactory.create(world, time, id, selfPointer._graph, initPreviouslyResolved);
                                                                                 }
                                                                                 selfPointer._tracker.monitor(resolvedNode);
-                                                                                if(callback != null) {
+                                                                                if (callback != null) {
                                                                                     callback.on((A) resolvedNode);
                                                                                 }
                                                                             }

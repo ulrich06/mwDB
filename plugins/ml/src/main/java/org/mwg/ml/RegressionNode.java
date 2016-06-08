@@ -2,9 +2,6 @@ package org.mwg.ml;
 
 import org.mwg.Callback;
 
-/**
- * Created by assaad on 04/05/16.
- */
 public interface RegressionNode {
     /**
      * Main training function to learn from the the expected output,

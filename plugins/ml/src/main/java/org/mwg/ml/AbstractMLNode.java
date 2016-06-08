@@ -1,9 +1,6 @@
 package org.mwg.ml;
 
-import org.mwg.Callback;
-import org.mwg.DeferCounter;
-import org.mwg.Graph;
-import org.mwg.Node;
+import org.mwg.*;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.Action;
@@ -13,10 +10,8 @@ import org.mwg.task.TaskContext;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by assaad on 04/05/16.
- */
 public abstract class AbstractMLNode extends AbstractNode {
+
     public static String FROM_SEPARATOR = ";";
     public static String FROM = "FROM";
 
@@ -47,8 +42,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         }
     }
 
-
-    public void extractFeatures(Callback<double[]> callback) {
+    protected void extractFeatures(Callback<double[]> callback) {
 
         String query = (String) super.get(FROM);
         if (query != null) {
@@ -69,10 +63,15 @@ public abstract class AbstractMLNode extends AbstractNode {
                     @Override
                     public void eval(TaskContext context) {
                         Object current = context.getPreviousResult();
-                        if (current instanceof Double) {
-                            result[taskIndex] = (double) current;
+                        if (current == null) {
+                            result[taskIndex] = Constants.NULL_LONG;
                         } else {
-                            throw new RuntimeException("Bad Extractor");
+                            if (current instanceof Double) {
+                                result[taskIndex] = (double) current;
+                            } else {
+                                result[taskIndex] = parseDouble(current.toString());
+                                throw new RuntimeException("Bad Extractor");
+                            }
                         }
                         waiter.count();
                         context.next();
