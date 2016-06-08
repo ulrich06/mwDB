@@ -32,7 +32,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 1);
             previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, 0l);
             previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, 0l);
-            callback.on(true);
+            if(callback!=null) {
+                callback.on(true);
+            }
             return;
         }
 
@@ -46,7 +48,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 weight = new double[1];
                 weight[0] = value;
                 previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
-                callback.on(true);
+                if(callback!=null) {
+                    callback.on(true);
+                }
                 return;
             } else {
                 stp = lastTime;
@@ -66,7 +70,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         if (Math.abs(PolynomialFit.extrapolate(t, weight) - value) <= maxError) {
             previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
             previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-            callback.on(true);
+            if(callback!=null) {
+                callback.on(true);
+            }
             return;
         }
 
@@ -105,7 +111,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
                 previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
                 previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-                callback.on(true);
+                if(callback!=null) {
+                    callback.on(true);
+                }
                 return;
             }
         }
@@ -139,13 +147,17 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
             phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
             phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
-            callback.on(true);
+            if(callback!=null) {
+                callback.on(true);
+            }
             return;
         } else {
             // 2 phased states need to be created
 
         }
-        callback.on(false);
+        if(callback!=null) {
+            callback.on(false);
+        }
         return;
     }
 
@@ -156,18 +168,24 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         long timeOrigin = state.time();
         double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if (weight == null) {
-            callback.on(0.0);
+            if(callback!=null) {
+                callback.on(0.0);
+            }
             return;
         }
         Long inferSTEP = (Long) state.getFromKey(INTERNAL_STEP_KEY);
         if (inferSTEP == null || inferSTEP == 0) {
-            callback.on(weight[0]);
+            if(callback!=null) {
+                callback.on(weight[0]);
+            }
             return;
         }
 
         double t = (time - timeOrigin);
         t = t / inferSTEP;
-        callback.on(PolynomialFit.extrapolate(t, weight));
+        if(callback!=null) {
+            callback.on(PolynomialFit.extrapolate(t, weight));
+        }
     }
 
     //Factory of the class integrated
@@ -236,7 +254,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree + 2);
+        return precision / Math.pow(2, degree+1);
     }
 
 

@@ -51,7 +51,7 @@ public class PolynomialNodeTest {
                 for (int i = 0; i < size; i++) {
                     values[i] = 2 * i * i * i * i * i - 1000 * i - 100000;
                 }
-                testPoly(times, values, 7, graph);
+                testPoly(times, values, 8, graph);
 
             }
         });
@@ -95,7 +95,7 @@ public class PolynomialNodeTest {
         polynomialNode.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
             @Override
             public void on(long[] result) {
-                Assert.assertTrue(result.length == numOfPoly||result.length ==1);
+                Assert.assertTrue(result.length <= numOfPoly);
             }
         });
     }

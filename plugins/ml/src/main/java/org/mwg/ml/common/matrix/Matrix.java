@@ -2,6 +2,7 @@ package org.mwg.ml.common.matrix;
 
 
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
+import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 import java.util.BitSet;
 import java.util.Random;
@@ -158,7 +159,9 @@ public class Matrix {
      */
     public static MatrixEngine defaultEngine() {
         if (_defaultEngine == null) {
-            _defaultEngine = new BlasMatrixEngine();
+            //_defaultEngine = new BlasMatrixEngine();
+            //_defaultEngine = new JamaMatrixEngine();
+            _defaultEngine = new HybridMatrixEngine();
         }
         return _defaultEngine;
     }
@@ -180,8 +183,8 @@ public class Matrix {
     }
 
 
-    public static int leadingDimension(Matrix matA) {
-        return Math.max(matA.columns(), matA.rows());
+    public int leadingDimension() {
+        return Math.max(_nbColumns, _nbRows);
     }
 
     public static Matrix random(int rows, int columns, double min, double max) {
