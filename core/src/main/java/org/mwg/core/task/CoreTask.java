@@ -93,13 +93,19 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public final Task get(String name) {
+        addAction(new ActionGet(name));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task traverse(String relationName) {
         addAction(new ActionTraverse(relationName));
         return this;
     }
 
     @Override
-    public Task traverseOrKeep(String relationName) {
+    public final Task traverseOrKeep(String relationName) {
         addAction(new ActionTraverseOrKeep(relationName));
         return this;
     }
@@ -324,10 +330,15 @@ public class CoreTask implements org.mwg.task.Task {
         int flatSize = flat.length();
         int previous = 0;
         String actionName = null;
+        boolean isClosed = false;
         while (cursor < flatSize) {
             char current = flat.charAt(cursor);
             switch (current) {
                 case Constants.TASK_SEP:
+                    if (!isClosed) {
+                        String getName = flat.substring(previous, cursor);
+                        action("get", getName);//default action
+                    }
                     actionName = null;
                     previous = cursor + 1;
                     break;
@@ -340,10 +351,17 @@ public class CoreTask implements org.mwg.task.Task {
                     action(actionName, flat.substring(previous, cursor));
                     actionName = null;
                     previous = cursor + 1;
+                    isClosed = true;
                     //ADD TASK
                     break;
             }
             cursor++;
+        }
+        if (!isClosed) {
+            String getName = flat.substring(previous, cursor);
+            if (getName.length() > 0) {
+                action("get", getName);//default action
+            }
         }
         return this;
     }

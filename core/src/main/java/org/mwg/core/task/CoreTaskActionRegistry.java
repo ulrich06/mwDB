@@ -14,6 +14,15 @@ public class CoreTaskActionRegistry implements TaskActionRegistry {
 
     public CoreTaskActionRegistry() {
         _factory = new HashMap<String, TaskActionFactory>();
+        add("get", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("get action need one parameter");
+                }
+                return new ActionGet(params[0]);
+            }
+        });
         add("traverse", new TaskActionFactory() {
             @Override
             public TaskAction create(String[] params) {

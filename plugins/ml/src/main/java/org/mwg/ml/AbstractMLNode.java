@@ -1,10 +1,14 @@
 package org.mwg.ml;
 
 import org.mwg.Callback;
+import org.mwg.DeferCounter;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.task.Action;
+import org.mwg.task.Task;
+import org.mwg.task.TaskContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,20 +48,46 @@ public abstract class AbstractMLNode extends AbstractNode {
     }
 
 
-
     public void extractFeatures(Callback<double[]> callback) {
-     /*   String query = (String) super.get(FROM);
-        double[] result;
+
+        String query = (String) super.get(FROM);
         if (query != null) {
+            //TODO CACHE TO AVOID PARSING EVERY TIME
             String[] split = query.split(FROM_SEPARATOR);
-            result = new double[split.length];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = parseDouble(get(split[i]).toString());
+            Task[] tasks = new Task[split.length];
+            for (int i = 0; i < split.length; i++) {
+                Task t = graph().newTask();
+                t.parse(split[i]);
+                tasks[i] = t;
             }
-            callback.on(result);
+            //END TODO IN CACHE
+            final double[] result = new double[tasks.length];
+            DeferCounter waiter = graph().counter(tasks.length);
+            for (int i = 0; i < split.length; i++) {
+                final int taskIndex = i;
+                tasks[i].executeThenAsync(null, this, new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object current = context.getPreviousResult();
+                        if (current instanceof Double) {
+                            result[taskIndex] = (double) current;
+                        } else {
+                            throw new RuntimeException("Bad Extractor");
+                        }
+                        waiter.count();
+                        context.next();
+                    }
+                });
+            }
+            waiter.then(new Callback() {
+                @Override
+                public void on(Object ignored) {
+                    callback.on(result);
+                }
+            });
         } else {
             callback.on(null);
-        }*/
+        }
     }
 
     /**

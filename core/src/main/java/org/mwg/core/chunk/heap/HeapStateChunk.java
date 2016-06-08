@@ -275,6 +275,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             param_elem = clonedDoubleArray;
                         }
                         break;
+                    case Type.REF:
+                    case Type.DEP_REF:
                     case Type.LONG_ARRAY:
                         if (p_unsafe_elem != null) {
                             long[] castedParamLong = (long[]) p_unsafe_elem;
@@ -414,6 +416,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 double[] copyD = new double[castedResultD.length];
                 System.arraycopy(castedResultD, 0, copyD, 0, castedResultD.length);
                 return copyD;
+            case Type.REF:
+            case Type.DEP_REF:
             case Type.LONG_ARRAY:
                 long[] castedResultL = (long[]) result;
                 long[] copyL = new long[castedResultL.length];
@@ -616,7 +620,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 }
                                 toInsert = currentDoubleArr;
                                 break;
-
+                            case Type.REF:
+                            case Type.DEP_REF:
                             case Type.LONG_ARRAY:
                                 if (currentLongArr == null) {
                                     currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
@@ -702,6 +707,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                         case Type.DOUBLE_ARRAY:
                             currentDoubleArr = new double[(int) currentSubSize];
                             break;
+                        case Type.REF:
+                        case Type.DEP_REF:
                         case Type.LONG_ARRAY:
                             currentLongArr = new long[(int) currentSubSize];
                             break;
@@ -726,6 +733,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             currentDoubleArr[currentSubIndex] = Base64.decodeToDoubleWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
                             break;
+                        case Type.REF:
+                        case Type.DEP_REF:
                         case Type.LONG_ARRAY:
                             currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
                             currentSubIndex++;
@@ -824,6 +833,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     }
                     toInsert = currentDoubleArr;
                     break;
+                case Type.REF:
+                case Type.DEP_REF:
                 case Type.LONG_ARRAY:
                     if (currentLongArr == null) {
                         currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
@@ -934,6 +945,8 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 Base64.encodeDoubleToBuffer(castedDoubleArr[j], buffer);
                             }
                             break;
+                        case Type.REF:
+                        case Type.DEP_REF:
                         case Type.LONG_ARRAY:
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);

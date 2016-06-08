@@ -66,6 +66,10 @@ public class Type {
                 return "map(long->long[])";
             case Type.STRING_LONG_MAP:
                 return "map(string->long)";
+            case Type.REF:
+                return "reference";
+            case Type.DEP_REF:
+                return "dependency";
             default:
                 return "unknown";
         }

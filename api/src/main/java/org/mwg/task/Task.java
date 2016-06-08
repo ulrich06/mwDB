@@ -98,6 +98,15 @@ public interface Task {
     Task traverse(String relationName);
 
     /**
+     * Retrieve any property given a precise name.
+     * If the property is a relationship, it is traversed an related nodes are retrieved.
+     *
+     * @param name of property to
+     * @return this task to chain actions (fluent API)
+     */
+    Task get(String name);
+
+    /**
      * Traverse the specified relation if not empty, otherwise keep leaf nodes
      * If it is followed by {@link #asVar(String)} method, the element are stored in an array
      *

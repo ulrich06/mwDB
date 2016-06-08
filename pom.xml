@@ -29,7 +29,7 @@
     </parent>
 
     <properties>
-        <java2typescript.plugin.version>53</java2typescript.plugin.version>
+        <java2typescript.plugin.version>55</java2typescript.plugin.version>
     </properties>
 
     <developers>
@@ -113,7 +113,7 @@
         <!-- Plugins -->
         <module>plugins/importer</module>
         <module>plugins/leveldb</module>
-        
+
 
         <module>plugins/ml</module>
         <module>plugins/mljs</module>

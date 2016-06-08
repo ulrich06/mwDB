@@ -62,9 +62,10 @@
 
         <concat destfile="${basedir}/target/test-classes/test.all.dev.js" force="no">
 
+            <!--
             <filelist dir="${basedir}/src" files="netlib.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
-
+-->
             <filelist dir="${basedir}/../../corejs/target/classes" files="mwg.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>

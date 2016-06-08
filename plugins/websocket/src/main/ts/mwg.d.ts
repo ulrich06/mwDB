@@ -189,6 +189,7 @@ declare module java {
             size(): number;
         }
         class HashMap<K, V> implements Map<K, V> {
+            private content;
             get(key: K): V;
             put(key: K, value: V): V;
             containsKey(key: K): boolean;
@@ -620,6 +621,7 @@ declare module org {
                 select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
                 selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 traverse(relationName: string): org.mwg.task.Task;
+                get(name: string): org.mwg.task.Task;
                 traverseOrKeep(relationName: string): org.mwg.task.Task;
                 traverseIndex(indexName: string, query: string): org.mwg.task.Task;
                 traverseIndexAll(indexName: string): org.mwg.task.Task;
@@ -698,6 +700,8 @@ declare module org {
             static LONG_LONG_MAP: number;
             static LONG_LONG_ARRAY_MAP: number;
             static STRING_LONG_MAP: number;
+            static REF: number;
+            static DEP_REF: number;
             static typeName(p_type: number): string;
         }
     }
@@ -1287,6 +1291,12 @@ declare module org {
                     constructor(p_name: string);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
+                class ActionGet implements org.mwg.task.TaskAction {
+                    private _name;
+                    constructor(p_name: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private collectArray(current, toLoad, leafs);
+                }
                 class ActionIfThen implements org.mwg.task.TaskAction {
                     private _condition;
                     private _action;
@@ -1380,6 +1390,7 @@ declare module org {
                     fromVar(variableName: string): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
                     selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    get(name: string): org.mwg.task.Task;
                     traverse(relationName: string): org.mwg.task.Task;
                     traverseOrKeep(relationName: string): org.mwg.task.Task;
                     traverseIndex(indexName: string, query: string): org.mwg.task.Task;

@@ -212,7 +212,7 @@ public abstract class AbstractNode implements Node {
                 incArray[previous.length] = relatedNode.id();
                 previous = incArray;
             }
-            preciseState.set(relationKey, Type.LONG_ARRAY, previous);
+            preciseState.set(relationKey, Type.REF, previous);
         } else {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
@@ -234,12 +234,12 @@ public abstract class AbstractNode implements Node {
                 }
                 if (indexToRemove != -1) {
                     if ((previous.length - 1) == 0) {
-                        preciseState.set(relationKey, Type.LONG_ARRAY, null);
+                        preciseState.set(relationKey, Type.REF, null);
                     } else {
                         long[] newArray = new long[previous.length - 1];
                         System.arraycopy(previous, 0, newArray, 0, indexToRemove);
                         System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
-                        preciseState.set(relationKey, Type.LONG_ARRAY, newArray);
+                        preciseState.set(relationKey, Type.REF, newArray);
                     }
                 }
             }
@@ -576,6 +576,8 @@ public abstract class AbstractNode implements Node {
                                 builder.append("]");
                                 break;
                             }
+                            case Type.REF:
+                            case Type.DEP_REF:
                             case Type.LONG_ARRAY: {
                                 builder.append(",\"");
                                 builder.append(_resolver.hashToString(attributeKey));

@@ -9,9 +9,23 @@ module org {
                         export module blas {
                             export class JSBlas implements org.mwg.ml.common.matrix.blassolver.blas.Blas {
                                 private netlib;
+                                private c_dgemm;
+                                private c_dgetrs;
+                                private c_dgetri;
+                                private c_dorgqr;
+                                private c_dgesdd;
+                                private c_dgeqrf;
+                                private c_dgetrf;
 
                                 constructor() {
                                     this.netlib = Module;
+                                    this.c_dgemm = this.netlib.cwrap('f2c_dgemm', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dgetrs = this.netlib.cwrap('dgetrs_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dgetri = this.netlib.cwrap('dgetri_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dorgqr = this.netlib.cwrap('dorgqr_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dgesdd = this.netlib.cwrap('dgesdd_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dgeqrf = this.netlib.cwrap('dgeqrf_', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
+                                    this.c_dgetrf = this.netlib.cwrap('dgetrf_', null, ['number', 'number', 'number', 'number', 'number', 'number']);
                                 }
 
                                 dgemm(transA:org.mwg.ml.common.matrix.TransposeType, transB:org.mwg.ml.common.matrix.TransposeType, m:number, n:number, k:number, alpha:number, matA:Float64Array, offsetA:number, ldA:number, matB:Float64Array, offsetB:number, ldB:number, beta:number, matC:Float64Array, offsetC:number, ldC:number):void {
@@ -53,15 +67,11 @@ module org {
 
                                     this.netlib.setValue(pldC, ldC, 'i32');
 
-
-                                    var dgemm = this.netlib.cwrap('f2c_dgemm', null, ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number']);
-                                    dgemm(ptransA, ptransB, pm, pn, pk, palpha, pmatA, pldA, pmatB, pldB, pbeta, pmatC, pldC);
-
+                                    this.c_dgemm(ptransA, ptransB, pm, pn, pk, palpha, pmatA, pldA, pmatB, pldB, pbeta, pmatC, pldC);
 
                                     matA.set(ddpmatA);
                                     matB.set(ddpmatB);
                                     matC.set(ddpmatC);
-
 
                                     this.netlib._free(ptransA);
                                     this.netlib._free(ptransB);
@@ -95,37 +105,29 @@ module org {
                                     this.netlib.setValue(pdim, dim, 'i32');
                                     this.netlib.setValue(pnrhs, nrhs, 'i32');
 
-                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer,pmatA, matA.length);
+                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer, pmatA, matA.length);
                                     ddpmatA.set(matA);
 
                                     this.netlib.setValue(pldA, ldA, 'i32');
 
-                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer,pipiv, ipiv.length);
+                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer, pipiv, ipiv.length);
                                     iipipiv.set(ipiv);
 
 
-                                    var ddpmatB = new Float64Array(this.netlib.HEAPF64.buffer,pmatB, matB.length);
+                                    var ddpmatB = new Float64Array(this.netlib.HEAPF64.buffer, pmatB, matB.length);
                                     ddpmatB.set(matB);
 
                                     this.netlib.setValue(pldB, ldB, 'i32');
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dgetrs = this.netlib.cwrap('dgetrs_', null, ['number','number','number','number','number','number','number','number','number']);
-                                    dgetrs(ptransA, pdim, pnrhs, pmatA, pldA, pipiv, pmatB, pldB, pinfo);
-
-
+                                    this.c_dgetrs(ptransA, pdim, pnrhs, pmatA, pldA, pipiv, pmatB, pldB, pinfo);
 
                                     matA.set(ddpmatA);
                                     ipiv.set(iipipiv);
                                     matB.set(ddpmatB);
                                     info.set(iipinfo);
-
-
 
                                     this.netlib._free(ptransA);
                                     this.netlib._free(pdim);
@@ -151,36 +153,29 @@ module org {
 
                                     this.netlib.setValue(pdim, dim, 'i32');
 
-                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer,pmatA, matA.length);
+                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer, pmatA, matA.length);
                                     ddpmatA.set(matA);
 
                                     this.netlib.setValue(pldA, ldA, 'i32');
 
-                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer,pipiv, ipiv.length);
+                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer, pipiv, ipiv.length);
                                     iipipiv.set(ipiv);
 
 
-                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer,pwork, work.length);
+                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer, pwork, work.length);
                                     ddpwork.set(work);
 
                                     this.netlib.setValue(pldWork, ldWork, 'i32');
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dgetri = this.netlib.cwrap('dgetri_', null, ['number','number','number','number','number','number','number']);
-                                    dgetri(pdim, pmatA, pldA, pipiv, pwork, pldWork, pinfo);
-
-
+                                    this.c_dgetri(pdim, pmatA, pldA, pipiv, pwork, pldWork, pinfo);
 
                                     matA.set(ddpmatA);
                                     ipiv.set(iipipiv);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
-
 
 
                                     this.netlib._free(pdim);
@@ -205,30 +200,23 @@ module org {
                                     this.netlib.setValue(prows, rows, 'i32');
                                     this.netlib.setValue(pcolumns, columns, 'i32');
 
-                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer,pmatA, matA.length);
+                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer, pmatA, matA.length);
                                     ddpmatA.set(matA);
 
                                     this.netlib.setValue(pldA, ldA, 'i32');
 
-                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer,pipiv, ipiv.length);
+                                    var iipipiv = new Int32Array(this.netlib.HEAP32.buffer, pipiv, ipiv.length);
                                     iipipiv.set(ipiv);
 
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dgetrf = this.netlib.cwrap('dgetrf_', null, ['number','number','number','number','number','number']);
-                                    dgetrf(prows, pcolumns, pmatA, pldA, pipiv, pinfo);
-
-
+                                    this.c_dgetrf(prows, pcolumns, pmatA, pldA, pipiv, pinfo);
 
                                     matA.set(ddpmatA);
                                     ipiv.set(iipipiv);
                                     info.set(iipinfo);
-
 
 
                                     this.netlib._free(prows);
@@ -257,36 +245,29 @@ module org {
                                     this.netlib.setValue(pn, n, 'i32');
                                     this.netlib.setValue(pk, k, 'i32');
 
-                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer,pmatA, matA.length);
+                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer, pmatA, matA.length);
                                     ddpmatA.set(matA);
 
                                     this.netlib.setValue(pldA, ldA, 'i32');
 
-                                    var ddptaw = new Float64Array(this.netlib.HEAPF64.buffer,ptaw, taw.length);
+                                    var ddptaw = new Float64Array(this.netlib.HEAPF64.buffer, ptaw, taw.length);
                                     ddptaw.set(taw);
 
 
-                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer,pwork, work.length);
+                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer, pwork, work.length);
                                     ddpwork.set(work);
 
                                     this.netlib.setValue(plWork, lWork, 'i32');
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dorgqr = this.netlib.cwrap('dorgqr_', null, ['number','number','number','number','number','number','number','number','number']);
-                                    dorgqr(pm, pn, pk, pmatA, pldA, ptaw, pwork, plWork, pinfo);
-
-
+                                    this.c_dorgqr(pm, pn, pk, pmatA, pldA, ptaw, pwork, plWork, pinfo);
 
                                     matA.set(ddpmatA);
                                     taw.set(ddptaw);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
-
 
 
                                     this.netlib._free(pm);
@@ -315,36 +296,29 @@ module org {
                                     this.netlib.setValue(pm, m, 'i32');
                                     this.netlib.setValue(pn, n, 'i32');
 
-                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer,pmatA, matA.length);
+                                    var ddpmatA = new Float64Array(this.netlib.HEAPF64.buffer, pmatA, matA.length);
                                     ddpmatA.set(matA);
 
                                     this.netlib.setValue(pldA, ldA, 'i32');
 
-                                    var ddptaw = new Float64Array(this.netlib.HEAPF64.buffer,ptaw, taw.length);
+                                    var ddptaw = new Float64Array(this.netlib.HEAPF64.buffer, ptaw, taw.length);
                                     ddptaw.set(taw);
 
 
-                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer,pwork, work.length);
+                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer, pwork, work.length);
                                     ddpwork.set(work);
 
                                     this.netlib.setValue(plWork, lWork, 'i32');
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dgeqrf = this.netlib.cwrap('dgeqrf_', null, ['number','number','number','number','number','number','number','number']);
-                                    dgeqrf(pm, pn, pmatA, pldA, ptaw, pwork, plWork, pinfo);
-
-
+                                    this.c_dgeqrf(pm, pn, pmatA, pldA, ptaw, pwork, plWork, pinfo);
 
                                     matA.set(ddpmatA);
                                     taw.set(ddptaw);
                                     work.set(ddpwork);
                                     info.set(iipinfo);
-
 
 
                                     this.netlib._free(pm);
@@ -379,44 +353,38 @@ module org {
                                     this.netlib.setValue(pm, m, 'i32');
                                     this.netlib.setValue(pn, n, 'i32');
 
-                                    var ddpdata = new Float64Array(this.netlib.HEAPF64.buffer,pdata, data.length);
+                                    var ddpdata = new Float64Array(this.netlib.HEAPF64.buffer, pdata, data.length);
                                     ddpdata.set(data);
 
                                     this.netlib.setValue(plda, lda, 'i32');
 
-                                    var ddps = new Float64Array(this.netlib.HEAPF64.buffer,ps, s.length);
+                                    var ddps = new Float64Array(this.netlib.HEAPF64.buffer, ps, s.length);
                                     ddps.set(s);
 
 
-                                    var ddpu = new Float64Array(this.netlib.HEAPF64.buffer,pu, u.length);
+                                    var ddpu = new Float64Array(this.netlib.HEAPF64.buffer, pu, u.length);
                                     ddpu.set(u);
 
                                     this.netlib.setValue(pldu, ldu, 'i32');
 
-                                    var ddpvt = new Float64Array(this.netlib.HEAPF64.buffer,pvt, vt.length);
+                                    var ddpvt = new Float64Array(this.netlib.HEAPF64.buffer, pvt, vt.length);
                                     ddpvt.set(vt);
 
                                     this.netlib.setValue(pldvt, ldvt, 'i32');
 
-                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer,pwork, work.length);
+                                    var ddpwork = new Float64Array(this.netlib.HEAPF64.buffer, pwork, work.length);
                                     ddpwork.set(work);
 
                                     this.netlib.setValue(plength, length, 'i32');
 
-                                    var iipiwork = new Int32Array(this.netlib.HEAP32.buffer,piwork, iwork.length);
+                                    var iipiwork = new Int32Array(this.netlib.HEAP32.buffer, piwork, iwork.length);
                                     iipiwork.set(iwork);
 
 
-                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer,pinfo, info.length);
+                                    var iipinfo = new Int32Array(this.netlib.HEAP32.buffer, pinfo, info.length);
                                     iipinfo.set(info);
 
-
-
-
-                                    var dgesdd = this.netlib.cwrap('dgesdd_', null, ['number','number','number','number','number','number','number','number','number','number','number','number','number','number']);
-                                    dgesdd(pjobz, pm, pn, pdata, plda, ps, pu, pldu, pvt, pldvt, pwork, plength, piwork, pinfo);
-
-
+                                    this.c_dgesdd(pjobz, pm, pn, pdata, plda, ps, pu, pldu, pvt, pldvt, pwork, plength, piwork, pinfo);
 
                                     data.set(ddpdata);
                                     s.set(ddps);
@@ -425,8 +393,6 @@ module org {
                                     work.set(ddpwork);
                                     iwork.set(iipiwork);
                                     info.set(iipinfo);
-
-
 
                                     this.netlib._free(pjobz);
                                     this.netlib._free(pm);
@@ -442,8 +408,6 @@ module org {
                                     this.netlib._free(plength);
                                     this.netlib._free(piwork);
                                     this.netlib._free(pinfo);
-
-
                                 }
 
                                 connect():void {
