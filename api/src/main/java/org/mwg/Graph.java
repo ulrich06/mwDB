@@ -194,7 +194,6 @@ public interface Graph {
     Task newTask();
 
     /**
-     * PROPOSITION
      * Create a new task context that we can give to initialize a task
      *
      * @return newly created task context object
@@ -211,7 +210,6 @@ public interface Graph {
      * @return shared global action registry
      */
     TaskActionRegistry actions();
-
 
 
 }

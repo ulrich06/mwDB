@@ -17,15 +17,17 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
         super();
         initGraph();
     }
+
     @Test
     public void testWithOneNode() {
         long[] id = new long[1];
         graph.newTask()
                 .world(0)
                 .time(0)
-                .createNode()
-                .nodeSet("name","node")
-                .nodeRemoveProperty("name")
+                .from("node").asVar("nodeName")
+                .newNode()
+                .set("name", "nodeName")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -51,32 +53,33 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
         graph.newTask()
                 .world(0)
                 .time(0)
+                .from("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] nodes = new Node[5];
-                        for(int i=0;i<5;i++) {
-                            nodes[i] = graph.newNode(0,0);
+                        for (int i = 0; i < 5; i++) {
+                            nodes[i] = graph.newNode(0, 0);
                         }
                         context.setResult(nodes);
                     }
                 })
-                .nodeSet("name","node")
-                .nodeRemoveProperty("name")
+                .set("name", "nodeName")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] nodes = (Node[]) context.getPreviousResult();
                         Assert.assertNotNull(nodes);
 
-                        for(int i=0;i<5;i++) {
+                        for (int i = 0; i < 5; i++) {
                             Assert.assertNull(nodes[i].get("name"));
                             ids[i] = nodes[i].id();
                         }
                     }
                 }).execute();
 
-        for(int i=0;i<ids.length;i++) {
+        for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
                 @Override
                 public void on(Node result) {
@@ -98,8 +101,8 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
                         context.setResult(null);
                     }
                 })
-                .nodeSet("name","node")
-                .nodeRemoveProperty("name")
+                .set("name", "node")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -110,24 +113,4 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
         Assert.assertTrue(nextCalled[0]);
     }
 
-    @Test
-    public void testWithObject() {
-        boolean[] exceptionCaught = new boolean[1];
-
-        try {
-            graph.newTask()
-                    .world(0)
-                    .time(0)
-                    .from(10)
-                    .nodeRemoveProperty("name")
-                    .execute();
-        } catch (RuntimeException ex) {
-            exceptionCaught[0] = true;
-        } catch (Exception ex) {
-            Assert.fail("Unexpected exception thrown");
-        }
-
-        Assert.assertTrue(exceptionCaught[0]);
-
-    }
 }

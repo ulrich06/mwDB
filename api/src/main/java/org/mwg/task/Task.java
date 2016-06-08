@@ -207,9 +207,6 @@ public interface Task {
      */
     void executeThen(Action action);
 
-
-    TaskContext newContext();
-
     void executeWith(TaskContext initialContext);
 
     /**
@@ -221,78 +218,79 @@ public interface Task {
      */
     void executeThenAsync(final TaskContext parentContext, final Object initialResult, final Action finalAction);
 
-    Task parse(String flat);
-
-    Task action(String name, String params);
-
-
-    /**
-     * Below is all the task that you can apply on a node. That means that the previous result must be a node or
-     * an array of node
-     *
-     * Semantic (except the two ones for node creation): if the previous result is null, the below action are
-     * ignored and the next action is called. If the previous result is neither a node nor an array of nodes,
-     * a RuntimeException is thrown.
-     */
-
-
     /**
      * Create a new node on the [world,time] of the context
      *
      * @return this task to chain actions (fluent API)
      */
-    Task createNode();
+    Task newNode();
 
     /**
-     * Create a new node on a specific [world,time]
+     * Sets the value of an attribute of a node or an array of nodes
+     * The node (or the array) should be init in the previous task
      *
+     * @param propertyName      The name of the attribute. Must be unique per node.
+     * @param variableNameToSet The name of the property to set, should be stored previously as a variable in task context.
      * @return this task to chain actions (fluent API)
      */
-    Task createNodeOn(long world,long time);
+    Task set(String propertyName, String variableNameToSet);
 
     /**
      * Sets the value of an attribute of a node or an array of nodes
      * The node (or the array) should be init in the previous task
      *
-     *
-     * @param propertyName The name of the attribute. Must be unique per node.
-     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     * @param propertyName      The name of the attribute. Must be unique per node.
+     * @param propertyType      The type of the attribute. Must be one of {@link Type} int value.
+     * @param variableNameToSet The name of the property to set, should be stored previously as a variable in task context.
+     * @return this task to chain actions (fluent API)
      */
-    Task nodeSet(String propertyName, Object propertyValue);
-
-    /**
-     * Sets the value of an attribute of a node or an array of nodes
-     * The node (or the array) should be init in the previous task
-     *
-     * @param propertyName The name of the attribute. Must be unique per node.
-     * @param propertyType The type of the attribute. Must be one of {@link Type} int value.
-     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
-     */
-    Task nodeSetProperty(String propertyName, byte propertyType, Object propertyValue);
+    Task setProperty(String propertyName, byte propertyType, String variableNameToSet);
 
     /**
      * Removes an attribute from a node or an array of nodes.
      * The node (or the array) should be init in the previous task
      *
      * @param propertyName The name of the attribute to remove.
+     * @return this task to chain actions (fluent API)
      */
-    Task nodeRemoveProperty(String propertyName);
+    Task removeProperty(String propertyName);
 
     /**
      * Adds a node to a relation of a node or of an array of nodes.
      *
-     * @param relationName The name of the relation.
-     * @param relatedNode The node to insert in the relation.
+     * @param relationName      The name of the relation.
+     * @param variableNameToAdd The name of the property to add, should be stored previously as a variable in task context.
+     * @return this task to chain actions (fluent API)
      */
-    Task nodeAdd(String relationName, Node relatedNode);
+    Task add(String relationName, String variableNameToAdd);
 
     /**
      * Removes a node from a relation of a node or of an array of nodes.
      *
-     * @param relationName The name of the relation.
-     * @param relatedNode The node to remove.
+     * @param relationName         The name of the relation.
+     * @param variableNameToRemove The name of the property to add, should be stored previously as a variable in task context.
+     * @return this task to chain actions (fluent API)
      */
-    Task nodeRemove(String relationName, Node relatedNode);
+    Task remove(String relationName, String variableNameToRemove);
 
+    /**
+     * Parse a string to build the current task. Syntax should follow: actionName(param).actionName2(param2)...
+     * In case actionName en () are empty, default task is get(name).
+     * Therefore the following: children.name should be read as get(children).get(name)
+     *
+     * @param flat string definition of the task
+     * @return this task to chain actions (fluent API)
+     */
+    Task parse(String flat);
+
+    /**
+     * Build a named action, based on the task registry.
+     * This allows to extend task API with your own DSL.
+     *
+     * @param name   designation of the task to add, should correspond to the name of the Task plugin registered.
+     * @param params parameters of the newly created task
+     * @return this task to chain actions (fluent API)
+     */
+    Task action(String name, String params);
 
 }

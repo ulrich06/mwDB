@@ -386,7 +386,7 @@ public class RobustnessTests {
         //propertyName
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().nodeSet(null,"").execute();
+            _graph.newTask().set(null,"").execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -397,7 +397,7 @@ public class RobustnessTests {
         //propertyValue
         exceptionCaught = false;
         try {
-            _graph.newTask().nodeSet("",null).execute();
+            _graph.newTask().set("",null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -411,7 +411,7 @@ public class RobustnessTests {
         //propertyName
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().nodeSetProperty(null,Type.STRING,"").execute();
+            _graph.newTask().setProperty(null,Type.STRING,"").execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -422,7 +422,7 @@ public class RobustnessTests {
         //propertyValue
         exceptionCaught = false;
         try {
-            _graph.newTask().nodeSetProperty("",Type.STRING,null).execute();
+            _graph.newTask().setProperty("",Type.STRING,null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -435,7 +435,7 @@ public class RobustnessTests {
     public void robustnessNodeRemoveProperty(){
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().nodeRemoveProperty(null).execute();
+            _graph.newTask().removeProperty(null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -449,7 +449,7 @@ public class RobustnessTests {
         //relationName
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().nodeAdd(null,_graph.newNode(0,0)).execute();
+            _graph.newTask().from(_graph.newNode(0,0)).asVar("x").add(null,"x").execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -460,7 +460,7 @@ public class RobustnessTests {
         //relatedNode
         exceptionCaught = false;
         try {
-            _graph.newTask().nodeAdd("",null).execute();
+            _graph.newTask().add("",null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -474,7 +474,7 @@ public class RobustnessTests {
         //relationName
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().nodeRemove(null,_graph.newNode(0,0)).execute();
+            _graph.newTask().from(_graph.newNode(0,0)).asVar("x").remove(null,"x").execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -485,7 +485,7 @@ public class RobustnessTests {
         //relatedNode
         exceptionCaught = false;
         try {
-            _graph.newTask().nodeRemove("",null).execute();
+            _graph.newTask().remove("",null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {

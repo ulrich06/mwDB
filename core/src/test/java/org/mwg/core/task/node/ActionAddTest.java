@@ -17,20 +17,21 @@ public class ActionAddTest extends AbstractActionTest {
 
     @Test
     public void testWithOneNode() {
-        Node relatedNode = graph.newNode(0,0);
+        Node relatedNode = graph.newNode(0, 0);
 
         long[] id = new long[1];
         graph.newTask()
                 .world(0)
                 .time(0)
-                .createNode()
-                .nodeAdd("friend",relatedNode)
+                .newNode()
+                .from(relatedNode).asVar("x")
+                .add("friend", "x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node node = (Node) context.getPreviousResult();
                         Assert.assertNotNull(node);
-                        Assert.assertEquals(1,((long[])node.get("friend")).length);
+                        Assert.assertEquals(1, ((long[]) node.get("friend")).length);
                         id[0] = node.id();
                     }
                 }).execute();
@@ -39,48 +40,49 @@ public class ActionAddTest extends AbstractActionTest {
         graph.lookup(0, 0, id[0], new Callback<Node>() {
             @Override
             public void on(Node result) {
-                Assert.assertEquals(1,((long[])result.get("friend")).length);
+                Assert.assertEquals(1, ((long[]) result.get("friend")).length);
             }
         });
     }
 
     @Test
     public void testWithArray() {
-        Node relatedNode = graph.newNode(0,0);
+        Node relatedNode = graph.newNode(0, 0);
 
         long[] ids = new long[5];
         graph.newTask()
                 .world(0)
                 .time(0)
+                .from(relatedNode).asVar("x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] nodes = new Node[5];
-                        for(int i=0;i<5;i++) {
-                            nodes[i] = graph.newNode(0,0);
+                        for (int i = 0; i < 5; i++) {
+                            nodes[i] = graph.newNode(0, 0);
                         }
                         context.setResult(nodes);
                     }
                 })
-                .nodeAdd("friend",relatedNode)
+                .add("friend", "x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node[] nodes = (Node[]) context.getPreviousResult();
                         Assert.assertNotNull(nodes);
 
-                        for(int i=0;i<5;i++) {
-                            Assert.assertEquals(1,((long[])nodes[i].get("friend")).length);
+                        for (int i = 0; i < 5; i++) {
+                            Assert.assertEquals(1, ((long[]) nodes[i].get("friend")).length);
                             ids[i] = nodes[i].id();
                         }
                     }
                 }).execute();
 
-        for(int i=0;i<ids.length;i++) {
+        for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
                 @Override
                 public void on(Node result) {
-                    Assert.assertEquals(1,((long[])result.get("friend")).length);
+                    Assert.assertEquals(1, ((long[]) result.get("friend")).length);
                 }
             });
         }
@@ -90,7 +92,7 @@ public class ActionAddTest extends AbstractActionTest {
 
     @Test
     public void testWithNull() {
-        Node relatedNode = graph.newNode(0,0);
+        Node relatedNode = graph.newNode(0, 0);
 
         boolean[] nextCalled = new boolean[1];
         graph.newTask()
@@ -102,7 +104,8 @@ public class ActionAddTest extends AbstractActionTest {
                         context.setResult(null);
                     }
                 })
-                .nodeAdd("friend",relatedNode)
+                .from(relatedNode).asVar("x")
+                .add("friend", "x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -113,31 +116,4 @@ public class ActionAddTest extends AbstractActionTest {
         Assert.assertTrue(nextCalled[0]);
     }
 
-    @Test
-    public void testWithObject() {
-        Node relatedNode = graph.newNode(0,0);
-
-        boolean[] exceptionCaught = new boolean[1];
-
-        try {
-            graph.newTask()
-                    .world(0)
-                    .time(0)
-                    .from(10)
-                    .nodeAdd("name",relatedNode)
-                    .then(new Action() {
-                        @Override
-                        public void eval(TaskContext context) {
-                            Assert.assertTrue(true);
-                        }
-                    }).execute();
-        } catch (RuntimeException ex) {
-            exceptionCaught[0] = true;
-        } catch (Exception ex) {
-            Assert.fail("Unexpected exception thrown");
-        }
-
-        Assert.assertTrue(exceptionCaught[0]);
-
-    }
 }

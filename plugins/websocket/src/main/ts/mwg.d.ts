@@ -333,6 +333,7 @@ declare module org {
             newBuffer(): org.mwg.struct.Buffer;
             newQuery(): org.mwg.Query;
             newTask(): org.mwg.task.Task;
+            newTaskContext(): org.mwg.task.TaskContext;
             space(): org.mwg.plugin.ChunkSpace;
             storage(): org.mwg.plugin.Storage;
             actions(): org.mwg.task.TaskActionRegistry;
@@ -640,9 +641,14 @@ declare module org {
                 save(): org.mwg.task.Task;
                 execute(): void;
                 executeThen(action: org.mwg.task.Action): void;
-                newContext(): org.mwg.task.TaskContext;
                 executeWith(initialContext: org.mwg.task.TaskContext): void;
                 executeThenAsync(parentContext: org.mwg.task.TaskContext, initialResult: any, finalAction: org.mwg.task.Action): void;
+                newNode(): org.mwg.task.Task;
+                set(propertyName: string, variableNameToSet: string): org.mwg.task.Task;
+                setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
+                removeProperty(propertyName: string): org.mwg.task.Task;
+                add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
+                remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                 parse(flat: string): org.mwg.task.Task;
                 action(name: string, params: string): org.mwg.task.Task;
             }
@@ -1169,6 +1175,7 @@ declare module org {
                 disconnect(callback: org.mwg.Callback<any>): void;
                 newBuffer(): org.mwg.struct.Buffer;
                 newTask(): org.mwg.task.Task;
+                newTaskContext(): org.mwg.task.TaskContext;
                 newQuery(): org.mwg.Query;
                 private saveDirtyList(dirtyIterator, callback);
                 index(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
@@ -1254,6 +1261,13 @@ declare module org {
                 }
             }
             module task {
+                class ActionAdd implements org.mwg.task.TaskAction {
+                    private _relationName;
+                    private _variableNameToAdd;
+                    constructor(relationName: string, variableNameToAdd: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private addFromArray(objs, relName, toRemove);
+                }
                 class ActionAsVar implements org.mwg.task.TaskAction {
                     private _name;
                     constructor(p_name: string);
@@ -1309,8 +1323,25 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     private filterArray(current);
                 }
+                class ActionNewNode implements org.mwg.task.TaskAction {
+                    constructor();
+                    eval(context: org.mwg.task.TaskContext): void;
+                }
                 class ActionNoop implements org.mwg.task.TaskAction {
                     eval(context: org.mwg.task.TaskContext): void;
+                }
+                class ActionRemove implements org.mwg.task.TaskAction {
+                    private _relationName;
+                    private _variableNameToRemove;
+                    constructor(relationName: string, variableNameToRemove: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private removeFromArray(objs, relName, toRemove);
+                }
+                class ActionRemoveProperty implements org.mwg.task.TaskAction {
+                    private _propertyName;
+                    constructor(propertyName: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private removePropertyFromArray(objs);
                 }
                 class ActionSave implements org.mwg.task.TaskAction {
                     eval(context: org.mwg.task.TaskContext): void;
@@ -1320,6 +1351,21 @@ declare module org {
                     constructor(p_filter: org.mwg.task.TaskFunctionSelect);
                     eval(context: org.mwg.task.TaskContext): void;
                     private filterArray(current);
+                }
+                class ActionSet implements org.mwg.task.TaskAction {
+                    private _relationName;
+                    private _variableNameToSet;
+                    constructor(relationName: string, variableNameToSet: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private setFromArray(objs, relName, toSet);
+                }
+                class ActionSetProperty implements org.mwg.task.TaskAction {
+                    private _relationName;
+                    private _variableNameToSet;
+                    private _propertyType;
+                    constructor(relationName: string, propertyType: number, variableNameToSet: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private setFromArray(objs, relName, toSet);
                 }
                 class ActionTime implements org.mwg.task.TaskAction {
                     private _time;
@@ -1410,7 +1456,6 @@ declare module org {
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
                     execute(): void;
-                    newContext(): org.mwg.task.TaskContext;
                     executeWith(initialContext: org.mwg.task.TaskContext): void;
                     executeThen(p_action: org.mwg.task.Action): void;
                     executeThenAsync(parent: org.mwg.task.TaskContext, initialResult: any, p_finalAction: org.mwg.task.Action): void;
@@ -1418,6 +1463,12 @@ declare module org {
                     parse(flat: string): org.mwg.task.Task;
                     private protect(input);
                     private protectIterable(input);
+                    newNode(): org.mwg.task.Task;
+                    set(propertyName: string, variableNameToSet: string): org.mwg.task.Task;
+                    setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
+                    removeProperty(propertyName: string): org.mwg.task.Task;
+                    add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
+                    remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                 }
                 class CoreTaskActionRegistry implements org.mwg.task.TaskActionRegistry {
                     private _factory;
