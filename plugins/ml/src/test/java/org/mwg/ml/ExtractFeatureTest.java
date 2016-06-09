@@ -11,7 +11,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void test() {
-        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNodeFactory()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -36,7 +36,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMath() {
-        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNodeFactory()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -61,7 +61,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMathEscaped() {
-        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNodeFactory()).build();
+        Graph graph = GraphBuilder.builder().withFactory(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
