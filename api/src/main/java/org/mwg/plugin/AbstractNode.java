@@ -42,7 +42,6 @@ public abstract class AbstractNode implements Node {
         //noop
     }
 
-
     protected NodeState unphasedState() {
         return this._resolver.resolveState(this, true);
     }
@@ -624,7 +623,6 @@ public abstract class AbstractNode implements Node {
         }
         return builder.toString();
     }
-
 
     public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
         if (propertyType != propertyTargetType) {

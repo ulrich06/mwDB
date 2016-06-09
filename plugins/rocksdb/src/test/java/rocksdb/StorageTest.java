@@ -27,7 +27,7 @@ public class StorageTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).withAutoSave(10_000).build());
+        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
     }
 
     final int valuesToInsert = 300_000;

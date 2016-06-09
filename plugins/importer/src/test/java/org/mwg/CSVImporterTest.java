@@ -14,7 +14,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest() {
 
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withAutoSave(1000).build();
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -55,7 +55,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest2() {
 
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withAutoSave(1000).build();
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

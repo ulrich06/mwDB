@@ -11,7 +11,7 @@ public class Benchmark2Test {
 
     //@Test
     public void heapTest() {
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100).withAutoSave(10).build();
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100).saveEvery(10).build();
         test(graph, new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -36,7 +36,7 @@ public class Benchmark2Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).withAutoSave(20).build();
+        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).saveEvery(20).build();
 
         test(graph, new Callback<Boolean>() {
             @Override

@@ -57,6 +57,19 @@ public class GraphBuilder {
         return this;
     }
 
+    public GraphBuilder withFactories(NodeFactory[] p_factories) {
+        if (_factories == null) {
+            _factories = p_factories;
+        } else {
+            NodeFactory[] _factories2 = new NodeFactory[_factories.length + p_factories.length];
+            System.arraycopy(_factories, 0, _factories2, 0, _factories.length);
+            System.arraycopy(p_factories, 0, _factories2, 0, p_factories.length);
+            _factories = _factories2;
+        }
+        return this;
+    }
+
+
     public GraphBuilder withGC() {
         this._gc = true;
         return this;
@@ -72,7 +85,7 @@ public class GraphBuilder {
         return this;
     }
 
-    public GraphBuilder withAutoSave(long batchSize) {
+    public GraphBuilder saveEvery(long batchSize) {
         this._saveBatchSize = batchSize;
         return this;
     }

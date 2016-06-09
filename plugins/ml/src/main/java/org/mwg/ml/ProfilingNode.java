@@ -1,8 +1,9 @@
 package org.mwg.ml;
 
 import org.mwg.Callback;
+import org.mwg.Node;
 
-public interface ProfilingNode {
+public interface ProfilingNode extends Node {
     /**
      * Main training function to learn from the the expected output,
      * The input features are defined through features extractions.

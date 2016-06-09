@@ -354,10 +354,11 @@ declare module org {
             readOnly(): org.mwg.GraphBuilder;
             withScheduler(p_scheduler: org.mwg.plugin.Scheduler): org.mwg.GraphBuilder;
             withFactory(p_factory: org.mwg.plugin.NodeFactory): org.mwg.GraphBuilder;
+            withFactories(p_factories: org.mwg.plugin.NodeFactory[]): org.mwg.GraphBuilder;
             withGC(): org.mwg.GraphBuilder;
             withOffHeapMemory(): org.mwg.GraphBuilder;
             withMemorySize(size: number): org.mwg.GraphBuilder;
-            withAutoSave(batchSize: number): org.mwg.GraphBuilder;
+            saveEvery(batchSize: number): org.mwg.GraphBuilder;
             build(): org.mwg.Graph;
         }
         module GraphBuilder {

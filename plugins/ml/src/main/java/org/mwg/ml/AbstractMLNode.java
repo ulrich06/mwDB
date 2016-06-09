@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class AbstractMLNode extends AbstractNode {
 
     public static String FROM_SEPARATOR = ";";
-    public static String FROM = "FROM";
+    public static String FROM = "from";
 
     public AbstractMLNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -68,6 +68,13 @@ public abstract class AbstractMLNode extends AbstractNode {
                         } else {
                             if (current instanceof Double) {
                                 result[taskIndex] = (double) current;
+                            } else if (current instanceof Object[]) {
+                                Object[] currentArr = (Object[]) current;
+                                if (currentArr.length == 1) {
+                                    result[taskIndex] = parseDouble(currentArr[0].toString());
+                                } else {
+                                    throw new RuntimeException("Bad Extractor");
+                                }
                             } else {
                                 result[taskIndex] = parseDouble(current.toString());
                                 throw new RuntimeException("Bad Extractor");

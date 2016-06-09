@@ -16,7 +16,7 @@ public class FlagTest {
 
     @Test
     public void heapTest() {
-        manyWorldTest(GraphBuilder.builder().withMemorySize(cacheSize).withAutoSave(cacheSize - 100).withScheduler(new NoopScheduler()).build());
+        manyWorldTest(GraphBuilder.builder().withMemorySize(cacheSize).saveEvery(cacheSize - 100).withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -31,7 +31,7 @@ public class FlagTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        manyWorldTest(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(cacheSize).withAutoSave(cacheSize - 100).build());
+        manyWorldTest(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(cacheSize).saveEvery(cacheSize - 100).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);

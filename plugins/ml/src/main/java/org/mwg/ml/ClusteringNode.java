@@ -1,8 +1,9 @@
 package org.mwg.ml;
 
 import org.mwg.Callback;
+import org.mwg.Node;
 
-public interface ClusteringNode {
+public interface ClusteringNode extends Node {
 
     /**
      * Main training function to learn from the the expected output,

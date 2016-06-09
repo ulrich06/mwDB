@@ -10,7 +10,7 @@ public class WSServerTest {
     public static void main(String[] args) {
         Graph graph = GraphBuilder.builder()
                 .withMemorySize(10000)
-                .withAutoSave(1000)
+                .saveEvery(1000)
                 .withOffHeapMemory()
                 .build();
         graph.connect(result -> {
@@ -41,7 +41,7 @@ public class WSServerTest {
 
         Graph graph = GraphBuilder.builder()
                 .withMemorySize(10000)
-                .withAutoSave(1000)
+                .saveEvery(1000)
                 .withOffHeapMemory()
                 .build();
         graph.connect(new Callback<Boolean>() {
@@ -58,7 +58,7 @@ public class WSServerTest {
 
                 CountDownLatch latch = new CountDownLatch(1);
 
-                Graph graph2 = GraphBuilder.builder().withMemorySize(10000).withAutoSave(1000).withStorage(new WSClient("ws://localhost:8050")).build();
+                Graph graph2 = GraphBuilder.builder().withMemorySize(10000).saveEvery(1000).withStorage(new WSClient("ws://localhost:8050")).build();
                 graph2.connect(result1 -> graph2.all(0, 0, "nodes", new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result1) {
