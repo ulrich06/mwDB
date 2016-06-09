@@ -56,11 +56,12 @@ public class MathEngineTest {
 
 
                 //Test Time extraction
-                engine = CoreMathExpressionEngine.parse("f1^2");
+                engine = CoreMathExpressionEngine.parse("f1^2+f2*f1");
                 context=graph.newNode(0,200);
                 context.set("f1",7);
+                context.set("f2",8);
                 d = engine.eval(context, new HashMap<String, Double> ());
-                Assert.assertTrue(d == 49);
+                Assert.assertTrue(d == 7*7+8*7);
 
             }
         });
