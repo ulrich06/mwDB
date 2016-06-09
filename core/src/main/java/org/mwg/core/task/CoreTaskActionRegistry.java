@@ -23,6 +23,15 @@ public class CoreTaskActionRegistry implements TaskActionRegistry {
                 return new ActionGet(params[0]);
             }
         });
+        add("math", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("math action need one parameter");
+                }
+                return new ActionMath(params[0]);
+            }
+        });
         add("traverse", new TaskActionFactory() {
             @Override
             public TaskAction create(String[] params) {

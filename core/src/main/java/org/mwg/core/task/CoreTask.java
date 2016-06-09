@@ -544,4 +544,11 @@ public class CoreTask implements org.mwg.task.Task {
         addAction(new ActionRemove(relationName, variableNameToRemove));
         return this;
     }
+
+
+    @Override
+    public Task math(String expression) {
+        addAction(new ActionMath(expression));
+        return this;
+    }
 }

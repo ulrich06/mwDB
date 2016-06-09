@@ -1,5 +1,4 @@
-package org.mwg.ml.common.mathexp.impl;
-
+package org.mwg.core.task.math;
 
 import java.util.*;
 
@@ -50,56 +49,56 @@ class MathFunction implements MathToken {
     }
 
     double eval(double[] p) {
-        if (PrimitiveHelper.equals(name, "NOT")) {
+        if (name.equals("NOT")) {
             return (p[0] == 0) ? 1 : 0;
-        } else if (PrimitiveHelper.equals(name, "IF")) {
+        } else if (name.equals("IF")) {
             return !(p[0] == 0) ? p[1] : p[2];
-        } else if (PrimitiveHelper.equals(name, "RAND")) {
+        } else if (name.equals("RAND")) {
             return Math.random();
-        } else if (PrimitiveHelper.equals(name, "SIN")) {
+        } else if (name.equals("SIN")) {
             return Math.sin(p[0]);
-        } else if (PrimitiveHelper.equals(name, "COS")) {
+        } else if (name.equals("COS")) {
             return Math.cos(p[0]);
-        } else if (PrimitiveHelper.equals(name, "TAN")) {
+        } else if (name.equals("TAN")) {
             return Math.tan(p[0]);
-        } else if (PrimitiveHelper.equals(name, "ASIN")) {
+        } else if (name.equals("ASIN")) {
             return Math.asin(p[0]);
-        } else if (PrimitiveHelper.equals(name, "ACOS")) {
+        } else if (name.equals("ACOS")) {
             return Math.acos(p[0]);
-        } else if (PrimitiveHelper.equals(name, "ATAN")) {
+        } else if (name.equals("ATAN")) {
             return Math.atan(p[0]);
-        } else if (PrimitiveHelper.equals(name, "MAX")) {
+        } else if (name.equals("MAX")) {
             return p[0] > p[1] ? p[0] : p[1];
-        } else if (PrimitiveHelper.equals(name, "MIN")) {
+        } else if (name.equals("MIN")) {
             return p[0] < p[1] ? p[0] : p[1];
-        } else if (PrimitiveHelper.equals(name, "ABS")) {
+        } else if (name.equals("ABS")) {
             return Math.abs(p[0]);
-        } else if (PrimitiveHelper.equals(name, "LOG")) {
+        } else if (name.equals("LOG")) {
             return Math.log(p[0]);
-        } else if (PrimitiveHelper.equals(name, "ROUND")) {
+        } else if (name.equals("ROUND")) {
             long factor = (long) Math.pow(10, p[1]);
             double value = p[0] * factor;
             long tmp = Math.round(value);
             return (double) tmp / factor;
-        } else if (PrimitiveHelper.equals(name, "FLOOR")) {
+        } else if (name.equals("FLOOR")) {
             return Math.floor(p[0]);
-        } else if (PrimitiveHelper.equals(name, "CEILING")) {
+        } else if (name.equals("CEILING")) {
             return Math.ceil(p[0]);
-        } else if (PrimitiveHelper.equals(name, "SQRT")) {
+        } else if (name.equals("SQRT")) {
             return Math.sqrt(p[0]);
-        } else if (PrimitiveHelper.equals(name, "SECONDS")) {
+        } else if (name.equals("SECONDS")) {
             return date_to_seconds(p[0]);
-        } else if (PrimitiveHelper.equals(name, "MINUTES")) {
+        } else if (name.equals("MINUTES")) {
             return date_to_minutes(p[0]);
-        } else if (PrimitiveHelper.equals(name, "HOURS")) {
+        } else if (name.equals( "HOURS")) {
             return date_to_hours(p[0]);
-        } else if (PrimitiveHelper.equals(name, "DAY")) {
+        } else if (name.equals("DAY")) {
             return date_to_days(p[0]);
-        } else if (PrimitiveHelper.equals(name, "MONTH")) {
+        } else if (name.equals("MONTH")) {
             return date_to_months(p[0]);
-        } else if (PrimitiveHelper.equals(name, "YEAR")) {
+        } else if (name.equals("YEAR")) {
             return date_to_year(p[0]);
-        } else if (PrimitiveHelper.equals(name, "DAYOFWEEK")) {
+        } else if (name.equals("DAYOFWEEK")) {
             return date_to_dayofweek(p[0]);
         }
         return 0;
@@ -193,5 +192,6 @@ class MathFunction implements MathToken {
     public int type() {
         return 1;
     }
+
 }
 

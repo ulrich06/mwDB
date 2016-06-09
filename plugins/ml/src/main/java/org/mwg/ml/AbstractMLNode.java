@@ -1,14 +1,10 @@
 package org.mwg.ml;
 
 import org.mwg.*;
-import org.mwg.ml.common.mathexp.impl.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class AbstractMLNode extends AbstractNode {
 
@@ -19,11 +15,13 @@ public abstract class AbstractMLNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    /*
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         super.setProperty(propertyName, propertyType, propertyValue);
-    }
+    }*/
 
+    /*
     @Override
     public Object get(String propertyName) {
         if (propertyName != null && propertyName.length() > 0 && propertyName.charAt(0) == '$') {
@@ -40,7 +38,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         } else {
             return super.get(propertyName);
         }
-    }
+    }*/
 
     protected void extractFeatures(Callback<double[]> callback) {
 

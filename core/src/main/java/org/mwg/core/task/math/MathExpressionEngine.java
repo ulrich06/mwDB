@@ -1,4 +1,4 @@
-package org.mwg.ml.common.mathexp;
+package org.mwg.core.task.math;
 
 import org.mwg.Node;
 

@@ -293,4 +293,11 @@ public interface Task {
      */
     Task action(String name, String params);
 
+    /**
+     * Execute a math expression on all nodes given from previous step
+     * @param expression math expression to execute
+     * @return this task to chain actions (fluent API)
+     */
+    Task math(String expression);
+
 }

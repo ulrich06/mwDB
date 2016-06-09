@@ -1,4 +1,4 @@
-package org.mwg.ml.common.mathexp.impl;
+package org.mwg.core.task.math;
 
 import java.util.HashMap;
 

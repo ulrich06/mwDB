@@ -1,49 +1,25 @@
-package org.mwg.ml.common.mathexp.impl;
+package org.mwg.core.task.math;
 
 import org.mwg.Node;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
-public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpressionEngine {
+public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
 
     static final char decimalSeparator = '.';
     static final char minusSign = '-';
     private final MathToken[] _cacheAST;
 
-    private MathExpressionEngine(String expression) {
-
-        /*
-        vars.put("PI", Math.PI);
-        vars.put("TRUE", 1.0);
-        vars.put("FALSE", 0.0);
-        */
-
+    private CoreMathExpressionEngine(String expression) {
         _cacheAST = buildAST(shuntingYard(expression));
     }
 
-
-    /*
-    private static class LRUCache extends LinkedHashMap<String, org.mwg.ml.common.mathexp.MathExpressionEngine> {
-
-        final int cacheSize;
-
-        LRUCache(int cacheSize) {
-            super(16, 0.75f, true);
-            this.cacheSize = cacheSize;
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, org.mwg.ml.common.mathexp.MathExpressionEngine> eldest) {
-            return size() >= cacheSize;
-        }
-
-    }*/
-
-    public static synchronized org.mwg.ml.common.mathexp.MathExpressionEngine parse(String p_expression) {
-        org.mwg.ml.common.mathexp.MathExpressionEngine newEngine = new MathExpressionEngine(p_expression);
-        return newEngine;
+    public static synchronized org.mwg.core.task.math.MathExpressionEngine parse(String p_expression) {
+        return new CoreMathExpressionEngine(p_expression);
     }
-
 
     /**
      * @native ts
@@ -117,8 +93,8 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
             if (MathEntities.getINSTANCE().functions.keySet().contains(token.toUpperCase())) {
                 stack.push(token);
                 lastFunction = token;
-            } else if (PrimitiveHelper.equals(",", token)) {
-                while (!stack.isEmpty() && !PrimitiveHelper.equals("(", stack.peek())) {
+            } else if (",".equals(token)) {
+                while (!stack.isEmpty() && !("(".equals(stack.peek()))) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -137,15 +113,15 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                     token2 = stack.isEmpty() ? null : stack.peek();
                 }
                 stack.push(token);
-            } else if (PrimitiveHelper.equals("(", token)) {
+            } else if ("(".equals(token)) {
                 if (previousToken != null) {
                     if (isNumber(previousToken)) {
                         throw new RuntimeException("Missing operator at character position " + tokenizer.getPos());
                     }
                 }
                 stack.push(token);
-            } else if (PrimitiveHelper.equals(")", token)) {
-                while (!stack.isEmpty() && !PrimitiveHelper.equals("(", stack.peek())) {
+            } else if (")".equals(token)) {
+                while (!stack.isEmpty() && !("(".equals(stack.peek()))) {
                     outputQueue.add(stack.pop());
                 }
                 if (stack.isEmpty()) {
@@ -163,7 +139,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
         }
         while (!stack.isEmpty()) {
             String element = stack.pop();
-            if (PrimitiveHelper.equals("(", element) || PrimitiveHelper.equals(")", element)) {
+            if ("(".equals(element) || ")".equals(element)) {
                 throw new RuntimeException("Mismatched parentheses");
             }
             outputQueue.add(element);
@@ -205,7 +181,7 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                         stack.push(resolvedVar);
                     } else {
                         if (context != null) {
-                            if (PrimitiveHelper.equals("TIME", castedFreeToken.content())) {
+                            if ("TIME".equals(castedFreeToken.content())) {
                                 stack.push((double) context.time());
                             } else {
                                 String tokenName = castedFreeToken.content().trim();
@@ -225,9 +201,9 @@ public class MathExpressionEngine implements org.mwg.ml.common.mathexp.MathExpre
                                     double resultAsDouble = parseDouble(resolved.toString());
                                     variables.put(cleanName, resultAsDouble);
                                     String valueString = resolved.toString();
-                                    if (PrimitiveHelper.equals(valueString, "true")) {
+                                    if (valueString.equals("true")) {
                                         stack.push(1.0);
-                                    } else if (PrimitiveHelper.equals(valueString, "false")) {
+                                    } else if (valueString.equals("false")) {
                                         stack.push(0.0);
                                     } else {
                                         try {

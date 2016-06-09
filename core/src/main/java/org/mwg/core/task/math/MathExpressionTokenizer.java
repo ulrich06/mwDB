@@ -1,4 +1,4 @@
-package org.mwg.ml.common.mathexp.impl;
+package org.mwg.core.task.math;
 
 
 class MathExpressionTokenizer {
@@ -29,20 +29,20 @@ class MathExpressionTokenizer {
             return previousToken = null;
         }
         char ch = input.charAt(pos);
-        while (MathExpressionEngine.isWhitespace(ch) && pos < input.length()) {
+        while (CoreMathExpressionEngine.isWhitespace(ch) && pos < input.length()) {
             ch = input.charAt(++pos);
         }
-        if (MathExpressionEngine.isDigit(ch)) {
-            while ((MathExpressionEngine.isDigit(ch) || ch == MathExpressionEngine.decimalSeparator) && (pos < input.length())) {
+        if (CoreMathExpressionEngine.isDigit(ch)) {
+            while ((CoreMathExpressionEngine.isDigit(ch) || ch == CoreMathExpressionEngine.decimalSeparator) && (pos < input.length())) {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
-        } else if (ch == MathExpressionEngine.minusSign && MathExpressionEngine.isDigit(peekNextChar()) && (PrimitiveHelper.equals("(", previousToken) || PrimitiveHelper.equals(",", previousToken) || previousToken == null || MathEntities.getINSTANCE().operators.keySet().contains(previousToken))) {
-            token.append(MathExpressionEngine.minusSign);
+        } else if (ch == CoreMathExpressionEngine.minusSign && CoreMathExpressionEngine.isDigit(peekNextChar()) && ("(".equals(previousToken) || ",".equals(previousToken) || previousToken == null || MathEntities.getINSTANCE().operators.keySet().contains(previousToken))) {
+            token.append(CoreMathExpressionEngine.minusSign);
             pos++;
             token.append(next());
-        } else if (MathExpressionEngine.isLetter(ch) || (ch == '_') || (ch == '{') || (ch == '}') || (ch == '$')) {
-            while ((MathExpressionEngine.isLetter(ch) || MathExpressionEngine.isDigit(ch) || (ch == '_') || (ch == '{') || (ch == '}') || (ch == '$')) && (pos < input.length())) {
+        } else if (CoreMathExpressionEngine.isLetter(ch) || (ch == '_') || (ch == '{') || (ch == '}') || (ch == '$')) {
+            while ((CoreMathExpressionEngine.isLetter(ch) || CoreMathExpressionEngine.isDigit(ch) || (ch == '_') || (ch == '{') || (ch == '}') || (ch == '$')) && (pos < input.length())) {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
@@ -50,11 +50,11 @@ class MathExpressionTokenizer {
             token.append(ch);
             pos++;
         } else {
-            while (!MathExpressionEngine.isLetter(ch) && !MathExpressionEngine.isDigit(ch) && ch != '_' && !MathExpressionEngine.isWhitespace(ch) && ch != '(' && ch != ')' && ch != ',' && (ch != '{') && (ch != '}') && (ch != '$') && (pos < input.length())) {
+            while (!CoreMathExpressionEngine.isLetter(ch) && !CoreMathExpressionEngine.isDigit(ch) && ch != '_' && !CoreMathExpressionEngine.isWhitespace(ch) && ch != '(' && ch != ')' && ch != ',' && (ch != '{') && (ch != '}') && (ch != '$') && (pos < input.length())) {
                 token.append(input.charAt(pos));
                 pos++;
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
-                if (ch == MathExpressionEngine.minusSign) {
+                if (ch == CoreMathExpressionEngine.minusSign) {
                     break;
                 }
             }

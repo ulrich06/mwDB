@@ -1,4 +1,4 @@
-package org.mwg.ml.common.mathexp.impl;
+package org.mwg.core.task.math;
 
 class MathDoubleToken implements MathToken {
 

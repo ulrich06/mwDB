@@ -1,5 +1,4 @@
-package org.mwg.ml.common.mathexp.impl;
-
+package org.mwg.core.task.math;
 
 /**
  * Abstract definition of a supported operator. An operator is defined by
@@ -30,38 +29,37 @@ class MathOperation implements MathToken {
     }
 
     double eval(double v1, double v2) {
-
-        if (PrimitiveHelper.equals(oper, "+")) {
+        if (oper.equals("+")) {
             return v1 + v2;
-        } else if (PrimitiveHelper.equals(oper, "-")) {
+        } else if (oper.equals("-")) {
             return v1 - v2;
-        } else if (PrimitiveHelper.equals(oper, "*")) {
+        } else if (oper.equals("*")) {
             return v1 * v2;
-        } else if (PrimitiveHelper.equals(oper, "/")) {
+        } else if (oper.equals("/")) {
             return v1 / v2;
-        } else if (PrimitiveHelper.equals(oper, "%")) {
+        } else if (oper.equals("%")) {
             return v1 % v2;
-        } else if (PrimitiveHelper.equals(oper, "^")) {
+        } else if (oper.equals("^")) {
             return Math.pow(v1, v2);
-        } else if (PrimitiveHelper.equals(oper, "&&")) {
+        } else if (oper.equals("&&")) {
             boolean b1 = !(v1 == 0);
             boolean b2 = !(v2 == 0);
             return b1 && b2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, "||")) {
+        } else if (oper.equals("||")) {
             boolean b1 = !(v1 == 0);
             boolean b2 = !(v2 == 0);
             return b1 || b2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, ">")) {
+        } else if (oper.equals(">")) {
             return v1 > v2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, ">=")) {
+        } else if (oper.equals(">=")) {
             return v1 >= v2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, "<")) {
+        } else if (oper.equals("<")) {
             return v1 < v2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, "<=")) {
+        } else if (oper.equals("<=")) {
             return v1 <= v2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, "==")) {
+        } else if (oper.equals("==")) {
             return v1 == v2 ? 1 : 0;
-        } else if (PrimitiveHelper.equals(oper, "!=")) {
+        } else if (oper.equals("!=")) {
             return v1 != v2 ? 1 : 0;
         }
         return 0;
