@@ -653,6 +653,7 @@ declare module org {
                 remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                 parse(flat: string): org.mwg.task.Task;
                 action(name: string, params: string): org.mwg.task.Task;
+                math(expression: string): org.mwg.task.Task;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -1325,6 +1326,12 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     private filterArray(current);
                 }
+                class ActionMath implements org.mwg.task.TaskAction {
+                    _engine: org.mwg.core.task.math.MathExpressionEngine;
+                    constructor(mathExpression: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    arrayEval(objs: any[], result: java.util.List<number>): void;
+                }
                 class ActionNewNode implements org.mwg.task.TaskAction {
                     constructor();
                     eval(context: org.mwg.task.TaskContext): void;
@@ -1471,6 +1478,7 @@ declare module org {
                     removeProperty(propertyName: string): org.mwg.task.Task;
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
                     remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
+                    math(expression: string): org.mwg.task.Task;
                 }
                 class CoreTaskActionRegistry implements org.mwg.task.TaskActionRegistry {
                     private _factory;
@@ -1505,6 +1513,85 @@ declare module org {
                     next(): void;
                     clean(): void;
                     private cleanObj(o);
+                }
+                module math {
+                    class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
+                        static decimalSeparator: string;
+                        static minusSign: string;
+                        private _cacheAST;
+                        constructor(expression: string);
+                        static parse(p_expression: string): org.mwg.core.task.math.MathExpressionEngine;
+                        static isNumber(st: string): boolean;
+                        static isDigit(c: string): boolean;
+                        static isLetter(c: string): boolean;
+                        static isWhitespace(c: string): boolean;
+                        private shuntingYard(expression);
+                        eval(context: org.mwg.Node, variables: java.util.Map<string, number>): number;
+                        private buildAST(rpn);
+                        private parseDouble(val);
+                    }
+                    class MathDoubleToken implements org.mwg.core.task.math.MathToken {
+                        private _content;
+                        constructor(_content: number);
+                        type(): number;
+                        content(): number;
+                    }
+                    class MathEntities {
+                        private static INSTANCE;
+                        operators: java.util.HashMap<string, org.mwg.core.task.math.MathOperation>;
+                        functions: java.util.HashMap<string, org.mwg.core.task.math.MathFunction>;
+                        static getINSTANCE(): org.mwg.core.task.math.MathEntities;
+                        constructor();
+                    }
+                    interface MathExpressionEngine {
+                        eval(context: org.mwg.Node, variables: java.util.Map<string, number>): number;
+                    }
+                    class MathExpressionTokenizer {
+                        private pos;
+                        private input;
+                        private previousToken;
+                        constructor(input: string);
+                        hasNext(): boolean;
+                        private peekNextChar();
+                        next(): string;
+                        getPos(): number;
+                    }
+                    class MathFreeToken implements org.mwg.core.task.math.MathToken {
+                        private _content;
+                        constructor(content: string);
+                        content(): string;
+                        type(): number;
+                    }
+                    class MathFunction implements org.mwg.core.task.math.MathToken {
+                        private name;
+                        private numParams;
+                        constructor(name: string, numParams: number);
+                        getName(): string;
+                        getNumParams(): number;
+                        eval(p: Float64Array): number;
+                        private date_to_seconds(value);
+                        private date_to_minutes(value);
+                        private date_to_hours(value);
+                        private date_to_days(value);
+                        private date_to_months(value);
+                        private date_to_year(value);
+                        private date_to_dayofweek(value);
+                        type(): number;
+                    }
+                    class MathOperation implements org.mwg.core.task.math.MathToken {
+                        private oper;
+                        private precedence;
+                        private leftAssoc;
+                        constructor(oper: string, precedence: number, leftAssoc: boolean);
+                        getOper(): string;
+                        getPrecedence(): number;
+                        isLeftAssoc(): boolean;
+                        eval(v1: number, v2: number): number;
+                        type(): number;
+                    }
+                    interface MathToken {
+                        type(): number;
+                    }
                 }
                 class TaskContextWrapper implements org.mwg.task.TaskContext {
                     private _wrapped;
