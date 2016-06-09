@@ -710,7 +710,6 @@ declare module org {
             static LONG_LONG_ARRAY_MAP: number;
             static STRING_LONG_MAP: number;
             static REF: number;
-            static DEP_REF: number;
             static typeName(p_type: number): string;
         }
     }

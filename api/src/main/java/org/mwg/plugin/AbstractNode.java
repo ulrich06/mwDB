@@ -584,7 +584,6 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.REF:
-                            case Type.DEP_REF:
                             case Type.LONG_ARRAY: {
                                 builder.append(",\"");
                                 builder.append(_resolver.hashToString(attributeKey));

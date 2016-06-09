@@ -31,7 +31,6 @@ public class Type {
     public static final byte STRING_LONG_MAP = 11;
 
     public static final byte REF = 12;
-    public static final byte DEP_REF = 13;
 
     /**
      * Convert a type that represent a byte to a readable String representation
@@ -68,8 +67,6 @@ public class Type {
                 return "map(string->long)";
             case Type.REF:
                 return "reference";
-            case Type.DEP_REF:
-                return "dependency";
             default:
                 return "unknown";
         }

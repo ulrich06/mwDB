@@ -38,7 +38,6 @@ class ActionGet implements TaskAction {
                     byte propType = loop.type(_name);
                     switch (propType) {
                         case Type.REF:
-                        case Type.DEP_REF:
                             long[] propValueRef = (long[]) propValue;
                             for (int j = 0; j < propValueRef.length; j++) {
                                 collectedIds.add(propValueRef[j]);
@@ -102,7 +101,6 @@ class ActionGet implements TaskAction {
                     byte propType = loop.type(_name);
                     switch (propType) {
                         case Type.REF:
-                        case Type.DEP_REF:
                             long[] interResult = (long[]) propValue;
                             for (int j = 0; j < interResult.length; j++) {
                                 toLoad.add(interResult[j]);

@@ -155,7 +155,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         unsafe.getAndAddLong(null, elemPtr, 1);
                         break;
                     case Type.REF:
-                    case Type.DEP_REF:
                     case Type.LONG_ARRAY:
                         unsafe.getAndAddLong(null, elemPtr, 1);
                         break;
@@ -320,7 +319,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 }
                                 break;
                             case Type.REF:
-                            case Type.DEP_REF:
                             case Type.LONG_ARRAY:
                                 long[] castedLongArr = (long[]) loopValue;
                                 Base64.encodeIntToBuffer(castedLongArr.length, buffer);
@@ -508,7 +506,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 toInsert = currentDoubleArr;
                                 break;
                             case Type.REF:
-                            case Type.DEP_REF:
                             case Type.LONG_ARRAY:
                                 if (currentLongArr == null) {
                                     currentLongArr = new long[Base64.decodeToIntWithBounds(buffer, previousStart, cursor)];
@@ -594,7 +591,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                             currentDoubleArr = new double[currentSubSize];
                             break;
                         case Type.REF:
-                        case Type.DEP_REF:
                         case Type.LONG_ARRAY:
                             currentLongArr = new long[currentSubSize];
                             break;
@@ -620,7 +616,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                             currentSubIndex++;
                             break;
                         case Type.REF:
-                        case Type.DEP_REF:
                         case Type.LONG_ARRAY:
                             currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(buffer, previousStart, cursor);
                             currentSubIndex++;
@@ -721,7 +716,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                     toInsert = currentDoubleArr;
                     break;
                 case Type.REF:
-                case Type.DEP_REF:
                 case Type.LONG_ARRAY:
                     if (currentLongArr == null) {
                         currentLongArr = new long[Base64.decodeToIntWithBounds(buffer, previousStart, cursor)];
@@ -850,7 +844,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 }
                 break;
             case Type.REF:
-            case Type.DEP_REF:
             case Type.LONG_ARRAY:
                 cowCounter = unsafe.getAndAddLong(null, addr, -1) - 1;
                 if (cowCounter == 0) {
@@ -947,7 +940,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                         param_elem = (double[]) p_unsafe_elem;
                         break;
                     case Type.REF:
-                    case Type.DEP_REF:
                     case Type.LONG_ARRAY:
                         param_elem = (long[]) p_unsafe_elem;
                         break;
@@ -1121,7 +1113,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                     }
                     break;
                 case Type.REF:
-                case Type.DEP_REF:
                 case Type.LONG_ARRAY:
                     long[] longArrayToInsert = (long[]) elem;
                     if (longArrayToInsert != null) {
@@ -1269,7 +1260,6 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 }
                 return doubleArray;
             case Type.REF:
-            case Type.DEP_REF:
             case Type.LONG_ARRAY:
                 long elemLongPtr = OffHeapLongArray.get(elementV_ptr, index);
                 if (elemLongPtr == CoreConstants.OFFHEAP_NULL_PTR) {
