@@ -51,8 +51,16 @@ public class MathEngineTest {
                 //Test Time extraction
                 engine = CoreMathExpressionEngine.parse("TIME");
                 Node context=graph.newNode(0,200);
-                d = engine.eval(context, hashmap);
+                d = engine.eval(context, null);
                 Assert.assertTrue(d == 200);
+
+
+                //Test Time extraction
+                engine = CoreMathExpressionEngine.parse("f1^2");
+                context=graph.newNode(0,200);
+                context.set("f1",7);
+                d = engine.eval(context, new HashMap<String, Double> ());
+                Assert.assertTrue(d == 49);
 
             }
         });
