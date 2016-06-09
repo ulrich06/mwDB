@@ -176,7 +176,10 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                     break;
                 case 3:
                     MathFreeToken castedFreeToken = (MathFreeToken) mathToken;
-                    Double resolvedVar = variables.get(castedFreeToken.content());
+                    Double resolvedVar = null;
+                    if(variables!=null){
+                        resolvedVar=variables.get(castedFreeToken.content());
+                    }
                     if (resolvedVar != null) {
                         stack.push(resolvedVar);
                     } else {
