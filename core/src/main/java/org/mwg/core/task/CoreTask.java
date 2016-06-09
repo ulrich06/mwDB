@@ -396,15 +396,26 @@ public class CoreTask implements org.mwg.task.Task {
         int previous = 0;
         String actionName = null;
         boolean isClosed = false;
+        boolean isEscaped = false;
         while (cursor < flatSize) {
             char current = flat.charAt(cursor);
             switch (current) {
+                case '\'':
+                    isEscaped = true;
+                    while (cursor < flatSize) {
+                        if (flat.charAt(cursor) == '\'') {
+                            break;
+                        }
+                        cursor++;
+                    }
+                    break;
                 case Constants.TASK_SEP:
                     if (!isClosed) {
                         String getName = flat.substring(previous, cursor);
                         action("get", getName);//default action
                     }
                     actionName = null;
+                    isEscaped = false;
                     previous = cursor + 1;
                     break;
                 case Constants.TASK_PARAM_OPEN:
@@ -413,7 +424,13 @@ public class CoreTask implements org.mwg.task.Task {
                     break;
                 case Constants.TASK_PARAM_CLOSE:
                     //ADD LAST PARAM
-                    action(actionName, flat.substring(previous, cursor));
+                    String extracted;
+                    if (isEscaped) {
+                        extracted = flat.substring(previous + 1, cursor - 1);
+                    } else {
+                        extracted = flat.substring(previous, cursor);
+                    }
+                    action(actionName, extracted);
                     actionName = null;
                     previous = cursor + 1;
                     isClosed = true;
