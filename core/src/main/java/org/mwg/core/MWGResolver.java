@@ -620,6 +620,7 @@ class MWGResolver implements Resolver {
                 this._space.unmarkChunk(nodeSuperTimeTree);
                 this._space.unmarkChunk(nodeTimeTree);
                 this._space.unmarkChunk(currentEntry);
+                nodeWorldOrder.unlock();
                 return currentEntry;
             }
         }
@@ -627,6 +628,7 @@ class MWGResolver implements Resolver {
         //REFRESH
         previousResolveds = castedNode._previousResolveds.get();
         if (previousResolveds == null) {
+            nodeWorldOrder.unlock();
             throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR);
         }
         nodeWorldOrderMagic = nodeWorldOrder.magic();
