@@ -60,7 +60,7 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

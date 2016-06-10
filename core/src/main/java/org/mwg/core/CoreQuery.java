@@ -28,7 +28,7 @@ public class CoreQuery implements Query {
     }
 
     @Override
-    public Query parseString(String flatQuery) {
+    public Query parse(String flatQuery) {
         int cursor = 0;
         long currentKey = Constants.NULL_LONG;
         int lastElemStart = 0;

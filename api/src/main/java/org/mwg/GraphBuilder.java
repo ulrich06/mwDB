@@ -6,10 +6,6 @@ import org.mwg.plugin.Storage;
 
 public class GraphBuilder {
 
-    public static GraphBuilder builder() {
-        return new GraphBuilder();
-    }
-
     private Storage _storage = null;
     private Scheduler _scheduler = null;
     private NodeFactory[] _factories = null;
@@ -19,60 +15,10 @@ public class GraphBuilder {
     private long _saveBatchSize = -1;
     private boolean _readOnly = false;
 
-    private static InternalBuilder internalBuilder = null;
+    private static InternalBuilder _internalBuilder = null;
 
     public interface InternalBuilder {
         Graph newGraph(Storage storage, boolean readOnly, Scheduler scheduler, NodeFactory[] factories, boolean usingGC, boolean usingOffHeapMemory, long memorySize, long autoSaveSize);
-    }
-
-    private GraphBuilder() {
-        //NOOP
-    }
-
-    public GraphBuilder withStorage(Storage p_storage) {
-        this._storage = p_storage;
-        return this;
-    }
-
-    public GraphBuilder readOnly() {
-        _readOnly = true;
-        return this;
-    }
-
-    public GraphBuilder withScheduler(Scheduler p_scheduler) {
-        this._scheduler = p_scheduler;
-        return this;
-    }
-
-    public GraphBuilder withFactory(NodeFactory p_factory) {
-        if (_factories == null) {
-            _factories = new NodeFactory[1];
-            _factories[0] = p_factory;
-        } else {
-            NodeFactory[] _factories2 = new NodeFactory[_factories.length + 1];
-            System.arraycopy(_factories, 0, _factories2, 0, _factories.length);
-            _factories2[_factories.length] = p_factory;
-            _factories = _factories2;
-        }
-        return this;
-    }
-
-    public GraphBuilder withFactories(NodeFactory[] p_factories) {
-        if (_factories == null) {
-            _factories = p_factories;
-        } else {
-            NodeFactory[] _factories2 = new NodeFactory[_factories.length + p_factories.length];
-            System.arraycopy(_factories, 0, _factories2, 0, _factories.length);
-            System.arraycopy(p_factories, 0, _factories2, 0, p_factories.length);
-            _factories = _factories2;
-        }
-        return this;
-    }
-
-
-    public GraphBuilder withGC() {
-        this._gc = true;
-        return this;
     }
 
     public GraphBuilder withOffHeapMemory() {
@@ -80,34 +26,81 @@ public class GraphBuilder {
         return this;
     }
 
-    public GraphBuilder withMemorySize(long size) {
-        this._memorySize = size;
+    public GraphBuilder withStorage(Storage storage) {
+        this._storage = storage;
         return this;
     }
 
-    public GraphBuilder saveEvery(long batchSize) {
-        this._saveBatchSize = batchSize;
+    public GraphBuilder withReadOnlyStorage(Storage storage) {
+        this._storage = storage;
+        _readOnly = true;
         return this;
     }
+
+    public GraphBuilder withMemorySize(long numberOfElements) {
+        this._memorySize = numberOfElements;
+        return this;
+    }
+
+    public GraphBuilder saveEvery(long numberOfElements) {
+        this._saveBatchSize = numberOfElements;
+        return this;
+    }
+
+    public GraphBuilder withScheduler(Scheduler scheduler) {
+        this._scheduler = scheduler;
+        return this;
+    }
+
+    public GraphBuilder addNodeType(NodeFactory nodeFactory) {
+        if (_factories == null) {
+            _factories = new NodeFactory[1];
+            _factories[0] = nodeFactory;
+        } else {
+            NodeFactory[] _factories2 = new NodeFactory[_factories.length + 1];
+            System.arraycopy(_factories, 0, _factories2, 0, _factories.length);
+            _factories2[_factories.length] = nodeFactory;
+            _factories = _factories2;
+        }
+        return this;
+    }
+
+    public GraphBuilder addNodeTypes(NodeFactory[] nodeFactories) {
+        if (_factories == null) {
+            _factories = nodeFactories;
+        } else {
+            NodeFactory[] _factories2 = new NodeFactory[_factories.length + nodeFactories.length];
+            System.arraycopy(_factories, 0, _factories2, 0, _factories.length);
+            System.arraycopy(nodeFactories, 0, _factories2, 0, nodeFactories.length);
+            _factories = _factories2;
+        }
+        return this;
+    }
+
+    public GraphBuilder withGC() {
+        this._gc = true;
+        return this;
+    }
+
 
     /**
      * @native ts
-     * if (org.mwg.GraphBuilder.internalBuilder == null) {
-     * org.mwg.GraphBuilder.internalBuilder = new org.mwg.core.Builder();
+     * if (org.mwg.GraphBuilder._internalBuilder == null) {
+     * org.mwg.GraphBuilder._internalBuilder = new org.mwg.core.Builder();
      * }
-     * return org.mwg.GraphBuilder.internalBuilder.newGraph(this._storage, this._readOnly, this._scheduler, this._factories, this._gc, this._offHeap, this._memorySize, this._saveBatchSize);
+     * return org.mwg.GraphBuilder._internalBuilder.newGraph(this._storage, this._readOnly, this._scheduler, this._factories, this._gc, this._offHeap, this._memorySize, this._saveBatchSize);
      */
     public Graph build() {
-        if (internalBuilder == null) {
+        if (_internalBuilder == null) {
             synchronized (this) {
                 try {
-                    internalBuilder = (InternalBuilder) getClass().getClassLoader().loadClass("org.mwg.core.Builder").newInstance();
+                    _internalBuilder = (InternalBuilder) getClass().getClassLoader().loadClass("org.mwg.core.Builder").newInstance();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
-        return internalBuilder.newGraph(_storage, _readOnly, _scheduler, _factories, _gc, _offHeap, _memorySize, _saveBatchSize);
+        return _internalBuilder.newGraph(_storage, _readOnly, _scheduler, _factories, _gc, _offHeap, _memorySize, _saveBatchSize);
     }
 
 }

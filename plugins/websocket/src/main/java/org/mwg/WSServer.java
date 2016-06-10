@@ -6,6 +6,7 @@ import io.undertow.websockets.WebSocketConnectionCallback;
 import io.undertow.websockets.core.*;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
 import org.mwg.plugin.Chunk;
+import org.mwg.plugin.Job;
 import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
 
@@ -78,7 +79,7 @@ public class WSServer implements WebSocketConnectionCallback {
         final BufferIterator it = payload.iterator();
         final Buffer codeView = it.next();
         final Buffer callbackCodeView = it.next();
-        if (codeView != null && callbackCodeView != null && codeView.size() != 0) {
+        if (codeView != null && callbackCodeView != null && codeView.length() != 0) {
             byte firstCodeView = codeView.read(0);
             //compute resp prefix
             switch (firstCodeView) {
@@ -135,7 +136,7 @@ public class WSServer implements WebSocketConnectionCallback {
                         }
                     }
                     final ChunkKey[] collectedKeys = flatKeys.toArray(new ChunkKey[flatKeys.size()]);
-                    process_put(collectedKeys, flatValues.toArray(new Buffer[flatValues.size()]), result -> {
+                    process_put(collectedKeys, flatValues.toArray(new Buffer[flatValues.size()]), () -> {
                         Buffer concat = graph.newBuffer();
                         concat.write(WSConstants.RESP_UNLOCK);
                         concat.write(Constants.BUFFER_SEP);
@@ -173,9 +174,9 @@ public class WSServer implements WebSocketConnectionCallback {
         graph.storage().unlock(toUnlock, callback);
     }
 
-    private void process_put(final ChunkKey[] keys, final Buffer[] values, Callback<Boolean> callback) {
-        DeferCounter defer = graph.counter(keys.length);
-        defer.then(callback);
+    private void process_put(final ChunkKey[] keys, final Buffer[] values, Job job) {
+        DeferCounter defer = graph.newCounter(keys.length);
+        defer.then(job);
         for (int i = 0; i < keys.length; i++) {
             final int finalI = i;
             ChunkKey tuple = keys[i];
@@ -193,9 +194,9 @@ public class WSServer implements WebSocketConnectionCallback {
     }
 
     private void process_get(ChunkKey[] keys, Callback<Buffer> callback) {
-        DeferCounter defer = graph.counter(keys.length);
+        DeferCounter defer = graph.newCounter(keys.length);
         final Buffer[] buffers = new Buffer[keys.length];
-        defer.then(result -> {
+        defer.then(() -> {
             Buffer stream = graph.newBuffer();
             for (int i = 0; i < buffers.length; i++) {
                 if (i != 0) {

@@ -9,7 +9,7 @@ public abstract class AbstractActionTest {
     protected Graph graph;
 
     protected void initGraph() {
-        graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
         final AbstractActionTest selfPointer = this;
         graph.connect(new Callback<Boolean>() {
             @Override

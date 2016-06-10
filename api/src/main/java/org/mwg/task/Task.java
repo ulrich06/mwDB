@@ -12,7 +12,7 @@ public interface Task {
      * @param world that hasField to be set into the task context and will be used for next sub tasks.
      * @return this task to chain actions (fluent API)
      */
-    Task world(long world);
+    Task setWorld(long world);
 
     /**
      * Method to set the task context to a particular time.
@@ -20,7 +20,7 @@ public interface Task {
      * @param time that hasField to be set into the task context and will be used for next sub tasks
      * @return this task to chain actions (fluent API)
      */
-    Task time(long time);
+    Task setTime(long time);
 
     /**
      * Method to store the current task result into a named variable
@@ -37,6 +37,8 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task fromVar(String variableName);
+
+    Task setVar(String variableName, Object inputValue);
 
     /**
      * Method to initialise a task with any object
@@ -175,7 +177,7 @@ public interface Task {
      * @param subTask that have to be executed
      * @return this task to chain actions (fluent API)
      */
-    Task wait(Task subTask);
+    Task executeSubTask(Task subTask);
 
     /**
      * Execute a sub task if the condition is satisfied
@@ -295,6 +297,7 @@ public interface Task {
 
     /**
      * Execute a math expression on all nodes given from previous step
+     *
      * @param expression math expression to execute
      * @return this task to chain actions (fluent API)
      */

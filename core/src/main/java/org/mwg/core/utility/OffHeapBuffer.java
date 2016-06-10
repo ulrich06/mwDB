@@ -80,7 +80,7 @@ class OffHeapBuffer extends AbstractBuffer {
     }
 
     @Override
-    public long size() {
+    public long length() {
         return writeCursor;
     }
 

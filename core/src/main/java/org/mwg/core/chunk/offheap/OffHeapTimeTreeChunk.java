@@ -53,7 +53,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
         //init
         if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             addr = previousAddr;
-        } else if (initialPayload != null && initialPayload.size() > 0) {
+        } else if (initialPayload != null && initialPayload.length() > 0) {
             addr = OffHeapLongArray.allocate(14);
             load(initialPayload);
         } else {
@@ -614,7 +614,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
 
         long cursor = 0;
         long previous = 0;
-        long payloadSize = buffer.size();
+        long payloadSize = buffer.length();
         while (cursor < payloadSize) {
             byte current = buffer.read(cursor);
             if (current == CoreConstants.CHUNK_SUB_SEP) {
@@ -635,7 +635,7 @@ public class OffHeapTimeTreeChunk implements TimeTreeChunk, OffHeapChunk {
             //loop
             long cursor = 0;
             long previous = 0;
-            long payloadSize = buffer.size();
+            long payloadSize = buffer.length();
             while (cursor < payloadSize) {
                 byte current = buffer.read(cursor);
                 if (current == CoreConstants.CHUNK_SUB_SEP) {

@@ -6,12 +6,13 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.plugin.Job;
 
 public class Benchmark2Test {
 
     //@Test
     public void heapTest() {
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withMemorySize(100).saveEvery(10).build();
+        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withMemorySize(100).saveEvery(10).build();
         test(graph, new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -36,7 +37,7 @@ public class Benchmark2Test {
         OffHeapLongArray.alloc_counter = 0;
         OffHeapStringArray.alloc_counter = 0;
 
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).saveEvery(20).build();
+        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100).saveEvery(20).build();
 
         test(graph, new Callback<Boolean>() {
             @Override
@@ -72,7 +73,7 @@ public class Benchmark2Test {
                 temp_node.free();
 
                 //Node node = graph.newNode(0, 0);
-                final DeferCounter counter = graph.counter(valuesToInsert);
+                final DeferCounter counter = graph.newCounter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
                     if (i % 10 == 0) {
@@ -118,9 +119,9 @@ public class Benchmark2Test {
                 // node.free();
 
 
-                counter.then(new Callback() {
+                counter.then(new Job() {
                     @Override
-                    public void on(Object result) {
+                    public void run() {
 
                         long beforeRead = System.currentTimeMillis();
 

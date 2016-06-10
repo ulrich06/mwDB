@@ -88,8 +88,8 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
     }
 
     private void load(Buffer payload) {
-        if (payload != null && payload.size() > 0) {
-            _currentIndex.compareAndSet(_currentIndex.get(), Base64.decodeToLongWithBounds(payload, 0, payload.size()));
+        if (payload != null && payload.length() > 0) {
+            _currentIndex.compareAndSet(_currentIndex.get(), Base64.decodeToLongWithBounds(payload, 0, payload.length()));
         } else {
             _currentIndex.compareAndSet(_currentIndex.get(), 0);
         }
@@ -103,7 +103,7 @@ public class HeapGenChunk implements GenChunk, HeapChunk {
     @Override
     public void merge(Buffer buffer) {
         long previous;
-        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
+        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.length());
         do {
             previous = _currentIndex.get();
         } while (!_currentIndex.compareAndSet(previous, toInsert));

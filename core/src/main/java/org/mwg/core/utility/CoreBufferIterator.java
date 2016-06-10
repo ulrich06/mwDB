@@ -12,7 +12,7 @@ class CoreBufferIterator implements BufferIterator {
 
     CoreBufferIterator(AbstractBuffer p_origin) {
         _origin = p_origin;
-        _originSize = p_origin.size();
+        _originSize = p_origin.length();
     }
 
     @Override

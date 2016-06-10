@@ -14,7 +14,7 @@ public class GetPostTest {
 
     @Test
     public void test() throws Exception {
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
         graph.connect(o -> {
             for (int i = 0; i < 10; i++) {
                 Node nodeLoop = graph.newNode(0, i);

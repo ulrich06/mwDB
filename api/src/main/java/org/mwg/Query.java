@@ -2,7 +2,7 @@ package org.mwg;
 
 public interface Query {
 
-    Query parseString(String flatQuery);
+    Query parse(String flatQuery);
 
     Query add(String attributeName, Object value);
 

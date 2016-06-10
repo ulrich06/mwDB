@@ -95,7 +95,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         this._extra = CoreConstants.NULL_LONG;
 
         this._listener = p_listener;
-        if (initialPayload != null && initialPayload.size() > 0) {
+        if (initialPayload != null && initialPayload.length() > 0) {
             load(initialPayload);
         } else {
             int initialCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
@@ -292,7 +292,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     @Override
     public void merge(Buffer buffer) {
         long cursor = 0;
-        long bufferSize = buffer.size();
+        long bufferSize = buffer.length();
         boolean initDone = false;
         long previousStart = 0;
         long loopKey = CoreConstants.NULL_LONG;
@@ -351,7 +351,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
     }
 
     private void load(Buffer buffer) {
-        if (buffer == null || buffer.size() == 0) {
+        if (buffer == null || buffer.length() == 0) {
             return;
         }
         int cursor = 0;
@@ -360,7 +360,7 @@ public class HeapWorldOrderChunk implements WorldOrderChunk, HeapChunk {
         long capacity = -1;
         int insertIndex = 0;
         InternalState temp_state = null;
-        long bufferSize = buffer.size();
+        long bufferSize = buffer.length();
         boolean initDone = false;
         while (cursor < bufferSize) {
             if (buffer.read(cursor) == CoreConstants.CHUNK_SEP) {

@@ -21,8 +21,8 @@ public class ActionAddTest extends AbstractActionTest {
 
         long[] id = new long[1];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .newNode()
                 .from(relatedNode).asVar("x")
                 .add("friend", "x")
@@ -51,8 +51,8 @@ public class ActionAddTest extends AbstractActionTest {
 
         long[] ids = new long[5];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .from(relatedNode).asVar("x")
                 .then(new Action() {
                     @Override
@@ -96,8 +96,8 @@ public class ActionAddTest extends AbstractActionTest {
 
         boolean[] nextCalled = new boolean[1];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

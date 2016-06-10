@@ -79,10 +79,10 @@ public class StateChunkTest implements ChunkListener {
     }
 
     private boolean compareBuffers(Buffer buffer, Buffer buffer2) {
-        if (buffer.size() != buffer2.size()) {
+        if (buffer.length() != buffer2.length()) {
             return false;
         }
-        for (int i = 0; i < buffer.size(); i++) {
+        for (int i = 0; i < buffer.length(); i++) {
             if (buffer.read(i) != buffer2.read(i)) {
                 return false;
             }
@@ -170,17 +170,17 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertTrue(compareBuffers(buffer, buffer2));
 
         //init chunk selectWith some maps
-        LongLongMap long2longMap = (LongLongMap) chunk.getOrCreate(8, Type.LONG_LONG_MAP);
+        LongLongMap long2longMap = (LongLongMap) chunk.getOrCreate(8, Type.LONG_TO_LONG_MAP);
         long2longMap.put(1, 1);
         long2longMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
         long2longMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
 
-        StringLongMap string2longMap = (StringLongMap) chunk.getOrCreate(9, Type.STRING_LONG_MAP);
+        StringLongMap string2longMap = (StringLongMap) chunk.getOrCreate(9, Type.STRING_TO_LONG_MAP);
         string2longMap.put("1", 1);
         string2longMap.put(Constants.END_OF_TIME + "", Constants.END_OF_TIME);
         string2longMap.put(Constants.BEGINNING_OF_TIME + "", Constants.BEGINNING_OF_TIME);
 
-        LongLongArrayMap long2longArrayMap = (LongLongArrayMap) chunk.getOrCreate(10, Type.LONG_LONG_ARRAY_MAP);
+        LongLongArrayMap long2longArrayMap = (LongLongArrayMap) chunk.getOrCreate(10, Type.LONG_TO_LONG_ARRAY_MAP);
         long2longArrayMap.put(1, 1);
         long2longArrayMap.put(Constants.END_OF_TIME, Constants.END_OF_TIME);
         long2longArrayMap.put(Constants.BEGINNING_OF_TIME, Constants.BEGINNING_OF_TIME);
@@ -297,9 +297,9 @@ public class StateChunkTest implements ChunkListener {
         protectionMethod(chunk, Type.INT_ARRAY, "hello", true);
 
         //maps
-        protectionMethod(chunk, Type.STRING_LONG_MAP, "hello", true);
-        protectionMethod(chunk, Type.LONG_LONG_MAP, "hello", true);
-        protectionMethod(chunk, Type.LONG_LONG_ARRAY_MAP, "hello", true);
+        protectionMethod(chunk, Type.STRING_TO_LONG_MAP, "hello", true);
+        protectionMethod(chunk, Type.LONG_TO_LONG_MAP, "hello", true);
+        protectionMethod(chunk, Type.LONG_TO_LONG_ARRAY_MAP, "hello", true);
 
         free(chunk);
 
@@ -319,9 +319,9 @@ public class StateChunkTest implements ChunkListener {
         chunk.set(6, Type.LONG_ARRAY, new long[]{1, 2, 3});
         chunk.set(7, Type.INT_ARRAY, new int[]{1, 2, 3});
         //init maps
-        ((LongLongMap) chunk.getOrCreate(8, Type.LONG_LONG_MAP)).put(100, 100);
-        ((LongLongArrayMap) chunk.getOrCreate(9, Type.LONG_LONG_ARRAY_MAP)).put(100, 100);
-        ((StringLongMap) chunk.getOrCreate(10, Type.STRING_LONG_MAP)).put("100", 100);
+        ((LongLongMap) chunk.getOrCreate(8, Type.LONG_TO_LONG_MAP)).put(100, 100);
+        ((LongLongArrayMap) chunk.getOrCreate(9, Type.LONG_TO_LONG_ARRAY_MAP)).put(100, 100);
+        ((StringLongMap) chunk.getOrCreate(10, Type.STRING_TO_LONG_MAP)).put("100", 100);
 
         //ok now switch all types
 
@@ -360,9 +360,9 @@ public class StateChunkTest implements ChunkListener {
         Assert.assertTrue(((int[]) chunk.get(6))[0] == 1);
 
         //switch maps
-        ((LongLongMap) chunk.getOrCreate(7, Type.LONG_LONG_MAP)).put(100, 100);
-        ((LongLongArrayMap) chunk.getOrCreate(8, Type.LONG_LONG_ARRAY_MAP)).put(100, 100);
-        ((StringLongMap) chunk.getOrCreate(9, Type.STRING_LONG_MAP)).put("100", 100);
+        ((LongLongMap) chunk.getOrCreate(7, Type.LONG_TO_LONG_MAP)).put(100, 100);
+        ((LongLongArrayMap) chunk.getOrCreate(8, Type.LONG_TO_LONG_ARRAY_MAP)).put(100, 100);
+        ((StringLongMap) chunk.getOrCreate(9, Type.STRING_TO_LONG_MAP)).put("100", 100);
 
         free(chunk);
 
@@ -393,9 +393,9 @@ public class StateChunkTest implements ChunkListener {
         chunk.set(6, Type.LONG_ARRAY, new long[]{1, 2, 3});
         chunk.set(7, Type.INT_ARRAY, new int[]{1, 2, 3});
         //init maps
-        ((LongLongMap) chunk.getOrCreate(8, Type.LONG_LONG_MAP)).put(100, 100);
-        ((LongLongArrayMap) chunk.getOrCreate(9, Type.LONG_LONG_ARRAY_MAP)).put(100, 100);
-        ((StringLongMap) chunk.getOrCreate(10, Type.STRING_LONG_MAP)).put("100", 100);
+        ((LongLongMap) chunk.getOrCreate(8, Type.LONG_TO_LONG_MAP)).put(100, 100);
+        ((LongLongArrayMap) chunk.getOrCreate(9, Type.LONG_TO_LONG_ARRAY_MAP)).put(100, 100);
+        ((StringLongMap) chunk.getOrCreate(10, Type.STRING_TO_LONG_MAP)).put("100", 100);
 
         //clone the chunk
         StateChunk chunk2 = factory.create(this, null, chunk);

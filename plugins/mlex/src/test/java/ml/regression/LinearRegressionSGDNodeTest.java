@@ -19,7 +19,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
 
     @Test
     public void testNormalSGD() {
-        Graph graph = GraphBuilder.builder()
+        Graph graph = new GraphBuilder()
                 //.withOffHeapMemory()
                 //.withMemorySize(20_000)
                 //.withAutoSave(10000)

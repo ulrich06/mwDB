@@ -225,13 +225,13 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 
 
     private void load(final Buffer buffer) {
-        if (buffer == null || buffer.size() == 0) {
+        if (buffer == null || buffer.length() == 0) {
             return;
         }
         _size = 0;
         long cursor = 0;
         long previous = 0;
-        long payloadSize = buffer.size();
+        long payloadSize = buffer.length();
         while (cursor < payloadSize) {
             byte current = buffer.read(cursor);
             if (current == CoreConstants.CHUNK_SUB_SEP) {
@@ -250,7 +250,7 @@ public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
         try {
             long cursor = 0;
             long previous = 0;
-            long payloadSize = buffer.size();
+            long payloadSize = buffer.length();
             while (cursor < payloadSize) {
                 byte current = buffer.read(cursor);
                 if (current == CoreConstants.CHUNK_SUB_SEP) {

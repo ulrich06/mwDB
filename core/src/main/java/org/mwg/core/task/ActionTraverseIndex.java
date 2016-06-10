@@ -5,6 +5,7 @@ import org.mwg.Node;
 import org.mwg.Query;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -42,9 +43,9 @@ class ActionTraverseIndex implements TaskAction {
                     Query queryObj = node.graph().newQuery();
                     queryObj.setWorld(context.getWorld());
                     queryObj.setTime(context.getTime());
-                    queryObj.parseString(_query);
+                    queryObj.parse(_query);
                     queryObj.setIndexName(_indexName);
-                    node.findQuery(queryObj, new Callback<Node[]>() {
+                    node.findByQuery(queryObj, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {
@@ -56,7 +57,11 @@ class ActionTraverseIndex implements TaskAction {
                         }
                     });
                 } else {
-                    node.allAt(context.getWorld(), context.getTime(), _indexName, new Callback<Node[]>() {
+                    Query query = node.graph().newQuery();
+                    query.setWorld(context.getWorld());
+                    query.setTime(context.getTime());
+                    query.setIndexName(_indexName);
+                    node.findAllByQuery(query, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {
@@ -69,9 +74,9 @@ class ActionTraverseIndex implements TaskAction {
                     });
                 }
             }
-            counter.then(new Callback() {
+            counter.then(new Job() {
                 @Override
-                public void on(Object result) {
+                public void run() {
                     if (cursor.get() == resultNodes.length) {
                         context.setResult(resultNodes);
                     } else {

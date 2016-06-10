@@ -34,13 +34,13 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task world(long world) {
+    public final org.mwg.task.Task setWorld(long world) {
         addAction(new ActionWorld(world));
         return this;
     }
 
     @Override
-    public final org.mwg.task.Task time(long time) {
+    public final org.mwg.task.Task setTime(long time) {
         addAction(new ActionTime(time));
         return this;
     }
@@ -93,12 +93,25 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
+
     @Override
     public final org.mwg.task.Task fromVar(String variableName) {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
         addAction(new ActionFromVar(variableName));
+        return this;
+    }
+
+    @Override
+    public Task setVar(String variableName, Object inputValue) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        if (inputValue == null) {
+            throw new RuntimeException("inputValue should not be null");
+        }
+        addAction(new ActionSetVar(variableName,inputValue));
         return this;
     }
 
@@ -187,7 +200,7 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task wait(Task subTask) {
+    public final org.mwg.task.Task executeSubTask(Task subTask) {
         if (subTask == null) {
             throw new RuntimeException("subTask should not be null");
         }

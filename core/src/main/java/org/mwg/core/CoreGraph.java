@@ -67,7 +67,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public long diverge(long world) {
+    public long fork(long world) {
         long childWorld = this._worldKeyCalculator.newKey();
         this._resolver.initWorld(world, childWorld);
         return childWorld;
@@ -192,7 +192,7 @@ class CoreGraph implements org.mwg.Graph {
                     selfPointer._storage.lock(new Callback<Buffer>() {
                         @Override
                         public void on(Buffer prefixBuf) {
-                            _prefix = (short) Base64.decodeToIntWithBounds(prefixBuf, 0, prefixBuf.size());
+                            _prefix = (short) Base64.decodeToIntWithBounds(prefixBuf, 0, prefixBuf.length());
                             prefixBuf.free();
                             final Buffer connectionKeys = selfPointer.newBuffer();
                             //preload ObjKeyGenerator
@@ -223,7 +223,7 @@ class CoreGraph implements org.mwg.Graph {
                                             //init the global universe tree (mandatory for synchronious create)
 
                                             WorldOrderChunk globalWorldOrder;
-                                            if (view3.size() > 0) {
+                                            if (view3.length() > 0) {
                                                 globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, view3, null);
                                             } else {
                                                 globalWorldOrder = (WorldOrderChunk) selfPointer._space.create(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, null, null);
@@ -232,21 +232,21 @@ class CoreGraph implements org.mwg.Graph {
 
                                             //init the global dictionary chunk
                                             StateChunk globalDictionaryChunk;
-                                            if (view4.size() > 0) {
+                                            if (view4.length() > 0) {
                                                 globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], view4, null);
                                             } else {
                                                 globalDictionaryChunk = (StateChunk) selfPointer._space.create(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2], null, null);
                                             }
                                             selfPointer._space.putAndMark(globalDictionaryChunk);
 
-                                            if (view2.size() > 0) {
+                                            if (view2.length() > 0) {
                                                 selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, _prefix, view2, null);
                                             } else {
                                                 selfPointer._worldKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.END_OF_TIME, Constants.NULL_LONG, _prefix, null, null);
                                             }
                                             selfPointer._space.putAndMark(selfPointer._worldKeyCalculator);
 
-                                            if (view1.size() > 0) {
+                                            if (view1.length() > 0) {
                                                 selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, _prefix, view1, null);
                                             } else {
                                                 selfPointer._nodeKeyCalculator = (GenChunk) selfPointer._space.create(ChunkType.GEN_CHUNK, Constants.BEGINNING_OF_TIME, Constants.NULL_LONG, _prefix, null, null);
@@ -507,7 +507,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void findQuery(Query query, Callback<Node[]> callback) {
+    public void findByQuery(Query query, Callback<Node[]> callback) {
         if (query == null) {
             throw new RuntimeException("query should not be null");
         }
@@ -530,7 +530,7 @@ class CoreGraph implements org.mwg.Graph {
                     }
                 } else {
                     query.setIndexName(CoreConstants.INDEX_ATTRIBUTE);
-                    foundIndex.findQuery(query, new Callback<org.mwg.Node[]>() {
+                    foundIndex.findByQuery(query, new Callback<org.mwg.Node[]>() {
                         @Override
                         public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
@@ -545,11 +545,20 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void all(long world, long time, String indexName, Callback<org.mwg.Node[]> callback) {
-        if (indexName == null) {
+    public void findAll(long world, long time, String indexName, Callback<org.mwg.Node[]> callback) {
+        Query query = newQuery();
+        query.setWorld(world);
+        query.setTime(time);
+        query.setIndexName(indexName);
+        findAllByQuery(query, callback);
+    }
+
+    @Override
+    public void findAllByQuery(Query query, Callback<Node[]> callback) {
+        if (query.indexName() == null) {
             throw new RuntimeException("indexName should not be null");
         }
-        getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
+        getIndexOrCreate(query.world(), query.time(), query.indexName(), new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
@@ -557,7 +566,13 @@ class CoreGraph implements org.mwg.Graph {
                         callback.on(new Node[0]);
                     }
                 } else {
-                    foundIndex.allAt(world, time, CoreConstants.INDEX_ATTRIBUTE, new Callback<org.mwg.Node[]>() {
+
+                    Query query2 = newQuery();
+                    query2.setWorld(query.world());
+                    query2.setTime(query.time());
+                    query2.setIndexName(CoreConstants.INDEX_ATTRIBUTE);
+
+                    foundIndex.findAllByQuery(query2, new Callback<org.mwg.Node[]>() {
                         @Override
                         public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
@@ -572,7 +587,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void namedIndex(long world, long time, String indexName, Callback<Node> callback) {
+    public void getIndexNode(long world, long time, String indexName, Callback<Node> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
@@ -602,7 +617,7 @@ class CoreGraph implements org.mwg.Graph {
 
                         globalIndexNodeUnsafe = new CoreNode(world, time, CoreConstants.END_OF_TIME, selfPointer, initPreviouslyResolved);
                         selfPointer._resolver.initNode(globalIndexNodeUnsafe, CoreConstants.NULL_LONG);
-                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.map(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_LONG_MAP);
+                        globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.getOrCreateMap(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_TO_LONG_MAP);
                     } else {
                         globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.get(CoreConstants.INDEX_ATTRIBUTE);
                     }
@@ -613,7 +628,7 @@ class CoreGraph implements org.mwg.Graph {
                         if (createIfNull) {
                             //insert null
                             org.mwg.Node newIndexNode = selfPointer.newNode(world, time);
-                            newIndexNode.map(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_LONG_ARRAY_MAP);
+                            newIndexNode.getOrCreateMap(CoreConstants.INDEX_ATTRIBUTE, Type.LONG_TO_LONG_ARRAY_MAP);
                             indexId = newIndexNode.id();
                             globalIndexContent.put(indexNameCoded, indexId);
                             callback.on(newIndexNode);
@@ -629,7 +644,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public DeferCounter counter(int expectedCountCalls) {
+    public DeferCounter newCounter(int expectedCountCalls) {
         return new CoreDeferCounter(expectedCountCalls);
     }
 

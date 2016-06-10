@@ -19,8 +19,8 @@ public class ActionNewNodeTest extends AbstractActionTest {
     public void testCreateNode() {
         final long id[] = new long[1];
         graph.newTask()
-                .world(15)
-                .time(587)
+                .setWorld(15)
+                .setTime(587)
                 .newNode()
                 .then(new Action() {
                     @Override

@@ -274,7 +274,7 @@ class MWGResolver implements Resolver {
                     BufferIterator it = payloads.iterator();
                     if (it.hasNext()) {
                         Buffer view = it.next();
-                        if (view.size() > 0) {
+                        if (view.length() > 0) {
                             result = selfPointer._space.create(type, world, time, id, view, null);
                             selfPointer._space.putAndMark(result);
                         }
@@ -332,7 +332,7 @@ class MWGResolver implements Resolver {
                     while (it.hasNext()) {
                         int reversedIndex = reverseIndex[i];
                         Buffer view = it.next();
-                        if (view.size() > 0) {
+                        if (view.length() > 0) {
                             result[reversedIndex] = selfPointer._space.create(types[reversedIndex], keys[reversedIndex * KEY_SIZE], keys[reversedIndex * KEY_SIZE + 1], keys[reversedIndex * KEY_SIZE + 2], view, null);
                         } else {
                             result[reversedIndex] = null;
@@ -1053,7 +1053,7 @@ class MWGResolver implements Resolver {
         if (insertIfNotExists) {
             StringLongMap dictionaryIndex = (StringLongMap) this.dictionary.get(0);
             if (dictionaryIndex == null) {
-                dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_LONG_MAP);
+                dictionaryIndex = (StringLongMap) this.dictionary.getOrCreate(0, Type.STRING_TO_LONG_MAP);
             }
             if (!dictionaryIndex.containsHash(hash)) {
                 dictionaryIndex.put(name, hash);

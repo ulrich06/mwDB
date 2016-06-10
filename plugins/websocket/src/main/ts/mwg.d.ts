@@ -310,32 +310,33 @@ declare module org {
         }
         interface DeferCounter {
             count(): void;
-            then(callback: org.mwg.Callback<any>): void;
+            then(job: org.mwg.plugin.Job): void;
         }
         interface Graph {
             newNode(world: number, time: number): org.mwg.Node;
             newTypedNode(world: number, time: number, nodeType: string): org.mwg.Node;
             cloneNode(origin: org.mwg.Node): org.mwg.Node;
             lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
-            diverge(world: number): number;
+            fork(world: number): number;
             save(callback: org.mwg.Callback<boolean>): void;
             connect(callback: org.mwg.Callback<boolean>): void;
             disconnect(callback: org.mwg.Callback<boolean>): void;
             index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            all(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            namedIndex(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
-            counter(expectedEventsCount: number): org.mwg.DeferCounter;
+            findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
+            newCounter(expectedEventsCount: number): org.mwg.DeferCounter;
             resolver(): org.mwg.plugin.Resolver;
             scheduler(): org.mwg.plugin.Scheduler;
+            space(): org.mwg.plugin.ChunkSpace;
+            storage(): org.mwg.plugin.Storage;
             newBuffer(): org.mwg.struct.Buffer;
             newQuery(): org.mwg.Query;
             newTask(): org.mwg.task.Task;
             newTaskContext(): org.mwg.task.TaskContext;
-            space(): org.mwg.plugin.ChunkSpace;
-            storage(): org.mwg.plugin.Storage;
             actions(): org.mwg.task.TaskActionRegistry;
         }
         class GraphBuilder {
@@ -347,18 +348,16 @@ declare module org {
             private _memorySize;
             private _saveBatchSize;
             private _readOnly;
-            private static internalBuilder;
-            static builder(): org.mwg.GraphBuilder;
-            constructor();
-            withStorage(p_storage: org.mwg.plugin.Storage): org.mwg.GraphBuilder;
-            readOnly(): org.mwg.GraphBuilder;
-            withScheduler(p_scheduler: org.mwg.plugin.Scheduler): org.mwg.GraphBuilder;
-            withFactory(p_factory: org.mwg.plugin.NodeFactory): org.mwg.GraphBuilder;
-            withFactories(p_factories: org.mwg.plugin.NodeFactory[]): org.mwg.GraphBuilder;
-            withGC(): org.mwg.GraphBuilder;
+            private static _internalBuilder;
             withOffHeapMemory(): org.mwg.GraphBuilder;
-            withMemorySize(size: number): org.mwg.GraphBuilder;
-            saveEvery(batchSize: number): org.mwg.GraphBuilder;
+            withStorage(storage: org.mwg.plugin.Storage): org.mwg.GraphBuilder;
+            withReadOnlyStorage(storage: org.mwg.plugin.Storage): org.mwg.GraphBuilder;
+            withMemorySize(numberOfElements: number): org.mwg.GraphBuilder;
+            saveEvery(numberOfElements: number): org.mwg.GraphBuilder;
+            withScheduler(scheduler: org.mwg.plugin.Scheduler): org.mwg.GraphBuilder;
+            addNodeType(nodeFactory: org.mwg.plugin.NodeFactory): org.mwg.GraphBuilder;
+            addNodeTypes(nodeFactories: org.mwg.plugin.NodeFactory[]): org.mwg.GraphBuilder;
+            withGC(): org.mwg.GraphBuilder;
             build(): org.mwg.Graph;
         }
         module GraphBuilder {
@@ -374,7 +373,7 @@ declare module org {
             type(propertyName: string): number;
             set(propertyName: string, propertyValue: any): void;
             setProperty(propertyName: string, propertyType: number, propertyValue: any): void;
-            map(propertyName: string, propertyType: number): org.mwg.struct.Map;
+            getOrCreateMap(propertyName: string, propertyType: number): org.mwg.struct.Map;
             removeProperty(propertyName: string): void;
             rel(relationName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             add(relationName: string, relatedNode: org.mwg.Node): void;
@@ -382,11 +381,11 @@ declare module org {
             index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
             find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            all(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            allAt(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findAll(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+            findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             timeDephasing(): number;
-            forcePhase(): void;
+            rephase(): void;
             timepoints(beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
             free(): void;
             graph(): org.mwg.Graph;
@@ -412,7 +411,7 @@ declare module org {
                 get(propertyName: string): any;
                 set(propertyName: string, propertyValue: any): void;
                 setProperty(propertyName: string, propertyType: number, propertyValue: any): void;
-                map(propertyName: string, propertyType: number): org.mwg.struct.Map;
+                getOrCreateMap(propertyName: string, propertyType: number): org.mwg.struct.Map;
                 type(propertyName: string): number;
                 removeProperty(attributeName: string): void;
                 rel(relationName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
@@ -420,13 +419,13 @@ declare module org {
                 remove(relationName: string, relatedNode: org.mwg.Node): void;
                 free(): void;
                 timeDephasing(): number;
-                forcePhase(): void;
+                rephase(): void;
                 timepoints(beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
                 jump<A extends org.mwg.Node>(targetTime: number, callback: org.mwg.Callback<A>): void;
-                findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                allAt(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                all(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findAll(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 private isNaN(toTest);
@@ -547,7 +546,7 @@ declare module org {
             }
         }
         interface Query {
-            parseString(flatQuery: string): org.mwg.Query;
+            parse(flatQuery: string): org.mwg.Query;
             add(attributeName: string, value: any): org.mwg.Query;
             setWorld(initialWorld: number): org.mwg.Query;
             world(): number;
@@ -565,7 +564,7 @@ declare module org {
                 writeAll(bytes: Int8Array): void;
                 read(position: number): number;
                 data(): Int8Array;
-                size(): number;
+                length(): number;
                 free(): void;
                 iterator(): org.mwg.struct.BufferIterator;
                 removeLast(): void;
@@ -612,10 +611,11 @@ declare module org {
                 (context: org.mwg.task.TaskContext): void;
             }
             interface Task {
-                world(world: number): org.mwg.task.Task;
-                time(time: number): org.mwg.task.Task;
+                setWorld(world: number): org.mwg.task.Task;
+                setTime(time: number): org.mwg.task.Task;
                 asVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
+                setVar(variableName: string, inputValue: any): org.mwg.task.Task;
                 from(inputValue: any): org.mwg.task.Task;
                 fromIndex(indexName: string, query: string): org.mwg.task.Task;
                 fromIndexAll(indexName: string): org.mwg.task.Task;
@@ -635,7 +635,7 @@ declare module org {
                 foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 foreachThen<T>(action: org.mwg.Callback<T>): org.mwg.task.Task;
-                wait(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 then(action: org.mwg.task.Action): org.mwg.task.Task;
@@ -706,10 +706,10 @@ declare module org {
             static DOUBLE_ARRAY: number;
             static LONG_ARRAY: number;
             static INT_ARRAY: number;
-            static LONG_LONG_MAP: number;
-            static LONG_LONG_ARRAY_MAP: number;
-            static STRING_LONG_MAP: number;
-            static REF: number;
+            static LONG_TO_LONG_MAP: number;
+            static LONG_TO_LONG_ARRAY_MAP: number;
+            static STRING_TO_LONG_MAP: number;
+            static RELATION: number;
             static typeName(p_type: number): string;
         }
     }
@@ -1166,7 +1166,7 @@ declare module org {
                 private _lock;
                 private _registry;
                 constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_factories: org.mwg.plugin.NodeFactory[]);
-                diverge(world: number): number;
+                fork(world: number): number;
                 newNode(world: number, time: number): org.mwg.Node;
                 newTypedNode(world: number, time: number, nodeType: string): org.mwg.Node;
                 cloneNode(origin: org.mwg.Node): org.mwg.Node;
@@ -1183,11 +1183,12 @@ declare module org {
                 index(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                findQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                all(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                namedIndex(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
+                findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
                 private getIndexOrCreate(world, time, indexName, callback, createIfNull);
-                counter(expectedCountCalls: number): org.mwg.DeferCounter;
+                newCounter(expectedCountCalls: number): org.mwg.DeferCounter;
                 resolver(): org.mwg.plugin.Resolver;
                 scheduler(): org.mwg.plugin.Scheduler;
                 space(): org.mwg.plugin.ChunkSpace;
@@ -1208,7 +1209,7 @@ declare module org {
                 private _time;
                 private _indexName;
                 constructor(p_resolver: org.mwg.plugin.Resolver);
-                parseString(flatQuery: string): org.mwg.Query;
+                parse(flatQuery: string): org.mwg.Query;
                 add(attributeName: string, value: any): org.mwg.Query;
                 setWorld(initialWorld: number): org.mwg.Query;
                 world(): number;
@@ -1375,6 +1376,12 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     private setFromArray(objs, relName, toSet);
                 }
+                class ActionSetVar implements org.mwg.task.TaskAction {
+                    private _name;
+                    private _value;
+                    constructor(name: string, value: any);
+                    eval(context: org.mwg.task.TaskContext): void;
+                }
                 class ActionTime implements org.mwg.task.TaskAction {
                     private _time;
                     constructor(p_time: number);
@@ -1434,14 +1441,15 @@ declare module org {
                     private _actionCursor;
                     constructor(p_graph: org.mwg.Graph);
                     private addAction(task);
-                    world(world: number): org.mwg.task.Task;
-                    time(time: number): org.mwg.task.Task;
+                    setWorld(world: number): org.mwg.task.Task;
+                    setTime(time: number): org.mwg.task.Task;
                     fromIndex(indexName: string, query: string): org.mwg.task.Task;
                     fromIndexAll(indexName: string): org.mwg.task.Task;
                     selectWith(name: string, pattern: string): org.mwg.task.Task;
                     selectWithout(name: string, pattern: string): org.mwg.task.Task;
                     asVar(variableName: string): org.mwg.task.Task;
                     fromVar(variableName: string): org.mwg.task.Task;
+                    setVar(variableName: string, inputValue: any): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
                     selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     get(name: string): org.mwg.task.Task;
@@ -1454,7 +1462,7 @@ declare module org {
                     group(groupFunction: org.mwg.task.TaskFunctionGroup): org.mwg.task.Task;
                     groupWhere(groupSubTask: org.mwg.task.Task): org.mwg.task.Task;
                     from(inputValue: any): org.mwg.task.Task;
-                    wait(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                     whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                     then(p_action: org.mwg.task.Action): org.mwg.task.Task;
@@ -1616,7 +1624,7 @@ declare module org {
                     abstract slice(initPos: number, endPos: number): Int8Array;
                     iterator(): org.mwg.struct.BufferIterator;
                     abstract read(position: number): number;
-                    abstract size(): number;
+                    abstract length(): number;
                     abstract write(b: number): void;
                     abstract writeAll(bytes: Int8Array): void;
                     abstract data(): Int8Array;
@@ -1639,7 +1647,7 @@ declare module org {
                     writeAll(bytes: Int8Array): void;
                     read(position: number): number;
                     data(): Int8Array;
-                    size(): number;
+                    length(): number;
                     free(): void;
                     iterator(): org.mwg.struct.BufferIterator;
                     removeLast(): void;
@@ -1658,7 +1666,7 @@ declare module org {
                     private _end;
                     constructor(nb: number);
                     count(): void;
-                    then(p_callback: org.mwg.Callback<any>): void;
+                    then(p_callback: org.mwg.plugin.Job): void;
                 }
                 class DataHasher {
                     private static byteTable;
@@ -1675,7 +1683,7 @@ declare module org {
                     writeAll(bytes: Int8Array): void;
                     read(position: number): number;
                     data(): Int8Array;
-                    size(): number;
+                    length(): number;
                     free(): void;
                     removeLast(): void;
                 }

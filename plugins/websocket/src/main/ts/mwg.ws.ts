@@ -81,14 +81,14 @@ module org {
                     payloadBuf.writeAll(payload);
                     var it = payloadBuf.iterator();
                     var codeView = it.next();
-                    if (codeView != null && codeView.size() != 0) {
+                    if (codeView != null && codeView.length() != 0) {
                         var firstCode = codeView.read(0);
                         if(firstCode == this.REQ_UPDATE){
                             //console.log("NOTIFY UPDATE"); //TODO
                         } else {
                             var callbackCodeView = it.next();
                             if(callbackCodeView != null){
-                                var callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
+                                var callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.length());
                                 var resolvedCallback = this.callbacks.get(callbackCode);
                                 if (resolvedCallback != null) {
                                     if (firstCode == this.RESP_GET || firstCode == this.RESP_LOCK) {

@@ -11,7 +11,7 @@ public class GraphRobustness {
     private Graph _graph;
 
     public GraphRobustness() {
-        _graph = GraphBuilder.builder().build();
+        _graph = new GraphBuilder().build();
         _graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -291,7 +291,7 @@ public class GraphRobustness {
     public void robustnessFindQuery() {
         boolean exceptionCaught = false;
         try {
-            _graph.findQuery(null, new Callback<Node[]>() {
+            _graph.findByQuery(null, new Callback<Node[]>() {
                 @Override
                 public void on(Node[] result) {
 
@@ -310,7 +310,7 @@ public class GraphRobustness {
             q.setWorld(0);
             q.setTime(0);
             q.setIndexName("indexName");
-            _graph.findQuery(q, null);
+            _graph.findByQuery(q, null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -325,7 +325,7 @@ public class GraphRobustness {
         //indexName
         boolean exceptionCaught = false;
         try {
-            _graph.all(0, 0, null, new Callback<Node[]>() {
+            _graph.findAll(0, 0, null, new Callback<Node[]>() {
                 @Override
                 public void on(Node[] result) {
 
@@ -341,7 +341,7 @@ public class GraphRobustness {
 
         //callback
         try {
-            _graph.all(0, 0, "indexName", null);
+            _graph.findAll(0, 0, "indexName", null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }
@@ -358,7 +358,7 @@ public class GraphRobustness {
         //indexName
         boolean exceptionCaught = false;
         try {
-            _graph.namedIndex(0, 0, null, new Callback<Node>() {
+            _graph.getIndexNode(0, 0, null, new Callback<Node>() {
                 @Override
                 public void on(Node result) {
 
@@ -374,7 +374,7 @@ public class GraphRobustness {
 
         //callback
         try {
-            _graph.namedIndex(0, 0, "indexName", null);
+            _graph.getIndexNode(0, 0, "indexName", null);
         } catch (Exception e) {
             Assert.fail("Unexpected exception thrown");
         }

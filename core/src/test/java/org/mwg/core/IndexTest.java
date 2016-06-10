@@ -14,8 +14,8 @@ public class IndexTest {
 
     @Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
-        testRelation(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).build());
+        testRelation(new GraphBuilder().withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -30,8 +30,8 @@ public class IndexTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(100).build());
-        testRelation(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(100).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(100).build());
+        testRelation(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(100).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -52,7 +52,7 @@ public class IndexTest {
                 node_t1.add("children", node_t0);
                 graph.index("bigram", node_t1, "children", null);
 
-                graph.all(0, 0, "bigram", new Callback<Node[]>() {
+                graph.findAll(0, 0, "bigram", new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result) {
                         Assert.assertEquals(result.length, 1);
@@ -66,7 +66,7 @@ public class IndexTest {
                 q.setTime(0);
                 q.setWorld(0);
                 q.add("children", new long[]{node_t0.id()});
-                graph.findQuery(q, new Callback<Node[]>() {
+                graph.findByQuery(q, new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result) {
                         Assert.assertEquals(result.length, 1);
@@ -88,7 +88,7 @@ public class IndexTest {
                 org.mwg.Node node_t0 = graph.newNode(0, 0);
                 node_t0.setProperty("name", Type.STRING, "MyName");
 
-                graph.all(0, 0, "nodes", new Callback<org.mwg.Node[]>() {
+                graph.findAll(0, 0, "nodes", new Callback<org.mwg.Node[]>() {
                     @Override
                     public void on(org.mwg.Node[] allNodes) {
                         counter[0]++;
@@ -103,7 +103,7 @@ public class IndexTest {
                     }
                 });
 
-                graph.all(0, 0, "nodes", new Callback<org.mwg.Node[]>() {
+                graph.findAll(0, 0, "nodes", new Callback<org.mwg.Node[]>() {
                     @Override
                     public void on(org.mwg.Node[] allNodes) {
                         counter[0]++;
@@ -123,7 +123,7 @@ public class IndexTest {
                 });
 
                 //test a null index
-                graph.all(0, 0, "unknownIndex", new Callback<org.mwg.Node[]>() {
+                graph.findAll(0, 0, "unknownIndex", new Callback<org.mwg.Node[]>() {
                     @Override
                     public void on(org.mwg.Node[] allNodes) {
                         counter[0]++;

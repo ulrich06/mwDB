@@ -145,10 +145,10 @@ public class WorldOrderChunkTest implements ChunkListener {
     }
 
     private boolean compareBuffers(Buffer buffer, Buffer buffer2) {
-        if (buffer.size() != buffer2.size()) {
+        if (buffer.length() != buffer2.length()) {
             return false;
         }
-        for (int i = 0; i < buffer.size(); i++) {
+        for (int i = 0; i < buffer.length(); i++) {
             if (buffer.read(i) != buffer2.read(i)) {
                 return false;
             }

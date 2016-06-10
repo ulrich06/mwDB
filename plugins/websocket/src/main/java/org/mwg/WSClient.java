@@ -170,7 +170,7 @@ public class WSClient implements Storage {
         payloadBuf.writeAll(payload);
         BufferIterator it = payloadBuf.iterator();
         Buffer codeView = it.next();
-        if (codeView != null && codeView.size() != 0) {
+        if (codeView != null && codeView.length() != 0) {
             final byte firstCode = codeView.read(0);
             if (firstCode == WSConstants.REQ_UPDATE) {
                 Buffer updateBuf = graph.newBuffer();
@@ -197,7 +197,7 @@ public class WSClient implements Storage {
             } else {
                 Buffer callbackCodeView = it.next();
                 if (callbackCodeView != null) {
-                    int callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.size());
+                    int callbackCode = Base64.decodeToIntWithBounds(callbackCodeView, 0, callbackCodeView.length());
                     Callback resolvedCallback = callbacks.get(callbackCode);
                     if (resolvedCallback != null) {
                         if (firstCode == WSConstants.RESP_LOCK || firstCode == WSConstants.RESP_GET) {

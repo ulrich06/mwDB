@@ -17,7 +17,7 @@ import java.util.Random;
 public class TestPolynomialRandom {
     @Test
     public void randomTest() {
-        final Graph graph = GraphBuilder.builder().withFactory(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

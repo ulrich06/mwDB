@@ -10,6 +10,7 @@ import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Job;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class StorageTest {
 
-     @Test
+    @Test
     public void offHeapTest() {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
@@ -27,7 +28,7 @@ public class StorageTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test("offheap ", GraphBuilder.builder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
+        test("offheap ", new GraphBuilder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
     }
 
     final int valuesToInsert = 300_000;
@@ -39,7 +40,7 @@ public class StorageTest {
             public void on(Boolean result) {
                 final long before = System.currentTimeMillis();
                 Node node = graph.newNode(0, 0);
-                final DeferCounter counter = graph.counter(valuesToInsert);
+                final DeferCounter counter = graph.newCounter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
                     if (i % 1_000_000 == 0) {
@@ -59,9 +60,9 @@ public class StorageTest {
                 }
                 node.free();
 
-                counter.then(new Callback() {
+                counter.then(new Job() {
                     @Override
-                    public void on(Object result) {
+                    public void run() {
 
                         long beforeRead = System.currentTimeMillis();
 
@@ -85,28 +86,28 @@ public class StorageTest {
             }
         });
     }
-    
+
     @AfterClass
     public static void oneTimeTearDown() throws IOException {
         File data = new File("data");
-        if(data.exists()){
-        	System.out.println("Cleanup data directory");
-        	Path directory = Paths.get("data");
-        	   Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-        		   @Override
-        		   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        			   Files.delete(file);
-        			   return FileVisitResult.CONTINUE;
-        		   }
+        if (data.exists()) {
+            System.out.println("Cleanup data directory");
+            Path directory = Paths.get("data");
+            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
 
-        		   @Override
-        		   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        			   Files.delete(dir);
-        			   return FileVisitResult.CONTINUE;
-        		   }
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
 
-        	   });
+            });
         }
     }
-    
+
 }

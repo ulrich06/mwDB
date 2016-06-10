@@ -5,6 +5,7 @@ import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -37,7 +38,7 @@ class ActionGet implements TaskAction {
                 if (propValue != null) {
                     byte propType = loop.type(_name);
                     switch (propType) {
-                        case Type.REF:
+                        case Type.RELATION:
                             long[] propValueRef = (long[]) propValue;
                             for (int j = 0; j < propValueRef.length; j++) {
                                 collectedIds.add(propValueRef[j]);
@@ -49,7 +50,7 @@ class ActionGet implements TaskAction {
                     }
                 }
             }
-            DeferCounter deferCounter = context.graph().counter(collectedIds.size());
+            DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
             final Node[] resultNodes = new Node[collectedIds.size()];
 
             if (collectedIds.size() > 0) {
@@ -64,9 +65,9 @@ class ActionGet implements TaskAction {
                     });
                 }
                 Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
-                deferCounter.then(new Callback() {
+                deferCounter.then(new Job() {
                     @Override
-                    public void on(java.lang.Object result) {
+                    public void run() {
                         if (finalCollectedProperties == null) {
                             context.setResult(resultNodes);
                             context.next();
@@ -100,7 +101,7 @@ class ActionGet implements TaskAction {
                 if (propValue != null) {
                     byte propType = loop.type(_name);
                     switch (propType) {
-                        case Type.REF:
+                        case Type.RELATION:
                             long[] interResult = (long[]) propValue;
                             for (int j = 0; j < interResult.length; j++) {
                                 toLoad.add(interResult[j]);

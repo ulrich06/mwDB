@@ -18,7 +18,7 @@ public class PolynomialNodeTest {
 
     @Test
     public void testConstant() {
-        final Graph graph = GraphBuilder.builder().withFactory(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withFactory(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

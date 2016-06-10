@@ -75,7 +75,7 @@ public interface Node {
      * @param propertyType The type of the attribute. Must be one of {@link Type} int value.
      * @return A Map instance that can be altered at the current world and time.
      */
-    Map map(String propertyName, byte propertyType);
+    Map getOrCreateMap(String propertyName, byte propertyType);
 
     /**
      * Removes an attribute from the node.
@@ -149,7 +149,7 @@ public interface Node {
      * @param query    The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
      * @param callback Called when the task is fully processed. The parameter is the requested nodes, empty array otherwise.
      */
-    void findQuery(Query query, Callback<Node[]> callback);
+    void findByQuery(Query query, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes in a particular index at the current node world and the current node time
@@ -157,17 +157,15 @@ public interface Node {
      * @param indexName The name of the index
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      */
-    void all(String indexName, Callback<Node[]> callback);
+    void findAll(String indexName, Callback<Node[]> callback);
 
     /**
-     * Retrieves all nodes in a particular index and in a particular world and time
+     * Retrieves all nodes in a particular index using a query descriptor
      *
-     * @param world     The world id in which the search must be performed.
-     * @param time      The timepoint at which the search must be performed.
-     * @param indexName The name of the index
+     * @param query    The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
      * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
      */
-    void allAt(long world, long time, String indexName, Callback<Node[]> callback);
+    void findAllByQuery(Query query, Callback<Node[]> callback);
 
     /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.
@@ -181,7 +179,7 @@ public interface Node {
      * Clones the previous state to the exact time of this node.<br>
      * This cancels the dephasing between the current timepoint of the node and the last record timepoint.
      */
-    void forcePhase();
+    void rephase();
 
     /**
      * Retrieves all timePoints fromVar the timeLine of this node when alterations occurred.<br>

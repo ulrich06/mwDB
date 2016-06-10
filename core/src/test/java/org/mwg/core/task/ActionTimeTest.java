@@ -11,7 +11,7 @@ public class ActionTimeTest extends AbstractActionTest {
     public void test() {
         initGraph();
         graph.newTask()
-                .time(10)
+                .setTime(10)
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

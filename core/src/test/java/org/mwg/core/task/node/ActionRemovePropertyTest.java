@@ -22,8 +22,8 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
     public void testWithOneNode() {
         long[] id = new long[1];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .from("node").asVar("nodeName")
                 .newNode()
                 .set("name", "nodeName")
@@ -51,8 +51,8 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
     public void testWithArray() {
         long[] ids = new long[5];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .from("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
@@ -93,8 +93,8 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
     public void testWithNull() {
         boolean[] nextCalled = new boolean[1];
         graph.newTask()
-                .world(0)
-                .time(0)
+                .setWorld(0)
+                .setTime(0)
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

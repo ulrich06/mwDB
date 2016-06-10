@@ -20,7 +20,7 @@ import java.util.Random;
 public class GaussianProbaTest {
     @Test
     public void Gaussian1D() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -83,7 +83,7 @@ public class GaussianProbaTest {
 
     @Test
     public void MultinomialTest() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -146,7 +146,7 @@ public class GaussianProbaTest {
 
     @Test
     public void Singularity() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

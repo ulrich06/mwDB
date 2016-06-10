@@ -41,7 +41,7 @@ public class BufferView implements Buffer {
     }
 
     @Override
-    public final long size() {
+    public final long length() {
         return _endPos - _initPos + 1;
     }
 

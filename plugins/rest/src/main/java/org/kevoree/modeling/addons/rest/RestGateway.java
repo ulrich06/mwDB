@@ -65,8 +65,8 @@ public class RestGateway implements HttpHandler {
             if (httpServerExchange.getRequestMethod().equalToString("GET")) {
                 httpServerExchange.dispatch();
                 graph.newTask()
-                        .world(world)
-                        .time(time)
+                        .setWorld(world)
+                        .setTime(time)
                         .parse(concatQuery.toString())
                         .then(context -> {
                             Object result = context.getPreviousResult();
@@ -154,8 +154,8 @@ public class RestGateway implements HttpHandler {
                 }
 
                 graph.newTask()
-                        .world(world)
-                        .time(time)
+                        .setWorld(world)
+                        .setTime(time)
                         .parse(concatQuery.toString())
                         .then(context -> {
                             Object result = context.getPreviousResult();

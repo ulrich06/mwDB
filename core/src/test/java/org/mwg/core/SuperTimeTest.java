@@ -15,7 +15,7 @@ public class SuperTimeTest {
 
     @Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -30,7 +30,7 @@ public class SuperTimeTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);

@@ -80,7 +80,7 @@ Therefore, query parameters describe the reference WORLD AND TIME that should be
 In all following examples we will consider the following very simple graph to illustrate snippets.
 
 ```java
-Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
 graph.connect(o -> {
     for (int i = 0; i < 10; i++) {
         //Create a node named nodeX

@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 public class WSServerTest {
 
     public static void main(String[] args) {
-        Graph graph = GraphBuilder.builder()
+        Graph graph = new GraphBuilder()
                 .withMemorySize(10000)
                 .saveEvery(1000)
                 .withOffHeapMemory()
@@ -39,7 +39,7 @@ public class WSServerTest {
     @Test
     public void test() {
 
-        Graph graph = GraphBuilder.builder()
+        Graph graph = new GraphBuilder()
                 .withMemorySize(10000)
                 .saveEvery(1000)
                 .withOffHeapMemory()
@@ -58,8 +58,8 @@ public class WSServerTest {
 
                 CountDownLatch latch = new CountDownLatch(1);
 
-                Graph graph2 = GraphBuilder.builder().withMemorySize(10000).saveEvery(1000).withStorage(new WSClient("ws://localhost:8050")).build();
-                graph2.connect(result1 -> graph2.all(0, 0, "nodes", new Callback<Node[]>() {
+                Graph graph2 = new GraphBuilder().withMemorySize(10000).saveEvery(1000).withStorage(new WSClient("ws://localhost:8050")).build();
+                graph2.connect(result1 -> graph2.findAll(0, 0, "nodes", new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result1) {
 
@@ -70,7 +70,7 @@ public class WSServerTest {
 
                         graph2.index("nodes", newNode, "name", null);
 
-                        graph2.all(0, 0, "nodes", new Callback<Node[]>() {
+                        graph2.findAll(0, 0, "nodes", new Callback<Node[]>() {
                             @Override
                             public void on(Node[] result) {
                                 Assert.assertEquals(2, result.length);
@@ -81,7 +81,7 @@ public class WSServerTest {
                             @Override
                             public void on(Boolean result) {
                                 //ok now try to access new node from graph
-                                graph.all(0, 0, "nodes", new Callback<Node[]>() {
+                                graph.findAll(0, 0, "nodes", new Callback<Node[]>() {
                                     @Override
                                     public void on(Node[] result) {
                                         Assert.assertEquals(2, result.length);

@@ -16,7 +16,7 @@ class ChunkKey {
     static ChunkKey build(Buffer buffer) {
         ChunkKey tuple = new ChunkKey();
         long cursor = 0;
-        long length = buffer.size();
+        long length = buffer.length();
         long previous = 0;
         int index = 0;
         while (cursor < length) {

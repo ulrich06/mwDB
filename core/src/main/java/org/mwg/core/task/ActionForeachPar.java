@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.*;
+import org.mwg.plugin.Job;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.Action;
@@ -18,10 +19,10 @@ class ActionForeachPar implements TaskAction {
     public void eval(TaskContext context) {
         final Object[] castedResult = ActionForeach.convert(context.getPreviousResult());
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
-        final DeferCounter counter = context.graph().counter(castedResult.length);
-        counter.then(new Callback() {
+        final DeferCounter counter = context.graph().newCounter(castedResult.length);
+        counter.then(new Job() {
             @Override
-            public void on(Object ignored) {
+            public void run() {
                 context.setResult(results);
                 context.next();
             }

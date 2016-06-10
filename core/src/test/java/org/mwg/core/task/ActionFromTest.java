@@ -28,7 +28,7 @@ public class ActionFromTest extends AbstractActionTest {
     public void testFromNodes() {
         initGraph();
         final ActionFromTest selfPointer = this;
-        graph.all(0, 0, "nodes", new Callback<Node[]>() {
+        graph.findAll(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
                 Assert.assertEquals(3,result.length);

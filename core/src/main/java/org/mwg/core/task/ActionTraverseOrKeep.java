@@ -4,6 +4,7 @@ import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -39,7 +40,7 @@ class ActionTraverseOrKeep implements TaskAction {
                     toLoad.add(loop.id()); //TODO change this quick and dirty solution
                 }
             }
-            DeferCounter deferCounter = context.graph().counter(toLoad.size());
+            DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()]; //toDo change abstractNode type
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {
@@ -51,9 +52,9 @@ class ActionTraverseOrKeep implements TaskAction {
                     }
                 });
             }
-            deferCounter.then(new Callback() {
+            deferCounter.then(new Job() {
                 @Override
-                public void on(Object result) {
+                public void run() {
                     context.setResult(resultNodes);
                     context.next();
                 }

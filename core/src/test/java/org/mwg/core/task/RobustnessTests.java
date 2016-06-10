@@ -14,7 +14,7 @@ public class RobustnessTests {
 
     @Before
     public void initGraph() {
-        _graph = GraphBuilder.builder().build();
+        _graph = new GraphBuilder().build();
         _graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -278,7 +278,7 @@ public class RobustnessTests {
     public void robustnessWait() {
         boolean exceptionCaught = false;
         try {
-            _graph.newTask().wait(null).execute();
+            _graph.newTask().executeSubTask(null).execute();
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {

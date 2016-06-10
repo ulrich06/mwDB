@@ -53,7 +53,7 @@ public class Base64Test {
 
         Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeLongToBuffer(val, buffer);
-        long dec = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
+        long dec = Base64.decodeToLongWithBounds(buffer, 0, buffer.length());
         Assert.assertEquals(val, dec);
 
     }
@@ -72,7 +72,7 @@ public class Base64Test {
     private void testInt(int val) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeIntToBuffer(val, buffer);
-        int dec = Base64.decodeToIntWithBounds(buffer, 0, buffer.size());
+        int dec = Base64.decodeToIntWithBounds(buffer, 0, buffer.length());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertEquals(val, dec);
         buffer.free();
@@ -132,7 +132,7 @@ public class Base64Test {
     private void testDouble(double val) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeDoubleToBuffer(val, buffer);
-        double dec = Base64.decodeToDoubleWithBounds(buffer, 0, buffer.size());
+        double dec = Base64.decodeToDoubleWithBounds(buffer, 0, buffer.length());
         //System.out.println(val + " -> " + enc + " -> " + dec);
         Assert.assertTrue(val == dec);
         buffer.free();
@@ -155,7 +155,7 @@ public class Base64Test {
     private void boolArrayInnerTest(boolean[] array) {
         Buffer buffer = BufferBuilder.newHeapBuffer();
         Base64.encodeBoolArrayToBuffer(array, buffer);
-        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer, 0, buffer.size(), array.length);
+        boolean[] dec = Base64.decodeToBoolArrayWithBounds(buffer, 0, buffer.length(), array.length);
         //System.out.println(0x7fffffff + " -> " + enc + " -> " + dec);
         Assert.assertTrue(array.length == dec.length);
         for (int i = 0; i < array.length; i++) {

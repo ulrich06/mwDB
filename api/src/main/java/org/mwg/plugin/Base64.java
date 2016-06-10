@@ -36,7 +36,7 @@ import org.mwg.struct.Buffer;
  * buffer.write(Base64.dictionary[(tmp & 0x1F)*2 + (l<0?1:0)]);
  * }
  * public static decodeToLong(s : org.mwg.struct.Buffer) {
- * return Base64.decodeToLongWithBounds(s, 0, s.size());
+ * return Base64.decodeToLongWithBounds(s, 0, s.length());
  * }
  * public static decodeToLongWithBounds(s:org.mwg.struct.Buffer, offsetBegin:number, offsetEnd:number) {
  * var result = Long.ZERO;
@@ -50,7 +50,7 @@ import org.mwg.struct.Buffer;
  * return result.toNumber();
  * }
  * public static decodeToInt(s : org.mwg.struct.Buffer) {
- * return Base64.decodeToIntWithBounds(s, 0, s.size());
+ * return Base64.decodeToIntWithBounds(s, 0, s.length());
  * }
  * public static decodeToIntWithBounds(s:org.mwg.struct.Buffer, offsetBegin:number, offsetEnd:number) {
  * var result = 0;
@@ -91,7 +91,7 @@ import org.mwg.struct.Buffer;
  * }
  * }
  * public static decodeToDouble(s : org.mwg.struct.Buffer) {
- * return Base64.decodeToDoubleWithBounds(s, 0, s.size());
+ * return Base64.decodeToDoubleWithBounds(s, 0, s.length());
  * }
  * public static decodeToDoubleWithBounds(s : org.mwg.struct.Buffer, offsetBegin : number, offsetEnd : number) {
  * var signAndExp = ((Base64.dictionary.indexOf(s.read(offsetBegin)) & 0xFF) * 64) + (Base64.dictionary.indexOf(s.read(offsetBegin + 1)) & 0xFF);
@@ -115,7 +115,7 @@ import org.mwg.struct.Buffer;
  * }
  * }
  * public static decodeBoolArray(s : org.mwg.struct.Buffer, arraySize : number) {
- * return Base64.decodeToBoolArrayWithBounds(s, 0, s.size(), arraySize);
+ * return Base64.decodeToBoolArrayWithBounds(s, 0, s.length(), arraySize);
  * }
  * public static decodeToBoolArrayWithBounds(s : org.mwg.struct.Buffer, offsetBegin : number, offsetEnd : number, arraySize : number) {
  * var resultTmp : any[] = [];
@@ -157,7 +157,7 @@ import org.mwg.struct.Buffer;
  * }
  * }
  * public static decodeString(s : org.mwg.struct.Buffer) {
- * return Base64.decodeToStringWithBounds(s, 0, s.size());
+ * return Base64.decodeToStringWithBounds(s, 0, s.length());
  * }
  * public static decodeToStringWithBounds(s : org.mwg.struct.Buffer, offsetBegin : number, offsetEnd : number) {
  * var result = "";

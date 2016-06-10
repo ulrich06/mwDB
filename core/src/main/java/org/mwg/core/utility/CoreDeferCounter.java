@@ -1,6 +1,6 @@
 package org.mwg.core.utility;
 
-import org.mwg.Callback;
+import org.mwg.plugin.Job;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,7 +10,7 @@ public class CoreDeferCounter implements org.mwg.DeferCounter {
 
     private final int _counter;
 
-    private Callback _end;
+    private Job _end;
 
     public CoreDeferCounter(int nb) {
         this._counter = nb;
@@ -27,17 +27,17 @@ public class CoreDeferCounter implements org.mwg.DeferCounter {
         } while (!this._nb_down.compareAndSet(previous, next));
         if (next == _counter) {
             if (_end != null) {
-                _end.on(null);
+                _end.run();
             }
         }
     }
 
     @Override
-    public void then(Callback p_callback) {
+    public void then(Job p_callback) {
         this._end = p_callback;
         if (this._nb_down.get() == _counter) {
             if (p_callback != null) {
-                p_callback.on(null);
+                p_callback.run();
             }
         }
     }

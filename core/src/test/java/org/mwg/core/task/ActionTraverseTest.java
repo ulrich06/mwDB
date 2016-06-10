@@ -102,7 +102,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                     }
                 }).execute();
 
-        graph.newTask().time(12)
+        graph.newTask().setTime(12)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
@@ -127,7 +127,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                     }
                 }).execute();
 
-        graph.newTask().time(13)
+        graph.newTask().setTime(13)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {

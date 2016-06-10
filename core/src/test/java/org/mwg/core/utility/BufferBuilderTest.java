@@ -78,7 +78,7 @@ public class BufferBuilderTest {
 
         Buffer view1 = it.next();
         Assert.assertNotNull(view1);
-        Assert.assertEquals(view1.size(), 3);
+        Assert.assertEquals(view1.length(), 3);
         byte[] view1flat = view1.data();
         view1flat[0] = one[0];
         view1flat[1] = one[1];
@@ -87,7 +87,7 @@ public class BufferBuilderTest {
 
         Buffer view2 = it.next();
         Assert.assertNotNull(view2);
-        Assert.assertEquals(view2.size(), 3);
+        Assert.assertEquals(view2.length(), 3);
         byte[] view2flat = view2.data();
         view2flat[0] = two[0];
         view2flat[1] = two[1];
@@ -96,7 +96,7 @@ public class BufferBuilderTest {
 
         Buffer view3 = it.next();
         Assert.assertNotNull(view3);
-        Assert.assertEquals(view3.size(), 2);
+        Assert.assertEquals(view3.length(), 2);
         byte[] view3flat = view3.data();
         view3flat[0] = three[0];
         view3flat[1] = three[1];
@@ -112,15 +112,15 @@ public class BufferBuilderTest {
 
         Buffer view = it.next();
         Assert.assertNotNull(view);
-        Assert.assertEquals(view.size(), 0);
+        Assert.assertEquals(view.length(), 0);
 
         Buffer view2 = it.next();
         Assert.assertNotNull(view2);
-        Assert.assertEquals(view2.size(), 0);
+        Assert.assertEquals(view2.length(), 0);
 
         Buffer view3 = it.next();
         Assert.assertNotNull(view3);
-        Assert.assertEquals(view3.size(), 0);
+        Assert.assertEquals(view3.length(), 0);
 
         Assert.assertEquals(false, it.hasNext());
 
@@ -224,25 +224,25 @@ public class BufferBuilderTest {
 
         BufferView next = (BufferView) it.next();
         Assert.assertArrayEquals(new byte[0], next.data());
-        Assert.assertEquals(0, next.size());
+        Assert.assertEquals(0, next.length());
 
         next = (BufferView) it.next();
         Assert.assertArrayEquals(new byte[0], next.data());
-        Assert.assertEquals(0, next.size());
+        Assert.assertEquals(0, next.length());
 
         next = (BufferView) it.next();
         Assert.assertArrayEquals(new byte[0], next.data());
-        Assert.assertEquals(0, next.size());
+        Assert.assertEquals(0, next.length());
 
         Assert.assertArrayEquals(new byte[]{15}, it.next().data());
 
         next = (BufferView) it.next();
         Assert.assertArrayEquals(new byte[0], next.data());
-        Assert.assertEquals(0, next.size());
+        Assert.assertEquals(0, next.length());
 
         next = (BufferView) it.next();
         Assert.assertArrayEquals(new byte[0], next.data());
-        Assert.assertEquals(0, next.size());
+        Assert.assertEquals(0, next.length());
 
         Assert.assertEquals(false, it.hasNext());
 

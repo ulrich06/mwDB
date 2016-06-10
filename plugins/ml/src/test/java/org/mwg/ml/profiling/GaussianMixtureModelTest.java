@@ -11,13 +11,10 @@ import org.mwg.core.scheduler.NoopScheduler;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 01/04/16.
- */
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        Graph graph = GraphBuilder.builder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

@@ -3,9 +3,9 @@ package org.mwg.struct;
 public interface Map {
 
     /**
-     * Size of the map
+     * Size of the getOrCreateMap
      *
-     * @return the size of the map
+     * @return the size of the getOrCreateMap
      */
     long size();
 

@@ -52,7 +52,7 @@ public class NodeFactoryTest implements NodeFactory {
 
     @Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withFactory(this).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).addNodeType(this).build());
     }
 
     /**
@@ -67,7 +67,7 @@ public class NodeFactoryTest implements NodeFactory {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).withFactory(this).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).addNodeType(this).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);

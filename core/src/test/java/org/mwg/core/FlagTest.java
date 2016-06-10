@@ -16,7 +16,7 @@ public class FlagTest {
 
     @Test
     public void heapTest() {
-        manyWorldTest(GraphBuilder.builder().withMemorySize(cacheSize).saveEvery(cacheSize - 100).withScheduler(new NoopScheduler()).build());
+        manyWorldTest(new GraphBuilder().withMemorySize(cacheSize).saveEvery(cacheSize - 100).withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -31,7 +31,7 @@ public class FlagTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        manyWorldTest(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(cacheSize).saveEvery(cacheSize - 100).build());
+        manyWorldTest(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(cacheSize).saveEvery(cacheSize - 100).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -60,7 +60,7 @@ public class FlagTest {
                 availableCacheSlot = graph.space().available();
                 Assert.assertEquals(availableCacheSlot, selfPointer.cacheSize - (4 + (0 * 4)));
 
-                long newWorld = graph.diverge(0);
+                long newWorld = graph.fork(0);
                 graph.lookup(newWorld, 0, node_id, new Callback<Node>() {
                     @Override
                     public void on(Node n0_w1) {

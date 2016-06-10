@@ -63,7 +63,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int LIGHT_OFF_LX = 0;
             final int NUM_OF_TRIALS = NUM_SWITCHES; //One swipe
 
-            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -141,7 +141,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -222,7 +222,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -310,7 +310,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
         for (int cs = 0; cs < NUM_SWITCHES; cs++) {
             final int correctSwitch = cs; //Have to make it final for inner class access
 
-            Graph graph = GraphBuilder.builder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().withFactory(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {

@@ -189,7 +189,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     }
                 }, traverse);
 
-        Task mainTask = graph().newTask().from(this).asVar("starterNode").wait(traverse).wait(creationTask);
+        Task mainTask = graph().newTask().from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
         mainTask.executeThen(new Action() {
             @Override
             public void eval(TaskContext context) {

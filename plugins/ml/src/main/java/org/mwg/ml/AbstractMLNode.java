@@ -2,6 +2,7 @@ package org.mwg.ml;
 
 import org.mwg.*;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
@@ -54,7 +55,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             }
             //END TODO IN CACHE
             final double[] result = new double[tasks.length];
-            DeferCounter waiter = graph().counter(tasks.length);
+            DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
                 tasks[i].executeThenAsync(null, this, new Action() {
@@ -83,9 +84,9 @@ public abstract class AbstractMLNode extends AbstractNode {
                     }
                 });
             }
-            waiter.then(new Callback() {
+            waiter.then(new Job() {
                 @Override
-                public void on(Object ignored) {
+                public void run() {
                     callback.on(result);
                 }
             });

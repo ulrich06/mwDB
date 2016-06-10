@@ -26,11 +26,11 @@ public class Type {
      * Primitive Maps
      * SHOULD NOT BE USED OUTSIDE THE CORE IMPLEMENTATION.
      */
-    public static final byte LONG_LONG_MAP = 9;
-    public static final byte LONG_LONG_ARRAY_MAP = 10;
-    public static final byte STRING_LONG_MAP = 11;
+    public static final byte LONG_TO_LONG_MAP = 9;
+    public static final byte LONG_TO_LONG_ARRAY_MAP = 10;
+    public static final byte STRING_TO_LONG_MAP = 11;
 
-    public static final byte REF = 12;
+    public static final byte RELATION = 12;
 
     /**
      * Convert a type that represent a byte to a readable String representation
@@ -59,14 +59,14 @@ public class Type {
             case Type.INT_ARRAY:
                 return "int[]";
             /** Maps */
-            case Type.LONG_LONG_MAP:
+            case Type.LONG_TO_LONG_MAP:
                 return "map(long->long)";
-            case Type.LONG_LONG_ARRAY_MAP:
+            case Type.LONG_TO_LONG_ARRAY_MAP:
                 return "map(long->long[])";
-            case Type.STRING_LONG_MAP:
+            case Type.STRING_TO_LONG_MAP:
                 return "map(string->long)";
-            case Type.REF:
-                return "reference";
+            case Type.RELATION:
+                return "relation";
             default:
                 return "unknown";
         }

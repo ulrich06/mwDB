@@ -16,7 +16,7 @@ public class TestTMP {
 
 
     public static void main(String[] args) {
-        Graph graph = GraphBuilder.builder().withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
 
         graph.connect(new Callback<Boolean>() {
             @Override

@@ -17,7 +17,7 @@ public class TimelineTest {
 
     @Test
     public void heapTest() {
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).build());
     }
 
     /**
@@ -32,7 +32,7 @@ public class TimelineTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(GraphBuilder.builder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -74,7 +74,7 @@ public class TimelineTest {
                         counter[0]++;
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName\"}", node_t1.toString()));
                         Assert.assertTrue(node_t1.timeDephasing() == 1); //node hasField a dephasing of 1 selectWith last known state
-                        node_t1.forcePhase(); // force the object to move to timepoint 1
+                        node_t1.rephase(); // force the object to move to timepoint 1
                         Assert.assertTrue(node_t1.timeDephasing() == 0); //node should be in phase now
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName\"}", node_t1.toString()));
 
@@ -102,7 +102,7 @@ public class TimelineTest {
                         });
 
                         //now try to diverge the world
-                        long newWorld = graph.diverge(0);
+                        long newWorld = graph.fork(0);
                         graph.lookup(newWorld, 2, node_t0.id(), new Callback<org.mwg.Node>() {
                             @Override
                             public void on(Node node_t1_w0) {

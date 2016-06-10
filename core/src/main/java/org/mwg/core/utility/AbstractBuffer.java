@@ -15,7 +15,7 @@ abstract class AbstractBuffer implements Buffer {
     /* Need to be present in Abstract class for TS*/
     public abstract byte read(long position);
 
-    public abstract long size();
+    public abstract long length();
 
     public abstract void write(byte b);
 

@@ -34,7 +34,7 @@ public class OffHeapGenChunk implements GenChunk, OffHeapChunk {
         //init
         if (previousAddr != CoreConstants.OFFHEAP_NULL_PTR) {
             rootPtr = previousAddr;
-        } else if (initialPayload != null && initialPayload.size() > 0) {
+        } else if (initialPayload != null && initialPayload.length() > 0) {
             rootPtr = OffHeapLongArray.allocate(7);
             load(initialPayload);
         } else {
@@ -47,14 +47,14 @@ public class OffHeapGenChunk implements GenChunk, OffHeapChunk {
 
     private void load(Buffer payload) {
         if (payload != null) {
-            OffHeapLongArray.set(rootPtr, INDEX_CURRENT, Base64.decodeToLongWithBounds(payload, 0, payload.size()));
+            OffHeapLongArray.set(rootPtr, INDEX_CURRENT, Base64.decodeToLongWithBounds(payload, 0, payload.length()));
         }
     }
 
     @Override
     public void merge(Buffer buffer) {
         long previous;
-        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.size());
+        long toInsert = Base64.decodeToLongWithBounds(buffer, 0, buffer.length());
         do {
             previous = OffHeapLongArray.get(rootPtr, INDEX_CURRENT);
         } while (!OffHeapLongArray.compareAndSwap(rootPtr, INDEX_CURRENT, previous, toInsert));

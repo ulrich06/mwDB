@@ -60,7 +60,7 @@ public interface Graph {
      * @param world origin world id
      * @return newly created child world id (to be used later in lookup method for instance)
      */
-    long diverge(long world);
+    long fork(long world);
 
     /**
      * Triggers a save task for the current graph.<br>
@@ -127,7 +127,7 @@ public interface Graph {
      * @param query    The query to satisfy
      * @param callback Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
      */
-    void findQuery(Query query, Callback<Node[]> callback);
+    void findByQuery(Query query, Callback<Node[]> callback);
 
     /**
      * Retrieves all nodes registered in a particular index.
@@ -137,7 +137,15 @@ public interface Graph {
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
      */
-    void all(long world, long time, String indexName, Callback<Node[]> callback);
+    void findAll(long world, long time, String indexName, Callback<Node[]> callback);
+
+    /**
+     * Retrieves all nodes registered in a particular index.
+     *
+     * @param query    The query to satisfy
+     * @param callback Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
+     */
+    void findAllByQuery(Query query, Callback<Node[]> callback);
 
     /**
      * Retrieve the back-end node behind a named index.
@@ -147,7 +155,7 @@ public interface Graph {
      * @param indexName The unique identifier of the index.
      * @param callback  Called when the retrieval is complete. Returns the retrieved index node, null otherwise.
      */
-    void namedIndex(long world, long time, String indexName, Callback<Node> callback);
+    void getIndexNode(long world, long time, String indexName, Callback<Node> callback);
 
     /**
      * Utility method to create a waiter based on a counter
@@ -155,7 +163,7 @@ public interface Graph {
      * @param expectedEventsCount number of expected events to count before running a task.
      * @return The waiter object.
      */
-    DeferCounter counter(int expectedEventsCount);
+    DeferCounter newCounter(int expectedEventsCount);
 
     /**
      * Retrieves the current state chunk resolver
@@ -170,6 +178,10 @@ public interface Graph {
      * @return current running scheduler
      */
     Scheduler scheduler();
+    
+    ChunkSpace space();
+
+    Storage storage();
 
     /**
      * Create a new buffer to save chunks
@@ -199,10 +211,6 @@ public interface Graph {
      * @return newly created task context object
      */
     TaskContext newTaskContext();
-
-    ChunkSpace space();
-
-    Storage storage();
 
     /**
      * Retrieve the shared action registry of Actions executed by task

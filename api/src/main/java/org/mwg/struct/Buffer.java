@@ -39,7 +39,7 @@ public interface Buffer {
      *
      * @return length of the buffer
      */
-    long size();
+    long length();
 
     /**
      * Free the buffer fromVar memory, this method should be the last called

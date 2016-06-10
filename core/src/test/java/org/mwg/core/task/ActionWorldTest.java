@@ -11,7 +11,7 @@ public class ActionWorldTest extends AbstractActionTest {
     public void test() {
         initGraph();
         graph.newTask()
-                .world(10)
+                .setWorld(10)
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

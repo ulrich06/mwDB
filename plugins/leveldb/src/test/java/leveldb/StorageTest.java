@@ -16,6 +16,7 @@ import org.mwg.*;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Job;
 
 public class StorageTest {
 
@@ -28,7 +29,7 @@ public class StorageTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test("offheap ", GraphBuilder.builder().withStorage(new LevelDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
+        test("offheap ", new GraphBuilder().withStorage(new LevelDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
     }
 
     final int valuesToInsert = 300_000;
@@ -40,7 +41,7 @@ public class StorageTest {
             public void on(Boolean result) {
                 final long before = System.currentTimeMillis();
                 Node node = graph.newNode(0, 0);
-                final DeferCounter counter = graph.counter(valuesToInsert);
+                final DeferCounter counter = graph.newCounter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
                     if (i % 1_000_000 == 0) {
@@ -60,9 +61,9 @@ public class StorageTest {
                 }
                 node.free();
 
-                counter.then(new Callback() {
+                counter.then(new Job() {
                     @Override
-                    public void on(Object result) {
+                    public void run() {
 
                         long beforeRead = System.currentTimeMillis();
 

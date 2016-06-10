@@ -9,8 +9,8 @@ public interface StringLongMap extends Map {
     boolean containsHash(long index);
 
     /**
-     * Add the tuple key/value to the map.
-     * In case the value is null, the value will be atomically replaced by the current size of the map and associated to the key
+     * Add the tuple key/value to the getOrCreateMap.
+     * In case the value is null, the value will be atomically replaced by the current size of the getOrCreateMap and associated to the key
      *
      * @param key   to insert key
      * @param value to insert value
@@ -18,7 +18,7 @@ public interface StringLongMap extends Map {
     void put(String key, long value);
 
     /**
-     * Remove the corresponding key from the map
+     * Remove the corresponding key from the getOrCreateMap
      *
      * @param key to remove key
      */

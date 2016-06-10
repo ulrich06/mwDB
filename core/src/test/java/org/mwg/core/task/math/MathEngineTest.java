@@ -16,7 +16,7 @@ import java.util.Map;
 public class MathEngineTest {
     @Test
     public void expression() {
-        Graph graph = GraphBuilder.builder().build();
+        Graph graph = new GraphBuilder().build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

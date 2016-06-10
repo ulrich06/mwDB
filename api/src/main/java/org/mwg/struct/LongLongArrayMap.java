@@ -11,8 +11,8 @@ public interface LongLongArrayMap extends Map {
     long[] get(long key);
 
     /**
-     * Add the tuple key/value to the map.
-     * This map allows keys conflicts.
+     * Add the tuple key/value to the getOrCreateMap.
+     * This getOrCreateMap allows keys conflicts.
      * In other words, one key can be mapped to various values.
      *
      * @param key   to insert key
@@ -21,7 +21,7 @@ public interface LongLongArrayMap extends Map {
     void put(long key, long value);
 
     /**
-     * Remove the current K/V tuple fromVar the map
+     * Remove the current K/V tuple fromVar the getOrCreateMap
      *
      * @param key   to delete key
      * @param value to delete value
