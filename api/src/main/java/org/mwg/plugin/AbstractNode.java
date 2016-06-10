@@ -397,12 +397,12 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void findAllByQuery(Query query, Callback<Node[]> callback) {
+    public void findAll(final String indexName, final Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
-        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(query.indexName(), false));
+        LongLongArrayMap indexMap = (LongLongArrayMap) currentNodeState.get(this._resolver.stringToHash(indexName, false));
         if (indexMap != null) {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
@@ -413,7 +413,7 @@ public abstract class AbstractNode implements Node {
             indexMap.each(new LongLongArrayMapCallBack() {
                 @Override
                 public void on(final long hash, final long nodeId) {
-                    selfPointer._resolver.lookup(query.world(), query.time(), nodeId, new Callback<org.mwg.Node>() {
+                    selfPointer._resolver.lookup(world(), time(), nodeId, new Callback<org.mwg.Node>() {
                         @Override
                         public void on(org.mwg.Node resolvedNode) {
                             resolved[loopInteger.getAndIncrement()] = resolvedNode;
@@ -437,15 +437,6 @@ public abstract class AbstractNode implements Node {
         } else {
             callback.on(new org.mwg.plugin.AbstractNode[0]);
         }
-    }
-
-    @Override
-    public void findAll(String indexName, Callback<Node[]> callback) {
-        Query query = graph().newQuery();
-        query.setWorld(world());
-        query.setTime(time());
-        query.setIndexName(indexName);
-        findAllByQuery(query, callback);
     }
 
     @Override

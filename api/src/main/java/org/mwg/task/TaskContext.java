@@ -29,4 +29,5 @@ public interface TaskContext {
     void next();
 
     void clean();
+    
 }

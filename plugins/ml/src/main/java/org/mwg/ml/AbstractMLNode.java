@@ -16,9 +16,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-
     protected void extractFeatures(Callback<double[]> callback) {
-
         String query = (String) super.get(FROM);
         if (query != null) {
             //TODO CACHE TO AVOID PARSING EVERY TIME

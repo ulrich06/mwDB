@@ -545,20 +545,11 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void findAll(long world, long time, String indexName, Callback<org.mwg.Node[]> callback) {
-        Query query = newQuery();
-        query.setWorld(world);
-        query.setTime(time);
-        query.setIndexName(indexName);
-        findAllByQuery(query, callback);
-    }
-
-    @Override
-    public void findAllByQuery(Query query, Callback<Node[]> callback) {
-        if (query.indexName() == null) {
+    public void findAll(final long world, final long time, final String indexName, final Callback<org.mwg.Node[]> callback) {
+        if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
-        getIndexOrCreate(query.world(), query.time(), query.indexName(), new Callback<org.mwg.Node>() {
+        getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
@@ -566,13 +557,7 @@ class CoreGraph implements org.mwg.Graph {
                         callback.on(new Node[0]);
                     }
                 } else {
-
-                    Query query2 = newQuery();
-                    query2.setWorld(query.world());
-                    query2.setTime(query.time());
-                    query2.setIndexName(CoreConstants.INDEX_ATTRIBUTE);
-
-                    foundIndex.findAllByQuery(query2, new Callback<org.mwg.Node[]>() {
+                    foundIndex.findAll(CoreConstants.INDEX_ATTRIBUTE, new Callback<org.mwg.Node[]>() {
                         @Override
                         public void on(org.mwg.Node[] collectedNodes) {
                             foundIndex.free();

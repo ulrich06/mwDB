@@ -160,14 +160,6 @@ public interface Node {
     void findAll(String indexName, Callback<Node[]> callback);
 
     /**
-     * Retrieves all nodes in a particular index using a query descriptor
-     *
-     * @param query    The query on the searched node's attribute (e.g.: "firstname=john,lastname=doe,age=30"
-     * @param callback  Called whe the collection is complete. Gives the list of contained nodes in parameter.
-     */
-    void findAllByQuery(Query query, Callback<Node[]> callback);
-
-    /**
      * Compute the time dephasing of this node, i.e. the difference between last modification and current node timepoint.
      *
      * @return The amount of time between the current time of the node and the last recorded state chunk time.

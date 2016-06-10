@@ -326,7 +326,6 @@ declare module org {
             find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
             newCounter(expectedEventsCount: number): org.mwg.DeferCounter;
             resolver(): org.mwg.plugin.Resolver;
@@ -383,7 +382,6 @@ declare module org {
             find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             findAll(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-            findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             timeDephasing(): number;
             rephase(): void;
             timepoints(beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
@@ -424,7 +422,6 @@ declare module org {
                 jump<A extends org.mwg.Node>(targetTime: number, callback: org.mwg.Callback<A>): void;
                 findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 find(indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 findAll(indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 index(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
@@ -1185,7 +1182,6 @@ declare module org {
                 find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                findAllByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
                 getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
                 private getIndexOrCreate(world, time, indexName, callback, createIfNull);
                 newCounter(expectedCountCalls: number): org.mwg.DeferCounter;

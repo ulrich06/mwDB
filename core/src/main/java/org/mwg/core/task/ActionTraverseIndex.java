@@ -57,11 +57,7 @@ class ActionTraverseIndex implements TaskAction {
                         }
                     });
                 } else {
-                    Query query = node.graph().newQuery();
-                    query.setWorld(context.getWorld());
-                    query.setTime(context.getTime());
-                    query.setIndexName(_indexName);
-                    node.findAllByQuery(query, new Callback<Node[]>() {
+                    node.findAll(_indexName, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {

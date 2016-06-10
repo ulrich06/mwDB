@@ -140,14 +140,6 @@ public interface Graph {
     void findAll(long world, long time, String indexName, Callback<Node[]> callback);
 
     /**
-     * Retrieves all nodes registered in a particular index.
-     *
-     * @param query    The query to satisfy
-     * @param callback Called when the retrieval is complete. Returns all nodes in the index in an array, an empty array otherwise.
-     */
-    void findAllByQuery(Query query, Callback<Node[]> callback);
-
-    /**
      * Retrieve the back-end node behind a named index.
      *
      * @param world     The world from which the index must be retrieved.
@@ -178,7 +170,7 @@ public interface Graph {
      * @return current running scheduler
      */
     Scheduler scheduler();
-    
+
     ChunkSpace space();
 
     Storage storage();
