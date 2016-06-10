@@ -15,30 +15,6 @@ public abstract class AbstractMLNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    /*
-    @Override
-    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        super.setProperty(propertyName, propertyType, propertyValue);
-    }*/
-
-    /*
-    @Override
-    public Object get(String propertyName) {
-        if (propertyName != null && propertyName.length() > 0 && propertyName.charAt(0) == '$') {
-            Object expressionObj = super.get(propertyName.substring(1));
-            //ToDo this is dangerous for infinite loops or circular dependency, to fix
-            org.mwg.ml.common.mathexp.MathExpressionEngine localEngine = MathExpressionEngine.parse(expressionObj.toString());
-
-            Map<String, Double> variables = new HashMap<String, Double>();
-            variables.put("PI", Math.PI);
-            variables.put("TRUE", 1.0);
-            variables.put("FALSE", 0.0);
-
-            return localEngine.eval(this, variables);
-        } else {
-            return super.get(propertyName);
-        }
-    }*/
 
     protected void extractFeatures(Callback<double[]> callback) {
 
