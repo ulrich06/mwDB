@@ -337,6 +337,7 @@ declare module org {
             newTask(): org.mwg.task.Task;
             newTaskContext(): org.mwg.task.TaskContext;
             actions(): org.mwg.task.TaskActionRegistry;
+            freeNodes(nodes: org.mwg.Node[]): void;
         }
         class GraphBuilder {
             private _storage;
@@ -1190,6 +1191,7 @@ declare module org {
                 space(): org.mwg.plugin.ChunkSpace;
                 actions(): org.mwg.task.TaskActionRegistry;
                 storage(): org.mwg.plugin.Storage;
+                freeNodes(nodes: org.mwg.Node[]): void;
             }
             class CoreNode extends org.mwg.plugin.AbstractNode {
                 constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);

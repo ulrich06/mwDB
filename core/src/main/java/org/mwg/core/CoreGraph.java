@@ -657,4 +657,15 @@ class CoreGraph implements org.mwg.Graph {
     public Storage storage() {
         return _storage;
     }
+
+    @Override
+    public void freeNodes(Node[] nodes) {
+        if (nodes != null) {
+            for (int i = 0; i < nodes.length; i++) {
+                if (nodes[i] != null) {
+                    nodes[i].free();
+                }
+            }
+        }
+    }
 }

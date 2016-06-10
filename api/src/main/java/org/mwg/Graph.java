@@ -220,5 +220,11 @@ public interface Graph {
      */
     TaskActionRegistry actions();
 
+    /**
+     * Free the array of nodes (sequentially call the free method on all nodes)
+     *
+     * @param nodes
+     */
+    void freeNodes(Node[] nodes);
 
 }
