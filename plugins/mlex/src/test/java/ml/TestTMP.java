@@ -103,12 +103,12 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = graph.newTask().from(root).asVar("starterNode").wait(traverse).then(new Action() {
+                Task mainTask = graph.newTask().from(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         //call callbask
                     }
-                }).wait(creationTask);
+                }).executeSubTask(creationTask);
 
                 mainTask.execute();
 

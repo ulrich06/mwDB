@@ -15,7 +15,7 @@ import java.util.Scanner;
  */
 public class GaussianMixtureSim {
     public static void main(String[] arg) {
-        Graph graph = new GraphBuilder().withFactory(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

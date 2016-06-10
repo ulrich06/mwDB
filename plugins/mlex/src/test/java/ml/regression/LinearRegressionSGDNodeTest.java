@@ -24,7 +24,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 //.withMemorySize(20_000)
                 //.withAutoSave(10000)
                 //.withStorage(new LevelDBStorage("data"))
-                .withFactory(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler())
+                .addNodeType(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override

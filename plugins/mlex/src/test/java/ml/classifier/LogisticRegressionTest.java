@@ -29,7 +29,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
     //@Test
     public void test() {
         //This test fails if there are too many errors
-        Graph graph = new GraphBuilder().withFactory(new LogisticRegressionClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new LogisticRegressionClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -53,7 +53,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
     @Test
     public void testRandomGen1D() {
         //This test fails if there are too many errors
-        Graph graph = new GraphBuilder().withFactory(new LogisticRegressionClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new LogisticRegressionClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

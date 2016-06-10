@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTest{
     @Test
     public void testNormalBatchGDIterationCountStop() {
-        Graph graph = new GraphBuilder().withFactory(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -46,7 +46,7 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
 
     @Test
     public void testNormalBatchGDErrorThresholdStop() {
-        Graph graph = new GraphBuilder().withFactory(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
