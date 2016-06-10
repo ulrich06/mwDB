@@ -150,31 +150,41 @@ public interface Graph {
     /**
      * Utility method to create a waiter based on a counter
      *
-     * @param expectedEventsCount number of expected events to count before running a task.
+     * @param expectedEventsCount number of events expected before running a task.
      * @return The waiter object.
      */
     DeferCounter newCounter(int expectedEventsCount);
 
     /**
-     * Retrieves the current state chunk resolver
+     * Retrieves the current resolver
      *
-     * @return current running resolver
+     * @return current resolver
      */
     Resolver resolver();
 
     /**
-     * Retrieves the current graph scheduler
+     * Retrieves the current scheduler
      *
-     * @return current running scheduler
+     * @return current scheduler
      */
     Scheduler scheduler();
 
+    /**
+     * Retrieves the current space
+     *
+     * @return current space
+     */
     ChunkSpace space();
 
+    /**
+     * Retrieves the current storage
+     *
+     * @return current running storage
+     */
     Storage storage();
 
     /**
-     * Create a new buffer to save chunks
+     * Creates a new buffer to save chunks
      *
      * @return newly created buffer
      */
