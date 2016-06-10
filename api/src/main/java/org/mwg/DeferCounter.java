@@ -8,13 +8,13 @@ import org.mwg.plugin.Job;
 public interface DeferCounter {
 
     /**
-     * Notifies the counter that an awaited event hasField occurred.<br>
+     * Notifies the counter that an awaited event has occurred.<br>
      * If the total amount of awaited events is reached, the task registered by the {@link #then(Job) then} method is executed.
      */
     void count();
 
     /**
-     * Registers the task, in form of a {@link Callback}, to be called when all awaited events have occurred.
+     * Registers the task, in form of a {@link Job}, to be called when all awaited events have occurred.
      *
      * @param job The task to be executed
      */

@@ -1,12 +1,11 @@
 package org.mwg;
 
 /**
- * Class that contains static constants used in Many World Graph
+ * Static constants used
  */
 public class Constants {
 
     // Limit long lengths to 53 bits because of JS limitation
-
     public static final int LONG_SIZE = 53;
 
     public static final int PREFIX_SIZE = 16;
