@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by andre on 5/10/2016.
  */
-public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTest{
+public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testNormalBatchGDIterationCountStop() {
         Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
@@ -35,10 +35,10 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg,Math.abs(rjc.coefs[0] - 2) < 1e-4);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg,Math.abs(rjc.intercept - 1) < 1e-4);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg,rjc.bufferError < 1e-4);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg,rjc.l2Reg < 1e-4);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < 1e-4);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 1) < 1e-4);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bufferError < 1e-4);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.l2Reg < 1e-4);
             }
         });
 
@@ -63,10 +63,10 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
 
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < 1e-3);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, Math.abs(rjc.intercept - 1) < 1e-3);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, rjc.bufferError < 1e-6);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, rjc.l2Reg < 1e-6);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < 1e-3);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 1) < 1e-3);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bufferError < 1e-6);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.l2Reg < 1e-6);
             }
         });
 
