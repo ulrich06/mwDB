@@ -64,7 +64,7 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
         // inv(Xt * X - lambda*I) * Xt * ys
         // I - almost identity, but with 0 for intercept term
         Matrix xtMulX = Matrix.multiplyTransposeAlphaBeta
-                (TransposeType.TRANSPOSE, 1, xMatrix, TransposeType.NOTRANSPOSE, 0, xMatrix);
+                (TransposeType.TRANSPOSE, 1, xMatrix, TransposeType.NOTRANSPOSE, 1, xMatrix);
 
         for (int i=1;i<=dims;i++){
             xtMulX.add(i,i,l2);
@@ -75,10 +75,10 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
         Matrix pinv=pinvsvd.getPInv();
 
         Matrix invMulXt = Matrix.multiplyTransposeAlphaBeta
-                (TransposeType.NOTRANSPOSE, 1, pinv, TransposeType.TRANSPOSE, 0, xMatrix);
+                (TransposeType.NOTRANSPOSE, 1, pinv, TransposeType.TRANSPOSE, 1, xMatrix);
 
         Matrix result = Matrix.multiplyTransposeAlphaBeta
-                (TransposeType.NOTRANSPOSE, 1, invMulXt, TransposeType.NOTRANSPOSE, 0, yVector);
+                (TransposeType.NOTRANSPOSE, 1, invMulXt, TransposeType.NOTRANSPOSE, 1, yVector);
 
         final double newCoefficients[] = new double[dims];
         for (int i=0;i<dims;i++){
