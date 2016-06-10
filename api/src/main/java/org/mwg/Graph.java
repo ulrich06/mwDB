@@ -179,26 +179,26 @@ public interface Graph {
     /**
      * Retrieves the current storage
      *
-     * @return current running storage
+     * @return current storage
      */
     Storage storage();
 
     /**
-     * Creates a new buffer to save chunks
+     * Creates a new buffer for serialization and loading methods
      *
      * @return newly created buffer
      */
     Buffer newBuffer();
 
     /**
-     * Create a new query that can be executed on the graph.
+     * Creates a new query that can be executed on the graph.
      *
      * @return newly created query
      */
     Query newQuery();
 
     /**
-     * Create a new task object to manipulate Graph in an easy way
+     * Creates a new task object to manipulate Graph in an easy way
      * By default, the world and the time of the task is 0
      *
      * @return newly created task object
@@ -206,14 +206,14 @@ public interface Graph {
     Task newTask();
 
     /**
-     * Create a new task context that we can give to initialize a task
+     * Creates a new task context that we can give to initialize a task
      *
      * @return newly created task context object
      */
     TaskContext newTaskContext();
 
     /**
-     * Retrieve the shared action registry of Actions executed by task
+     * Retrieves the shared action registry of Actions executed by task
      *
      * @return shared global action registry
      */
