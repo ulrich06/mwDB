@@ -24,7 +24,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.getPreviousResult())[0].get("name"), "root");
+                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "root");
                     }
                 })
                 .execute();
@@ -45,7 +45,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.getPreviousResult()).length, 0);
+                        Assert.assertEquals(((Node[]) context.result()).length, 0);
                     }
                 })
                 .execute();
@@ -66,7 +66,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.getPreviousResult()).length, 3);
+                        Assert.assertEquals(((Node[]) context.result()).length, 3);
                     }
                 })
                 .execute();

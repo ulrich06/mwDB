@@ -17,8 +17,8 @@ class ActionAdd implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object previousResult = context.getPreviousResult();
-        final Object savedVar = context.getVariable(_variableNameToAdd);
+        final Object previousResult = context.result();
+        final Object savedVar = context.variable(_variableNameToAdd);
         if (savedVar instanceof AbstractNode) {
             if (previousResult instanceof AbstractNode) {
                 ((Node) previousResult).add(_relationName, (Node) savedVar);

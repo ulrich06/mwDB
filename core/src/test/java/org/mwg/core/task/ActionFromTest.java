@@ -17,7 +17,7 @@ public class ActionFromTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(context.getPreviousResult(), "uselessPayload");
+                        Assert.assertEquals(context.result(), "uselessPayload");
                     }
                 })
                 .execute();

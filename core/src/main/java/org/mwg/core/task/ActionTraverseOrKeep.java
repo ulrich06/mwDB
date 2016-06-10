@@ -22,7 +22,7 @@ class ActionTraverseOrKeep implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        Object previousResult = context.getPreviousResult();
+        Object previousResult = context.result();
         if (previousResult != null) {
             //dry execute to count waiter
             Set<Long> toLoad = new HashSet<Long>();
@@ -44,7 +44,7 @@ class ActionTraverseOrKeep implements TaskAction {
             final Node[] resultNodes = new Node[toLoad.size()]; //toDo change abstractNode type
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {
-                context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {
+                context.graph().lookup(context.world(), context.time(), idNode, new Callback<Node>() {
                     @Override
                     public void on(Node result) {
                         resultNodes[cursor.getAndIncrement()] = result;

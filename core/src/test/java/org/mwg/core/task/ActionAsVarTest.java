@@ -16,8 +16,8 @@ public class ActionAsVarTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(context.getPreviousResult(), "hello");
-                        Assert.assertEquals(context.getVariable("myVar"), "hello");
+                        Assert.assertEquals(context.result(), "hello");
+                        Assert.assertEquals(context.variable("myVar"), "hello");
                     }
                 })
                 .execute();

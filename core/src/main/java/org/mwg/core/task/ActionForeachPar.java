@@ -17,7 +17,7 @@ class ActionForeachPar implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object[] castedResult = ActionForeach.convert(context.getPreviousResult());
+        final Object[] castedResult = ActionForeach.convert(context.result());
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
         final DeferCounter counter = context.graph().newCounter(castedResult.length);
         counter.then(new Job() {

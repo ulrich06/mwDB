@@ -55,7 +55,7 @@ public class TestTMP {
                 Task creationTask = graph.newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.getVariable("starterNode");
+                        Node node = (Node) context.variable("starterNode");
                         System.out.println("Creation: " + node);
                     }
                 });
@@ -77,11 +77,11 @@ public class TestTMP {
                  .ifThen(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
-                        Node[] result = (Node[]) context.getVariable("childNode");
+                        Node[] result = (Node[]) context.variable("childNode");
 
                         if(result.length > 0) {
                             context.setVariable("starterNode",result[0]);
-                            Node starter = (Node) context.getVariable("starterNode");
+                            Node starter = (Node) context.variable("starterNode");
                             System.out.println(recursionNb[0] + " 1er ifThen " + starter + " -> " + Arrays.toString(result));
 
                         }
@@ -93,10 +93,10 @@ public class TestTMP {
                     public boolean eval(TaskContext context) {
 
 
-                        Node[] result = (Node[]) context.getVariable("childNode");
+                        Node[] result = (Node[]) context.variable("childNode");
 
                         if(result.length == 0) {
-                            Node starter = (Node) context.getVariable("starterNode");
+                            Node starter = (Node) context.variable("starterNode");
                             System.out.println(recursionNb[0] + " 2nd ifThen " + starter);
                         }
                         return result.length == 0;

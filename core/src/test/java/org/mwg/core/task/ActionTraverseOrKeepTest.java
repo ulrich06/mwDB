@@ -18,7 +18,7 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] lastResult = (Node[]) context.getPreviousResult();
+                        Node[] lastResult = (Node[]) context.result();
                         Assert.assertEquals(lastResult[0].get("name"), "n0");
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }

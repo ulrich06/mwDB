@@ -15,7 +15,7 @@ class ActionFromIndexAll implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.graph().findAll(context.getWorld(), context.getTime(), _indexName, new Callback<Node[]>() {
+        context.graph().findAll(context.world(), context.time(), _indexName, new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
                 context.setResult(result);

@@ -31,7 +31,7 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.getPreviousResult();
+                        Node node = (Node) context.result();
                         Assert.assertNotNull(node);
                         Assert.assertNull(node.get("name"));
 
@@ -69,7 +69,7 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] nodes = (Node[]) context.getPreviousResult();
+                        Node[] nodes = (Node[]) context.result();
                         Assert.assertNotNull(nodes);
 
                         for (int i = 0; i < 5; i++) {

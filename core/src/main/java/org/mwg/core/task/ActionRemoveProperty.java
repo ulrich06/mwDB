@@ -15,7 +15,7 @@ class ActionRemoveProperty implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        Object previousResult = context.getPreviousResult();
+        Object previousResult = context.result();
         if (previousResult instanceof AbstractNode) {
             ((Node) previousResult).removeProperty(_propertyName);
         } else if (previousResult instanceof Object[]) {

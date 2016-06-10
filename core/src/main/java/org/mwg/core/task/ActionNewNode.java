@@ -10,7 +10,7 @@ class ActionNewNode implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        context.setResult(context.graph().newNode(context.getWorld(), context.getTime()));
+        context.setResult(context.graph().newNode(context.world(), context.time()));
         context.next();
     }
 }

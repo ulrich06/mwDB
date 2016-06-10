@@ -21,14 +21,14 @@ public class ActionForeachParTest extends AbstractActionTest {
                     @Override
                     public void eval(TaskContext context) {
                         i[0]++;
-                        Assert.assertEquals(context.getPreviousResult(), i[0]);
-                        context.setResult(context.getPreviousResult());//propagate result
+                        Assert.assertEquals(context.result(), i[0]);
+                        context.setResult(context.result());//propagate result
                     }
                 }))
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] result = (Object[]) context.getPreviousResult();
+                        Object[] result = (Object[]) context.result();
                         Assert.assertEquals(result.length, 3);
                         Assert.assertEquals(result[0], 1l);
                         Assert.assertEquals(result[1], 2l);
@@ -40,12 +40,12 @@ public class ActionForeachParTest extends AbstractActionTest {
         graph.newTask().fromIndexAll("nodes").foreachPar(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(context.getPreviousResult());
+                context.setResult(context.result());
             }
         })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Object[] result = (Object[]) context.getPreviousResult();
+                Object[] result = (Object[]) context.result();
                 Assert.assertEquals(result.length, 3);
                 Assert.assertEquals(((Node) result[0]).get("name"), "n0");
                 Assert.assertEquals(((Node) result[1]).get("name"), "n1");
@@ -61,12 +61,12 @@ public class ActionForeachParTest extends AbstractActionTest {
         graph.newTask().from(paramIterable).foreachPar(graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(context.getPreviousResult());
+                context.setResult(context.result());
             }
         })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Object[] result = (Object[]) context.getPreviousResult();
+                Object[] result = (Object[]) context.result();
                 Assert.assertEquals(result.length, 3);
                 Assert.assertEquals(result[0], "n0");
                 Assert.assertEquals(result[1], "n1");

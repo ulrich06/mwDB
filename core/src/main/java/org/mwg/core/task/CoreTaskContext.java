@@ -42,7 +42,7 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final long getWorld() {
+    public final long world() {
         return this._world;
     }
 
@@ -52,7 +52,7 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final long getTime() {
+    public final long time() {
         return this._time;
     }
 
@@ -62,19 +62,19 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final Object getVariable(String name) {
+    public final Object variable(String name) {
         Object result = this._variables.get(name);
         if (result != null) {
             return result;
         }
         if (_parentContext != null) {
-            return this._parentContext.getVariable(name);
+            return this._parentContext.variable(name);
         }
         return null;
     }
 
     @Override
-    public String[] getVariablesKeys() {
+    public String[] variablesKeys() {
         String[] result = new String[this._variables.size()];
         int index = 0;
         for (String key : this._variables.keySet()) {
@@ -114,20 +114,20 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public final Object getPreviousResult() {
+    public final Object result() {
         int current = _currentTaskId.get();
         if (current == 0) {
             return _initialResult;
         } else {
             Object previousResult = _results[current - 1];
             if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext) {
-                return ((org.mwg.task.TaskContext) previousResult).getPreviousResult();
+                return ((org.mwg.task.TaskContext) previousResult).result();
             } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
                 org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
                 Object[] result = new Object[contexts.length];
                 int result_index = 0;
                 for (int i = 0; i < contexts.length; i++) {
-                    Object currentLoop = contexts[i].getPreviousResult();
+                    Object currentLoop = contexts[i].result();
                     if (currentLoop != null) {
                         result[result_index] = currentLoop;
                         result_index++;
@@ -160,9 +160,9 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     private void mergeVariables(TaskContext actionResult) {
-        String[] variables = actionResult.getVariablesKeys();
+        String[] variables = actionResult.variablesKeys();
         for (String variableName : variables) {
-            this.setVariable(variableName, actionResult.getVariable(variableName));
+            this.setVariable(variableName, actionResult.variable(variableName));
         }
     }
 

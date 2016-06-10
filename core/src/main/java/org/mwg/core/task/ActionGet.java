@@ -25,7 +25,7 @@ class ActionGet implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        Object previousResult = context.getPreviousResult();
+        Object previousResult = context.result();
         if (previousResult != null) {
             //dry execute to count waiter
             Set<Long> collectedIds = new HashSet<Long>();
@@ -56,7 +56,7 @@ class ActionGet implements TaskAction {
             if (collectedIds.size() > 0) {
                 final AtomicInteger cursor = new AtomicInteger(0);
                 for (Long idNode : collectedIds) {
-                    context.graph().lookup(context.getWorld(), context.getTime(), idNode, new Callback<Node>() {
+                    context.graph().lookup(context.world(), context.time(), idNode, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
                             resultNodes[cursor.getAndIncrement()] = result;

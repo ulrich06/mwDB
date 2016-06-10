@@ -22,7 +22,7 @@ class ActionMath implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        Object previous = context.getPreviousResult();
+        Object previous = context.result();
         List<Double> result = new ArrayList<Double>();
         if (previous instanceof AbstractNode) {
             Map<String, Double> variables = new HashMap<String, Double>();

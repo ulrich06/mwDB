@@ -69,7 +69,7 @@ public class RestGateway implements HttpHandler {
                         .setTime(time)
                         .parse(concatQuery.toString())
                         .then(context -> {
-                            Object result = context.getPreviousResult();
+                            Object result = context.result();
                             httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                             Sender sender = httpServerExchange.getResponseSender();
                             if (result != null) {
@@ -158,7 +158,7 @@ public class RestGateway implements HttpHandler {
                         .setTime(time)
                         .parse(concatQuery.toString())
                         .then(context -> {
-                            Object result = context.getPreviousResult();
+                            Object result = context.result();
                             if (result != null) {
                                 if (result instanceof Object[]) {
                                     Object[] castedArray = (Object[]) result;

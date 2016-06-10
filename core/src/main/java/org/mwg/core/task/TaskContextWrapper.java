@@ -21,8 +21,8 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public long getWorld() {
-        return _wrapped.getWorld();
+    public long world() {
+        return _wrapped.world();
     }
 
     @Override
@@ -31,8 +31,8 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public long getTime() {
-        return _wrapped.getTime();
+    public long time() {
+        return _wrapped.time();
     }
 
     @Override
@@ -41,13 +41,13 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public Object getVariable(String name) {
-        return _wrapped.getVariable(name);
+    public Object variable(String name) {
+        return _wrapped.variable(name);
     }
 
     @Override
-    public String[] getVariablesKeys() {
-        return _wrapped.getVariablesKeys();
+    public String[] variablesKeys() {
+        return _wrapped.variablesKeys();
     }
 
     @Override
@@ -61,8 +61,8 @@ class TaskContextWrapper implements TaskContext {
     }
 
     @Override
-    public Object getPreviousResult() {
-        return _wrapped.getPreviousResult();
+    public Object result() {
+        return _wrapped.result();
     }
 
     @Override

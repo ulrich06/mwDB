@@ -28,14 +28,14 @@ class ActionWhileDo implements TaskAction {
             }
         };
         if (_cond.eval(context)) {
-            _then.executeThenAsync(context, context.getPreviousResult(), );
+            _then.executeThenAsync(context, context.result(), );
         } else {
-            context.setResult(context.getPreviousResult());
+            context.setResult(context.result());
             context.next();
         }
 
 
-        final Object[] castedResult = convert(context.getPreviousResult());
+        final Object[] castedResult = convert(context.result());
         AtomicInteger cursor = new AtomicInteger(0);
         final CoreTaskContext[] results = new CoreTaskContext[castedResult.length];
         _then.executeThenAsync(context, castedResult[0], new TaskAction() {

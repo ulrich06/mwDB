@@ -15,7 +15,7 @@ public class ActionWorldTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(context.getWorld(), 10);
+                        Assert.assertEquals(context.world(), 10);
                     }
                 })
                 .execute();

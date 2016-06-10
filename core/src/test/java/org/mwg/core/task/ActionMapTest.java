@@ -23,7 +23,7 @@ public class ActionMapTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] names = (Object[]) context.getPreviousResult();
+                        Object[] names = (Object[]) context.result();
                         Assert.assertEquals(names[0], "n0");
                         Assert.assertEquals(names[1], "n1");
                         Assert.assertEquals(names[2], "root");

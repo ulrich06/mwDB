@@ -17,8 +17,8 @@ class ActionSet implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object previousResult = context.getPreviousResult();
-        final Object savedVar = context.getVariable(_variableNameToSet);
+        final Object previousResult = context.result();
+        final Object savedVar = context.variable(_variableNameToSet);
         if (previousResult instanceof AbstractNode) {
             ((Node) previousResult).set(_relationName, savedVar);
         } else if (previousResult instanceof Object[]) {

@@ -16,7 +16,7 @@ class ActionMap implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        final Object previousResult = context.getPreviousResult();
+        final Object previousResult = context.result();
         if (previousResult != null) {
             if (previousResult instanceof Object[]) {
                 context.setResult(filterArray((Object[]) previousResult));

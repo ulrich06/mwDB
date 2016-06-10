@@ -35,7 +35,7 @@ public abstract class AbstractMLNode extends AbstractNode {
                 tasks[i].executeThenAsync(null, this, new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object current = context.getPreviousResult();
+                        Object current = context.result();
                         if (current == null) {
                             result[taskIndex] = Constants.NULL_LONG;
                         } else {

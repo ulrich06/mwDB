@@ -19,7 +19,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] lastResult = (Node[]) context.getPreviousResult();
+                        Node[] lastResult = (Node[]) context.result();
                         Assert.assertEquals(lastResult[0].get("name"), "n0");
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
@@ -36,7 +36,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] lastResult = (Node[]) context.getPreviousResult();
+                        Node[] lastResult = (Node[]) context.result();
                         Assert.assertEquals(lastResult[0].get("name"), "n0");
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
@@ -85,7 +85,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.getPreviousResult();
+                        Node[] n = (Node[]) context.result();
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
@@ -97,7 +97,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.getPreviousResult();
+                        Node[] n = (Node[]) context.result();
                         Assert.assertEquals(0, n.length);
                     }
                 }).execute();
@@ -108,7 +108,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.getPreviousResult();
+                        Node[] n = (Node[]) context.result();
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
@@ -120,7 +120,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.getPreviousResult();
+                        Node[] n = (Node[]) context.result();
                         Assert.assertEquals(2, n.length);
                         Assert.assertEquals("node1", n[0].get("name"));
                         Assert.assertEquals("node2", n[1].get("name"));
@@ -133,7 +133,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.getPreviousResult();
+                        Node[] n = (Node[]) context.result();
                         Assert.assertEquals(3, n.length);
                         Assert.assertEquals("node1", n[0].get("name"));
                         Assert.assertEquals("node2", n[1].get("name"));

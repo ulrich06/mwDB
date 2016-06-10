@@ -17,8 +17,8 @@ public class ActionWithoutTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.getPreviousResult())[0].get("name"), "n1");
-                        Assert.assertEquals(((Node[]) context.getPreviousResult())[1].get("name"), "root");
+                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n1");
+                        Assert.assertEquals(((Node[]) context.result())[1].get("name"), "root");
                     }
                 })
                 .execute();
@@ -29,7 +29,7 @@ public class ActionWithoutTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.getPreviousResult())[0].get("name"), "root");
+                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "root");
                     }
                 })
                 .execute();

@@ -7,7 +7,7 @@ class ActionNoop implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        final Object previousResult = context.getPreviousResult();
+        final Object previousResult = context.result();
         context.setResult(previousResult);
         //continue for next step
         context.next();

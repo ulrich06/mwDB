@@ -23,7 +23,7 @@ class ActionTraverseIndex implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        Object previousResult = context.getPreviousResult();
+        Object previousResult = context.result();
         if (previousResult != null) {
             Node[] toLoad;
             if (previousResult instanceof AbstractNode) {
@@ -41,8 +41,8 @@ class ActionTraverseIndex implements TaskAction {
                 Node node = toLoad[i];
                 if (_query != null) {
                     Query queryObj = node.graph().newQuery();
-                    queryObj.setWorld(context.getWorld());
-                    queryObj.setTime(context.getTime());
+                    queryObj.setWorld(context.world());
+                    queryObj.setTime(context.time());
                     queryObj.parse(_query);
                     queryObj.setIndexName(_indexName);
                     node.findByQuery(queryObj, new Callback<Node[]>() {

@@ -71,7 +71,7 @@ public class ActionIfThenTest extends AbstractActionTest{
         },addVarInContext).fromVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Integer val = (Integer) context.getPreviousResult();
+                Integer val = (Integer) context.result();
                 Assert.assertEquals(5,(int)val);
             }
         }).execute();
@@ -84,7 +84,7 @@ public class ActionIfThenTest extends AbstractActionTest{
         Task accessVar = graph.newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Integer variable = (Integer) context.getVariable("variable");
+                Integer variable = (Integer) context.variable("variable");
                 Assert.assertEquals(5,(int)variable);
             }
         });

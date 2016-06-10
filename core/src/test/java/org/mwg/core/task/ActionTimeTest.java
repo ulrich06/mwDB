@@ -15,7 +15,7 @@ public class ActionTimeTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(context.getTime(), 10);
+                        Assert.assertEquals(context.time(), 10);
                     }
                 })
                 .execute();

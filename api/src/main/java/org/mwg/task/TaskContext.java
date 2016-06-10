@@ -6,28 +6,28 @@ public interface TaskContext {
 
     Graph graph();
 
-    long getWorld();
+    long world();
 
     void setWorld(long world);
 
-    long getTime();
+    long time();
 
     void setTime(long time);
 
-    Object getVariable(String name);
+    Object variable(String name);
 
-    String[] getVariablesKeys();
+    String[] variablesKeys();
 
     void setVariable(String name, Object value);
 
     void addToVariable(String name, Object value);
 
-    Object getPreviousResult();
+    Object result();
 
     void setResult(Object actionResult);
 
     void next();
 
     void clean();
-    
+
 }

@@ -28,8 +28,8 @@ public class ActionSetPropertyTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertNotNull(context.getPreviousResult());
-                        Node node = (Node) context.getPreviousResult();
+                        Assert.assertNotNull(context.result());
+                        Node node = (Node) context.result();
                         Assert.assertEquals("node", node.get("name"));
 
                         id[0] = node.id();
@@ -65,8 +65,8 @@ public class ActionSetPropertyTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertNotNull(context.getPreviousResult());
-                        Node[] nodes = (Node[]) context.getPreviousResult();
+                        Assert.assertNotNull(context.result());
+                        Node[] nodes = (Node[]) context.result();
 
                         for (int i = 0; i < 5; i++) {
                             Assert.assertEquals("node", nodes[i].get("name"));

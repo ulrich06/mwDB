@@ -30,8 +30,8 @@ public class ActionRemoveTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertNotNull(context.getPreviousResult());
-                        Node node = (Node) context.getPreviousResult();
+                        Assert.assertNotNull(context.result());
+                        Node node = (Node) context.result();
                         Assert.assertNull(node.get("friend"));
                         id[0] = node.id();
                     }
@@ -70,8 +70,8 @@ public class ActionRemoveTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertNotNull(context.getPreviousResult());
-                        Node[] nodes = (Node[]) context.getPreviousResult();
+                        Assert.assertNotNull(context.result());
+                        Node[] nodes = (Node[]) context.result();
 
                         for (int i = 0; i < 5; i++) {
                             Assert.assertNull(nodes[i].get("friend"));

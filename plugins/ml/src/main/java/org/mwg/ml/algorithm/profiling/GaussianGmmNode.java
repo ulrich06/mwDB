@@ -159,7 +159,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         Task creationTask = graph().newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                GaussianGmmNode node = (GaussianGmmNode) context.getVariable("starterNode");
+                GaussianGmmNode node = (GaussianGmmNode) context.variable("starterNode");
                 //System.out.println("Vector: " + values[0] + " " + values[1]);
                 node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
             }
@@ -170,8 +170,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Node[] result = (Node[]) context.getPreviousResult();
-                GaussianGmmNode parent = (GaussianGmmNode) context.getVariable("starterNode");
+                Node[] result = (Node[]) context.result();
+                GaussianGmmNode parent = (GaussianGmmNode) context.variable("starterNode");
                 GaussianGmmNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
@@ -185,7 +185,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 .ifThen(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
-                        return (boolean) context.getVariable("continueLoop");
+                        return (boolean) context.variable("continueLoop");
                     }
                 }, traverse);
 
@@ -485,7 +485,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             @Override
             public void eval(TaskContext context) {
 
-                Node[] leaves = (Node[]) context.getPreviousResult();   // to check
+                Node[] leaves = (Node[]) context.result();   // to check
                 Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
                 for (int i = 0; i < nbfeature; i++) {
                     covBackup.set(i, i, err[i]);
@@ -545,7 +545,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         deepTraverseTask.then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Node[] leaves = (Node[]) context.getPreviousResult();   // to check
+                Node[] leaves = (Node[]) context.result();   // to check
                 Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
                 for (int i = 0; i < nbfeature; i++) {
                     covBackup.set(i, i, err[i]);

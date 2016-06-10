@@ -13,7 +13,7 @@ class ActionFromVar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.setResult(context.getVariable(_name));
+        context.setResult(context.variable(_name));
         //continue for next step
         context.next();
     }

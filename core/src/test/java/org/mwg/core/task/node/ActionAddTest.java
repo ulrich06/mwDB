@@ -29,7 +29,7 @@ public class ActionAddTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.getPreviousResult();
+                        Node node = (Node) context.result();
                         Assert.assertNotNull(node);
                         Assert.assertEquals(1, ((long[]) node.get("friend")).length);
                         id[0] = node.id();
@@ -68,7 +68,7 @@ public class ActionAddTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] nodes = (Node[]) context.getPreviousResult();
+                        Node[] nodes = (Node[]) context.result();
                         Assert.assertNotNull(nodes);
 
                         for (int i = 0; i < 5; i++) {

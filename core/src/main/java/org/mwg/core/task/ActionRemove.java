@@ -17,8 +17,8 @@ class ActionRemove implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object previousResult = context.getPreviousResult();
-        final Object savedVar = context.getVariable(_variableNameToRemove);
+        final Object previousResult = context.result();
+        final Object savedVar = context.variable(_variableNameToRemove);
         if (savedVar instanceof AbstractNode) {
             if (previousResult instanceof AbstractNode) {
                 ((Node) previousResult).remove(_relationName, (Node) savedVar);

@@ -253,7 +253,7 @@ public class CoreTask implements org.mwg.task.Task {
         Task task = _graph.newTask().then(new Action() {
             @Override
             public void eval(org.mwg.task.TaskContext context) {
-                Object previousResult = context.getPreviousResult();
+                Object previousResult = context.result();
                 if (previousResult != null) {
                     action.on((T) previousResult);
                 }
@@ -325,8 +325,8 @@ public class CoreTask implements org.mwg.task.Task {
         };
         final org.mwg.task.TaskContext context = new CoreTaskContext(parent, protect(initialResult), _graph, final_actions);
         if (parent != null) {
-            context.setWorld(parent.getWorld());
-            context.setTime(parent.getTime());
+            context.setWorld(parent.world());
+            context.setTime(parent.time());
         }
         _graph.scheduler().dispatch(new Job() {
             @Override
