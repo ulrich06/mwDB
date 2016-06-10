@@ -448,21 +448,21 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void unindex(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
+    public void unindex(String indexName, org.mwg.Node nodeToUnindex, String flatKeyAttributes, Callback<Boolean> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
-        if (toIndexNode == null) {
+        if (nodeToUnindex == null) {
             throw new RuntimeException("toIndexNode should not be null");
         }
         if (flatKeyAttributes == null) {
             throw new RuntimeException("flatKeyAttributes should not be null");
         }
-        getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
+        getIndexOrCreate(nodeToUnindex.world(), nodeToUnindex.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
             public void on(org.mwg.Node foundIndex) {
                 if (foundIndex != null) {
-                    foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, toIndexNode, flatKeyAttributes, new Callback<Boolean>() {
+                    foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, nodeToUnindex, flatKeyAttributes, new Callback<Boolean>() {
                         @Override
                         public void on(Boolean result) {
                             foundIndex.free();

@@ -96,15 +96,14 @@ public interface Graph {
     void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
-     * Removes the {@code nodeToIndex} from the global index identified by {@code indexName}.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, Callback)} using the same attributes.
+     * Removes the {@code nodeToUnindex} from the global index identified by {@code indexName}.<br>
      *
      * @param indexName         A string uniquely identifying the index in the {@link Graph}.
-     * @param nodeToIndex       The node to remove from the index.
-     * @param flatKeyAttributes The set of attributes used asVar keys to index the node, given as a flat string separated by ','. The order does not matter.
-     * @param callback          Called when the unindexing is done. The parameter specifies whether or not the indexing hasField succeeded.
+     * @param nodeToUnindex       The node to remove from the index.
+     * @param flatKeyAttributes The set of attributes used as keys to index the node, given as a flat string separated by ','. The order does not matter.
+     * @param callback          Called when the unindexing is done. The parameter specifies whether or not the unindexing has succeeded.
      */
-    void unindex(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
+    void unindex(String indexName, Node nodeToUnindex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
      * Retrieves from an index nodes that satisfy the query.<br>
