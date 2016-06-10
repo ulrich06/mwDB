@@ -8,14 +8,14 @@ import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
 
 public class OpsTest {
 
-    int exec=50000;
-    boolean enablebench=false;
-    int dim=10;
+    int exec = 1000;
+    boolean enablebench = false;
+    int dim = 10;
 
 
     @Test
-    public void optimize(){
-        if(!enablebench){
+    public void optimize() {
+        if (!enablebench) {
             return;
         }
         MatrixEngine blas = new BlasMatrixEngine();
@@ -29,7 +29,7 @@ public class OpsTest {
         double ratio;
 
 
-        for(dim=5;dim<15;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixMult(blas);
@@ -41,19 +41,18 @@ public class OpsTest {
                 MatrixMult(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas MULT " + blastime + " JAMA MULT " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas MULT " + blastime + " JAMA MULT " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //    System.out.println("DIM " + dim + " Blas MULT " + blastime + " JAMA MULT " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas MULT " + blastime + " JAMA MULT " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
 
         System.out.println("");
 
 
-        for(dim=33;dim<38;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixSVD(blas);
@@ -65,18 +64,17 @@ public class OpsTest {
                 MatrixSVD(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas SVD " + blastime + " JAMA SVD " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas SVD " + blastime + " JAMA SVD " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //    System.out.println("DIM " + dim + " Blas SVD " + blastime + " JAMA SVD " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas SVD " + blastime + " JAMA SVD " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
 
         System.out.println("");
 
-        for(dim=13;dim<23;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixQR(blas);
@@ -88,18 +86,17 @@ public class OpsTest {
                 MatrixQR(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas QR " + blastime + " JAMA QR " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas QR " + blastime + " JAMA QR " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //    System.out.println("DIM " + dim + " Blas QR " + blastime + " JAMA QR " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas QR " + blastime + " JAMA QR " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
 
         System.out.println("");
 
-        for(dim=7;dim<15;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixLU(blas);
@@ -111,18 +108,17 @@ public class OpsTest {
                 MatrixLU(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas LU " + blastime + " JAMA LU " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas LU " + blastime + " JAMA LU " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //      System.out.println("DIM " + dim + " Blas LU " + blastime + " JAMA LU " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas LU " + blastime + " JAMA LU " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
 
         System.out.println("");
 
-        for(dim=6;dim<11;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixPseudoInv(blas);
@@ -134,18 +130,17 @@ public class OpsTest {
                 MatrixPseudoInv(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas Pinv " + blastime + " JAMA Pinv " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas Pinv " + blastime + " JAMA Pinv " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //     System.out.println("DIM " + dim + " Blas Pinv " + blastime + " JAMA Pinv " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas Pinv " + blastime + " JAMA Pinv " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
         System.out.println("");
 
 
-        for(dim=7;dim<15;dim++) {
+        for (dim = 5; dim < 30; dim++) {
             start = System.currentTimeMillis();
             for (int z = 0; z < exec; z++) {
                 MatrixInvert(blas);
@@ -157,12 +152,11 @@ public class OpsTest {
                 MatrixInvert(jama);
             }
             jamatime = System.currentTimeMillis() - start;
-            ratio=jamatime*1.0/blastime;
-            if(jamatime<blastime) {
-                System.out.println("DIM " + dim + " Blas invert " + blastime + " JAMA invert " + jamatime +" ratio " + ratio );
-            }
-            else{
-                System.out.println("DIM " + dim + " Blas invert " + blastime + " JAMA invert " + jamatime +" ratio " + ratio + " WIN FOR BLAS: "+dim);
+            ratio = jamatime * 1.0 / blastime;
+            if (jamatime < blastime) {
+                //     System.out.println("DIM " + dim + " Blas invert " + blastime + " JAMA invert " + jamatime +" ratio " + ratio );
+            } else {
+                System.out.println("DIM " + dim + " Blas invert " + blastime + " JAMA invert " + jamatime + " ratio " + ratio + " WIN FOR BLAS: " + dim);
             }
         }
     }
@@ -204,7 +198,7 @@ public class OpsTest {
 
         Matrix matA = Matrix.random(dim, dim, 0, 100);
         Matrix matB = Matrix.random(dim, dim, 0, 100);
-        Matrix res = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE,1.0,matA,TransposeType.NOTRANSPOSE,1.0,matB);
+        Matrix res = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1.0, matA, TransposeType.NOTRANSPOSE, 1.0, matB);
     }
 
     public void MatrixInvert(MatrixEngine engine) {
@@ -213,7 +207,7 @@ public class OpsTest {
         Matrix matA = Matrix.random(dim, dim, 0, 100);
         Matrix res = engine.invert(matA, false);
 
-        if(!enablebench) {
+        if (!enablebench) {
             Matrix id = Matrix.multiply(matA, res);
 
 
@@ -241,7 +235,7 @@ public class OpsTest {
         Matrix matB = Matrix.random(m, p, 0, 100);
 
         Matrix res = engine.solveLU(matA, matB, false, TransposeType.NOTRANSPOSE);
-        if(!enablebench) {
+        if (!enablebench) {
             Matrix temp = Matrix.multiply(matA, res);
 
             for (int i = 0; i < m; i++) {
@@ -264,7 +258,7 @@ public class OpsTest {
 
 
         Matrix res = engine.solveQR(matA, matB, false, TransposeType.NOTRANSPOSE);
-        if(!enablebench) {
+        if (!enablebench) {
             Matrix temp = Matrix.multiply(matA, res);
 
 
@@ -284,7 +278,7 @@ public class OpsTest {
 
         Matrix matA = Matrix.random(m, n, 0, 100);
         Matrix res = engine.pinv(matA, false);
-        if(!enablebench) {
+        if (!enablebench) {
             Matrix id = Matrix.multiply(res, matA);
 
             for (int i = 0; i < id.rows(); i++) {
@@ -310,7 +304,7 @@ public class OpsTest {
         Matrix matA = Matrix.random(m, n, 0, 100);
 
         SVDDecompose svd = engine.decomposeSVD(matA, false);
-        if(!enablebench) {
+        if (!enablebench) {
             Matrix U = svd.getU();
             Matrix S = svd.getSMatrix();
             Matrix Vt = svd.getVt();
