@@ -7,7 +7,7 @@ import org.mwg.Type;
 public interface Task {
 
     /**
-     * Method to set the task context to a particular world.
+     * Sets the task context to a particular world.
      *
      * @param world that hasField to be set into the task context and will be used for next sub tasks.
      * @return this task to chain actions (fluent API)
@@ -15,7 +15,7 @@ public interface Task {
     Task setWorld(long world);
 
     /**
-     * Method to set the task context to a particular time.
+     * Sets the task context to a particular time.
      *
      * @param time that hasField to be set into the task context and will be used for next sub tasks
      * @return this task to chain actions (fluent API)
@@ -23,21 +23,27 @@ public interface Task {
     Task setTime(long time);
 
     /**
-     * Method to store the current task result into a named variable
+     * Stores the current task result into a named variable
      *
-     * @param variableName to store result
+     * @param variableName identifier of this result
      * @return this task to chain actions (fluent API)
      */
     Task asVar(String variableName);
 
     /**
-     * Method to retrieve a previous task result and stack it for next sub tasks.
+     * Retrieves a previous task result and stack it for next sub tasks.
      *
-     * @param variableName to retrieve the past result
+     * @param variableName identifying a previous result
      * @return this task to chain actions (fluent API)
      */
     Task fromVar(String variableName);
 
+    /**
+     * Initializes a named variable into the task context.
+     * @param variableName the name of the variable
+     * @param inputValue the value of the variable
+     * @return this task to chain actions (fluent API)
+     */
     Task setVar(String variableName, Object inputValue);
 
     /**
@@ -49,34 +55,41 @@ public interface Task {
     Task from(Object inputValue);
 
     /**
-     * Retrieve an indexed nodes which respect a query
+     * Retrieves indexed nodes that matches the query
      *
-     * @param indexName named of the global index to use
-     * @param query     query to retrieve node such as name=FOO
+     * @param indexName name of the index to use
+     * @param query     query to filter nodes, such as name=FOO
      * @return this task to chain actions (fluent API)
      */
     Task fromIndex(String indexName, String query);
 
     /**
-     * Retrieve all indexed nodes fromVar a global named index
+     * Retrieves all nodes from a named index
      *
-     * @param indexName named of the global index to use
+     * @param indexName name of the index
      * @return this task to chain actions (fluent API)
      */
     Task fromIndexAll(String indexName);
 
     /**
-     * @param name
-     * @param pattern
-     * @return
+     * Filters the previous result to keep nodes which named attribute has a specific value
+     * @param name the name of the attribute used to filter
+     * @param pattern the value nodes must have for this attribute
+     * @return this task to chain actions (fluent API)
      */
     Task selectWith(String name, String pattern);
 
+    /**
+     * Filters the previous result to keep nodes which named attribute do not have a given value
+     * @param name the name of the attribute used to filter
+     * @param pattern the value nodes must not have for this attribute
+     * @return this task to chain actions (fluent API)
+     */
     Task selectWithout(String name, String pattern);
 
     /**
-     * Filter the previous result to get nodes that respect the specified condition in {@code filterFunction}
-     * If you want to access/modify the context, please use, please use {@link #selectWhere(Task)}
+     * Filters the previous result to get nodes that complies to the condition specified in {@code filterFunction}
+     * If you want to access/modify the context, please use {@link #selectWhere(Task)}
      *
      * @param filterFunction condition that nodes have to respect
      * @return this task to chain actions (fluent API)
@@ -105,7 +118,7 @@ public interface Task {
      * Retrieve any property given a precise name.
      * If the property is a relationship, it is traversed an related nodes are retrieved.
      *
-     * @param name of property to
+     * @param name of property to retrieve
      * @return this task to chain actions (fluent API)
      */
     Task get(String name);
@@ -145,7 +158,7 @@ public interface Task {
     Task groupWhere(Task groupSubTask);
 
     /**
-     * Iterate through a collection and call the sub task for each elements
+     * Iterate through a collection and calls the sub task for each elements
      *
      * @param subTask sub task to call for each elements
      * @return this task to chain actions (fluent API)
