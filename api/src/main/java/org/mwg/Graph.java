@@ -8,6 +8,7 @@ import org.mwg.task.TaskContext;
 
 /**
  * Graph is the main structure of mwDB.
+ * Use the {@link GraphBuilder} to get an instance.
  */
 public interface Graph {
 
