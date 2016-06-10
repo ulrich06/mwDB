@@ -39,6 +39,7 @@
         <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.d.ts" todir="${basedir}/target/classes"/>
         <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js" todir="${basedir}/target/classes"/>
         <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js.map" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/src/netlib.js" todir="${basedir}/target/classes"/>
 
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="--target"/>

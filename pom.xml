@@ -124,6 +124,9 @@
         <!--
         <module>plugins/debug</module>
         -->
+
+        <module>plugins/alljs</module>
+
     </modules>
 
     <build>
