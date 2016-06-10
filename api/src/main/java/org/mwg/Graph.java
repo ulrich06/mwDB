@@ -1,9 +1,6 @@
 package org.mwg;
 
-import org.mwg.plugin.ChunkSpace;
-import org.mwg.plugin.Resolver;
-import org.mwg.plugin.Scheduler;
-import org.mwg.plugin.Storage;
+import org.mwg.plugin.*;
 import org.mwg.struct.Buffer;
 import org.mwg.task.Task;
 import org.mwg.task.TaskActionRegistry;
@@ -15,7 +12,7 @@ import org.mwg.task.TaskContext;
 public interface Graph {
 
     /**
-     * Creates a new {@link Node Node} (generic) in the Graph and returns the new Node.
+     * Creates a new (generic) {@link Node Node} in the Graph and returns the new Node.
      *
      * @param world initial world of the node
      * @param time  initial time of the node
@@ -24,11 +21,11 @@ public interface Graph {
     Node newNode(long world, long time);
 
     /**
-     * Creates a new {@link Node Node} selectWith a specified behavior name (related to NodeFactory plugins) in the Graph and returns the new Node.
+     * Creates a new {@link Node Node} using the {@link NodeFactory} previously declared with the {@link GraphBuilder#addNodeType(NodeFactory)} method and returns the new Node.
      *
      * @param world    initial world of the node
      * @param time     initial time of the node
-     * @param nodeType name of the special NodeFactory plugin
+     * @param nodeType name of the {@link NodeFactory} to be used, as previously declared with the {@link GraphBuilder#addNodeType(NodeFactory)} method.
      * @return newly created node
      */
     Node newTypedNode(long world, long time, String nodeType);
@@ -47,15 +44,16 @@ public interface Graph {
      *
      * @param world    The world identifier in which the Node must be searched.
      * @param time     The time at which the Node must be resolved.
-     * @param id       The unique identifier of the {@link Node} researched.
+     * @param id       The unique identifier of the {@link Node} ({@link Node#id()}) researched.
      * @param callback The task to be called when the {@link Node} is retrieved.
      */
     <A extends Node> void lookup(long world, long time, long id, Callback<A> callback);
 
     /**
-     * Creates a spin-off world fromVar the world given asVar parameter.<br>
+     * Creates a spin-off world from the world given as parameter.<br>
      * The forked world can then be altered independently of its parent.<br>
-     * Every modification in the parent world will nevertheless be inherited.
+     * Every modification in the parent world will nevertheless be inherited.<br>
+     * In case of concurrent change, changes in the forked world overrides changes from the parent.
      *
      * @param world origin world id
      * @return newly created child world id (to be used later in lookup method for instance)
@@ -64,9 +62,9 @@ public interface Graph {
 
     /**
      * Triggers a save task for the current graph.<br>
-     * This method synchronizes the storage selectWith the current RAM memory.
+     * This method synchronizes the physical storage with the current in-memory graph.
      *
-     * @param callback Called when the save is finished. The parameter specifies whether or not the save succeeded.
+     * @param callback called when the save is finished. The parameter specifies whether or not the task succeeded.
      */
     void save(Callback<Boolean> callback);
 
@@ -87,42 +85,42 @@ public interface Graph {
     /**
      * Adds the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
      * If the index does not exist, it is created on the fly.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, Callback)} using the same attributes.
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, Callback)} using the same attributes.
      *
      * @param indexName         A string uniquely identifying the index in the {@link Graph}.
      * @param nodeToIndex       The node to add in the index.
-     * @param flatKeyAttributes The set of attributes used asVar keys to index the node, given as a flat string separated by ','. The order does not matter.
-     * @param callback          Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
+     * @param flatKeyAttributes The set of attributes used as keys to index the node, given as a flat string separated by ','. The order does not matter.
+     * @param callback          Called when the indexing is done. The parameter specifies whether or not the indexing has succeeded.
      */
     void index(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
-     * Removes the {@code nodeToIndex} to the global index identified by {@code indexName}.<br>
-     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved selectWith {@link #find(long, long, String, String, Callback)} using the same attributes.
+     * Removes the {@code nodeToIndex} from the global index identified by {@code indexName}.<br>
+     * The node is referenced by its {@code keyAttributes} in the index, and can be retrieved with {@link #find(long, long, String, String, Callback)} using the same attributes.
      *
      * @param indexName         A string uniquely identifying the index in the {@link Graph}.
-     * @param nodeToIndex       The node to add in the index.
+     * @param nodeToIndex       The node to remove from the index.
      * @param flatKeyAttributes The set of attributes used asVar keys to index the node, given as a flat string separated by ','. The order does not matter.
-     * @param callback          Called when the indexing is done. The parameter specifies whether or not the indexing hasField succeeded.
+     * @param callback          Called when the unindexing is done. The parameter specifies whether or not the indexing hasField succeeded.
      */
     void unindex(String indexName, Node nodeToIndex, String flatKeyAttributes, Callback<Boolean> callback);
 
     /**
-     * Retrieves nodes from an index that satisfies the query.<br>
-     * The query must be defined using at least sub-set attributes used for the indexing, or all of them.<br>
+     * Retrieves from an index nodes that satisfy the query.<br>
+     * The query must be defined using at least a sub-set of the attributes used for the indexing.<br>
      * The form of the query is a list of &lt;key, value&gt; tuples (i.e.: "&lt;attName&gt;=&lt;val&gt;, &lt;attName2&gt;=&lt;val2&gt;,...").<br>
      * e.g: "name=john,age=30"
      *
      * @param world     The world id in which the search must be performed.
      * @param time      The timepoint at which the search must be performed.
      * @param indexName The name of the index in which to search.
-     * @param query     The query the node must satisfy.
+     * @param query     The query nodes must satisfy.
      * @param callback  Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
      */
     void find(long world, long time, String indexName, String query, Callback<Node[]> callback);
 
     /**
-     * Retrieves nodes from a global index that satisfies the query object passed as parameter.<br>
+     * Retrieves nodes from a global index that satisfy the query object passed as parameter.<br>
      *
      * @param query    The query to satisfy
      * @param callback Called when the search is finished. The requested nodes are given in parameter, empty array otherwise.
