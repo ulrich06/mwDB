@@ -3,7 +3,7 @@
     <script src="../../../corejs/target/classes/mwg.js"></script>
     <script src="../target/classes/mwg.ws.js"></script>
     <script>
-        var graph = org.mwg.GraphBuilder.builder().withStorage(new org.mwg.plugin.WSClient("ws://kloud4:8050")).build();
+        var graph = new org.mwg.GraphBuilder().withStorage(new org.mwg.plugin.WSClient("ws://kloud4:8050")).build();
         graph.connect(function () {
 
 
