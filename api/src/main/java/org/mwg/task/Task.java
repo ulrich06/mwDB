@@ -289,8 +289,8 @@ public interface Task {
     Task remove(String relationName, String variableNameToRemove);
 
     /**
-     * Parse a string to build the current task. Syntax should follow: actionName(param).actionName2(param2)...
-     * In case actionName en () are empty, default task is get(name).
+     * Parse a string to build the current task. Syntax is as follow: actionName(param).actionName2(param2)...
+     * In case actionName() are empty, default task is get(name).
      * Therefore the following: children.name should be read as get(children).get(name)
      *
      * @param flat string definition of the task
