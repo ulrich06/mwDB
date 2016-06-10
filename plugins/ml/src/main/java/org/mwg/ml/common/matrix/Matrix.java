@@ -153,14 +153,12 @@ public class Matrix {
     /**
      * @native ts
      * if(Matrix._defaultEngine == null){
-     * Matrix._defaultEngine = new org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine();
+     * Matrix._defaultEngine = new org.mwg.ml.common.matrix.HybridMatrixEngine();
      * }
      * return Matrix._defaultEngine;
      */
     public static MatrixEngine defaultEngine() {
         if (_defaultEngine == null) {
-            //_defaultEngine = new BlasMatrixEngine();
-            //_defaultEngine = new JamaMatrixEngine();
             _defaultEngine = new HybridMatrixEngine();
         }
         return _defaultEngine;
