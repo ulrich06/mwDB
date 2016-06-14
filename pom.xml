@@ -112,10 +112,12 @@
         <!-- Plugins -->
         <module>plugins/importer</module>
         <module>plugins/leveldb</module>
-        
+
+        <!--
         <module>plugins/ml</module>
         <module>plugins/mljs</module>
         <module>plugins/mlx</module>
+        -->
 
         <module>plugins/rest</module>
         <module>plugins/websocket</module>
