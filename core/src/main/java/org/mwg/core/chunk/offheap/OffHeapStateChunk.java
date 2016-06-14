@@ -3,11 +3,15 @@ package org.mwg.core.chunk.offheap;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.core.CoreConstants;
-import org.mwg.plugin.*;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.*;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Base64;
+import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkType;
+import org.mwg.plugin.NodeStateCallback;
+import org.mwg.struct.*;
 
 /**
  * @ignore ts
@@ -80,25 +84,17 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
             if (initialPayload != null && initialPayload.length() > 0) {
                 load(initialPayload, false);
+                if (elementK_ptr == CoreConstants.OFFHEAP_NULL_PTR) {
+                    init(initialCapacity);
+                }
+
             } else if (origin != null) {
                 OffHeapStateChunk castedOrigin = (OffHeapStateChunk) origin;
                 softClone(castedOrigin);
                 incrementCopyOnWriteCounter(castedOrigin.root_array_ptr);
             } else {
-                /** init long[] variables */
-                elementK_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
-                elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, elementV_ptr); //used for soft clone, therefore cow counter cannot be here
-                elementNext_ptr = OffHeapLongArray.allocate(initialCapacity + 1); //cow counter + capacity
-                OffHeapLongArray.set(elementNext_ptr, 0, 1); //init cow counter
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
-                elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
-                elementType_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_TYPE, elementType_ptr);
+                init(initialCapacity);
 
-                OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
             }
 
         } else {
@@ -110,6 +106,23 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             elementType_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE);
         }
 
+    }
+
+    private void init(long initialCapacity) {
+        /** init long[] variables */
+        elementK_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
+        elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, elementV_ptr); //used for soft clone, therefore cow counter cannot be here
+        elementNext_ptr = OffHeapLongArray.allocate(initialCapacity + 1); //cow counter + capacity
+        OffHeapLongArray.set(elementNext_ptr, 0, 1); //init cow counter
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+        elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
+        elementType_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_TYPE, elementType_ptr);
+
+        OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
     }
 
     @Override
