@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kevoree.mwg.plugins</groupId>
     <artifactId>rocksdb</artifactId>
-    <version>2-SNAPSHOT</version>
+    <version>2</version>
     <name>mwg :: Plugins :: RocksDB</name>
 
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
-        <version>2-SNAPSHOT</version>
+        <version>2</version>
         <relativePath>../..</relativePath>
     </parent>
 
