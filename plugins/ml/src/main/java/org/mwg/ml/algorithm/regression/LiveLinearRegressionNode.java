@@ -127,7 +127,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
     }
 
     @Override
-    public void extrapolate(Callback<Double> callback) {
+    public void extrapolate(final Callback<Double> callback) {
         NodeState state = this._resolver.resolveState(this, true);
         final double[] weights = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if(weights==null){
