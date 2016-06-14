@@ -1,7 +1,7 @@
 package org.mwg.ml.common.matrix;
 
 public interface MatrixEngine {
-    Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB);
+    Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB,  Matrix matB, double beta, Matrix matC);
 
     Matrix invert(Matrix mat, boolean invertInPlace);
 

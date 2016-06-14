@@ -47,7 +47,7 @@ public class MultiplyTest {
             Matrix matA = Matrix.random(r, o, 0, 100);
             Matrix matB = Matrix.random(o, p, 0, 100);
 
-            Matrix result = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1, matA, TransposeType.NOTRANSPOSE, 1, matB);
+            Matrix result = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1, matA, TransposeType.NOTRANSPOSE, matB,0,null);
             Matrix matD = manualMultpily(matA, matB);
 
             double eps = 1e-7;

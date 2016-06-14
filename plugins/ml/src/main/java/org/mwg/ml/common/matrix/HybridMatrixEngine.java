@@ -54,12 +54,12 @@ public class HybridMatrixEngine implements MatrixEngine {
 
 
     @Override
-    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB) {
+    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, Matrix matB, double beta, Matrix matC) {
         if(matA.leadingDimension()<MULT_LIMIT&&matB.leadingDimension()<MULT_LIMIT){
-            return jama.multiplyTransposeAlphaBeta(transA,alpha,matA,transB,beta,matB);
+            return jama.multiplyTransposeAlphaBeta(transA,alpha,matA,transB,matB, beta, matC);
         }
         else {
-            return blas.multiplyTransposeAlphaBeta(transA,alpha,matA,transB,beta,matB);
+            return blas.multiplyTransposeAlphaBeta(transA,alpha,matA,transB,matB,beta, matC);
         }
     }
 
