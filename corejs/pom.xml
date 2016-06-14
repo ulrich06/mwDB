@@ -4,12 +4,12 @@
     <groupId>org.kevoree.mwg</groupId>
     <artifactId>corejs</artifactId>
     <name>mwg :: CoreJs</name>
-    <version>2</version>
+    <version>3-SNAPSHOT</version>
 
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
-        <version>2</version>
+        <version>3-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
