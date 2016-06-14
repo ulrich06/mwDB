@@ -1,0 +1,24 @@
+<html>
+<head>
+    <script src="mwg.js"></script>
+    <script src="mwg.ml.js"></script>
+    <script src="mwg.ws.js"></script>
+</head>
+
+<body>
+<script>
+    var graph = new org.mwg.GraphBuilder()
+            .withStorage(new org.mwg.plugin.WSClient("ws://localhost:8050"))
+            .withMemorySize(10000)
+            .saveEvery(100)
+            .build();
+    graph.connect(function () {
+        var nowTime = new Date().getMilliseconds();
+        graph.indexes(0, nowTime, function (indexNames) {
+            console.log("Indexes=", indexNames);
+        });
+    });
+</script>
+</body>
+
+</html>

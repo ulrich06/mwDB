@@ -553,7 +553,7 @@ public abstract class AbstractNode implements Node {
                                 break;
                             }
                             case Type.DOUBLE: {
-                                if (isNaN((Double) elem)) {
+                                if (!isNaN((Double) elem)) {
                                     builder.append(",\"");
                                     builder.append(_resolver.hashToString(attributeKey));
                                     builder.append("\":");

@@ -477,6 +477,37 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
+    public void indexes(long world, long time, Callback<String[]> callback) {
+        final CoreGraph selfPointer = this;
+        this._resolver.lookup(world, time, CoreConstants.END_OF_TIME, new Callback<org.mwg.Node>() {
+            @Override
+            public void on(org.mwg.Node globalIndexNodeUnsafe) {
+                if (globalIndexNodeUnsafe == null) {
+                    callback.on(new String[0]);
+                } else {
+                    LongLongMap globalIndexContent = (LongLongMap) globalIndexNodeUnsafe.get(CoreConstants.INDEX_ATTRIBUTE);
+                    if (globalIndexContent == null) {
+                        globalIndexNodeUnsafe.free();
+                        callback.on(new String[0]);
+                    } else {
+                        String[] result = new String[(int) globalIndexContent.size()];
+                        final int[] resultIndex = {0};
+                        globalIndexContent.each(new LongLongMapCallBack() {
+                            @Override
+                            public void on(long key, long value) {
+                                result[resultIndex[0]] = selfPointer._resolver.hashToString(key);
+                                resultIndex[0]++;
+                            }
+                        });
+                        globalIndexNodeUnsafe.free();
+                        callback.on(result);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
     public void find(long world, long time, String indexName, String query, Callback<org.mwg.Node[]> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
