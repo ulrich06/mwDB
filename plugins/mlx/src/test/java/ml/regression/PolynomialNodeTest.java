@@ -101,7 +101,7 @@ public class PolynomialNodeTest {
         polynomialNode.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
             @Override
             public void on(long[] result) {
-                Assert.assertTrue(result.length == numOfPoly);
+                Assert.assertTrue(result.length <= numOfPoly);
             }
         });
     }
