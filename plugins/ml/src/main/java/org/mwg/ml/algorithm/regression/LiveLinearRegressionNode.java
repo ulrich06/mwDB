@@ -46,7 +46,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
     }
 
     @Override
-    public void learn(double output, Callback<Boolean> callback) {
+    public void learn(final double output, final Callback<Boolean> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] input) {

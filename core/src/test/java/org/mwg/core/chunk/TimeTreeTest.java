@@ -22,7 +22,7 @@ public class TimeTreeTest implements ChunkListener {
 
     @Test
     public void heapTest() {
-        ChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
             public TimeTreeChunk create(Buffer payload) {
@@ -50,7 +50,7 @@ public class TimeTreeTest implements ChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        ChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         KTimeTreeChunkFactory factory = new KTimeTreeChunkFactory() {
             @Override
             public TimeTreeChunk create(Buffer payload) {

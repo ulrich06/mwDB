@@ -8,6 +8,8 @@ import io.undertow.util.Headers;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.task.Action;
+import org.mwg.task.TaskContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +30,7 @@ public class RestGateway implements HttpHandler {
     }
 
     @Override
-    public void handleRequest(HttpServerExchange httpServerExchange) throws Exception {
+    public void handleRequest(final HttpServerExchange httpServerExchange) throws Exception {
         String rawPath = httpServerExchange.getRelativePath();
 
         long world = 0;
@@ -68,31 +70,34 @@ public class RestGateway implements HttpHandler {
                         .setWorld(world)
                         .setTime(time)
                         .parse(concatQuery.toString())
-                        .then(context -> {
-                            Object result = context.result();
-                            httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
-                            Sender sender = httpServerExchange.getResponseSender();
-                            if (result != null) {
-                                if (result instanceof Object[]) {
-                                    Object[] results = (Object[]) result;
-                                    StringBuilder builder = new StringBuilder();
-                                    builder.append("[\n");
-                                    for (int i = 0; i < results.length; i++) {
-                                        if (i != 0) {
-                                            builder.append(",\n");
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                Object result = context.result();
+                                httpServerExchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+                                Sender sender = httpServerExchange.getResponseSender();
+                                if (result != null) {
+                                    if (result instanceof Object[]) {
+                                        Object[] results = (Object[]) result;
+                                        StringBuilder builder = new StringBuilder();
+                                        builder.append("[\n");
+                                        for (int i = 0; i < results.length; i++) {
+                                            if (i != 0) {
+                                                builder.append(",\n");
+                                            }
+                                            builder.append((results[i]).toString());
                                         }
-                                        builder.append((results[i]).toString());
+                                        builder.append("\n]\n");
+                                        sender.send(builder.toString());
+                                        httpServerExchange.endExchange();
+                                    } else {
+                                        sender.send("[{" + result.toString() + "}]");
                                     }
-                                    builder.append("\n]\n");
-                                    sender.send(builder.toString());
-                                    httpServerExchange.endExchange();
                                 } else {
-                                    sender.send("[{" + result.toString() + "}]");
+                                    sender.send("[]");
                                 }
-                            } else {
-                                sender.send("[]");
+                                httpServerExchange.endExchange();
                             }
-                            httpServerExchange.endExchange();
                         })
                         .execute();
             } else {
@@ -129,7 +134,7 @@ public class RestGateway implements HttpHandler {
                 httpServerExchange.getResponseSender().send(body.length() + "");
                 httpServerExchange.endExchange();
 
-                Map<String, String> postParam = new HashMap<String, String>();
+                final Map<String, String> postParam = new HashMap<String, String>();
                 int cursor = 0;
                 int lastStart = 0;
                 while (cursor < body.length()) {
@@ -157,23 +162,26 @@ public class RestGateway implements HttpHandler {
                         .setWorld(world)
                         .setTime(time)
                         .parse(concatQuery.toString())
-                        .then(context -> {
-                            Object result = context.result();
-                            if (result != null) {
-                                if (result instanceof Object[]) {
-                                    Object[] castedArray = (Object[]) result;
-                                    for (int i = 0; i < castedArray.length; i++) {
-                                        if (castedArray[i] instanceof AbstractNode) {
-                                            AbstractNode castedNodeLoop = (AbstractNode) castedArray[i];
-                                            for (String kk : postParam.keySet()) {
-                                                castedNodeLoop.set(kk, postParam.get(kk));
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                Object result = context.result();
+                                if (result != null) {
+                                    if (result instanceof Object[]) {
+                                        Object[] castedArray = (Object[]) result;
+                                        for (int i = 0; i < castedArray.length; i++) {
+                                            if (castedArray[i] instanceof AbstractNode) {
+                                                AbstractNode castedNodeLoop = (AbstractNode) castedArray[i];
+                                                for (String kk : postParam.keySet()) {
+                                                    castedNodeLoop.set(kk, postParam.get(kk));
+                                                }
                                             }
                                         }
-                                    }
-                                } else if (result instanceof AbstractNode) {
-                                    AbstractNode castedNode = (AbstractNode) result;
-                                    for (String kk : postParam.keySet()) {
-                                        castedNode.set(kk, postParam.get(kk));
+                                    } else if (result instanceof AbstractNode) {
+                                        AbstractNode castedNode = (AbstractNode) result;
+                                        for (String kk : postParam.keySet()) {
+                                            castedNode.set(kk, postParam.get(kk));
+                                        }
                                     }
                                 }
                             }

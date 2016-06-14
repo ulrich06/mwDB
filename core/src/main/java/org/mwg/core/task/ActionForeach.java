@@ -19,12 +19,12 @@ class ActionForeach implements TaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final ActionForeach selfPointer = this;
         final Object[] castedResult = convert(context.result());
-        AtomicInteger cursor = new AtomicInteger(0);
+        final AtomicInteger cursor = new AtomicInteger(0);
         final TaskContext[] results = new CoreTaskContext[castedResult.length];
-        Action[] recursiveAction = new Action[1];
+        final Action[] recursiveAction = new Action[1];
         recursiveAction[0] = new Action() {
             @Override
             public void eval(final TaskContext subTaskFinalContext) {

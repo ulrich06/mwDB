@@ -48,19 +48,19 @@ public class ActionTraverseTest extends AbstractActionTest {
     @Test
     public void testTraverseIndex() {
         initGraph();
-        Node node1 = graph.newNode(0, 0);
+        final Node node1 = graph.newNode(0, 0);
         node1.setProperty("name", Type.STRING, "node1");
         node1.setProperty("value", Type.INT, 1);
 
-        Node node2 = graph.newNode(0, 0);
+        final Node node2 = graph.newNode(0, 0);
         node2.setProperty("name", Type.STRING, "node2");
         node2.setProperty("value", Type.INT, 2);
 
-        Node node3 = graph.newNode(0, 12);
+        final Node node3 = graph.newNode(0, 12);
         node3.setProperty("name", Type.STRING, "node3");
         node3.setProperty("value", Type.INT, 3);
 
-        Node root = graph.newNode(0, 0);
+        final Node root = graph.newNode(0, 0);
         root.setProperty("name", Type.STRING, "root2");
         graph.index("rootIndex", root, "name", new Callback<Boolean>() {
             @Override

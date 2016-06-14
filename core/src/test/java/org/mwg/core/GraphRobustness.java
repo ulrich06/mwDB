@@ -75,7 +75,7 @@ public class GraphRobustness {
 
     @Test
     public void robustnessConnect() {
-        boolean[] exceptionCaught = new boolean[1];
+        final boolean[] exceptionCaught = new boolean[1];
         exceptionCaught[0] = false;
         _graph.disconnect(new Callback<Boolean>() {
             @Override

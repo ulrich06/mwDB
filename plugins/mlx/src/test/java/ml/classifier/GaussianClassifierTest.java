@@ -17,7 +17,7 @@ public class GaussianClassifierTest extends AbstractClassifierTest{
     @Test
     public void test() {
         //This test fails if there are too many errors
-        Graph graph = new GraphBuilder().addNodeType(new GaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianClassifierNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

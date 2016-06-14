@@ -283,7 +283,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     }
 
     @Override
-    public final void save(Buffer buffer) {
+    public final void save(final Buffer buffer) {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ; // lock
         try {
             consistencyCheck();

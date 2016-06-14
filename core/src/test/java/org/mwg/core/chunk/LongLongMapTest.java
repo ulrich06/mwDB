@@ -66,8 +66,8 @@ public class LongLongMapTest implements ChunkListener {
 
         Assert.assertTrue(dirtyCount == 5);
 
-        long[] keys = new long[3];
-        long[] values = new long[3];
+        final long[] keys = new long[3];
+        final long[] values = new long[3];
         final int[] resIndex = {0};
         map.each(new LongLongMapCallBack() {
             @Override

@@ -60,16 +60,16 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                final GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
 
                 double eps = 1e-7;
 
 
-                double[][] train = new double[16][];
+                final double[][] train = new double[16][];
 
                 int time = 0;
                 int k = 0;
@@ -79,7 +79,7 @@ public class GaussianNodeTest {
                         train[i][j] = longleyData[k];
                         k++;
                     }
-                    int finalI = i;
+                    final int finalI = i;
                     gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
                         @Override
                         public void on(GaussianGmmNode result) {

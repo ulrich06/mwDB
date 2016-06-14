@@ -10,12 +10,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
-/**
- * Created by assaad on 04/04/16.
- */
 public class GaussianMixtureSim {
     public static void main(String[] arg) {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

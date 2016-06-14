@@ -6,15 +6,12 @@ import org.mwg.task.*;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
 
-/**
- * Created by ludovicmouline on 26/04/16.
- */
-public class ActionIfThenTest extends AbstractActionTest{
+public class ActionIfThenTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        boolean[] result = {false,false};
+        final boolean[] result = {false, false};
 
         Task modifyResult0 = graph.newTask()
                 .then(new Action() {
@@ -39,17 +36,17 @@ public class ActionIfThenTest extends AbstractActionTest{
                     public boolean eval(TaskContext context) {
                         return true;
                     }
-                },modifyResult0).execute();
+                }, modifyResult0).execute();
 
         graph.newTask().ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return false;
             }
-        },modifyResult0).execute();
+        }, modifyResult0).execute();
 
-        Assert.assertEquals(true,result[0]);
-        Assert.assertEquals(false,result[1]);
+        Assert.assertEquals(true, result[0]);
+        Assert.assertEquals(false, result[1]);
         removeGraph();
     }
 
@@ -68,11 +65,11 @@ public class ActionIfThenTest extends AbstractActionTest{
             public boolean eval(TaskContext context) {
                 return true;
             }
-        },addVarInContext).fromVar("variable").then(new Action() {
+        }, addVarInContext).fromVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Integer val = (Integer) context.result();
-                Assert.assertEquals(5,(int)val);
+                Assert.assertEquals(5, (int) val);
             }
         }).execute();
         removeGraph();
@@ -85,7 +82,7 @@ public class ActionIfThenTest extends AbstractActionTest{
             @Override
             public void eval(TaskContext context) {
                 Integer variable = (Integer) context.variable("variable");
-                Assert.assertEquals(5,(int)variable);
+                Assert.assertEquals(5, (int) variable);
             }
         });
 
@@ -94,7 +91,7 @@ public class ActionIfThenTest extends AbstractActionTest{
             public boolean eval(TaskContext context) {
                 return true;
             }
-        },accessVar).execute();
+        }, accessVar).execute();
         removeGraph();
     }
 }

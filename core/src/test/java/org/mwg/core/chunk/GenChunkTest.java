@@ -30,7 +30,7 @@ public class GenChunkTest implements ChunkListener {
 
     @Test
     public void heapTest() {
-        ChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         GenChunkTest.GenChunkFactory factory = new GenChunkTest.GenChunkFactory() {
             @Override
             public GenChunk create(long id, Buffer payload) {
@@ -53,7 +53,7 @@ public class GenChunkTest implements ChunkListener {
 
         Unsafe.DEBUG_MODE = true;
 
-        ChunkListener selfPointer = this;
+        final ChunkListener selfPointer = this;
         GenChunkTest.GenChunkFactory factory = new GenChunkTest.GenChunkFactory() {
             @Override
             public GenChunk create(long id, Buffer payload) {

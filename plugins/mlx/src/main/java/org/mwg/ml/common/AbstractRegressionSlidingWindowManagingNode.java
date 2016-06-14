@@ -49,7 +49,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
         for (int i = 0; i < valueBuffer.length; i++) {
             newBuffer[i] = valueBuffer[i];
         }
-        for (int i=0;i<resultBuffer.length;i++){
+        for (int i = 0; i < resultBuffer.length; i++) {
             newResultBuffer[i] = resultBuffer[i];
         }
         for (int i = valueBuffer.length; i < newBuffer.length; i++) {
@@ -61,7 +61,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
     }
 
     protected final void setResultBuffer(double[] resBuffer) {
-        Objects.requireNonNull(resBuffer,"result buffer must be not null");
+        Objects.requireNonNull(resBuffer, "result buffer must be not null");
         unphasedState().setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.DOUBLE_ARRAY, resBuffer);
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
     }
 
     @Override
-    protected void removeFirstValueFromResultBuffer(){
+    protected void removeFirstValueFromResultBuffer() {
         double resultBuffer[] = getResultBuffer();
         if (resultBuffer.length == 0) {
             return;
@@ -110,8 +110,8 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      * {@inheritDoc}
      */
     @Override
-    public void learn(double output, Callback<Boolean> callback){
-        extractFeatures(new Callback<double[]>(){
+    public void learn(final double output, final Callback<Boolean> callback) {
+        extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {
                 boolean outcome = addValue(result, output);
@@ -122,13 +122,12 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
 
 
     /**
-     *
      * @param value
      * @param outcome
      */
     protected abstract void updateModelParameters(double value[], double outcome);
 
-    public void extrapolate(Callback<Double> callback){
+    public void extrapolate(final Callback<Double> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {

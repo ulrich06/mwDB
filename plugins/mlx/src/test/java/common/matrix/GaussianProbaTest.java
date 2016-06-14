@@ -14,23 +14,20 @@ import org.mwg.ml.common.matrix.operation.Gaussian1D;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 03/05/16.
- */
 public class GaussianProbaTest {
     @Test
     public void Gaussian1D() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNode = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                double eps = 1e-7;
+                final GaussianGmmNode gaussianNode = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                final double eps = 1e-7;
 
 
-                int total = 16;
-                double[][] train = new double[total][1];
-                Random rand = new Random();
+                final int total = 16;
+                final double[][] train = new double[total][1];
+                final Random rand = new Random();
 
                 double sum = 0;
                 double sumsquare = 0;
@@ -39,7 +36,7 @@ public class GaussianProbaTest {
                     sum += train[i][0];
                     sumsquare += train[i][0] * train[i][0];
 
-                    int finalI = i;
+                    final int finalI = i;
                     gaussianNode.jump(i, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
@@ -55,8 +52,8 @@ public class GaussianProbaTest {
 
                 }
 
-                double finalSum = sum;
-                double finalSumsquare = sumsquare;
+                final double finalSum = sum;
+                final double finalSumsquare = sumsquare;
                 gaussianNode.jump(16, new Callback<GaussianGmmNode>() {
                     @Override
                     public void on(GaussianGmmNode result) {
@@ -83,7 +80,7 @@ public class GaussianProbaTest {
 
     @Test
     public void MultinomialTest() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -146,7 +143,7 @@ public class GaussianProbaTest {
 
     @Test
     public void Singularity() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

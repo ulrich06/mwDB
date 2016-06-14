@@ -19,7 +19,7 @@ public class ActionRemoveTest extends AbstractActionTest {
     public void testWithOneNode() {
         Node relatedNode = graph.newNode(0, 0);
 
-        long[] id = new long[1];
+        final long[] id = new long[1];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)
@@ -50,7 +50,7 @@ public class ActionRemoveTest extends AbstractActionTest {
     public void testWithArray() {
         Node relatedNode = graph.newNode(0, 0);
 
-        long[] ids = new long[5];
+        final long[] ids = new long[5];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)
@@ -96,7 +96,7 @@ public class ActionRemoveTest extends AbstractActionTest {
     public void testWithNull() {
         Node relatedNode = graph.newNode(0, 0);
 
-        boolean[] nextCalled = new boolean[1];
+        final boolean[] nextCalled = new boolean[1];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)
