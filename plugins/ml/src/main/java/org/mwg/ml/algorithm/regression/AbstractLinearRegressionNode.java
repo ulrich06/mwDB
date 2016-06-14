@@ -4,7 +4,6 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Arrays;
 import java.util.Objects;

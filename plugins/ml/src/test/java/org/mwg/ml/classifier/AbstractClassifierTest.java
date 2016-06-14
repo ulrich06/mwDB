@@ -1,4 +1,4 @@
-package ml.classifier;
+package org.mwg.ml.classifier;
 
 import org.mwg.Callback;
 import org.mwg.Type;

@@ -2,11 +2,8 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.*;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 import org.mwg.plugin.NodeFactory;
-
-import java.util.*;
 
 /**
  * Created by Andrey Boytsov on 4/14/2016.

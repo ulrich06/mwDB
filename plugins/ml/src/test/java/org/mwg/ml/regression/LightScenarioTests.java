@@ -1,4 +1,4 @@
-package ml.regression;
+package org.mwg.ml.regression;
 
 import org.junit.Test;
 import org.mwg.Callback;
@@ -7,7 +7,6 @@ import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.AbstractMLNode;
 
 import java.util.Random;

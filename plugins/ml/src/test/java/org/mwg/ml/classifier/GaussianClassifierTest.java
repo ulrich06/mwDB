@@ -1,4 +1,4 @@
-package ml.classifier;
+package org.mwg.ml.classifier;
 
 import org.junit.Test;
 import org.mwg.*;

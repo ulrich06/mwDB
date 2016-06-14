@@ -4,7 +4,6 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeFactory;
 

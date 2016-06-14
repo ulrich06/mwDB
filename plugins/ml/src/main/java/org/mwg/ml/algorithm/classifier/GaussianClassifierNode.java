@@ -2,15 +2,10 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.NodeFactory;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 public class GaussianClassifierNode extends AbstractGaussianClassifierNode implements ClassificationNode {
 
