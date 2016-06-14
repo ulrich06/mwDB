@@ -24,6 +24,8 @@ public abstract class AbstractMLNode extends AbstractNode {
             Task[] tasks = new Task[split.length];
             for (int i = 0; i < split.length; i++) {
                 Task t = graph().newTask();
+                t.setWorld(world());
+                t.setTime(time());
                 t.parse(split[i]);
                 tasks[i] = t;
             }
