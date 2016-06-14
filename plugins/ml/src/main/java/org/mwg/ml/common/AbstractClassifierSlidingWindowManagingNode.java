@@ -5,9 +5,6 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 /**
  * Created by andre on 5/4/2016.
  */
@@ -55,7 +52,8 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
         int errorCount = 0;
         int index = 0;
         while (startIndex + dims <= valueBuffer.length) {
-            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+            double curValue[] = new double[dims];
+            System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
             int realClass = realClasses[index];
             int predictedClass = predictValue(curValue);
             errorCount += (realClass != predictedClass) ? 1 : 0;
@@ -120,7 +118,8 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
 
         int i = 0;
         while (startIndex + dims < valueBuffer.length) {
-            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+            double curValue[] = new double[dims];
+            System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
             result[i] = predictValue(curValue);
             //Continue the loop
             startIndex += dims;
@@ -149,7 +148,8 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
         final int dims = getInputDimensions();
         int i = 0;
         while (startIndex + dims < valueBuffer.length) {
-            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+            double curValue[] = new double[dims];
+            System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
             updateModelParameters(curValue, resultBuffer[i]);
             startIndex += dims;
             i++;
@@ -199,7 +199,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
     }
 
     protected final void setResultBuffer(int[] resBuffer) {
-        Objects.requireNonNull(resBuffer, "result buffer must be not null");
+        AbstractClassifierSlidingWindowManagingNode.requireNotNull(resBuffer, "result buffer must be not null");
         unphasedState().setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.INT_ARRAY, resBuffer);
     }
 
@@ -209,7 +209,8 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
         if (resultBuffer.length == 0) {
             return;
         }
-        int newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length);
+        int newResultBuffer[] = new int[resultBuffer.length-1];
+        System.arraycopy(resultBuffer, 1, newResultBuffer, 0, resultBuffer.length-1);
         setResultBuffer(newResultBuffer);
     }
 

@@ -174,6 +174,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             return;
         }
         Long inferSTEP = (Long) state.getFromKey(INTERNAL_STEP_KEY);
+
         if (inferSTEP == null || inferSTEP == 0) {
             if(callback!=null) {
                 callback.on(weight[0]);
@@ -182,6 +183,12 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         }
 
         double t = (time - timeOrigin);
+        Long lastTime=(Long) state.getFromKey(INTERNAL_LAST_TIME_KEY);
+        if(t>lastTime){
+            t=(double)lastTime;
+        }
+
+
         t = t / inferSTEP;
         if(callback!=null) {
             callback.on(PolynomialFit.extrapolate(t, weight));

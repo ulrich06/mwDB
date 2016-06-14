@@ -7,9 +7,6 @@ import org.mwg.ml.ClassificationNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeFactory;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 /**
  * Created by andrey.boytsov on 17/05/16.
  */
@@ -78,20 +75,20 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
             illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
                     "L2 regularization coefficient should be of type double or integer");
             if (propertyValue instanceof Double){
-                illegalArgumentIfFalse((Double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((Double)propertyValue);
+                illegalArgumentIfFalse((double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization((double)propertyValue);
             }else{
-                illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization(((Integer)propertyValue).doubleValue());
+                illegalArgumentIfFalse((int)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization((double)((int)propertyValue));
             }
         }else if (propertyName.startsWith(COEFFICIENTS_KEY) || propertyName.startsWith(INTERCEPT_KEY)) {
             //Nothing. Those cannot be set.
         }else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)){
-            setIterationDifferenceThreshold(((Double)propertyValue).doubleValue());
+            setIterationDifferenceThreshold((double)propertyValue);
         }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
-            setIterationCountThreshold(((Integer)propertyValue).intValue());
+            setIterationCountThreshold((int)propertyValue);
         }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
-            setLearningRate(((Double)propertyValue).doubleValue());
+            setLearningRate((double)propertyValue);
         }else{
             super.setProperty(propertyName, propertyType, propertyValue);
         }
@@ -116,7 +113,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     }
 
     protected void setCoefficients(double[] coefficients, int classNum) {
-        Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+        LogisticRegressionClassifierNode.requireNotNull(coefficients,"Regression coefficients must be not null");
         unphasedState().setFromKey(COEFFICIENTS_KEY+classNum, Type.DOUBLE_ARRAY, coefficients);
     }
 
@@ -212,10 +209,12 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
                 int startIndex = 0;
                 int index = 0;
-                double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
+                double oldCoefs[] = new double[coefs.length];
+                System.arraycopy(coefs, 0, oldCoefs, 0, coefs.length);
                 final double oldIntercept = intercept;
                 while (startIndex + dims <= valueBuffer.length){
-                    double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+                    double curValue[] = new double[dims];
+                    System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
 
                     double h = sigmoid(dot(value, oldCoefs)+intercept);
                     int y = (resultBuffer[index]==cl)?1:0;
@@ -242,11 +241,11 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 setCoefficients(coefs, cl);
                 setIntercept(intercept, cl);
                 if (gdDifferenceThresh>0){
-                    exitCase |= maxDiff<gdDifferenceThresh;
+                    exitCase = exitCase || maxDiff<gdDifferenceThresh;
                 }
 
                 if (gdIterThresh>0){
-                    exitCase |= iterCount>=gdIterThresh;
+                    exitCase = exitCase || (iterCount>=gdIterThresh);
                 }
 
                 if ((!(gdDifferenceThresh>0))&&(!(gdIterThresh>0))) {

@@ -1,5 +1,6 @@
 package org.mwg.ml.algorithm.classifier;
 
+import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.ml.ClassificationNode;
@@ -109,7 +110,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
     @Override
     protected int predictValue(double value[]) {
         int classes[] = getKnownClasses();
-        double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
+        double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes) {
             double curLikelihood = getLikelihoodForClass(value, curClass);

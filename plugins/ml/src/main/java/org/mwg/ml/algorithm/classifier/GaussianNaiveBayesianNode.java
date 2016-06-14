@@ -110,7 +110,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             return kk[0];
         }
         int classes[] = getKnownClasses();
-        double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
+        double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes){
             double curLikelihood = getLikelihoodForClass(value, curClass);

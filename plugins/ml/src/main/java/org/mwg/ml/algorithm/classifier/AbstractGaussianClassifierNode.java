@@ -2,9 +2,8 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
-
-import java.util.Objects;
 
 /**
  * Created by andrey.boytsov on 17/05/16.
@@ -50,19 +49,19 @@ public abstract class AbstractGaussianClassifierNode extends AbstractClassifierS
 
     protected final int getClassTotal(int classNum) {
         Object objClassTotal = unphasedState().getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
-        Objects.requireNonNull(objClassTotal, "Class total must be not null (class " + classNum + ")");
-        return ((Integer) objClassTotal).intValue();
+        AbstractGaussianClassifierNode.requireNotNull(objClassTotal, "Class total must be not null (class " + classNum + ")");
+        return ((int) objClassTotal);
     }
 
     protected double[] getSums(int classNum) {
         Object objSum = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
-        Objects.requireNonNull(objSum, "Sums must be not null (class " + classNum + ")");
+        AbstractGaussianClassifierNode.requireNotNull(objSum, "Sums must be not null (class " + classNum + ")");
         return (double[]) objSum;
     }
 
     protected double[] getSumSquares(int classNum) {
         Object objSumSq = unphasedState().getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
-        Objects.requireNonNull(objSumSq, "Sums of squares must be not null (class " + classNum + ")");
+        AbstractGaussianClassifierNode.requireNotNull(objSumSq, "Sums of squares must be not null (class " + classNum + ")");
         return (double[]) objSumSq;
     }
 

@@ -9,7 +9,7 @@ import org.mwg.ml.common.matrix.TransposeType;
 public class JamaMatrixEngine implements MatrixEngine {
 
     @Override
-    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB) {
+    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, Matrix matB, double beta, Matrix matC) {
         if (Matrix.testDimensionsAB(transA, transB, matA, matB)) {
             int[] dimC = new int[3];
             if (transA.equals(TransposeType.NOTRANSPOSE)) {
@@ -33,15 +33,23 @@ public class JamaMatrixEngine implements MatrixEngine {
                     dimC[2]= matA.rows();
                 }
             }
-            Matrix matC = new Matrix(null, dimC[0], dimC[1]);
+            if(beta==0||matC==null) {
+                matC = new Matrix(null, dimC[0], dimC[1]);
+            }
             //perform mult here
 
+            double temp=0;
             if(transA== TransposeType.NOTRANSPOSE && transB== TransposeType.NOTRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
+                        temp=0;
                         for(int k=0;k<dimC[2];k++){
-                         matC.add(i,j,alpha*matA.get(i,k)*beta*matB.get(k,j))   ;
+                        temp+=alpha*matA.get(i,k)*matB.get(k,j)  ;
                         }
+                        if(beta!=0) {
+                            temp = temp + beta * matC.get(i, j);
+                        }
+                        matC.set(i,j,temp);
                     }
                 }
 
@@ -49,31 +57,45 @@ public class JamaMatrixEngine implements MatrixEngine {
             else if(transA== TransposeType.NOTRANSPOSE && transB== TransposeType.TRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
+                        temp=0;
                         for(int k=0;k<dimC[2];k++){
-                            matC.add(i,j,alpha*matA.get(i,k)*beta*matB.get(j,k))   ;
+                            temp+=alpha*matA.get(i,k)*matB.get(j,k)  ;
                         }
+                        if(beta!=0) {
+                            temp = temp + beta * matC.get(i, j);
+                        }
+                        matC.set(i,j,temp);
                     }
                 }
             }
             else if(transA== TransposeType.TRANSPOSE && transB== TransposeType.NOTRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
+                        temp=0;
                         for(int k=0;k<dimC[2];k++){
-                            matC.add(i,j,alpha*matA.get(k,i)*beta*matB.get(k,j))   ;
+                            temp+=alpha*matA.get(k,i)*matB.get(k,j)  ;
                         }
+                        if(beta!=0) {
+                            temp = temp + beta * matC.get(i, j);
+                        }
+                        matC.set(i,j,temp);
                     }
                 }
             }
             else if(transA== TransposeType.TRANSPOSE && transB== TransposeType.TRANSPOSE){
                 for(int i=0;i<dimC[0];i++){
                     for(int j=0;j<dimC[1];j++){
+                        temp=0;
                         for(int k=0;k<dimC[2];k++){
-                            matC.add(i,j,alpha*matA.get(k,i)*beta*matB.get(j,k))   ;
+                            temp+=alpha*matA.get(k,i)*matB.get(j,k)  ;
                         }
+                        if(beta!=0) {
+                            temp = temp + beta * matC.get(i, j);
+                        }
+                        matC.set(i,j,temp);
                     }
                 }
             }
-
             return matC;
         } else {
             throw new RuntimeException("Dimensions mismatch between A,B and C");

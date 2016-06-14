@@ -5,8 +5,6 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Created by andre on 5/4/2016.
@@ -61,7 +59,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
     }
 
     protected final void setResultBuffer(double[] resBuffer) {
-        Objects.requireNonNull(resBuffer,"result buffer must be not null");
+        AbstractRegressionSlidingWindowManagingNode.requireNotNull(resBuffer,"result buffer must be not null");
         unphasedState().setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.DOUBLE_ARRAY, resBuffer);
     }
 
@@ -84,7 +82,8 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
         if (resultBuffer.length == 0) {
             return;
         }
-        double newResultBuffer[] = Arrays.copyOfRange(resultBuffer, 1, resultBuffer.length);
+        double newResultBuffer[] = new double[resultBuffer.length-1];
+        System.arraycopy(resultBuffer, 1, newResultBuffer,0, resultBuffer.length-1);
         setResultBuffer(newResultBuffer);
     }
 

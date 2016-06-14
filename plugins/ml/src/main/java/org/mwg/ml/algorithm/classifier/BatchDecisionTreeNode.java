@@ -1,5 +1,6 @@
 package org.mwg.ml.algorithm.classifier;
 
+import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
@@ -13,6 +14,14 @@ import java.util.*;
  * Created by andre on 5/9/2016.
  */
 public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagingNode {
+
+    void sort(double ar[]){
+        for (int i = ar.length-1;i>=0;i--){
+            for (int j=0; j<i; j++){
+
+            }
+        }
+    }
 
     public static final String NAME = "BatchDecisionTreeClassifier";
 
@@ -54,13 +63,13 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     protected static final String INTERNAL_DECISION_TREE_KEY = "_decisionTreeSerialized";
 
     protected void setDecisionTreeArray(double[] decisionTreeArray) {
-        Objects.requireNonNull(decisionTreeArray, "Decision tree must be not null at that point");
+        BatchDecisionTreeNode.requireNotNull(decisionTreeArray, "Decision tree must be not null at that point");
         unphasedState().setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, decisionTreeArray);
     }
 
     protected double[] getDecisionTreeArray() {
         Object objDT = unphasedState().getFromKey(INTERNAL_DECISION_TREE_KEY);
-        Objects.requireNonNull(objDT, "Decision tree must be not null at that point");
+        BatchDecisionTreeNode.requireNotNull(objDT, "Decision tree must be not null at that point");
         return (double[]) objDT;
     }
 

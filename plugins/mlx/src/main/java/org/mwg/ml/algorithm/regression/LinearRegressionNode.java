@@ -78,7 +78,7 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
                 (TransposeType.NOTRANSPOSE, pinv, TransposeType.TRANSPOSE, xMatrix);
 
         Matrix result = Matrix.multiplyTranspose
-                (TransposeType.NOTRANSPOSE, invMulXt, TransposeType.NOTRANSPOSE, yVector);
+                (TransposeType.NOTRANSPOSE,  invMulXt, TransposeType.NOTRANSPOSE,  yVector);
 
         final double newCoefficients[] = new double[dims];
         for (int i=0;i<dims;i++){

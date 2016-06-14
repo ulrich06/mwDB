@@ -16,6 +16,17 @@ public abstract class AbstractMLNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    /**
+     * If {@code obj} is null, throws {@code NullPointerException} with a {@code message}
+     * @param obj
+     * @param message
+     */
+    protected static void requireNotNull(Object obj, String message){
+        if (obj==null) {
+            throw new NullPointerException(message);
+        }
+    }
+
     protected void extractFeatures(Callback<double[]> callback) {
         String query = (String) super.get(FROM);
         if (query != null) {

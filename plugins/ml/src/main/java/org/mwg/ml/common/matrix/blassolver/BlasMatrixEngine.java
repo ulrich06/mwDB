@@ -32,7 +32,7 @@ public class BlasMatrixEngine implements MatrixEngine {
 
     //C=alpha*A + beta * B (with possible transpose for A or B)
     @Override
-    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, double beta, Matrix matB) {
+    public Matrix multiplyTransposeAlphaBeta(TransposeType transA, double alpha, Matrix matA, TransposeType transB, Matrix matB, double beta, Matrix matC) {
 
         if (Matrix.testDimensionsAB(transA, transB, matA, matB)) {
             int k = 0;
@@ -56,7 +56,9 @@ public class BlasMatrixEngine implements MatrixEngine {
                     dimC[1] = matB.rows();
                 }
             }
-            Matrix matC = new Matrix(null, dimC[0], dimC[1]);
+            if(beta==0|| matC==null) {
+                matC = new Matrix(null, dimC[0], dimC[1]);
+            }
             _blas.dgemm(transA, transB, matC.rows(), matC.columns(), k, alpha, matA.data(), 0, matA.rows(), matB.data(), 0, matB.rows(), beta, matC.data(), 0, matC.rows());
             return matC;
         } else {
