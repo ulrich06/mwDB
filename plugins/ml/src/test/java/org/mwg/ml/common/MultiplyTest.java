@@ -36,7 +36,7 @@ public class MultiplyTest {
 
     public void InternalManualMult(MatrixEngine engine) {
 
-        long current = System.currentTimeMillis();
+      //  long current = System.currentTimeMillis();
 
         for (int z = 0; z < 1000; z++) {
 
@@ -59,7 +59,7 @@ public class MultiplyTest {
             }
         }
 
-        System.out.println(System.currentTimeMillis() - current);
+      //  System.out.println(System.currentTimeMillis() - current);
 
     }
 }

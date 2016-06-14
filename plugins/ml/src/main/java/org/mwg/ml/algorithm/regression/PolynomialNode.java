@@ -12,8 +12,76 @@ import org.mwg.plugin.NodeState;
 
 public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
+    //Machine Learning Properties and their default values with _DEF
+    /**
+     * Tolerated error
+     */
+    public static final String PRECISION_KEY = "precision";
+    public static final double PRECISION_DEF = 1;
+
+    public static final String VALUE_KEY = "value";
+
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "Polynomial";
+
+    //Internal state variables private and starts with _
+    private static final String INTERNAL_WEIGHT_KEY = "weight";
+    private static final String INTERNAL_STEP_KEY = "step";
+    private static final String INTERNAL_NB_PAST_KEY = "nb";
+    private static final String INTERNAL_LAST_TIME_KEY = "lastTime";
+
+    //Other default parameters that should not be changed externally:
+    private static final int MAX_DEGREE = 20; // maximum polynomial degree
+
+    private final static String NOT_MANAGED_ATT_ERROR = "Polynomial node can only handle value attribute, please use a super node to store other data";
+
+    //Factory of the class integrated
+    public static class Factory implements NodeFactory {
+
+        @Override
+        public String name() {
+            return NAME;
+        }
+
+        @Override
+        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+            return new PolynomialNode(world, time, id, graph, initialResolution);
+        }
+    }
+
+    public PolynomialNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+        super(p_world, p_time, p_id, p_graph, currentResolution);
+    }
+
+    //Override default Abstract node default setters and getters
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if (propertyName.equals(VALUE_KEY)) {
+            learn(Double.parseDouble(propertyValue.toString()), null);
+        } else if (propertyName.equals(PRECISION_KEY)) {
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
+        } else {
+            throw new RuntimeException(NOT_MANAGED_ATT_ERROR);
+            //super.setProperty(propertyName, propertyType, propertyValue);
+        }
+    }
+
+    @Override
+    public Object get(String propertyName) {
+        if (propertyName.equals(VALUE_KEY)) {
+            final Double[] res = {null};
+            //hack to query the value
+            extrapolate(new Callback<Double>() {
+                @Override
+                public void on(Double result) {
+                    res[0] = result;
+                }
+            });
+            return res[0];
+        } else {
+            return super.get(propertyName);
+        }
+    }
 
     @Override
     public void learn(double value, Callback<Boolean> callback) {
@@ -21,7 +89,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
         long timeOrigin = previousState.time();
         long nodeTime = time();
-        double precision = (double) previousState.getFromKey(PRECISION_KEY);
+        double precision = previousState.getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
         double[] weight = (double[]) previousState.getFromKey(INTERNAL_WEIGHT_KEY);
 
         //Initial feed for the very first time, the weight is set directly with the first value that arrives
@@ -32,23 +100,21 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 1);
             previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, 0l);
             previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, 0l);
-            if(callback!=null) {
+            if (callback != null) {
                 callback.on(true);
             }
             return;
         }
 
         // For the second time point, test and check for the step in time
-
         Long stp = (Long) previousState.getFromKey(INTERNAL_STEP_KEY);
         long lastTime = nodeTime - timeOrigin;
         if (stp == null || stp == 0) {
-
             if (lastTime == 0) {
                 weight = new double[1];
                 weight[0] = value;
                 previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
-                if(callback!=null) {
+                if (callback != null) {
                     callback.on(true);
                 }
                 return;
@@ -57,7 +123,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, stp);
             }
         }
-
 
         //Then, first step, check if the current model already fits the new value:
         int deg = weight.length - 1;
@@ -70,7 +135,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         if (Math.abs(PolynomialFit.extrapolate(t, weight) - value) <= maxError) {
             previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
             previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-            if(callback!=null) {
+            if (callback != null) {
                 callback.on(true);
             }
             return;
@@ -88,7 +153,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         }
 
         //first check if we can increase the degree
-        int newMaxDegree = Math.min(num, _maxDegree);
+        int newMaxDegree = Math.min(num, MAX_DEGREE);
         if (deg < newMaxDegree) {
             deg++;
             double[] times = new double[factor * num + 1];
@@ -111,7 +176,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
                 previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
                 previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-                if(callback!=null) {
+                if (callback != null) {
                     callback.on(true);
                 }
                 return;
@@ -147,7 +212,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
             phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);
             phasedState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, newstep);
-            if(callback!=null) {
+            if (callback != null) {
                 callback.on(true);
             }
             return;
@@ -155,10 +220,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             // 2 phased states need to be created
 
         }
-        if(callback!=null) {
+        if (callback != null) {
             callback.on(false);
         }
-        return;
     }
 
     @Override
@@ -168,80 +232,30 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         long timeOrigin = state.time();
         double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if (weight == null) {
-            if(callback!=null) {
+            if (callback != null) {
                 callback.on(0.0);
             }
             return;
         }
         Long inferSTEP = (Long) state.getFromKey(INTERNAL_STEP_KEY);
-
         if (inferSTEP == null || inferSTEP == 0) {
-            if(callback!=null) {
+            if (callback != null) {
                 callback.on(weight[0]);
             }
             return;
         }
-
         double t = (time - timeOrigin);
-        Long lastTime=(Long) state.getFromKey(INTERNAL_LAST_TIME_KEY);
-        if(t>lastTime){
-            t=(double)lastTime;
+        Long lastTime = (Long) state.getFromKey(INTERNAL_LAST_TIME_KEY);
+        if (t > lastTime) {
+            t = (double) lastTime;
         }
-
-
         t = t / inferSTEP;
-        if(callback!=null) {
+        if (callback != null) {
             callback.on(PolynomialFit.extrapolate(t, weight));
         }
     }
 
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new PolynomialNode(world, time, id, graph, initialResolution);
-        }
-    }
-
-    //Machine Learning Properties and their default values with _DEF
-
-    public static final String PRECISION_KEY = "PRECISION"; //tolerated Error to specify by the signal
-    public static final int PRECISION_DEF = 1;
-
-
-    //Public specific getters and setters
-    public static final String FEATURES_KEY = "FEATURES";
-
-    //Internal state variables private and starts with _
-    private static final String INTERNAL_WEIGHT_KEY = "_weight";
-    private static final String INTERNAL_STEP_KEY = "_step";
-    private static final String INTERNAL_NB_PAST_KEY = "_nb";
-    private static final String INTERNAL_LAST_TIME_KEY = "_lastTime";
-
-    //Other default parameters that should not be changed externally:
-    private static final int _maxDegree = 20; // maximum polynomial degree
-
-
-    public PolynomialNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
-        super(p_world, p_time, p_id, p_graph, currentResolution);
-    }
-
-    //Override default Abstract node default setters and getters
-    @Override
-    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(PRECISION_KEY)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
-    }
-
+    /*
     //Other services and funcitons
     public double getPrecision() {
         return (double) unphasedState().getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
@@ -251,6 +265,14 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         return (double[]) unphasedState().getFromKey(INTERNAL_WEIGHT_KEY);
     }
 
+    public int getDegree() {
+        double[] weights = getWeight();
+        if (weights == null) {
+            return -1;
+        } else {
+            return weights.length - 1;
+        }
+    }*/
 
     private double maxErr(double precision, int degree) {
         //double tol = precision;
@@ -261,7 +283,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
        /* } else if (_prioritization == Prioritization.SAMEPRIORITY) {
             tol = precision * degree * 2 / (2 * _maxDegree);
         }*/
-        return precision / Math.pow(2, degree+1);
+        return precision / Math.pow(2, degree + 1);
     }
 
 
@@ -278,16 +300,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
     }
 
 
-    public int getDegree() {
-        double[] weights = getWeight();
-        if (weights == null) {
-            return -1;
-        } else {
-            return weights.length - 1;
-        }
-    }
-
-
     //Default to string to print the learned state of ML, useful for debug
     @Override
     public String toString() {
@@ -300,10 +312,9 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         builder.append(id());
         NodeState state = this._resolver.resolveState(this, true);
         if (state != null) {
-            builder.append(",\"data\": {");
             double[] weight = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
             if (weight != null) {
-                builder.append("\"polynomial\": \"");
+                builder.append("\"polynomial\":\"");
                 for (int i = 0; i < weight.length; i++) {
                     if (i != 0) {
                         builder.append("+(");
@@ -312,7 +323,8 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                     if (i == 1) {
                         builder.append("*t");
                     } else if (i > 1) {
-                        builder.append("*t^" + i);
+                        builder.append("*t^");
+                        builder.append(i);
                     }
                     if (i != 0) {
                         builder.append(")");
@@ -320,7 +332,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 }
                 builder.append("\"");
             }
-            builder.append("}}");
+            builder.append("}");
         }
         return builder.toString();
     }
