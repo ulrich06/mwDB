@@ -7,7 +7,7 @@ import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.AbstractMLNode;
 
 import java.util.Random;
@@ -63,11 +63,11 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int LIGHT_OFF_LX = 0;
             final int NUM_OF_TRIALS = NUM_SWITCHES; //One swipe
 
-            Graph graph = new GraphBuilder().addNodeType(new LiveLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
-                    LiveLinearRegressionNode lrNode = (LiveLinearRegressionNode) graph.newTypedNode(0, 0, LiveLinearRegressionNode.NAME);
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                     lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, NUM_OF_TRIALS);
                     lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                     lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
@@ -141,11 +141,11 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = new GraphBuilder().addNodeType(new LiveLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
-                    LiveLinearRegressionNode lrNode = (LiveLinearRegressionNode) graph.newTypedNode(0, 0, LiveLinearRegressionNode.NAME);
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                     lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFF_SIZE);
                     lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                     lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
@@ -222,11 +222,11 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = new GraphBuilder().addNodeType(new LiveLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
-                    LiveLinearRegressionNode lrNode = (LiveLinearRegressionNode) graph.newTypedNode(0, 0, LiveLinearRegressionNode.NAME);
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                     lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFF_SIZE);
                     lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                     lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
@@ -310,11 +310,11 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
         for (int cs = 0; cs < NUM_SWITCHES; cs++) {
             final int correctSwitch = cs; //Have to make it final for inner class access
 
-            Graph graph = new GraphBuilder().addNodeType(new LiveLinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
-                    LiveLinearRegressionNode lrNode = (LiveLinearRegressionNode) graph.newTypedNode(0, 0, LiveLinearRegressionNode.NAME);
+                    LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                     lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFF_SIZE);
                     lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
                     lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 100.0);
