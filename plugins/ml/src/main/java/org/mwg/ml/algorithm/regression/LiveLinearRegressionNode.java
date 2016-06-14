@@ -9,6 +9,9 @@ import org.mwg.ml.RegressionNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
+/**
+ * Created by assaad on 14/06/16.
+ */
 public class LiveLinearRegressionNode extends AbstractMLNode implements RegressionNode {
 
     public static final String ALPHA_KEY = "ALPHA"; //learning rate
@@ -25,7 +28,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
 
 
     private static final String INTERNAL_TOTAL_KEY = "TOTAL_KEY";
-    private static final String INTERNAL_WEIGHT_KEY = "_weight";
+    public static final String WEIGHT_KEY = "_weight";
     private static final String INTERNAL_WEIGHT_BACKUP_KEY = "_weightbckup";
 
     private static final String MISMATCH_MSG = "Different Imput lengths are not supported";
@@ -69,11 +72,16 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
         int iterations = state.getFromKeyWithDefault(ITERATION_KEY, ITERATION_DEF);
         double alpha = state.getFromKeyWithDefault(ALPHA_KEY, ALPHA_DEF);
         double lambda = state.getFromKeyWithDefault(LAMBDA_KEY, LAMBDA_DEF);
-        double[] weights = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
+        double[] weights = (double[]) state.getFromKey(WEIGHT_KEY);
 
         if (weights == null) {
             weights = new double[input.length + 1];
         }
+
+        if (input == null) {
+            throw new RuntimeException("Input can't be null");
+        }
+
         if (weights.length != (input.length + 1)) {
             throw new RuntimeException(MISMATCH_MSG);
         }
@@ -83,14 +91,14 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             double h = calculate(weights, input);
             double err = alpha * (h - output);
             for (int i = 0; i < featuresize; i++) {
-                weights[i] = weights[i] - alpha * ((h - output) * input[j] - lambda * weights[j]);
+                weights[i] = weights[i] - alpha * ((h - output) * input[i] - lambda * weights[i]);
             }
             weights[featuresize] = weights[featuresize] - err;
         }
 
         double[] bckupWeight = (double[]) state.getFromKey(INTERNAL_WEIGHT_BACKUP_KEY);
         if (bckupWeight == null) {
-            state.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
+            state.setFromKey(WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
             state.setFromKey(INTERNAL_WEIGHT_BACKUP_KEY, Type.DOUBLE_ARRAY, weights);
             state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, 1);
         } else {
@@ -101,15 +109,33 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             double deviation = state.getFromKeyWithDefault(THRESHOLD_KEY, THRESHOLD_DEF);
             if (diff > deviation) {
                 state = newState(time());
-                state.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
+                state.setFromKey(WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
                 state.setFromKey(INTERNAL_WEIGHT_BACKUP_KEY, Type.DOUBLE_ARRAY, weights);
                 state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, 1);
             } else {
-                state.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
+                state.setFromKey(WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
                 state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, (int) state.getFromKey(INTERNAL_TOTAL_KEY) + 1);
             }
         }
+
+        if (callback != null) {
+            callback.on(true);
+        }
     }
+
+
+    //Override default Abstract node default setters and getters
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if (propertyName.equals(ALPHA_KEY)) {
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
+        } else if (propertyName.equals(LAMBDA_KEY)) {
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
+        } else {
+            super.setProperty(propertyName, propertyType, propertyValue);
+        }
+    }
+
 
     private double calculate(double[] weights, double[] input) {
         double h = 0;
@@ -123,7 +149,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
     @Override
     public void extrapolate(final Callback<Double> callback) {
         NodeState state = this._resolver.resolveState(this, true);
-        final double[] weights = (double[]) state.getFromKey(INTERNAL_WEIGHT_KEY);
+        final double[] weights = (double[]) state.getFromKey(WEIGHT_KEY);
         if (weights == null) {
             if (callback != null) {
                 callback.on(0.0);

@@ -22,9 +22,9 @@ public abstract class AbstractMLNode extends AbstractNode {
      * @param obj
      * @param message
      */
-    protected static void requireNotNull(Object obj, String message) {
-        if (obj == null) {
-            throw new NullPointerException(message);
+    protected static void requireNotNull(Object obj, String message){
+        if (obj==null) {
+            throw new RuntimeException(message);
         }
     }
 
@@ -38,7 +38,7 @@ public abstract class AbstractMLNode extends AbstractNode {
                 Task t = graph().newTask();
                 t.setWorld(world());
                 t.setTime(time());
-                t.parse(split[i]);
+                t.parse(split[i].trim());
                 tasks[i] = t;
             }
             //END TODO IN CACHE
