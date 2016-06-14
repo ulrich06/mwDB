@@ -18,11 +18,12 @@ public abstract class AbstractMLNode extends AbstractNode {
 
     /**
      * If {@code obj} is null, throws {@code NullPointerException} with a {@code message}
+     *
      * @param obj
      * @param message
      */
-    protected static void requireNotNull(Object obj, String message){
-        if (obj==null) {
+    protected static void requireNotNull(Object obj, String message) {
+        if (obj == null) {
             throw new NullPointerException(message);
         }
     }
