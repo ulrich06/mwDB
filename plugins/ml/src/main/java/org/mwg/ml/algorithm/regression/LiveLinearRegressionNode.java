@@ -8,7 +8,6 @@ import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.RegressionNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
-import org.omg.PortableServer.POAManagerPackage.State;
 
 /**
  * Created by assaad on 14/06/16.
@@ -24,8 +23,8 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
     public static final String ITERATION_KEY = "ITERATION"; //Number of iterations on each values
     public static final int ITERATION_DEF = 5;
 
-    public static final String DEVIATION_KEY = "DEVIATION"; //Number of iterations on each values
-    public static final double DEVIATION_DEF = 0.01;
+    public static final String THRESHOLD_KEY = "THRESHOLD"; //Number of iterations on each values
+    public static final double THRESHOLD_DEF = 0.01;
 
 
     private static final String INTERNAL_TOTAL_KEY="TOTAL_KEY";
@@ -104,7 +103,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             for(int i=0;i<weights.length;i++){
                 diff=Math.max(diff,Math.abs(weights[i]-bckupWeight[i]));
             }
-            double deviation=state.getFromKeyWithDefault(DEVIATION_KEY,DEVIATION_DEF);
+            double deviation=state.getFromKeyWithDefault(THRESHOLD_KEY,THRESHOLD_DEF);
             if(diff>deviation){
                 state= newState(time());
                 state.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY,weights);
