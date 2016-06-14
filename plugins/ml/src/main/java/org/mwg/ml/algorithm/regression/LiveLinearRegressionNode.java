@@ -11,7 +11,7 @@ import org.mwg.plugin.NodeState;
 /**
  * Created by assaad on 14/06/16.
  */
-public class wlRegressionNode extends AbstractMLNode implements RegressionNode  {
+public class LiveLinearRegressionNode extends AbstractMLNode implements RegressionNode  {
 
     public static final String ALPHA_KEY = "ALPHA"; //tolerated Error to specify by the signal
     public static final double ALPHA_DEF = 0.01;
@@ -36,12 +36,12 @@ public class wlRegressionNode extends AbstractMLNode implements RegressionNode  
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new wlRegressionNode(world, time, id, graph, initialResolution);
+            return new LiveLinearRegressionNode(world, time, id, graph, initialResolution);
         }
     }
 
 
-    public wlRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public LiveLinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -59,25 +59,23 @@ public class wlRegressionNode extends AbstractMLNode implements RegressionNode  
     public void internalLearn(double[] input, double output, Callback<Boolean> callback){
         NodeState state = this._resolver.resolveState(this, true);
         int iteration=state.getFromKeyWithDefault(ITERATION_KEY,ITERATION_DEF);
+        double alpha =state.getFromKeyWithDefault(ALPHA_KEY,ALPHA_DEF);
         double [] weights=(double []) state.getFromKey(INTERNAL_WEIGHT_KEY);
         if(weights==null){
             weights=new double[input.length+1];
         }
         if(weights.length!=(input.length+1)){
-            throw new RuntimeException("");
+            throw new RuntimeException("Different weight length is not supported");
         }
         int featuresize=input.length;
 
         for(int j=0; j<iteration;j++) {
-          /*  double h = calculate(input);
-            if(result!=0){
-                lasterror=Math.abs((h-result)*100/result);
-            }
-            double err = -alpha * (h - result);
+        /*    double h = calculate(input);
+            double err = -alpha * (h - output);
             for (int i = 0; i < featuresize; i++) {
-                weights[i] = weights[i] + err * features[i];
+                weights[i] = weights[i] + err * input[i];
             }
-            weights[featuresize] = weights[featuresize] + err;*/
+            weights[featuresize] = weights[featuresize] + err; */
         }
     }
 
