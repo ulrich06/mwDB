@@ -61,7 +61,7 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
         }
 
         //For batch gradient descent:
-        //Theta_j = theta_j - alpha * (1/m * sum( h(X_i) - y_i )*X_j_i - lambda/m * theta_j)
+        //Theta_j = theta_j - alpha * (1/m * sum( h(X_i) - y_i )*X_j_i + lambda/m * theta_j)
 
         double h = 0;
         for (int j=0;j<dims;j++){
@@ -70,9 +70,9 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
         h += intercept;
 
         //For stochastic gradient descent:
-        //Theta_j = theta_j - alpha * ( (h(X_i) - y_i )*X_j - lambda * theta_j)
+        //Theta_j = theta_j - alpha * ( (h(X_i) - y_i )*X_j + lambda * theta_j)
         for (int j=0;j<dims;j++){
-            coefs[j] -= alpha * ( ( h - response)*value[j] - lambda * coefs[j]);
+            coefs[j] -= alpha * ( ( h - response)*value[j] + lambda * coefs[j]);
         }
         //Intercept: value is 1, L2 reg-n not used.
         intercept -= alpha * ( h - response);

@@ -73,7 +73,8 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
             int index = 0;
             double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
             while (startIndex + dims <= valueBuffer.length){
-                double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+                double curValue[] = new double[dims];
+                System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
 
                 double h = 0;
                 for (int j=0;j<dims;j++){
@@ -98,12 +99,12 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
             setIntercept(intercept);
             if (gdErrorThresh>0){
                 double newError = getBufferError();
-                exitCase |= (prevError-newError)<gdErrorThresh;
+                exitCase = exitCase || ((prevError-newError)<gdErrorThresh);
                 prevError = newError;
             }
 
             if (gdIterThresh>0){
-                exitCase |= iterCount>=gdIterThresh;
+                exitCase = exitCase || (iterCount>=gdIterThresh);
             }
 
             if ((!(gdErrorThresh>0))&&(!(gdIterThresh>0))) {

@@ -3,9 +3,6 @@ package org.mwg.ml.common;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
-
-import java.util.Objects;
-
 /**
  * Created by andre on 4/26/2016.
  * <p>
@@ -75,7 +72,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     }
 
     protected final void setValueBuffer(double[] valueBuffer) {
-        Objects.requireNonNull(valueBuffer, "value buffer must be not null");
+        AbstractSlidingWindowManagingNode.requireNotNull(valueBuffer, "value buffer must be not null");
         unphasedState().setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, valueBuffer);
     }
 
@@ -149,7 +146,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
                 unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
             } else {
                 illegalArgumentIfFalse((Integer) propertyValue >= 0, "Low error threshold should be non-negative");
-                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer) propertyValue).doubleValue());
+                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, (double)((int) propertyValue));
             }
         } else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)) {
             illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
@@ -159,7 +156,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
                 unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
             } else {
                 illegalArgumentIfFalse((Integer) propertyValue >= 0, "High error threshold should be non-negative");
-                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, ((Integer) propertyValue).doubleValue());
+                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, (double)((int) propertyValue));
             }
         }else if(INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName) ||
                 INPUT_DIM_KEY.equals(propertyName) || INTERNAL_RESULTS_BUFFER_KEY.equals(propertyName)){

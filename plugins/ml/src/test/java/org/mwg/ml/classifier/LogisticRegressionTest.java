@@ -1,4 +1,4 @@
-package ml.classifier;
+package org.mwg.ml.classifier;
 
 /**
  * Created by andrey.boytsov on 17/05/16.

@@ -1,4 +1,4 @@
-package ml.regression;
+package org.mwg.ml.regression;
 
 import org.junit.Test;
 import org.mwg.Callback;
