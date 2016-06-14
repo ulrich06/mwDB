@@ -14,15 +14,6 @@ import java.util.*;
  * Created by andre on 5/9/2016.
  */
 public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagingNode {
-
-    void sort(double ar[]){
-        for (int i = ar.length-1;i>=0;i--){
-            for (int j=0; j<i; j++){
-
-            }
-        }
-    }
-
     public static final String NAME = "BatchDecisionTreeClassifier";
 
     public static class Factory implements NodeFactory {
@@ -116,8 +107,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         //When counting median, leave only unique elements.
         //Otherwise we can end up with everything above or below the boundary.
         Set<Double> uniqueValuesSet = new HashSet<>();
-        for (double d : values){
-            uniqueValuesSet.add(d);
+        for (int i = 0 ; i < values.length; i++){
+            uniqueValuesSet.add(values[i]);
         }
         if (uniqueValuesSet.size()==1){
             return new double[]{values[0]};
@@ -134,8 +125,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     private static int[] toIntArray(List<Integer> intList){
         int result[] = new int[intList.size()];
         int index = 0;
-        for (Integer i : intList){
-            result[index] = i;
+        for (int i=0;i<intList.size();i++){
+            result[index] = intList.get(i);
             index++;
         }
         return result;
@@ -144,8 +135,9 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     private static double[][] toDouble2DArray(List<double[]> doubleList){
         double result[][] = new double[doubleList.size()][];
         int index = 0;
-        for (double[] i : doubleList){
-            result[index] = Arrays.copyOf(i, i.length);
+        for (int i = 0; i < doubleList.size(); i++){
+            double[] curArray = doubleList.get(i);
+            result[index] = Arrays.copyOf(curArray, curArray.length);
             index++;
         }
         return result;
@@ -156,7 +148,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         double boundariesList[] = getAllPossibleBoundaries(values);
         double maxImprovement = -1; //Improvement cannot be <0 ,so we'll replace that immediately
         double bestBoundary = Double.NaN;
-        for (double boundary : boundariesList){
+        for (int k=0;k< boundariesList.length; k++){
+            double boundary = boundariesList[k];
             int originalErrors = getMajorityErrors(classNumbers);
             List<Integer> aboveBoundaryClassNumbers = new ArrayList<Integer>();
             List<Integer> belowBoundaryClassNumbers = new ArrayList<Integer>();

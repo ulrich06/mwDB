@@ -129,11 +129,11 @@ class MWGResolver implements Resolver {
                 try {
                     selfPointer.getOrLoadAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, Constants.NULL_LONG, new Callback<Chunk>() {
                         @Override
-                        public void on(Chunk theGlobalWorldOrder) {
+                        public void on(final Chunk theGlobalWorldOrder) {
                             if (theGlobalWorldOrder != null) {
                                 selfPointer.getOrLoadAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                     @Override
-                                    public void on(Chunk theNodeWorldOrder) {
+                                    public void on(final Chunk theNodeWorldOrder) {
                                         if (theNodeWorldOrder == null) {
                                             selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                             callback.on(null);
@@ -141,7 +141,7 @@ class MWGResolver implements Resolver {
                                             final long closestWorld = selfPointer.resolve_world((WorldOrderChunk) theGlobalWorldOrder, (WorldOrderChunk) theNodeWorldOrder, time, world);
                                             selfPointer.getOrLoadAndMark(ChunkType.TIME_TREE_CHUNK, closestWorld, Constants.NULL_LONG, id, new Callback<Chunk>() {
                                                 @Override
-                                                public void on(Chunk theNodeSuperTimeTree) {
+                                                public void on(final Chunk theNodeSuperTimeTree) {
                                                     if (theNodeSuperTimeTree == null) {
                                                         selfPointer._space.unmarkChunk(theNodeWorldOrder);
                                                         selfPointer._space.unmarkChunk(theGlobalWorldOrder);
@@ -157,14 +157,14 @@ class MWGResolver implements Resolver {
                                                         }
                                                         selfPointer.getOrLoadAndMark(ChunkType.TIME_TREE_CHUNK, closestWorld, closestSuperTime, id, new Callback<Chunk>() {
                                                             @Override
-                                                            public void on(Chunk theNodeTimeTree) {
+                                                            public void on(final Chunk theNodeTimeTree) {
                                                                 if (theNodeTimeTree == null) {
                                                                     selfPointer._space.unmarkChunk(theNodeSuperTimeTree);
                                                                     selfPointer._space.unmarkChunk(theNodeWorldOrder);
                                                                     selfPointer._space.unmarkChunk(theGlobalWorldOrder);
                                                                     callback.on(null);
                                                                 } else {
-                                                                    long closestTime = ((TimeTreeChunk) theNodeTimeTree).previousOrEqual(time);
+                                                                    final long closestTime = ((TimeTreeChunk) theNodeTimeTree).previousOrEqual(time);
                                                                     if (closestTime == Constants.NULL_LONG) {
                                                                         selfPointer._space.unmarkChunk(theNodeTimeTree);
                                                                         selfPointer._space.unmarkChunk(theNodeSuperTimeTree);
@@ -264,7 +264,7 @@ class MWGResolver implements Resolver {
         if (cached != null) {
             callback.on(cached);
         } else {
-            Buffer buffer = selfPointer._graph.newBuffer();
+            final Buffer buffer = selfPointer._graph.newBuffer();
             BufferBuilder.keyToBuffer(buffer, type, world, time, id);
             this._storage.get(buffer, new Callback<Buffer>() {
                 @Override
@@ -287,7 +287,7 @@ class MWGResolver implements Resolver {
         }
     }
 
-    private void getOrLoadAndMarkAll(byte[] types, long[] keys, final Callback<Chunk[]> callback) {
+    private void getOrLoadAndMarkAll(final byte[] types, final long[] keys, final Callback<Chunk[]> callback) {
         int nbKeys = keys.length / KEY_SIZE;
         final boolean[] toLoadIndexes = new boolean[nbKeys];
         int nbElem = 0;

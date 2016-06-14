@@ -12,13 +12,10 @@ import org.mwg.ml.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by andre on 5/10/2016.
- */
 public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testNormalBatchGDIterationCountStop() {
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -46,7 +43,7 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
 
     @Test
     public void testNormalBatchGDErrorThresholdStop() {
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

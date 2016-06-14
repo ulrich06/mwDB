@@ -185,12 +185,12 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
     }
 
     @Override
-    public void getOrLoadAndMark(byte type, long world, long time, long id, Callback<Chunk> callback) {
+    public void getOrLoadAndMark(final byte type, final long world, final long time, final long id, final Callback<Chunk> callback) {
         Chunk fromMemory = getAndMark(type, world, time, id);
         if (fromMemory != null) {
             callback.on(fromMemory);
         } else {
-            Buffer keys = graph().newBuffer();
+            final Buffer keys = graph().newBuffer();
             BufferBuilder.keyToBuffer(keys, type, world, time, id);
             graph().storage().get(keys, new Callback<Buffer>() {
                 @Override

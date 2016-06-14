@@ -35,12 +35,12 @@ public class StorageTest {
     final int valuesToInsert = 300_000;
     final long timeOrigin = 1000;
 
-    private void test(String name, Graph graph) {
+    private void test(final String name, final Graph graph) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 final long before = System.currentTimeMillis();
-                Node node = graph.newNode(0, 0);
+                final Node node = graph.newNode(0, 0);
                 final DeferCounter counter = graph.newCounter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 

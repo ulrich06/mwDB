@@ -128,7 +128,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     @Override
-    public void learn(Callback<Boolean> callback) {
+    public void learn(final Callback<Boolean> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] values) {
@@ -140,7 +140,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     //ToDO temporal hack to avoid features extractions - to remove later
-    public void learnVector(double[] values, Callback<Boolean> callback) {
+    public void learnVector(final double[] values, final Callback<Boolean> callback) {
         NodeState resolved = this._resolver.resolveState(this, true);
         final int width = resolved.getFromKeyWithDefault(WIDTH_KEY, WIDTH_DEF);
         final double compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
@@ -427,9 +427,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void query(int level, double[] min, double[] max, Callback<ProbaDistribution> callback) {
-        int nbfeature = this.getNumberOfFeatures();
-
+    public void query(int level, double[] min, double[] max, final Callback<ProbaDistribution> callback) {
+        final int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
             return;
@@ -473,7 +472,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         deepTraverseTask.from(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
             deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN_KEY);
-            int finalI = i;
+            final int finalI = i;
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
                 public boolean select(Node node) {
@@ -517,8 +516,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void generateDistributions(int level, Callback<ProbaDistribution> callback) {
-        int nbfeature = this.getNumberOfFeatures();
+    public void generateDistributions(int level, final Callback<ProbaDistribution> callback) {
+        final int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
             return;

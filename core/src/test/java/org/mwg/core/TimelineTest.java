@@ -40,12 +40,12 @@ public class TimelineTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void test(Graph graph) {
+    private void test(final Graph graph) {
         final int[] counter = {0};
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean o) {
-                org.mwg.Node node_t0 = graph.newNode(0, 0);
+                final org.mwg.Node node_t0 = graph.newNode(0, 0);
                 //timeTree should be already filled
                 node_t0.timepoints(Constants.BEGINNING_OF_TIME, Constants.END_OF_TIME, new Callback<long[]>() {
                     @Override
@@ -70,7 +70,7 @@ public class TimelineTest {
 
                 graph.lookup(node_t0.world(), 1, node_t0.id(), new Callback<org.mwg.Node>() {
                     @Override
-                    public void on(org.mwg.Node node_t1) {
+                    public void on(final org.mwg.Node node_t1) {
                         counter[0]++;
                         Assert.assertTrue(PrimitiveHelper.equals("{\"world\":0,\"time\":1,\"id\":1,\"name\":\"MyName\"}", node_t1.toString()));
                         Assert.assertTrue(node_t1.timeDephasing() == 1); //node hasField a dephasing of 1 selectWith last known state
@@ -141,8 +141,6 @@ public class TimelineTest {
                                         Assert.assertTrue(longs[1] == 0);
                                     }
                                 });
-
-
 
 
                             }

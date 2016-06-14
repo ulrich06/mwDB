@@ -39,8 +39,8 @@ public class FlagTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void manyWorldTest(Graph graph) {
-        FlagTest selfPointer = this;
+    private void manyWorldTest(final Graph graph) {
+        final FlagTest selfPointer = this;
 
         final int[] counter = {0};
         graph.connect(new Callback<Boolean>() {

@@ -10,13 +10,10 @@ import org.mwg.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by assaad on 09/06/16.
- */
 public class MathEngineTest {
     @Test
     public void expression() {
-        Graph graph = new GraphBuilder().build();
+        final Graph graph = new GraphBuilder().build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

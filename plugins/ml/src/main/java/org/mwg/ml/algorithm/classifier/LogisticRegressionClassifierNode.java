@@ -81,7 +81,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 illegalArgumentIfFalse((int)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
                 setL2Regularization((double)((int)propertyValue));
             }
-        }else if (propertyName.startsWith(COEFFICIENTS_KEY) || propertyName.startsWith(INTERCEPT_KEY)) {
+        }else if ((propertyName.lastIndexOf(COEFFICIENTS_KEY,0) == 0) || (propertyName.lastIndexOf(INTERCEPT_KEY,0) == 0)) {
             //Nothing. Those cannot be set.
         }else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)){
             setIterationDifferenceThreshold((double)propertyValue);
@@ -96,9 +96,9 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     public Object get(String propertyName){
-        if(propertyName.startsWith(COEFFICIENTS_KEY)) {
+        if(propertyName.lastIndexOf(COEFFICIENTS_KEY,0) == 0) {
             return unphasedState().getFromKeyWithDefault(propertyName, COEFFICIENTS_DEF);
-        }else if (propertyName.startsWith(INTERCEPT_KEY)){
+        }else if (propertyName.lastIndexOf(INTERCEPT_KEY,0) == 0){
             return unphasedState().getFromKeyWithDefault(propertyName, INTERCEPT_DEF);
         }else if(L2_COEF_KEY.equals(propertyName)){
             return getL2Regularization();

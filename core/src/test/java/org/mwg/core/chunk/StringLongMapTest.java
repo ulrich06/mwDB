@@ -93,12 +93,12 @@ public class StringLongMapTest implements ChunkListener {
 
         Assert.assertTrue(dirtyCount == 5);
 
-        String[] keys = new String[3];
-        long[] values = new long[3];
+        final String[] keys = new String[3];
+        final long[] values = new long[3];
         final int[] resIndex = {0};
         map.each(new StringLongMapCallBack() {
             @Override
-            public void on(String key, long value) {
+            public void on(final String key, final long value) {
                 keys[resIndex[0]] = key;
                 values[resIndex[0]] = value;
                 resIndex[0]++;

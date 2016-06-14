@@ -38,7 +38,7 @@ public class SuperTimeTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void test(org.mwg.Graph graph) {
+    private void test(final org.mwg.Graph graph) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean o) {

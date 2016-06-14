@@ -27,7 +27,7 @@ public abstract class AbstractMLNode extends AbstractNode {
         }
     }
 
-    protected void extractFeatures(Callback<double[]> callback) {
+    protected void extractFeatures(final Callback<double[]> callback) {
         String query = (String) super.get(FROM);
         if (query != null) {
             //TODO CACHE TO AVOID PARSING EVERY TIME
@@ -40,7 +40,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             }
             //END TODO IN CACHE
             final double[] result = new double[tasks.length];
-            DeferCounter waiter = graph().newCounter(tasks.length);
+            final DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
                 tasks[i].executeThenAsync(null, this, new Action() {

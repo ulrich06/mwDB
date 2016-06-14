@@ -38,12 +38,12 @@ public class HelloWorldTest {
 
     }
 
-    private void test(Graph graph) {
+    private void test(final Graph graph) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean o) {
 
-                org.mwg.Node node0 = graph.newNode(0, 0);
+                final org.mwg.Node node0 = graph.newNode(0, 0);
 
                 //do something selectWith the node
                 graph.lookup(0, 0, node0.id(), new Callback<org.mwg.Node>() {

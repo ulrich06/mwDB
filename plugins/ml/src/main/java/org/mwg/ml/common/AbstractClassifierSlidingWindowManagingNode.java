@@ -22,7 +22,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      * {@inheritDoc}
      */
     @Override
-    public void classify(Callback<Integer> callback) {
+    public void classify(final Callback<Integer> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {
@@ -250,7 +250,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      * {@inheritDoc}
      */
     @Override
-    public void learn(int expectedClass, Callback<Boolean> callback) {
+    public void learn(final int expectedClass, final Callback<Boolean> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {

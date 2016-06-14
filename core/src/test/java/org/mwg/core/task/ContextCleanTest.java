@@ -14,9 +14,9 @@ public class ContextCleanTest {
 
    // @Test
     public void finalCleanTest() {
-        TaskContext[] retention = new TaskContext[1];
+        final TaskContext[] retention = new TaskContext[1];
 
-        Graph graph = new GraphBuilder().build();
+        final Graph graph = new GraphBuilder().build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -43,8 +43,8 @@ public class ContextCleanTest {
 
    // @Test
     public void complexTest() {
-        TaskContext[] retention = new TaskContext[2];
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
+        final TaskContext[] retention = new TaskContext[2];
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

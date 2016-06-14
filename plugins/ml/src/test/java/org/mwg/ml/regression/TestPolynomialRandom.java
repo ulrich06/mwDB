@@ -27,9 +27,9 @@ public class TestPolynomialRandom {
                 long seed= 1545436547678348l;
                 //Random random = new Random(seed);
                 Random random = new Random();
-                double[] values = new double[size];
-                double[] error = new double[size];
-                double[] poly = new double[size];
+                final double[] values = new double[size];
+                final double[] error = new double[size];
+                final double[] poly = new double[size];
 
                 PolynomialNode polynomialNode = (PolynomialNode) graph.newTypedNode(0, 1, "Polynomial");
                 polynomialNode.set(PolynomialNode.PRECISION_KEY, precision);
@@ -37,7 +37,7 @@ public class TestPolynomialRandom {
                 long start=System.currentTimeMillis();
                 for (int i = 0; i < size; i++) {
                     values[i] = random.nextDouble();
-                    int finalI = i;
+                    final int finalI = i;
                     polynomialNode.jump(i + 1, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
@@ -50,12 +50,12 @@ public class TestPolynomialRandom {
                 System.out.println("total time: "+end+" ms");
 
 
-                double[] res = new double[3];
+                final double[] res = new double[3];
 
 
 
                 for (int i = 0; i < size; i++) {
-                    int finalI = i;
+                    final int finalI = i;
                     polynomialNode.jump(i + 1, new Callback<Node>() {
                         @Override
                         public void on(Node result) {

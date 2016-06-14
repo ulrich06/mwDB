@@ -17,7 +17,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise() {
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -39,7 +39,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise2() {
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -61,7 +61,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testSuddenError() {
         //This test fails only on crash. Otherwise, it is just for
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -87,7 +87,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testTooLargeRegularization() {
         //This test fails only on crash. Otherwise, it is just for
-        Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

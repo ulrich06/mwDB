@@ -163,7 +163,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void rel(String relationName, Callback<Node[]> callback) {
+    public void rel(String relationName, final Callback<Node[]> callback) {
         if (callback == null) {
             return;
         }
@@ -286,7 +286,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void findByQuery(Query query, Callback<Node[]> callback) {
+    public void findByQuery(final Query query, final Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -407,7 +407,7 @@ public abstract class AbstractNode implements Node {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
             final Node[] resolved = new org.mwg.plugin.AbstractNode[mapSize];
-            DeferCounter waiter = _graph.newCounter(mapSize);
+            final DeferCounter waiter = _graph.newCounter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(0);
             indexMap.each(new LongLongArrayMapCallBack() {
@@ -503,7 +503,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("{\"world\":");
         builder.append(world());
         builder.append(",\"time\":");

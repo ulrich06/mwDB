@@ -15,18 +15,18 @@ public class DecisionTreeNode{
     private static int ELEMENTS_PER_NODE = 5;
 
     public static DecisionTreeNode deserializeFromDoubleArray(double decisionTreeArray[]){
-        return deserializeFromDoubleArray(decisionTreeArray, 0);
+        return deserializeFromDoubleArrayWithRoot(decisionTreeArray, 0);
     }
 
-    protected static DecisionTreeNode deserializeFromDoubleArray(double decisionTreeArray[], int rootIndex){
+    protected static DecisionTreeNode deserializeFromDoubleArrayWithRoot(double decisionTreeArray[], int rootIndex){
         DecisionTreeNode dtr = new DecisionTreeNode();
         dtr.boundary = decisionTreeArray[rootIndex*ELEMENTS_PER_NODE];
         dtr.classNum = (int)decisionTreeArray[rootIndex*ELEMENTS_PER_NODE+1];
         int leftNum = (int)decisionTreeArray[rootIndex*ELEMENTS_PER_NODE+2];
         //Stringctly > is correct - 0 is root node, loops are not acceptable
-        dtr.left = (leftNum>0)?deserializeFromDoubleArray(decisionTreeArray, leftNum):null;
+        dtr.left = (leftNum>0)?deserializeFromDoubleArrayWithRoot(decisionTreeArray, leftNum):null;
         int rightNum = (int)decisionTreeArray[rootIndex*ELEMENTS_PER_NODE+3];
-        dtr.right = (rightNum>0)?deserializeFromDoubleArray(decisionTreeArray, rightNum):null;
+        dtr.right = (rightNum>0)?deserializeFromDoubleArrayWithRoot(decisionTreeArray, rightNum):null;
         dtr.featureNum = (int)decisionTreeArray[rootIndex*ELEMENTS_PER_NODE+4];
         return dtr;
     }

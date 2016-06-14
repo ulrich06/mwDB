@@ -17,7 +17,7 @@ public class GaussianNaiveBayesianTest extends AbstractClassifierTest{
     public void test() {
         //This test fails if there are too many errors
 
-        Graph graph = new GraphBuilder()
+        final Graph graph = new GraphBuilder()
                 .addNodeType(new GaussianNaiveBayesianNode.Factory())
                 .withScheduler(new NoopScheduler())
                 .addNodeType(new GaussianClassifierNode.Factory())

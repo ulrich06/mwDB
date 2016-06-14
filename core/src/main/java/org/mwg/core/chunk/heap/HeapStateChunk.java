@@ -895,7 +895,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     }
 
     @Override
-    public final void save(Buffer buffer) {
+    public final void save(final Buffer buffer) {
         final InternalState internalState = state;
         Base64.encodeIntToBuffer(internalState._elementCount, buffer);
         for (int i = 0; i < internalState._elementCount; i++) {

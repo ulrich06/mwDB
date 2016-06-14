@@ -40,7 +40,7 @@ class ActionTraverseOrKeep implements TaskAction {
                     toLoad.add(loop.id()); //TODO change this quick and dirty solution
                 }
             }
-            DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
+            final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()]; //toDo change abstractNode type
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {
