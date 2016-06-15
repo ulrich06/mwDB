@@ -91,7 +91,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         //TODO: for now it is only median. Add more sophisticated things.
         //When counting median, leave only unique elements.
         //Otherwise we can end up with everything above or below the boundary.
-        Set<Double> uniqueValuesSet = new HashSet<>();
+        Set<Double> uniqueValuesSet = new HashSet<Double>();
         for (double d : values){
             uniqueValuesSet.add(d);
         }
@@ -106,7 +106,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     private static double[] getAllPossibleBoundaries(double values[]){
         //When counting median, leave only unique elements.
         //Otherwise we can end up with everything above or below the boundary.
-        Set<Double> uniqueValuesSet = new HashSet<>();
+        Set<Double> uniqueValuesSet = new HashSet<Double>();
         for (int i = 0 ; i < values.length; i++){
             uniqueValuesSet.add(values[i]);
         }

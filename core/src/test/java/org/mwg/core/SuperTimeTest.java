@@ -108,7 +108,7 @@ public class SuperTimeTest {
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
                         public void on(Node result) {
-                            Assert.assertTrue((int) result.get("time") == finalI);
+                            Assert.assertTrue((Integer) result.get("time") == finalI);
                         }
                     });
                 }

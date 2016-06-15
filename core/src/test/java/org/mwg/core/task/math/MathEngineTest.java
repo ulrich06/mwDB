@@ -39,7 +39,7 @@ public class MathEngineTest {
 
                 //Test Variables
                 engine = CoreMathExpressionEngine.parse("v+5");
-                Map<String, Double> hashmap = new HashMap<>();
+                Map<String, Double> hashmap = new HashMap<String, Double>();
                 hashmap.put("v", 20.0);
                 d = engine.eval(null, hashmap);
                 Assert.assertTrue(d == 25);

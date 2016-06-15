@@ -307,20 +307,20 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 Base64.encodeStringToBuffer((String) loopValue, buffer);
                                 break;
                             case Type.BOOL:
-                                if ((boolean) loopValue) {
+                                if ((Boolean) loopValue) {
                                     buffer.write(CoreConstants.BOOL_TRUE);
                                 } else {
                                     buffer.write(CoreConstants.BOOL_FALSE);
                                 }
                                 break;
                             case Type.LONG:
-                                Base64.encodeLongToBuffer((long) loopValue, buffer);
+                                Base64.encodeLongToBuffer((Long) loopValue, buffer);
                                 break;
                             case Type.DOUBLE:
-                                Base64.encodeDoubleToBuffer((double) loopValue, buffer);
+                                Base64.encodeDoubleToBuffer((Double) loopValue, buffer);
                                 break;
                             case Type.INT:
-                                Base64.encodeIntToBuffer((int) loopValue, buffer);
+                                Base64.encodeIntToBuffer((Integer) loopValue, buffer);
                                 break;
                             /** Arrays */
                             case Type.DOUBLE_ARRAY:
@@ -929,21 +929,21 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 switch (p_elemType) {
                     /** Primitives */
                     case Type.BOOL:
-                        param_elem = (boolean) p_unsafe_elem;
+                        param_elem = (Boolean) p_unsafe_elem;
                         break;
                     case Type.DOUBLE:
-                        param_elem = (double) p_unsafe_elem;
+                        param_elem = (Double) p_unsafe_elem;
                         break;
                     case Type.LONG:
                         if (p_unsafe_elem instanceof Integer) {
-                            int preCasting = (int) p_unsafe_elem;
+                            int preCasting = (Integer) p_unsafe_elem;
                             param_elem = (long) preCasting;
                         } else {
-                            param_elem = (long) p_unsafe_elem;
+                            param_elem = (Long) p_unsafe_elem;
                         }
                         break;
                     case Type.INT:
-                        param_elem = (int) p_unsafe_elem;
+                        param_elem = (Integer) p_unsafe_elem;
                         break;
                     case Type.STRING:
                         param_elem = (String) p_unsafe_elem;
@@ -1080,16 +1080,16 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             switch (elemType) {
                 /** Primitives */
                 case Type.BOOL:
-                    OffHeapLongArray.set(addr, index, ((boolean) elem) ? 1 : 0);
+                    OffHeapLongArray.set(addr, index, ((Boolean) elem) ? 1 : 0);
                     break;
                 case Type.DOUBLE:
-                    OffHeapDoubleArray.set(addr, index, ((double) elem));
+                    OffHeapDoubleArray.set(addr, index, ((Double) elem));
                     break;
                 case Type.LONG:
-                    OffHeapLongArray.set(addr, index, ((long) elem));
+                    OffHeapLongArray.set(addr, index, ((Long) elem));
                     break;
                 case Type.INT:
-                    OffHeapLongArray.set(addr, index, ((int) elem));
+                    OffHeapLongArray.set(addr, index, ((Integer) elem));
                     break;
                 /** String */
                 case Type.STRING:

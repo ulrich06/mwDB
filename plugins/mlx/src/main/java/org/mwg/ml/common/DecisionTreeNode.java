@@ -44,7 +44,7 @@ public class DecisionTreeNode{
     }
 
     private List<Double> serializeToDoubleObjectArray(){
-        List<Double> result = new ArrayList<>();
+        List<Double> result = new ArrayList<Double>();
         List<DecisionTreeNode> frontier = new ArrayList<DecisionTreeNode>();
         frontier.add(this);
         int currentNumberToAdd = 0;

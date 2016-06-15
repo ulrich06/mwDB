@@ -71,8 +71,8 @@ public class WSClient implements Storage {
             Xnio xnio = Xnio.getInstance(io.undertow.websockets.client.WebSocketClient.class.getClassLoader());
             _worker = xnio.createWorker(OptionMap.builder()
                     .set(Options.WORKER_IO_THREADS, 2)
-                    .set(Options.CONNECTION_HIGH_WATER, 1_000_000)
-                    .set(Options.CONNECTION_LOW_WATER, 1_000_000)
+                    .set(Options.CONNECTION_HIGH_WATER, 1000000)
+                    .set(Options.CONNECTION_LOW_WATER, 1000000)
                     .set(Options.WORKER_TASK_CORE_THREADS, 30)
                     .set(Options.WORKER_TASK_MAX_THREADS, 30)
                     .set(Options.TCP_NODELAY, true)

@@ -12,16 +12,17 @@ import org.mwg.plugin.NodeState;
 
 public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
-    //Machine Learning Properties and their default values with _DEF
     /**
-     * Tolerated error
+     * Tolerated error that can be configure per node to drive the learning process
      */
     public static final String PRECISION_KEY = "precision";
     public static final double PRECISION_DEF = 1;
 
     public static final String VALUE_KEY = "value";
 
-    //Name of the algorithm to be used in the meta model
+    /**
+     * Name of the algorithm to be used in the meta model
+     */
     public final static String NAME = "Polynomial";
 
     //Internal state variables private and starts with _
@@ -126,7 +127,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
         //Then, first step, check if the current model already fits the new value:
         int deg = weight.length - 1;
-        int num = (int) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
+        Integer num = (Integer) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
         double t = (nodeTime - timeOrigin);
         t = t / stp;
         double maxError = maxErr(precision, deg);
@@ -142,7 +143,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         }
 
         //Check if we are inserting in the past:
-        long previousTime = timeOrigin + (long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
+        long previousTime = timeOrigin + (Long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
         int factor;
 
         //The difference between inserting in the future or in the past
@@ -160,7 +161,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             double[] values = new double[factor * num + 1];
             double inc = 0;
             if (num > 1) {
-                inc = ((long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
+                inc = ((Long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
                 inc = inc / (stp * (factor * num - 1));
             }
             for (int i = 0; i < factor * num; i++) {
@@ -182,7 +183,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 return;
             }
         }
-
 
         //It does not fit, create a new state and split the polynomial, different splits if we are dealing with the future or with the past
         if (nodeTime > previousTime) {
@@ -218,7 +218,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             return;
         } else {
             // 2 phased states need to be created
-
+            //TODO ?
         }
         if (callback != null) {
             callback.on(false);
@@ -255,25 +255,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         }
     }
 
-    /*
-    //Other services and funcitons
-    public double getPrecision() {
-        return (double) unphasedState().getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
-    }
-
-    public double[] getWeight() {
-        return (double[]) unphasedState().getFromKey(INTERNAL_WEIGHT_KEY);
-    }
-
-    public int getDegree() {
-        double[] weights = getWeight();
-        if (weights == null) {
-            return -1;
-        } else {
-            return weights.length - 1;
-        }
-    }*/
-
     private double maxErr(double precision, int degree) {
         //double tol = precision;
     /*    if (_prioritization == Prioritization.HIGHDEGREES) {
@@ -285,7 +266,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         }*/
         return precision / Math.pow(2, degree + 1);
     }
-
 
     private double tempError(double[] computedWeights, double[] times, double[] values) {
         double maxErr = 0;
@@ -299,8 +279,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         return maxErr;
     }
 
-
-    //Default to string to print the learned state of ML, useful for debug
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

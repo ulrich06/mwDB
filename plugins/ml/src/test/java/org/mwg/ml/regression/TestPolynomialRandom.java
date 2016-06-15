@@ -75,7 +75,7 @@ public class TestPolynomialRandom {
                     });
                 }
 
-                polynomialNode.timepoints(0, size + 3, new Callback<long[]>() {
+                polynomialNode.timepoints(0, size  + 3, new Callback<long[]>() {
                     @Override
                     public void on(long[] result) {
                         res[2]=result.length;
