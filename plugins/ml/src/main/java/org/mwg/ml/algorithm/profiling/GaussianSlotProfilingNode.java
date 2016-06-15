@@ -16,12 +16,10 @@ public class GaussianSlotProfilingNode extends AbstractMLNode implements Profili
 
     @Override
     public void learn(final Callback<Boolean> callback) {
-
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] values) {
                 learnArray(values);
-
                 callback.on(true);
             }
         });
