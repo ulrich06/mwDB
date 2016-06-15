@@ -67,7 +67,7 @@ public class TestTMP {
                 }).fromVar("starterNode").traverse("fils").select(new TaskFunctionSelect() {
                     @Override
                     public boolean select(Node node) {
-                        return (boolean) node.get("enter");
+                        return (Boolean) node.get("enter");
                     }
                 }).asVar("childNode")
                         .ifThen(new TaskFunctionConditional() {
