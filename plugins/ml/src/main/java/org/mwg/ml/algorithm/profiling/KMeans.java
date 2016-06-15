@@ -2,9 +2,9 @@ package org.mwg.ml.algorithm.profiling;
 
 import java.util.Random;
 
-public class KMeans {
+class KMeans {
 
-    public int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations, double[] div) {
+    int[][] getClusterIds(double[][] data, int numOfCluster, int numOfIterations, double[] div) {
         int[][] result = new int[numOfCluster][];
         int features = data[0].length;
         int[] totals = new int[numOfCluster];
@@ -19,7 +19,6 @@ public class KMeans {
         for (int i = 0; i < numOfCluster; i++) {
             System.arraycopy(data[i], 0, centroids[i], 0, features);
         }
-
 
         for (int iter = 0; iter < numOfIterations; iter++) {
             for (int i = 0; i < totals.length; i++) {
@@ -87,7 +86,7 @@ public class KMeans {
         return pos;
     }
 
-    public static double distance(double[] features, double[] avg, double[] precisions) {
+    static double distance(double[] features, double[] avg, double[] precisions) {
         double max = 0;
         double temp;
         for (int i = 0; i < features.length; i++) {

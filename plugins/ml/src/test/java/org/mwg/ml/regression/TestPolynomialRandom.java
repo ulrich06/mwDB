@@ -24,17 +24,17 @@ public class TestPolynomialRandom {
                 double precision = 0.001;
                 int size = 1000;
 
-                long seed= 1545436547678348l;
+                long seed = 1545436547678348l;
                 //Random random = new Random(seed);
                 Random random = new Random();
                 final double[] values = new double[size];
                 final double[] error = new double[size];
                 final double[] poly = new double[size];
 
-                PolynomialNode polynomialNode = (PolynomialNode) graph.newTypedNode(0, 1, "Polynomial");
-                polynomialNode.set(PolynomialNode.PRECISION_KEY, precision);
+                PolynomialNode polynomialNode = (PolynomialNode) graph.newTypedNode(0, 1, PolynomialNode.NAME);
+                polynomialNode.set(PolynomialNode.PRECISION, precision);
 
-                long start=System.currentTimeMillis();
+                long start = System.currentTimeMillis();
                 for (int i = 0; i < size; i++) {
                     values[i] = random.nextDouble();
                     final int finalI = i;
@@ -46,12 +46,11 @@ public class TestPolynomialRandom {
                         }
                     });
                 }
-                long end=System.currentTimeMillis()-start;
-                System.out.println("total time: "+end+" ms");
+                long end = System.currentTimeMillis() - start;
+                System.out.println("total time: " + end + " ms");
 
 
                 final double[] res = new double[3];
-
 
 
                 for (int i = 0; i < size; i++) {
@@ -63,29 +62,29 @@ public class TestPolynomialRandom {
                             x.extrapolate(new Callback<Double>() {
                                 @Override
                                 public void on(Double result) {
-                                    poly[finalI]=result;
+                                    poly[finalI] = result;
                                     error[finalI] = Math.abs(result - values[finalI]);
-                                    if(error[finalI] >res[0]){
-                                        res[0]=error[finalI];
+                                    if (error[finalI] > res[0]) {
+                                        res[0] = error[finalI];
                                     }
-                                    res[1]+=error[finalI];
+                                    res[1] += error[finalI];
                                 }
                             });
                         }
                     });
                 }
 
-                polynomialNode.timepoints(0, size  + 3, new Callback<long[]>() {
+                polynomialNode.timepoints(0, size + 3, new Callback<long[]>() {
                     @Override
                     public void on(long[] result) {
-                        res[2]=result.length;
+                        res[2] = result.length;
                     }
                 });
 
-                res[1]=res[1]/size;
+                res[1] = res[1] / size;
 
-                Assert.assertTrue(res[0]<=precision);
-                Assert.assertTrue(res[2]<size);
+                Assert.assertTrue(res[0] <= precision);
+                Assert.assertTrue(res[2] < size);
 
 //                System.out.println("Max error: "+res[0]);
 //                System.out.println("Avg error: "+res[1]);

@@ -12,16 +12,16 @@ import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
 
-public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
+public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode {
 
 
     //Getters and setters
-    public final static String NAME = "GaussianGmm";
+    public final static String NAME = "GaussianMixtureNode";
+
     public static final String MIN = "min";
     public static final String MAX = "max";
     public static final String AVG = "avg";
     public static final String COV = "cov";
-
 
     //Mixture model params
     public static final String LEVEL_KEY = "_level";  //Current level of the gaussian node, top level is the highest number, bottom leaves have level 0.
@@ -56,15 +56,14 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianGmmNode(world, time, id, graph, initialResolution);
+            return new GaussianMixtureNode(world, time, id, graph, initialResolution);
         }
     }
 
-    public GaussianGmmNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public GaussianMixtureNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
-
-
+    
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (propertyName.equals(LEVEL_KEY)) {
@@ -159,7 +158,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         Task creationTask = graph().newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                GaussianGmmNode node = (GaussianGmmNode) context.variable("starterNode");
+                GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
                 //System.out.println("Vector: " + values[0] + " " + values[1]);
                 node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
             }
@@ -171,8 +170,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             @Override
             public void eval(TaskContext context) {
                 Node[] result = (Node[]) context.result();
-                GaussianGmmNode parent = (GaussianGmmNode) context.variable("starterNode");
-                GaussianGmmNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
+                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
+                GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
                     context.setVariable("continueLoop", true);
@@ -220,7 +219,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
     //ToDo need to be replaced by gaussian distances !!
-    private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, double threshold, double level) {
+    private GaussianMixtureNode filter(final Node[] result, final double[] features, final double[] precisions, double threshold, double level) {
         threshold = threshold + level * 0.707;
 
 
@@ -231,7 +230,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         double min = Double.MAX_VALUE;
         int index = 0;
         for (int i = 0; i < result.length; i++) {
-            GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
+            GaussianMixtureNode temp = ((GaussianMixtureNode) result[i]);
             double[] avg = temp.getAvg();
             distances[i] = distance(features, avg, temp.getCovarianceArray(avg, precisions));
             if (distances[i] < min) {
@@ -240,7 +239,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
         }
         if (min < threshold) {
-            return ((GaussianGmmNode) result[index]);
+            return ((GaussianMixtureNode) result[index]);
         } else {
             return null;
         }
@@ -278,7 +277,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 @Override
                 public void on(Node[] result) {
                     for (int i = 0; i < result.length; i++) {
-                        GaussianGmmNode g = (GaussianGmmNode) result[i];
+                        GaussianMixtureNode g = (GaussianMixtureNode) result[i];
                         g.updateLevel(newLevel - 1);
                         result[i].free();
                     }
@@ -287,8 +286,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
     }
 
-    private GaussianGmmNode createLevel(double[] values, final int level, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
-        GaussianGmmNode g = (GaussianGmmNode) graph().newTypedNode(this.world(), this.time(), "GaussianGmm");
+    private GaussianMixtureNode createLevel(double[] values, final int level, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
+        GaussianMixtureNode g = (GaussianMixtureNode) graph().newTypedNode(this.world(), this.time(), NAME);
         g.set(LEVEL_KEY, level);
         g.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false); //dirac
         super.add(INTERNAL_SUBGAUSSIAN_KEY, g);
@@ -305,10 +304,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 @Override
                 //result.length hold the original subgaussian number, and width is after compression
                 public void on(Node[] result) {
-                    GaussianGmmNode[] subgauss = new GaussianGmmNode[result.length];
+                    GaussianMixtureNode[] subgauss = new GaussianMixtureNode[result.length];
                     double[][] data = new double[result.length][];
                     for (int i = 0; i < result.length; i++) {
-                        subgauss[i] = (GaussianGmmNode) result[i];
+                        subgauss[i] = (GaussianMixtureNode) result[i];
                         data[i] = subgauss[i].getAvg();
                     }
 
@@ -317,7 +316,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     int[][] clusters = clusteringEngine.getClusterIds(data, width, compressionIter, precisions);
 
                     //Select the ones which will remain as head by the maximum weight
-                    GaussianGmmNode[] mainClusters = new GaussianGmmNode[width];
+                    GaussianMixtureNode[] mainClusters = new GaussianMixtureNode[width];
                     for (int i = 0; i < width; i++) {
                         if (clusters[i] != null && clusters[i].length > 0) {
                             int max = 0;
@@ -343,7 +342,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                         if (clusters[i] != null && clusters[i].length > 0) {
                             for (int j = 0; j < clusters[i].length; j++) {
-                                GaussianGmmNode g = subgauss[clusters[i][j]];
+                                GaussianMixtureNode g = subgauss[clusters[i][j]];
                                 if (g != mainClusters[i]) {
                                     mainClusters[i].move(g);
                                     selfPointer.remove(INTERNAL_SUBGAUSSIAN_KEY, g);
@@ -363,7 +362,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    private void move(GaussianGmmNode subgaus) {
+    private void move(GaussianMixtureNode subgaus) {
         //manage total
         int total = getTotal();
         int level = getLevel();
@@ -476,7 +475,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
                 public boolean select(Node node) {
-                    return ((GaussianGmmNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
+                    return ((GaussianMixtureNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
                 }
             });
         }
@@ -496,7 +495,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                 MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.length];
                 for (int i = 0; i < leaves.length; i++) {
-                    GaussianGmmNode temp = ((GaussianGmmNode) leaves[i]);
+                    GaussianMixtureNode temp = ((GaussianMixtureNode) leaves[i]);
                     totals[i] = temp.getTotal();
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
@@ -556,7 +555,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                 MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.length];
                 for (int i = 0; i < leaves.length; i++) {
-                    GaussianGmmNode temp = ((GaussianGmmNode) leaves[i]);
+                    GaussianMixtureNode temp = ((GaussianMixtureNode) leaves[i]);
                     totals[i] = temp.getTotal();
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
@@ -634,7 +633,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 }
                 //Self clone to create a sublevel
                 if (createNode && level > 0) {
-                    GaussianGmmNode newLev = createLevel(sum, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
+                    GaussianMixtureNode newLev = createLevel(sum, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
                     double d = distance(values, sum, precisions);
                     if (d < threshold) {
                         reccursive = true;
@@ -672,7 +671,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
             total++;
             if (createNode && level > 0 && !reccursive) {
-                GaussianGmmNode newLev = createLevel(values, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
+                GaussianMixtureNode newLev = createLevel(values, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
                 newLev.free();
                 checkAndCompress(width, compressionFactor, compressionIter, precisions, threshold);
             }

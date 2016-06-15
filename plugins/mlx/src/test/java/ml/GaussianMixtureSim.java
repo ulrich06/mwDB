@@ -3,7 +3,7 @@ package ml;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
-import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
 
 import java.text.DecimalFormat;
@@ -12,16 +12,16 @@ import java.util.Scanner;
 
 public class GaussianMixtureSim {
     public static void main(String[] arg) {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 boolean exit = false;
                 String command;
 
-                GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                node1.set(GaussianGmmNode.LEVEL_KEY,2);
-                node1.set(GaussianGmmNode.WIDTH_KEY,3);
+                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                node1.set(GaussianMixtureNode.LEVEL_KEY,2);
+                node1.set(GaussianMixtureNode.WIDTH_KEY,3);
 
                 while (!exit) {
                     Scanner scanIn = new Scanner(System.in);

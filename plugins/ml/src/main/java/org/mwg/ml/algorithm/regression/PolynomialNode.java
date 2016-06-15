@@ -15,15 +15,14 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
     /**
      * Tolerated error that can be configure per node to drive the learning process
      */
-    public static final String PRECISION_KEY = "precision";
+    public static final String PRECISION = "precision";
     public static final double PRECISION_DEF = 1;
-
-    public static final String VALUE_KEY = "value";
+    public static final String VALUE = "value";
 
     /**
      * Name of the algorithm to be used in the meta model
      */
-    public final static String NAME = "Polynomial";
+    public final static String NAME = "PolynomialNode";
 
     //Internal state variables private and starts with _
     private static final String INTERNAL_WEIGHT_KEY = "weight";
@@ -57,19 +56,18 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(VALUE_KEY)) {
+        if (propertyName.equals(VALUE)) {
             learn(Double.parseDouble(propertyValue.toString()), null);
-        } else if (propertyName.equals(PRECISION_KEY)) {
+        } else if (propertyName.equals(PRECISION)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else {
             throw new RuntimeException(NOT_MANAGED_ATT_ERROR);
-            //super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
 
     @Override
     public Object get(String propertyName) {
-        if (propertyName.equals(VALUE_KEY)) {
+        if (propertyName.equals(VALUE)) {
             final Double[] res = {null};
             //hack to query the value
             extrapolate(new Callback<Double>() {
@@ -90,7 +88,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
         long timeOrigin = previousState.time();
         long nodeTime = time();
-        double precision = previousState.getFromKeyWithDefault(PRECISION_KEY, PRECISION_DEF);
+        double precision = previousState.getFromKeyWithDefault(PRECISION, PRECISION_DEF);
         double[] weight = (double[]) previousState.getFromKey(INTERNAL_WEIGHT_KEY);
 
         //Initial feed for the very first time, the weight is set directly with the first value that arrives
@@ -207,7 +205,7 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             }
 
             //create and set the phase set
-            phasedState.setFromKey(PRECISION_KEY, Type.DOUBLE, precision);
+            phasedState.setFromKey(PRECISION, Type.DOUBLE, precision);
             phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
             phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
             phasedState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, newstep);

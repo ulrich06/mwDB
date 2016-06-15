@@ -7,9 +7,6 @@ import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 14/06/16.
- */
 public class LiveLinearRegressionTest {
     @Test
     public void testRegression() {
@@ -105,7 +102,7 @@ public class LiveLinearRegressionTest {
 
                 cumerr[0] = cumerr[0] / test;
 
-               // System.out.println("Avg error: " + cumerr[0]);
+                // System.out.println("Avg error: " + cumerr[0]);
                 graph.disconnect(null);
             }
         });

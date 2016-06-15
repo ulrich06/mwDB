@@ -9,7 +9,7 @@ import org.mwg.ml.ProfilingNode;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
-public class GaussianSlotProfilingNode extends AbstractMLNode implements ProfilingNode {
+public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
 
     //Name of the algorithm to be used in the meta model
     public final static String NAME = "GaussianSlotProfiling";
@@ -133,7 +133,7 @@ public class GaussianSlotProfilingNode extends AbstractMLNode implements Profili
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianSlotProfilingNode(world, time, id, graph, initialResolution);
+            return new GaussianSlotNode(world, time, id, graph, initialResolution);
         }
     }
 
@@ -183,7 +183,7 @@ public class GaussianSlotProfilingNode extends AbstractMLNode implements Profili
     }
 
 
-    public GaussianSlotProfilingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public GaussianSlotNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
