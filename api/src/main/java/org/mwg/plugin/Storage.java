@@ -5,7 +5,7 @@ import org.mwg.Graph;
 import org.mwg.struct.Buffer;
 
 /**
- * Storage defines the interface any storage solution must comply selectWith to be plugged to mwDB.
+ * Storage defines the interface any storage solution must comply with to be plugged to mwDB.
  */
 public interface Storage {
 

@@ -8,7 +8,7 @@ import org.mwg.*;
 public interface Resolver {
 
     /**
-     * Initializes the resolver selectWith the graph passed as parameter
+     * Initializes the resolver with the graph passed as parameter
      *
      * @param graph graph this resolver belongs to
      */
@@ -91,7 +91,7 @@ public interface Resolver {
      * @param node              The node for which timepoints are requested.
      * @param beginningOfSearch The earliest timePoint of the search (included).
      * @param endOfSearch       The latest timePoint of the search (included).
-     * @param callback          Called when finished, selectWith the list of timepoints included in the bounds for this node.
+     * @param callback          Called when finished, with the list of timepoints included in the bounds for this node.
      */
     void resolveTimepoints(Node node, long beginningOfSearch, long endOfSearch, Callback<long[]> callback);
 
