@@ -1,12 +1,10 @@
 package org.mwg.ml.algorithm.profiling;
 
+import org.mwg.ml.ProgressReporter;
 import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 
 
-/**
- * Created by assaad on 11/05/16.
- */
 public class ProbaDistribution {
     MultivariateNormalDistribution[] distributions;
     int total[];
@@ -43,7 +41,7 @@ public class ProbaDistribution {
 
     public double[] calculateArray(double[][] features, ProgressReporter reporter) {
         if (reporter != null) {
-            reporter.updateGraphInfo("Number of distributions: " + distributions.length + " , values: " + global);
+            reporter.updateInformation("Number of distributions: " + distributions.length + " , values: " + global);
         }
 
         double result[] = new double[features.length];
