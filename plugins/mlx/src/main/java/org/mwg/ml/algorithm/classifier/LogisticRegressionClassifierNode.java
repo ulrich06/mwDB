@@ -75,20 +75,20 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
             illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
                     "L2 regularization coefficient should be of type double or integer");
             if (propertyValue instanceof Double){
-                illegalArgumentIfFalse((double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((double)propertyValue);
+                illegalArgumentIfFalse((Double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization((Double)propertyValue);
             }else{
-                illegalArgumentIfFalse((int)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((double)((int)propertyValue));
+                illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
+                setL2Regularization((double)((Integer)propertyValue));
             }
         }else if ((propertyName.lastIndexOf(COEFFICIENTS_KEY,0) == 0) || (propertyName.lastIndexOf(INTERCEPT_KEY,0) == 0)) {
             //Nothing. Those cannot be set.
         }else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)){
-            setIterationDifferenceThreshold((double)propertyValue);
+            setIterationDifferenceThreshold((Double)propertyValue);
         }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
-            setIterationCountThreshold((int)propertyValue);
+            setIterationCountThreshold((Integer)propertyValue);
         }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
-            setLearningRate((double)propertyValue);
+            setLearningRate((Double)propertyValue);
         }else{
             super.setProperty(propertyName, propertyType, propertyValue);
         }

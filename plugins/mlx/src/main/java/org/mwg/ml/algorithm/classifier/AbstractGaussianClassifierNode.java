@@ -50,7 +50,7 @@ public abstract class AbstractGaussianClassifierNode extends AbstractClassifierS
     protected final int getClassTotal(int classNum) {
         Object objClassTotal = unphasedState().getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
         AbstractGaussianClassifierNode.requireNotNull(objClassTotal, "Class total must be not null (class " + classNum + ")");
-        return ((int) objClassTotal);
+        return ((Integer) objClassTotal);
     }
 
     protected double[] getSums(int classNum) {

@@ -9,9 +9,6 @@ import org.mwg.core.scheduler.NoopScheduler;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by youradmin on 4/28/16.
- */
 public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test

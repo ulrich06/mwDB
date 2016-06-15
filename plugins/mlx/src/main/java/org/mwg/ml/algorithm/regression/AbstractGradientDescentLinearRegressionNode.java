@@ -41,11 +41,11 @@ public abstract class AbstractGradientDescentLinearRegressionNode extends Abstra
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (GD_ERROR_THRESH_KEY.equals(propertyName)){
-            setIterationErrorThreshold((double)propertyValue);
+            setIterationErrorThreshold((Double)propertyValue);
         }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
-            setIterationCountThreshold((int)propertyValue);
+            setIterationCountThreshold((Integer)propertyValue);
         }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
-            setLearningRate((double)propertyValue);
+            setLearningRate((Double)propertyValue);
         }else{
             super.setProperty(propertyName, propertyType, propertyValue);
         }
