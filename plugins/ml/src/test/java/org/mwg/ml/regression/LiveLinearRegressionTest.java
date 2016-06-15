@@ -28,7 +28,7 @@ public class LiveLinearRegressionTest {
                 learningNode.add("sensor", MultiSensor);
                 learningNode.set("from", "sensor.temperature; sensor.humidity; sensor.power");
                 learningNode.set(LiveLinearRegressionNode.ALPHA_KEY, 0.00001);
-                learningNode.set(LiveLinearRegressionNode.LAMBDA_KEY, 0.00);
+                learningNode.set(LiveLinearRegressionNode.LAMBDA_KEY, 0.0001d);
                 learningNode.set(LiveLinearRegressionNode.ITERATION_KEY, 10);
                 MultiSensor.add("regression", learningNode);
 

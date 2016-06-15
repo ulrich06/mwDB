@@ -145,7 +145,10 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(LAMBDA_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else {
+        }else if (propertyName.equals(ITERATION_KEY)) {
+            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
+        }
+        else {
             super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
