@@ -21,7 +21,7 @@ public class GaussianProbaTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                final GaussianMixtureNode gaussianNode = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                final GaussianMixtureNode gaussianNode = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
                 final double eps = 1e-7;
 
 
@@ -85,7 +85,7 @@ public class GaussianProbaTest {
             @Override
             public void on(Boolean result) {
 
-                GaussianMixtureNode gaussianNodeLive = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianMixtureNode gaussianNodeLive = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
 
                 gaussianNodeLive.set(GaussianMixtureNode.FROM, "f1;f2");
 
@@ -152,8 +152,8 @@ public class GaussianProbaTest {
 
                 Random rand = new Random();
 
-                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                GaussianMixtureNode node2 = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
+                GaussianMixtureNode node2 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
 
                 node1.set(GaussianMixtureNode.FROM, "f1;f2;f3");
                 node2.set(GaussianMixtureNode.FROM, "f1;f2;f3;f4");

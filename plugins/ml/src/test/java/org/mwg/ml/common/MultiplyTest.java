@@ -38,8 +38,6 @@ public class MultiplyTest {
 
       //  long current = System.currentTimeMillis();
 
-        for (int z = 0; z < 1000; z++) {
-
             //Test matrix mult
             int r = 30;
             int o = 30;
@@ -57,7 +55,7 @@ public class MultiplyTest {
                     Assert.assertTrue(Math.abs(result.get(i, j) - matD.get(i, j)) < eps);
                 }
             }
-        }
+
 
       //  System.out.println(System.currentTimeMillis() - current);
 

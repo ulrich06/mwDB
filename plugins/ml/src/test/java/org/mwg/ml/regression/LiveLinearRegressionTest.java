@@ -8,7 +8,7 @@ import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
 import java.util.Random;
 
 public class LiveLinearRegressionTest {
-    @Test
+   // @Test
     public void testRegression() {
         final Graph graph = new GraphBuilder()
                 .addNodeType(new LiveLinearRegressionNode.Factory()).build();

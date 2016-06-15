@@ -19,7 +19,7 @@ public class GaussianMixtureSim {
                 boolean exit = false;
                 String command;
 
-                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
                 node1.set(GaussianMixtureNode.LEVEL_KEY,2);
                 node1.set(GaussianMixtureNode.WIDTH_KEY,3);
 

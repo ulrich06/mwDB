@@ -8,6 +8,7 @@ import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.AbstractMLNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 
 import java.util.Random;
 
