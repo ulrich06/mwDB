@@ -128,7 +128,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
                 state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, 1);
             } else {
                 state.setFromKey(WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
-                state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, (int) state.getFromKey(INTERNAL_TOTAL_KEY) + 1);
+                state.setFromKey(INTERNAL_TOTAL_KEY, Type.INT, (Integer) state.getFromKey(INTERNAL_TOTAL_KEY) + 1);
             }
         }
 

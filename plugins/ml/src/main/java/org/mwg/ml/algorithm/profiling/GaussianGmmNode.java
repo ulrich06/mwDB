@@ -185,7 +185,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 .ifThen(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
-                        return (boolean) context.variable("continueLoop");
+                        return (Boolean) context.variable("continueLoop");
                     }
                 }, traverse);
 
@@ -193,7 +193,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         mainTask.executeThen(new Action() {
             @Override
             public void eval(TaskContext context) {
-                if(callback!=null) {
+                if (callback != null) {
                     callback.on(true);
                 }
             }

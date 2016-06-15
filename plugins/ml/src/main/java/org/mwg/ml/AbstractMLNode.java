@@ -22,8 +22,8 @@ public abstract class AbstractMLNode extends AbstractNode {
      * @param obj
      * @param message
      */
-    protected static void requireNotNull(Object obj, String message){
-        if (obj==null) {
+    protected static void requireNotNull(Object obj, String message) {
+        if (obj == null) {
             throw new RuntimeException(message);
         }
     }
@@ -54,7 +54,7 @@ public abstract class AbstractMLNode extends AbstractNode {
                             result[taskIndex] = Constants.NULL_LONG;
                         } else {
                             if (current instanceof Double) {
-                                result[taskIndex] = (double) current;
+                                result[taskIndex] = (Double) current;
                             } else if (current instanceof Object[]) {
                                 Object[] currentArr = (Object[]) current;
                                 if (currentArr.length == 1) {
