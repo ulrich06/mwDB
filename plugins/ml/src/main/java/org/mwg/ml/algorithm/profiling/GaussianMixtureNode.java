@@ -35,7 +35,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
     public static final String THRESHOLD = "_threshold";  //Factor of distance before check inside fail
     public static final double THRESHOLD_DEF = 3;
 
-    public static final String PRECISION_KEY = "_precision"; //Default covariance matrix for a dirac function
+    public static final String PRECISION = "_precision"; //Default covariance matrix for a dirac function
 
     //Gaussian keys
     public static final String INTERNAL_SUBGAUSSIAN = "_subGaussian";
@@ -74,7 +74,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(THRESHOLD)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(PRECISION_KEY)) {
+        } else if (propertyName.equals(PRECISION)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE_ARRAY);
         } else {
             super.setProperty(propertyName, propertyType, propertyValue);
@@ -91,7 +91,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             return Type.DOUBLE_ARRAY;
         } else if (attributeName.equals(COV)) {
             return Type.DOUBLE_ARRAY;
-        } else if (attributeName.equals(PRECISION_KEY)) {
+        } else if (attributeName.equals(PRECISION)) {
             return Type.DOUBLE_ARRAY;
         } else {
             return super.type(attributeName);
@@ -111,7 +111,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         } else if (attributeName.equals(COV)) {
             NodeState resolved = this._resolver.resolveState(this, true);
 
-            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
             int nbfeature = this.getNumberOfFeatures();
             if (initialPrecision == null) {
                 initialPrecision = new double[nbfeature];
@@ -144,7 +144,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final int width = resolved.getFromKeyWithDefault(WIDTH, WIDTH_DEF);
         final double compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR, COMPRESSION_FACTOR_DEF);
         final int compressionIter = resolved.getFromKeyWithDefault(COMPRESSION_ITER, COMPRESSION_ITER_DEF);
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -435,7 +435,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         NodeState resolved = this._resolver.resolveState(this, true);
 
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[nbfeature];
             for (int i = 0; i < nbfeature; i++) {
@@ -524,7 +524,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         NodeState resolved = this._resolver.resolveState(this, true);
 
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[nbfeature];
             for (int i = 0; i < nbfeature; i++) {
