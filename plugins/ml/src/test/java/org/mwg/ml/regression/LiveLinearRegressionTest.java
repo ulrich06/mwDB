@@ -65,7 +65,7 @@ public class LiveLinearRegressionTest {
                 final double[] cumerr = new double[1];
                 cumerr[0] = 0;
 
-                int test = 10000;
+                int test = 1000;
                 for (int i = size; i < size + test; i++) {
                     MultiSensor.jump(i + 1, new Callback<Node>() {
                         @Override
