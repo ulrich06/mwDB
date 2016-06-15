@@ -20,8 +20,8 @@ public class GaussianMixtureSim {
                 String command;
 
                 GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
-                node1.set(GaussianMixtureNode.LEVEL_KEY,2);
-                node1.set(GaussianMixtureNode.WIDTH_KEY,3);
+                node1.set(GaussianMixtureNode.LEVEL,2);
+                node1.set(GaussianMixtureNode.WIDTH,3);
 
                 while (!exit) {
                     Scanner scanIn = new Scanner(System.in);
