@@ -22,6 +22,7 @@ declare module java {
         }
         class Double {
             static MAX_VALUE: number;
+            static NaN: number;
         }
     }
     namespace util {
