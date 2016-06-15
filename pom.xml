@@ -116,10 +116,8 @@
 
 
         <module>plugins/ml</module>
-        <!--
         <module>plugins/mljs</module>
         <module>plugins/mlx</module>
-        -->
 
 
         <module>plugins/rest</module>

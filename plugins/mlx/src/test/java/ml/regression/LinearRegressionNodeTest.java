@@ -1,11 +1,10 @@
-package org.mwg.ml.regression;
+package ml.regression;
 
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;

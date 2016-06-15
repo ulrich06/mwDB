@@ -34,7 +34,7 @@ public class LiveLinearRegressionTest {
 
                 final Random random = new Random();
                 final double coef[] = {2, -3, -2, 5};
-                int size = 1000;
+                int size = 100;
 
                 for (int i = 0; i < size; i++) {
                     MultiSensor.jump(i + 1, new Callback<Node>() {
@@ -105,7 +105,7 @@ public class LiveLinearRegressionTest {
 
                 cumerr[0] = cumerr[0] / test;
 
-                System.out.println("Avg error: " + cumerr[0]);
+               // System.out.println("Avg error: " + cumerr[0]);
                 graph.disconnect(null);
             }
         });

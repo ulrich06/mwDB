@@ -22,7 +22,7 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            LinearRegressionNode newNode = new LinearRegressionNode(world, time, id, graph, initialResolution);
+            AbstractGradientDescentLinearRegressionNode.LinearRegressionNode newNode = new AbstractGradientDescentLinearRegressionNode.LinearRegressionNode(world, time, id, graph, initialResolution);
             return newNode;
         }
     }
