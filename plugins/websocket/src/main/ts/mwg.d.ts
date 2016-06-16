@@ -22,6 +22,7 @@ declare module java {
         }
         class Double {
             static MAX_VALUE: number;
+            static NaN: number;
         }
     }
     namespace util {
@@ -430,6 +431,7 @@ declare module org {
                 private isNaN(toTest);
                 toString(): string;
                 setPropertyWithType(propertyName: string, propertyType: number, propertyValue: any, propertyTargetType: number): void;
+                private parseInteger(numberValue);
             }
             class Base64 {
                 private static dictionary;

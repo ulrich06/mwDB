@@ -53,7 +53,7 @@ public interface Node {
      * This method hasField to be used for primitive types.
      *
      * @param propertyName  The name of the attribute. Must be unique per node.
-     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     * @param propertyValue The value of the attribute. Must be consistent with the propertyType.
      */
     void set(String propertyName, Object propertyValue);
 
@@ -63,7 +63,7 @@ public interface Node {
      *
      * @param propertyName  The name of the attribute. Must be unique per node.
      * @param propertyType  The type of the attribute. Must be one of {@link Type} int value.
-     * @param propertyValue The value of the attribute. Must be consistent selectWith the propertyType.
+     * @param propertyValue The value of the attribute. Must be consistent with the propertyType.
      */
     void setProperty(String propertyName, byte propertyType, Object propertyValue);
 
@@ -187,7 +187,7 @@ public interface Node {
     /**
      * Informs mwDB memory manager that this node object can be freed fromVar the memory.<br>
      * <b>Warning: this MUST be the last method called on this node.</b><br>
-     * To work selectWith the node afterwards, a new lookup is mandatory.
+     * To work with the node afterwards, a new lookup is mandatory.
      */
     void free();
 
@@ -199,7 +199,7 @@ public interface Node {
     Graph graph();
 
     /**
-     * Jump over the time for this object. This method is equivalent to a call to lookup selectWith the same ID than the current Node.
+     * Jump over the time for this object. This method is equivalent to a call to lookup with the same ID than the current Node.
      *
      * @param targetTime target time selectWhere this node hasField to be resolved.
      * @param callback   Called whe the jump is complete. Gives the new timed node in parameter.

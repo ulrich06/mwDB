@@ -71,12 +71,12 @@ public class PInvSVD {
         }
 
         // V*W
-        Matrix temp = Matrix.multiplyTransposeAlphaBeta(TransposeType.TRANSPOSE,1,V, TransposeType.TRANSPOSE,1,S);
+        Matrix temp = Matrix.multiplyTranspose(TransposeType.TRANSPOSE,V, TransposeType.TRANSPOSE,S);
 
 
         //V*W*Ut
 
-        pinv= Matrix.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE,1,temp, TransposeType.TRANSPOSE,1,_svd.getU());
+        pinv= Matrix.multiplyTranspose(TransposeType.NOTRANSPOSE,temp, TransposeType.TRANSPOSE,_svd.getU());
         return this;
     }
 

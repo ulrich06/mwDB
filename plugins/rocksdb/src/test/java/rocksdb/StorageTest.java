@@ -1,6 +1,5 @@
 package rocksdb;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
@@ -14,13 +13,11 @@ import org.mwg.plugin.Job;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 
 public class StorageTest {
 
     @Test
-    public void offHeapTest() {
+    public void offHeapTest() throws IOException {
         OffHeapByteArray.alloc_counter = 0;
         OffHeapDoubleArray.alloc_counter = 0;
         OffHeapLongArray.alloc_counter = 0;
@@ -28,13 +25,13 @@ public class StorageTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test("offheap ", new GraphBuilder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100_000).saveEvery(10_000).build());
+        test("offheap ", new GraphBuilder().withStorage(new RocksDBStorage("data")).withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100000).saveEvery(10000).build());
     }
 
-    final int valuesToInsert = 300_000;
+    final int valuesToInsert = 300000;
     final long timeOrigin = 1000;
 
-    private void test(String name, Graph graph) {
+    private void test(final String name, final Graph graph) throws IOException {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -43,7 +40,7 @@ public class StorageTest {
                 final DeferCounter counter = graph.newCounter(valuesToInsert);
                 for (long i = 0; i < valuesToInsert; i++) {
 
-                    if (i % 1_000_000 == 0) {
+                    if (i % 1000000 == 0) {
                         System.out.println("<insert til " + i + " in " + (System.currentTimeMillis() - before) / 1000 + "s");
                     }
 
@@ -85,29 +82,38 @@ public class StorageTest {
 
             }
         });
-    }
-
-    @AfterClass
-    public static void oneTimeTearDown() throws IOException {
         File data = new File("data");
         if (data.exists()) {
-            System.out.println("Cleanup data directory");
-            Path directory = Paths.get("data");
-            Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-
-            });
+            delete(data);
         }
     }
+
+    private static void delete(File file) throws IOException {
+        if (file.isDirectory()) {
+            //directory is empty, then delete it
+            if (file.list().length == 0) {
+                file.delete();
+            } else {
+                //list all the directory contents
+                String files[] = file.list();
+                for (String temp : files) {
+                    //construct the file structure
+                    File fileDelete = new File(file, temp);
+
+                    //recursive delete
+                    delete(fileDelete);
+                }
+                //check the directory again, if empty then delete it
+                if (file.list().length == 0) {
+                    file.delete();
+                }
+            }
+
+        } else {
+            //if file, then delete it
+            file.delete();
+        }
+    }
+
 
 }

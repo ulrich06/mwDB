@@ -38,7 +38,7 @@ public class SuperTimeTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void test(org.mwg.Graph graph) {
+    private void test(final org.mwg.Graph graph) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean o) {
@@ -108,7 +108,7 @@ public class SuperTimeTest {
                     graph.lookup(0, i, node_t0.id(), new Callback<org.mwg.Node>() {
                         @Override
                         public void on(Node result) {
-                            Assert.assertTrue((int) result.get("time") == finalI);
+                            Assert.assertTrue((Integer) result.get("time") == finalI);
                         }
                     });
                 }

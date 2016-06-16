@@ -4,12 +4,8 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeFactory;
-
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Created by andrey.boytsov on 17/05/16.
@@ -83,16 +79,16 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 setL2Regularization((Double)propertyValue);
             }else{
                 illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization(((Integer)propertyValue).doubleValue());
+                setL2Regularization((double)((Integer)propertyValue));
             }
-        }else if (propertyName.startsWith(COEFFICIENTS_KEY) || propertyName.startsWith(INTERCEPT_KEY)) {
+        }else if ((propertyName.lastIndexOf(COEFFICIENTS_KEY,0) == 0) || (propertyName.lastIndexOf(INTERCEPT_KEY,0) == 0)) {
             //Nothing. Those cannot be set.
         }else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)){
-            setIterationDifferenceThreshold(((Double)propertyValue).doubleValue());
+            setIterationDifferenceThreshold((Double)propertyValue);
         }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
-            setIterationCountThreshold(((Integer)propertyValue).intValue());
+            setIterationCountThreshold((Integer)propertyValue);
         }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
-            setLearningRate(((Double)propertyValue).doubleValue());
+            setLearningRate((Double)propertyValue);
         }else{
             super.setProperty(propertyName, propertyType, propertyValue);
         }
@@ -100,9 +96,9 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     public Object get(String propertyName){
-        if(propertyName.startsWith(COEFFICIENTS_KEY)) {
+        if(propertyName.lastIndexOf(COEFFICIENTS_KEY,0) == 0) {
             return unphasedState().getFromKeyWithDefault(propertyName, COEFFICIENTS_DEF);
-        }else if (propertyName.startsWith(INTERCEPT_KEY)){
+        }else if (propertyName.lastIndexOf(INTERCEPT_KEY,0) == 0){
             return unphasedState().getFromKeyWithDefault(propertyName, INTERCEPT_DEF);
         }else if(L2_COEF_KEY.equals(propertyName)){
             return getL2Regularization();
@@ -117,7 +113,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     }
 
     protected void setCoefficients(double[] coefficients, int classNum) {
-        Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+        LogisticRegressionClassifierNode.requireNotNull(coefficients,"Regression coefficients must be not null");
         unphasedState().setFromKey(COEFFICIENTS_KEY+classNum, Type.DOUBLE_ARRAY, coefficients);
     }
 
@@ -213,10 +209,12 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
                 int startIndex = 0;
                 int index = 0;
-                double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
+                double oldCoefs[] = new double[coefs.length];
+                System.arraycopy(coefs, 0, oldCoefs, 0, coefs.length);
                 final double oldIntercept = intercept;
                 while (startIndex + dims <= valueBuffer.length){
-                    double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+                    double curValue[] = new double[dims];
+                    System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
 
                     double h = sigmoid(dot(value, oldCoefs)+intercept);
                     int y = (resultBuffer[index]==cl)?1:0;
@@ -243,11 +241,11 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 setCoefficients(coefs, cl);
                 setIntercept(intercept, cl);
                 if (gdDifferenceThresh>0){
-                    exitCase |= maxDiff<gdDifferenceThresh;
+                    exitCase = exitCase || maxDiff<gdDifferenceThresh;
                 }
 
                 if (gdIterThresh>0){
-                    exitCase |= iterCount>=gdIterThresh;
+                    exitCase = exitCase || (iterCount>=gdIterThresh);
                 }
 
                 if ((!(gdDifferenceThresh>0))&&(!(gdIterThresh>0))) {

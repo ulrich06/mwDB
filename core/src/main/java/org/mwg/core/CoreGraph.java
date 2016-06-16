@@ -178,7 +178,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void connect(Callback<Boolean> callback) {
+    public void connect(final Callback<Boolean> callback) {
         //negociate a lock
         while (this._lock.compareAndSet(false, true)) ;
         //ok we have it, let's go
@@ -295,7 +295,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void disconnect(Callback callback) {
+    public void disconnect(final Callback callback) {
         while (this._lock.compareAndSet(false, true)) ;
         //ok we have the lock
         if (_isConnected.compareAndSet(true, false)) {
@@ -376,7 +376,7 @@ class CoreGraph implements org.mwg.Graph {
             }
         } else {
             boolean isNoop = this._storage instanceof BlackHoleStorage;
-            Buffer stream = newBuffer();
+            final Buffer stream = newBuffer();
             boolean isFirst = true;
             while (dirtyIterator.hasNext()) {
                 Chunk loopChunk = dirtyIterator.next();
@@ -418,7 +418,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void index(String indexName, org.mwg.Node toIndexNode, String flatKeyAttributes, Callback<Boolean> callback) {
+    public void index(final String indexName, final org.mwg.Node toIndexNode, final String flatKeyAttributes, final Callback<Boolean> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
@@ -430,7 +430,7 @@ class CoreGraph implements org.mwg.Graph {
         }
         getIndexOrCreate(toIndexNode.world(), toIndexNode.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
-            public void on(org.mwg.Node foundIndex) {
+            public void on(final org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     throw new RuntimeException("Index creation failed, cache is probably full !!!");
                 }
@@ -448,7 +448,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void unindex(String indexName, org.mwg.Node nodeToUnindex, String flatKeyAttributes, Callback<Boolean> callback) {
+    public void unindex(final String indexName, final org.mwg.Node nodeToUnindex, final String flatKeyAttributes, final Callback<Boolean> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
@@ -460,7 +460,7 @@ class CoreGraph implements org.mwg.Graph {
         }
         getIndexOrCreate(nodeToUnindex.world(), nodeToUnindex.time(), indexName, new Callback<org.mwg.Node>() {
             @Override
-            public void on(org.mwg.Node foundIndex) {
+            public void on(final org.mwg.Node foundIndex) {
                 if (foundIndex != null) {
                     foundIndex.unindex(CoreConstants.INDEX_ATTRIBUTE, nodeToUnindex, flatKeyAttributes, new Callback<Boolean>() {
                         @Override
@@ -477,7 +477,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void indexes(long world, long time, Callback<String[]> callback) {
+    public void indexes(final long world, final long time, final Callback<String[]> callback) {
         final CoreGraph selfPointer = this;
         this._resolver.lookup(world, time, CoreConstants.END_OF_TIME, new Callback<org.mwg.Node>() {
             @Override
@@ -490,7 +490,7 @@ class CoreGraph implements org.mwg.Graph {
                         globalIndexNodeUnsafe.free();
                         callback.on(new String[0]);
                     } else {
-                        String[] result = new String[(int) globalIndexContent.size()];
+                        final String[] result = new String[(int) globalIndexContent.size()];
                         final int[] resultIndex = {0};
                         globalIndexContent.each(new LongLongMapCallBack() {
                             @Override
@@ -508,7 +508,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void find(long world, long time, String indexName, String query, Callback<org.mwg.Node[]> callback) {
+    public void find(final long world, final long time, final String indexName, final String query, final Callback<org.mwg.Node[]> callback) {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
@@ -517,7 +517,7 @@ class CoreGraph implements org.mwg.Graph {
         }
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
-            public void on(org.mwg.Node foundIndex) {
+            public void on(final org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(new Node[0]);
@@ -538,7 +538,7 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public void findByQuery(Query query, Callback<Node[]> callback) {
+    public void findByQuery(final Query query, final Callback<Node[]> callback) {
         if (query == null) {
             throw new RuntimeException("query should not be null");
         }
@@ -554,7 +554,7 @@ class CoreGraph implements org.mwg.Graph {
 
         getIndexOrCreate(query.world(), query.time(), query.indexName(), new Callback<org.mwg.Node>() {
             @Override
-            public void on(org.mwg.Node foundIndex) {
+            public void on(final org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(new Node[0]);
@@ -563,7 +563,7 @@ class CoreGraph implements org.mwg.Graph {
                     query.setIndexName(CoreConstants.INDEX_ATTRIBUTE);
                     foundIndex.findByQuery(query, new Callback<org.mwg.Node[]>() {
                         @Override
-                        public void on(org.mwg.Node[] collectedNodes) {
+                        public void on(final org.mwg.Node[] collectedNodes) {
                             foundIndex.free();
                             if (PrimitiveHelper.isDefined(callback)) {
                                 callback.on(collectedNodes);
@@ -582,7 +582,7 @@ class CoreGraph implements org.mwg.Graph {
         }
         getIndexOrCreate(world, time, indexName, new Callback<org.mwg.Node>() {
             @Override
-            public void on(org.mwg.Node foundIndex) {
+            public void on(final org.mwg.Node foundIndex) {
                 if (foundIndex == null) {
                     if (PrimitiveHelper.isDefined(callback)) {
                         callback.on(new Node[0]);
@@ -610,7 +610,7 @@ class CoreGraph implements org.mwg.Graph {
         getIndexOrCreate(world, time, indexName, callback, false);
     }
 
-    private void getIndexOrCreate(long world, long time, String indexName, Callback<org.mwg.Node> callback, boolean createIfNull) {
+    private void getIndexOrCreate(final long world, final long time, final String indexName, final Callback<org.mwg.Node> callback, final boolean createIfNull) {
         final CoreGraph selfPointer = this;
         final long indexNameCoded = this._resolver.stringToHash(indexName, createIfNull);
         this._resolver.lookup(world, time, CoreConstants.END_OF_TIME, new Callback<org.mwg.Node>() {

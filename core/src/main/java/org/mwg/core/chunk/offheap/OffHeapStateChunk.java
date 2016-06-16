@@ -3,11 +3,15 @@ package org.mwg.core.chunk.offheap;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.core.CoreConstants;
-import org.mwg.plugin.*;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.*;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Base64;
+import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkType;
+import org.mwg.plugin.NodeStateCallback;
+import org.mwg.struct.*;
 
 /**
  * @ignore ts
@@ -80,25 +84,17 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
 
             if (initialPayload != null && initialPayload.length() > 0) {
                 load(initialPayload, false);
+                if (elementK_ptr == CoreConstants.OFFHEAP_NULL_PTR) {
+                    init(initialCapacity);
+                }
+
             } else if (origin != null) {
                 OffHeapStateChunk castedOrigin = (OffHeapStateChunk) origin;
                 softClone(castedOrigin);
                 incrementCopyOnWriteCounter(castedOrigin.root_array_ptr);
             } else {
-                /** init long[] variables */
-                elementK_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
-                elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, elementV_ptr); //used for soft clone, therefore cow counter cannot be here
-                elementNext_ptr = OffHeapLongArray.allocate(initialCapacity + 1); //cow counter + capacity
-                OffHeapLongArray.set(elementNext_ptr, 0, 1); //init cow counter
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
-                elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
-                elementType_ptr = OffHeapLongArray.allocate(initialCapacity);
-                OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_TYPE, elementType_ptr);
+                init(initialCapacity);
 
-                OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
             }
 
         } else {
@@ -110,6 +106,23 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             elementType_ptr = OffHeapLongArray.get(root_array_ptr, INDEX_ELEMENT_TYPE);
         }
 
+    }
+
+    private void init(long initialCapacity) {
+        /** init long[] variables */
+        elementK_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_K, elementK_ptr);
+        elementV_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_V, elementV_ptr); //used for soft clone, therefore cow counter cannot be here
+        elementNext_ptr = OffHeapLongArray.allocate(initialCapacity + 1); //cow counter + capacity
+        OffHeapLongArray.set(elementNext_ptr, 0, 1); //init cow counter
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_NEXT, elementNext_ptr);
+        elementHash_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_HASH, elementHash_ptr);
+        elementType_ptr = OffHeapLongArray.allocate(initialCapacity);
+        OffHeapLongArray.set(root_array_ptr, INDEX_ELEMENT_TYPE, elementType_ptr);
+
+        OffHeapLongArray.set(root_array_ptr, INDEX_HASH_READ_ONLY, 0);
     }
 
     @Override
@@ -270,7 +283,7 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     }
 
     @Override
-    public final void save(Buffer buffer) {
+    public final void save(final Buffer buffer) {
         while (!OffHeapLongArray.compareAndSwap(root_array_ptr, INDEX_LOCK, 0, 1)) ; // lock
         try {
             consistencyCheck();
@@ -294,20 +307,20 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                                 Base64.encodeStringToBuffer((String) loopValue, buffer);
                                 break;
                             case Type.BOOL:
-                                if ((boolean) loopValue) {
+                                if ((Boolean) loopValue) {
                                     buffer.write(CoreConstants.BOOL_TRUE);
                                 } else {
                                     buffer.write(CoreConstants.BOOL_FALSE);
                                 }
                                 break;
                             case Type.LONG:
-                                Base64.encodeLongToBuffer((long) loopValue, buffer);
+                                Base64.encodeLongToBuffer((Long) loopValue, buffer);
                                 break;
                             case Type.DOUBLE:
-                                Base64.encodeDoubleToBuffer((double) loopValue, buffer);
+                                Base64.encodeDoubleToBuffer((Double) loopValue, buffer);
                                 break;
                             case Type.INT:
-                                Base64.encodeIntToBuffer((int) loopValue, buffer);
+                                Base64.encodeIntToBuffer((Integer) loopValue, buffer);
                                 break;
                             /** Arrays */
                             case Type.DOUBLE_ARRAY:
@@ -916,21 +929,21 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
                 switch (p_elemType) {
                     /** Primitives */
                     case Type.BOOL:
-                        param_elem = (boolean) p_unsafe_elem;
+                        param_elem = (Boolean) p_unsafe_elem;
                         break;
                     case Type.DOUBLE:
-                        param_elem = (double) p_unsafe_elem;
+                        param_elem = (Double) p_unsafe_elem;
                         break;
                     case Type.LONG:
                         if (p_unsafe_elem instanceof Integer) {
-                            int preCasting = (int) p_unsafe_elem;
+                            int preCasting = (Integer) p_unsafe_elem;
                             param_elem = (long) preCasting;
                         } else {
-                            param_elem = (long) p_unsafe_elem;
+                            param_elem = (Long) p_unsafe_elem;
                         }
                         break;
                     case Type.INT:
-                        param_elem = (int) p_unsafe_elem;
+                        param_elem = (Integer) p_unsafe_elem;
                         break;
                     case Type.STRING:
                         param_elem = (String) p_unsafe_elem;
@@ -1067,16 +1080,16 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
             switch (elemType) {
                 /** Primitives */
                 case Type.BOOL:
-                    OffHeapLongArray.set(addr, index, ((boolean) elem) ? 1 : 0);
+                    OffHeapLongArray.set(addr, index, ((Boolean) elem) ? 1 : 0);
                     break;
                 case Type.DOUBLE:
-                    OffHeapDoubleArray.set(addr, index, ((double) elem));
+                    OffHeapDoubleArray.set(addr, index, ((Double) elem));
                     break;
                 case Type.LONG:
-                    OffHeapLongArray.set(addr, index, ((long) elem));
+                    OffHeapLongArray.set(addr, index, ((Long) elem));
                     break;
                 case Type.INT:
-                    OffHeapLongArray.set(addr, index, ((int) elem));
+                    OffHeapLongArray.set(addr, index, ((Integer) elem));
                     break;
                 /** String */
                 case Type.STRING:

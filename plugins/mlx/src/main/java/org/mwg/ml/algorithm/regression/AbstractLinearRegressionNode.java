@@ -4,14 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
 
-import java.util.Arrays;
-import java.util.Objects;
-
-/**
- * Created by andre on 4/29/2016.
- */
 public abstract class AbstractLinearRegressionNode extends AbstractRegressionSlidingWindowManagingNode implements RegressionNode {
 
     /**
@@ -66,7 +59,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
                 setL2Regularization((Double)propertyValue);
             }else{
                 illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization(((Integer)propertyValue).doubleValue());
+                setL2Regularization((double)((Integer)propertyValue));
             }
         }else if (COEFFICIENTS_KEY.equals(propertyName) || INTERCEPT_KEY.equals(propertyName)) {
             //Nothing. Those cannot be set.
@@ -88,7 +81,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     }
 
     protected void setCoefficients(double[] coefficients) {
-        Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+       // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
         unphasedState().setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
     }
 
@@ -139,7 +132,8 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
         double intercept = getIntercept();
         double sqrResidualSum = 0;
         while (startIndex + dims <= valueBuffer.length) { //For each value
-            double curValue[] = Arrays.copyOfRange(valueBuffer, startIndex, startIndex + dims);
+            double curValue[] = new double[dims];
+            System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
             double response = predictValueInternal(curValue,coefficients,intercept);
 
             sqrResidualSum += (response - results[index])*(response - results[index]);

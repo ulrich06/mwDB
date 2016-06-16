@@ -3,7 +3,7 @@ package org.mwg.ml.profiling;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.*;
-import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.common.matrix.Matrix;
 
@@ -60,30 +60,30 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                final GaussianMixtureNode gaussianNodeLive = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
 
                 double eps = 1e-7;
 
 
-                double[][] train = new double[16][];
+                final double[][] train = new double[16][];
 
                 int time = 0;
                 int k = 0;
                 for (int i = 0; i < 16; i++) {
-                    train[i]=new double[7];
+                    train[i] = new double[7];
                     for (int j = 0; j < 7; j++) {
                         train[i][j] = longleyData[k];
                         k++;
                     }
-                    int finalI = i;
-                    gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
+                    final int finalI = i;
+                    gaussianNodeLive.jump(time, new Callback<GaussianMixtureNode>() {
                         @Override
-                        public void on(GaussianGmmNode result) {
-                            result.learnVector(train[finalI],new Callback<Boolean>() {
+                        public void on(GaussianMixtureNode result) {
+                            result.learnVector(train[finalI], new Callback<Boolean>() {
                                 @Override
                                 public void on(Boolean result) {
 
@@ -97,7 +97,7 @@ public class GaussianNodeTest {
                 double[][] rcovData = new double[7][7];
                 k = 0;
                 for (int i = 0; i < 7; i++) {
-                    rcovData[i]=new double[7];
+                    rcovData[i] = new double[7];
                     for (int j = 0; j < 7; j++) {
                         rcovData[i][j] = rData[k];
                         k++;
@@ -109,17 +109,17 @@ public class GaussianNodeTest {
                 final double[][] covLive = new double[7][7];
 
 
-                gaussianNodeLive.jump(time, new Callback<GaussianGmmNode>() {
+                gaussianNodeLive.jump(time, new Callback<GaussianMixtureNode>() {
                     @Override
-                    public void on(GaussianGmmNode result) {
+                    public void on(GaussianMixtureNode result) {
                         double[] a = result.getAvg();
-                        Matrix c = result.getCovariance(a,null);
+                        Matrix c = result.getCovariance(a, null);
                         if (c != null) {
                             for (int i = 0; i < a.length; i++) {
                                 avgLive[i] = a[i];
-                                covLive[i]=new double[a.length];
+                                covLive[i] = new double[a.length];
                                 for (int j = 0; j < a.length; j++) {
-                                    covLive[i][j] = c.get(i,j);
+                                    covLive[i][j] = c.get(i, j);
                                 }
                             }
                         }

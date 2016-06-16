@@ -12,33 +12,33 @@ import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
 
-public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
+public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode {
 
 
     //Getters and setters
-    public final static String NAME = "GaussianGmm";
+    public final static String NAME = "GaussianMixtureNode";
+
     public static final String MIN = "min";
     public static final String MAX = "max";
     public static final String AVG = "avg";
     public static final String COV = "cov";
 
-
     //Mixture model params
-    public static final String LEVEL_KEY = "_level";  //Current level of the gaussian node, top level is the highest number, bottom leaves have level 0.
+    public static final String LEVEL = "_level";  //Current level of the gaussian node, top level is the highest number, bottom leaves have level 0.
     public static final int LEVEL_DEF = 0;
-    public static final String WIDTH_KEY = "_width";  // Nuber of children after compressing, note that Factor x wodth is the max per level tolerated before compressing
+    public static final String WIDTH = "_width";  // Nuber of children after compressing, note that Factor x wodth is the max per level tolerated before compressing
     public static final int WIDTH_DEF = 10;
-    public static final String COMPRESSION_FACTOR_KEY = "_compression";  // Factor of subnodes allowed before starting compression. For ex: 2 => 2x Width before compressing to width
+    public static final String COMPRESSION_FACTOR = "_compression";  // Factor of subnodes allowed before starting compression. For ex: 2 => 2x Width before compressing to width
     public static final double COMPRESSION_FACTOR_DEF = 2;
-    public static final String COMPRESSION_ITER_KEY = "_compressioniter"; //Number of time to iterate K-means before finding the best compression
+    public static final String COMPRESSION_ITER = "_compressioniter"; //Number of time to iterate K-means before finding the best compression
     public static final int COMPRESSION_ITER_DEF = 10;
-    public static final String THRESHOLD_KEY = "_threshold";  //Factor of distance before check inside fail
+    public static final String THRESHOLD = "_threshold";  //Factor of distance before check inside fail
     public static final double THRESHOLD_DEF = 3;
 
-    public static final String PRECISION_KEY = "_precision"; //Default covariance matrix for a dirac function
+    public static final String PRECISION = "_precision"; //Default covariance matrix for a dirac function
 
     //Gaussian keys
-    public static final String INTERNAL_SUBGAUSSIAN_KEY = "_subGaussian";
+    public static final String INTERNAL_SUBGAUSSIAN = "_subGaussian";
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_SUMSQUARE_KEY = "_sumSquare";
     private static final String INTERNAL_TOTAL_KEY = "_total";
@@ -56,26 +56,25 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         @Override
         public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianGmmNode(world, time, id, graph, initialResolution);
+            return new GaussianMixtureNode(world, time, id, graph, initialResolution);
         }
     }
 
-    public GaussianGmmNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public GaussianMixtureNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
-
-
+    
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(LEVEL_KEY)) {
+        if (propertyName.equals(LEVEL)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(WIDTH_KEY)) {
+        } else if (propertyName.equals(WIDTH)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(COMPRESSION_FACTOR_KEY)) {
+        } else if (propertyName.equals(COMPRESSION_FACTOR)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(THRESHOLD_KEY)) {
+        } else if (propertyName.equals(THRESHOLD)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(PRECISION_KEY)) {
+        } else if (propertyName.equals(PRECISION)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE_ARRAY);
         } else {
             super.setProperty(propertyName, propertyType, propertyValue);
@@ -92,7 +91,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             return Type.DOUBLE_ARRAY;
         } else if (attributeName.equals(COV)) {
             return Type.DOUBLE_ARRAY;
-        } else if (attributeName.equals(PRECISION_KEY)) {
+        } else if (attributeName.equals(PRECISION)) {
             return Type.DOUBLE_ARRAY;
         } else {
             return super.type(attributeName);
@@ -112,7 +111,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         } else if (attributeName.equals(COV)) {
             NodeState resolved = this._resolver.resolveState(this, true);
 
-            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
             int nbfeature = this.getNumberOfFeatures();
             if (initialPrecision == null) {
                 initialPrecision = new double[nbfeature];
@@ -128,7 +127,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     @Override
-    public void learn(Callback<Boolean> callback) {
+    public void learn(final Callback<Boolean> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] values) {
@@ -140,12 +139,12 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     //ToDO temporal hack to avoid features extractions - to remove later
-    public void learnVector(double[] values, Callback<Boolean> callback) {
+    public void learnVector(final double[] values, final Callback<Boolean> callback) {
         NodeState resolved = this._resolver.resolveState(this, true);
-        final int width = resolved.getFromKeyWithDefault(WIDTH_KEY, WIDTH_DEF);
-        final double compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
-        final int compressionIter = resolved.getFromKeyWithDefault(COMPRESSION_ITER_KEY, COMPRESSION_ITER_DEF);
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        final int width = resolved.getFromKeyWithDefault(WIDTH, WIDTH_DEF);
+        final double compressionFactor = resolved.getFromKeyWithDefault(COMPRESSION_FACTOR, COMPRESSION_FACTOR_DEF);
+        final int compressionIter = resolved.getFromKeyWithDefault(COMPRESSION_ITER, COMPRESSION_ITER_DEF);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -153,13 +152,13 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
         }
         final double[] precisions = initialPrecision;
-        final double threshold = resolved.getFromKeyWithDefault(THRESHOLD_KEY, THRESHOLD_DEF);
+        final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
         Task creationTask = graph().newTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                GaussianGmmNode node = (GaussianGmmNode) context.variable("starterNode");
+                GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
                 //System.out.println("Vector: " + values[0] + " " + values[1]);
                 node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
             }
@@ -167,12 +166,12 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
         Task traverse = graph().newTask();
-        traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN_KEY).then(new Action() {
+        traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Node[] result = (Node[]) context.result();
-                GaussianGmmNode parent = (GaussianGmmNode) context.variable("starterNode");
-                GaussianGmmNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
+                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
+                GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
                     context.setVariable("continueLoop", true);
@@ -185,7 +184,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 .ifThen(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
-                        return (boolean) context.variable("continueLoop");
+                        return (Boolean) context.variable("continueLoop");
                     }
                 }, traverse);
 
@@ -193,7 +192,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         mainTask.executeThen(new Action() {
             @Override
             public void eval(TaskContext context) {
-                if(callback!=null) {
+                if (callback != null) {
                     callback.on(true);
                 }
             }
@@ -220,7 +219,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
     //ToDo need to be replaced by gaussian distances !!
-    private GaussianGmmNode filter(final Node[] result, final double[] features, final double[] precisions, double threshold, double level) {
+    private GaussianMixtureNode filter(final Node[] result, final double[] features, final double[] precisions, double threshold, double level) {
         threshold = threshold + level * 0.707;
 
 
@@ -231,7 +230,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         double min = Double.MAX_VALUE;
         int index = 0;
         for (int i = 0; i < result.length; i++) {
-            GaussianGmmNode temp = ((GaussianGmmNode) result[i]);
+            GaussianMixtureNode temp = ((GaussianMixtureNode) result[i]);
             double[] avg = temp.getAvg();
             distances[i] = distance(features, avg, temp.getCovarianceArray(avg, precisions));
             if (distances[i] < min) {
@@ -240,7 +239,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
         }
         if (min < threshold) {
-            return ((GaussianGmmNode) result[index]);
+            return ((GaussianMixtureNode) result[index]);
         } else {
             return null;
         }
@@ -253,32 +252,32 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
 
     public int getLevel() {
-        return this._resolver.resolveState(this, true).getFromKeyWithDefault(LEVEL_KEY, LEVEL_DEF);
+        return this._resolver.resolveState(this, true).getFromKeyWithDefault(LEVEL, LEVEL_DEF);
     }
 
     public int getWidth() {
-        return this._resolver.resolveState(this, true).getFromKeyWithDefault(WIDTH_KEY, WIDTH_DEF);
+        return this._resolver.resolveState(this, true).getFromKeyWithDefault(WIDTH, WIDTH_DEF);
     }
 
     public double getCompressionFactor() {
-        return this._resolver.resolveState(this, true).getFromKeyWithDefault(COMPRESSION_FACTOR_KEY, COMPRESSION_FACTOR_DEF);
+        return this._resolver.resolveState(this, true).getFromKeyWithDefault(COMPRESSION_FACTOR, COMPRESSION_FACTOR_DEF);
     }
 
     public int getCompressionIter() {
-        return this._resolver.resolveState(this, true).getFromKeyWithDefault(COMPRESSION_ITER_KEY, COMPRESSION_ITER_DEF);
+        return this._resolver.resolveState(this, true).getFromKeyWithDefault(COMPRESSION_ITER, COMPRESSION_ITER_DEF);
     }
 
 
     private void updateLevel(final int newLevel) {
-        super.set(LEVEL_KEY, newLevel);
+        super.set(LEVEL, newLevel);
         if (newLevel == 0) {
-            super.set(INTERNAL_SUBGAUSSIAN_KEY, new long[0]);
+            super.set(INTERNAL_SUBGAUSSIAN, new long[0]);
         } else {
-            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
+            super.rel(INTERNAL_SUBGAUSSIAN, new Callback<Node[]>() {
                 @Override
                 public void on(Node[] result) {
                     for (int i = 0; i < result.length; i++) {
-                        GaussianGmmNode g = (GaussianGmmNode) result[i];
+                        GaussianMixtureNode g = (GaussianMixtureNode) result[i];
                         g.updateLevel(newLevel - 1);
                         result[i].free();
                     }
@@ -287,11 +286,11 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         }
     }
 
-    private GaussianGmmNode createLevel(double[] values, final int level, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
-        GaussianGmmNode g = (GaussianGmmNode) graph().newTypedNode(this.world(), this.time(), "GaussianGmm");
-        g.set(LEVEL_KEY, level);
+    private GaussianMixtureNode createLevel(double[] values, final int level, final int width, final double compressionFactor, final int compressionIter, final double[] precisions, final double threshold) {
+        GaussianMixtureNode g = (GaussianMixtureNode) graph().newTypedNode(this.world(), this.time(), NAME);
+        g.set(LEVEL, level);
         g.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false); //dirac
-        super.add(INTERNAL_SUBGAUSSIAN_KEY, g);
+        super.add(INTERNAL_SUBGAUSSIAN, g);
         return g;
     }
 
@@ -299,16 +298,16 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         final Node selfPointer = this;
 
-        long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
+        long[] subgaussians = (long[]) super.get(INTERNAL_SUBGAUSSIAN);
         if (subgaussians != null && subgaussians.length >= compressionFactor * width) {
-            super.rel(INTERNAL_SUBGAUSSIAN_KEY, new Callback<Node[]>() {
+            super.rel(INTERNAL_SUBGAUSSIAN, new Callback<Node[]>() {
                 @Override
                 //result.length hold the original subgaussian number, and width is after compression
                 public void on(Node[] result) {
-                    GaussianGmmNode[] subgauss = new GaussianGmmNode[result.length];
+                    GaussianMixtureNode[] subgauss = new GaussianMixtureNode[result.length];
                     double[][] data = new double[result.length][];
                     for (int i = 0; i < result.length; i++) {
-                        subgauss[i] = (GaussianGmmNode) result[i];
+                        subgauss[i] = (GaussianMixtureNode) result[i];
                         data[i] = subgauss[i].getAvg();
                     }
 
@@ -317,7 +316,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                     int[][] clusters = clusteringEngine.getClusterIds(data, width, compressionIter, precisions);
 
                     //Select the ones which will remain as head by the maximum weight
-                    GaussianGmmNode[] mainClusters = new GaussianGmmNode[width];
+                    GaussianMixtureNode[] mainClusters = new GaussianMixtureNode[width];
                     for (int i = 0; i < width; i++) {
                         if (clusters[i] != null && clusters[i].length > 0) {
                             int max = 0;
@@ -343,10 +342,10 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                         if (clusters[i] != null && clusters[i].length > 0) {
                             for (int j = 0; j < clusters[i].length; j++) {
-                                GaussianGmmNode g = subgauss[clusters[i][j]];
+                                GaussianMixtureNode g = subgauss[clusters[i][j]];
                                 if (g != mainClusters[i]) {
                                     mainClusters[i].move(g);
-                                    selfPointer.remove(INTERNAL_SUBGAUSSIAN_KEY, g);
+                                    selfPointer.remove(INTERNAL_SUBGAUSSIAN, g);
                                     g.free();
                                 }
                             }
@@ -363,7 +362,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    private void move(GaussianGmmNode subgaus) {
+    private void move(GaussianMixtureNode subgaus) {
         //manage total
         int total = getTotal();
         int level = getLevel();
@@ -407,19 +406,19 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         //Add the subGaussian to the relationship
         if (level > 0) {
-            long[] subrelations = (long[]) subgaus.get(INTERNAL_SUBGAUSSIAN_KEY);
+            long[] subrelations = (long[]) subgaus.get(INTERNAL_SUBGAUSSIAN);
             if (subrelations == null) {
                 subgaus.updateLevel(level - 1);
-                super.add(INTERNAL_SUBGAUSSIAN_KEY, subgaus);
+                super.add(INTERNAL_SUBGAUSSIAN, subgaus);
             } else {
-                long[] oldrel = (long[]) this.get(INTERNAL_SUBGAUSSIAN_KEY);
+                long[] oldrel = (long[]) this.get(INTERNAL_SUBGAUSSIAN);
                 if (oldrel == null) {
                     oldrel = new long[0];
                 }
                 long[] newrelations = new long[oldrel.length + subrelations.length];
                 System.arraycopy(oldrel, 0, newrelations, 0, oldrel.length);
                 System.arraycopy(subrelations, 0, newrelations, oldrel.length, subrelations.length);
-                set(INTERNAL_SUBGAUSSIAN_KEY, newrelations);
+                set(INTERNAL_SUBGAUSSIAN, newrelations);
             }
 
 
@@ -427,9 +426,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void query(int level, double[] min, double[] max, Callback<ProbaDistribution> callback) {
-        int nbfeature = this.getNumberOfFeatures();
-
+    public void query(int level, double[] min, double[] max, final Callback<ProbaDistribution> callback) {
+        final int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
             return;
@@ -437,7 +435,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         NodeState resolved = this._resolver.resolveState(this, true);
 
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[nbfeature];
             for (int i = 0; i < nbfeature; i++) {
@@ -463,7 +461,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
         final double[] finalMin = min;
         final double[] finalMax = max;
         final double[] err = initialPrecision;
-        final double threshold = resolved.getFromKeyWithDefault(THRESHOLD_KEY, THRESHOLD_DEF);
+        final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
         //At this point we have min and max at least with 2xerr of difference
 
@@ -472,12 +470,12 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         deepTraverseTask.from(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
-            deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN_KEY);
-            int finalI = i;
+            deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
+            final int finalI = i;
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
                 public boolean select(Node node) {
-                    return ((GaussianGmmNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
+                    return ((GaussianMixtureNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
                 }
             });
         }
@@ -497,7 +495,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                 MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.length];
                 for (int i = 0; i < leaves.length; i++) {
-                    GaussianGmmNode temp = ((GaussianGmmNode) leaves[i]);
+                    GaussianMixtureNode temp = ((GaussianMixtureNode) leaves[i]);
                     totals[i] = temp.getTotal();
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
@@ -517,8 +515,8 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
 
-    public void generateDistributions(int level, Callback<ProbaDistribution> callback) {
-        int nbfeature = this.getNumberOfFeatures();
+    public void generateDistributions(int level, final Callback<ProbaDistribution> callback) {
+        final int nbfeature = this.getNumberOfFeatures();
         if (nbfeature == 0) {
             callback.on(null);
             return;
@@ -526,7 +524,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         NodeState resolved = this._resolver.resolveState(this, true);
 
-        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION_KEY);
+        double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
         if (initialPrecision == null) {
             initialPrecision = new double[nbfeature];
             for (int i = 0; i < nbfeature; i++) {
@@ -539,7 +537,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
         deepTraverseTask.from(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
-            deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN_KEY);
+            deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
         }
 
         deepTraverseTask.then(new Action() {
@@ -557,7 +555,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
 
                 MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.length];
                 for (int i = 0; i < leaves.length; i++) {
-                    GaussianGmmNode temp = ((GaussianGmmNode) leaves[i]);
+                    GaussianMixtureNode temp = ((GaussianMixtureNode) leaves[i]);
                     totals[i] = temp.getTotal();
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
@@ -635,7 +633,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
                 }
                 //Self clone to create a sublevel
                 if (createNode && level > 0) {
-                    GaussianGmmNode newLev = createLevel(sum, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
+                    GaussianMixtureNode newLev = createLevel(sum, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
                     double d = distance(values, sum, precisions);
                     if (d < threshold) {
                         reccursive = true;
@@ -673,7 +671,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
             }
             total++;
             if (createNode && level > 0 && !reccursive) {
-                GaussianGmmNode newLev = createLevel(values, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
+                GaussianMixtureNode newLev = createLevel(values, level - 1, width, compressionFactor, compressionIter, precisions, threshold);
                 newLev.free();
                 checkAndCompress(width, compressionFactor, compressionIter, precisions, threshold);
             }
@@ -890,7 +888,7 @@ public class GaussianGmmNode extends AbstractMLNode implements ProfilingNode {
     }
 
     public long[] getSubGraph() {
-        long[] res = (long[]) super.get(INTERNAL_SUBGAUSSIAN_KEY);
+        long[] res = (long[]) super.get(INTERNAL_SUBGAUSSIAN);
         if (res == null) {
             res = new long[0];
         }

@@ -2,11 +2,8 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.*;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 import org.mwg.plugin.NodeFactory;
-
-import java.util.*;
 
 /**
  * Created by Andrey Boytsov on 4/14/2016.
@@ -113,7 +110,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             return kk[0];
         }
         int classes[] = getKnownClasses();
-        double curMaxLikelihood = Double.NEGATIVE_INFINITY; //Even likelihood 0 should surpass it
+        double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes){
             double curLikelihood = getLikelihoodForClass(value, curClass);

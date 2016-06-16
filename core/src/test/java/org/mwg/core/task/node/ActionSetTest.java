@@ -16,7 +16,7 @@ public class ActionSetTest extends ActionNewNodeTest {
 
     @Test
     public void testWithOneNode() {
-        long[] id = new long[1];
+        final long[] id = new long[1];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)
@@ -44,7 +44,7 @@ public class ActionSetTest extends ActionNewNodeTest {
 
     @Test
     public void testWithArray() {
-        long[] ids = new long[5];
+        final long[] ids = new long[5];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)
@@ -85,7 +85,7 @@ public class ActionSetTest extends ActionNewNodeTest {
 
     @Test
     public void testWithNull() {
-        boolean[] nextCalled = new boolean[1];
+        final boolean[] nextCalled = new boolean[1];
         graph.newTask()
                 .setWorld(0)
                 .setTime(0)

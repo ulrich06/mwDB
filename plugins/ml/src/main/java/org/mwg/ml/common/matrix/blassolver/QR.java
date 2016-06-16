@@ -143,7 +143,7 @@ public class QR {
             }
             // Solve Qa=b
             // a = Q'b
-            Z = Matrix.multiplyTransposeAlphaBeta(TransposeType.TRANSPOSE, 1.0, Q, TransposeType.NOTRANSPOSE, 1.0, Y);
+            Z = Matrix.multiplyTranspose(TransposeType.TRANSPOSE, Q, TransposeType.NOTRANSPOSE, Y);
 
             // solve for Rx = b using the standard upper triangular blassolver
             solveU(R, Z.data(), n, m);

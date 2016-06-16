@@ -39,14 +39,14 @@ public class IndexTest {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void testRelation(Graph graph) {
+    private void testRelation(final Graph graph) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                org.mwg.Node node_t0 = graph.newNode(0, 0);
+                final org.mwg.Node node_t0 = graph.newNode(0, 0);
                 node_t0.setProperty("name", Type.STRING, "MyName");
 
-                org.mwg.Node node_t1 = graph.newNode(0, 0);
+                final org.mwg.Node node_t1 = graph.newNode(0, 0);
                 node_t1.setProperty("name", Type.STRING, "MyName2");
 
                 node_t1.add("children", node_t0);
@@ -80,7 +80,7 @@ public class IndexTest {
         });
     }
 
-    private void test(Graph graph) {
+    private void test(final Graph graph) {
         final int[] counter = {0};
         graph.connect(new Callback<Boolean>() {
             @Override

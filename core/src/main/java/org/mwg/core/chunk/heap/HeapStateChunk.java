@@ -247,21 +247,21 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 switch (p_elemType) {
                     /** Primitives */
                     case Type.BOOL:
-                        param_elem = (boolean) p_unsafe_elem;
+                        param_elem = (Boolean) p_unsafe_elem;
                         break;
                     case Type.DOUBLE:
-                        param_elem = (double) p_unsafe_elem;
+                        param_elem = (Double) p_unsafe_elem;
                         break;
                     case Type.LONG:
                         if (p_unsafe_elem instanceof Integer) {
-                            int preCasting = (int) p_unsafe_elem;
+                            int preCasting = (Integer) p_unsafe_elem;
                             param_elem = (long) preCasting;
                         } else {
-                            param_elem = (long) p_unsafe_elem;
+                            param_elem = (Long) p_unsafe_elem;
                         }
                         break;
                     case Type.INT:
-                        param_elem = (int) p_unsafe_elem;
+                        param_elem = (Integer) p_unsafe_elem;
                         break;
                     case Type.STRING:
                         param_elem = (String) p_unsafe_elem;
@@ -895,7 +895,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
     }
 
     @Override
-    public final void save(Buffer buffer) {
+    public final void save(final Buffer buffer) {
         final InternalState internalState = state;
         Base64.encodeIntToBuffer(internalState._elementCount, buffer);
         for (int i = 0; i < internalState._elementCount; i++) {
@@ -915,20 +915,20 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             Base64.encodeStringToBuffer((String) loopValue, buffer);
                             break;
                         case Type.BOOL:
-                            if ((boolean) internalState._elementV[i]) {
+                            if ((Boolean) internalState._elementV[i]) {
                                 buffer.write(CoreConstants.BOOL_TRUE);
                             } else {
                                 buffer.write(CoreConstants.BOOL_FALSE);
                             }
                             break;
                         case Type.LONG:
-                            Base64.encodeLongToBuffer((long) loopValue, buffer);
+                            Base64.encodeLongToBuffer((Long) loopValue, buffer);
                             break;
                         case Type.DOUBLE:
-                            Base64.encodeDoubleToBuffer((double) loopValue, buffer);
+                            Base64.encodeDoubleToBuffer((Double) loopValue, buffer);
                             break;
                         case Type.INT:
-                            Base64.encodeIntToBuffer((int) loopValue, buffer);
+                            Base64.encodeIntToBuffer((Integer) loopValue, buffer);
                             break;
                         /** Arrays */
                         case Type.DOUBLE_ARRAY:

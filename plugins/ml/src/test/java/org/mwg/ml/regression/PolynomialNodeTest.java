@@ -58,9 +58,9 @@ public class PolynomialNodeTest {
     }
 
 
-    public static void testPoly(long[] times, double[] values, int numOfPoly, final Graph graph) {
-        PolynomialNode polynomialNode = (PolynomialNode) graph.newTypedNode(0, times[0], "Polynomial");
-        polynomialNode.set(PolynomialNode.PRECISION_KEY, precision);
+    public static void testPoly(long[] times, final double[] values, final int numOfPoly, final Graph graph) {
+        PolynomialNode polynomialNode = (PolynomialNode) graph.newTypedNode(0, times[0], PolynomialNode.NAME);
+        polynomialNode.set(PolynomialNode.PRECISION, precision);
 
         for (int i = 0; i < size; i++) {
             final int ia = i;

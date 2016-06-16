@@ -8,29 +8,26 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.algorithm.profiling.GaussianGmmNode;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 
 import java.util.Random;
 
-/**
- * Created by assaad on 03/05/16.
- */
 public class GaussianProbaTest {
     @Test
     public void Gaussian1D() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                GaussianGmmNode gaussianNode = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                double eps = 1e-7;
+                final GaussianMixtureNode gaussianNode = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
+                final double eps = 1e-7;
 
 
-                int total = 16;
-                double[][] train = new double[total][1];
-                Random rand = new Random();
+                final int total = 16;
+                final double[][] train = new double[total][1];
+                final Random rand = new Random();
 
                 double sum = 0;
                 double sumsquare = 0;
@@ -39,7 +36,7 @@ public class GaussianProbaTest {
                     sum += train[i][0];
                     sumsquare += train[i][0] * train[i][0];
 
-                    int finalI = i;
+                    final int finalI = i;
                     gaussianNode.jump(i, new Callback<Node>() {
                         @Override
                         public void on(Node result) {
@@ -55,11 +52,11 @@ public class GaussianProbaTest {
 
                 }
 
-                double finalSum = sum;
-                double finalSumsquare = sumsquare;
-                gaussianNode.jump(16, new Callback<GaussianGmmNode>() {
+                final double finalSum = sum;
+                final double finalSumsquare = sumsquare;
+                gaussianNode.jump(16, new Callback<GaussianMixtureNode>() {
                     @Override
-                    public void on(GaussianGmmNode result) {
+                    public void on(GaussianMixtureNode result) {
                         double[] avgBatch = result.getAvg();
                         Matrix covBatch = result.getCovariance(avgBatch,null);
 
@@ -83,14 +80,14 @@ public class GaussianProbaTest {
 
     @Test
     public void MultinomialTest() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
-                GaussianGmmNode gaussianNodeLive = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianMixtureNode gaussianNodeLive = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
 
-                gaussianNodeLive.set(GaussianGmmNode.FROM, "f1;f2");
+                gaussianNodeLive.set(GaussianMixtureNode.FROM, "f1;f2");
 
                 int test = 100;
                 int feat = 2;
@@ -146,7 +143,7 @@ public class GaussianProbaTest {
 
     @Test
     public void Singularity() {
-        Graph graph = new GraphBuilder().addNodeType(new GaussianGmmNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -155,11 +152,11 @@ public class GaussianProbaTest {
 
                 Random rand = new Random();
 
-                GaussianGmmNode node1 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
-                GaussianGmmNode node2 = (GaussianGmmNode) graph.newTypedNode(0, 0, "GaussianGmm");
+                GaussianMixtureNode node1 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
+                GaussianMixtureNode node2 = (GaussianMixtureNode) graph.newTypedNode(0, 0, GaussianMixtureNode.NAME);
 
-                node1.set(GaussianGmmNode.FROM, "f1;f2;f3");
-                node2.set(GaussianGmmNode.FROM, "f1;f2;f3;f4");
+                node1.set(GaussianMixtureNode.FROM, "f1;f2;f3");
+                node2.set(GaussianMixtureNode.FROM, "f1;f2;f3;f4");
 
                 for (int i = 0; i < 1000; i++) {
                     data[0] = 8 + rand.nextDouble() * 4; //avg =10, [8,12]

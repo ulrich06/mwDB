@@ -82,8 +82,8 @@ public class ActionForeachTest extends AbstractActionTest {
     @Test
     public void testForeach() {
         initGraph();
-        long[] toTest = {1, 2, 3, 4, 5};
-        int[] index = {0};
+        final long[] toTest = {1, 2, 3, 4, 5};
+        final int[] index = {0};
 
         graph.newTask().from(toTest).foreachThen(new Callback<Long>() {
             @Override

@@ -94,7 +94,7 @@ public class StateChunkTest implements ChunkListener {
         StateChunk chunk = factory.create(this, null, null);
 
         chunk.set(0, Type.INT, CoreConstants.OFFHEAP_NULL_PTR);
-        int elem = (int) chunk.get(0);
+        int elem = (Integer) chunk.get(0);
         Assert.assertEquals(elem, CoreConstants.OFFHEAP_NULL_PTR);
         Buffer buffer = BufferBuilder.newHeapBuffer();
         chunk.save(buffer);
@@ -108,7 +108,7 @@ public class StateChunkTest implements ChunkListener {
         }
 
         StateChunk chunk2 = factory.create(this, buffer, null);
-        int elem2 = (int) chunk2.get(0);
+        int elem2 = (Integer) chunk2.get(0);
         Assert.assertEquals(elem2, CoreConstants.OFFHEAP_NULL_PTR);
         Buffer buffer2 = BufferBuilder.newHeapBuffer();
         chunk2.save(buffer2);
@@ -328,7 +328,7 @@ public class StateChunkTest implements ChunkListener {
         //switch primitives
         chunk.set(10, Type.BOOL, true);
         Assert.assertTrue(chunk.getType(10) == Type.BOOL);
-        Assert.assertTrue((boolean) chunk.get(10));
+        Assert.assertTrue((Boolean) chunk.get(10));
 
         chunk.set(0, Type.STRING, "hello");
         Assert.assertTrue(chunk.getType(0) == Type.STRING);
@@ -336,15 +336,15 @@ public class StateChunkTest implements ChunkListener {
 
         chunk.set(1, Type.LONG, 1000l);
         Assert.assertTrue(chunk.getType(1) == Type.LONG);
-        Assert.assertTrue((long) chunk.get(1) == 1000l);
+        Assert.assertTrue((Long) chunk.get(1) == 1000l);
 
         chunk.set(2, Type.INT, 100);
         Assert.assertTrue(chunk.getType(2) == Type.INT);
-        Assert.assertTrue((int) chunk.get(2) == 100);
+        Assert.assertTrue((Integer) chunk.get(2) == 100);
 
         chunk.set(3, Type.DOUBLE, 1.0);
         Assert.assertTrue(chunk.getType(3) == Type.DOUBLE);
-        Assert.assertTrue((double) chunk.get(3) == 1.0);
+        Assert.assertTrue((Double) chunk.get(3) == 1.0);
 
         //switch arrays
         chunk.set(4, Type.DOUBLE_ARRAY, new double[]{1.0, 2.0, 3.0});
@@ -402,19 +402,19 @@ public class StateChunkTest implements ChunkListener {
 
         //test primitives
         Assert.assertTrue(chunk2.getType(0) == Type.BOOL);
-        Assert.assertTrue((boolean) chunk.get(0));
+        Assert.assertTrue((Boolean) chunk.get(0));
 
         Assert.assertTrue(chunk2.getType(1) == Type.STRING);
         Assert.assertTrue(PrimitiveHelper.equals(chunk2.get(1).toString(), "hello"));
 
         Assert.assertTrue(chunk2.getType(2) == Type.LONG);
-        Assert.assertTrue((long) chunk2.get(2) == 1000l);
+        Assert.assertTrue((Long) chunk2.get(2) == 1000l);
 
         Assert.assertTrue(chunk2.getType(3) == Type.INT);
-        Assert.assertTrue((int) chunk2.get(3) == 100);
+        Assert.assertTrue((Integer) chunk2.get(3) == 100);
 
         Assert.assertTrue(chunk2.getType(4) == Type.DOUBLE);
-        Assert.assertTrue((double) chunk2.get(4) == 1.0);
+        Assert.assertTrue((Double) chunk2.get(4) == 1.0);
 
         //test arrays
         Assert.assertTrue(chunk2.getType(5) == Type.DOUBLE_ARRAY);

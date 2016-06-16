@@ -185,7 +185,7 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     private void cleanObj(Object o) {
-        CoreTaskContext selfPoiner = this;
+        final CoreTaskContext selfPoiner = this;
         if (!PrimitiveHelper.iterate(o, new Callback<Object>() {
             @Override
             public void on(Object result) {

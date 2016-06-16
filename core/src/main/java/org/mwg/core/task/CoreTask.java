@@ -246,7 +246,7 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final <T> org.mwg.task.Task foreachThen(Callback<T> action) {
+    public final <T> org.mwg.task.Task foreachThen(final Callback<T> action) {
         if (action == null) {
             throw new RuntimeException("action should not be null");
         }
@@ -298,7 +298,7 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final void executeThen(Action p_action) {
+    public final void executeThen(final Action p_action) {
         executeThenAsync(null, null, new Action() {
             @Override
             public void eval(TaskContext context) {

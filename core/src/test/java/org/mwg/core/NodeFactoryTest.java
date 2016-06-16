@@ -75,7 +75,7 @@ public class NodeFactoryTest implements NodeFactory {
         Assert.assertTrue(OffHeapStringArray.alloc_counter == 0);
     }
 
-    private void test(Graph graph) {
+    private void test(final Graph graph) {
 
         graph.connect(new Callback<Boolean>() {
             @Override

@@ -7,8 +7,8 @@ import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 import org.mwg.ml.AbstractMLNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 
 import java.util.Random;
 
@@ -63,7 +63,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int LIGHT_OFF_LX = 0;
             final int NUM_OF_TRIALS = NUM_SWITCHES; //One swipe
 
-            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -131,7 +131,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
      */
     @Test
     public void noDelayRandomClickingSwitchResponse() {
-        Random rng = new Random(1);
+        final Random rng = new Random(1);
 
         final int LIGHT_ON_LX = 500;
         final int LIGHT_OFF_LX = 0;
@@ -141,7 +141,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -214,7 +214,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
      */
     @Test
     public void noDelayRandomLightLevelSwitchResponse() {
-        Random rng = new Random(2);
+        final Random rng = new Random(2);
 
         final int BUFF_SIZE = 10;
 
@@ -222,7 +222,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
             final int correctSwitch = cs; //Have to make it final for inner class access
             //System.out.println("Correct switch: "+correctSwitch);
 
-            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {
@@ -300,7 +300,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
      */
     @Test
     public void delayedRandomLightLevelSwitchResponse() {
-        Random rng = new Random(3);
+        final Random rng = new Random(3);
 
         final int LAG = 1; //Timeframes between turning the switch and seeing light change
         final int AFTER_TIMEFRAMES = 7; //Timeframes when everything is working normally after light level is reported
@@ -310,7 +310,7 @@ public class LightScenarioTests extends AbstractLinearRegressionTest{
         for (int cs = 0; cs < NUM_SWITCHES; cs++) {
             final int correctSwitch = cs; //Have to make it final for inner class access
 
-            Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+            final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
             graph.connect(new Callback<Boolean>() {
                 @Override
                 public void on(Boolean result) {

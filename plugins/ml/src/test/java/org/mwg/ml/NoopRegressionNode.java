@@ -25,7 +25,7 @@ public class NoopRegressionNode extends AbstractMLNode implements RegressionNode
     }
 
     @Override
-    public void learn(double output, Callback<Boolean> callback) {
+    public void learn(double output, final Callback<Boolean> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {

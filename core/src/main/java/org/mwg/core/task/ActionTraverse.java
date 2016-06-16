@@ -36,7 +36,7 @@ class ActionTraverse implements TaskAction {
                     }
                 }
             }
-            DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
+            final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()];
             final AtomicInteger cursor = new AtomicInteger(0);
             for (Long idNode : toLoad) {

@@ -112,7 +112,7 @@ public abstract class AbstractNode implements Node {
         } else if (propertyValue instanceof Long) {
             setProperty(propertyName, Type.LONG, propertyValue);
         } else if (propertyValue instanceof Float) {
-            setProperty(propertyName, Type.DOUBLE, (double) ((float) propertyValue));
+            setProperty(propertyName, Type.DOUBLE, (double) ((Float) propertyValue));
         } else if (propertyValue instanceof Integer) {
             setProperty(propertyName, Type.INT, propertyValue);
         } else if (propertyValue instanceof Boolean) {
@@ -163,7 +163,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void rel(String relationName, Callback<Node[]> callback) {
+    public void rel(String relationName, final Callback<Node[]> callback) {
         if (callback == null) {
             return;
         }
@@ -286,7 +286,7 @@ public abstract class AbstractNode implements Node {
     }
 
     @Override
-    public void findByQuery(Query query, Callback<Node[]> callback) {
+    public void findByQuery(final Query query, final Callback<Node[]> callback) {
         NodeState currentNodeState = this._resolver.resolveState(this, false);
         if (currentNodeState == null) {
             throw new RuntimeException(Constants.CACHE_MISS_ERROR);
@@ -407,7 +407,7 @@ public abstract class AbstractNode implements Node {
             final AbstractNode selfPointer = this;
             int mapSize = (int) indexMap.size();
             final Node[] resolved = new org.mwg.plugin.AbstractNode[mapSize];
-            DeferCounter waiter = _graph.newCounter(mapSize);
+            final DeferCounter waiter = _graph.newCounter(mapSize);
             //TODO replace by a parralel lookup
             final AtomicInteger loopInteger = new AtomicInteger(0);
             indexMap.each(new LongLongArrayMapCallBack() {
@@ -503,7 +503,7 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         builder.append("{\"world\":");
         builder.append(world());
         builder.append(",\"time\":");
@@ -522,7 +522,7 @@ public abstract class AbstractNode implements Node {
                                 builder.append(",\"");
                                 builder.append(_resolver.hashToString(attributeKey));
                                 builder.append("\":");
-                                if ((boolean) elem) {
+                                if ((Boolean) elem) {
                                     builder.append("0");
                                 } else {
                                     builder.append("1");
@@ -622,7 +622,7 @@ public abstract class AbstractNode implements Node {
             if (propertyTargetType == Type.INT && propertyType == Type.LONG) {
                 NodeState preciseState = this._resolver.resolveState(this, false);
                 if (preciseState != null) {
-                    preciseState.set(this._resolver.stringToHash(propertyName, true), propertyTargetType, (int) (long) propertyValue);
+                    preciseState.set(this._resolver.stringToHash(propertyName, true), propertyTargetType, parseInteger(propertyValue.toString()));
                 } else {
                     throw new RuntimeException(Constants.CACHE_MISS_ERROR);
                 }
@@ -637,6 +637,14 @@ public abstract class AbstractNode implements Node {
                 throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }
         }
+    }
+
+    /**
+     * @native ts
+     * return parseInt(numberValue);
+     */
+    private Integer parseInteger(String numberValue){
+        return Integer.parseInt(numberValue);
     }
 
 }

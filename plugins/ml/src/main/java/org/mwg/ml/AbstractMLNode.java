@@ -16,7 +16,19 @@ public abstract class AbstractMLNode extends AbstractNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    protected void extractFeatures(Callback<double[]> callback) {
+    /**
+     * If {@code obj} is null, throws {@code NullPointerException} with a {@code message}
+     *
+     * @param obj
+     * @param message
+     */
+    protected static void requireNotNull(Object obj, String message) {
+        if (obj == null) {
+            throw new RuntimeException(message);
+        }
+    }
+
+    protected void extractFeatures(final Callback<double[]> callback) {
         String query = (String) super.get(FROM);
         if (query != null) {
             //TODO CACHE TO AVOID PARSING EVERY TIME
@@ -24,12 +36,14 @@ public abstract class AbstractMLNode extends AbstractNode {
             Task[] tasks = new Task[split.length];
             for (int i = 0; i < split.length; i++) {
                 Task t = graph().newTask();
-                t.parse(split[i]);
+                t.setWorld(world());
+                t.setTime(time());
+                t.parse(split[i].trim());
                 tasks[i] = t;
             }
             //END TODO IN CACHE
             final double[] result = new double[tasks.length];
-            DeferCounter waiter = graph().newCounter(tasks.length);
+            final DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
                 tasks[i].executeThenAsync(null, this, new Action() {
@@ -40,7 +54,7 @@ public abstract class AbstractMLNode extends AbstractNode {
                             result[taskIndex] = Constants.NULL_LONG;
                         } else {
                             if (current instanceof Double) {
-                                result[taskIndex] = (double) current;
+                                result[taskIndex] = (Double) current;
                             } else if (current instanceof Object[]) {
                                 Object[] currentArr = (Object[]) current;
                                 if (currentArr.length == 1) {

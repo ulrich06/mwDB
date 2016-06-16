@@ -10,13 +10,10 @@ import org.mwg.Node;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by assaad on 09/06/16.
- */
 public class MathEngineTest {
     @Test
     public void expression() {
-        Graph graph = new GraphBuilder().build();
+        final Graph graph = new GraphBuilder().build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -42,7 +39,7 @@ public class MathEngineTest {
 
                 //Test Variables
                 engine = CoreMathExpressionEngine.parse("v+5");
-                Map<String, Double> hashmap = new HashMap<>();
+                Map<String, Double> hashmap = new HashMap<String, Double>();
                 hashmap.put("v", 20.0);
                 d = engine.eval(null, hashmap);
                 Assert.assertTrue(d == 25);

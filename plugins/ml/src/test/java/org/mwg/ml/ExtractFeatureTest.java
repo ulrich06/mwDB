@@ -11,7 +11,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void test() {
-        Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -19,7 +19,7 @@ public class ExtractFeatureTest {
                 Node domainNode = graph.newNode(0, 0);
                 domainNode.set("value", 42.2);
 
-                RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
+                final RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
                 learningNode.add("sensor", domainNode);
                 learningNode.set("from", "sensor.value");
                 learningNode.learn(3, new Callback<Boolean>() {
@@ -36,7 +36,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMath() {
-        Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -44,7 +44,7 @@ public class ExtractFeatureTest {
                 Node domainNode = graph.newNode(0, 0);
                 domainNode.set("value", 2.5);
 
-                RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
+                final RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
                 learningNode.add("sensor", domainNode);
                 learningNode.set("from", "sensor.math(value*3)");
                 learningNode.learn(3, new Callback<Boolean>() {
@@ -61,7 +61,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMathEscaped() {
-        Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -69,7 +69,7 @@ public class ExtractFeatureTest {
                 Node domainNode = graph.newNode(0, 0);
                 domainNode.set("value", 2.5);
 
-                RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
+                final RegressionNode learningNode = (RegressionNode) graph.newTypedNode(0, 0, "NoopRegressionNode");
                 learningNode.add("sensor", domainNode);
                 learningNode.set("from", "sensor.math('value*3')");
                 learningNode.learn(3, new Callback<Boolean>() {

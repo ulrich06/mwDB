@@ -198,7 +198,7 @@ public class OpsTest {
 
         Matrix matA = Matrix.random(dim, dim, 0, 100);
         Matrix matB = Matrix.random(dim, dim, 0, 100);
-        Matrix res = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1.0, matA, TransposeType.NOTRANSPOSE, 1.0, matB);
+        Matrix res = engine.multiplyTransposeAlphaBeta(TransposeType.NOTRANSPOSE, 1.0, matA, TransposeType.NOTRANSPOSE, matB,0,null);
     }
 
     public void MatrixInvert(MatrixEngine engine) {

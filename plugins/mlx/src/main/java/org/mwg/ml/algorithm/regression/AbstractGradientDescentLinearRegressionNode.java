@@ -1,7 +1,12 @@
 package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.Type;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.TransposeType;
+import org.mwg.ml.common.matrix.operation.PInvSVD;
+import org.mwg.plugin.NodeFactory;
 
 /**
  * Created by andre on 4/29/2016.
@@ -36,11 +41,11 @@ public abstract class AbstractGradientDescentLinearRegressionNode extends Abstra
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (GD_ERROR_THRESH_KEY.equals(propertyName)){
-            setIterationErrorThreshold(((Double)propertyValue).doubleValue());
+            setIterationErrorThreshold((Double)propertyValue);
         }else if (GD_ITERATION_THRESH_KEY.equals(propertyName)){
-            setIterationCountThreshold(((Integer)propertyValue).intValue());
+            setIterationCountThreshold((Integer)propertyValue);
         }else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)){
-            setLearningRate(((Double)propertyValue).doubleValue());
+            setLearningRate((Double)propertyValue);
         }else{
             super.setProperty(propertyName, propertyType, propertyValue);
         }

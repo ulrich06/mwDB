@@ -50,7 +50,7 @@ class ActionGet implements TaskAction {
                     }
                 }
             }
-            DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
+            final DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
             final Node[] resultNodes = new Node[collectedIds.size()];
 
             if (collectedIds.size() > 0) {
@@ -64,7 +64,7 @@ class ActionGet implements TaskAction {
                         }
                     });
                 }
-                Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
+                final Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
                 deferCounter.then(new Job() {
                     @Override
                     public void run() {

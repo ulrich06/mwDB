@@ -22,7 +22,7 @@ class ActionTraverseIndex implements TaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         Object previousResult = context.result();
         if (previousResult != null) {
             Node[] toLoad;

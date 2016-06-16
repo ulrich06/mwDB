@@ -13,7 +13,7 @@ public class BenchmarkTest {
 
     // @Test
     public void heapTest() {
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withMemorySize(100000).saveEvery(10000).build();
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withMemorySize(100000).saveEvery(10000).build();
         test("heap ", graph, new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -40,7 +40,7 @@ public class BenchmarkTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100000).saveEvery(10000).build();
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(100000).saveEvery(10000).build();
 
         test("offheap ", graph, new Callback<Boolean>() {
             @Override
@@ -67,7 +67,7 @@ public class BenchmarkTest {
 
     final long timeOrigin = 1000;
 
-    private void test(String name, Graph graph, Callback<Boolean> testEnd) {
+    private void test(final String name, final Graph graph, final Callback<Boolean> testEnd) {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

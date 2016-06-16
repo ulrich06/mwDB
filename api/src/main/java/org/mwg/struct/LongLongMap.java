@@ -3,7 +3,7 @@ package org.mwg.struct;
 public interface LongLongMap extends Map {
 
     /**
-     * Retrieve the value inserted selectWith the param key
+     * Retrieve the value inserted with the param key
      *
      * @param key key that have to be retrieve
      * @return associated value, Constants.NULL.LONG in case of not found.

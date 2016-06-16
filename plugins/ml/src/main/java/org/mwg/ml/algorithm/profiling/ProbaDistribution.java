@@ -1,17 +1,15 @@
 package org.mwg.ml.algorithm.profiling;
 
+import org.mwg.ml.ProgressReporter;
 import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 
 
-/**
- * Created by assaad on 11/05/16.
- */
 public class ProbaDistribution {
-    MultivariateNormalDistribution[] distributions;
-    int total[];
-    int global;
-
+    
+    private MultivariateNormalDistribution[] distributions;
+    private int total[];
+    private int global;
 
     public ProbaDistribution(int total[], MultivariateNormalDistribution[] distributions, int global) {
         this.total = total;
@@ -43,7 +41,7 @@ public class ProbaDistribution {
 
     public double[] calculateArray(double[][] features, ProgressReporter reporter) {
         if (reporter != null) {
-            reporter.updateGraphInfo("Number of distributions: " + distributions.length + " , values: " + global);
+            reporter.updateInformation("Number of distributions: " + distributions.length + " , values: " + global);
         }
 
         double result[] = new double[features.length];
@@ -77,15 +75,13 @@ public class ProbaDistribution {
     }
 
 
-
-    public double addUpProbabilities(double[][] features){
-        double res=0;
-        for(int i=0;i<features.length;i++){
-            res+=calculate(features[i]);
+    public double addUpProbabilities(double[][] features) {
+        double res = 0;
+        for (int i = 0; i < features.length; i++) {
+            res += calculate(features[i]);
         }
         return res;
     }
-
 
 
     public double[] compareProbaDistribution(ProbaDistribution other, double[][] features) {
@@ -93,13 +89,13 @@ public class ProbaDistribution {
         double[] res1 = this.calculateArray(features, null);
         double[] res2 = other.calculateArray(features, null);
 
-        double temp=0;
+        double temp = 0;
 
         for (int i = 0; i < res1.length; i++) {
-            temp=Math.abs(res1[i] - res2[i]);
-            error[0] += temp ;
-            if(temp>error[1]){
-                error[1]=temp;
+            temp = Math.abs(res1[i] - res2[i]);
+            error[0] += temp;
+            if (temp > error[1]) {
+                error[1] = temp;
             }
         }
         error[0] = error[0] / res1.length;

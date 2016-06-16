@@ -22,7 +22,7 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest{
     @Test
     public void test1DdescisionTree() {
         //This test fails if there are too many errors
-        Graph graph = new GraphBuilder().addNodeType(new BatchDecisionTreeNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new BatchDecisionTreeNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -48,7 +48,7 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest{
     @Test
     public void test2DRandomDescisionTree() {
         //This test fails if there are too many errors
-        Graph graph = new GraphBuilder().addNodeType(new BatchDecisionTreeNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().addNodeType(new BatchDecisionTreeNode.Factory()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

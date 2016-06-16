@@ -14,7 +14,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest() {
 
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -55,7 +55,7 @@ public class CSVImporterTest {
     @Test
     public void singleNodeTest2() {
 
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).saveEvery(1000).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -94,13 +94,13 @@ public class CSVImporterTest {
     @Test
     public void multiNodeTest2() {
 
-        Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
 
                 //create an empty
-                Node house = graph.newNode(0, 0);
+                final Node house = graph.newNode(0, 0);
                 house.setProperty("ID", Type.STRING, "ABC123");
                 graph.index("houses", house, "ID", null);
 
@@ -116,26 +116,29 @@ public class CSVImporterTest {
                 });
                 importer.mapper().nodeResolver(new KNodeResolver() {
                     @Override
-                    public void resolve(Graph graph, Map<String, Integer> headers, String[] values, long toResolveworld, long toResolveTime, Callback<Node> callback) {
+                    public void resolve(final Graph graph, Map<String, Integer> headers, String[] values, final long toResolveworld, final long toResolveTime, final Callback<Node> callback) {
                         final String roomName = values[headers.get("Place")];
                         final String locationName = values[headers.get("Location")];
-                        house.find("sensors", "room=" + roomName + ",sensor=" + locationName, previouslyDefinedSensors -> {
-                            if (previouslyDefinedSensors.length == 1) {
-                                callback.on(previouslyDefinedSensors[0]);
-                            } else {
-                                Node sensorNode = graph.newNode(toResolveworld, toResolveTime);
-                                sensorNode.setProperty("room", Type.STRING, roomName);
-                                sensorNode.setProperty("sensor", Type.STRING, locationName);
-                                house.index("rooms", sensorNode, "room,sensor", new Callback<Boolean>() {
-                                    @Override
-                                    public void on(Boolean result) {
-                                        if (result) {
-                                            callback.on(sensorNode);
-                                        } else {
-                                            callback.on(null);
+                        house.find("sensors", "room=" + roomName + ",sensor=" + locationName, new Callback<Node[]>() {
+                            @Override
+                            public void on(Node[] previouslyDefinedSensors) {
+                                if (previouslyDefinedSensors.length == 1) {
+                                    callback.on(previouslyDefinedSensors[0]);
+                                } else {
+                                    final Node sensorNode = graph.newNode(toResolveworld, toResolveTime);
+                                    sensorNode.setProperty("room", Type.STRING, roomName);
+                                    sensorNode.setProperty("sensor", Type.STRING, locationName);
+                                    house.index("rooms", sensorNode, "room,sensor", new Callback<Boolean>() {
+                                        @Override
+                                        public void on(Boolean result) {
+                                            if (result) {
+                                                callback.on(sensorNode);
+                                            } else {
+                                                callback.on(null);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         });
                     }
