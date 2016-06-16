@@ -577,8 +577,8 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
     @Override
     public String toString() {
-       // return (String) get(NAME);
-       double[] avg = getAvg();
+        return NAME;
+     /*  double[] avg = getAvg();
         StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
         if (avg != null) {
             for (int i = 0; i < avg.length; i++) {
@@ -586,7 +586,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
             sb.append(", total: ").append(getTotal());
         }
-        return sb.toString();
+        return sb.toString();*/
     }
 
 
