@@ -48,14 +48,11 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
      * Number of input dimensions
      */
     public static final String INPUT_DIM_KEY = "InputDimensions";
-    /**
-     * Number of input dimensions - default
-     */
-    public static final int INPUT_DIM_UNKNOWN = -1;
+
     /**
      * Number of input dimensions - default (unknown so far)
      */
-    public static final int INPUT_DIM_DEF = INPUT_DIM_UNKNOWN;
+    public static final int INPUT_DIM_DEF = -1;
 
 
     public static final double UPPER_PERCENTILE = 0.75;
@@ -149,7 +146,7 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
     }
 
     protected void addValueToBuffer(double[] value) {
-        if (getInputDimensions()==INPUT_DIM_UNKNOWN){
+        if (getInputDimensions()<0){
             setInputDimensions(value.length);
         }
         double valueBuffer[] = getValueBuffer();

@@ -1,4 +1,4 @@
-package ml.anomalydetector;
+package org.mwg.ml.anomalydetector;
 
 import org.junit.Test;
 import org.mwg.Callback;
@@ -30,7 +30,7 @@ public class InterquartileRangeOutlierDetectorNodeTest {
             -0.865745872,-0.546697967, 0.448811623,-0.189598775, 0.868184331, 0.476605718,-0.553966352,-0.586257513,-0.202730776, 0.862270127,
             0.156878572,-0.744383825,-0.216351202, 1.510074024,-0.139686834, 1.414843729, 0.017254308,-1.420384951, 0.060592004,-2.153703322};
 
-    protected static class AnomalyDetectionJumpCallback implements Callback<AnomalyDetectionNode> {
+    protected static class AnomalyDetectionJumpCallback {
 
         final String features[];
 
@@ -48,7 +48,6 @@ public class InterquartileRangeOutlierDetectorNodeTest {
             }
         };
 
-        @Override
         public void on(AnomalyDetectionNode result) {
             for (int i=0;i<features.length;i++){
                 result.set(features[i], value[i]);
@@ -58,7 +57,7 @@ public class InterquartileRangeOutlierDetectorNodeTest {
         }
     }
 
-    protected static class AnomalyClassifyCallback implements Callback<AnomalyDetectionNode> {
+    protected static class AnomalyClassifyCallback {
 
         final String features[];
 
@@ -79,7 +78,6 @@ public class InterquartileRangeOutlierDetectorNodeTest {
             }
         };
 
-        @Override
         public void on(AnomalyDetectionNode result) {
             for (int i=0;i<features.length;i++){
                 result.set(features[i], value[i]);
@@ -90,11 +88,18 @@ public class InterquartileRangeOutlierDetectorNodeTest {
     }
 
     protected AnomalyDetectionJumpCallback runThroughDummyDataset(AnomalyDetectionNode classfierNode){
-        AnomalyDetectionJumpCallback cjc = new AnomalyDetectionJumpCallback(new String[]{FEATURE});
+        final AnomalyDetectionJumpCallback cjc = new AnomalyDetectionJumpCallback(new String[]{FEATURE});
+
+        Callback<AnomalyDetectionNode> cad = new Callback<AnomalyDetectionNode>() {
+            @Override
+            public void on(AnomalyDetectionNode result) {
+                cjc.on(result);
+            }
+        };
 
         for (int i = 0; i < testSet.length; i++) {
             cjc.value = new double[]{testSet[i]};
-            classfierNode.jump(i, cjc);
+            classfierNode.jump(i, cad);
         }
 
         return cjc;
@@ -112,31 +117,38 @@ public class InterquartileRangeOutlierDetectorNodeTest {
                 iqadNode.setProperty(InterquartileRangeOutlierDetectorNode.BUFFER_SIZE_KEY, Type.INT, testSet.length);
                 iqadNode.set(AbstractMLNode.FROM, FEATURE);
 
-                AnomalyDetectionJumpCallback adjc = runThroughDummyDataset(iqadNode);
-                AnomalyClassifyCallback acc = new AnomalyClassifyCallback(new String[]{FEATURE});
+                final AnomalyDetectionJumpCallback adjc = runThroughDummyDataset(iqadNode);
+                final AnomalyClassifyCallback acc = new AnomalyClassifyCallback(new String[]{FEATURE});
                 int index = testSet.length;
+
+                Callback<AnomalyDetectionNode> accCB = new Callback<AnomalyDetectionNode>() {
+                    @Override
+                    public void on(AnomalyDetectionNode result) {
+                        acc.on(result);
+                    }
+                };
 
                 acc.value = new double[]{-2.44};
                 acc.expectedOutlier = true;
-                iqadNode.jump(index, acc);
+                iqadNode.jump(index, accCB);
                 assertTrue(acc.called);
                 index++;
 
                 acc.value = new double[]{-2.43};
                 acc.expectedOutlier = false;
-                iqadNode.jump(index, acc);
+                iqadNode.jump(index, accCB);
                 assertTrue(acc.called);
                 index++;
 
                 acc.value = new double[]{2.36};
                 acc.expectedOutlier = false;
-                iqadNode.jump(index, acc);
+                iqadNode.jump(index, accCB);
                 assertTrue(acc.called);
                 index++;
 
                 acc.value = new double[]{2.37};
                 acc.expectedOutlier = true;
-                iqadNode.jump(index, acc);
+                iqadNode.jump(index, accCB);
                 assertTrue(acc.called);
                 index++;
 
