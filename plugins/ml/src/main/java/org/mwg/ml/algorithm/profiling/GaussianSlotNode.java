@@ -108,18 +108,22 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
 
         int slot = getIntTime(time(), numOfSlot, periodSize);
         int index = slot * features;
+        //int indexSquare = slot * features * (features + 1) / 2;
 
         int[] total = (int[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
         double[] sum = (double[]) resolved.getFromKey(INTERNAL_SUM_KEY);
+         // double[] sumsq= (double[]) resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
 
         double[] result = new double[features];
         if (total != null) {
             if (total[slot] != 0) {
                 for (int j = 0; j < features; j++) {
                     result[j] = sum[j + index] / total[slot];
+                    //result[j] = Gaussian1D.draw(sum[j + index], sumsq[j+indexSquare], total[slot]);
                 }
             }
         }
+
         callback.on(result);
     }
 
