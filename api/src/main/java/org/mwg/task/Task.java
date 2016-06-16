@@ -1,7 +1,6 @@
 package org.mwg.task;
 
 import org.mwg.Callback;
-import org.mwg.Node;
 import org.mwg.Type;
 
 public interface Task {
@@ -241,7 +240,7 @@ public interface Task {
     Task newNode();
 
     /**
-     * Sets the value of an attribute of a node or an array of nodes
+     * Sets the value of an attribute of a node or an array of nodes with a variable value
      * The node (or the array) should be init in the previous task
      *
      * @param propertyName      The name of the attribute. Must be unique per node.
@@ -251,7 +250,7 @@ public interface Task {
     Task set(String propertyName, String variableNameToSet);
 
     /**
-     * Sets the value of an attribute of a node or an array of nodes
+     * Sets the value of an attribute of a node or an array of nodes with a variable value
      * The node (or the array) should be init in the previous task
      *
      * @param propertyName      The name of the attribute. Must be unique per node.
