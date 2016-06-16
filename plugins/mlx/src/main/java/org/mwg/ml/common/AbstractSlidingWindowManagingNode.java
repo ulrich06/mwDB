@@ -168,20 +168,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     }
 
     /**
-     * Asserts that condition is true. If not - throws {@code IllegalArgumentException} with a specified error message
-     *
-     * @param condition    Condition to test
-     * @param errorMessage Error message thrown with {@code IllegalArgumentException} (if thrown)
-     * @throws IllegalArgumentException if condition is false
-     */
-    protected void illegalArgumentIfFalse(boolean condition, String errorMessage) {
-        assert errorMessage != null;
-        if (!condition) {
-            throw new IllegalArgumentException(errorMessage);
-        }
-    }
-
-    /**
      * Defines implementation-specific actions to do before going to bootstrap mode.
      */
     protected abstract void setBootstrapModeHook();

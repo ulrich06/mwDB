@@ -28,6 +28,20 @@ public abstract class AbstractMLNode extends AbstractNode {
         }
     }
 
+    /**
+     * Asserts that condition is true. If not - throws {@code IllegalArgumentException} with a specified error message
+     *
+     * @param condition    Condition to test
+     * @param errorMessage Error message thrown with {@code IllegalArgumentException} (if thrown)
+     * @throws IllegalArgumentException if condition is false
+     */
+    protected void illegalArgumentIfFalse(boolean condition, String errorMessage) {
+        assert errorMessage != null;
+        if (!condition) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
     protected void extractFeatures(final Callback<double[]> callback) {
         String query = (String) super.get(FROM);
         if (query != null) {
