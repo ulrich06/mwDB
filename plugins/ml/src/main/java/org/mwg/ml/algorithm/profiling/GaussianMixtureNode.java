@@ -155,7 +155,8 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
-        Task creationTask = graph().newTask().then(new Action() {
+
+        Task creationTask = graph().newTask().setTime(time()).setWorld(world()).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
@@ -165,7 +166,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         });
 
 
-        Task traverse = graph().newTask();
+        Task traverse = graph().newTask().setTime(time()).setWorld(world());
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
@@ -188,7 +189,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                     }
                 }, traverse);
 
-        Task mainTask = graph().newTask().from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
+        Task mainTask = graph().newTask().setTime(time()).setWorld(world()).from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
         mainTask.executeThen(new Action() {
             @Override
             public void eval(TaskContext context) {
@@ -465,7 +466,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         //At this point we have min and max at least with 2xerr of difference
 
-        Task deepTraverseTask = graph().newTask();
+        Task deepTraverseTask = graph().newTask().setTime(time()).setWorld(world());
         final int parentLevel = this.getLevel();
 
         deepTraverseTask.from(new Node[]{this});
@@ -533,7 +534,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         }
         final double[] err = initialPrecision;
 
-        Task deepTraverseTask = graph().newTask();
+        Task deepTraverseTask = graph().newTask().setTime(time()).setWorld(world());
 
         deepTraverseTask.from(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
@@ -576,18 +577,16 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
     @Override
     public String toString() {
-        return (String) get("name");
-//       double[] avg = getAvg();
-//        StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
-//        if (avg != null) {
-//            NumberFormat formatter = new DecimalFormat("#0.0");
-//            for (int i = 0; i < avg.length; i++) {
-//                sb.append(formatter.format(avg[i]));
-//                sb.append(" ");
-//            }
-//            sb.append(", total: ").append(getTotal());
-//        }
-//        return sb.toString();
+        return NAME;
+     /*  double[] avg = getAvg();
+        StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
+        if (avg != null) {
+            for (int i = 0; i < avg.length; i++) {
+                sb.append(avg[i]).append(" ");
+            }
+            sb.append(", total: ").append(getTotal());
+        }
+        return sb.toString();*/
     }
 
 
