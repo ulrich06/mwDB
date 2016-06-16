@@ -8,6 +8,7 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
@@ -17,7 +18,7 @@ import java.util.Random;
 public class GaussianProbaTest {
     @Test
     public void Gaussian1D() {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -80,7 +81,7 @@ public class GaussianProbaTest {
 
     @Test
     public void MultinomialTest() {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -143,7 +144,7 @@ public class GaussianProbaTest {
 
     @Test
     public void Singularity() {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

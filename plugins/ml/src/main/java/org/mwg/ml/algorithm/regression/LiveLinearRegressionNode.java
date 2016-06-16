@@ -42,19 +42,6 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
     public final static String NAME = "LiveLinearRegression";
 
     //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new LiveLinearRegressionNode(world, time, id, graph, initialResolution);
-        }
-    }
-
 
     public LiveLinearRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -78,22 +65,21 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
         double[] weights = (double[]) state.getFromKey(WEIGHT_KEY);
 
 
-
         if (weights == null) {
             weights = new double[input.length + 1];
-            Random random=new Random();
-            for(int i=0;i<weights.length;i++){
-                weights[i]=random.nextDouble()*0.001;
+            Random random = new Random();
+            for (int i = 0; i < weights.length; i++) {
+                weights[i] = random.nextDouble() * 0.001;
             }
         }
 
         //ToDo test currentErr and update alpha automatically
-        double prevErr = state.getFromKeyWithDefault(LAST_ERR_KEY,0.0);
+        double prevErr = state.getFromKeyWithDefault(LAST_ERR_KEY, 0.0);
         double currErr = calculate(weights, input) - output;
-        if(currErr>prevErr){
+        if (currErr > prevErr) {
         }
 
-        state.setFromKey(LAST_ERR_KEY,Type.DOUBLE,currErr);
+        state.setFromKey(LAST_ERR_KEY, Type.DOUBLE, currErr);
 
         if (input == null || weights.length != (input.length + 1)) {
             throw new RuntimeException(MISMATCH_MSG);
@@ -120,7 +106,7 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             }
             double deviation = state.getFromKeyWithDefault(THRESHOLD_KEY, THRESHOLD_DEF);
 
-            if (diff>deviation) {
+            if (diff > deviation) {
                 state = phasedState();
                 //ToDo test weight here and play with alpha
                 state.setFromKey(WEIGHT_KEY, Type.DOUBLE_ARRAY, weights);
@@ -145,10 +131,9 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
         } else if (propertyName.equals(LAMBDA_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        }else if (propertyName.equals(ITERATION_KEY)) {
+        } else if (propertyName.equals(ITERATION_KEY)) {
             super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        }
-        else {
+        } else {
             super.setProperty(propertyName, propertyType, propertyValue);
         }
     }

@@ -2,6 +2,7 @@ package org.mwg.ml.regression;
 
 import org.junit.Test;
 import org.mwg.*;
+import org.mwg.ml.MLPlugin;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
 
@@ -11,7 +12,7 @@ public class LiveLinearRegressionTest {
    // @Test
     public void testRegression() {
         final Graph graph = new GraphBuilder()
-                .addNodeType(new LiveLinearRegressionNode.Factory()).build();
+                .withPlugin(new MLPlugin()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

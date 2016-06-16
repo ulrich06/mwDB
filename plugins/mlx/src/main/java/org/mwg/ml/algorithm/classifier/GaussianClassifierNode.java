@@ -12,19 +12,6 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
 
     public static final String NAME = "GaussianClassifier";
 
-    public static class Factory implements NodeFactory {
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            GaussianClassifierNode newNode = new GaussianClassifierNode(world, time, id, graph, initialResolution);
-            return newNode;
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -66,7 +53,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
     protected void updateModelParameters(double value[], int classNum) {
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
-        if (getInputDimensions()==INPUT_DIM_UNKNOWN){
+        if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
             setInputDimensions(value.length);
         }
         initializeClassIfNecessary(classNum);
@@ -102,7 +89,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
         }
         double sums[] = getSums(classNum);
         double sumSquares[] = getSumSquares(classNum);
-        MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total,false);
+        MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total, false);
         return distr.density(value, true);//TODO Normalize on average? Does not matter (comparing anyway)
         //But normalization leaves less chance for underflow
     }

@@ -338,13 +338,13 @@ declare module org {
             newQuery(): org.mwg.Query;
             newTask(): org.mwg.task.Task;
             newTaskContext(): org.mwg.task.TaskContext;
-            actions(): org.mwg.task.TaskActionRegistry;
             freeNodes(nodes: org.mwg.Node[]): void;
+            taskAction(name: string): org.mwg.task.TaskActionFactory;
         }
         class GraphBuilder {
             private _storage;
             private _scheduler;
-            private _factories;
+            private _plugins;
             private _offHeap;
             private _gc;
             private _memorySize;
@@ -357,14 +357,13 @@ declare module org {
             withMemorySize(numberOfElements: number): org.mwg.GraphBuilder;
             saveEvery(numberOfElements: number): org.mwg.GraphBuilder;
             withScheduler(scheduler: org.mwg.plugin.Scheduler): org.mwg.GraphBuilder;
-            addNodeType(nodeFactory: org.mwg.plugin.NodeFactory): org.mwg.GraphBuilder;
-            addNodeTypes(nodeFactories: org.mwg.plugin.NodeFactory[]): org.mwg.GraphBuilder;
+            withPlugin(plugin: org.mwg.plugin.Plugin): org.mwg.GraphBuilder;
             withGC(): org.mwg.GraphBuilder;
             build(): org.mwg.Graph;
         }
         module GraphBuilder {
             interface InternalBuilder {
-                newGraph(storage: org.mwg.plugin.Storage, readOnly: boolean, scheduler: org.mwg.plugin.Scheduler, factories: org.mwg.plugin.NodeFactory[], usingGC: boolean, usingOffHeapMemory: boolean, memorySize: number, autoSaveSize: number): org.mwg.Graph;
+                newGraph(storage: org.mwg.plugin.Storage, readOnly: boolean, scheduler: org.mwg.plugin.Scheduler, plugins: org.mwg.plugin.Plugin[], usingGC: boolean, usingOffHeapMemory: boolean, memorySize: number, autoSaveSize: number): org.mwg.Graph;
             }
         }
         interface Node {
@@ -433,6 +432,16 @@ declare module org {
                 setPropertyWithType(propertyName: string, propertyType: number, propertyValue: any, propertyTargetType: number): void;
                 private parseInteger(numberValue);
             }
+            class AbstractPlugin implements org.mwg.plugin.Plugin {
+                private _nodeTypes;
+                private _taskActionTypes;
+                declareNode(name: string, factory: org.mwg.plugin.NodeFactory): org.mwg.plugin.AbstractPlugin;
+                nodeTypes(): string[];
+                nodeType(nodeTypeName: string): org.mwg.plugin.NodeFactory;
+                taskActionTypes(): string[];
+                taskActionType(taskTypeName: string): org.mwg.task.TaskActionFactory;
+                declareAction(name: string, factory: org.mwg.task.TaskActionFactory): org.mwg.plugin.AbstractPlugin;
+            }
             class Base64 {
                 private static dictionary;
                 private static powTwo;
@@ -497,8 +506,7 @@ declare module org {
                 (): void;
             }
             interface NodeFactory {
-                name(): string;
-                create(world: number, time: number, id: number, graph: org.mwg.Graph, initialResolution: Float64Array): org.mwg.Node;
+                (world: number, time: number, id: number, graph: org.mwg.Graph, initialResolution: Float64Array): org.mwg.Node;
             }
             interface NodeState {
                 world(): number;
@@ -516,6 +524,12 @@ declare module org {
             }
             interface NodeStateCallback {
                 (attributeKey: number, elemType: number, elem: any): void;
+            }
+            interface Plugin {
+                nodeTypes(): string[];
+                nodeType(nodeTypeName: string): org.mwg.plugin.NodeFactory;
+                taskActionTypes(): string[];
+                taskActionType(taskTypeName: string): org.mwg.task.TaskActionFactory;
             }
             interface Resolver {
                 init(graph: org.mwg.Graph): void;
@@ -662,11 +676,6 @@ declare module org {
             interface TaskActionFactory {
                 (params: string[]): org.mwg.task.TaskAction;
             }
-            interface TaskActionRegistry {
-                add(name: string, action: org.mwg.task.TaskActionFactory): void;
-                remove(name: string): void;
-                get(name: string): org.mwg.task.TaskActionFactory;
-            }
             interface TaskContext {
                 graph(): org.mwg.Graph;
                 world(): number;
@@ -730,7 +739,7 @@ declare module org {
                 disconnect(callback: org.mwg.Callback<boolean>): void;
             }
             class Builder implements org.mwg.GraphBuilder.InternalBuilder {
-                newGraph(p_storage: org.mwg.plugin.Storage, p_readOnly: boolean, p_scheduler: org.mwg.plugin.Scheduler, p_factories: org.mwg.plugin.NodeFactory[], p_usingGC: boolean, p_usingOffHeapMemory: boolean, p_memorySize: number, p_autoSaveSize: number): org.mwg.Graph;
+                newGraph(p_storage: org.mwg.plugin.Storage, p_readOnly: boolean, p_scheduler: org.mwg.plugin.Scheduler, p_plugins: org.mwg.plugin.Plugin[], p_usingGC: boolean, p_usingOffHeapMemory: boolean, p_memorySize: number, p_autoSaveSize: number): org.mwg.Graph;
                 private createSpace(usingOffHeapMemory, memorySize, autoSaveSize);
             }
             module chunk {
@@ -1157,21 +1166,21 @@ declare module org {
                 private _space;
                 private _scheduler;
                 private _resolver;
-                private _factories;
-                private _factoryNames;
+                private _nodeTypes;
+                private _taskActions;
                 offHeapBuffer: boolean;
                 private _prefix;
                 private _nodeKeyCalculator;
                 private _worldKeyCalculator;
                 private _isConnected;
                 private _lock;
-                private _registry;
-                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_factories: org.mwg.plugin.NodeFactory[]);
+                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_plugins: org.mwg.plugin.Plugin[]);
                 fork(world: number): number;
                 newNode(world: number, time: number): org.mwg.Node;
                 newTypedNode(world: number, time: number, nodeType: string): org.mwg.Node;
                 cloneNode(origin: org.mwg.Node): org.mwg.Node;
                 factoryByCode(code: number): org.mwg.plugin.NodeFactory;
+                taskAction(taskActionName: string): org.mwg.task.TaskActionFactory;
                 lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
                 save(callback: org.mwg.Callback<boolean>): void;
                 connect(callback: org.mwg.Callback<boolean>): void;
@@ -1193,7 +1202,6 @@ declare module org {
                 resolver(): org.mwg.plugin.Resolver;
                 scheduler(): org.mwg.plugin.Scheduler;
                 space(): org.mwg.plugin.ChunkSpace;
-                actions(): org.mwg.task.TaskActionRegistry;
                 storage(): org.mwg.plugin.Storage;
                 freeNodes(nodes: org.mwg.Node[]): void;
             }
@@ -1488,13 +1496,7 @@ declare module org {
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
                     remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                     math(expression: string): org.mwg.task.Task;
-                }
-                class CoreTaskActionRegistry implements org.mwg.task.TaskActionRegistry {
-                    private _factory;
-                    constructor();
-                    add(name: string, action: org.mwg.task.TaskActionFactory): void;
-                    remove(name: string): void;
-                    get(name: string): org.mwg.task.TaskActionFactory;
+                    static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
                     private _variables;

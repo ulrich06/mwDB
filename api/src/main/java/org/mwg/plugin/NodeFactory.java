@@ -7,12 +7,8 @@ import org.mwg.Node;
  * NodeFactory plugin allows to propose alternative implementations for {@link Node}.<br>
  * This specialization allows ot inject particular behavior into {@link Node} such as machine learning, extrapolation function.
  */
+@FunctionalInterface
 public interface NodeFactory {
-
-    /**
-     * @return unique identifier for the factory plugin (usually the fully qualified name of the extended Node)
-     */
-    String name();
 
     /**
      * Create a new Node

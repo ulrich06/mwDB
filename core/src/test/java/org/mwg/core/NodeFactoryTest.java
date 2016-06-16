@@ -11,15 +11,13 @@ import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractPlugin;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.core.utility.Unsafe;
 
-public class NodeFactoryTest implements NodeFactory {
+public class NodeFactoryTest {
 
-    @Override
-    public String name() {
-        return "HelloWorldNode";
-    }
+    private static final String NAME = "HelloWorldNode";
 
     interface ExNode extends org.mwg.Node {
         String sayHello();
@@ -45,14 +43,14 @@ public class NodeFactoryTest implements NodeFactory {
         }
     }
 
-    @Override
-    public org.mwg.Node create(long world, long time, long id, org.mwg.Graph graph, long[] currentResolution) {
-        return new ExNodeImpl(world, time, id, graph, currentResolution);
-    }
-
     @Test
     public void heapTest() {
-        test(new GraphBuilder().withScheduler(new NoopScheduler()).addNodeType(this).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withPlugin(new AbstractPlugin().declareNode(NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new ExNodeImpl(world, time, id, graph, initialResolution);
+            }
+        })).build());
     }
 
     /**
@@ -67,7 +65,12 @@ public class NodeFactoryTest implements NodeFactory {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).addNodeType(this).build());
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).withPlugin(new AbstractPlugin().declareNode(NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new ExNodeImpl(world, time, id, graph, initialResolution);
+            }
+        })).build());
 
         Assert.assertTrue(OffHeapByteArray.alloc_counter == 0);
         Assert.assertTrue(OffHeapDoubleArray.alloc_counter == 0);
@@ -80,7 +83,7 @@ public class NodeFactoryTest implements NodeFactory {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Node specializedNode = graph.newTypedNode(0, 0, "HelloWorldNode");
+                Node specializedNode = graph.newTypedNode(0, 0, NAME);
 
                 String hw = (String) specializedNode.get("hello");
                 Assert.assertTrue(hw.equals("world"));

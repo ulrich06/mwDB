@@ -127,20 +127,6 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
         callback.on(result);
     }
 
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianSlotNode(world, time, id, graph, initialResolution);
-        }
-    }
-
     //Machine Learning Properties and their default values with _DEF
 
     public static final String SLOTS_NUMBER = "SLOTS_NUMBER"; //Number of slots to create in the profile, default is 1

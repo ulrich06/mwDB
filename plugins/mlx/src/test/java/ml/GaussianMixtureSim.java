@@ -3,6 +3,7 @@ package ml;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
 
@@ -12,7 +13,7 @@ import java.util.Scanner;
 
 public class GaussianMixtureSim {
     public static void main(String[] arg) {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

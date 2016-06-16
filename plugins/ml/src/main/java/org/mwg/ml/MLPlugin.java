@@ -1,0 +1,45 @@
+package org.mwg.ml;
+
+import org.mwg.Graph;
+import org.mwg.Node;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
+import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
+import org.mwg.ml.algorithm.regression.PolynomialNode;
+import org.mwg.plugin.AbstractPlugin;
+import org.mwg.plugin.NodeFactory;
+
+public class MLPlugin extends AbstractPlugin {
+
+    public MLPlugin() {
+        super();
+        //PolynomialNode
+        declareNode(PolynomialNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new PolynomialNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //GaussianSlot
+        declareNode(GaussianSlotNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new GaussianSlotNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //GaussianMixtureNode
+        declareNode(GaussianMixtureNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new GaussianMixtureNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //LiveRegressionNode
+        declareNode(LiveLinearRegressionNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new LiveLinearRegressionNode(world, time, id, graph, initialResolution);
+            }
+        });
+    }
+}

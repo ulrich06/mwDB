@@ -45,25 +45,10 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
 
-
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianMixtureNode(world, time, id, graph, initialResolution);
-        }
-    }
-
     public GaussianMixtureNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
-    
+
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (propertyName.equals(LEVEL)) {

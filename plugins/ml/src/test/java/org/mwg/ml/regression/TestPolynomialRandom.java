@@ -7,6 +7,7 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.MLPlugin;
 import org.mwg.ml.algorithm.regression.PolynomialNode;
 
 import java.util.Random;
@@ -17,7 +18,7 @@ import java.util.Random;
 public class TestPolynomialRandom {
     @Test
     public void randomTest() {
-        final Graph graph = new GraphBuilder().addNodeType(new PolynomialNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

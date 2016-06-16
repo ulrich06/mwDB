@@ -3,17 +3,14 @@ package org.mwg.core;
 import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.ReadOnlyStorage;
-import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.*;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
-import org.mwg.plugin.NodeFactory;
-import org.mwg.plugin.Scheduler;
-import org.mwg.plugin.Storage;
 
 public class Builder implements GraphBuilder.InternalBuilder {
 
     @Override
-    public org.mwg.Graph newGraph(Storage p_storage, boolean p_readOnly, Scheduler p_scheduler, NodeFactory[] p_factories, boolean p_usingGC, boolean p_usingOffHeapMemory, long p_memorySize, long p_autoSaveSize) {
+    public org.mwg.Graph newGraph(Storage p_storage, boolean p_readOnly, Scheduler p_scheduler, Plugin[] p_plugins, boolean p_usingGC, boolean p_usingOffHeapMemory, long p_memorySize, long p_autoSaveSize) {
         Storage storage = p_storage;
         if (storage == null) {
             storage = new BlackHoleStorage();
@@ -41,7 +38,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
             autoSaveSize = memorySize;
         }
         space = createSpace(p_usingOffHeapMemory, memorySize, autoSaveSize);
-        org.mwg.core.CoreGraph graph = new org.mwg.core.CoreGraph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler), p_factories);
+        org.mwg.core.CoreGraph graph = new org.mwg.core.CoreGraph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler), p_plugins);
         if (p_usingOffHeapMemory) {
             graph.offHeapBuffer = true;
         }

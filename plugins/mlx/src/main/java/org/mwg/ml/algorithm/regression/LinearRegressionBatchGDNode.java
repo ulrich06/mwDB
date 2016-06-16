@@ -10,25 +10,11 @@ import java.util.Arrays;
 /**
  * Linear regression node based on stochastic gradient descent.
  * Likelz to be much faster than non-SGD, but might take longer time to converge.
- *
  * Created by andre on 4/29/2016.
  */
 public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
 
     public static final String NAME = "LinearRegressionBatchGradientDescent";
-
-    public static class Factory implements NodeFactory {
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            LinearRegressionBatchGDNode newNode = new LinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
-            return newNode;
-        }
-    }
 
     public LinearRegressionBatchGDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -38,7 +24,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     protected void updateModelParameters(double value[], double result) {
         //Value should be already added to buffer by that time
         int dims = getInputDimensions();
-        if (dims==INPUT_DIM_UNKNOWN){
+        if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
             setInputDimensions(dims);
         }
@@ -55,7 +41,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
         //Get coefficients. If they are of length 0, initialize with random.
         double coefs[] = getCoefficients();
         double intercept = getIntercept();
-        if (coefs.length==0){
+        if (coefs.length == 0) {
             coefs = new double[dims];
             setCoefficients(coefs);
         }
@@ -66,48 +52,48 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
         int iterCount = 0;
         boolean exitCase = false;
         double prevError = getBufferError();
-        while (!exitCase){
+        while (!exitCase) {
             iterCount++;
 
             int startIndex = 0;
             int index = 0;
             double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
-            while (startIndex + dims <= valueBuffer.length){
+            while (startIndex + dims <= valueBuffer.length) {
                 double curValue[] = new double[dims];
                 System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
 
                 double h = 0;
-                for (int j=0;j<dims;j++){
-                    h += oldCoefs[j]*curValue[j];
+                for (int j = 0; j < dims; j++) {
+                    h += oldCoefs[j] * curValue[j];
                 }
                 h += intercept;
 
                 double outcome = resultBuffer[index];
-                for (int j=0;j<dims;j++){
-                    coefs[j] -= alpha * ( ( h - outcome)*curValue[j])/bufferLength;
+                for (int j = 0; j < dims; j++) {
+                    coefs[j] -= alpha * ((h - outcome) * curValue[j]) / bufferLength;
                 }
-                intercept -= alpha * ( h - outcome) / bufferLength;
+                intercept -= alpha * (h - outcome) / bufferLength;
 
                 startIndex += dims;
                 index++;
             }
-            for (int j=0;j<dims;j++){
+            for (int j = 0; j < dims; j++) {
                 coefs[j] += alpha * lambda * oldCoefs[j];
             }
 
             setCoefficients(coefs);
             setIntercept(intercept);
-            if (gdErrorThresh>0){
+            if (gdErrorThresh > 0) {
                 double newError = getBufferError();
-                exitCase = exitCase || ((prevError-newError)<gdErrorThresh);
+                exitCase = exitCase || ((prevError - newError) < gdErrorThresh);
                 prevError = newError;
             }
 
-            if (gdIterThresh>0){
-                exitCase = exitCase || (iterCount>=gdIterThresh);
+            if (gdIterThresh > 0) {
+                exitCase = exitCase || (iterCount >= gdIterThresh);
             }
 
-            if ((!(gdErrorThresh>0))&&(!(gdIterThresh>0))) {
+            if ((!(gdErrorThresh > 0)) && (!(gdIterThresh > 0))) {
                 //Protection against infinite loops. If neither error threshold, nor iteration thresholds are used,
                 //run loops once, do not go infinite.
                 exitCase = true;

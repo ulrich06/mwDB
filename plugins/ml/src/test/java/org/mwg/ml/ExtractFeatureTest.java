@@ -6,12 +6,19 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
+import org.mwg.plugin.AbstractPlugin;
+import org.mwg.plugin.NodeFactory;
 
 public class ExtractFeatureTest {
 
     @Test
     public void test() {
-        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new NoopRegressionNode(world, time, id, graph, initialResolution);
+            }
+        })).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -36,7 +43,12 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMath() {
-        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new NoopRegressionNode(world, time, id, graph, initialResolution);
+            }
+        })).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -61,7 +73,12 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMathEscaped() {
-        final Graph graph = new GraphBuilder().addNodeType(new NoopRegressionNode.NoopRegressionNodeFactory()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new NoopRegressionNode(world, time, id, graph, initialResolution);
+            }
+        })).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

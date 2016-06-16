@@ -6,6 +6,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
+import org.mwg.ml.MLPlugin;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
 
@@ -14,7 +15,7 @@ import java.util.Random;
 public class GaussianMixtureModelTest {
     @Test
     public void mixtureTest() {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

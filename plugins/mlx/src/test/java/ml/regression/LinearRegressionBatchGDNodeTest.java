@@ -6,6 +6,7 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.ml.AbstractMLNode;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testNormalBatchGDIterationCountStop() {
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -43,7 +44,7 @@ public class LinearRegressionBatchGDNodeTest extends AbstractLinearRegressionTes
 
     @Test
     public void testNormalBatchGDErrorThresholdStop() {
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionBatchGDNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

@@ -6,6 +6,7 @@ import org.mwg.Callback;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
 import org.mwg.ml.AbstractMLNode;
@@ -24,7 +25,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 //.withMemorySize(20_000)
                 //.withAutoSave(10000)
                 //.withStorage(new LevelDBStorage("data"))
-                .addNodeType(new LinearRegressionSGDNode.Factory()).withScheduler(new NoopScheduler())
+                .withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override

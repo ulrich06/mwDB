@@ -11,6 +11,7 @@ import org.mwg.task.*;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class CoreTask implements org.mwg.task.Task {
@@ -111,7 +112,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (inputValue == null) {
             throw new RuntimeException("inputValue should not be null");
         }
-        addAction(new ActionSetVar(variableName,inputValue));
+        addAction(new ActionSetVar(variableName, inputValue));
         return this;
     }
 
@@ -337,7 +338,6 @@ public class CoreTask implements org.mwg.task.Task {
         });
     }
 
-
     @Override
     public Task action(String name, String flatParams) {
         if (name == null) {
@@ -346,7 +346,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (flatParams == null) {
             throw new RuntimeException("flatParams should not be null");
         }
-        TaskActionFactory actionFactory = _graph.actions().get(name);
+        TaskActionFactory actionFactory = _graph.taskAction(name);
         if (actionFactory == null) {
             throw new RuntimeException("Unknown task action: " + name);
         }
@@ -581,4 +581,80 @@ public class CoreTask implements org.mwg.task.Task {
         addAction(new ActionMath(expression));
         return this;
     }
+
+    public static void fillDefault(Map<String, TaskActionFactory> registry){
+        registry.put("get", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("get action need one parameter");
+                }
+                return new ActionGet(params[0]);
+            }
+        });
+        registry.put("math", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("math action need one parameter");
+                }
+                return new ActionMath(params[0]);
+            }
+        });
+        registry.put("traverse", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("traverse action need one parameter");
+                }
+                return new ActionTraverse(params[0]);
+            }
+        });
+        registry.put("traverseOrKeep", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("traverseOrKeep action need one parameter");
+                }
+                return new ActionTraverseOrKeep(params[0]);
+            }
+        });
+        registry.put("fromIndexAll", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("fromIndexAll action need one parameter");
+                }
+                return new ActionFromIndexAll(params[0]);
+            }
+        });
+        registry.put("fromIndex", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("fromIndex action need two parameter");
+                }
+                return new ActionFromIndex(params[0], params[1]);
+            }
+        });
+        registry.put("with", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("with action need two parameter");
+                }
+                return new ActionWith(params[0], Pattern.compile(params[1]));
+            }
+        });
+        registry.put("without", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("without action need two parameter");
+                }
+                return new ActionWithout(params[0], Pattern.compile(params[1]));
+            }
+        });
+    }
+
 }

@@ -35,20 +35,6 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
 
     private final static String NOT_MANAGED_ATT_ERROR = "Polynomial node can only handle value attribute, please use a super node to store other data";
 
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new PolynomialNode(world, time, id, graph, initialResolution);
-        }
-    }
-
     public PolynomialNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
