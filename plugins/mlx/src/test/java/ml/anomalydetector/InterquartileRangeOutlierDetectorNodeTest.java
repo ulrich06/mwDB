@@ -1,4 +1,4 @@
-package org.mwg.ml.anomalydetector;
+package ml.anomalydetector;
 
 import org.junit.Test;
 import org.mwg.Callback;
