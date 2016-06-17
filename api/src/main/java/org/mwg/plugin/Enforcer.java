@@ -14,7 +14,7 @@ public class Enforcer {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
                 if (input != null && inputType != Type.BOOL) {
-                    throw new RuntimeException("Property " + propertyName + " should be long value, currently " + input);
+                    throw new RuntimeException("Property " + propertyName + " should be Boolean value, currently " + input);
                 }
             }
         });
@@ -25,7 +25,7 @@ public class Enforcer {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
                 if (input != null && inputType != Type.STRING) {
-                    throw new RuntimeException("Property " + propertyName + " should be long value, currently " + input);
+                    throw new RuntimeException("Property " + propertyName + " should be String value, currently " + input);
                 }
             }
         });
@@ -106,6 +106,28 @@ public class Enforcer {
             public void check(byte inputType, Object input) throws RuntimeException {
                 if (input != null && inputType != Type.DOUBLE_ARRAY) {
                     throw new RuntimeException("Property " + propertyName + " should be doubleArray value, currently " + input);
+                }
+            }
+        });
+    }
+
+    public Enforcer asPositiveInt(String propertyName) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                if (input != null && inputType != Type.INT && inputType<=0) {
+                    throw new RuntimeException("Property " + propertyName + " should be a positive integer, currently " + input);
+                }
+            }
+        });
+    }
+
+    public Enforcer asPositiveDouble(String propertyName) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                if (input != null && inputType != Type.DOUBLE && inputType<=0) {
+                    throw new RuntimeException("Property " + propertyName + " should be a positive double, currently " + input);
                 }
             }
         });
