@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -112,7 +113,7 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
 
         int[] total = (int[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
         double[] sum = (double[]) resolved.getFromKey(INTERNAL_SUM_KEY);
-         // double[] sumsq= (double[]) resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
+        // double[] sumsq= (double[]) resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
 
         double[] result = new double[features];
         if (total != null) {
@@ -146,23 +147,20 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_SUMSQUARE_KEY = "_sumSquare";
 
+    private static final Enforcer enforcer = new Enforcer()
+            .asInt(SLOTS_NUMBER)
+            .asLong(PERIOD_SIZE);
 
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(SLOTS_NUMBER)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(PERIOD_SIZE)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.LONG);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
+        enforcer.check(propertyName, propertyType, propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
     public Object get(String attributeName) {
         NodeState state = this._resolver.resolveState(this, true);
-
         if (attributeName.equals(SLOTS_NUMBER)) {
             return state.getFromKeyWithDefault(SLOTS_NUMBER, SLOTS_NUMBER_DEF);
         } else if (attributeName.equals(PERIOD_SIZE)) {

@@ -8,6 +8,7 @@ import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
@@ -49,21 +50,17 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    private static final Enforcer enforcer = new Enforcer()
+            .asIntWithin(LEVEL, 0, 1000)
+            .asIntWithin(WIDTH, 0, 1000)
+            .asDouble(COMPRESSION_FACTOR)
+            .asDouble(THRESHOLD)
+            .asDoubleArray(PRECISION);
+
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(LEVEL)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(WIDTH)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(COMPRESSION_FACTOR)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(THRESHOLD)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(PRECISION)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE_ARRAY);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
+        enforcer.check(propertyName, propertyType, propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
@@ -138,7 +135,6 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         }
         final double[] precisions = initialPrecision;
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
-
 
 
         Task creationTask = graph().newTask().setTime(time()).setWorld(world()).then(new Action() {

@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.RegressionNode;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -123,22 +124,18 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
         }
     }
 
+    private static final Enforcer enforcer = new Enforcer()
+            .asDouble(ALPHA_KEY)
+            .asDouble(LAMBDA_KEY)
+            .asInt(ITERATION_KEY);
 
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(ALPHA_KEY)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(LAMBDA_KEY)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(ITERATION_KEY)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
+        enforcer.check(propertyName, propertyType, propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
-
-
+    
     private double calculate(double[] weights, double[] input) {
         double h = 0;
         for (int j = 0; j < input.length; j++) {

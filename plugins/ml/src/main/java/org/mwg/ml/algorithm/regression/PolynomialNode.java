@@ -7,6 +7,7 @@ import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.matrix.operation.PolynomialFit;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -39,13 +40,16 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    private static final Enforcer enforcer = new Enforcer().asDouble(PRECISION);
+
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (propertyName.equals(VALUE)) {
             learn(Double.parseDouble(propertyValue.toString()), null);
         } else if (propertyName.equals(PRECISION)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
+            enforcer.check(propertyName, propertyType, propertyValue);
+            super.setProperty(propertyName, propertyType, propertyValue);
         } else {
             throw new RuntimeException(NOT_MANAGED_ATT_ERROR);
         }
