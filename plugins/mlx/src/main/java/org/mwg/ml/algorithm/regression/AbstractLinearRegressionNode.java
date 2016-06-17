@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
+import org.mwg.plugin.NodeState;
 
 public abstract class AbstractLinearRegressionNode extends AbstractRegressionSlidingWindowManagingNode implements RegressionNode {
 
@@ -37,18 +38,6 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    public double[] getCoefficients(){
-        return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
-    }
-
-    public double getIntercept(){
-        return unphasedState().getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF);
-    }
-
-    protected void setIntercept(double intercept){
-        unphasedState().setFromKey(INTERCEPT_KEY, Type.DOUBLE, intercept);
-    }
-
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
         if (L2_COEF_KEY.equals(propertyName)) {
@@ -71,22 +60,28 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     @Override
     public Object get(String propertyName){
         if(COEFFICIENTS_KEY.equals(propertyName)){
-            return getCoefficients();
+            return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
         }else if(INTERCEPT_KEY.equals(propertyName)){
-            return getIntercept();
+            return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
         }else if(L2_COEF_KEY.equals(propertyName)){
-            return getL2Regularization();
+            return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
         }
         return super.get(propertyName);
     }
 
-    protected void setCoefficients(double[] coefficients) {
-       // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        unphasedState().setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefficients);
+    public double[] debugGetCoefficients() {
+        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+        return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, new double[0]);
     }
 
-    public double getL2Regularization(){
-        return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
+    public double debugGetL2Regularization() {
+        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+        return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, 0.0);
+    }
+
+    public double debugGetIntercept() {
+        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
+        return unphasedState().getFromKeyWithDefault(INTERCEPT_KEY, 0.0);
     }
 
     public void setL2Regularization(double l2) {
@@ -95,14 +90,14 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     }
 
     @Override
-    protected void setBootstrapModeHook() {
+    protected void setBootstrapModeHook(NodeState state) {
         //What should we do when bootstrap mode is approaching?
         //TODO Nothing?
     }
 
     @Override
-    public double predictValue(double curValue[]){
-        return predictValueInternal(curValue, getCoefficients(), getIntercept());
+    public double predictValue(NodeState state, double curValue[]){
+        return predictValueInternal(curValue, state.getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF), state.getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF));
     }
 
     private double predictValueInternal(double curValue[], double coefs[], double intercept){
@@ -114,22 +109,25 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
         return response;
     }
 
+    public double debugGetBufferError(){
+        NodeState state = unphasedState();
+        return getBufferError(state, (double[])state.getFromKey(INTERNAL_VALUE_BUFFER_KEY), (double[])state.getFromKey(INTERNAL_RESULTS_BUFFER_KEY));
+    }
+
     @Override
-    public double getBufferError() {
+    public double getBufferError(NodeState state, double valueBuffer[], double results[]) {
         //For each value in value buffer
         int startIndex = 0;
-        final int dims = getInputDimensions();
+        final int dims = valueBuffer.length / results.length;
 
-        double valueBuffer[] = getValueBuffer();
         final int numValues = valueBuffer.length / dims;//TODO What if there are not enough values?
         if (numValues == 0) {
             return 0;
         }
 
-        double coefficients[] = getCoefficients();
+        double coefficients[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
         int index = 0;
-        double results[] = getResultBuffer();
-        double intercept = getIntercept();
+        double intercept = state.getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF);
         double sqrResidualSum = 0;
         while (startIndex + dims <= valueBuffer.length) { //For each value
             double curValue[] = new double[dims];
@@ -148,7 +146,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
     @Override
     public String toString(){
         StringBuilder result = new StringBuilder();
-        double coefs[] = getCoefficients();
+        double coefs[] = unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
         result.append("Coefficients: ");
         for (int j = 0; j < coefs.length; j++) {
             result.append(coefs[j] + ", ");

@@ -4,6 +4,7 @@ import org.mwg.*;
 import org.mwg.ml.ClassificationNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
 import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.NodeState;
 
 public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode implements ClassificationNode {
 
@@ -21,7 +22,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
     }
 
 
-    protected void initializeClassIfNecessary(int classNum) {
+    protected void initializeClassIfNecessary(NodeState state, int classNum) {
         Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         if (oldSumsObj != null) {
             //Is there, but could be deleted
@@ -35,7 +36,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         addToKnownClassesList(classNum);
         setTotal(classNum, 0);
         final int dimensions = getInputDimensions();
-        setSums(classNum, new double[dimensions]);
+        state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dimensions]);
         setSumsSquared(classNum, new double[dimensions]);
 
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
@@ -43,13 +44,13 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
 
 
     @Override
-    protected void updateModelParameters(double value[], int classNum) {
+    protected void updateModelParameters(NodeState state, double valueBuffer[], int resultBuffer[], double value[], int classNum) {
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
         if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
             setInputDimensions(value.length);
         }
-        initializeClassIfNecessary(classNum);
+        initializeClassIfNecessary(state, classNum);
         setTotal(classNum, getClassTotal(classNum) + 1);
 
         double currentSum[] = getSums(classNum);
@@ -58,14 +59,14 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             currentSum[i] += value[i];
             currentSumSquares[i] += value[i] * value[i];
         }
-        setSums(classNum, currentSum);
+        state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, currentSum);
         setSumsSquared(classNum, currentSumSquares);
         //Need to re-put
     }
 
-    protected double getLikelihoodForClass(double value[], int classNum) {
+    protected double getLikelihoodForClass(NodeState state, double value[], int classNum) {
         //It is assumed that real class is removed and replaces with 0
-        initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
+        initializeClassIfNecessary(state, classNum); //TODO should not be necessary. Double-check.
         int total = getClassTotal(classNum);
         if (total < 2) {
             //Not enough data to build model for that class.
@@ -87,7 +88,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
     }
 
     @Override
-    protected int predictValue(double value[]) {
+    protected int predictValue(NodeState state, double value[]) {
         int kk[] = getKnownClasses();
         if (kk.length == 1) {
             return kk[0];
@@ -96,7 +97,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes) {
-            double curLikelihood = getLikelihoodForClass(value, curClass);
+            double curLikelihood = getLikelihoodForClass(state, value, curClass);
             if (curLikelihood > curMaxLikelihood) {
                 curMaxLikelihood = curLikelihood;
                 curMaxLikelihoodClass = curClass;
@@ -113,7 +114,6 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             return "No classes";
         }
         for (int classNum : allClasses) {
-            initializeClassIfNecessary(classNum); //TODO should not be necessary. Double-check.
             int total = getClassTotal(classNum);
             if (total < 2) {
                 //Not enough data to build model for that class.

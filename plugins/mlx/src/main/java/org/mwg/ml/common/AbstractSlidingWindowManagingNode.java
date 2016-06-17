@@ -3,6 +3,8 @@ package org.mwg.ml.common;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
+import org.mwg.plugin.Enforcer;
+import org.mwg.plugin.NodeState;
 
 /**
  * Created by andre on 4/26/2016.
@@ -66,7 +68,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     /**
      * Attribute key - sliding window of values
      */
-    private static final String INTERNAL_VALUE_BUFFER_KEY = "_valueBuffer";
+    protected static final String INTERNAL_VALUE_BUFFER_KEY = "_valueBuffer";
 
     public AbstractSlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -77,35 +79,33 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         unphasedState().setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, valueBuffer);
     }
 
-    //Results buffer is set by further class. .
-
-    protected void removeFirstValueFromBuffer() {
-        final int dims = getInputDimensions();
-        double valueBuffer[] = getValueBuffer();
-        if (valueBuffer.length == 0) {
-            return;
+    /**
+     * Adjust buffer: adds value to the end of it, removes first value(s) if necessary.
+     *
+     * @param state
+     * @param value
+     */
+    protected static double[] adjustValueBuffer(NodeState state, double value[], boolean bootstrapMode) {
+        int dimensions = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
+        if (dimensions < 0) {
+            dimensions = value.length;
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
-        double newBuffer[] = new double[valueBuffer.length - dims];
-        for (int i = 0; i < newBuffer.length; i++) {
-            newBuffer[i] = valueBuffer[i + dims];
-        }
-        setValueBuffer(newBuffer);
-        removeFirstValueFromResultBuffer();
-    }
 
-    protected abstract void removeFirstValueFromResultBuffer();
+        double buffer[] = state.getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
 
-    protected int getNumValuesInBuffer() {
-        final int valLength = getValueBuffer().length;
-        return valLength / getInputDimensions();
-    }
+        final int bufferLength = buffer.length / dimensions; //Buffer is "unrolled" into 1D array.
+        //So adding 1 value to the end and removing (currentBufferLength + 1) - maxBufferLength from the beginning.
+        final int maxBufferLength = state.getFromKeyWithDefault(BUFFER_SIZE_KEY, BUFFER_SIZE_DEF);
+        final int numValuesToRemoveFromBeginning = bootstrapMode ? 0 : Math.max(0, bufferLength + 1 - maxBufferLength);
+        final int newBufferLength = bufferLength + 1 - numValuesToRemoveFromBeginning;
 
-    public boolean isInBootstrapMode() {
-        return unphasedState().getFromKeyWithDefault(BOOTSTRAP_MODE_KEY, BOOTSTRAP_MODE_DEF);
-    }
+        double newBuffer[] = new double[newBufferLength * dimensions];
+        System.arraycopy(buffer, numValuesToRemoveFromBeginning*dimensions, newBuffer, 0, newBuffer.length - dimensions);
+        System.arraycopy(value, 0, newBuffer, newBuffer.length - dimensions, dimensions);
 
-    protected double[] getValueBuffer() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
+        state.setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, newBuffer);
+        return newBuffer;
     }
 
     /**
@@ -129,40 +129,19 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, dims);
     }
 
-    public void setPropertyUnphased(String propertyName, byte propertyType, Object propertyValue) {
-        unphasedState().setFromKey(propertyName, propertyType, propertyValue);
-    }
+    //Results buffer is set by further class. .
+    private static final Enforcer enforcer = new Enforcer()
+            .asPositiveInt(BUFFER_SIZE_KEY)
+            .asPositiveDouble(LOW_ERROR_THRESH_KEY)
+            .asPositiveDouble(HIGH_ERROR_THRESH_KEY);
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (BUFFER_SIZE_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
-            illegalArgumentIfFalse((Integer) propertyValue > 0, "Buffer size should be positive");
-            unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
-        } else if (LOW_ERROR_THRESH_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
-                    "Low error threshold should be of type double or integer");
-            if (propertyValue instanceof Double) {
-                illegalArgumentIfFalse((Double) propertyValue >= 0, "Low error threshold should be non-negative");
-                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
-            } else {
-                illegalArgumentIfFalse((Integer) propertyValue >= 0, "Low error threshold should be non-negative");
-                unphasedState().setFromKey(LOW_ERROR_THRESH_KEY, Type.DOUBLE, (double) ((Integer) propertyValue));
-            }
-        } else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
-                    "High error threshold should be of type double or integer");
-            if (propertyValue instanceof Double) {
-                illegalArgumentIfFalse((Double) propertyValue >= 0, "High error threshold should be non-negative");
-                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, propertyValue);
-            } else {
-                illegalArgumentIfFalse((Integer) propertyValue >= 0, "High error threshold should be non-negative");
-                unphasedState().setFromKey(HIGH_ERROR_THRESH_KEY, Type.DOUBLE, (double) ((Integer) propertyValue));
-            }
-        } else if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName) ||
+        if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || BOOTSTRAP_MODE_KEY.equals(propertyName) ||
                 INPUT_DIM_KEY.equals(propertyName) || INTERNAL_RESULTS_BUFFER_KEY.equals(propertyName)) {
             //Nothing. They are unsettable directly
         } else {
+            enforcer.check(propertyName, propertyType, propertyValue);
             super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
@@ -170,47 +149,20 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
     /**
      * Defines implementation-specific actions to do before going to bootstrap mode.
      */
-    protected abstract void setBootstrapModeHook();
+    protected abstract void setBootstrapModeHook(NodeState state);
 
-    protected void setBootstrapMode(boolean newBootstrapMode) {
+    protected NodeState setBootstrapMode(NodeState state, boolean newBootstrapMode) {
+        NodeState newState = state;
         if (newBootstrapMode) {
             //New state starts now
-            phasedState();
-            setBootstrapModeHook();
+            newState = phasedState();
+            setBootstrapModeHook(newState);
         }
-        unphasedState().setFromKey(BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
+        newState.setFromKey(BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
+        return newState;
     }
 
-    protected double getHigherErrorThreshold() {
-        return unphasedState().getFromKeyWithDefault(HIGH_ERROR_THRESH_KEY, HIGH_ERROR_THRESH_DEF);
+    public boolean debugIsInBootstrapMode() {
+        return unphasedState().getFromKeyWithDefault(BOOTSTRAP_MODE_KEY, true);
     }
-
-    protected double getLowerErrorThreshold() {
-        return unphasedState().getFromKeyWithDefault(LOW_ERROR_THRESH_KEY, LOW_ERROR_THRESH_DEF);
-    }
-
-    protected abstract double getBufferError();
-
-    public int getCurrentBufferLength() {
-        double valueBuffer[] = getValueBuffer();
-        final int dims = getInputDimensions();
-        return valueBuffer.length / dims;
-    }
-
-    @Override
-    public Object get(String propertyName) {
-        if (INPUT_DIM_KEY.equals(propertyName)) {
-            return getInputDimensions();
-        } else if (BUFFER_SIZE_KEY.equals(propertyName)) {
-            return getMaxBufferLength();
-        } else if (LOW_ERROR_THRESH_KEY.equals(propertyName)) {
-            return getLowerErrorThreshold();
-        } else if (HIGH_ERROR_THRESH_KEY.equals(propertyName)) {
-            return getHigherErrorThreshold();
-        } else if (BOOTSTRAP_MODE_KEY.equals(propertyName)) {
-            return isInBootstrapMode();
-        }
-        return super.get(propertyName);
-    }
-
 }

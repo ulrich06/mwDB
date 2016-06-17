@@ -54,11 +54,11 @@ public class AbstractLinearRegressionTest {
                 result.set(features[i], value[i]);
             }
             result.learn(response, cb);
-            coefs = result.getCoefficients();
-            intercept = result.getIntercept();
-            bufferError = result.getBufferError();
-            bootstrapMode = result.isInBootstrapMode();
-            l2Reg = result.getL2Regularization();
+            coefs = result.debugGetCoefficients();
+            intercept = result.debugGetIntercept();
+            bufferError = result.debugGetBufferError();
+            bootstrapMode = result.debugIsInBootstrapMode();
+            l2Reg = result.debugGetL2Regularization();
             result.free();
         }
     };

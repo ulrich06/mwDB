@@ -29,10 +29,6 @@ public abstract class AbstractGradientDescentLinearRegressionNode extends Abstra
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    public double getLearningRate(){
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
-    }
-
     public void setLearningRate(double newLearningRate){
         illegalArgumentIfFalse(newLearningRate > 0, "Learning rate should be positive");
         unphasedState().setFromKey(INTERNAL_VALUE_LEARNING_RATE_KEY, Type.DOUBLE, newLearningRate);

@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.NodeState;
 
 import java.util.Arrays;
 
@@ -21,29 +22,25 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     }
 
     @Override
-    protected void updateModelParameters(double value[], double result) {
+    protected void updateModelParameters(NodeState state, double valueBuffer[], double resultBuffer[], double value[], double result) {
         //Value should be already added to buffer by that time
         int dims = getInputDimensions();
         if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
             setInputDimensions(dims);
         }
-        final double alpha = getLearningRate();
-        final double lambda = getL2Regularization();
-        final int bufferLength = getCurrentBufferLength();
-
-        final double valueBuffer[] = getValueBuffer();
-        final double resultBuffer[] = getResultBuffer();
+        final double alpha = state.getFromKeyWithDefault(INTERNAL_VALUE_LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
+        final double lambda = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
         final double gdErrorThresh = getIterationErrorThreshold();
         final int gdIterThresh = getIterationCountThreshold();
 
         //Get coefficients. If they are of length 0, initialize with random.
-        double coefs[] = getCoefficients();
-        double intercept = getIntercept();
+        double coefs[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
+        double intercept = state.getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF);
         if (coefs.length == 0) {
             coefs = new double[dims];
-            setCoefficients(coefs);
+            state.setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefs);
         }
 
         //For batch gradient descent:
@@ -51,7 +48,7 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
         int iterCount = 0;
         boolean exitCase = false;
-        double prevError = getBufferError();
+        double prevError = getBufferError(state, valueBuffer, resultBuffer);
         while (!exitCase) {
             iterCount++;
 
@@ -70,9 +67,9 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
 
                 double outcome = resultBuffer[index];
                 for (int j = 0; j < dims; j++) {
-                    coefs[j] -= alpha * ((h - outcome) * curValue[j]) / bufferLength;
+                    coefs[j] -= alpha * ((h - outcome) * curValue[j]) / resultBuffer.length;
                 }
-                intercept -= alpha * (h - outcome) / bufferLength;
+                intercept -= alpha * (h - outcome) / resultBuffer.length;
 
                 startIndex += dims;
                 index++;
@@ -81,10 +78,10 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
                 coefs[j] += alpha * lambda * oldCoefs[j];
             }
 
-            setCoefficients(coefs);
-            setIntercept(intercept);
+            state.setFromKey(INTERCEPT_KEY, Type.DOUBLE, intercept);
+            state.setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, coefs);
             if (gdErrorThresh > 0) {
-                double newError = getBufferError();
+                double newError = getBufferError(state, valueBuffer, resultBuffer);
                 exitCase = exitCase || ((prevError - newError) < gdErrorThresh);
                 prevError = newError;
             }

@@ -134,7 +134,7 @@ public class AbstractClassifierTest {
                 result.set(features[i], value[i]);
             }
             result.learn(expectedClass, cb);
-            if (result.isInBootstrapMode() != expectedBootstrap) {
+            if (result.debugIsInBootstrapMode() != expectedBootstrap) {
                 errors++;
             }
             result.free();

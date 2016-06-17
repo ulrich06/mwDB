@@ -6,6 +6,7 @@ import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.NodeState;
 
 /**
  * Created by andrey.boytsov on 17/05/16.
@@ -142,12 +143,12 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     }
 
     @Override
-    protected int predictValue(double[] value) {
+    protected int predictValue(NodeState state, double[] value) {
         int classes[] = getKnownClasses();
         double maxLikelihood = -1.0; //Guaranteed to change. No real likelihood is less than 0.
         int maxClass = 0;
         for (int cl : classes) {
-            double likelihoodPerClass = getLikelihoodForClass(value, cl);
+            double likelihoodPerClass = getLikelihoodForClass(state, value, cl);
             if (likelihoodPerClass > maxLikelihood) {
                 maxLikelihood = likelihoodPerClass;
                 maxClass = cl;
@@ -157,28 +158,23 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     }
 
     @Override
-    protected double getLikelihoodForClass(double[] value, int classNum) {
+    protected double getLikelihoodForClass(NodeState state, double[] value, int classNum) {
         return sigmoid(dot(value, getCoefficients(classNum)) + getIntercept(classNum));
     }
 
     @Override
-    protected void updateModelParameters(double[] value, int classNumber) {
+    protected void updateModelParameters(NodeState state, double[] valueBuffer, int resultBuffer[], double value[], int classNumber) {
         if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
             setInputDimensions(value.length);
         }
         initializeClassIfNecessary(classNumber);
         final int dims = getInputDimensions();
 
-        final double valueBuffer[] = getValueBuffer();
-        final int resultBuffer[] = getRealBufferClasses();
-
         final double gdDifferenceThresh = getIterationDifferenceThreshold();
         final int gdIterThresh = getIterationCountThreshold();
 
         final double alpha = getLearningRate();
         final double lambda = getL2Regularization();
-
-        final int bufferLength = getCurrentBufferLength();
 
         int classes[] = getKnownClasses();
         for (final int cl : classes) {
@@ -207,9 +203,9 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                     int y = (resultBuffer[index] == cl) ? 1 : 0;
 
                     for (int j = 0; j < dims; j++) {
-                        coefs[j] += alpha * ((y - h) * curValue[j]) / bufferLength;
+                        coefs[j] += alpha * ((y - h) * curValue[j]) / resultBuffer.length;
                     }
-                    intercept += alpha * (y - h) / bufferLength;
+                    intercept += alpha * (y - h) / resultBuffer.length;
 
                     startIndex += dims;
                     index++;
@@ -247,11 +243,11 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     }
 
     @Override
-    protected void removeAllClassesHook() {
+    protected void removeAllClassesHook(NodeState state) {
         int classes[] = getKnownClasses();
         for (int curClass : classes) {
-            unphasedState().setFromKey(INTERCEPT_KEY + curClass, Type.DOUBLE, INTERCEPT_DEF);
-            unphasedState().setFromKey(COEFFICIENTS_KEY + curClass, Type.DOUBLE_ARRAY, COEFFICIENTS_DEF);
+            state.setFromKey(INTERCEPT_KEY + curClass, Type.DOUBLE, INTERCEPT_DEF);
+            state.setFromKey(COEFFICIENTS_KEY + curClass, Type.DOUBLE_ARRAY, COEFFICIENTS_DEF);
         }
     }
 

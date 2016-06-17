@@ -62,7 +62,6 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
 
     private static final Enforcer enforcer = new Enforcer()
            .asIntWithin(BUFFER_SIZE_KEY, 1, MAX_BUFFER_LIMIT);
-           //.asIntWithin("BufferSize", 1, 100000);
 
     public InterquartileRangeOutlierDetectorNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -92,14 +91,8 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         final int newBufferLength = bufferLength + 1 - numValuesToRemoveFromBeginning;
 
         double newBuffer[] = new double[newBufferLength * dimensions];
-        //Setting first values
-        for (int i = 0; i < newBuffer.length - dimensions; i++) {
-            newBuffer[i] = buffer[i + numValuesToRemoveFromBeginning*dimensions];
-        }
-        //Setting last value
-        for (int i = 0; i<dimensions; i++){
-            newBuffer[newBuffer.length - dimensions + i] = value[i];
-        }
+        System.arraycopy(buffer, numValuesToRemoveFromBeginning*dimensions, newBuffer, 0, newBuffer.length - dimensions);
+        System.arraycopy(value, 0, newBuffer, newBuffer.length - dimensions, dimensions);
 
         double upperBounds[] = new double[dimensions];
         double lowerBounds[] = new double[dimensions];

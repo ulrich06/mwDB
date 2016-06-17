@@ -2,6 +2,7 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.plugin.NodeState;
 
 /**
  * Created by andre on 5/9/2016.
@@ -15,36 +16,36 @@ public class StreamDecisionTreeNode extends AbstractClassifierSlidingWindowManag
     }
 
     @Override
-    protected int predictValue(double[] value) {
+    protected int predictValue(NodeState state, double[] value) {
         return 0;
     }
 
     @Override
-    protected double getLikelihoodForClass(double[] value, int classNum) {
-        final int predictedClass = predictValue(value);
+    protected double getLikelihoodForClass(NodeState state, double[] value, int classNum) {
+        final int predictedClass = predictValue(state, value);
         //No real likelihood. Just yes or no.
         return (classNum==predictedClass)?1.0:0.0;
     }
 
     @Override
-    protected void addValueBootstrap(double[] value, int classNum){
-        //-1 because we will add 1 value to the buffer later.
-        while (getCurrentBufferLength() > (getMaxBufferLength()-1)) {
-            removeFirstValueFromBuffer();
-        }
-        super.addValueBootstrap(value, classNum);
-    }
-
-    @Override
-    protected void updateModelParameters(double[] value, int classNumber) {
+    protected void updateModelParameters(NodeState state, double[] valueBuffer, int[] resultBuffer, double[] value, int classNumber) {
         //TODO No tree? Initialize with the leaf.
 
         //TODO If there is a tree already:
-          //TODO Go to the leaf
+        //TODO Go to the leaf
     }
 
     @Override
-    protected void removeAllClassesHook() {
+    protected boolean addValueBootstrap(NodeState state, double[] value, int classNum){
+        //-1 because we will add 1 value to the buffer later.
+        //while (getCurrentBufferLength() > (getMaxBufferLength()-1)) {
+          //  removeFirstValueFromBuffer();
+        //}
+        return super.addValueBootstrap(state, value, classNum);
+    }
+
+    @Override
+    protected void removeAllClassesHook(NodeState state) {
         //Nothing
     }
 }

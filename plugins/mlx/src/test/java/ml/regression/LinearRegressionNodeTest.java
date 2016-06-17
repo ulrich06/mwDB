@@ -75,9 +75,9 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 1) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.bufferError - 166666.6666666) < eps);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0]  - 144.9) < 1);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept + 332.8) < 1);
+                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.bufferError - 79349.32) < 20);
             }
         });
     }

@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.DecisionTreeNode;
+import org.mwg.plugin.NodeState;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     }
 
     @Override
-    protected int predictValue(double[] value) {
+    protected int predictValue(NodeState state, double[] value) {
         if (rootNode == null) {
             rootNode = DecisionTreeNode.deserializeFromDoubleArray(getDecisionTreeArray());
         }
@@ -54,8 +55,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     }
 
     @Override
-    protected double getLikelihoodForClass(double[] value, int classNum) {
-        final int predictedClass = predictValue(value);
+    protected double getLikelihoodForClass(NodeState state, double[] value, int classNum) {
+        final int predictedClass = predictValue(state, value);
         //No real likelihood. Just yes or no.
         return (classNum == predictedClass) ? 1.0 : 0.0;
     }
@@ -206,9 +207,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return leaf;
     }
 
-    private double[][] unpackValues(double[] values) {
-        final int dims = getInputDimensions();
-        final int numValues = getNumValuesInBuffer();
+    private double[][] unpackValues(double[] values, int dims) {
+        final int numValues = values.length/dims;
         double result[][] = new double[numValues][dims];
         int indexX = 0;
         int indexY = 0;
@@ -316,17 +316,17 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     }
 
     @Override
-    protected void updateModelParameters(double[] value, int classNumber) {
+    protected void updateModelParameters(NodeState state, double valueBuffer[], int resultBuffer[], double[] value, int classNumber) {
         if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
             setInputDimensions(value.length);
         }
 
-        rootNode = split(unpackValues(getValueBuffer()), getRealBufferClasses());
+        rootNode = split(unpackValues(valueBuffer, valueBuffer.length/resultBuffer.length), resultBuffer);
         setDecisionTreeArray(rootNode.serializeToDoubleArray());
     }
 
     @Override
-    protected void removeAllClassesHook() {
+    protected void removeAllClassesHook(NodeState state) {
         //Nothing to do here
     }
 }

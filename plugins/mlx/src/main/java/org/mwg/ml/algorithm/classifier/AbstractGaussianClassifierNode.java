@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.plugin.NodeState;
 
 /**
  * Created by andrey.boytsov on 17/05/16.
@@ -37,11 +38,6 @@ public abstract class AbstractGaussianClassifierNode extends AbstractClassifierS
         unphasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, val);
     }
 
-    protected final void setSums(int classNum, double[] vals) {
-        assert vals != null;
-        unphasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
-    }
-
     protected final void setSumsSquared(int classNum, double[] vals) {
         assert vals != null;
         unphasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, vals);
@@ -66,12 +62,12 @@ public abstract class AbstractGaussianClassifierNode extends AbstractClassifierS
     }
 
     @Override
-    protected void removeAllClassesHook() {
+    protected void removeAllClassesHook(NodeState state) {
         int classes[] = getKnownClasses();
         for (int curClass : classes) {
-            unphasedState().setFromKey(INTERNAL_TOTAL_KEY_PREFIX + curClass, Type.INT, 0);
-            unphasedState().setFromKey(INTERNAL_SUM_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
-            unphasedState().setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
+            state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + curClass, Type.INT, 0);
+            state.setFromKey(INTERNAL_SUM_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
+            state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);
         }
     }
 

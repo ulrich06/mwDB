@@ -4,6 +4,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
+import org.mwg.plugin.NodeState;
 
 
 /**
@@ -17,11 +18,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    protected abstract double predictValue(double value[]);
-
-    public double[] getResultBuffer() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_RESULTS_BUFFER_KEY, INTERNAL_RESULTS_BUFFER_DEF);
-    }
+    protected abstract double predictValue(NodeState state, double value[]);
 
     /**
      * Adds new value to the buffer. Connotations change depending on whether the node is in bootstrap mode or not.
@@ -31,60 +28,53 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
     protected boolean addValue(double value[], double result) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
 
-        if (isInBootstrapMode()) {
-            addValueBootstrap(value, result);
-        } else {
-            addValueNoBootstrap(value, result);
+        NodeState state = unphasedState();
+        boolean bootstrapMode = state.getFromKeyWithDefault(BOOTSTRAP_MODE_KEY, BOOTSTRAP_MODE_DEF);
+
+        if (bootstrapMode) {
+            return addValueBootstrap(state, value, result);
         }
-        return isInBootstrapMode(); //Can change since last time
+        return addValueNoBootstrap(state, value, result);
+
     }
 
-    protected void addValueToBuffer(double[] value, double result) {
-        double valueBuffer[] = getValueBuffer();
-        double resultBuffer[] = getResultBuffer();
-        double newBuffer[] = new double[valueBuffer.length + value.length];
-        double newResultBuffer[] = new double[resultBuffer.length + 1];
-        for (int i = 0; i < valueBuffer.length; i++) {
-            newBuffer[i] = valueBuffer[i];
-        }
-        for (int i = 0; i < resultBuffer.length; i++) {
-            newResultBuffer[i] = resultBuffer[i];
-        }
-        for (int i = valueBuffer.length; i < newBuffer.length; i++) {
-            newBuffer[i] = value[i - valueBuffer.length];
-        }
-        newResultBuffer[resultBuffer.length] = result;
-        setValueBuffer(newBuffer);
-        setResultBuffer(newResultBuffer);
+    protected static double[] adjustResultBuffer(NodeState state, double result, boolean bootstrapMode){
+        double resultBuffer[] = state.getFromKeyWithDefault(INTERNAL_RESULTS_BUFFER_KEY, INTERNAL_RESULTS_BUFFER_DEF);
+
+        //So adding 1 value to the end and removing (currentBufferLength + 1) - maxBufferLength from the beginning.
+        final int maxResultBufferLength = state.getFromKeyWithDefault(BUFFER_SIZE_KEY, BUFFER_SIZE_DEF);
+        final int numValuesToRemoveFromBeginning = bootstrapMode ? 0 : Math.max(0, resultBuffer.length + 1 - maxResultBufferLength);
+
+        double newBuffer[] = new double[resultBuffer.length + 1 - numValuesToRemoveFromBeginning];
+        //Setting first values
+        System.arraycopy(resultBuffer, numValuesToRemoveFromBeginning, newBuffer, 0, newBuffer.length - 1);
+        newBuffer[newBuffer.length-1] = result;
+        state.setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.DOUBLE_ARRAY, newBuffer);
+        return newBuffer;
     }
 
-    protected final void setResultBuffer(double[] resBuffer) {
-        AbstractRegressionSlidingWindowManagingNode.requireNotNull(resBuffer,"result buffer must be not null");
-        unphasedState().setFromKey(INTERNAL_RESULTS_BUFFER_KEY, Type.DOUBLE_ARRAY, resBuffer);
-    }
+    protected abstract double getBufferError(NodeState state, double valueBuffer[], double resultBuffer[]);
 
-    protected void addValueNoBootstrap(double value[], double result) {
-        addValueToBuffer(value, result);
-        while (getCurrentBufferLength() > getMaxBufferLength()) {
-            removeFirstValueFromBuffer();
-        }
+    /**
+     *
+     * @param state
+     * @param value
+     * @param result
+     * @return New bootstrap state
+     */
+    protected boolean addValueNoBootstrap(NodeState state, double value[], double result) {
+        double newBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustValueBuffer(state, value, false);
+        double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, false);
 
         //Predict for each value in the buffer. Calculate percentage of errors.
-        double errorInBuffer = getBufferError();
-        if (errorInBuffer > getHigherErrorThreshold()) {
-            setBootstrapMode(true); //If number of errors is above higher threshold, get into the bootstrap
+        double errorInBuffer = getBufferError(state, newBuffer, newResultBuffer);
+        double higherErrorThreshold = state.getFromKeyWithDefault(HIGH_ERROR_THRESH_KEY, HIGH_ERROR_THRESH_DEF);
+        if (errorInBuffer > higherErrorThreshold) {
+            setBootstrapMode(state, true); //If number of errors is above higher threshold, get into the bootstrap
+            updateModelParameters(state, newBuffer, newResultBuffer, value, result);
+            return true;
         }
-    }
-
-    @Override
-    protected void removeFirstValueFromResultBuffer() {
-        double resultBuffer[] = getResultBuffer();
-        if (resultBuffer.length == 0) {
-            return;
-        }
-        double newResultBuffer[] = new double[resultBuffer.length-1];
-        System.arraycopy(resultBuffer, 1, newResultBuffer,0, resultBuffer.length-1);
-        setResultBuffer(newResultBuffer);
+        return false;
     }
 
     /**
@@ -92,17 +82,22 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      *
      * @param value New value to add; {@code null} disallowed
      */
-    protected void addValueBootstrap(double value[], double result) {
-        addValueToBuffer(value, result); //In bootstrap - no need to account for length
-        updateModelParameters(value, result);
+    protected boolean addValueBootstrap(NodeState state, double value[], double result) {
+        double newBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustValueBuffer(state, value, true);
+        double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, true);
+        boolean newBootstrap = true;
 
-        if (getNumValuesInBuffer() >= getMaxBufferLength()) {
+        if (newResultBuffer.length >= getMaxBufferLength()) {
             //Predict for each value in the buffer. Calculate percentage of errors.
-            double errorInBuffer = getBufferError();
-            if (errorInBuffer <= getLowerErrorThreshold()) {
-                setBootstrapMode(false); //If number of errors is below lower threshold, get out of bootstrap
+            double errorInBuffer = getBufferError(state, newBuffer, newResultBuffer);
+            double lowerErrorThreshold = state.getFromKeyWithDefault(LOW_ERROR_THRESH_KEY, LOW_ERROR_THRESH_DEF);
+            if (errorInBuffer <= lowerErrorThreshold) {
+                setBootstrapMode(state, false); //If number of errors is below lower threshold, get out of bootstrap
+                newBootstrap = false;
             }
         }
+        updateModelParameters(state, newBuffer, newResultBuffer, value, result);
+        return newBootstrap;
     }
 
     /**
@@ -124,13 +119,13 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      * @param value
      * @param outcome
      */
-    protected abstract void updateModelParameters(double value[], double outcome);
+    protected abstract void updateModelParameters(NodeState state, double valueBuffer[], double resultBuffer[], double value[], double outcome);
 
     public void extrapolate(final Callback<Double> callback) {
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {
-                double outcome = predictValue(result);
+                double outcome = predictValue(unphasedState(), result);
                 callback.on(outcome);
             }
         });

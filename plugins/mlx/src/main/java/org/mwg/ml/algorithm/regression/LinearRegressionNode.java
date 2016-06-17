@@ -2,10 +2,12 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.operation.PInvSVD;
 import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.NodeState;
 
 public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
@@ -16,34 +18,29 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
     }
 
     @Override
-    protected void updateModelParameters(double[] value, double response) {
+    protected void updateModelParameters(NodeState state, double currentBuffer[], double resultBuffer[], double value[], double currentResult) {
         int dims = getInputDimensions();
         if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
             setInputDimensions(dims);
         }
-        final int bufferLength = getCurrentBufferLength();
-        //Value should be already added to buffer by that time
-        final double currentBuffer[] = getValueBuffer();
         //Adding place for intercepts
-        final double reshapedValue[] = new double[currentBuffer.length + bufferLength];
+        final double reshapedValue[] = new double[currentBuffer.length + resultBuffer.length];
 
-        final double y[] = getResultBuffer();
-
-        final double l2 = getL2Regularization();
+        final double l2 = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
         //Step 1. Re-arrange to column-based format.
-        for (int i = 0; i < bufferLength; i++) {
+        for (int i = 0; i < resultBuffer.length; i++) {
             reshapedValue[i] = 1; //First column is 1 (for intercepts)
         }
-        for (int i = 0; i < bufferLength; i++) {
+        for (int i = 0; i < resultBuffer.length; i++) {
             for (int j = 0; j < dims; j++) {
-                reshapedValue[(j + 1) * bufferLength + i] = currentBuffer[i * dims + j];
+                reshapedValue[(j + 1) * resultBuffer.length + i] = currentBuffer[i * dims + j];
             }
         }
 
-        Matrix xMatrix = new Matrix(reshapedValue, bufferLength, dims + 1);
-        Matrix yVector = new Matrix(y, bufferLength, 1);
+        Matrix xMatrix = new Matrix(reshapedValue, resultBuffer.length, dims + 1);
+        Matrix yVector = new Matrix(resultBuffer, resultBuffer.length, 1);
 
         // inv(Xt * X - lambda*I) * Xt * ys
         // I - almost identity, but with 0 for intercept term
@@ -68,7 +65,7 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
         for (int i = 0; i < dims; i++) {
             newCoefficients[i] = result.get(i + 1, 0);
         }
-        setIntercept(result.get(0, 0));
-        setCoefficients(newCoefficients);
+        state.setFromKey(INTERCEPT_KEY, Type.DOUBLE, result.get(0, 0));
+        state.setFromKey(COEFFICIENTS_KEY, Type.DOUBLE_ARRAY, newCoefficients);
     }
 }
