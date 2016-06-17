@@ -7,6 +7,7 @@ import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.AnomalyDetectionNode;
 import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.NodeState;
 
 import java.util.Arrays;
 
@@ -68,45 +69,57 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
     protected boolean addValue(double value[]) {
         illegalArgumentIfFalse(value != null, "Value must be not null");
 
-        addValueToBuffer(value);
-        while (getCurrentBufferLength() > getMaxBufferLength()) {
-            removeFirstValueFromBuffer();
+        NodeState state = unphasedState();
+        int dimensions = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
+        if (dimensions < 0) {
+            dimensions = value.length;
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
-        recalculateBounds();
 
-        return checkValue(value);
-    }
+        double buffer[] = state.getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
 
-    private void recalculateBounds() {
-        final int dims = getInputDimensions();
-        double buf[] = getValueBuffer();
-        int len = getCurrentBufferLength();
-        for (int i = 0; i < dims; i++) {
+        final int bufferLength = buffer.length / dimensions; //Buffer is "unrolled" into 1D array.
+        //So adding 1 value to the end and removing (currentBufferLength + 1) - maxBufferLength from the beginning.
+        final int maxBufferLength = state.getFromKeyWithDefault(BUFFER_SIZE_KEY, BUFFER_SIZE_DEF);
+        final int numValuesToRemoveFromBeginning = Math.max(0, bufferLength + 1 - maxBufferLength);
+        final int newBufferLength = bufferLength + 1 - numValuesToRemoveFromBeginning;
+
+        double newBuffer[] = new double[newBufferLength * dimensions];
+        //Setting first values
+        for (int i = 0; i < newBuffer.length - dimensions; i++) {
+            newBuffer[i] = buffer[i + numValuesToRemoveFromBeginning*dimensions];
+        }
+        //Setting last value
+        for (int i = 0; i<dimensions; i++){
+            newBuffer[newBuffer.length - dimensions + i] = value[i];
+        }
+
+        double upperBounds[] = new double[dimensions];
+        double lowerBounds[] = new double[dimensions];
+        for (int i = 0; i < dimensions; i++) {
             //Get column
-            double column[] = new double[len];
+            double column[] = new double[newBufferLength];
             int index = i;
-            for (int j = 0; j < len; j++) {
-                column[j] = buf[index];
-                index += dims;
+            for (int j = 0; j < newBufferLength; j++) {
+                column[j] = newBuffer[index];
+                index += dimensions;
             }
             //Sort.
             Arrays.sort(column);
             //Get 25 and 75 percentile
-            double upperPercentile = column[Math.min((int) Math.round(len * UPPER_PERCENTILE), len - 1)];
-            double lowerPercentile = column[Math.max((int) Math.round(len * LOWER_PERCENTILE), 0)];
+            double upperPercentile = column[Math.min((int) Math.round(newBufferLength * UPPER_PERCENTILE), newBufferLength - 1)];
+            double lowerPercentile = column[Math.max((int) Math.round(newBufferLength * LOWER_PERCENTILE), 0)];
             double interquartileRange = upperPercentile - lowerPercentile;
-            double upperBound = upperPercentile + RANGE_COEF * interquartileRange;
-            double lowerBound = lowerPercentile - RANGE_COEF * interquartileRange;
-            unphasedState().setFromKey(UPPER_BOUND_KEY_PREFIX + i, Type.DOUBLE, upperBound);
-            unphasedState().setFromKey(LOWER_BOUND_KEY_PREFIX + i, Type.DOUBLE, lowerBound);
+            upperBounds[i] = upperPercentile + RANGE_COEF * interquartileRange;
+            lowerBounds[i] = lowerPercentile - RANGE_COEF * interquartileRange;
+            state.setFromKey(UPPER_BOUND_KEY_PREFIX + i, Type.DOUBLE, upperBounds[i]);
+            state.setFromKey(LOWER_BOUND_KEY_PREFIX + i, Type.DOUBLE, lowerBounds[i]);
         }
+        state.setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, newBuffer);
+
+        return checkValue(value, upperBounds, lowerBounds);
     }
 
-    public int getCurrentBufferLength() {
-        double valueBuffer[] = getValueBuffer();
-        final int dims = getInputDimensions();
-        return valueBuffer.length / dims;
-    }
 
     private double getUpperBound(int dimension) {
         Object boundObj = unphasedState().getFromKey(UPPER_BOUND_KEY_PREFIX + dimension);
@@ -118,33 +131,14 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         return (Double) boundObj;
     }
 
-    protected boolean checkValue(double value[]) {
+    protected boolean checkValue(double value[], double lowerBounds[], double upperBounds[]) {
         for (int i = 0; i < value.length; i++) {
             //A bit strange condition to make sure that NaNs are counted as anomalies
-            if (!((value[i] <= getUpperBound(i)) && (value[i] >= getLowerBound(i)))) {
+            if (!((value[i] <= upperBounds[i]) && (value[i] >= lowerBounds[i]))) {
                 return true; //Not within bounds? Anomaly
             }
         }
         return false;
-    }
-
-    protected void setInputDimensions(int dims) {
-        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, dims);
-    }
-
-    protected void addValueToBuffer(double[] value) {
-        if (getInputDimensions() < 0) {
-            setInputDimensions(value.length);
-        }
-        double valueBuffer[] = getValueBuffer();
-        double newBuffer[] = new double[valueBuffer.length + value.length];
-        for (int i = 0; i < valueBuffer.length; i++) {
-            newBuffer[i] = valueBuffer[i];
-        }
-        for (int i = valueBuffer.length; i < newBuffer.length; i++) {
-            newBuffer[i] = value[i - valueBuffer.length];
-        }
-        setValueBuffer(newBuffer);
     }
 
     @Override
@@ -163,43 +157,17 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         extractFeatures(new Callback<double[]>() {
             @Override
             public void on(double[] result) {
-                boolean isAnomaly = checkValue(result);
+                double lowerBounds[] = new double[result.length];
+                double upperBounds[] = new double[result.length];
+                NodeState state = unphasedState();
+                for (int i = 0; i < result.length; i++) {
+                    lowerBounds[i] = (Double)state.getFromKey(LOWER_BOUND_KEY_PREFIX + i);
+                    upperBounds[i] = (Double)state.getFromKey(UPPER_BOUND_KEY_PREFIX + i);
+                }
+                boolean isAnomaly = checkValue(result, lowerBounds, upperBounds);
                 callback.on(isAnomaly);
             }
         });
-    }
-
-    protected void removeFirstValueFromBuffer() {
-        final int dims = getInputDimensions();
-        double valueBuffer[] = getValueBuffer();
-        if (valueBuffer.length == 0) {
-            return;
-        }
-        double newBuffer[] = new double[valueBuffer.length - dims];
-        for (int i = 0; i < newBuffer.length; i++) {
-            newBuffer[i] = valueBuffer[i + dims];
-        }
-        setValueBuffer(newBuffer);
-    }
-
-    protected double[] getValueBuffer() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
-    }
-
-    protected int getMaxBufferLength() {
-        return unphasedState().getFromKeyWithDefault(BUFFER_SIZE_KEY, BUFFER_SIZE_DEF);
-    }
-
-    protected final void setValueBuffer(double[] valueBuffer) {
-        InterquartileRangeOutlierDetectorNode.requireNotNull(valueBuffer, "value buffer must be not null");
-        unphasedState().setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, valueBuffer);
-    }
-
-    /**
-     * @return Class index - index in a value array, where class label is supposed to be
-     */
-    protected int getInputDimensions() {
-        return unphasedState().getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
     }
 
     @Override
@@ -213,15 +181,5 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         } else {
             super.setProperty(propertyName, propertyType, propertyValue);
         }
-    }
-
-    @Override
-    public Object get(String propertyName) {
-        if (INPUT_DIM_KEY.equals(propertyName)) {
-            return getInputDimensions();
-        } else if (BUFFER_SIZE_KEY.equals(propertyName)) {
-            return getMaxBufferLength();
-        }
-        return super.get(propertyName);
     }
 }
