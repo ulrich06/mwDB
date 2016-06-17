@@ -12,25 +12,12 @@ import java.util.Arrays;
 
 /**
  * Anomaly is detected if at least for one of the dimensions the value is <...> interquartile ranges away from the mean.
- *
+ * <p>
  * Created by andrey.boytsov on 14/06/16.
  */
-public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implements AnomalyDetectionNode{
+public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implements AnomalyDetectionNode {
 
     public static final String NAME = "InterquartileRangeAnomalyDetection";
-
-    public static class Factory implements NodeFactory {
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            InterquartileRangeOutlierDetectorNode newNode = new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
-            return newNode;
-        }
-    }
 
     /**
      * Attribute key - sliding window of values
@@ -59,7 +46,7 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
     public static final double LOWER_PERCENTILE = 0.25;
     public static final double RANGE_COEF = 1.5;
 
-   /**
+    /**
      * Upper bound for some dimension (dimension added to the key)
      */
     public static final String UPPER_BOUND_KEY_PREFIX = "UpperBoundDimension";
@@ -90,26 +77,26 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         return checkValue(value);
     }
 
-    private void recalculateBounds(){
+    private void recalculateBounds() {
         final int dims = getInputDimensions();
         double buf[] = getValueBuffer();
         int len = getCurrentBufferLength();
-        for (int i=0;i<dims;i++){
+        for (int i = 0; i < dims; i++) {
             //Get column
             double column[] = new double[len];
             int index = i;
-            for (int j = 0; j < len; j++){
+            for (int j = 0; j < len; j++) {
                 column[j] = buf[index];
                 index += dims;
             }
             //Sort.
             Arrays.sort(column);
             //Get 25 and 75 percentile
-            double upperPercentile = column[Math.min((int) Math.round(len*UPPER_PERCENTILE), len-1)];
-            double lowerPercentile = column[Math.max((int) Math.round(len*LOWER_PERCENTILE), 0)];
-            double interquartileRange = upperPercentile-lowerPercentile;
-            double upperBound = upperPercentile + RANGE_COEF*interquartileRange;
-            double lowerBound = lowerPercentile - RANGE_COEF*interquartileRange;
+            double upperPercentile = column[Math.min((int) Math.round(len * UPPER_PERCENTILE), len - 1)];
+            double lowerPercentile = column[Math.max((int) Math.round(len * LOWER_PERCENTILE), 0)];
+            double interquartileRange = upperPercentile - lowerPercentile;
+            double upperBound = upperPercentile + RANGE_COEF * interquartileRange;
+            double lowerBound = lowerPercentile - RANGE_COEF * interquartileRange;
             unphasedState().setFromKey(UPPER_BOUND_KEY_PREFIX + i, Type.DOUBLE, upperBound);
             unphasedState().setFromKey(LOWER_BOUND_KEY_PREFIX + i, Type.DOUBLE, lowerBound);
         }
@@ -121,20 +108,20 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         return valueBuffer.length / dims;
     }
 
-    private double getUpperBound(int dimension){
+    private double getUpperBound(int dimension) {
         Object boundObj = unphasedState().getFromKey(UPPER_BOUND_KEY_PREFIX + dimension);
-        return (Double)boundObj;
+        return (Double) boundObj;
     }
 
-    private double getLowerBound(int dimension){
+    private double getLowerBound(int dimension) {
         Object boundObj = unphasedState().getFromKey(LOWER_BOUND_KEY_PREFIX + dimension);
-        return (Double)boundObj;
+        return (Double) boundObj;
     }
 
-    protected boolean checkValue(double value[]){
-        for (int i=0;i<value.length;i++){
+    protected boolean checkValue(double value[]) {
+        for (int i = 0; i < value.length; i++) {
             //A bit strange condition to make sure that NaNs are counted as anomalies
-            if (!((value[i] <= getUpperBound(i))&&(value[i] >= getLowerBound(i)))){
+            if (!((value[i] <= getUpperBound(i)) && (value[i] >= getLowerBound(i)))) {
                 return true; //Not within bounds? Anomaly
             }
         }
@@ -146,7 +133,7 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
     }
 
     protected void addValueToBuffer(double[] value) {
-        if (getInputDimensions()<0){
+        if (getInputDimensions() < 0) {
             setInputDimensions(value.length);
         }
         double valueBuffer[] = getValueBuffer();
@@ -173,13 +160,13 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
 
     @Override
     public void classify(final Callback<Boolean> callback) {
-            extractFeatures(new Callback<double[]>() {
-                @Override
-                public void on(double[] result) {
-                    boolean isAnomaly = checkValue(result);
-                    callback.on(isAnomaly);
-                }
-            });
+        extractFeatures(new Callback<double[]>() {
+            @Override
+            public void on(double[] result) {
+                boolean isAnomaly = checkValue(result);
+                callback.on(isAnomaly);
+            }
+        });
     }
 
     protected void removeFirstValueFromBuffer() {
@@ -221,7 +208,7 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
             illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
             illegalArgumentIfFalse((Integer) propertyValue > 0, "Buffer size should be positive");
             unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
-        } else if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName)  || INPUT_DIM_KEY.equals(propertyName)) {
+        } else if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || INPUT_DIM_KEY.equals(propertyName)) {
             //Nothing. They are unsettable directly
         } else {
             super.setProperty(propertyName, propertyType, propertyValue);

@@ -2,6 +2,7 @@ package org.mwg.ml;
 
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
 import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
 import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
 import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
@@ -55,6 +56,12 @@ public class MLXPlugin extends MLPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionNode(world, time, id, graph, initialResolution);
+            }
+        });
+        declareNodeType(InterquartileRangeOutlierDetectorNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
             }
         });
     }
