@@ -58,12 +58,6 @@ public class MLXPlugin extends MLPlugin {
                 return new LinearRegressionNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNodeType(InterquartileRangeOutlierDetectorNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
-            }
-        });
     }
 
 }

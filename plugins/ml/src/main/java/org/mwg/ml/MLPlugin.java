@@ -2,6 +2,7 @@ package org.mwg.ml;
 
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
 import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
@@ -39,6 +40,13 @@ public class MLPlugin extends AbstractPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LiveLinearRegressionNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //InterquartileRangeOutlierDetectorNode
+        declareNodeType(InterquartileRangeOutlierDetectorNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
             }
         });
     }

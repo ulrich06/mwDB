@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.AnomalyDetectionNode;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -17,6 +18,8 @@ import java.util.Arrays;
  * Created by andrey.boytsov on 14/06/16.
  */
 public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implements AnomalyDetectionNode {
+
+    public static final int MAX_BUFFER_LIMIT = 100000;
 
     public static final String NAME = "InterquartileRangeAnomalyDetection";
 
@@ -56,6 +59,10 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
      * Lower bound for some dimension (dimension added to the key)
      */
     public static final String LOWER_BOUND_KEY_PREFIX = "LowerBoundDimension";
+
+    private static final Enforcer enforcer = new Enforcer()
+           .asIntWithin(BUFFER_SIZE_KEY, 1, MAX_BUFFER_LIMIT);
+           //.asIntWithin("BufferSize", 1, 100000);
 
     public InterquartileRangeOutlierDetectorNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -172,13 +179,10 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
 
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (BUFFER_SIZE_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse(propertyValue instanceof Integer, "Buffer size should be integer");
-            illegalArgumentIfFalse((Integer) propertyValue > 0, "Buffer size should be positive");
-            unphasedState().setFromKey(BUFFER_SIZE_KEY, Type.INT, propertyValue);
-        } else if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || INPUT_DIM_KEY.equals(propertyName)) {
+        if (INTERNAL_VALUE_BUFFER_KEY.equals(propertyName) || INPUT_DIM_KEY.equals(propertyName)) {
             //Nothing. They are unsettable directly
         } else {
+            enforcer.check(propertyName, propertyType, propertyValue);
             super.setProperty(propertyName, propertyType, propertyValue);
         }
     }
