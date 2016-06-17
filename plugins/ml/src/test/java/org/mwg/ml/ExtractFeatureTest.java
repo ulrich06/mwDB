@@ -13,7 +13,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void test() {
-        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNodeType(NoopRegressionNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new NoopRegressionNode(world, time, id, graph, initialResolution);
@@ -43,7 +43,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMath() {
-        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNodeType(NoopRegressionNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new NoopRegressionNode(world, time, id, graph, initialResolution);
@@ -73,7 +73,7 @@ public class ExtractFeatureTest {
 
     @Test
     public void testMathEscaped() {
-        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNode(NoopRegressionNode.NAME, new NodeFactory() {
+        final Graph graph = new GraphBuilder().withPlugin(new AbstractPlugin().declareNodeType(NoopRegressionNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new NoopRegressionNode(world, time, id, graph, initialResolution);

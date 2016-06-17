@@ -9,10 +9,17 @@ public class AbstractPlugin implements Plugin {
 
     private final Map<String, NodeFactory> _nodeTypes = new HashMap<String, NodeFactory>();
 
-    private final Map<String, TaskActionFactory> _taskActionTypes = new HashMap<String, TaskActionFactory>();
+    private final Map<String, TaskActionFactory> _taskActions = new HashMap<String, TaskActionFactory>();
 
-    public AbstractPlugin declareNode(String name, NodeFactory factory) {
+    @Override
+    public Plugin declareNodeType(String name, NodeFactory factory) {
         _nodeTypes.put(name, factory);
+        return this;
+    }
+
+    @Override
+    public Plugin declareTaskAction(String name, TaskActionFactory factory) {
+        _taskActions.put(name, factory);
         return this;
     }
 
@@ -28,17 +35,13 @@ public class AbstractPlugin implements Plugin {
 
     @Override
     public String[] taskActionTypes() {
-        return _taskActionTypes.keySet().toArray(new String[_taskActionTypes.size()]);
+        return _taskActions.keySet().toArray(new String[_taskActions.size()]);
     }
 
     @Override
     public TaskActionFactory taskActionType(String taskTypeName) {
-        return _taskActionTypes.get(taskTypeName);
+        return _taskActions.get(taskTypeName);
     }
 
-    public AbstractPlugin declareAction(String name, TaskActionFactory factory) {
-        _taskActionTypes.put(name, factory);
-        return this;
-    }
 
 }

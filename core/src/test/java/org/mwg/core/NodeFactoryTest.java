@@ -45,7 +45,7 @@ public class NodeFactoryTest {
 
     @Test
     public void heapTest() {
-        test(new GraphBuilder().withScheduler(new NoopScheduler()).withPlugin(new AbstractPlugin().declareNode(NAME, new NodeFactory() {
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withPlugin(new AbstractPlugin().declareNodeType(NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new ExNodeImpl(world, time, id, graph, initialResolution);
@@ -65,7 +65,7 @@ public class NodeFactoryTest {
 
         Unsafe.DEBUG_MODE = true;
 
-        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).withPlugin(new AbstractPlugin().declareNode(NAME, new NodeFactory() {
+        test(new GraphBuilder().withScheduler(new NoopScheduler()).withOffHeapMemory().withMemorySize(10000).saveEvery(20).withPlugin(new AbstractPlugin().declareNodeType(NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new ExNodeImpl(world, time, id, graph, initialResolution);

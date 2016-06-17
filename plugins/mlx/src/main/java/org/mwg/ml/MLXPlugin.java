@@ -15,43 +15,43 @@ public class MLXPlugin extends MLPlugin {
 
     public MLXPlugin() {
         super();
-        declareNode(GaussianClassifierNode.NAME, new NodeFactory() {
+        declareNodeType(GaussianClassifierNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new GaussianClassifierNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(BatchDecisionTreeNode.NAME, new NodeFactory() {
+        declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(GaussianNaiveBayesianNode.NAME, new NodeFactory() {
+        declareNodeType(GaussianNaiveBayesianNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new GaussianNaiveBayesianNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(LinearRegressionSGDNode.NAME, new NodeFactory() {
+        declareNodeType(LinearRegressionSGDNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(LogisticRegressionClassifierNode.NAME, new NodeFactory() {
+        declareNodeType(LogisticRegressionClassifierNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LogisticRegressionClassifierNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(LinearRegressionBatchGDNode.NAME, new NodeFactory() {
+        declareNodeType(LinearRegressionBatchGDNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNode(LinearRegressionNode.NAME, new NodeFactory() {
+        declareNodeType(LinearRegressionNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionNode(world, time, id, graph, initialResolution);

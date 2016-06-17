@@ -14,28 +14,28 @@ public class MLPlugin extends AbstractPlugin {
     public MLPlugin() {
         super();
         //PolynomialNode
-        declareNode(PolynomialNode.NAME, new NodeFactory() {
+        declareNodeType(PolynomialNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new PolynomialNode(world, time, id, graph, initialResolution);
             }
         });
         //GaussianSlot
-        declareNode(GaussianSlotNode.NAME, new NodeFactory() {
+        declareNodeType(GaussianSlotNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new GaussianSlotNode(world, time, id, graph, initialResolution);
             }
         });
         //GaussianMixtureNode
-        declareNode(GaussianMixtureNode.NAME, new NodeFactory() {
+        declareNodeType(GaussianMixtureNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new GaussianMixtureNode(world, time, id, graph, initialResolution);
             }
         });
         //LiveRegressionNode
-        declareNode(LiveLinearRegressionNode.NAME, new NodeFactory() {
+        declareNodeType(LiveLinearRegressionNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LiveLinearRegressionNode(world, time, id, graph, initialResolution);

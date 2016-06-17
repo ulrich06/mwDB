@@ -434,13 +434,13 @@ declare module org {
             }
             class AbstractPlugin implements org.mwg.plugin.Plugin {
                 private _nodeTypes;
-                private _taskActionTypes;
-                declareNode(name: string, factory: org.mwg.plugin.NodeFactory): org.mwg.plugin.AbstractPlugin;
+                private _taskActions;
+                declareNodeType(name: string, factory: org.mwg.plugin.NodeFactory): org.mwg.plugin.Plugin;
+                declareTaskAction(name: string, factory: org.mwg.task.TaskActionFactory): org.mwg.plugin.Plugin;
                 nodeTypes(): string[];
                 nodeType(nodeTypeName: string): org.mwg.plugin.NodeFactory;
                 taskActionTypes(): string[];
                 taskActionType(taskTypeName: string): org.mwg.task.TaskActionFactory;
-                declareAction(name: string, factory: org.mwg.task.TaskActionFactory): org.mwg.plugin.AbstractPlugin;
             }
             class Base64 {
                 private static dictionary;
@@ -526,6 +526,8 @@ declare module org {
                 (attributeKey: number, elemType: number, elem: any): void;
             }
             interface Plugin {
+                declareNodeType(name: string, factory: org.mwg.plugin.NodeFactory): org.mwg.plugin.Plugin;
+                declareTaskAction(name: string, factory: org.mwg.task.TaskActionFactory): org.mwg.plugin.Plugin;
                 nodeTypes(): string[];
                 nodeType(nodeTypeName: string): org.mwg.plugin.NodeFactory;
                 taskActionTypes(): string[];
