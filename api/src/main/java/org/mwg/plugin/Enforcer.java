@@ -58,7 +58,7 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.DOUBLE) {
+                if (input != null && (inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG)) {
                     throw new RuntimeException("Property " + propertyName + " should be double value, currently " + input);
                 }
             }
@@ -70,7 +70,7 @@ public class Enforcer {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
                 double inputDouble = (double) input;
-                if (input != null && (inputType != Type.DOUBLE || inputDouble < min || inputDouble > max)) {
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble < min || inputDouble > max)) {
                     throw new RuntimeException("Property " + propertyName + " should be double value [" + min + "," + max + "], currently " + input);
                 }
             }
@@ -92,8 +92,8 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                int inputDouble = (int) input;
-                if (input != null && ((inputType != Type.INT && inputType != Type.LONG) || inputDouble < min || inputDouble > max)) {
+                int inputInt = (int) input;
+                if (input != null && ((inputType != Type.INT && inputType != Type.LONG) || inputInt < min || inputInt > max)) {
                     throw new RuntimeException("Property " + propertyName + " should be integer value [" + min + "," + max + "], currently " + input);
                 }
             }
@@ -115,7 +115,8 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.INT && inputType<=0) {
+                int inputInt = (int) input;
+                if (input != null && inputType != Type.INT && inputInt<=0) {
                     throw new RuntimeException("Property " + propertyName + " should be a positive integer, currently " + input);
                 }
             }
@@ -126,7 +127,8 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.DOUBLE && inputType<=0) {
+                double inputDouble = (double) input;
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble<=0)) {
                     throw new RuntimeException("Property " + propertyName + " should be a positive double, currently " + input);
                 }
             }
@@ -137,7 +139,8 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.LONG && inputType<=0) {
+                long inputLong=(long) input;
+                if (input != null && ((inputType != Type.LONG && inputType != Type.INT)  || inputLong<=0)) {
                     throw new RuntimeException("Property " + propertyName + " should be a positive long, currently " + input);
                 }
             }
