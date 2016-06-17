@@ -429,8 +429,6 @@ declare module org {
                 unindex(indexName: string, nodeToIndex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
                 private isNaN(toTest);
                 toString(): string;
-                setPropertyWithType(propertyName: string, propertyType: number, propertyValue: any, propertyTargetType: number): void;
-                private parseInteger(numberValue);
             }
             class AbstractPlugin implements org.mwg.plugin.Plugin {
                 private _nodeTypes;
@@ -501,6 +499,23 @@ declare module org {
                 static TIME_TREE_CHUNK: number;
                 static WORLD_ORDER_CHUNK: number;
                 static GEN_CHUNK: number;
+            }
+            class Enforcer {
+                private checkers;
+                asBool(propertyName: string): org.mwg.plugin.Enforcer;
+                asString(propertyName: string): org.mwg.plugin.Enforcer;
+                asLong(propertyName: string): org.mwg.plugin.Enforcer;
+                asLongWithin(propertyName: string, min: number, max: number): org.mwg.plugin.Enforcer;
+                asDouble(propertyName: string): org.mwg.plugin.Enforcer;
+                asDoubleWithin(propertyName: string, min: number, max: number): org.mwg.plugin.Enforcer;
+                asInt(propertyName: string): org.mwg.plugin.Enforcer;
+                asIntWithin(propertyName: string, min: number, max: number): org.mwg.plugin.Enforcer;
+                asDoubleArray(propertyName: string): org.mwg.plugin.Enforcer;
+                declare(propertyName: string, checker: org.mwg.plugin.EnforcerChecker): org.mwg.plugin.Enforcer;
+                check(propertyName: string, propertyType: number, propertyValue: any): void;
+            }
+            interface EnforcerChecker {
+                check(inputType: number, input: any): void;
             }
             interface Job {
                 (): void;

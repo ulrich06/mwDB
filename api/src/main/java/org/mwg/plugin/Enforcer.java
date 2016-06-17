@@ -35,7 +35,7 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.LONG) {
+                if (input != null && inputType != Type.LONG && inputType != Type.INT) {
                     throw new RuntimeException("Property " + propertyName + " should be long value, currently " + input);
                 }
             }
@@ -47,7 +47,7 @@ public class Enforcer {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
                 long inputDouble = (long) input;
-                if (input != null && (inputType != Type.LONG || inputDouble < min || inputDouble > max)) {
+                if (input != null && ((inputType != Type.LONG && inputType != Type.INT) || inputDouble < min || inputDouble > max)) {
                     throw new RuntimeException("Property " + propertyName + " should be long value [" + min + "," + max + "], currently " + input);
                 }
             }
@@ -81,7 +81,7 @@ public class Enforcer {
         return declare(propertyName, new EnforcerChecker() {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
-                if (input != null && inputType != Type.INT) {
+                if (input != null && inputType != Type.INT && inputType != Type.LONG) {
                     throw new RuntimeException("Property " + propertyName + " should be integer value, currently " + input);
                 }
             }
@@ -93,7 +93,7 @@ public class Enforcer {
             @Override
             public void check(byte inputType, Object input) throws RuntimeException {
                 int inputDouble = (int) input;
-                if (input != null && (inputType != Type.INT || inputDouble < min || inputDouble > max)) {
+                if (input != null && ((inputType != Type.INT && inputType != Type.LONG) || inputDouble < min || inputDouble > max)) {
                     throw new RuntimeException("Property " + propertyName + " should be integer value [" + min + "," + max + "], currently " + input);
                 }
             }
