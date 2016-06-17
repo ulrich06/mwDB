@@ -10,7 +10,7 @@ public class AbstractPlugin implements Plugin {
     private final Map<String, NodeFactory> _nodeTypes = new HashMap<String, NodeFactory>();
 
     private final Map<String, TaskActionFactory> _taskActions = new HashMap<String, TaskActionFactory>();
-    
+
     @Override
     public Plugin declareNodeType(String name, NodeFactory factory) {
         _nodeTypes.put(name, factory);
@@ -42,6 +42,5 @@ public class AbstractPlugin implements Plugin {
     public TaskActionFactory taskActionType(String taskTypeName) {
         return _taskActions.get(taskTypeName);
     }
-
-
+    
 }
