@@ -52,9 +52,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
     private static final Enforcer enforcer = new Enforcer()
             .asIntWithin(LEVEL, 0, 1000)
-            .asIntWithin(WIDTH, 0, 1000)
-            .asDouble(COMPRESSION_FACTOR)
-            .asDouble(THRESHOLD)
+            .asIntWithin(WIDTH, 1, 1000)
+            .asPositiveDouble(COMPRESSION_FACTOR)
+            .asPositiveDouble(THRESHOLD)
             .asDoubleArray(PRECISION);
 
     @Override

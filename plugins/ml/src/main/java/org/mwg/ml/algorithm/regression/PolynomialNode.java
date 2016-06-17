@@ -35,12 +35,13 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
     private static final int MAX_DEGREE = 20; // maximum polynomial degree
 
     private final static String NOT_MANAGED_ATT_ERROR = "Polynomial node can only handle value attribute, please use a super node to store other data";
+    private static final Enforcer enforcer = new Enforcer().asPositiveDouble(PRECISION);
+
 
     public PolynomialNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    private static final Enforcer enforcer = new Enforcer().asDouble(PRECISION);
 
     //Override default Abstract node default setters and getters
     @Override
