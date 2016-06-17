@@ -2,12 +2,10 @@ package org.mwg.ml.algorithm.profiling;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
 import org.mwg.plugin.Enforcer;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
@@ -148,8 +146,8 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
     private static final String INTERNAL_SUMSQUARE_KEY = "_sumSquare";
 
     private static final Enforcer enforcer = new Enforcer()
-            .asInt(SLOTS_NUMBER)
-            .asLong(PERIOD_SIZE);
+            .asPositiveInt(SLOTS_NUMBER)
+            .asPositiveLong(PERIOD_SIZE);
 
     //Override default Abstract node default setters and getters
     @Override
