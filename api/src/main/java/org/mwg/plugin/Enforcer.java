@@ -133,6 +133,17 @@ public class Enforcer {
         });
     }
 
+    public Enforcer asPositiveLong(String propertyName) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                if (input != null && inputType != Type.LONG && inputType<=0) {
+                    throw new RuntimeException("Property " + propertyName + " should be a positive long, currently " + input);
+                }
+            }
+        });
+    }
+
     public Enforcer declare(String propertyName, EnforcerChecker checker) {
         this.checkers.put(propertyName, checker);
         return this;
