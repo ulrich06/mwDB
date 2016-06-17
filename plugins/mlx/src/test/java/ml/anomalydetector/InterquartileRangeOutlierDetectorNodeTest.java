@@ -106,8 +106,26 @@ public class InterquartileRangeOutlierDetectorNodeTest {
         return cjc;
     }
 
+    protected AnomalyDetectionJumpCallback runThroughDummyDataset2D(AnomalyDetectionNode classfierNode){
+        final AnomalyDetectionJumpCallback cjc = new AnomalyDetectionJumpCallback(new String[]{"f1","f2"});
+
+        Callback<AnomalyDetectionNode> cad = new Callback<AnomalyDetectionNode>() {
+            @Override
+            public void on(AnomalyDetectionNode result) {
+                cjc.on(result);
+            }
+        };
+
+        for (int i = 0; i < testSet.length; i++) {
+            cjc.value = new double[]{testSet[i], -testSet[i]};
+            classfierNode.jump(i, cad);
+        }
+
+        return cjc;
+    }
+
     @Test
-    public void test() {
+    public void test1D() {
         //This test fails if there are too many errors
         final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
@@ -148,6 +166,65 @@ public class InterquartileRangeOutlierDetectorNodeTest {
                 index++;
 
                 acc.value = new double[]{2.37};
+                acc.expectedOutlier = true;
+                iqadNode.jump(index, accCB);
+                assertTrue(acc.called);
+                index++;
+
+                iqadNode.free();
+                graph.disconnect(null);
+            }
+        });
+    }
+
+    @Test
+    public void test2D() {
+        //This test fails if there are too many errors
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                InterquartileRangeOutlierDetectorNode iqadNode = (InterquartileRangeOutlierDetectorNode) graph.newTypedNode(0, 0, InterquartileRangeOutlierDetectorNode.NAME);
+
+                iqadNode.setProperty(InterquartileRangeOutlierDetectorNode.BUFFER_SIZE_KEY, Type.INT, testSet.length);
+                iqadNode.set(AbstractMLNode.FROM, "f1;f2");
+
+                final AnomalyDetectionJumpCallback adjc = runThroughDummyDataset2D(iqadNode);
+                final AnomalyClassifyCallback acc = new AnomalyClassifyCallback(new String[]{"f1","f2"});
+                int index = testSet.length;
+
+                Callback<AnomalyDetectionNode> accCB = new Callback<AnomalyDetectionNode>() {
+                    @Override
+                    public void on(AnomalyDetectionNode result) {
+                        acc.on(result);
+                    }
+                };
+
+                acc.value = new double[]{-2.44, 0};
+                acc.expectedOutlier = true;
+                iqadNode.jump(index, accCB);
+                assertTrue(acc.called);
+                index++;
+
+                acc.value = new double[]{0, 2.56};
+                acc.expectedOutlier = true;
+                iqadNode.jump(index, accCB);
+                assertTrue(acc.called);
+                index++;
+
+                acc.value = new double[]{-2.43, 2.43};
+                acc.expectedOutlier = false;
+                iqadNode.jump(index, accCB);
+                assertTrue(acc.called);
+                index++;
+
+                acc.value = new double[]{2.36, -2.36};
+                acc.expectedOutlier = false;
+                iqadNode.jump(index, accCB);
+                assertTrue(acc.called);
+                index++;
+
+                acc.value = new double[]{2.37, 0};
                 acc.expectedOutlier = true;
                 iqadNode.jump(index, accCB);
                 assertTrue(acc.called);
