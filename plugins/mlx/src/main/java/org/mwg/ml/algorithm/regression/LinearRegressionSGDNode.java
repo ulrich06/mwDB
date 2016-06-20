@@ -1,9 +1,7 @@
 package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 /**

@@ -61,10 +61,10 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
     /**
      * Attribute key - List of known classes
      */
-    private static final String INTERNAL_KNOWN_CLASSES_LIST = "_knownClassesList";
+    public static final String KNOWN_CLASSES_LIST_KEY = "_knownClassesList";
 
     protected void addToKnownClassesList(NodeState state, int classLabel) {
-        int[] knownClasses = getKnownClasses();
+        int[] knownClasses = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         int[] newKnownClasses = new int[knownClasses.length + 1];
         for (int i = 0; i < knownClasses.length; i++) {
             if (classLabel == knownClasses[i]) {
@@ -73,7 +73,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
             newKnownClasses[i] = knownClasses[i];
         }
         newKnownClasses[knownClasses.length] = classLabel;
-        state.setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, newKnownClasses);
+        state.setFromKey(KNOWN_CLASSES_LIST_KEY, Type.INT_ARRAY, newKnownClasses);
     }
 
     /**
@@ -82,10 +82,6 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      * @return
      */
     protected abstract double getLikelihoodForClass(NodeState state, double value[], int classNum);
-
-    protected int[] getKnownClasses() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_KNOWN_CLASSES_LIST, new int[0]);
-    }
 
     /**
      * Adds value's contribution to total, sum and sum of squares of new model.
@@ -119,7 +115,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
 
     private void removeAllClasses(NodeState state) {
         removeAllClassesHook(state);
-        state.setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, new int[0]);
+        state.setFromKey(KNOWN_CLASSES_LIST_KEY, Type.INT_ARRAY, new int[0]);
     }
 
     /**

@@ -32,7 +32,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
     //TODO Try out changing parameters on the fly
 
     protected void initializeClassIfNecessary(NodeState state, int classNum) {
-        Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        Object oldSumsObj = state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         if (oldSumsObj != null) {
             //Is there, but could be deleted
             double oldSums[] = (double[]) oldSumsObj;
@@ -99,7 +99,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
 
     @Override
     protected int predictValue(NodeState state, double value[]) {
-        int classes[] = getKnownClasses();
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes) {
@@ -116,7 +116,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
     public String toString() {
         NodeState state = unphasedState();
         String result = "";
-        int allClasses[] = getKnownClasses();
+        int allClasses[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         if (allClasses.length == 0) {
             return "No classes";
         }
@@ -127,7 +127,7 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
                 result += classNum + ": Not enough data(" + total + ")\n";
             } else {
                 double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
-                double means[] = (double[])unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+                double means[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
                 for (int i = 0; i < means.length; i++) {
                     means[i] = means[i] / total;
                 }

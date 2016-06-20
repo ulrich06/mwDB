@@ -2,7 +2,6 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeState;
 
@@ -35,7 +34,7 @@ public abstract class AbstractGaussianClassifierNode extends AbstractClassifierS
 
     @Override
     protected void removeAllClassesHook(NodeState state) {
-        int classes[] = getKnownClasses();
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         for (int curClass : classes) {
             state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + curClass, Type.INT, 0);
             state.setFromKey(INTERNAL_SUM_KEY_PREFIX + curClass, Type.DOUBLE_ARRAY, new double[0]);

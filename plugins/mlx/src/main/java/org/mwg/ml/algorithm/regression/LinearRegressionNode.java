@@ -1,12 +1,10 @@
 package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.operation.PInvSVD;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 public class LinearRegressionNode extends AbstractLinearRegressionNode {

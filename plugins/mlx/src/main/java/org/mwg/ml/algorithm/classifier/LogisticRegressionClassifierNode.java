@@ -1,12 +1,10 @@
 package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.Enforcer;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 /**
@@ -92,7 +90,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     protected int predictValue(NodeState state, double[] value) {
-        int classes[] = getKnownClasses();
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         double maxLikelihood = -1.0; //Guaranteed to change. No real likelihood is less than 0.
         int maxClass = 0;
         for (int cl : classes) {
@@ -126,7 +124,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
         final double alpha = state.getFromKeyWithDefault(LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
         final double lambda = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
-        int classes[] = getKnownClasses();
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         for (final int cl : classes) {
             double coefs[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY + cl, COEFFICIENTS_DEF);
             double intercept = state.getFromKeyWithDefault(INTERCEPT_KEY + cl, INTERCEPT_DEF);
@@ -194,7 +192,7 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     protected void removeAllClassesHook(NodeState state) {
-        int classes[] = getKnownClasses();
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         for (int curClass : classes) {
             state.setFromKey(INTERCEPT_KEY + curClass, Type.DOUBLE, INTERCEPT_DEF);
             state.setFromKey(COEFFICIENTS_KEY + curClass, Type.DOUBLE_ARRAY, COEFFICIENTS_DEF);

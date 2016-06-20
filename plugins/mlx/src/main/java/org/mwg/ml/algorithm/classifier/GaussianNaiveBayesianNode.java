@@ -54,7 +54,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, curTotal + 1);
 
         double currentSum[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
-        double currentSumSquares[] = (double[])unphasedState().getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
+        double currentSumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         for (int i = 0; i < value.length; i++) {
             currentSum[i] += value[i];
             currentSumSquares[i] += value[i] * value[i];
@@ -89,11 +89,10 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
 
     @Override
     protected int predictValue(NodeState state, double value[]) {
-        int kk[] = getKnownClasses();
-        if (kk.length == 1) {
-            return kk[0];
+        int classes[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
+        if (classes.length == 1) {
+            return classes[0];
         }
-        int classes[] = getKnownClasses();
         double curMaxLikelihood = Constants.BEGINNING_OF_TIME; //Even likelihood 0 should surpass it
         int curMaxLikelihoodClass = -1;
         for (int curClass : classes) {
@@ -110,7 +109,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
     public String toString() {
         NodeState state = unphasedState();
         String result = "";
-        int allClasses[] = getKnownClasses();
+        int allClasses[] = state.getFromKeyWithDefault(KNOWN_CLASSES_LIST_KEY, new int[0]);
         if (allClasses.length == 0) {
             return "No classes";
         }

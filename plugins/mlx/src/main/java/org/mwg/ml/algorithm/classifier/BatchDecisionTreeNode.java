@@ -35,21 +35,10 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     protected static final String INTERNAL_DECISION_TREE_KEY = "_decisionTreeSerialized";
 
-    protected void setDecisionTreeArray(double[] decisionTreeArray) {
-        BatchDecisionTreeNode.requireNotNull(decisionTreeArray, "Decision tree must be not null at that point");
-        unphasedState().setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, decisionTreeArray);
-    }
-
-    protected double[] getDecisionTreeArray() {
-        Object objDT = unphasedState().getFromKey(INTERNAL_DECISION_TREE_KEY);
-        BatchDecisionTreeNode.requireNotNull(objDT, "Decision tree must be not null at that point");
-        return (double[]) objDT;
-    }
-
     @Override
     protected int predictValue(NodeState state, double[] value) {
         if (rootNode == null) {
-            rootNode = DecisionTreeNode.deserializeFromDoubleArray(getDecisionTreeArray());
+            rootNode = DecisionTreeNode.deserializeFromDoubleArray((double[])state.getFromKey(INTERNAL_DECISION_TREE_KEY));
         }
         return predict(rootNode, value);
     }
@@ -322,7 +311,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         }
 
         rootNode = split(state, unpackValues(valueBuffer, valueBuffer.length/resultBuffer.length), resultBuffer);
-        setDecisionTreeArray(rootNode.serializeToDoubleArray());
+        state.setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, rootNode.serializeToDoubleArray());
     }
 
     @Override

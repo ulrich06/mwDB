@@ -74,11 +74,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    protected final void setValueBuffer(double[] valueBuffer) {
-        AbstractSlidingWindowManagingNode.requireNotNull(valueBuffer, "value buffer must be not null");
-        unphasedState().setFromKey(INTERNAL_VALUE_BUFFER_KEY, Type.DOUBLE_ARRAY, valueBuffer);
-    }
-
     /**
      * Adjust buffer: adds value to the end of it, removes first value(s) if necessary.
      *
