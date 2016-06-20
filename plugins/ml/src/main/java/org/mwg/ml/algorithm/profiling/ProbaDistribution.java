@@ -7,9 +7,9 @@ import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 
 public class ProbaDistribution {
     
-    private MultivariateNormalDistribution[] distributions;
-    private int total[];
-    private int global;
+    public MultivariateNormalDistribution[] distributions;
+    public int total[];
+    public int global;
 
     public ProbaDistribution(int total[], MultivariateNormalDistribution[] distributions, int global) {
         this.total = total;
@@ -100,18 +100,5 @@ public class ProbaDistribution {
         }
         error[0] = error[0] / res1.length;
         return error;
-    }
-
-
-    public NDimentionalArray ParallelCalculate(double[][] space, ProgressReporter progressReporter) {
-        NDimentionalArray result = new NDimentionalArray();
-
-        try {
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 }
