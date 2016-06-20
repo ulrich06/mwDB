@@ -222,7 +222,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return result;
     }
 
-    private DecisionTreeNode split(double[][] values, int classNumbers[]) {
+    private DecisionTreeNode split(NodeState state, double[][] values, int classNumbers[]) {
         assert classNumbers.length > 0;
         //Step 1. Select the feature to split upon
         // For each feature:
@@ -239,7 +239,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
             return createLeaf(getMostFrequentElement(classNumbers));
         }
 
-        final int dims = getInputDimensions();
+        final int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
         int chosenFeature = -1;
         double maxImprovement = 0; //TODO initialize with threshold
         double bestBoundary = Double.NaN;
@@ -287,8 +287,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         split.featureNum = chosenFeature;
         split.boundary = boundary;
         //split.classNum does not matter
-        split.left = split(bbValuesArray, bbClasses);
-        split.right = split(abValuesArray, abClasses);
+        split.left = split(state, bbValuesArray, bbClasses);
+        split.right = split(state, abValuesArray, abClasses);
         return split;
     }
 
@@ -317,11 +317,11 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     @Override
     protected void updateModelParameters(NodeState state, double valueBuffer[], int resultBuffer[], double[] value, int classNumber) {
-        if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
-            setInputDimensions(value.length);
+        if (state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF) == INPUT_DIM_UNKNOWN) {
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
 
-        rootNode = split(unpackValues(valueBuffer, valueBuffer.length/resultBuffer.length), resultBuffer);
+        rootNode = split(state, unpackValues(valueBuffer, valueBuffer.length/resultBuffer.length), resultBuffer);
         setDecisionTreeArray(rootNode.serializeToDoubleArray());
     }
 

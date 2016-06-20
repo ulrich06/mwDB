@@ -115,20 +115,6 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         return unphasedState().getFromKeyWithDefault(BUFFER_SIZE_KEY, BUFFER_SIZE_DEF);
     }
 
-    /**
-     * @return Class index - index in a value array, where class label is supposed to be
-     */
-    protected int getInputDimensions() {
-        return unphasedState().getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
-    }
-
-    /**
-     * @return Class index - index in a value array, where class label is supposed to be
-     */
-    protected void setInputDimensions(int dims) {
-        unphasedState().setFromKey(INPUT_DIM_KEY, Type.INT, dims);
-    }
-
     //Results buffer is set by further class. .
     private static final Enforcer enforcer = new Enforcer()
             .asPositiveInt(BUFFER_SIZE_KEY)
@@ -160,9 +146,5 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
         }
         newState.setFromKey(BOOTSTRAP_MODE_KEY, Type.BOOL, newBootstrapMode);
         return newState;
-    }
-
-    public boolean debugIsInBootstrapMode() {
-        return unphasedState().getFromKeyWithDefault(BOOTSTRAP_MODE_KEY, true);
     }
 }

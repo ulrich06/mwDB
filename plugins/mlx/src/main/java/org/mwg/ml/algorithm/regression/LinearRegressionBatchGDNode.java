@@ -24,16 +24,16 @@ public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRe
     @Override
     protected void updateModelParameters(NodeState state, double valueBuffer[], double resultBuffer[], double value[], double result) {
         //Value should be already added to buffer by that time
-        int dims = getInputDimensions();
+        int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_UNKNOWN);
         if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
-            setInputDimensions(dims);
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, dims);
         }
-        final double alpha = state.getFromKeyWithDefault(INTERNAL_VALUE_LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
+        final double alpha = state.getFromKeyWithDefault(LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
         final double lambda = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
-        final double gdErrorThresh = getIterationErrorThreshold();
-        final int gdIterThresh = getIterationCountThreshold();
+        final double gdErrorThresh = state.getFromKeyWithDefault(GD_ERROR_THRESH_KEY, Double.NaN);
+        final int gdIterThresh = state.getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
 
         //Get coefficients. If they are of length 0, initialize with random.
         double coefs[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);

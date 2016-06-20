@@ -8,6 +8,7 @@ import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
+import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
 import org.mwg.ml.AbstractMLNode;
 
@@ -36,7 +37,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFFER_SIZE);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.001);
-                lrNode.setLearningRate(0.01);
+                lrNode.setProperty(LinearRegressionBatchGDNode.LEARNING_RATE_KEY, Type.DOUBLE, 0.01);
                 lrNode.set(AbstractMLNode.FROM, FEATURE);
 
                 AbstractLinearRegressionTest.RegressionJumpCallback rjc = runRandom(lrNode, BUFFER_SIZE+1000);

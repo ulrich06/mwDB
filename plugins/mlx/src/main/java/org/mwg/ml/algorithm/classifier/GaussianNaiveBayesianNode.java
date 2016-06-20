@@ -33,9 +33,9 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             }
         }
 
-        addToKnownClassesList(classNum);
+        addToKnownClassesList(state, classNum);
         state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, 0);
-        final int dimensions = getInputDimensions();
+        final int dimensions = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
         state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dimensions]);
         state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dimensions]);
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
@@ -46,8 +46,8 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
     protected void updateModelParameters(NodeState state, double valueBuffer[], int resultBuffer[], double value[], int classNum) {
         //Rebuild Gaussian for mentioned class
         //Update sum, sum of squares and total
-        if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
-            setInputDimensions(value.length);
+        if (state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF) == INPUT_DIM_UNKNOWN) {
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
         initializeClassIfNecessary(state, classNum);
         int curTotal = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
@@ -80,7 +80,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         double likelihood = 1;
         double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         double sumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
-        for (int i = 0; i < getInputDimensions(); i++) {
+        for (int i = 0; i < state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF); i++) {
             likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
         }
         //TODO Use log likelihood? Can be better for underflows.

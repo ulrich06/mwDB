@@ -4,6 +4,7 @@ import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.RegressionNode;
 import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 
 public abstract class AbstractLinearRegressionNode extends AbstractRegressionSlidingWindowManagingNode implements RegressionNode {
@@ -38,55 +39,17 @@ public abstract class AbstractLinearRegressionNode extends AbstractRegressionSli
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
+    private static final Enforcer alrEnforcer = new Enforcer()
+            .asNonNegativeDouble(L2_COEF_KEY);
+
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (L2_COEF_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse( (propertyValue instanceof Double)||(propertyValue instanceof Integer),
-                    "L2 regularization coefficient should be of type double or integer");
-            if (propertyValue instanceof Double){
-                illegalArgumentIfFalse((Double)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((Double)propertyValue);
-            }else{
-                illegalArgumentIfFalse((Integer)propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((double)((Integer)propertyValue));
-            }
-        }else if (COEFFICIENTS_KEY.equals(propertyName) || INTERCEPT_KEY.equals(propertyName)) {
+        if (COEFFICIENTS_KEY.equals(propertyName) || INTERCEPT_KEY.equals(propertyName)) {
             //Nothing. Those cannot be set.
         }else{
+            alrEnforcer.check(propertyName, propertyType, propertyValue);
             super.setProperty(propertyName, propertyType, propertyValue);
         }
-    }
-
-    @Override
-    public Object get(String propertyName){
-        if(COEFFICIENTS_KEY.equals(propertyName)){
-            return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
-        }else if(INTERCEPT_KEY.equals(propertyName)){
-            return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF);
-        }else if(L2_COEF_KEY.equals(propertyName)){
-            return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
-        }
-        return super.get(propertyName);
-    }
-
-    public double[] debugGetCoefficients() {
-        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY, new double[0]);
-    }
-
-    public double debugGetL2Regularization() {
-        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, 0.0);
-    }
-
-    public double debugGetIntercept() {
-        // Objects.requireNonNull(coefficients,"Regression coefficients must be not null");
-        return unphasedState().getFromKeyWithDefault(INTERCEPT_KEY, 0.0);
-    }
-
-    public void setL2Regularization(double l2) {
-        illegalArgumentIfFalse(l2>=0,"L2 coefficients must be non-negative");
-        unphasedState().setFromKey(L2_COEF_KEY, Type.DOUBLE, l2);
     }
 
     @Override

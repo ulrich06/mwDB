@@ -19,10 +19,10 @@ public class LinearRegressionNode extends AbstractLinearRegressionNode {
 
     @Override
     protected void updateModelParameters(NodeState state, double currentBuffer[], double resultBuffer[], double value[], double currentResult) {
-        int dims = getInputDimensions();
+        int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_UNKNOWN);
         if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
-            setInputDimensions(dims);
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, dims);
         }
         //Adding place for intercepts
         final double reshapedValue[] = new double[currentBuffer.length + resultBuffer.length];

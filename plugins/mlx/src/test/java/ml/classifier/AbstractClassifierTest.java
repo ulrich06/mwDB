@@ -134,7 +134,9 @@ public class AbstractClassifierTest {
                 result.set(features[i], value[i]);
             }
             result.learn(expectedClass, cb);
-            if (result.debugIsInBootstrapMode() != expectedBootstrap) {
+            Boolean bootstrapObj = (Boolean)result.get(AbstractClassifierSlidingWindowManagingNode.BOOTSTRAP_MODE_KEY);
+            boolean curBootstrap = (bootstrapObj==null)?true:bootstrapObj;
+            if (curBootstrap != expectedBootstrap) {
                 errors++;
             }
             result.free();

@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
+import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
@@ -96,7 +97,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
-                lrNode.setL2Regularization(1000000000);
+                lrNode.setProperty(LinearRegressionNode.L2_COEF_KEY, Type.DOUBLE, 1000000000.0);
 
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, false);
 

@@ -46,12 +46,12 @@ public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegres
     @Override
     protected void updateModelParameters(NodeState state, double valueBuffer[], double resultBuffer[], double value[], double response) {
         //Value should be already added to buffer by that time
-        int dims = getInputDimensions();
+        int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_UNKNOWN);
         if (dims == INPUT_DIM_UNKNOWN) {
             dims = value.length;
-            setInputDimensions(dims);
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, dims);
         }
-        final double alpha = state.getFromKeyWithDefault(INTERNAL_VALUE_LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
+        final double alpha = state.getFromKeyWithDefault(LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
         double lambda = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
         //Get coefficients. If they are of length 0, initialize with random.

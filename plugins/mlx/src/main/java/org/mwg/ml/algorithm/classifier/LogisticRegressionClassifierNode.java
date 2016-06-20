@@ -114,11 +114,11 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     protected void updateModelParameters(NodeState state, double[] valueBuffer, int resultBuffer[], double value[], int classNumber) {
-        if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
-            setInputDimensions(value.length);
+        if (state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF) == INPUT_DIM_UNKNOWN) {
+            state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
         initializeClassIfNecessary(state, classNumber);
-        final int dims = getInputDimensions();
+        final int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
 
         final double gdDifferenceThresh = state.getFromKeyWithDefault(GD_DIFFERENCE_THRESH_KEY, 0.0);
         final int gdIterThresh = state.getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
@@ -211,9 +211,9 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 return;
             }
         }
-        int dims = getInputDimensions();
+        int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
 
-        addToKnownClassesList(classNum);
+        addToKnownClassesList(state, classNum);
         state.setFromKey(COEFFICIENTS_KEY + classNum, Type.DOUBLE_ARRAY, new double[dims]);
         state.setFromKey(INTERCEPT_KEY + classNum, Type.DOUBLE, INTERCEPT_DEF);
     }

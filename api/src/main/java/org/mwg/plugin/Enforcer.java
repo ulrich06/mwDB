@@ -109,6 +109,18 @@ public class Enforcer {
         });
     }
 
+    public Enforcer asIntGreaterOrEquals(String propertyName, int min) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                int inputInt = (int) input;
+                if (input != null && ((inputType != Type.INT && inputType != Type.LONG) || inputInt < min )) {
+                    throw new RuntimeException("Property " + propertyName + " should be integer value >=" + min + ", currently " + input);
+                }
+            }
+        });
+    }
+
     public Enforcer asDoubleArray(String propertyName) {
         return declare(propertyName, new EnforcerChecker() {
             @Override
@@ -146,7 +158,8 @@ public class Enforcer {
                 else {
                     inputDouble=(double) input;
                 }
-                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble<0)) {
+                //!(inputDouble>=0) avoids explicit NaN check
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || !(inputDouble>=0) )) {
                     throw new RuntimeException("Property " + propertyName + " should be a non-negative double, currently " + input);
                 }
             }
@@ -168,7 +181,28 @@ public class Enforcer {
                 else {
                     inputDouble=(double) input;
                 }
-                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble<=0)) {
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || !(inputDouble>0) )) {
+                    throw new RuntimeException("Property " + propertyName + " should be a positive double, currently " + input);
+                }
+            }
+        });
+    }
+
+    public Enforcer asNonNegativeOrNanDouble(String propertyName) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                double inputDouble;
+                if(input instanceof Integer){
+                    inputDouble=(double) (Integer) input;
+                }
+                else if (input instanceof Long){
+                    inputDouble=(double) (Long) input;
+                }
+                else {
+                    inputDouble=(double) input;
+                }
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble<0)) {
                     throw new RuntimeException("Property " + propertyName + " should be a positive double, currently " + input);
                 }
             }

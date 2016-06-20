@@ -54,11 +54,13 @@ public class AbstractLinearRegressionTest {
                 result.set(features[i], value[i]);
             }
             result.learn(response, cb);
-            coefs = result.debugGetCoefficients();
-            intercept = result.debugGetIntercept();
+            coefs = (double[])result.get(AbstractLinearRegressionNode.COEFFICIENTS_KEY);
+            intercept = (Double)result.get(AbstractLinearRegressionNode.INTERCEPT_KEY);
             bufferError = result.debugGetBufferError();
-            bootstrapMode = result.debugIsInBootstrapMode();
-            l2Reg = result.debugGetL2Regularization();
+            Boolean bootstrapModeObj =  (Boolean)result.get(AbstractLinearRegressionNode.BOOTSTRAP_MODE_KEY);
+            bootstrapMode = (bootstrapModeObj==null)?true:bootstrapModeObj;
+            Double l2RegObj = (Double)result.get(AbstractLinearRegressionNode.L2_COEF_KEY);
+            l2Reg = (l2RegObj == null)?AbstractLinearRegressionNode.L2_COEF_DEF:l2RegObj;
             result.free();
         }
     };

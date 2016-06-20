@@ -63,7 +63,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      */
     private static final String INTERNAL_KNOWN_CLASSES_LIST = "_knownClassesList";
 
-    protected void addToKnownClassesList(int classLabel) {
+    protected void addToKnownClassesList(NodeState state, int classLabel) {
         int[] knownClasses = getKnownClasses();
         int[] newKnownClasses = new int[knownClasses.length + 1];
         for (int i = 0; i < knownClasses.length; i++) {
@@ -73,7 +73,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
             newKnownClasses[i] = knownClasses[i];
         }
         newKnownClasses[knownClasses.length] = classLabel;
-        unphasedState().setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, newKnownClasses);
+        state.setFromKey(INTERNAL_KNOWN_CLASSES_LIST, Type.INT_ARRAY, newKnownClasses);
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
         double valueBuffer[] = state.getFromKeyWithDefault(INTERNAL_VALUE_BUFFER_KEY, new double[0]);
         int resultBuffer[] = state.getFromKeyWithDefault(INTERNAL_RESULTS_BUFFER_KEY, new int[0]);
         int startIndex = 0;
-        final int dims = getInputDimensions();
+        final int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_UNKNOWN);
         int i = 0;
         while (startIndex + dims < valueBuffer.length) {
             double curValue[] = new double[dims];
