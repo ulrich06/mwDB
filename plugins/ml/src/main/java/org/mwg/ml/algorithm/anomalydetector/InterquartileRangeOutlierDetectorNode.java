@@ -2,12 +2,10 @@ package org.mwg.ml.algorithm.anomalydetector;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.AnomalyDetectionNode;
 import org.mwg.plugin.Enforcer;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
 import java.util.Arrays;
@@ -120,16 +118,6 @@ public class InterquartileRangeOutlierDetectorNode extends AbstractMLNode implem
         return checkValue(value, upperBounds, lowerBounds);
     }
 
-
-    private double getUpperBound(int dimension) {
-        Object boundObj = unphasedState().getFromKey(UPPER_BOUND_KEY_PREFIX + dimension);
-        return (Double) boundObj;
-    }
-
-    private double getLowerBound(int dimension) {
-        Object boundObj = unphasedState().getFromKey(LOWER_BOUND_KEY_PREFIX + dimension);
-        return (Double) boundObj;
-    }
 
     protected boolean checkValue(double value[], double lowerBounds[], double upperBounds[]) {
         for (int i = 0; i < value.length; i++) {
