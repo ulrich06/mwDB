@@ -132,6 +132,28 @@ public class Enforcer {
         });
     }
 
+    public Enforcer asNonNegativeDouble(String propertyName) {
+        return declare(propertyName, new EnforcerChecker() {
+            @Override
+            public void check(byte inputType, Object input) throws RuntimeException {
+                double inputDouble;
+                if(input instanceof Integer){
+                    inputDouble=(double) (Integer) input;
+                }
+                else if (input instanceof Long){
+                    inputDouble=(double) (Long) input;
+                }
+                else {
+                    inputDouble=(double) input;
+                }
+                if (input != null && ((inputType != Type.DOUBLE && inputType != Type.INT && inputType != Type.LONG) || inputDouble<0)) {
+                    throw new RuntimeException("Property " + propertyName + " should be a non-negative double, currently " + input);
+                }
+            }
+        });
+    }
+
+
     public Enforcer asPositiveDouble(String propertyName) {
         return declare(propertyName, new EnforcerChecker() {
             @Override

@@ -512,6 +512,7 @@ declare module org {
                 asIntWithin(propertyName: string, min: number, max: number): org.mwg.plugin.Enforcer;
                 asDoubleArray(propertyName: string): org.mwg.plugin.Enforcer;
                 asPositiveInt(propertyName: string): org.mwg.plugin.Enforcer;
+                asNonNegativeDouble(propertyName: string): org.mwg.plugin.Enforcer;
                 asPositiveDouble(propertyName: string): org.mwg.plugin.Enforcer;
                 asPositiveLong(propertyName: string): org.mwg.plugin.Enforcer;
                 declare(propertyName: string, checker: org.mwg.plugin.EnforcerChecker): org.mwg.plugin.Enforcer;

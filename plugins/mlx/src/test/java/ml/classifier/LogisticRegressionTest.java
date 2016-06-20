@@ -38,8 +38,8 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
                 lrNode.setProperty(LogisticRegressionClassifierNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 lrNode.setProperty(LogisticRegressionClassifierNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 lrNode.setProperty(LogisticRegressionClassifierNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
-                lrNode.setLearningRate(0.001); //0.001 - looks correct
-                lrNode.setIterationCountThreshold(1000000);
+                lrNode.setProperty(LogisticRegressionClassifierNode.LEARNING_RATE_KEY, Type.DOUBLE, 0.001); //0.001 - looks correct
+                lrNode.setProperty(LogisticRegressionClassifierNode.GD_ITERATION_THRESH_KEY, Type.INT, 1000000);
                 lrNode.set(AbstractMLNode.FROM, FEATURE);
                 //lrNode.setL2Regularization(10);
 
@@ -62,8 +62,8 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
                 lrNode.setProperty(LogisticRegressionClassifierNode.BUFFER_SIZE_KEY, Type.INT, 60);
                 lrNode.setProperty(LogisticRegressionClassifierNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
                 lrNode.setProperty(LogisticRegressionClassifierNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
-                lrNode.setLearningRate(0.01); //0.001 - looks correct
-                lrNode.setIterationCountThreshold(1000);
+                lrNode.setProperty(LogisticRegressionClassifierNode.LEARNING_RATE_KEY, Type.DOUBLE, 0.01);
+                lrNode.setProperty(LogisticRegressionClassifierNode.GD_ITERATION_THRESH_KEY, Type.INT, 1000);
                 lrNode.set(AbstractMLNode.FROM, FEATURE);
                 //lrNode.setL2Regularization(10);
 

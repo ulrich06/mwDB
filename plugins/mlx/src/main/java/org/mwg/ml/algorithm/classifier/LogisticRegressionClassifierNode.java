@@ -5,6 +5,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 
@@ -45,76 +46,6 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
-    public double[] getCoefficients(int classNum) {
-        return unphasedState().getFromKeyWithDefault(COEFFICIENTS_KEY + classNum, COEFFICIENTS_DEF);
-    }
-
-    public double getIntercept(int classNum) {
-        return unphasedState().getFromKeyWithDefault(INTERCEPT_KEY + classNum, INTERCEPT_DEF);
-    }
-
-    protected void setIntercept(double intercept, int classNum) {
-        unphasedState().setFromKey(INTERCEPT_KEY + classNum, Type.DOUBLE, intercept);
-    }
-
-    @Override
-    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (L2_COEF_KEY.equals(propertyName)) {
-            illegalArgumentIfFalse((propertyValue instanceof Double) || (propertyValue instanceof Integer),
-                    "L2 regularization coefficient should be of type double or integer");
-            if (propertyValue instanceof Double) {
-                illegalArgumentIfFalse((Double) propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((Double) propertyValue);
-            } else {
-                illegalArgumentIfFalse((Integer) propertyValue >= 0, "L2 regularization coefficient should be non-negative");
-                setL2Regularization((double) ((Integer) propertyValue));
-            }
-        } else if ((propertyName.lastIndexOf(COEFFICIENTS_KEY, 0) == 0) || (propertyName.lastIndexOf(INTERCEPT_KEY, 0) == 0)) {
-            //Nothing. Those cannot be set.
-        } else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)) {
-            setIterationDifferenceThreshold((Double) propertyValue);
-        } else if (GD_ITERATION_THRESH_KEY.equals(propertyName)) {
-            setIterationCountThreshold((Integer) propertyValue);
-        } else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)) {
-            setLearningRate((Double) propertyValue);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
-    }
-
-    @Override
-    public Object get(String propertyName) {
-        if (propertyName.lastIndexOf(COEFFICIENTS_KEY, 0) == 0) {
-            return unphasedState().getFromKeyWithDefault(propertyName, COEFFICIENTS_DEF);
-        } else if (propertyName.lastIndexOf(INTERCEPT_KEY, 0) == 0) {
-            return unphasedState().getFromKeyWithDefault(propertyName, INTERCEPT_DEF);
-        } else if (L2_COEF_KEY.equals(propertyName)) {
-            return getL2Regularization();
-        } else if (GD_DIFFERENCE_THRESH_KEY.equals(propertyName)) {
-            return getIterationDifferenceThreshold();
-        } else if (GD_ITERATION_THRESH_KEY.equals(propertyName)) {
-            return getIterationCountThreshold();
-        } else if (INTERNAL_VALUE_LEARNING_RATE_KEY.equals(propertyName)) {
-            return getLearningRate();
-        }
-        return super.get(propertyName);
-    }
-
-    protected void setCoefficients(double[] coefficients, int classNum) {
-        LogisticRegressionClassifierNode.requireNotNull(coefficients, "Regression coefficients must be not null");
-        unphasedState().setFromKey(COEFFICIENTS_KEY + classNum, Type.DOUBLE_ARRAY, coefficients);
-    }
-
-    public double getL2Regularization() {
-        return unphasedState().getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
-    }
-
-    public void setL2Regularization(double l2) {
-        illegalArgumentIfFalse(l2 >= 0, "L2 coefficients must be non-negative");
-        unphasedState().setFromKey(L2_COEF_KEY, Type.DOUBLE, l2);
-    }
-
-
     public static final String GD_DIFFERENCE_THRESH_KEY = "gdDifferenceThreshold";
     public static final String GD_ITERATION_THRESH_KEY = "gdIterationThreshold";
 
@@ -125,7 +56,24 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
     /**
      * Attribute key - Learning rate
      */
-    protected static final String INTERNAL_VALUE_LEARNING_RATE_KEY = "_LearningRate";
+    public static final String LEARNING_RATE_KEY = "LearningRate";
+
+    private static final Enforcer logRegrEnforcer = new Enforcer()
+            .asDouble(GD_DIFFERENCE_THRESH_KEY)
+            .asDouble(GD_ITERATION_THRESH_KEY)
+            .asPositiveDouble(LEARNING_RATE_KEY)
+            .asNonNegativeDouble(L2_COEF_KEY);
+
+
+    @Override
+    public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
+        if ((propertyName.lastIndexOf(COEFFICIENTS_KEY, 0) == 0) || (propertyName.lastIndexOf(INTERCEPT_KEY, 0) == 0)) {
+            //Nothing. Those cannot be set.
+        } else {
+            logRegrEnforcer.check(propertyName, propertyType, propertyValue);
+            super.setProperty(propertyName, propertyType, propertyValue);
+        }
+    }
 
     private static double sigmoid(double x) {
         return 1.0 / (1.0 + Math.exp(-x));
@@ -159,7 +107,9 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
 
     @Override
     protected double getLikelihoodForClass(NodeState state, double[] value, int classNum) {
-        return sigmoid(dot(value, getCoefficients(classNum)) + getIntercept(classNum));
+        double coefs[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY + classNum, COEFFICIENTS_DEF);
+        double intercept = state.getFromKeyWithDefault(INTERCEPT_KEY + classNum, INTERCEPT_DEF);
+        return sigmoid(dot(value, coefs) + intercept);
     }
 
     @Override
@@ -167,22 +117,22 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
         if (getInputDimensions() == INPUT_DIM_UNKNOWN) {
             setInputDimensions(value.length);
         }
-        initializeClassIfNecessary(classNumber);
+        initializeClassIfNecessary(state, classNumber);
         final int dims = getInputDimensions();
 
-        final double gdDifferenceThresh = getIterationDifferenceThreshold();
-        final int gdIterThresh = getIterationCountThreshold();
+        final double gdDifferenceThresh = state.getFromKeyWithDefault(GD_DIFFERENCE_THRESH_KEY, 0.0);
+        final int gdIterThresh = state.getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
 
-        final double alpha = getLearningRate();
-        final double lambda = getL2Regularization();
+        final double alpha = state.getFromKeyWithDefault(LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
+        final double lambda = state.getFromKeyWithDefault(L2_COEF_KEY, L2_COEF_DEF);
 
         int classes[] = getKnownClasses();
         for (final int cl : classes) {
-            double coefs[] = getCoefficients(cl);
-            double intercept = getIntercept(cl);
+            double coefs[] = state.getFromKeyWithDefault(COEFFICIENTS_KEY + cl, COEFFICIENTS_DEF);
+            double intercept = state.getFromKeyWithDefault(INTERCEPT_KEY + cl, INTERCEPT_DEF);
             if (coefs.length == 0) { //TODO should not happen? If necessary, remove unnecessary check & replace with assertion
                 coefs = new double[dims];
-                setCoefficients(coefs, cl);
+                state.setFromKey(COEFFICIENTS_KEY + cl, Type.DOUBLE_ARRAY, coefs);
             }
 
             int iterCount = 0;
@@ -221,8 +171,8 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
                 }
                 maxDiff = Math.max(Math.abs(intercept - oldIntercept), maxDiff);
 
-                setCoefficients(coefs, cl);
-                setIntercept(intercept, cl);
+                state.setFromKey(COEFFICIENTS_KEY + cl, Type.DOUBLE_ARRAY, coefs);
+                state.setFromKey(INTERCEPT_KEY + cl, Type.DOUBLE, intercept);
                 if (gdDifferenceThresh > 0) {
                     exitCase = exitCase || maxDiff < gdDifferenceThresh;
                 }
@@ -251,8 +201,8 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
         }
     }
 
-    protected void initializeClassIfNecessary(int classNum) {
-        Object oldCoefsObj = unphasedState().getFromKey(COEFFICIENTS_KEY + classNum);
+    protected void initializeClassIfNecessary(NodeState state, int classNum) {
+        Object oldCoefsObj = state.getFromKey(COEFFICIENTS_KEY + classNum);
         if (oldCoefsObj != null) {
             //Is there, but could be deleted
             double oldCoefs[] = (double[]) oldCoefsObj;
@@ -264,42 +214,8 @@ public class LogisticRegressionClassifierNode extends AbstractClassifierSlidingW
         int dims = getInputDimensions();
 
         addToKnownClassesList(classNum);
-        setCoefficients(new double[dims], classNum);
-        setIntercept(INTERCEPT_DEF, classNum);
-    }
-
-    public double getIterationDifferenceThreshold() {
-        return unphasedState().getFromKeyWithDefault(GD_DIFFERENCE_THRESH_KEY, Double.NaN);
-    }
-
-    public void setIterationDifferenceThreshold(double errorThreshold) {
-        unphasedState().setFromKey(GD_DIFFERENCE_THRESH_KEY, Type.DOUBLE, errorThreshold);
-    }
-
-    public void removeIterationDifferenceThreshold() {
-        unphasedState().setFromKey(GD_DIFFERENCE_THRESH_KEY, Type.DOUBLE, Double.NaN);
-    }
-
-    public int getIterationCountThreshold() {
-        return unphasedState().getFromKeyWithDefault(GD_ITERATION_THRESH_KEY, DEFAULT_GD_ITERATIONS_COUNT);
-    }
-
-    public void setIterationCountThreshold(int iterationCountThreshold) {
-        //Any value is acceptable.
-        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, iterationCountThreshold);
-    }
-
-    public void removeIterationCountThreshold() {
-        unphasedState().setFromKey(GD_ITERATION_THRESH_KEY, Type.INT, -1);
-    }
-
-    public double getLearningRate() {
-        return unphasedState().getFromKeyWithDefault(INTERNAL_VALUE_LEARNING_RATE_KEY, DEFAULT_LEARNING_RATE);
-    }
-
-    public void setLearningRate(double newLearningRate) {
-        illegalArgumentIfFalse(newLearningRate > 0, "Learning rate should be positive");
-        unphasedState().setFromKey(INTERNAL_VALUE_LEARNING_RATE_KEY, Type.DOUBLE, newLearningRate);
+        state.setFromKey(COEFFICIENTS_KEY + classNum, Type.DOUBLE_ARRAY, new double[dims]);
+        state.setFromKey(INTERCEPT_KEY + classNum, Type.DOUBLE, INTERCEPT_DEF);
     }
 
 }

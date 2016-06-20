@@ -43,10 +43,10 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
         }
 
         addToKnownClassesList(classNum);
-        setTotal(classNum, 0);
+        state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, 0);
         final int dims = getInputDimensions();
         state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dims]);
-        setSumsSquared(classNum, new double[dims * (dims + 1) / 2]);
+        state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dims * (dims + 1) / 2]);
 
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
     }
@@ -59,16 +59,17 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
             setInputDimensions(value.length);
         }
         initializeClassIfNecessary(state, classNum);
-        setTotal(classNum, getClassTotal(classNum) + 1);
+        int curClassTotal = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
+        state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, curClassTotal + 1);
 
-        double currentSum[] = getSums(classNum);
+        double currentSum[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         for (int i = 0; i < value.length; i++) {
             currentSum[i] += value[i];
         }
         state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, currentSum);
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
 
-        double currentSumSquares[] = getSumSquares(classNum);
+        double currentSumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         int k = 0;
         for (int i = 0; i < value.length; i++) {
             for (int j = i; j < value.length; j++) {
@@ -77,20 +78,20 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
             }
             k++;
         }
-        setSumsSquared(classNum, currentSumSquares);
+        state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, currentSumSquares);
         //TODO No need to put? Depends on whether att returns a copy. Just in case, re-put
     }
 
     protected double getLikelihoodForClass(NodeState state, double value[], int classNum) {
         //It is assumed that real class is removed and replaces with 0
         initializeClassIfNecessary(state, classNum); //TODO should not be necessary. Double-check.
-        int total = getClassTotal(classNum);
+        int total = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
         if (total < 2) {
             //Not enough data to build model for that class.
             return 0;
         }
-        double sums[] = getSums(classNum);
-        double sumSquares[] = getSumSquares(classNum);
+        double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        double sumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         MultivariateNormalDistribution distr = MultivariateNormalDistribution.getDistribution(sums, sumSquares, total, false);
         return distr.density(value, true);//TODO Normalize on average? Does not matter (comparing anyway)
         //But normalization leaves less chance for underflow
@@ -113,23 +114,24 @@ public class GaussianClassifierNode extends AbstractGaussianClassifierNode imple
 
     @Override
     public String toString() {
+        NodeState state = unphasedState();
         String result = "";
         int allClasses[] = getKnownClasses();
         if (allClasses.length == 0) {
             return "No classes";
         }
         for (int classNum : allClasses) {
-            int total = getClassTotal(classNum);
+            int total = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
             if (total < 2) {
                 //Not enough data to build model for that class.
                 result += classNum + ": Not enough data(" + total + ")\n";
             } else {
-                double sums[] = getSums(classNum);
-                double means[] = getSums(classNum);
+                double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+                double means[] = (double[])unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
                 for (int i = 0; i < means.length; i++) {
                     means[i] = means[i] / total;
                 }
-                double sumSquares[] = getSumSquares(classNum);
+                double sumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
                 Matrix cov =
                         MultivariateNormalDistribution.getCovariance(sums, sumSquares, total);
                 result += classNum + ": mean = ["; //TODO For now - cannot report variance from distribution

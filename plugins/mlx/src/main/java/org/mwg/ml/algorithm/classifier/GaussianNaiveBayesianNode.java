@@ -23,7 +23,7 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
 
 
     protected void initializeClassIfNecessary(NodeState state, int classNum) {
-        Object oldSumsObj = unphasedState().getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        Object oldSumsObj = state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
         if (oldSumsObj != null) {
             //Is there, but could be deleted
             double oldSums[] = (double[]) oldSumsObj;
@@ -34,11 +34,10 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         }
 
         addToKnownClassesList(classNum);
-        setTotal(classNum, 0);
+        state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, 0);
         final int dimensions = getInputDimensions();
         state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dimensions]);
-        setSumsSquared(classNum, new double[dimensions]);
-
+        state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, new double[dimensions]);
         //Model can stay uninitialized until total is at least <TODO 2? 1?>
     }
 
@@ -51,23 +50,24 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
             setInputDimensions(value.length);
         }
         initializeClassIfNecessary(state, classNum);
-        setTotal(classNum, getClassTotal(classNum) + 1);
+        int curTotal = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
+        state.setFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum, Type.INT, curTotal + 1);
 
-        double currentSum[] = getSums(classNum);
-        double currentSumSquares[] = getSumSquares(classNum);
+        double currentSum[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        double currentSumSquares[] = (double[])unphasedState().getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         for (int i = 0; i < value.length; i++) {
             currentSum[i] += value[i];
             currentSumSquares[i] += value[i] * value[i];
         }
         state.setFromKey(INTERNAL_SUM_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, currentSum);
-        setSumsSquared(classNum, currentSumSquares);
+        state.setFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum, Type.DOUBLE_ARRAY, currentSumSquares);
         //Need to re-put
     }
 
     protected double getLikelihoodForClass(NodeState state, double value[], int classNum) {
         //It is assumed that real class is removed and replaces with 0
         initializeClassIfNecessary(state, classNum); //TODO should not be necessary. Double-check.
-        int total = getClassTotal(classNum);
+        int total = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
         if (total < 2) {
             //Not enough data to build model for that class.
             return 0;
@@ -78,8 +78,8 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
         //Step 2. Get sum of squares.
         //Step 3. Multiply for each dimension
         double likelihood = 1;
-        double sums[] = getSums(classNum);
-        double sumSquares[] = getSumSquares(classNum);
+        double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+        double sumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
         for (int i = 0; i < getInputDimensions(); i++) {
             likelihood *= Gaussian1D.getDensity(sums[i], sumSquares[i], total, value[i]);
         }
@@ -108,23 +108,24 @@ public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode im
 
     @Override
     public String toString() {
+        NodeState state = unphasedState();
         String result = "";
         int allClasses[] = getKnownClasses();
         if (allClasses.length == 0) {
             return "No classes";
         }
         for (int classNum : allClasses) {
-            int total = getClassTotal(classNum);
+            int total = (Integer)state.getFromKey(INTERNAL_TOTAL_KEY_PREFIX + classNum);
             if (total < 2) {
                 //Not enough data to build model for that class.
                 result += classNum + ": Not enough data(" + total + ")\n";
             } else {
-                double sums[] = getSums(classNum);
-                double means[] = getSums(classNum);
+                double sums[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
+                double means[] = (double[])state.getFromKey(INTERNAL_SUM_KEY_PREFIX + classNum);
                 for (int i = 0; i < means.length; i++) {
                     means[i] = means[i] / total;
                 }
-                double sumSquares[] = getSumSquares(classNum);
+                double sumSquares[] = (double[])state.getFromKey(INTERNAL_SUMSQUARE_KEY_PREFIX + classNum);
                 result += classNum + ": mean = ["; //TODO For now - cannot report variance from distribution
                 for (int i = 0; i < means.length; i++) {
                     result += means[i] + ", ";
