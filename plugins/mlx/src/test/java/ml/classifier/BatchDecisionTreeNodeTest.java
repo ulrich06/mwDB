@@ -378,7 +378,6 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest {
                             cjc.on((AbstractClassifierSlidingWindowManagingNode) result);
                         }
                     });
-                    //System.out.println(i+"\t"+cjc.errors);
                     assertTrue(cjc.errors == 0);
                 }
 
@@ -436,7 +435,6 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest {
                             cjc.on((AbstractClassifierSlidingWindowManagingNode) result);
                         }
                     });
-                    System.out.println(i+"\t"+cjc.errors);
                     assertTrue(cjc.errors == 0);
                 }
                 //This should be the last drop: 19 errors of 60 value buffer (0.31...>0.3) should push us back into bootstrap

@@ -22,12 +22,6 @@ public class MLXPlugin extends MLPlugin {
                 return new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNodeType(LogisticRegressionClassifierNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new LogisticRegressionClassifierNode(world, time, id, graph, initialResolution);
-            }
-        });
         declareNodeType(LinearRegressionBatchGDNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
