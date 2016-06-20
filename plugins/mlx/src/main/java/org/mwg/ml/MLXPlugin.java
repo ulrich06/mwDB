@@ -22,12 +22,6 @@ public class MLXPlugin extends MLPlugin {
                 return new GaussianClassifierNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
-            }
-        });
         declareNodeType(GaussianNaiveBayesianNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
@@ -56,6 +50,13 @@ public class MLXPlugin extends MLPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //BatchDecisionTreeNode
+        declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
             }
         });
     }

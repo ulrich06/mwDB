@@ -1,4 +1,4 @@
-package org.mwg.ml.common;
+package org.mwg.ml.algorithm;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
@@ -63,7 +63,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      * @return New bootstrap state
      */
     protected boolean addValueNoBootstrap(NodeState state, double value[], double result) {
-        double newBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustValueBuffer(state, value, false);
+        double newBuffer[] = adjustValueBuffer(state, value, false);
         double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, false);
 
         //Predict for each value in the buffer. Calculate percentage of errors.
@@ -83,7 +83,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      * @param value New value to add; {@code null} disallowed
      */
     protected boolean addValueBootstrap(NodeState state, double value[], double result) {
-        double newBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustValueBuffer(state, value, true);
+        double newBuffer[] = adjustValueBuffer(state, value, true);
         double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, true);
         boolean newBootstrap = true;
 

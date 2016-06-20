@@ -2,7 +2,7 @@ package org.mwg.ml.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.DecisionTreeNode;
 import org.mwg.plugin.NodeState;
 
@@ -108,7 +108,8 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         int index = 0;
         for (int i = 0; i < doubleList.size(); i++) {
             double[] curArray = doubleList.get(i);
-            result[index] = Arrays.copyOf(curArray, curArray.length);
+            result[index] = new double[curArray.length];
+            System.arraycopy(curArray, 0, result[index], 0, curArray.length);
             index++;
         }
         return result;
@@ -159,14 +160,15 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     private static int getMostFrequentElement(int[] classNumbers) {
         assert classNumbers.length > 0; //Should ot reach that spot if we have empty set
-        int sortedClassNumbers[] = Arrays.copyOf(classNumbers, classNumbers.length);
+        int sortedClassNumbers[] = new int[classNumbers.length];
+        System.arraycopy(classNumbers, 0, sortedClassNumbers, 0, classNumbers.length);
         Arrays.sort(sortedClassNumbers);
         //Actually, we don't need sorting itself
         //We only need to group same class numbers together for detecting the majority
         //This way we can have majority detection in O(n*log(n)) + O(n) = O(n*log(n))
         //As opposed to O(n^2) for straightforward algorithm
         int maxClass = 0;
-        int maxCount = Integer.MIN_VALUE;
+        int maxCount = -1;
         int currentClass = 0;
         int currentCount = 0;
         for (int i = 0; i < sortedClassNumbers.length; i++) {

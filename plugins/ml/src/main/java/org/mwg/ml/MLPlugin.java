@@ -49,5 +49,6 @@ public class MLPlugin extends AbstractPlugin {
                 return new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
             }
         });
+
     }
 }

@@ -1,10 +1,11 @@
-package ml.classifier;
+package org.mwg.ml.classifier;
 
 import org.mwg.Callback;
+import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.algorithm.AbstractAnySlidingWindowManagingNode;
 import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.AbstractAnySlidingWindowManagingNode;
 
 /**
  * Created by andre on 5/9/2016.
@@ -82,13 +83,18 @@ public class AbstractClassifierTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 
     protected ClassificationJumpCallback runThroughDummyDataset(AbstractClassifierSlidingWindowManagingNode classfierNode){
-        ClassificationJumpCallback cjc = new ClassificationJumpCallback();
+        ClassificationJumpCallback cjc = new ClassificationJumpCallback(new String[]{FEATURE});
 
         for (int i = 0; i < dummyDataset1.length; i++) {
             cjc.value = new double[]{dummyDataset1[i][0]};
             cjc.expectedClass = (int) dummyDataset1[i][1];
             cjc.expectedBootstrap = bootstraps1[i];
-            classfierNode.jump(i, cjc);
+            classfierNode.jump(i, new Callback<Node>() {
+                @Override
+                public void on(Node result) {
+                    cjc.on((AbstractClassifierSlidingWindowManagingNode)result);
+                }
+            });
         }
 
         return cjc;
@@ -104,7 +110,7 @@ public class AbstractClassifierTest {
     /**
      * Created by andre on 5/9/2016.
      */
-    protected static class ClassificationJumpCallback implements Callback<AbstractClassifierSlidingWindowManagingNode> {
+    protected static class ClassificationJumpCallback {
 
         final String features[];
 
@@ -112,14 +118,10 @@ public class AbstractClassifierTest {
             this.features = featureNames;
         }
 
-        public ClassificationJumpCallback(){
-            this(new String[]{FEATURE});
-        }
-
         public int errors = 0;
         public double value[] = null;
         public boolean expectedBootstrap = true;
-        public int expectedClass = Integer.MIN_VALUE;
+        public int expectedClass = -10000;
 
         Callback<Boolean> cb = new Callback<Boolean>() {
             @Override
@@ -128,7 +130,6 @@ public class AbstractClassifierTest {
             }
         };
 
-        @Override
         public void on(AbstractClassifierSlidingWindowManagingNode result) {
             for (int i=0;i<features.length;i++){
                 result.set(features[i], value[i]);

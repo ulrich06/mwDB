@@ -1,8 +1,7 @@
-package org.mwg.ml.algorithm.classifier;
+package org.mwg.ml.algorithm;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeState;
 
 /**

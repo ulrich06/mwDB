@@ -3,7 +3,7 @@ package org.mwg.ml.algorithm.classifier;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 

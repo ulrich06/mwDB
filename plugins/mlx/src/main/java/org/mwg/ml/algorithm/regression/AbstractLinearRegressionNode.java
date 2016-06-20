@@ -2,7 +2,7 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.ml.RegressionNode;
-import org.mwg.ml.common.AbstractRegressionSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.AbstractRegressionSlidingWindowManagingNode;
 import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 

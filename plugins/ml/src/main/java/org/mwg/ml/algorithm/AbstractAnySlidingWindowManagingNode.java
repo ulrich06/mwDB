@@ -1,4 +1,4 @@
-package org.mwg.ml.common;
+package org.mwg.ml.algorithm;
 
 import org.mwg.Graph;
 import org.mwg.Type;
