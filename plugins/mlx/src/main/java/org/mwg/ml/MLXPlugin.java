@@ -16,18 +16,6 @@ public class MLXPlugin extends MLPlugin {
 
     public MLXPlugin() {
         super();
-        declareNodeType(GaussianClassifierNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new GaussianClassifierNode(world, time, id, graph, initialResolution);
-            }
-        });
-        declareNodeType(GaussianNaiveBayesianNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new GaussianNaiveBayesianNode(world, time, id, graph, initialResolution);
-            }
-        });
         declareNodeType(LinearRegressionSGDNode.NAME, new NodeFactory() {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
