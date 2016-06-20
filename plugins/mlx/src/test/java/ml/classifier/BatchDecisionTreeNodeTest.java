@@ -9,7 +9,7 @@ import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
 import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
+import org.mwg.ml.common.AbstractAnySlidingWindowManagingNode;
 
 import java.util.Random;
 
@@ -52,10 +52,10 @@ public class BatchDecisionTreeNodeTest extends AbstractClassifierTest {
             public void on(Boolean result) {
                 BatchDecisionTreeNode bdtNode = (BatchDecisionTreeNode) graph.newTypedNode(0, 0, BatchDecisionTreeNode.NAME);
 
-                bdtNode.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
-                bdtNode.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
+                bdtNode.setProperty(AbstractAnySlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
+                bdtNode.setProperty(AbstractAnySlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
                 bdtNode.set(AbstractMLNode.FROM, "f1" + AbstractMLNode.FROM_SEPARATOR + "f2");
-                bdtNode.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
+                bdtNode.setProperty(AbstractAnySlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
 
                 Random rng = new Random(1);
 

@@ -12,7 +12,7 @@ import org.mwg.plugin.NodeState;
  * Common superclass for all ML algorithm that use bootstrap mode
  * and
  */
-public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
+public abstract class AbstractAnySlidingWindowManagingNode extends AbstractMLNode {
     /**
      * Internal keys - those attributes are only for internal use within the node.
      * They are not supposed to be accessed from outside (although it is not banned).
@@ -70,7 +70,7 @@ public abstract class AbstractSlidingWindowManagingNode extends AbstractMLNode {
      */
     protected static final String INTERNAL_VALUE_BUFFER_KEY = "_valueBuffer";
 
-    public AbstractSlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractAnySlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 

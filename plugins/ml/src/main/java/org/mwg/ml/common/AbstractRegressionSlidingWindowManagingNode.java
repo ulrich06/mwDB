@@ -10,7 +10,7 @@ import org.mwg.plugin.NodeState;
 /**
  * Created by andre on 5/4/2016.
  */
-public abstract class AbstractRegressionSlidingWindowManagingNode extends AbstractSlidingWindowManagingNode implements RegressionNode {
+public abstract class AbstractRegressionSlidingWindowManagingNode extends AbstractAnySlidingWindowManagingNode implements RegressionNode {
 
     protected static final double[] INTERNAL_RESULTS_BUFFER_DEF = new double[0];
 

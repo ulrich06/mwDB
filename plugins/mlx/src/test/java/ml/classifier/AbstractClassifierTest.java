@@ -4,7 +4,7 @@ import org.mwg.Callback;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
+import org.mwg.ml.common.AbstractAnySlidingWindowManagingNode;
 
 /**
  * Created by andre on 5/9/2016.
@@ -95,9 +95,9 @@ public class AbstractClassifierTest {
     }
 
     protected void standardSettings(AbstractMLNode node){
-        node.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
-        node.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
-        node.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
         node.set(AbstractMLNode.FROM, FEATURE);
     }
 

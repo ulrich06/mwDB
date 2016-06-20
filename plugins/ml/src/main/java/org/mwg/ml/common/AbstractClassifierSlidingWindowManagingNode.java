@@ -9,7 +9,7 @@ import org.mwg.plugin.NodeState;
 /**
  * Created by andre on 5/4/2016.
  */
-public abstract class AbstractClassifierSlidingWindowManagingNode extends AbstractSlidingWindowManagingNode implements ClassificationNode {
+public abstract class AbstractClassifierSlidingWindowManagingNode extends AbstractAnySlidingWindowManagingNode implements ClassificationNode {
 
     protected static final int[] INTERNAL_RESULTS_BUFFER_DEF = new int[0];
 
