@@ -4,7 +4,7 @@ import org.mwg.Callback;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.common.AbstractSlidingWindowManagingNode;
 
 /**
  * Created by andre on 5/9/2016.

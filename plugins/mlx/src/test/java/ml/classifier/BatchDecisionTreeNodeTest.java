@@ -9,7 +9,7 @@ import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
 import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
+import org.mwg.ml.algorithm.common.AbstractSlidingWindowManagingNode;
 
 import java.util.Random;
 

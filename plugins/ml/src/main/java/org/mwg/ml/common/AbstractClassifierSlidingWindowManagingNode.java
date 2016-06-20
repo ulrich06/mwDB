@@ -156,7 +156,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      * @return New bootstrap mode value
      */
     protected boolean addValueNoBootstrap(NodeState state, double value[], int result) {
-        double newBuffer[] = AbstractClassifierSlidingWindowManagingNode.adjustValueBuffer(state, value, false);
+        double newBuffer[] = adjustValueBuffer(state, value, false);
         int newResultBuffer[] = AbstractClassifierSlidingWindowManagingNode.adjustResultBuffer(state, result, false);
 
         //Predict for each value in the buffer. Calculate percentage of errors.
@@ -176,7 +176,7 @@ public abstract class AbstractClassifierSlidingWindowManagingNode extends Abstra
      * @param value New value to add; {@code null} disallowed
      */
     protected boolean addValueBootstrap(NodeState state, double value[], int result) {
-        double newBuffer[] = AbstractClassifierSlidingWindowManagingNode.adjustValueBuffer(state, value, true);
+        double newBuffer[] = adjustValueBuffer(state, value, true);
         int newResultBuffer[] = AbstractClassifierSlidingWindowManagingNode.adjustResultBuffer(state, result, true);
         boolean newBootstrap = true;
 
