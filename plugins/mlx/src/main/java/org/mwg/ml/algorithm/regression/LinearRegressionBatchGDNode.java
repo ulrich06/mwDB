@@ -2,6 +2,7 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
+import org.mwg.ml.algorithm.AbstractLRGradientDescentNode;
 import org.mwg.plugin.NodeState;
 
 import java.util.Arrays;
@@ -11,7 +12,7 @@ import java.util.Arrays;
  * Likelz to be much faster than non-SGD, but might take longer time to converge.
  * Created by andre on 4/29/2016.
  */
-public class LinearRegressionBatchGDNode extends AbstractGradientDescentLinearRegressionNode {
+public class LinearRegressionBatchGDNode extends AbstractLRGradientDescentNode {
 
     public static final String NAME = "LinearRegressionBatchGradientDescent";
 

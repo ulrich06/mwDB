@@ -2,6 +2,7 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
+import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.operation.PInvSVD;

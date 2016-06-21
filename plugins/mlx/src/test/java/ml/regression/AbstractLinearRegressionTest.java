@@ -2,14 +2,14 @@ package ml.regression;
 
 import org.mwg.Callback;
 import org.mwg.Type;
-import org.mwg.ml.algorithm.regression.AbstractLinearRegressionNode;
+import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by andre on 5/10/2016.

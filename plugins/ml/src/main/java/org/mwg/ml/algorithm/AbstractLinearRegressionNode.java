@@ -1,12 +1,11 @@
-package org.mwg.ml.algorithm.regression;
+package org.mwg.ml.algorithm;
 
 import org.mwg.Graph;
 import org.mwg.ml.RegressionNode;
-import org.mwg.ml.algorithm.AbstractRegressionSlidingWindowManagingNode;
 import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 
-public abstract class AbstractLinearRegressionNode extends AbstractRegressionSlidingWindowManagingNode implements RegressionNode {
+public abstract class AbstractLinearRegressionNode extends AbstractAnySlidingWindowManagingRegressionNode implements RegressionNode {
 
     /**
      * Regression coefficients

@@ -2,6 +2,7 @@ package org.mwg.ml.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
+import org.mwg.ml.algorithm.AbstractLRGradientDescentNode;
 import org.mwg.plugin.NodeState;
 
 /**
@@ -10,7 +11,7 @@ import org.mwg.plugin.NodeState;
  * <p>
  * Created by andre on 4/29/2016.
  */
-public class LinearRegressionSGDNode extends AbstractGradientDescentLinearRegressionNode {
+public class LinearRegressionSGDNode extends AbstractLRGradientDescentNode {
 
     public static final String NAME = "LinearRegressionStochasticGradientDescent";
 

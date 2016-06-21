@@ -10,11 +10,11 @@ import org.mwg.plugin.NodeState;
 /**
  * Created by andre on 5/4/2016.
  */
-public abstract class AbstractRegressionSlidingWindowManagingNode extends AbstractAnySlidingWindowManagingNode implements RegressionNode {
+public abstract class AbstractAnySlidingWindowManagingRegressionNode extends AbstractAnySlidingWindowManagingNode implements RegressionNode {
 
     protected static final double[] INTERNAL_RESULTS_BUFFER_DEF = new double[0];
 
-    public AbstractRegressionSlidingWindowManagingNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public AbstractAnySlidingWindowManagingRegressionNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      */
     protected boolean addValueNoBootstrap(NodeState state, double value[], double result) {
         double newBuffer[] = adjustValueBuffer(state, value, false);
-        double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, false);
+        double newResultBuffer[] = AbstractAnySlidingWindowManagingRegressionNode.adjustResultBuffer(state, result, false);
 
         //Predict for each value in the buffer. Calculate percentage of errors.
         double errorInBuffer = getBufferError(state, newBuffer, newResultBuffer);
@@ -84,7 +84,7 @@ public abstract class AbstractRegressionSlidingWindowManagingNode extends Abstra
      */
     protected boolean addValueBootstrap(NodeState state, double value[], double result) {
         double newBuffer[] = adjustValueBuffer(state, value, true);
-        double newResultBuffer[] = AbstractRegressionSlidingWindowManagingNode.adjustResultBuffer(state, result, true);
+        double newResultBuffer[] = AbstractAnySlidingWindowManagingRegressionNode.adjustResultBuffer(state, result, true);
         boolean newBootstrap = true;
 
         if (newResultBuffer.length >= getMaxBufferLength()) {

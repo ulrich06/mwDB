@@ -15,13 +15,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class Generator {
     public static void main(String[] args) {
-        Random rng = new Random(1);
+        Random rng = new Random(3);
 
-        List<Double> f1 = new ArrayList<Double>();
-        //List<Double> f2 = new ArrayList<Double>();
+        List<Integer> f1 = new ArrayList<Integer>();
+        //List<Double> f1 = new ArrayList<Double>();
 
-        for (int i = 0; i <= 1000; i++) {
-            f1.add(rng.nextDouble()*10);
+        for (int i = 0; i <= 600; i++) {
+            f1.add(rng.nextInt(10));
             //f2.add(rng.nextDouble());
         }
         //Now starting to make errors:
@@ -35,10 +35,10 @@ public class Generator {
 
         //System.out.println(""+f1.size()+"  "+f2.size());
 
-        System.out.print("double f1Array[] = new double[]{");
+        System.out.print("private static final int f3[] = new int[]{");
         for (int i=0;i<f1.size();i++){
             System.out.print(f1.get(i)+", ");
-            if (i % 6 == 0){
+            if (i % 50 == 0){
                 System.out.println();
             }
         }
