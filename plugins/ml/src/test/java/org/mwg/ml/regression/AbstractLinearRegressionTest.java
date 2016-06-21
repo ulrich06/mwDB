@@ -240,7 +240,7 @@ public class AbstractLinearRegressionTest {
         RegressionJumpCallback rjc = new RegressionJumpCallback(new String[]{FEATURE});
 
         for (int i = 0; i < rounds; i++) {
-            double x = f[i];
+            double x = f[i % f.length];
             rjc.value = new double[]{x};
             rjc.response = 2*x+1;
             lrNode.jump(i, new Callback<Node>() {

@@ -16,12 +16,6 @@ public class MLXPlugin extends MLPlugin {
 
     public MLXPlugin() {
         super();
-        declareNodeType(LinearRegressionSGDNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
-            }
-        });
         //BatchDecisionTreeNode
         declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
             @Override

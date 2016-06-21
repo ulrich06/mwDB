@@ -8,10 +8,7 @@ import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
 import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.PolynomialNode;
+import org.mwg.ml.algorithm.regression.*;
 import org.mwg.plugin.AbstractPlugin;
 import org.mwg.plugin.NodeFactory;
 
@@ -82,6 +79,12 @@ public class MLPlugin extends AbstractPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionBatchGDNode(world, time, id, graph, initialResolution);
+            }
+        });
+        declareNodeType(LinearRegressionSGDNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
             }
         });
     }

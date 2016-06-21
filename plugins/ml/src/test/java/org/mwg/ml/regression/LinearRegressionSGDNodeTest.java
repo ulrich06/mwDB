@@ -1,4 +1,4 @@
-package ml.regression;
+package org.mwg.ml.regression;
 
 import org.mwg.Graph;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.mwg.Callback;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
+import org.mwg.ml.MLPlugin;
 import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
@@ -26,29 +26,29 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 //.withMemorySize(20_000)
                 //.withAutoSave(10000)
                 //.withStorage(new LevelDBStorage("data"))
-                .withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler())
+                .withPlugin(new MLPlugin()).withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
                 LinearRegressionSGDNode lrNode = (LinearRegressionSGDNode) graph.newTypedNode(0, 0, LinearRegressionSGDNode.NAME);
 
-                final int BUFFER_SIZE = 4000;
+                final int BUFFER_SIZE = 3000;
                 lrNode.setProperty(AbstractLinearRegressionNode.BUFFER_SIZE_KEY, Type.INT, BUFFER_SIZE);
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.001);
                 lrNode.setProperty(LinearRegressionBatchGDNode.LEARNING_RATE_KEY, Type.DOUBLE, 0.01);
-                lrNode.set(AbstractMLNode.FROM, FEATURE);
+                lrNode.set(AbstractMLNode.FROM, AbstractLinearRegressionTest.FEATURE);
 
-                AbstractLinearRegressionTest.RegressionJumpCallback rjc = runRandom(lrNode, BUFFER_SIZE+1000);
+                AbstractLinearRegressionTest.RegressionJumpCallback rjc = runRandom(lrNode, BUFFER_SIZE+500);
 
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < 1e-3);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, Math.abs(rjc.intercept - 1) < 2e-3);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, rjc.bufferError < eps);
-                assertTrue(rjc.intercept+"\t"+rjc.coefs[0]+"\t"+rjc.bufferError+"\t"+rjc.l2Reg, rjc.l2Reg < eps);
+                assertTrue(Math.abs(rjc.coefs[0] - 2) < 1e-3);
+                assertTrue(Math.abs(rjc.intercept - 1) < 2e-3);
+                assertTrue(rjc.bufferError < eps);
+                assertTrue(rjc.l2Reg < eps);
             }
         });
     }
