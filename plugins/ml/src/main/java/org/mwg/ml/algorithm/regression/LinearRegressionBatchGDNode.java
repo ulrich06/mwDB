@@ -53,7 +53,8 @@ public class LinearRegressionBatchGDNode extends AbstractLRGradientDescentNode {
 
             int startIndex = 0;
             int index = 0;
-            double oldCoefs[] = Arrays.copyOf(coefs, coefs.length);
+            double oldCoefs[] = new double[coefs.length];
+            System.arraycopy(coefs, 0, oldCoefs, 0, coefs.length);
             while (startIndex + dims <= valueBuffer.length) {
                 double curValue[] = new double[dims];
                 System.arraycopy(valueBuffer, startIndex, curValue, 0, dims);
