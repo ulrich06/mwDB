@@ -13,7 +13,7 @@ import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.mlx.algorithm.classifier.LogisticRegressionClassifierNode;
-import org.mwg.mlx.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 

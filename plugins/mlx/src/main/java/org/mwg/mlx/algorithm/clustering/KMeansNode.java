@@ -6,6 +6,9 @@ import org.mwg.Graph;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * @ignore ts
+ */
 public class KMeansNode extends AbstractNode {
 
     public KMeansNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {

@@ -5,7 +5,7 @@ import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
-import org.mwg.mlx.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 
 import static org.junit.Assert.assertTrue;

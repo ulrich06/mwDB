@@ -1,7 +1,7 @@
 package org.mwg.mlx.algorithm;
 
 import org.mwg.Graph;
-import org.mwg.mlx.RegressionNode;
+import org.mwg.ml.RegressionNode;
 import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 

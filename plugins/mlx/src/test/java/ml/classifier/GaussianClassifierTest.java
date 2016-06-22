@@ -3,8 +3,8 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.classifier.GaussianClassifierNode;
 
 import static org.junit.Assert.assertTrue;
 

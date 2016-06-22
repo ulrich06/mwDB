@@ -1,4 +1,4 @@
-package org.mwg.ml.algorithm;
+package org.mwg.mlx.algorithm;
 
 import org.mwg.Callback;
 import org.mwg.Graph;

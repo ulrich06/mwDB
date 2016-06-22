@@ -1,10 +1,10 @@
-package org.mwg.ml.algorithm.classifier;
+package org.mwg.mlx.algorithm.classifier;
 
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.ml.algorithm.AbstractGaussianClassifierNode;
+import org.mwg.mlx.algorithm.AbstractGaussianClassifierNode;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.NodeState;

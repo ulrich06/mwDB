@@ -3,9 +3,9 @@ package org.mwg.mlx.algorithm.regression;
 import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
-import org.mwg.mlx.common.matrix.Matrix;
-import org.mwg.mlx.common.matrix.TransposeType;
-import org.mwg.mlx.common.matrix.operation.PInvSVD;
+import org.mwg.ml.common.matrix.Matrix;
+import org.mwg.ml.common.matrix.TransposeType;
+import org.mwg.ml.common.matrix.operation.PInvSVD;
 import org.mwg.plugin.NodeState;
 
 public class LinearRegressionNode extends AbstractLinearRegressionNode {

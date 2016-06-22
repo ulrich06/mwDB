@@ -10,7 +10,7 @@ import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionSGDNode;
-import org.mwg.mlx.AbstractMLNode;
+import org.mwg.ml.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 
