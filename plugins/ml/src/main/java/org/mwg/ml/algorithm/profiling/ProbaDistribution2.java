@@ -5,6 +5,9 @@ import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 
 
+/**
+ * @ignore ts
+ */
 public class ProbaDistribution2 {
 
     public MultivariateNormalDistribution[] distributions;

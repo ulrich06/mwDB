@@ -3,9 +3,10 @@ package org.mwg.ml;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.ml.common.NDimentionalArray;
+import org.mwg.ml.common.matrix.Matrix;
 
 /**
- * Created by assaad on 20/06/16.
+ * @ignore ts
  */
 public class NDArrayTest {
 
@@ -56,11 +57,17 @@ public class NDArrayTest {
                     int posF = array.convertFlat(vals);
                     //  System.out.println(k+ ": " + pos[0] + "," + pos[1] + "," + pos[2] + ", ->" + posF);
                     Assert.assertTrue(k == posF);
+
+                    double[] temps=array.revertFlatIndex(k);
+                    Assert.assertTrue(Matrix.compare(vals,temps,1e-6));
+
                     k++;
 
                 }
             }
         }
+
+
 
 
         double[] seed = new double[min.length];

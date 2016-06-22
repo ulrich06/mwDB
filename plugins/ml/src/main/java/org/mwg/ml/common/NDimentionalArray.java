@@ -1,7 +1,8 @@
 package org.mwg.ml.common;
 
-import java.util.HashMap;
-
+/**
+ * @ignore ts
+ */
 public class NDimentionalArray {
 
     private double[] _data;
@@ -27,6 +28,7 @@ public class NDimentionalArray {
         }
         else{
             //create hashmap
+            throw new RuntimeException("Not implemented yet");
         }
         this.min=min;
         this.max=max;
@@ -61,6 +63,14 @@ public class NDimentionalArray {
         return positions;
     }
 
+    public double[] revertIndex(int[] indices){
+        double[] positions=new double[indices.length];
+        for(int i=0;i<min.length;i++){
+            positions[i]= indices[i]*precisions[i]+min[i];
+        }
+        return positions;
+    }
+
     public int convertFlat(double[] indices){
         int position=0;
         int tempMult=1;
@@ -76,6 +86,16 @@ public class NDimentionalArray {
         return position;
     }
 
+    public double[] revertFlatIndex(int index){
+        int[] tempindex=new int[dimensions.length];
+
+
+        for(int i=0;i<min.length;i++){
+            tempindex[i]=index%dimensions[i];
+            index=(index-tempindex[i])/dimensions[i];
+        }
+        return revertIndex(tempindex);
+    }
 
 
     public int[] getDimensions(){
@@ -100,5 +120,17 @@ public class NDimentionalArray {
             }
         }
         totalProba=1.0;
+    }
+
+    public double[] getBestPrediction() {
+        double max=0;
+        int pos=0;
+        for(int i=0;i<_data.length;i++){
+            if(_data[i]>max){
+                max=_data[i];
+                pos=i;
+            }
+        }
+        return revertFlatIndex(pos);
     }
 }

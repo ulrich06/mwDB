@@ -77,8 +77,9 @@ public class LiveLinearRegressionNode extends AbstractMLNode implements Regressi
         //ToDo test currentErr and update alpha automatically
         double prevErr = state.getFromKeyWithDefault(LAST_ERR_KEY, 0.0);
         double currErr = calculate(weights, input) - output;
-        if (currErr > prevErr) {
-        }
+      /*  if (currErr > prevErr) {
+            //toDo fill here
+        }*/
 
         state.setFromKey(LAST_ERR_KEY, Type.DOUBLE, currErr);
 

@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
+import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.Enforcer;
@@ -886,5 +887,67 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
         }
         return Math.sqrt(max);
+    }
+
+
+    /**
+     * @ignore ts
+     */
+    public void predictValue(double[] temp, int[] pos, int level, Callback<double[]> callback) {
+        if(callback!=null) {
+//            double[] values = new double[temp.length];
+//            System.arraycopy(temp, 0, values, 0, temp.length);
+
+            NodeState resolved = this._resolver.resolveState(this, true);
+            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
+            if (initialPrecision == null) {
+                initialPrecision = new double[temp.length];
+                for (int i = 0; i < temp.length; i++) {
+                    initialPrecision[i] = 1;
+                }
+            }
+            final double[] err = initialPrecision;
+            double[] min = getMin();
+            double[] max = getMax();
+
+
+            double[] minsearch=new double[temp.length];
+            double[] maxsearch=new double[temp.length];
+
+            for(int i=0;i<temp.length;i++){
+                minsearch[i]=temp[i]-2*err[i];
+                maxsearch[i]=temp[i]+2*err[i];
+            }
+
+            for(int i=0;i<pos.length;i++){
+                minsearch[pos[i]]=min[i];
+                maxsearch[pos[i]]=max[i];
+            }
+
+            query(level, minsearch, maxsearch, new Callback<ProbaDistribution>() {
+                @Override
+                public void on(ProbaDistribution probabilities) {
+                    ProbaDistribution2 newCalc = new ProbaDistribution2(probabilities.total, probabilities.distributions, probabilities.global);
+                    double[] best =null;
+                    if(probabilities.distributions.length==0){
+                        double[] avg=getAvg();
+                        best=new double[avg.length];
+                        System.arraycopy(temp, 0, best, 0, temp.length);
+                        for(int i=0;i<pos.length;i++){
+                            best[pos[i]]=avg[i];
+                        }
+                    }
+                    else {
+                        NDimentionalArray temp = newCalc.calculate(minsearch, maxsearch, err, err, null);
+                        best = temp.getBestPrediction();
+                    }
+                    callback.on(best);
+
+                }
+            });
+
+
+
+        }
     }
 }
