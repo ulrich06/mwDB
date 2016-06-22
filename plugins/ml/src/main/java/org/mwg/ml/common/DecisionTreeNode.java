@@ -49,7 +49,8 @@ public class DecisionTreeNode{
         frontier.add(this);
         int currentNumberToAdd = 0;
         while(frontier.size()>0){
-            DecisionTreeNode currentNode = frontier.remove(0);
+            DecisionTreeNode currentNode = frontier.get(0);
+            frontier.remove(0);
             result.add(currentNode.boundary);
             result.add((double)currentNode.classNum);
             if (currentNode.left!=null){
