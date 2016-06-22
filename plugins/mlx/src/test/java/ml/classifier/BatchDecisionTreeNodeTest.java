@@ -3,11 +3,11 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
-import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.algorithm.AbstractAnySlidingWindowManagingNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.mlx.algorithm.classifier.BatchDecisionTreeNode;
+import org.mwg.mlx.AbstractMLNode;
+import org.mwg.mlx.algorithm.AbstractAnySlidingWindowManagingNode;
 
 import static org.junit.Assert.assertTrue;
 

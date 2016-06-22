@@ -10,12 +10,10 @@ package ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
-import org.mwg.ml.AbstractMLNode;
-
-import java.util.Random;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.mlx.algorithm.classifier.LogisticRegressionClassifierNode;
+import org.mwg.mlx.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 

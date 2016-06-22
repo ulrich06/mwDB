@@ -1,9 +1,5 @@
 package ml.classifier;
 
-import org.mwg.Callback;
-import org.mwg.Node;
-import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

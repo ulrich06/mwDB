@@ -1,14 +1,13 @@
-package org.mwg.ml;
+package org.mwg.mlx;
 
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
-import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
-import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
-import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
+import org.mwg.mlx.algorithm.classifier.BatchDecisionTreeNode;
+import org.mwg.mlx.algorithm.classifier.GaussianNaiveBayesianNode;
+import org.mwg.mlx.algorithm.classifier.LogisticRegressionClassifierNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionBatchGDNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionSGDNode;
 import org.mwg.plugin.NodeFactory;
 
 public class MLXPlugin extends MLPlugin {

@@ -1,4 +1,4 @@
-package org.mwg.ml.algorithm;
+package org.mwg.mlx.algorithm;
 
 import org.mwg.Graph;
 import org.mwg.plugin.Enforcer;

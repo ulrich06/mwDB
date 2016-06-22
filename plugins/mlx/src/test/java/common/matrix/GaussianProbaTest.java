@@ -8,10 +8,10 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
-import org.mwg.ml.common.matrix.Matrix;
-import org.mwg.ml.common.matrix.operation.Gaussian1D;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.mlx.common.matrix.Matrix;
+import org.mwg.mlx.common.matrix.operation.Gaussian1D;
 
 import java.util.Random;
 

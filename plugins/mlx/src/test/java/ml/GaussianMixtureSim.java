@@ -3,14 +3,13 @@ package ml;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Callback;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Scanner;
-
 
 /**
  * @ignore ts

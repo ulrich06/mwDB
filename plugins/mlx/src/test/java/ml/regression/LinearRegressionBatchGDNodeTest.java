@@ -6,11 +6,11 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLXPlugin;
-import org.mwg.ml.algorithm.AbstractLRGradientDescentNode;
-import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
-import org.mwg.ml.AbstractMLNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.AbstractLRGradientDescentNode;
+import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionBatchGDNode;
+import org.mwg.mlx.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 

@@ -3,9 +3,9 @@ package ml.classifier;
 import org.mwg.Callback;
 import org.mwg.Node;
 import org.mwg.Type;
-import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.algorithm.AbstractAnySlidingWindowManagingNode;
-import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
+import org.mwg.mlx.AbstractMLNode;
+import org.mwg.mlx.algorithm.AbstractAnySlidingWindowManagingNode;
+import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
 
 /**
  * Created by andre on 5/9/2016.

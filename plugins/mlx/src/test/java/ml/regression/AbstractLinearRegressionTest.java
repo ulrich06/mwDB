@@ -3,9 +3,9 @@ package ml.regression;
 import org.mwg.Callback;
 import org.mwg.Node;
 import org.mwg.Type;
-import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
+import org.mwg.mlx.AbstractMLNode;
+import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 
 
 import static org.junit.Assert.assertTrue;

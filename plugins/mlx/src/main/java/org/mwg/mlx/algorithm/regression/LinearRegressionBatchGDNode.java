@@ -1,8 +1,8 @@
-package org.mwg.ml.algorithm.regression;
+package org.mwg.mlx.algorithm.regression;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.ml.algorithm.AbstractLRGradientDescentNode;
+import org.mwg.mlx.algorithm.AbstractLRGradientDescentNode;
 import org.mwg.plugin.NodeState;
 
 /**
