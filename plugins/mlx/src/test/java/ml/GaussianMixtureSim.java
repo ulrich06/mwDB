@@ -11,6 +11,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Scanner;
 
+
+/**
+ * @ignore ts
+ */
 public class GaussianMixtureSim {
     public static void main(String[] arg) {
         final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
