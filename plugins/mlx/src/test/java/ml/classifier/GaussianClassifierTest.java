@@ -1,9 +1,9 @@
-package org.mwg.ml.classifier;
+package ml.classifier;
 
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLPlugin;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
 
 import static org.junit.Assert.assertTrue;
@@ -18,7 +18,7 @@ public class GaussianClassifierTest extends AbstractClassifierTest{
     @Test
     public void test() {
         //This test fails if there are too many errors
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

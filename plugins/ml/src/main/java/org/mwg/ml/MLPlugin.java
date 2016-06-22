@@ -3,7 +3,6 @@ package org.mwg.ml;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
-import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
 import org.mwg.ml.algorithm.regression.*;
@@ -49,11 +48,6 @@ public class MLPlugin extends AbstractPlugin {
                 return new InterquartileRangeOutlierDetectorNode(world, time, id, graph, initialResolution);
             }
         });
-        declareNodeType(GaussianClassifierNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new GaussianClassifierNode(world, time, id, graph, initialResolution);
-            }
-        });
+
     }
 }

@@ -9,6 +9,7 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.NodeState;
 
+
 public class GaussianClassifierNode extends AbstractGaussianClassifierNode implements ClassificationNode {
 
     public static final String NAME = "GaussianClassifier";
