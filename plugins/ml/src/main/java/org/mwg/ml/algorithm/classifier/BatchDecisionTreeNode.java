@@ -24,9 +24,17 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     }
 
     protected int predict(DecisionTreeNode node, double value[]) {
+        if (node==rootNode){
+            System.out.println(value[0]);
+            if (value.length>1){
+                System.out.println("\t"+value[1]);
+            }
+        }
         if ((node.left == null) && (node.right == null)) {
+            System.out.println("Class: "+node.classNum);
             return node.classNum;
         }
+        System.out.println("Going deeper...");
         if (value[node.featureNum] >= node.boundary) {
             return predict(node.right, value);
         }
@@ -38,7 +46,16 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     @Override
     protected int predictValue(NodeState state, double[] value) {
         if (rootNode == null) {
-            rootNode = DecisionTreeNode.deserializeFromDoubleArray((double[])state.getFromKey(INTERNAL_DECISION_TREE_KEY));
+            double serializedTree[] = (double[])state.getFromKey(INTERNAL_DECISION_TREE_KEY);
+            String s = "DESERIALIZED\n";
+            for (int i = 0;i<serializedTree.length;i++){
+                s += serializedTree[i]+"; ";
+                if (i%5 == 4){
+                    s += "\n";
+                }
+            }
+            System.out.println(s);
+            rootNode = DecisionTreeNode.deserializeFromDoubleArray(serializedTree);
         }
         return predict(rootNode, value);
     }
@@ -58,22 +75,6 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         return result;
     }
 
-    private static double getBoundary(double values[]) {
-        //TODO: for now it is only median. Add more sophisticated things.
-        //When counting median, leave only unique elements.
-        //Otherwise we can end up with everything above or below the boundary.
-        Set<Double> uniqueValuesSet = new HashSet<Double>();
-        for (double d : values) {
-            uniqueValuesSet.add(d);
-        }
-        Double sortedValues[] = uniqueValuesSet.toArray(new Double[0]);
-        Arrays.sort(sortedValues);
-        final int midArray = sortedValues.length / 2;
-        if (values.length % 2 == 0)
-            return (sortedValues[midArray] + sortedValues[midArray - 1]) / 2; //Mind that index start with 0
-        return sortedValues[midArray]; //Again, mind that index start with 0
-    }
-
     private static double[] getAllPossibleBoundaries(double values[]) {
         //When counting median, leave only unique elements.
         //Otherwise we can end up with everything above or below the boundary.
@@ -88,8 +89,19 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         Arrays.sort(sortedValues);
         double result[] = new double[sortedValues.length - 1];
         for (int i = 0; i < result.length; i++) {
-            result[i] = (sortedValues[i] + sortedValues[i + 1]) / 2;
+            double a = sortedValues[i];
+            double b = sortedValues[i+1];
+            result[i] = a + b;
+            System.out.println("Sum (a+b)"+(a+b));
+            System.out.println("Sum (result)"+result[i]);
+            result[i] = (a + b) / 2.0;
+            System.out.println("Averaging: "+sortedValues[i]+"\t"+sortedValues[i+1]+"\t"+result[i]);
         }
+        String s = "\tRESULT";
+        for (int i=0;i<result.length;i++){
+            s += result[i]+";";
+        }
+        System.out.println(s);
         return result;
     }
 
@@ -118,6 +130,11 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
     private static double[] getImprovementAndBoundary(double[] values, int classNumbers[]) {
         //TODO for now using only accuracy improvement. Add more criteria.
         double boundariesList[] = getAllPossibleBoundaries(values);
+        String s ="\tBOUNDARIES LIST";
+        for (int i=0;i<boundariesList.length;i++){
+            s += boundariesList[i]+";";
+        }
+        System.out.println(s);
         double maxImprovement = -1; //Improvement cannot be <0 ,so we'll replace that immediately
         double bestBoundary = Double.NaN;
         for (int k = 0; k < boundariesList.length; k++) {
@@ -215,6 +232,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     private DecisionTreeNode split(NodeState state, double[][] values, int classNumbers[]) {
         assert classNumbers.length > 0;
+        System.out.println("Starting split - inside");
         //Step 1. Select the feature to split upon
         // For each feature:
         //   1.1. Get the boundary
@@ -223,12 +241,16 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         // If improvement is not worth it, just stop here and make a leaf.
         // Otherwise - make a split, recursively call this method.
         if (allClassNumbersAreTheSame(classNumbers)) {
+            System.out.println("Same classes: "+classNumbers[0]);
             return createLeaf(classNumbers[0]);
         }
 
         if (allValuesAreTheSame(values)) {
+            System.out.println("Same values: "+getMostFrequentElement(classNumbers));
             return createLeaf(getMostFrequentElement(classNumbers));
         }
+
+        System.out.println("Split - checkpoint 1");
 
         final int dims = state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF);
         int chosenFeature = -1;
@@ -239,6 +261,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
             double improvementAndBoundary[] = getImprovementAndBoundary(valuesOfFeature, classNumbers);
             double improvement = improvementAndBoundary[0];
             double boundary = improvementAndBoundary[1];
+            System.out.println(i+"\tImprovement: "+improvement+"\tBoundary: "+boundary);
             if (improvement > maxImprovement) {
                 maxImprovement = improvement;
                 bestBoundary = boundary;
@@ -246,6 +269,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
             }
         }
         if (chosenFeature < 0) {
+            System.out.println("No improvement: "+getMostFrequentElement(classNumbers)+"\t"+bestBoundary);
             return createLeaf(getMostFrequentElement(classNumbers));
         }
 
@@ -280,6 +304,7 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
         //split.classNum does not matter
         split.left = split(state, bbValuesArray, bbClasses);
         split.right = split(state, abValuesArray, abClasses);
+        System.out.println("Further split by feature: "+split.featureNum+"\tBoundary: "+split.boundary);
         return split;
     }
 
@@ -308,12 +333,39 @@ public class BatchDecisionTreeNode extends AbstractClassifierSlidingWindowManagi
 
     @Override
     protected void updateModelParameters(NodeState state, double valueBuffer[], int resultBuffer[], double[] value, int classNumber) {
+        System.out.println("Updating for class number: "+classNumber);
         if (state.getFromKeyWithDefault(INPUT_DIM_KEY, INPUT_DIM_DEF) == INPUT_DIM_UNKNOWN) {
             state.setFromKey(INPUT_DIM_KEY, Type.INT, value.length);
         }
 
+        System.out.println("Starting split.");
         rootNode = split(state, unpackValues(valueBuffer, valueBuffer.length/resultBuffer.length), resultBuffer);
-        state.setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, rootNode.serializeToDoubleArray());
+        double serializedTree[] = rootNode.serializeToDoubleArray();
+
+        String s = "SERIALIZED\n";
+        for (int i = 0;i<serializedTree.length;i++){
+            s += serializedTree[i]+"; ";
+            if (i%5 == 4){
+                s += "\n";
+            }
+        }
+        s += "Boundary: "+rootNode.boundary+"\n";
+        s += "ClassNum: "+rootNode.classNum+"\n";
+        s += "Left: "+rootNode.left+"\n";
+        s += "Right: "+rootNode.right+"\n";
+        s += "FeatureNum: "+rootNode.featureNum+"\n";
+        int dims = valueBuffer.length/resultBuffer.length;
+        int resIndex = 0;
+        for (int i = 0;i<valueBuffer.length;i++){
+            s += valueBuffer[i]+"; ";
+            if (i%dims == (dims-1)){
+                s += "\t"+resultBuffer[resIndex]+"\n";
+                resIndex++;
+            }
+        }
+        System.out.println(s);
+
+        state.setFromKey(INTERNAL_DECISION_TREE_KEY, Type.DOUBLE_ARRAY, serializedTree);
     }
 
     @Override

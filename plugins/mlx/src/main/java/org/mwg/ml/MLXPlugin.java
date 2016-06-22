@@ -16,13 +16,6 @@ public class MLXPlugin extends MLPlugin {
 
     public MLXPlugin() {
         super();
-        //BatchDecisionTreeNode
-        declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
-            @Override
-            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-                return new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
-            }
-        });
     }
 
 }

@@ -3,6 +3,7 @@ package org.mwg.ml;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
+import org.mwg.ml.algorithm.classifier.BatchDecisionTreeNode;
 import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
 import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
 import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
@@ -85,6 +86,13 @@ public class MLPlugin extends AbstractPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new LinearRegressionSGDNode(world, time, id, graph, initialResolution);
+            }
+        });
+        //BatchDecisionTreeNode
+        declareNodeType(BatchDecisionTreeNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new BatchDecisionTreeNode(world, time, id, graph, initialResolution);
             }
         });
     }
