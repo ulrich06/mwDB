@@ -1,9 +1,9 @@
-package org.mwg.ml.classifier;
+package ml.classifier;
 
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLPlugin;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
 
 import static org.junit.Assert.assertTrue;
@@ -15,7 +15,7 @@ public class GaussianNaiveBayesianTest extends AbstractClassifierTest {
         //This test fails if there are too many errors
 
         final Graph graph = new GraphBuilder()
-                .withPlugin(new MLPlugin())
+                .withPlugin(new MLXPlugin())
                 .withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {

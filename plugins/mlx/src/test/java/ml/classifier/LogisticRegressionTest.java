@@ -1,4 +1,4 @@
-package org.mwg.ml.classifier;
+package ml.classifier;
 
 /**
  * Created by andrey.boytsov on 17/05/16.
@@ -10,7 +10,7 @@ package org.mwg.ml.classifier;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLPlugin;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.algorithm.classifier.LogisticRegressionClassifierNode;
 import org.mwg.ml.AbstractMLNode;
@@ -197,7 +197,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
     //@Test
     public void test() {
         //This test fails if there are too many errors
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -221,7 +221,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
     @Test
     public void testRandomGen1D() {
         //This test fails if there are too many errors
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -234,7 +234,7 @@ public class LogisticRegressionTest extends AbstractClassifierTest{
                 lrNode.set(AbstractMLNode.FROM, AbstractClassifierTest.FEATURE);
                 //lrNode.setL2Regularization(10);
 
-                ClassificationJumpCallback cjc = new ClassificationJumpCallback(new String[]{FEATURE});
+                ClassificationJumpCallback cjc = new ClassificationJumpCallback(new String[]{AbstractClassifierTest.FEATURE});
 
                 for (int i = 0; i < 1000; i++) {
                     double x = f[i];

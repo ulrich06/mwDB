@@ -1,9 +1,9 @@
-package org.mwg.ml.regression;
+package ml.regression;
 
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLPlugin;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionNode;
 
@@ -14,7 +14,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise() {
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -36,7 +36,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise2() {
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -58,7 +58,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testSuddenError() {
         //This test fails only on crash. Otherwise, it is just for
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -89,7 +89,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testTooLargeRegularization() {
         //This test fails only on crash. Otherwise, it is just for
-        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

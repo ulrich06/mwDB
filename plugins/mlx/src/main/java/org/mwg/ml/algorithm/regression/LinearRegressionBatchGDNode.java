@@ -5,8 +5,6 @@ import org.mwg.Type;
 import org.mwg.ml.algorithm.AbstractLRGradientDescentNode;
 import org.mwg.plugin.NodeState;
 
-import java.util.Arrays;
-
 /**
  * Linear regression node based on stochastic gradient descent.
  * Likelz to be much faster than non-SGD, but might take longer time to converge.

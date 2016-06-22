@@ -1,4 +1,4 @@
-package org.mwg.ml.regression;
+package ml.regression;
 
 import org.mwg.Graph;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.mwg.Callback;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.MLPlugin;
+import org.mwg.ml.MLXPlugin;
 import org.mwg.ml.algorithm.AbstractLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.ml.algorithm.regression.LinearRegressionSGDNode;
@@ -26,7 +26,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 //.withMemorySize(20_000)
                 //.withAutoSave(10000)
                 //.withStorage(new LevelDBStorage("data"))
-                .withPlugin(new MLPlugin()).withScheduler(new NoopScheduler())
+                .withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -38,7 +38,7 @@ public class LinearRegressionSGDNodeTest extends AbstractLinearRegressionTest{
                 lrNode.setProperty(AbstractLinearRegressionNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.1);
                 lrNode.setProperty(AbstractLinearRegressionNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.001);
                 lrNode.setProperty(LinearRegressionBatchGDNode.LEARNING_RATE_KEY, Type.DOUBLE, 0.01);
-                lrNode.set(AbstractMLNode.FROM, AbstractLinearRegressionTest.FEATURE);
+                lrNode.set(AbstractMLNode.FROM, FEATURE);
 
                 AbstractLinearRegressionTest.RegressionJumpCallback rjc = runRandom(lrNode, BUFFER_SIZE+500);
 
