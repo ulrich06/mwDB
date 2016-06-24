@@ -61,7 +61,7 @@ public abstract class AbstractLinearRegressionNode extends AbstractAnySlidingWin
         return predictValueInternal(curValue, state.getFromKeyWithDefault(COEFFICIENTS_KEY, COEFFICIENTS_DEF), state.getFromKeyWithDefault(INTERCEPT_KEY, INTERCEPT_DEF));
     }
 
-    private double predictValueInternal(double curValue[], double coefs[], double intercept){
+    protected double predictValueInternal(double curValue[], double coefs[], double intercept){
         double response = 0;
         for (int i=0;i<curValue.length;i++){
             response += coefs[i]*curValue[i];

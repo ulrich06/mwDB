@@ -6,6 +6,7 @@ import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionWithPeriodicityNode;
 
 
 import static org.junit.Assert.assertTrue;
@@ -206,6 +207,10 @@ public class AbstractLinearRegressionTest {
         public double value[];
         public double response;
 
+        public double sinComponents[];
+        public double cosComponents[];
+
+
         Callback<Boolean> cb = new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -225,6 +230,10 @@ public class AbstractLinearRegressionTest {
             bootstrapMode = (bootstrapModeObj==null)?true:bootstrapModeObj;
             Double l2RegObj = (Double)result.get(AbstractLinearRegressionNode.L2_COEF_KEY);
             l2Reg = (l2RegObj == null)?AbstractLinearRegressionNode.L2_COEF_DEF:l2RegObj;
+
+            sinComponents = (double[])result.get(LinearRegressionWithPeriodicityNode.SINUS_KEY);
+            cosComponents = (double[])result.get(LinearRegressionWithPeriodicityNode.COSINE_KEY);
+
             result.free();
         }
     };
