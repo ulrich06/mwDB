@@ -157,7 +157,8 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 times[i] = i * inc;
                 values[i] = PolynomialFit.extrapolate(times[i], weight);
             }
-            times[factor * num] = (nodeTime - timeOrigin) / stp;
+            times[factor * num] = (nodeTime - timeOrigin);
+            times[factor * num] =times[factor * num]/ stp;
             values[factor * num] = value;
             PolynomialFit pf = new PolynomialFit(deg);
             pf.fit(times, values);

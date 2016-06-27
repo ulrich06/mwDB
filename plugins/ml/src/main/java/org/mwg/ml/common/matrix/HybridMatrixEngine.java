@@ -101,6 +101,7 @@ public class HybridMatrixEngine implements MatrixEngine {
         else {
             return blas.solveQR(matA, matB, workInPlace, transB);
         }
+       // return blas.solveQR(matA, matB, workInPlace, transB);
     }
 
     @Override
