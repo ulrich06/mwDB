@@ -95,13 +95,13 @@ public class HybridMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix solveQR(Matrix matA, Matrix matB, boolean workInPlace, TransposeType transB) {
-        if(matA.leadingDimension()<SOLVEQR_LIMIT &&matB.leadingDimension()<SOLVEQR_LIMIT){
+        /*if(matA.leadingDimension()<SOLVEQR_LIMIT &&matB.leadingDimension()<SOLVEQR_LIMIT){
             return jama.solveQR(matA, matB, workInPlace, transB);
         }
         else {
             return blas.solveQR(matA, matB, workInPlace, transB);
-        }
-       // return blas.solveQR(matA, matB, workInPlace, transB);
+        }*/
+       return blas.solveQR(matA, matB, workInPlace, transB);
     }
 
     @Override
