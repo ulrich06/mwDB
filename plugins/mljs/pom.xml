@@ -71,7 +71,7 @@
                             <copyJRE>false</copyJRE>
                             <copyJunit>true</copyJunit>
                             <moduleImports>
-                                <moduleImport>../../../generated-sources/src/main/mwg.ml.ts</moduleImport>
+                                <moduleImport>../generated-sources/mwg.ml.ts</moduleImport>
                             </moduleImports>
                             <source>${basedir}/../ml/src/test/java</source>
                             <target>${basedir}/target/generated-test-sources</target>

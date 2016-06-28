@@ -77,7 +77,7 @@
                             <copyJRE>false</copyJRE>
                             <copyJunit>true</copyJunit>
                             <moduleImports>
-                                <moduleImport>../../../generated-sources/src/main/core.ts</moduleImport>
+                                <moduleImport>../generated-sources/core.ts</moduleImport>
                             </moduleImports>
                             <source>${basedir}/../core/src/test/java</source>
                             <target>${basedir}/target/generated-test-sources</target>

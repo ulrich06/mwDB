@@ -312,6 +312,8 @@ declare module org {
         interface DeferCounter {
             count(): void;
             then(job: org.mwg.plugin.Job): void;
+            wrap(): org.mwg.Callback<any>;
+            waitResult(): any;
         }
         interface Graph {
             newNode(world: number, time: number): org.mwg.Node;
@@ -1691,9 +1693,12 @@ declare module org {
                     private _nb_down;
                     private _counter;
                     private _end;
+                    private _result;
                     constructor(nb: number);
                     count(): void;
                     then(p_callback: org.mwg.plugin.Job): void;
+                    wrap(): org.mwg.Callback<any>;
+                    waitResult(): any;
                 }
                 class DataHasher {
                     private static byteTable;

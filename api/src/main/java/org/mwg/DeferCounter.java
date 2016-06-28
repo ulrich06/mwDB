@@ -20,4 +20,10 @@ public interface DeferCounter {
      */
     void then(Job job);
 
+    /**
+     */
+    Callback wrap();
+
+    Object waitResult();
+
 }
