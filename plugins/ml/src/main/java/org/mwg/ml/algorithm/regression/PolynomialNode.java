@@ -28,6 +28,8 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
     //Internal state variables private and starts with _
     private static final String INTERNAL_WEIGHT_KEY = "weight";
     private static final String INTERNAL_STEP_KEY = "step";
+    private static final String INTERNAL_TIME_BUFFER = "times";
+    private static final String INTERNAL_VALUES_BUFFER = "values";
     private static final String INTERNAL_NB_PAST_KEY = "nb";
     private static final String INTERNAL_LAST_TIME_KEY = "lastTime";
 
@@ -90,81 +92,50 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 1);
             previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, 0l);
             previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, 0l);
+            previousState.setFromKey(INTERNAL_TIME_BUFFER, Type.DOUBLE_ARRAY, new double[]{0});
+            previousState.setFromKey(INTERNAL_VALUES_BUFFER, Type.DOUBLE_ARRAY, new double[]{value});
             if (callback != null) {
                 callback.on(true);
             }
             return;
         }
-
-        // For the second time point, test and check for the step in time
-        Long stp = (Long) previousState.getFromKey(INTERNAL_STEP_KEY);
-        long lastTime = nodeTime - timeOrigin;
-        if (stp == null || stp == 0) {
-            if (lastTime == 0) {
-                weight = new double[1];
-                weight[0] = value;
-                previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
-                if (callback != null) {
-                    callback.on(true);
-                }
-                return;
-            } else {
-                stp = lastTime;
-                previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, stp);
-            }
-        }
-
-        //Then, first step, check if the current model already fits the new value:
-        int deg = weight.length - 1;
-        Integer num = (Integer) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
-        double t = (nodeTime - timeOrigin);
-        t = t / stp;
-        double maxError = maxErr(precision, deg);
-
-        //If yes, update some states parameters and return
-        if (Math.abs(PolynomialFit.extrapolate(t, weight) - value) <= maxError) {
-            previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
-            previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
-            if (callback != null) {
-                callback.on(true);
-            }
-            return;
-        }
-
         //Check if we are inserting in the past:
         long previousTime = timeOrigin + (Long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY);
-        int factor;
-
-        //The difference between inserting in the future or in the past
         if (nodeTime > previousTime) {
-            factor = 1;
-        } else {
-            factor = 3;
-        }
+            // For the second time point, test and check for the step in time
+            Long stp = (Long) previousState.getFromKey(INTERNAL_STEP_KEY);
+            long lastTime = nodeTime - timeOrigin;
+            if (stp == null || stp == 0) {
+                if (lastTime == 0) {
+                    weight = new double[1];
+                    weight[0] = value;
+                    previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+                    previousState.setFromKey(INTERNAL_TIME_BUFFER, Type.DOUBLE_ARRAY, new double[]{0});
+                    previousState.setFromKey(INTERNAL_VALUES_BUFFER, Type.DOUBLE_ARRAY, new double[]{value});
+                    if (callback != null) {
+                        callback.on(true);
+                    }
+                    return;
+                } else {
+                    stp = lastTime;
+                    previousState.setFromKey(INTERNAL_STEP_KEY, Type.LONG, stp);
+                }
+            }
 
-        //first check if we can increase the degree
-        int newMaxDegree = Math.min(num, MAX_DEGREE);
-        if (deg < newMaxDegree) {
-            deg++;
-            double[] times = new double[factor * num + 1];
-            double[] values = new double[factor * num + 1];
-            double inc = 0;
-            if (num > 1) {
-                inc = ((Long) previousState.getFromKey(INTERNAL_LAST_TIME_KEY));
-                inc = inc / (stp * (factor * num - 1));
-            }
-            for (int i = 0; i < factor * num; i++) {
-                times[i] = i * inc;
-                values[i] = PolynomialFit.extrapolate(times[i], weight);
-            }
-            times[factor * num] = (nodeTime - timeOrigin);
-            times[factor * num] =times[factor * num]/ stp;
-            values[factor * num] = value;
-            PolynomialFit pf = new PolynomialFit(deg);
-            pf.fit(times, values);
-            if (tempError(pf.getCoef(), times, values) <= maxError) {
-                weight = pf.getCoef();
-                previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+            //Then, first step, check if the current model already fits the new value:
+            int deg = weight.length - 1;
+            Integer num = (Integer) previousState.getFromKey(INTERNAL_NB_PAST_KEY);
+
+            double t = (nodeTime - timeOrigin);
+            t = t / stp;
+            double maxError = maxErr(precision, deg);
+
+            double[] times = updateBuffer(previousState, t, INTERNAL_TIME_BUFFER);
+            double[] values = updateBuffer(previousState, value, INTERNAL_VALUES_BUFFER);
+
+
+            //If yes, update some states parameters and return
+            if (Math.abs(PolynomialFit.extrapolate(t, weight) - value) <= maxError) {
                 previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
                 previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
                 if (callback != null) {
@@ -172,31 +143,57 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
                 }
                 return;
             }
-        }
 
-        //It does not fit, create a new state and split the polynomial, different splits if we are dealing with the future or with the past
-        if (nodeTime > previousTime) {
+            //If not increase polynomial degrees
+            int newdeg = Math.min(times.length, MAX_DEGREE);
+            while (deg < newdeg && times.length < MAX_DEGREE * 4) {
+                maxError = maxErr(precision, deg);
+                PolynomialFit pf = new PolynomialFit(deg);
+                pf.fit(times, values);
+                if (tempError(pf.getCoef(), times, values) <= maxError) {
+                    weight = pf.getCoef();
+                    previousState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, num + 1);
+                    previousState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
+                    previousState.setFromKey(INTERNAL_LAST_TIME_KEY, Type.LONG, lastTime);
+                    if (callback != null) {
+                        callback.on(true);
+                    }
+                    return;
+                }
+                deg++;
+            }
+
+
+            //It does not fit, create a new state and split the polynomial, different splits if we are dealing with the future or with the past
+
             long newstep = nodeTime - previousTime;
             NodeState phasedState = newState(previousTime); //force clone
-            double[] values = new double[2];
-            double pt = previousTime - timeOrigin;
-            pt = pt / stp;
-            values[0] = PolynomialFit.extrapolate(pt, weight);
-            values[1] = value;
+            double[] nvalues = new double[2];
+            double[] ntimes = new double[2];
+
+            ntimes[0] = 0;
+            ntimes[1] = 1;
+            nvalues[0] = values[values.length - 2];
+            nvalues[1] = value;
 
             //Test if the newly created polynomial is of degree 0 or 1.
             maxError = maxErr(precision, 0);
-            if (Math.abs(values[1] - values[0]) <= maxError) {
+            if (Math.abs(nvalues[1] - nvalues[0]) <= maxError) {
                 // Here it's a degree 0
                 weight = new double[1];
-                weight[0] = values[0];
+                weight[0] = nvalues[0];
             } else {
                 //Here it's a degree 1
-                values[1] = values[1] - values[0];
-                weight = values;
+                weight = new double[2];
+                weight[0] = nvalues[0];
+                weight[1] = nvalues[1] - nvalues[0];
             }
 
+            previousState.setFromKey(INTERNAL_TIME_BUFFER, Type.DOUBLE_ARRAY, null);
+            previousState.setFromKey(INTERNAL_VALUES_BUFFER, Type.DOUBLE_ARRAY, null);
             //create and set the phase set
+            phasedState.setFromKey(INTERNAL_TIME_BUFFER, Type.DOUBLE_ARRAY, ntimes);
+            phasedState.setFromKey(INTERNAL_VALUES_BUFFER, Type.DOUBLE_ARRAY, nvalues);
             phasedState.setFromKey(PRECISION, Type.DOUBLE, precision);
             phasedState.setFromKey(INTERNAL_WEIGHT_KEY, Type.DOUBLE_ARRAY, weight);
             phasedState.setFromKey(INTERNAL_NB_PAST_KEY, Type.INT, 2);
@@ -208,10 +205,27 @@ public class PolynomialNode extends AbstractMLNode implements RegressionNode {
             return;
         } else {
             // 2 phased states need to be created
-            //TODO ?
+            //TODO Insert in past.
         }
         if (callback != null) {
             callback.on(false);
+        }
+    }
+
+    private static double[] updateBuffer(NodeState state, double t, String key) {
+        double[] ts = (double[]) state.getFromKey(key);
+        if (ts.length < MAX_DEGREE * 4) {
+            double[] nts = new double[ts.length + 1];
+            System.arraycopy(ts, 0, nts, 0, ts.length);
+            nts[ts.length] = t;
+            state.setFromKey(key, Type.DOUBLE_ARRAY, nts);
+            return nts;
+        } else {
+            double[] nts = new double[ts.length];
+            System.arraycopy(ts, 1, nts, 0, ts.length - 1);
+            nts[ts.length - 1] = t;
+            state.setFromKey(key, Type.DOUBLE_ARRAY, nts);
+            return nts;
         }
     }
 
