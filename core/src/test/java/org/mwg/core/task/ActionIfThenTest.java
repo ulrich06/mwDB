@@ -2,9 +2,10 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.task.*;
+import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskFunctionConditional;
 
 public class ActionIfThenTest extends AbstractActionTest {
 

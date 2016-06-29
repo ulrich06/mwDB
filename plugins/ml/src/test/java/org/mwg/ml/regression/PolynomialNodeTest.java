@@ -9,7 +9,6 @@ import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLPlugin;
 import org.mwg.ml.algorithm.regression.PolynomialNode;
-import org.mwg.plugin.AbstractPlugin;
 
 public class PolynomialNodeTest {
     private static final int size = 100;

@@ -1,16 +1,16 @@
 package ml.regression;
 
-import org.mwg.Graph;
 import org.junit.Test;
 import org.mwg.Callback;
+import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Type;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionBatchGDNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionSGDNode;
-import org.mwg.ml.AbstractMLNode;
 
 import static org.junit.Assert.assertTrue;
 

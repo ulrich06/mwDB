@@ -4,14 +4,15 @@ package org.mwg.core.chunk.heap;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.Stack;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.Chunk;
 import org.mwg.plugin.ChunkIterator;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.plugin.ChunkType;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.*;
-import org.mwg.core.utility.PrimitiveHelper;
+import org.mwg.struct.Buffer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;

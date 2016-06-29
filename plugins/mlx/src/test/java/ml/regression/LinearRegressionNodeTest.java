@@ -7,7 +7,6 @@ import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {

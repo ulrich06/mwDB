@@ -1,7 +1,7 @@
 package org.mwg.mlx.algorithm.clustering;
 
-import org.mwg.plugin.AbstractNode;
 import org.mwg.Graph;
+import org.mwg.plugin.AbstractNode;
 
 import java.util.Arrays;
 import java.util.Random;

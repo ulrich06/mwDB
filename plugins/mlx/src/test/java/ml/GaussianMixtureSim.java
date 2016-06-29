@@ -1,11 +1,11 @@
 package ml;
 
+import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
-import org.mwg.Callback;
-import org.mwg.mlx.MLXPlugin;
-import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.mlx.MLXPlugin;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

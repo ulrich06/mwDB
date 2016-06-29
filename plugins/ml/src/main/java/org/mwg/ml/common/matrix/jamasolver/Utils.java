@@ -1,7 +1,5 @@
 package org.mwg.ml.common.matrix.jamasolver;
 
-import org.mwg.ml.common.matrix.Matrix;
-
 class Utils {
 
     /**

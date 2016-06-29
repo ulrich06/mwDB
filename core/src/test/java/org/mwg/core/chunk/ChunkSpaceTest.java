@@ -2,7 +2,6 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;

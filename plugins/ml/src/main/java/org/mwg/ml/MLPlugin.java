@@ -5,7 +5,8 @@ import org.mwg.Node;
 import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
-import org.mwg.ml.algorithm.regression.*;
+import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
+import org.mwg.ml.algorithm.regression.PolynomialNode;
 import org.mwg.plugin.AbstractPlugin;
 import org.mwg.plugin.NodeFactory;
 

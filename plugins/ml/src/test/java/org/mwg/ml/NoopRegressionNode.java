@@ -2,8 +2,6 @@ package org.mwg.ml;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.Node;
-import org.mwg.plugin.NodeFactory;
 
 public class NoopRegressionNode extends AbstractMLNode implements RegressionNode {
 

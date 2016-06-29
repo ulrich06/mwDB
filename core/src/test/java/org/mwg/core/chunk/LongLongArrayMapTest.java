@@ -2,15 +2,15 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.core.CoreConstants;
 import org.mwg.Graph;
-import org.mwg.plugin.Chunk;
-import org.mwg.struct.LongLongArrayMap;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;
 import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Chunk;
+import org.mwg.struct.LongLongArrayMap;
 
 
 public class LongLongArrayMapTest implements ChunkListener {

@@ -4,13 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.chunk.heap.HeapChunk;
+import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
+import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.Unsafe;
 import org.mwg.plugin.Chunk;
 import org.mwg.struct.Buffer;
-import org.mwg.core.chunk.heap.HeapWorldOrderChunk;
-import org.mwg.core.chunk.heap.HeapChunk;
-import org.mwg.core.chunk.offheap.*;
-import org.mwg.core.utility.Unsafe;
 
 public class WorldOrderChunkTest implements ChunkListener {
 

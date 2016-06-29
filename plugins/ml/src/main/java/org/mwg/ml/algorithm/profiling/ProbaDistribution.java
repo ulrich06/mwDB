@@ -1,7 +1,6 @@
 package org.mwg.ml.algorithm.profiling;
 
 import org.mwg.ml.ProgressReporter;
-import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 
 

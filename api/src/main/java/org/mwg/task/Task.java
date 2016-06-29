@@ -1,7 +1,6 @@
 package org.mwg.task;
 
 import org.mwg.Callback;
-import org.mwg.Node;
 import org.mwg.Type;
 
 public interface Task {

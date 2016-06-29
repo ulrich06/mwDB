@@ -1,11 +1,14 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
-import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.core.utility.ReadOnlyStorage;
-import org.mwg.plugin.*;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
+import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.core.utility.ReadOnlyStorage;
+import org.mwg.plugin.ChunkSpace;
+import org.mwg.plugin.Plugin;
+import org.mwg.plugin.Scheduler;
+import org.mwg.plugin.Storage;
 
 public class Builder implements GraphBuilder.InternalBuilder {
 

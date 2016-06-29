@@ -8,9 +8,8 @@ import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionWithPeriodicityNode;
 
-
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by andre on 5/10/2016.

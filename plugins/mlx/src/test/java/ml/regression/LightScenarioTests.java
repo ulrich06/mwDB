@@ -3,13 +3,13 @@ package ml.regression;
 import org.junit.Test;
 import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.AbstractMLNode;
 import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
-import org.mwg.ml.AbstractMLNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by andre on 5/24/2016.

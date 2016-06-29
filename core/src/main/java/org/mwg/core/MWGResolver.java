@@ -1,11 +1,19 @@
 package org.mwg.core;
 
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.Constants;
+import org.mwg.Type;
+import org.mwg.core.chunk.StateChunk;
+import org.mwg.core.chunk.TimeTreeChunk;
+import org.mwg.core.chunk.TreeWalker;
+import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.DataHasher;
-import org.mwg.struct.*;
 import org.mwg.plugin.*;
-import org.mwg.core.chunk.*;
+import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
+import org.mwg.struct.LongLongMap;
+import org.mwg.struct.StringLongMap;
 
 class MWGResolver implements Resolver {
 

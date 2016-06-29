@@ -1,10 +1,6 @@
 package org.mwg.ml.common.matrix;
 
 
-import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
-
-import java.util.BitSet;
 import java.util.Random;
 
 //Most of the time we will be using column based matrix due to blas.

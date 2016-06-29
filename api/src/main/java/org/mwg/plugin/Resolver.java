@@ -1,6 +1,8 @@
 package org.mwg.plugin;
 
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.Node;
 
 /**
  * Resolver plugin, able to change the semantic of Many World Graph

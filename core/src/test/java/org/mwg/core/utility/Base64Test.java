@@ -3,8 +3,8 @@ package org.mwg.core.utility;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Constants;
-import org.mwg.struct.Buffer;
 import org.mwg.plugin.Base64;
+import org.mwg.struct.Buffer;
 
 public class Base64Test {
 

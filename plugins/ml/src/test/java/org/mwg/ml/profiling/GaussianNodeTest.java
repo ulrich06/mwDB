@@ -2,10 +2,12 @@ package org.mwg.ml.profiling;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
+import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.MLPlugin;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
-import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.ml.common.matrix.Matrix;
 
 /**

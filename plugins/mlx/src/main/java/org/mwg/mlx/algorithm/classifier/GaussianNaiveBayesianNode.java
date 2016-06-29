@@ -1,9 +1,11 @@
 package org.mwg.mlx.algorithm.classifier;
 
-import org.mwg.*;
+import org.mwg.Constants;
+import org.mwg.Graph;
+import org.mwg.Type;
 import org.mwg.ml.ClassificationNode;
-import org.mwg.mlx.algorithm.AbstractGaussianClassifierNode;
 import org.mwg.ml.common.matrix.operation.Gaussian1D;
+import org.mwg.mlx.algorithm.AbstractGaussianClassifierNode;
 import org.mwg.plugin.NodeState;
 
 public class GaussianNaiveBayesianNode extends AbstractGaussianClassifierNode implements ClassificationNode {

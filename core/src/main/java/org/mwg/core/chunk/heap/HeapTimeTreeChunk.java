@@ -1,13 +1,13 @@
 package org.mwg.core.chunk.heap;
 
 import org.mwg.core.CoreConstants;
-import org.mwg.plugin.ChunkType;
-import org.mwg.struct.Buffer;
 import org.mwg.core.chunk.ChunkListener;
 import org.mwg.core.chunk.TimeTreeChunk;
 import org.mwg.core.chunk.TreeWalker;
-import org.mwg.plugin.Base64;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Base64;
+import org.mwg.plugin.ChunkType;
+import org.mwg.struct.Buffer;
 
 public class HeapTimeTreeChunk implements TimeTreeChunk, HeapChunk {
 

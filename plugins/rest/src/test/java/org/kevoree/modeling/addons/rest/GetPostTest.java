@@ -2,7 +2,6 @@ package org.kevoree.modeling.addons.rest;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import jdk.nashorn.internal.runtime.regexp.joni.ast.StringNode;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;

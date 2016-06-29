@@ -1,13 +1,17 @@
 package org.mwg.core.chunk.heap;
 
+import org.mwg.Graph;
 import org.mwg.Type;
 import org.mwg.core.CoreConstants;
-import org.mwg.Graph;
-import org.mwg.plugin.*;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.*;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Base64;
+import org.mwg.plugin.Chunk;
+import org.mwg.plugin.ChunkType;
+import org.mwg.plugin.NodeStateCallback;
+import org.mwg.struct.*;
 
 public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
 

@@ -2,8 +2,8 @@ package org.mwg.mlx.algorithm.classifier;
 
 import org.mwg.Graph;
 import org.mwg.Type;
-import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.ml.common.DecisionTreeNode;
+import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
 import org.mwg.plugin.NodeState;
 
 import java.util.*;

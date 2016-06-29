@@ -10,7 +10,6 @@ import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
 import org.mwg.plugin.Enforcer;
-import org.mwg.plugin.NodeFactory;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
 

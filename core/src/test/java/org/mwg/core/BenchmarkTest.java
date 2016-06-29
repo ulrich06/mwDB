@@ -2,9 +2,10 @@ package org.mwg.core;
 
 import org.junit.Assert;
 import org.mwg.*;
-import org.mwg.Graph;
-import org.mwg.Node;
-import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.chunk.offheap.OffHeapByteArray;
+import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
+import org.mwg.core.chunk.offheap.OffHeapLongArray;
+import org.mwg.core.chunk.offheap.OffHeapStringArray;
 import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.utility.Unsafe;
 import org.mwg.plugin.Job;

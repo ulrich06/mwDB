@@ -8,7 +8,6 @@ import org.mwg.mlx.MLXPlugin;
 import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
 import org.mwg.mlx.algorithm.regression.LinearRegressionWithPeriodicityNode;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class LinearRegressionPeriodicNodeTest extends AbstractLinearRegressionTest {

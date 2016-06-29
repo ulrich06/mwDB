@@ -4,8 +4,8 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
-import org.mwg.task.*;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.task.*;
 
 import java.util.Arrays;
 

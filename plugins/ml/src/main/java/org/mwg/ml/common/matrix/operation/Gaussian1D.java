@@ -1,7 +1,5 @@
 package org.mwg.ml.common.matrix.operation;
 
-import java.util.Random;
-
 /**
  * Created by assaad on 22/04/16.
  */

@@ -6,8 +6,6 @@ import org.mwg.core.chunk.heap.FixedStack;
 import org.mwg.core.chunk.offheap.*;
 import org.mwg.core.utility.Unsafe;
 
-import java.util.concurrent.LinkedBlockingDeque;
-
 public class FixedStackTest {
     private static final int CAPACITY = 15;
 

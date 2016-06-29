@@ -1,7 +1,7 @@
 package org.mwg.ml.common.matrix.blassolver.blas;
 
 import org.mwg.ml.common.matrix.TransposeType;
-import org.netlib.blas.*;
+import org.netlib.blas.Dgemm;
 import org.netlib.lapack.*;
 import org.netlib.util.intW;
 
