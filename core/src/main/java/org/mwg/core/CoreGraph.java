@@ -479,6 +479,10 @@ class CoreGraph implements org.mwg.Graph {
                             }
                         }
                     });
+                } else {
+                    if (PrimitiveHelper.isDefined(callback)) {
+                        callback.on(false);
+                    }
                 }
             }
         }, false);
