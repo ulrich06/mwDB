@@ -915,31 +915,30 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             double[] maxsearch=new double[temp.length];
 
             for(int i=0;i<temp.length;i++){
-                minsearch[i]=temp[i]-2*err[i];
-                maxsearch[i]=temp[i]+2*err[i];
+                minsearch[i]=temp[i]-Math.sqrt(err[i]);
+                maxsearch[i]=temp[i]+Math.sqrt(err[i]);
             }
 
             for(int i=0;i<pos.length;i++){
-                minsearch[pos[i]]=min[i];
-                maxsearch[pos[i]]=max[i];
+                minsearch[pos[i]]=min[pos[i]];
+                maxsearch[pos[i]]=max[pos[i]];
             }
 
             query(level, minsearch, maxsearch, new Callback<ProbaDistribution>() {
                 @Override
                 public void on(ProbaDistribution probabilities) {
                     ProbaDistribution2 newCalc = new ProbaDistribution2(probabilities.total, probabilities.distributions, probabilities.global);
-                    double[] best =null;
+                    double[] best =new double[temp.length];
+                    System.arraycopy(temp, 0, best, 0, temp.length);
                     if(probabilities.distributions.length==0){
                         double[] avg=getAvg();
-                        best=new double[avg.length];
-                        System.arraycopy(temp, 0, best, 0, temp.length);
                         for(int i=0;i<pos.length;i++){
                             best[pos[i]]=avg[i];
                         }
                     }
                     else {
                         NDimentionalArray temp = newCalc.calculate(minsearch, maxsearch, err, err, null);
-                        best = temp.getBestPrediction();
+                        best[pos[0]] =temp.getBestPrediction(pos[0]);
                     }
                     callback.on(best);
 

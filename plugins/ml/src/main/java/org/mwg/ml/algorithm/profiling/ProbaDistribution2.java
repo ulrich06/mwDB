@@ -50,22 +50,9 @@ public class ProbaDistribution2 {
     }
 
     private void calculateOneDist(MultivariateNormalDistribution distribution, double weight, double[] min, double[] max, double[] sqrerr, NDimentionalArray result) {
-        double[] tempmin = distribution.getMin();
-        double[] tempmax = distribution.getMax();
-        double[] tempavg = distribution.getAvg();
-
-        if (tempmin == null || tempmax == null) {
-            tempmin = new double[tempavg.length];
-            tempmax = new double[tempavg.length];
-            for (int i = 0; i < tempavg.length; i++) {
-                tempmin[i] = Math.max(min[i], tempavg[i] - 5 * sqrerr[i]);
-                tempmax[i] = Math.min(max[i], tempavg[i] + 5 * sqrerr[i]);
-            }
-        }
-        double[] seed = new double[tempmin.length];
-        System.arraycopy(tempmin, 0, seed, 0, tempmin.length);
-        reccursiveCalc(distribution, weight, tempmin, tempmax, sqrerr, seed, result);
-
+        double[] seed = new double[min.length];
+        System.arraycopy(min, 0, seed, 0, min.length);
+        reccursiveCalc(distribution, weight, min, max, sqrerr, seed, result);
     }
 
     private void reccursiveCalc(MultivariateNormalDistribution distribution, double weight, double[] min, double[] max, double[] steps, double[] seed, NDimentionalArray result) {

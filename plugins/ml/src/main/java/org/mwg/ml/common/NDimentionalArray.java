@@ -122,15 +122,17 @@ public class NDimentionalArray {
         totalProba=1.0;
     }
 
-    public double[] getBestPrediction() {
-        double max=0;
-        int pos=0;
+    public double getBestPrediction(int index) {
+        double sumXproba=0;
         for(int i=0;i<_data.length;i++){
-            if(_data[i]>max){
-                max=_data[i];
-                pos=i;
-            }
+           if(_data[i]==0){
+               continue;
+           }
+            else{
+               double[] revert=revertFlatIndex(i);
+               sumXproba+=revert[index]*_data[i];
+           }
         }
-        return revertFlatIndex(pos);
+        return sumXproba;
     }
 }

@@ -7,7 +7,7 @@ import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 /**
  * Computes singular value decompositions
  */
-public class SVD implements SVDDecompose {
+class SVD implements SVDDecompose {
 
     /**
      * Work array

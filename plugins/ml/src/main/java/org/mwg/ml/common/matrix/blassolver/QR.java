@@ -5,7 +5,7 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 
-public class QR {
+class QR {
 
     /**
      * The orthogonal matrix

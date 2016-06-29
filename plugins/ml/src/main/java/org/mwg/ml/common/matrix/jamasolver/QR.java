@@ -16,7 +16,7 @@ import org.mwg.ml.common.matrix.Matrix;
    returns false.
 */
 
-public class QR {
+class QR {
 
 /* ------------------------
    Class variables
