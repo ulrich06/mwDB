@@ -35,6 +35,6 @@ public class GaussianDistance implements Distance {
 
     @Override
     public double getMaxValue() {
-        return Double.POSITIVE_INFINITY;
+        return Double.MAX_VALUE;
     }
 }
