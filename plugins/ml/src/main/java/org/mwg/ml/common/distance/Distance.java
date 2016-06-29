@@ -32,7 +32,7 @@ public interface Distance {
      * @return true if the first distance is better than the second, false in
      *         other cases.
      */
-    public boolean compare(double x, double y);
+     public boolean compare(double x, double y);
 
     /**
      * Returns the value that this distance metric produces for the lowest
