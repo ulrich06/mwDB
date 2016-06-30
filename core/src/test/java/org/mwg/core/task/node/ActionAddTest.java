@@ -8,6 +8,8 @@ import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.setWorld;
+
 public class ActionAddTest extends AbstractActionTest {
 
     public ActionAddTest() {
@@ -20,8 +22,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] id = new long[1];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .newNode()
                 .from(relatedNode).asVar("x")
@@ -34,7 +35,7 @@ public class ActionAddTest extends AbstractActionTest {
                         Assert.assertEquals(1, ((long[]) node.get("friend")).length);
                         id[0] = node.id();
                     }
-                }).execute();
+                }).execute(graph);
 
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
@@ -50,8 +51,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] ids = new long[5];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .from(relatedNode).asVar("x")
                 .then(new Action() {
@@ -76,7 +76,7 @@ public class ActionAddTest extends AbstractActionTest {
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute();
+                }).execute(graph);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
@@ -95,8 +95,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final boolean[] nextCalled = new boolean[1];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .then(new Action() {
                     @Override
@@ -111,7 +110,7 @@ public class ActionAddTest extends AbstractActionTest {
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute();
+                }).execute(graph);
 
         Assert.assertTrue(nextCalled[0]);
     }

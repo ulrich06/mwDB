@@ -368,11 +368,6 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public Task newTask() {
-        return new CoreTask(this);
-    }
-
-    @Override
     public TaskContext newTaskContext() {
         return new CoreTaskContext(null, null, this, new TaskAction[0]);
     }

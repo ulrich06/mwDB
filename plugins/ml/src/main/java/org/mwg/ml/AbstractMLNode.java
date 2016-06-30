@@ -10,6 +10,8 @@ import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.setWorld;
+
 public abstract class AbstractMLNode extends AbstractNode {
 
     public static String FROM_SEPARATOR = ";";
@@ -52,8 +54,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             String[] split = query.split(FROM_SEPARATOR);
             Task[] tasks = new Task[split.length];
             for (int i = 0; i < split.length; i++) {
-                Task t = graph().newTask();
-                t.setWorld(world());
+                Task t = setWorld(world());
                 t.setTime(time());
                 t.parse(split[i].trim());
                 tasks[i] = t;
@@ -63,7 +64,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             final DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
-                tasks[i].executeThenAsync(null, this, new Action() {
+                tasks[i].executeThenAsync(graph(), null, this, new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Object current = context.result();

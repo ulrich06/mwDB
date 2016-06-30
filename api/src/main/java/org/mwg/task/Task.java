@@ -1,6 +1,7 @@
 package org.mwg.task;
 
 import org.mwg.Callback;
+import org.mwg.Graph;
 import org.mwg.Type;
 
 public interface Task {
@@ -39,8 +40,9 @@ public interface Task {
 
     /**
      * Initializes a named variable into the task context.
+     *
      * @param variableName the name of the variable
-     * @param inputValue the value of the variable
+     * @param inputValue   the value of the variable
      * @return this task to chain actions (fluent API)
      */
     Task setVar(String variableName, Object inputValue);
@@ -72,7 +74,8 @@ public interface Task {
 
     /**
      * Filters the previous result to keep nodes which named attribute has a specific value
-     * @param name the name of the attribute used to filter
+     *
+     * @param name    the name of the attribute used to filter
      * @param pattern the value nodes must have for this attribute
      * @return this task to chain actions (fluent API)
      */
@@ -80,7 +83,8 @@ public interface Task {
 
     /**
      * Filters the previous result to keep nodes which named attribute do not have a given value
-     * @param name the name of the attribute used to filter
+     *
+     * @param name    the name of the attribute used to filter
      * @param pattern the value nodes must not have for this attribute
      * @return this task to chain actions (fluent API)
      */
@@ -211,7 +215,7 @@ public interface Task {
     /**
      * Schedule and execute the current task program
      */
-    void execute();
+    void execute(final Graph graph);
 
     /**
      * Schedule and execute the current task program, when every actions will be execute the last action passed as parameter will be executed.
@@ -219,9 +223,9 @@ public interface Task {
      *
      * @param action last action the execution before the clean procedure
      */
-    void executeThen(Action action);
+    void executeThen(final Graph graph, Action action);
 
-    void executeWith(TaskContext initialContext);
+    void executeWith(final Graph graph, TaskContext initialContext);
 
     /**
      * Schedule and execute the current task program. However
@@ -230,7 +234,7 @@ public interface Task {
      * @param initialResult initial content if any, null otherwise
      * @param finalAction   last action the execution before the clean procedure. Warning this last action will be executed in asynchronous mode. Therefore, no objects of the task will be freed before the call the method next on the parameter context.
      */
-    void executeThenAsync(final TaskContext parentContext, final Object initialResult, final Action finalAction);
+    void executeThenAsync(final Graph graph, final TaskContext parentContext, final Object initialResult, final Action finalAction);
 
     /**
      * Create a new node on the [world,time] of the context
@@ -314,5 +318,7 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task math(String expression);
+
+    Task loop(int repetition);
 
 }

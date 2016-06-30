@@ -6,13 +6,14 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.from;
+
 public class ActionFromIndexTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .from("uselessPayload")
+        from("uselessPayload")
                 .fromIndex("nodes", "name=n0")
                 .then(new Action() {
                     @Override
@@ -21,7 +22,7 @@ public class ActionFromIndexTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 1);
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 

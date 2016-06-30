@@ -207,14 +207,6 @@ public interface Graph {
     Query newQuery();
 
     /**
-     * Creates a new task object to manipulate Graph in an easy way
-     * By default, the world and the time of the task is 0
-     *
-     * @return newly created task object
-     */
-    Task newTask();
-
-    /**
      * Creates a new task context that we can give to initialize a task
      *
      * @return newly created task context object

@@ -10,7 +10,7 @@ public class ActionGetTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .get("children")
                 .get("name")
@@ -22,14 +22,14 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1], "n1");
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 
     @Test
     public void testDefaultSynthax() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .parse("children.name")
                 .then(new Action() {
@@ -40,7 +40,7 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1], "n1");
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 

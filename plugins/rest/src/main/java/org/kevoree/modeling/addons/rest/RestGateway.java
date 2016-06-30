@@ -18,6 +18,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mwg.task.Actions.setWorld;
+
 public class RestGateway implements HttpHandler {
 
     private int port;
@@ -66,8 +68,7 @@ public class RestGateway implements HttpHandler {
             }
             if (httpServerExchange.getRequestMethod().equalToString("GET")) {
                 httpServerExchange.dispatch();
-                graph.newTask()
-                        .setWorld(world)
+                setWorld(world)
                         .setTime(time)
                         .parse(concatQuery.toString())
                         .then(new Action() {
@@ -99,7 +100,7 @@ public class RestGateway implements HttpHandler {
                                 httpServerExchange.endExchange();
                             }
                         })
-                        .execute();
+                        .execute(graph);
             } else {
                 //avoid blocking the main HTTP server thread
                 if (httpServerExchange.isInIoThread()) {
@@ -158,8 +159,7 @@ public class RestGateway implements HttpHandler {
                     }
                 }
 
-                graph.newTask()
-                        .setWorld(world)
+                setWorld(world)
                         .setTime(time)
                         .parse(concatQuery.toString())
                         .then(new Action() {
@@ -186,7 +186,7 @@ public class RestGateway implements HttpHandler {
                                 }
                             }
                         })
-                        .execute();
+                        .execute(graph);
             }
 
         } catch (Exception e) {

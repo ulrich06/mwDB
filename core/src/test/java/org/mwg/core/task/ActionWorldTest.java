@@ -5,20 +5,21 @@ import org.junit.Test;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.setWorld;
+
 public class ActionWorldTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .setWorld(10)
+        setWorld(10)
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(context.world(), 10);
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 

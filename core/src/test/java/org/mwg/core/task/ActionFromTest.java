@@ -7,20 +7,21 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.from;
+
 public class ActionFromTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .from("uselessPayload")
+        from("uselessPayload")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(context.result(), "uselessPayload");
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 
@@ -31,26 +32,25 @@ public class ActionFromTest extends AbstractActionTest {
         graph.findAll(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
-                Assert.assertEquals(3,result.length);
+                Assert.assertEquals(3, result.length);
 
                 String[] expected = new String[]{(String) result[0].get("name"),
                         (String) result[1].get("name"),
                         (String) result[2].get("name")};
 
-                selfPointer.graph.newTask()
-                        .from(result)
+                from(result)
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task
                             }
                         })
-                        .execute();
+                        .execute(selfPointer.graph);
 
                 String[] resultName = new String[3];
                 try {
                     int i = 0;
-                    for(Node n : result) {
+                    for (Node n : result) {
                         resultName[i] = (String) n.get("name");
                         i++;
                     }
@@ -58,7 +58,7 @@ public class ActionFromTest extends AbstractActionTest {
                     resultName[0] = "fail";
                 }
 
-                Assert.assertArrayEquals(expected,resultName);
+                Assert.assertArrayEquals(expected, resultName);
             }
         });
         removeGraph();
@@ -71,25 +71,24 @@ public class ActionFromTest extends AbstractActionTest {
         graph.find(0, 0, "roots", "name=root", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
-                Assert.assertEquals(1,result.length);
+                Assert.assertEquals(1, result.length);
 
-                selfPointer.graph.newTask()
-                        .from(result[0])
+                from(result[0])
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task
                             }
                         })
-                        .execute();
-                String name = "";
+                        .execute(graph);
+                String name;
                 try {
                     name = (String) result[0].get("name");
                 } catch (Exception e) {
                     name = "fail";
                 }
 
-                Assert.assertEquals("root",name);
+                Assert.assertEquals("root", name);
             }
         });
         removeGraph();

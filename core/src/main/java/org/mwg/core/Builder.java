@@ -4,11 +4,13 @@ import org.mwg.GraphBuilder;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.ReadOnlyStorage;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.plugin.Plugin;
 import org.mwg.plugin.Scheduler;
 import org.mwg.plugin.Storage;
+import org.mwg.task.Task;
 
 public class Builder implements GraphBuilder.InternalBuilder {
 
@@ -46,6 +48,11 @@ public class Builder implements GraphBuilder.InternalBuilder {
             graph.offHeapBuffer = true;
         }
         return graph;
+    }
+
+    @Override
+    public Task newTask() {
+        return new CoreTask();
     }
 
     /**

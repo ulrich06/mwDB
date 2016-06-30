@@ -15,7 +15,7 @@ class ActionTrigger implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        _subTask.executeThenAsync(context, context.result(), new Action() {
+        _subTask.executeThenAsync(context.graph(),context, context.result(), new Action() {
             @Override
             public void eval(TaskContext subTaskFinalContext) {
                 context.setResult(subTaskFinalContext);

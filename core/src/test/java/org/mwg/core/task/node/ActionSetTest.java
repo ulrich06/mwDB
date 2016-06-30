@@ -7,6 +7,8 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.setWorld;
+
 public class ActionSetTest extends ActionNewNodeTest {
 
     public ActionSetTest() {
@@ -17,8 +19,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithOneNode() {
         final long[] id = new long[1];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .from("node").asVar("nodeName")
                 .newNode()
@@ -32,7 +33,7 @@ public class ActionSetTest extends ActionNewNodeTest {
 
                         id[0] = node.id();
                     }
-                }).execute();
+                }).execute(graph);
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
             @Override
@@ -45,8 +46,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithArray() {
         final long[] ids = new long[5];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .from("node").asVar("nodeName")
                 .then(new Action() {
@@ -71,7 +71,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute();
+                }).execute(graph);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
@@ -86,8 +86,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithNull() {
         final boolean[] nextCalled = new boolean[1];
-        graph.newTask()
-                .setWorld(0)
+        setWorld(0)
                 .setTime(0)
                 .from("node").asVar("nodeName")
                 .then(new Action() {
@@ -102,7 +101,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute();
+                }).execute(graph);
 
         Assert.assertTrue(nextCalled[0]);
     }

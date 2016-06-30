@@ -8,13 +8,14 @@ import org.mwg.Type;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.*;
+
 public class ActionTraverseTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .fromIndexAll("nodes")
+        fromIndexAll("nodes")
                 .traverse("children")
                 .then(new Action() {
                     @Override
@@ -24,15 +25,14 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 
     @Test
     public void testParse() {
         initGraph();
-        graph.newTask()
-                .parse("fromIndexAll(nodes).traverse(children)")
+        parse("fromIndexAll(nodes).traverse(children)")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -41,7 +41,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute();
+                .execute(graph);
         removeGraph();
     }
 
@@ -79,8 +79,7 @@ public class ActionTraverseTest extends AbstractActionTest {
             }
         });
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
                     @Override
@@ -89,10 +88,9 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute();
+                }).execute(graph);
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node3")
                 .then(new Action() {
                     @Override
@@ -100,9 +98,9 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Node[] n = (Node[]) context.result();
                         Assert.assertEquals(0, n.length);
                     }
-                }).execute();
+                }).execute(graph);
 
-        graph.newTask().setTime(12)
+        setTime(12)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
@@ -112,10 +110,9 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute();
+                }).execute(graph);
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {
                     @Override
@@ -125,9 +122,9 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals("node1", n[0].get("name"));
                         Assert.assertEquals("node2", n[1].get("name"));
                     }
-                }).execute();
+                }).execute(graph);
 
-        graph.newTask().setTime(13)
+        setTime(13)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {
@@ -139,7 +136,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals("node2", n[1].get("name"));
                         Assert.assertEquals("node3", n[2].get("name"));
                     }
-                }).execute();
+                }).execute(graph);
         removeGraph();
     }
 

@@ -17,7 +17,7 @@ class ActionIfThen implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         if (_condition.eval(context)) {
-            _action.executeThenAsync(context, context.result(), new Action() {
+            _action.executeThenAsync(context.graph(),context, context.result(), new Action() {
                 @Override
                 public void eval(TaskContext subTaskFinalContext) {
                     context.setResult(subTaskFinalContext);

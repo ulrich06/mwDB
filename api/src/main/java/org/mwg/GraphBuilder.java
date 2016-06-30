@@ -3,6 +3,7 @@ package org.mwg;
 import org.mwg.plugin.Plugin;
 import org.mwg.plugin.Scheduler;
 import org.mwg.plugin.Storage;
+import org.mwg.task.Task;
 
 /**
  * Creates an instance of a Graph, with several customizable features.
@@ -21,7 +22,11 @@ public class GraphBuilder {
     private static InternalBuilder _internalBuilder = null;
 
     public interface InternalBuilder {
+
         Graph newGraph(Storage storage, boolean readOnly, Scheduler scheduler, Plugin[] plugins, boolean usingGC, boolean usingOffHeapMemory, long memorySize, long autoSaveSize);
+
+        Task newTask();
+
     }
 
     /**

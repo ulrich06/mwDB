@@ -13,6 +13,8 @@ import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
 
+import static org.mwg.task.Actions.setTime;
+
 public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode {
 
 
@@ -137,7 +139,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
-        Task creationTask = graph().newTask().setTime(time()).setWorld(world()).then(new Action() {
+        Task creationTask = setTime(time()).setWorld(world()).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
@@ -147,7 +149,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         });
 
 
-        Task traverse = graph().newTask().setTime(time()).setWorld(world());
+        Task traverse = setTime(time()).setWorld(world());
         traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
@@ -170,8 +172,8 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                     }
                 }, traverse);
 
-        Task mainTask = graph().newTask().setTime(time()).setWorld(world()).from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
-        mainTask.executeThen(new Action() {
+        Task mainTask = setTime(time()).setWorld(world()).from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
+        mainTask.executeThen(graph(),new Action() {
             @Override
             public void eval(TaskContext context) {
                 if (callback != null) {
@@ -447,7 +449,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         //At this point we have min and max at least with 2xerr of difference
 
-        Task deepTraverseTask = graph().newTask().setTime(time()).setWorld(world());
+        Task deepTraverseTask = setTime(time()).setWorld(world());
         final int parentLevel = this.getLevel();
 
         deepTraverseTask.from(new Node[]{this});
@@ -493,7 +495,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
         });
 
-        deepTraverseTask.execute();
+        deepTraverseTask.execute(graph());
     }
 
 
@@ -515,7 +517,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         }
         final double[] err = initialPrecision;
 
-        Task deepTraverseTask = graph().newTask().setTime(time()).setWorld(world());
+        Task deepTraverseTask = setTime(time()).setWorld(world());
 
         deepTraverseTask.from(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
@@ -553,7 +555,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
         });
 
-        deepTraverseTask.execute();
+        deepTraverseTask.execute(graph());
     }
 
     @Override
