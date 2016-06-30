@@ -62,7 +62,9 @@ class HeapBuffer extends AbstractBuffer {
     @Override
     public byte[] data() {
         byte[] copy = new byte[writeCursor];
-        System.arraycopy(buffer, 0, copy, 0, writeCursor);
+        if(buffer != null){
+            System.arraycopy(buffer, 0, copy, 0, writeCursor);
+        }
         return copy;
     }
 

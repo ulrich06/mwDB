@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -20,7 +21,23 @@ class ActionSetProperty implements TaskAction {
     @Override
     public void eval(TaskContext context) {
         final Object previousResult = context.result();
-        final Object savedVar = context.variable(_variableNameToSet);
+        Object savedVar = context.variable(_variableNameToSet);
+        if (savedVar == null) {
+            Object tempateBased = CoreTask.template(this._variableNameToSet, context);
+            switch (_propertyType) {
+                case Type.INT:
+                    savedVar = parseInt(tempateBased.toString());
+                    break;
+                case Type.DOUBLE:
+                    savedVar = Double.parseDouble(tempateBased.toString());
+                    break;
+                case Type.LONG:
+                    savedVar = parseLong(tempateBased.toString());
+                    break;
+                default:
+                    savedVar = tempateBased;
+            }
+        }
         if (previousResult instanceof AbstractNode) {
             ((Node) previousResult).setProperty(_relationName, _propertyType, savedVar);
         } else if (previousResult instanceof Object[]) {
@@ -28,6 +45,21 @@ class ActionSetProperty implements TaskAction {
         }
         context.setResult(previousResult);
         context.next();
+    }
+
+    /**
+     * @native ts
+     * return parseInt(payload);
+     */
+    private int parseInt(String payload){
+        return Integer.parseInt(payload);
+    }
+    /**
+     * @native ts
+     * return parseInt(payload);
+     */
+    private long parseLong(String payload){
+        return Long.parseLong(payload);
     }
 
     private void setFromArray(final Object[] objs, final String relName, final Object toSet) {

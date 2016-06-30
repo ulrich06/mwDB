@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
@@ -23,7 +24,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                 .setTime(0)
                 .from("node").asVar("nodeName")
                 .newNode()
-                .set("name", "nodeName")
+                .setProperty("name", Type.STRING, "nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -59,7 +60,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                         context.setResult(nodes);
                     }
                 })
-                .set("name", "nodeName")
+                .setProperty("name", Type.STRING, "nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -95,7 +96,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                         context.setResult(null);
                     }
                 })
-                .set("name", "node")
+                .setProperty("name", Type.STRING, "node")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

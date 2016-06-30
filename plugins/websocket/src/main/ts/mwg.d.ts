@@ -672,6 +672,8 @@ declare module org {
                 static traverseIndex(indexName: string, query: string): org.mwg.task.Task;
                 static repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                static println(): org.mwg.task.Task;
+                static setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -709,7 +711,6 @@ declare module org {
                 executeWith(graph: org.mwg.Graph, initialContext: org.mwg.task.TaskContext): void;
                 executeThenAsync(graph: org.mwg.Graph, parentContext: org.mwg.task.TaskContext, initialResult: any, finalAction: org.mwg.task.Action): void;
                 newNode(): org.mwg.task.Task;
-                set(propertyName: string, variableNameToSet: string): org.mwg.task.Task;
                 setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
                 removeProperty(propertyName: string): org.mwg.task.Task;
                 add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
@@ -719,6 +720,7 @@ declare module org {
                 math(expression: string): org.mwg.task.Task;
                 repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                println(): org.mwg.task.Task;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -737,6 +739,7 @@ declare module org {
                 setVariable(name: string, value: any): void;
                 addToVariable(name: string, value: any): void;
                 result(): any;
+                resultAsObjectArray(): any[];
                 resultAsString(): string;
                 resultAsStringArray(): string[];
                 resultAsNode(): org.mwg.Node;
@@ -1418,6 +1421,9 @@ declare module org {
                     constructor(actionName: string, flatParams: string);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
+                class ActionPrintln implements org.mwg.task.TaskAction {
+                    eval(context: org.mwg.task.TaskContext): void;
+                }
                 class ActionRemove implements org.mwg.task.TaskAction {
                     private _relationName;
                     private _variableNameToRemove;
@@ -1440,19 +1446,14 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     private filterArray(current);
                 }
-                class ActionSet implements org.mwg.task.TaskAction {
-                    private _relationName;
-                    private _variableNameToSet;
-                    constructor(relationName: string, variableNameToSet: string);
-                    eval(context: org.mwg.task.TaskContext): void;
-                    private setFromArray(objs, relName, toSet);
-                }
                 class ActionSetProperty implements org.mwg.task.TaskAction {
                     private _relationName;
                     private _variableNameToSet;
                     private _propertyType;
                     constructor(relationName: string, propertyType: number, variableNameToSet: string);
                     eval(context: org.mwg.task.TaskContext): void;
+                    private parseInt(payload);
+                    private parseLong(payload);
                     private setFromArray(objs, relName, toSet);
                 }
                 class ActionSetVar implements org.mwg.task.TaskAction {
@@ -1557,7 +1558,6 @@ declare module org {
                     static protect(graph: org.mwg.Graph, input: any): any;
                     private static protectIterable(input);
                     newNode(): org.mwg.task.Task;
-                    set(propertyName: string, variableNameToSet: string): org.mwg.task.Task;
                     setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
                     removeProperty(propertyName: string): org.mwg.task.Task;
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
@@ -1565,6 +1565,8 @@ declare module org {
                     math(expression: string): org.mwg.task.Task;
                     repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    println(): org.mwg.task.Task;
+                    static template(input: string, context: org.mwg.task.TaskContext): string;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
@@ -1592,6 +1594,7 @@ declare module org {
                     resultAsStringArray(): string[];
                     resultAsNode(): org.mwg.Node;
                     resultAsNodeArray(): org.mwg.Node[];
+                    resultAsObjectArray(): any[];
                     setResult(actionResult: any): void;
                     private mergeVariables(actionResult);
                     next(): void;
@@ -1690,6 +1693,7 @@ declare module org {
                     setVariable(name: string, value: any): void;
                     addToVariable(name: string, value: any): void;
                     result(): any;
+                    resultAsObjectArray(): any[];
                     resultAsString(): string;
                     resultAsStringArray(): string[];
                     resultAsNode(): org.mwg.Node;

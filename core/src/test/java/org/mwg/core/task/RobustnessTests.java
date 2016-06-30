@@ -8,6 +8,8 @@ import org.mwg.*;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionConditional;
 
+import static org.mwg.task.Actions.setProperty;
+
 
 public class RobustnessTests {
     private Graph _graph;
@@ -386,7 +388,7 @@ public class RobustnessTests {
         //propertyName
         boolean exceptionCaught = false;
         try {
-            new CoreTask().set(null,"").execute(_graph);
+            setProperty(null, Type.STRING,"").execute(_graph);
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -397,7 +399,7 @@ public class RobustnessTests {
         //propertyValue
         exceptionCaught = false;
         try {
-            new CoreTask().set("",null).execute(_graph);
+            new CoreTask().setProperty("", Type.STRING,null).execute(_graph);
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {

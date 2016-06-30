@@ -465,18 +465,6 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task set(String propertyName, String variableNameToSet) {
-        if (propertyName == null) {
-            throw new RuntimeException("propertyName should not be null");
-        }
-        if (variableNameToSet == null) {
-            throw new RuntimeException("propertyValue should not be null");
-        }
-        addAction(new ActionSet(propertyName, variableNameToSet));
-        return this;
-    }
-
-    @Override
     public Task setProperty(String propertyName, byte propertyType, String variableNameToSet) {
         if (propertyName == null) {
             throw new RuntimeException("propertyName should not be null");
@@ -521,7 +509,6 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-
     @Override
     public Task math(String expression) {
         addAction(new ActionMath(expression));
@@ -543,6 +530,34 @@ public class CoreTask implements org.mwg.task.Task {
     public Task println() {
         addAction(new ActionPrintln());
         return this;
+    }
+
+    public static String template(String input, TaskContext context) {
+        int cursor = 1;
+        StringBuilder buffer = null;
+        int previousPos = -1;
+        while (cursor < input.length()) {
+            if (input.charAt(cursor) == '{' && input.charAt(cursor - 1) == '{') {
+                previousPos = cursor + 1;
+            } else if (input.charAt(cursor) == '}' && input.charAt(cursor - 1) == '}') {
+                if (buffer == null) {
+                    buffer = new StringBuilder();
+                    buffer.append(input.substring(0, previousPos - 2));
+                }
+                buffer.append(context.variable(input.substring(previousPos, cursor - 1)));
+                previousPos = -1;
+            } else {
+                if (previousPos == -1 && buffer != null) {
+                    buffer.append(input.charAt(cursor));
+                }
+            }
+            cursor++;
+        }
+        if (buffer == null) {
+            return input;
+        } else {
+            return buffer.toString();
+        }
     }
 
     public static void fillDefault(Map<String, TaskActionFactory> registry) {

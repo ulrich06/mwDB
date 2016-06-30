@@ -151,9 +151,9 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
                         System.arraycopy(result, 0, shrinked, 0, result_index);
                         return shrinked;
                     } else {
-                        Object[] shrinked = new Object[result_index];
-                        System.arraycopy(result, 0, shrinked, 0, result_index);
-                        return shrinked;
+                        Object[] shrinked2 = new Object[result_index];
+                        System.arraycopy(result, 0, shrinked2, 0, result_index);
+                        return shrinked2;
                     }
                 }
             } else {
