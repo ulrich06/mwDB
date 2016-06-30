@@ -4,12 +4,12 @@
     <groupId>org.kevoree.mwg.plugins</groupId>
     <artifactId>mljs</artifactId>
     <name>mwg :: Plugins :: MLJS</name>
-    <version>5</version>
+    <version>6-SNAPSHOT</version>
 
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
-        <version>5</version>
+        <version>6-SNAPSHOT</version>
         <relativePath>../..</relativePath>
     </parent>
 
