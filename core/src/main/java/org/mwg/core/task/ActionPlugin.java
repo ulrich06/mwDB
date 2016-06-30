@@ -6,7 +6,7 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskActionFactory;
 import org.mwg.task.TaskContext;
 
-public class ActionPlugin implements TaskAction {
+class ActionPlugin implements TaskAction {
 
     private final String _actionName;
 
@@ -74,6 +74,7 @@ public class ActionPlugin implements TaskAction {
             }
             //add the action to the action
             subAction = actionFactory.create(params);
+            initilized = true;
         }
         if (subAction != null) {
             subAction.eval(context);

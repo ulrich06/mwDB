@@ -319,8 +319,9 @@ public interface Task {
      */
     Task math(String expression);
 
-    Task loop(int repetition);
+    Task repeat(int repetition, Task subTask);
 
-    Task loopPar(int repetition);
+    Task repeatPar(int repetition, Task subTask);
 
+    Task println();
 }

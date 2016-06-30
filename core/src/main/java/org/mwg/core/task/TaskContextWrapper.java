@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Graph;
+import org.mwg.Node;
 import org.mwg.task.TaskContext;
 
 /**
@@ -63,6 +64,31 @@ class TaskContextWrapper implements TaskContext {
     @Override
     public Object result() {
         return _wrapped.result();
+    }
+
+    @Override
+    public Object[] resultAsObjectArray() {
+        return _wrapped.resultAsObjectArray();
+    }
+
+    @Override
+    public String resultAsString() {
+        return _wrapped.resultAsString();
+    }
+
+    @Override
+    public String[] resultAsStringArray() {
+        return _wrapped.resultAsStringArray();
+    }
+
+    @Override
+    public Node resultAsNode() {
+        return _wrapped.resultAsNode();
+    }
+
+    @Override
+    public Node[] resultAsNodeArray() {
+        return _wrapped.resultAsNodeArray();
     }
 
     @Override

@@ -529,13 +529,20 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task loop(int repetition) {
+    public Task repeat(int repetition, Task subTask) {
+        addAction(new ActionLoop(repetition, subTask));
+        return this;
+    }
+
+    @Override
+    public Task repeatPar(int repetition, Task subTask) {
         throw new RuntimeException("Not implemented yet!");
     }
 
     @Override
-    public Task loopPar(int repetition) {
-        throw new RuntimeException("Not implemented yet!");
+    public Task println() {
+        addAction(new ActionPrintln());
+        return this;
     }
 
     public static void fillDefault(Map<String, TaskActionFactory> registry) {

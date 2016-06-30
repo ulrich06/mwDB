@@ -92,5 +92,15 @@ public class Actions {
         return newTask().traverseIndex(indexName, query);
     }
 
+    public static Task repeat(int repetition, Task subTask) {
+        return newTask().repeat(repetition, subTask);
+    }
 
+    public static Task repeatPar(int repetition, Task subTask) {
+        return newTask().repeatPar(repetition, subTask);
+    }
+
+    public static Task println() {
+        return newTask().println();
+    }
 }

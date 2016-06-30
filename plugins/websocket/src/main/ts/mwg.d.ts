@@ -670,6 +670,8 @@ declare module org {
                 static traverse(relationName: string): org.mwg.task.Task;
                 static get(name: string): org.mwg.task.Task;
                 static traverseIndex(indexName: string, query: string): org.mwg.task.Task;
+                static repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                static repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -715,8 +717,8 @@ declare module org {
                 parse(flat: string): org.mwg.task.Task;
                 action(name: string, params: string): org.mwg.task.Task;
                 math(expression: string): org.mwg.task.Task;
-                loop(repetition: number): org.mwg.task.Task;
-                loopPar(repetition: number): org.mwg.task.Task;
+                repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -735,6 +737,10 @@ declare module org {
                 setVariable(name: string, value: any): void;
                 addToVariable(name: string, value: any): void;
                 result(): any;
+                resultAsString(): string;
+                resultAsStringArray(): string[];
+                resultAsNode(): org.mwg.Node;
+                resultAsNodeArray(): org.mwg.Node[];
                 setResult(actionResult: any): void;
                 next(): void;
                 clean(): void;
@@ -1379,6 +1385,12 @@ declare module org {
                     constructor(cond: org.mwg.task.TaskFunctionConditional, action: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
+                class ActionLoop implements org.mwg.task.TaskAction {
+                    private _subTask;
+                    private _iteration;
+                    constructor(p_iteration: number, p_subTask: org.mwg.task.Task);
+                    eval(context: org.mwg.task.TaskContext): void;
+                }
                 class ActionMap implements org.mwg.task.TaskAction {
                     private _map;
                     constructor(p_map: org.mwg.task.TaskFunctionMap);
@@ -1551,8 +1563,8 @@ declare module org {
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
                     remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                     math(expression: string): org.mwg.task.Task;
-                    loop(repetition: number): org.mwg.task.Task;
-                    loopPar(repetition: number): org.mwg.task.Task;
+                    repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
@@ -1576,6 +1588,10 @@ declare module org {
                     addToVariable(name: string, value: any): void;
                     setVariable(name: string, value: any): void;
                     result(): any;
+                    resultAsString(): string;
+                    resultAsStringArray(): string[];
+                    resultAsNode(): org.mwg.Node;
+                    resultAsNodeArray(): org.mwg.Node[];
                     setResult(actionResult: any): void;
                     private mergeVariables(actionResult);
                     next(): void;
@@ -1674,6 +1690,10 @@ declare module org {
                     setVariable(name: string, value: any): void;
                     addToVariable(name: string, value: any): void;
                     result(): any;
+                    resultAsString(): string;
+                    resultAsStringArray(): string[];
+                    resultAsNode(): org.mwg.Node;
+                    resultAsNodeArray(): org.mwg.Node[];
                     setResult(actionResult: any): void;
                     next(): void;
                     clean(): void;

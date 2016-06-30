@@ -3,7 +3,7 @@ package org.mwg.core.task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-public class ActionSetVar implements TaskAction {
+class ActionSetVar implements TaskAction {
 
     private final String _name;
 

@@ -125,25 +125,66 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
             } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
                 org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
                 Object[] result = new Object[contexts.length];
+                boolean allNodes = true;
                 int result_index = 0;
                 for (int i = 0; i < contexts.length; i++) {
                     Object currentLoop = contexts[i].result();
                     if (currentLoop != null) {
                         result[result_index] = currentLoop;
+                        if (!(currentLoop instanceof AbstractNode)) {
+                            allNodes = false;
+                        }
                         result_index++;
                     }
                 }
                 if (contexts.length == result_index) {
-                    return result;
+                    if (allNodes) {
+                        Node[] shrinked = new Node[result_index];
+                        System.arraycopy(result, 0, shrinked, 0, result_index);
+                        return shrinked;
+                    } else {
+                        return result;
+                    }
                 } else {
-                    Object[] shrinked = new Object[result_index];
-                    System.arraycopy(result, 0, shrinked, 0, result_index);
-                    return shrinked;
+                    if (allNodes) {
+                        Node[] shrinked = new Node[result_index];
+                        System.arraycopy(result, 0, shrinked, 0, result_index);
+                        return shrinked;
+                    } else {
+                        Object[] shrinked = new Object[result_index];
+                        System.arraycopy(result, 0, shrinked, 0, result_index);
+                        return shrinked;
+                    }
                 }
             } else {
                 return previousResult;
             }
         }
+    }
+
+    @Override
+    public String resultAsString() {
+        return (String) result();
+    }
+
+    @Override
+    public String[] resultAsStringArray() {
+        return (String[]) result();
+    }
+
+    @Override
+    public Node resultAsNode() {
+        return (Node) result();
+    }
+
+    @Override
+    public Node[] resultAsNodeArray() {
+        return (Node[]) result();
+    }
+
+    @Override
+    public Object[] resultAsObjectArray() {
+        return (Object[]) result();
     }
 
     @Override
