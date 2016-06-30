@@ -533,6 +533,11 @@ public class CoreTask implements org.mwg.task.Task {
         throw new RuntimeException("Not implemented yet!");
     }
 
+    @Override
+    public Task loopPar(int repetition) {
+        throw new RuntimeException("Not implemented yet!");
+    }
+
     public static void fillDefault(Map<String, TaskActionFactory> registry) {
         registry.put("get", new TaskActionFactory() { //DefaultTask
             @Override

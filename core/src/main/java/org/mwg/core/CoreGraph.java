@@ -678,6 +678,11 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
+    public Task newTask() {
+        return new CoreTask();
+    }
+
+    @Override
     public Resolver resolver() {
         return _resolver;
     }

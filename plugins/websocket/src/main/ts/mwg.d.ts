@@ -338,6 +338,7 @@ declare module org {
             storage(): org.mwg.plugin.Storage;
             newBuffer(): org.mwg.struct.Buffer;
             newQuery(): org.mwg.Query;
+            newTask(): org.mwg.task.Task;
             newTaskContext(): org.mwg.task.TaskContext;
             freeNodes(nodes: org.mwg.Node[]): void;
             taskAction(name: string): org.mwg.task.TaskActionFactory;
@@ -652,15 +653,23 @@ declare module org {
             }
             class Actions {
                 private static _internalBuilder;
-                private static newTask();
+                static newTask(): org.mwg.task.Task;
                 static setWorld(world: number): org.mwg.task.Task;
                 static setTime(world: number): org.mwg.task.Task;
-                static fromVar(variableName: string): org.mwg.task.Task;
                 static then(action: org.mwg.task.Action): org.mwg.task.Task;
                 static from(input: any): org.mwg.task.Task;
+                static fromVar(variableName: string): org.mwg.task.Task;
                 static fromIndexAll(indexName: string): org.mwg.task.Task;
                 static fromIndex(indexName: string, query: string): org.mwg.task.Task;
                 static parse(flatTask: string): org.mwg.task.Task;
+                static asVar(variableName: string): org.mwg.task.Task;
+                static setVar(variableName: string, inputValue: any): org.mwg.task.Task;
+                static selectWith(name: string, pattern: string): org.mwg.task.Task;
+                static selectWithout(name: string, pattern: string): org.mwg.task.Task;
+                static select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
+                static traverse(relationName: string): org.mwg.task.Task;
+                static get(name: string): org.mwg.task.Task;
+                static traverseIndex(indexName: string, query: string): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -707,6 +716,7 @@ declare module org {
                 action(name: string, params: string): org.mwg.task.Task;
                 math(expression: string): org.mwg.task.Task;
                 loop(repetition: number): org.mwg.task.Task;
+                loopPar(repetition: number): org.mwg.task.Task;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -1237,6 +1247,7 @@ declare module org {
                 getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
                 private getIndexOrCreate(world, time, indexName, callback, createIfNull);
                 newCounter(expectedCountCalls: number): org.mwg.DeferCounter;
+                newTask(): org.mwg.task.Task;
                 resolver(): org.mwg.plugin.Resolver;
                 scheduler(): org.mwg.plugin.Scheduler;
                 space(): org.mwg.plugin.ChunkSpace;
@@ -1541,6 +1552,7 @@ declare module org {
                     remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                     math(expression: string): org.mwg.task.Task;
                     loop(repetition: number): org.mwg.task.Task;
+                    loopPar(repetition: number): org.mwg.task.Task;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {

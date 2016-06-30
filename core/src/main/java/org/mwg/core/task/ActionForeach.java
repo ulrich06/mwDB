@@ -36,11 +36,15 @@ class ActionForeach implements TaskAction {
                     context.next();
                 } else {
                     //recursive call
-                    selfPointer._subTask.executeThenAsync(context.graph(),context, castedResult[nextCursot], recursiveAction[0]);
+                    selfPointer._subTask.executeThenAsync(context.graph(), context, castedResult[nextCursot], recursiveAction[0]);
                 }
             }
         };
-        _subTask.executeThenAsync(context.graph(),context, castedResult[0], recursiveAction[0]);
+        Object propagatedResult = null;
+        if(castedResult.length > 0){
+            propagatedResult = castedResult[0];
+        }
+        _subTask.executeThenAsync(context.graph(), context, propagatedResult, recursiveAction[0]);
     }
 
     /**

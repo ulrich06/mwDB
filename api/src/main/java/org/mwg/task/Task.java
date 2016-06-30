@@ -321,4 +321,6 @@ public interface Task {
 
     Task loop(int repetition);
 
+    Task loopPar(int repetition);
+
 }
