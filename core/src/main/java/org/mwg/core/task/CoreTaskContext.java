@@ -152,10 +152,10 @@ public class CoreTaskContext implements TaskContext {
     public final void setResult(Object actionResult) {
         final Object previousResult = this._result;
         //Optimization
-        //if (actionResult != previousResult) {
+        if (actionResult != previousResult) {
             this._result = CoreTask.protect(_graph, actionResult);
             cleanObj(previousResult); //clean the previous result
-        //}
+        }
         //next step now...
         int nextCursor = _currentTaskId.incrementAndGet();
         TaskAction nextAction = null;
