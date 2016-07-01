@@ -145,6 +145,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
                 //System.out.println("Vector: " + values[0] + " " + values[1]);
                 node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
+                context.setResult(context.result());
             }
         });
 
@@ -156,6 +157,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 Node[] result = (Node[]) context.result();
                 GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
                 GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
+
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
                     context.setVariable("continueLoop", true);
@@ -163,6 +165,8 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 } else {
                     context.setVariable("continueLoop", false);
                 }
+
+                context.setResult(result);
             }
         })
                 .ifThen(new TaskFunctionConditional() {
@@ -491,7 +495,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                         distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                     }
                 }
+                context.setResult(context.result());
                 callback.on(new ProbaDistribution(totals, distributions, globalTotal));
+
             }
         });
 
@@ -551,6 +557,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                         distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                     }
                 }
+                context.setResult(context.result());
                 callback.on(new ProbaDistribution(totals, distributions, globalTotal));
             }
         });
