@@ -31,6 +31,7 @@ class NearestNeighborList {
 
     // constructor
     public NearestNeighborList(int capacity) {
+        count = 0;
         this.capacity = capacity;
         this.data = new long[capacity + 1];
         this.value = new double[capacity + 1];
@@ -61,7 +62,7 @@ class NearestNeighborList {
     }
 
     public long[] getAllNodes() {
-        int size=Math.min(capacity,count);
+        int size = Math.min(capacity, count);
         long[] nbrs = new long[size];
 
         for (int i = 0; i < size; ++i) {
