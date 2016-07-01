@@ -1,59 +1,57 @@
-package org.mwg.core.task.node;
+package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import static org.mwg.task.Actions.setWorld;
 
-public class ActionAddTest extends AbstractActionTest {
+public class ActionRemovePropertyTest extends AbstractActionTest {
 
-    public ActionAddTest() {
+    public ActionRemovePropertyTest() {
         super();
         initGraph();
     }
 
     @Test
     public void testWithOneNode() {
-        Node relatedNode = graph.newNode(0, 0);
-
         final long[] id = new long[1];
         setWorld(0)
                 .setTime(0)
+                .inject("node").asVar("nodeName")
                 .newNode()
-                .from(relatedNode).asVar("x")
-                .add("friend", "x")
+                .setProperty("name", Type.STRING, "nodeName")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node node = (Node) context.result();
                         Assert.assertNotNull(node);
-                        Assert.assertEquals(1, ((long[]) node.get("friend")).length);
+                        Assert.assertNull(node.get("name"));
+
                         id[0] = node.id();
                     }
-                }).execute(graph);
-
+                }).execute(graph,null);
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
             @Override
             public void on(Node result) {
-                Assert.assertEquals(1, ((long[]) result.get("friend")).length);
+                Assert.assertNull(result.get("name"));
             }
         });
     }
 
     @Test
     public void testWithArray() {
-        Node relatedNode = graph.newNode(0, 0);
-
         final long[] ids = new long[5];
         setWorld(0)
                 .setTime(0)
-                .from(relatedNode).asVar("x")
+                .inject("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -64,7 +62,8 @@ public class ActionAddTest extends AbstractActionTest {
                         context.setResult(nodes);
                     }
                 })
-                .add("friend", "x")
+                .setProperty("name", Type.STRING, "nodeName")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -72,28 +71,24 @@ public class ActionAddTest extends AbstractActionTest {
                         Assert.assertNotNull(nodes);
 
                         for (int i = 0; i < 5; i++) {
-                            Assert.assertEquals(1, ((long[]) nodes[i].get("friend")).length);
+                            Assert.assertNull(nodes[i].get("name"));
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
                 @Override
                 public void on(Node result) {
-                    Assert.assertEquals(1, ((long[]) result.get("friend")).length);
+                    Assert.assertNull(result.get("name"));
                 }
             });
         }
-
-
     }
 
     @Test
     public void testWithNull() {
-        Node relatedNode = graph.newNode(0, 0);
-
         final boolean[] nextCalled = new boolean[1];
         setWorld(0)
                 .setTime(0)
@@ -103,14 +98,14 @@ public class ActionAddTest extends AbstractActionTest {
                         context.setResult(null);
                     }
                 })
-                .from(relatedNode).asVar("x")
-                .add("friend", "x")
+                .setProperty("name", Type.STRING, "node")
+                .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         Assert.assertTrue(nextCalled[0]);
     }

@@ -7,28 +7,28 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
-import static org.mwg.task.Actions.from;
+import static org.mwg.task.Actions.inject;
 
-public class ActionFromTest extends AbstractActionTest {
+public class ActionInjectTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        from("uselessPayload")
+        inject("uselessPayload")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertEquals(context.result(), "uselessPayload");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 
     @Test
     public void testFromNodes() {
         initGraph();
-        final ActionFromTest selfPointer = this;
+        final ActionInjectTest selfPointer = this;
         graph.findAll(0, 0, "nodes", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
@@ -38,14 +38,14 @@ public class ActionFromTest extends AbstractActionTest {
                         (String) result[1].get("name"),
                         (String) result[2].get("name")};
 
-                from(result)
+                inject(result)
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task
                             }
                         })
-                        .execute(selfPointer.graph);
+                        .execute(selfPointer.graph, null);
 
                 String[] resultName = new String[3];
                 try {
@@ -67,20 +67,20 @@ public class ActionFromTest extends AbstractActionTest {
     @Test
     public void testFromNode() {
         initGraph();
-        final ActionFromTest selfPointer = this;
+        final ActionInjectTest selfPointer = this;
         graph.find(0, 0, "roots", "name=root", new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
                 Assert.assertEquals(1, result.length);
 
-                from(result[0])
+                inject(result[0])
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 //empty task
                             }
                         })
-                        .execute(graph);
+                        .execute(graph,null);
                 String name;
                 try {
                     name = (String) result[0].get("name");

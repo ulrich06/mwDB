@@ -80,7 +80,6 @@ class ActionPlugin implements TaskAction {
             subAction.eval(context);
         } else {
             context.setResult(context.result());
-            context.next();
         }
     }
 }

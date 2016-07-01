@@ -23,7 +23,7 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

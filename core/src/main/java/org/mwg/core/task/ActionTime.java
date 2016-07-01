@@ -15,7 +15,6 @@ class ActionTime implements TaskAction {
     public void eval(final TaskContext context) {
         context.setTime(_time);
         context.setResult(context.result());
-        context.next();
     }
 
 }

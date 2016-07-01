@@ -15,7 +15,6 @@ class ActionWorld implements TaskAction {
     public void eval(final TaskContext context) {
         context.setWorld(_world);
         context.setResult(context.result());
-        context.next();
     }
 
 }

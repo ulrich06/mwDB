@@ -10,7 +10,7 @@ import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
 
-import static org.mwg.task.Actions.from;
+import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.then;
 
 public class ContextCleanTest {
@@ -31,7 +31,7 @@ public class ContextCleanTest {
                         node.set("name", "node");
                         context.setResult(node);
                     }
-                }).execute(graph);
+                }).execute(graph, null);
             }
         });
 
@@ -54,7 +54,7 @@ public class ContextCleanTest {
                 final String[] flat = {""};
                 Node n0 = graph.newNode(0, 0);
                 Node n1 = graph.newNode(0, 0);
-                from(new Node[]{n0, n1})
+                inject(new Node[]{n0, n1})
                         .select(new TaskFunctionSelect() {
                             @Override
                             public boolean select(Node node) {
@@ -67,6 +67,7 @@ public class ContextCleanTest {
                                 retention[0] = context;
                             }
                         })
+                        /*
                         .foreachThen(new Callback<Node>() {
                             @Override
                             public void on(Node result) {
@@ -78,7 +79,7 @@ public class ContextCleanTest {
                             public void eval(TaskContext context) {
                                 retention[1] = context;
                             }
-                        });
+                        });*/;
             }
         });
 

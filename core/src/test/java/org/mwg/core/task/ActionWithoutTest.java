@@ -22,7 +22,7 @@ public class ActionWithoutTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[1].get("name"), "root");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
 
         fromIndexAll("nodes")
                 .selectWithout("name", "n.*")
@@ -32,7 +32,7 @@ public class ActionWithoutTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[0].get("name"), "root");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
 
     }

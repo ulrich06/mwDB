@@ -36,14 +36,14 @@ public class ActionIfThenTest extends AbstractActionTest {
             public boolean eval(TaskContext context) {
                 return true;
             }
-        }, modifyResult0).execute(graph);
+        }, modifyResult0).execute(graph,null);
 
         new CoreTask().ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return false;
             }
-        }, modifyResult0).execute(graph);
+        }, modifyResult0).execute(graph,null);
 
         Assert.assertEquals(true, result[0]);
         Assert.assertEquals(false, result[1]);
@@ -53,7 +53,7 @@ public class ActionIfThenTest extends AbstractActionTest {
     @Test
     public void testChainAfterIfThen() {
         initGraph();
-        Task addVarInContext = from(5).asVar("variable").then(new Action() {
+        Task addVarInContext = inject(5).asVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 //empty action
@@ -71,7 +71,7 @@ public class ActionIfThenTest extends AbstractActionTest {
                 Integer val = (Integer) context.result();
                 Assert.assertEquals(5, (int) val);
             }
-        }).execute(graph);
+        }).execute(graph,null);
         removeGraph();
     }
 
@@ -86,12 +86,12 @@ public class ActionIfThenTest extends AbstractActionTest {
             }
         });
 
-        from(5).asVar("variable").ifThen(new TaskFunctionConditional() {
+        inject(5).asVar("variable").ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;
             }
-        }, accessVar).execute(graph);
+        }, accessVar).execute(graph,null);
         removeGraph();
     }
 }

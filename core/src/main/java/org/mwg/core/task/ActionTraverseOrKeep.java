@@ -56,11 +56,10 @@ class ActionTraverseOrKeep implements TaskAction {
                 @Override
                 public void run() {
                     context.setResult(resultNodes);
-                    context.next();
                 }
             });
         } else {
-            context.next();
+            context.setResult(null);
         }
     }
 

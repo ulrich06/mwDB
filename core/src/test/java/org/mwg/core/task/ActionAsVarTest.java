@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.Callback;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
@@ -12,13 +13,18 @@ public class ActionAsVarTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        from("hello").asVar("myVar").then(new Action() {
+        inject("hello").asVar("myVar").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Assert.assertEquals(context.result(), "hello");
                 Assert.assertEquals(context.variable("myVar"), "hello");
             }
-        }).execute(graph);
+        }).execute(graph, new Callback<Object>() {
+            @Override
+            public void on(Object result) {
+                Assert.assertNotNull(result);
+            }
+        });
         removeGraph();
     }
 

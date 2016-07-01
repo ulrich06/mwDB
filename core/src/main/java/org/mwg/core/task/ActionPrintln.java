@@ -24,7 +24,6 @@ class ActionPrintln implements TaskAction {
             System.out.println(result);
         }
         context.setResult(result);
-        context.next();
     }
 
 }

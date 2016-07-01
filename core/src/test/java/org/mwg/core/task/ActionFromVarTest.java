@@ -15,7 +15,7 @@ public class ActionFromVarTest extends AbstractActionTest {
         initGraph();
         fromIndexAll("nodes")
                 .asVar("x")
-                .from("uselessPayload")
+                .inject("uselessPayload")
                 .fromVar("x")
                 .then(new Action() {
                     @Override
@@ -25,7 +25,7 @@ public class ActionFromVarTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[2].get("name"), "root");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

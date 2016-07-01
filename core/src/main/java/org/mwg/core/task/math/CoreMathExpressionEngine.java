@@ -1,6 +1,7 @@
 package org.mwg.core.task.math;
 
 import org.mwg.Node;
+import org.mwg.task.TaskContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +149,7 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
     }
 
     @Override
-    public final double eval(Node context, Map<String, Double> variables) {
+    public final double eval(final Node context, final TaskContext taskContext, final Map<String, Double> variables) {
         if (this._cacheAST == null) {
             throw new RuntimeException("Call parse before");
         }
@@ -177,19 +178,19 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                 case 3:
                     MathFreeToken castedFreeToken = (MathFreeToken) mathToken;
                     Double resolvedVar = null;
-                    if(variables!=null){
-                        resolvedVar=variables.get(castedFreeToken.content());
+                    if (variables != null) {
+                        resolvedVar = variables.get(castedFreeToken.content());
                     }
                     if (resolvedVar != null) {
                         stack.push(resolvedVar);
                     } else {
-                        if (context != null) {
-                            if ("TIME".equals(castedFreeToken.content())) {
-                                stack.push((double) context.time());
-                            } else {
-                                String tokenName = castedFreeToken.content().trim();
-                                Object resolved;
-                                String cleanName;
+                        if ("TIME".equals(castedFreeToken.content())) {
+                            stack.push((double) context.time());
+                        } else {
+                            String tokenName = castedFreeToken.content().trim();
+                            Object resolved = null;
+                            String cleanName = null;
+                            if (context != null) {
                                 if (tokenName.length() > 0 && tokenName.charAt(0) == '{' && tokenName.charAt(tokenName.length() - 1) == '}') {
                                     resolved = context.get(castedFreeToken.content().substring(1, tokenName.length() - 1));
                                     cleanName = castedFreeToken.content().substring(1, tokenName.length() - 1);
@@ -200,27 +201,30 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                                 if (cleanName.length() > 0 && cleanName.charAt(0) == '$') {
                                     cleanName = cleanName.substring(1);
                                 }
-                                if (resolved != null) {
-                                    double resultAsDouble = parseDouble(resolved.toString());
-                                    variables.put(cleanName, resultAsDouble);
-                                    String valueString = resolved.toString();
-                                    if (valueString.equals("true")) {
-                                        stack.push(1.0);
-                                    } else if (valueString.equals("false")) {
-                                        stack.push(0.0);
-                                    } else {
-                                        try {
-                                            stack.push(resultAsDouble);
-                                        } catch (Exception e) {
-                                            //noop
-                                        }
-                                    }
-                                } else {
-                                    throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
+                            }
+                            if (taskContext != null) {
+                                if (resolved == null) {
+                                    resolved = taskContext.variable(tokenName);
                                 }
                             }
-                        } else {
-                            throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
+                            if (resolved != null) {
+                                double resultAsDouble = parseDouble(resolved.toString());
+                                variables.put(cleanName, resultAsDouble);
+                                String valueString = resolved.toString();
+                                if (valueString.equals("true")) {
+                                    stack.push(1.0);
+                                } else if (valueString.equals("false")) {
+                                    stack.push(0.0);
+                                } else {
+                                    try {
+                                        stack.push(resultAsDouble);
+                                    } catch (Exception e) {
+                                        //noop
+                                    }
+                                }
+                            } else {
+                                throw new RuntimeException("Unknow variable for name " + castedFreeToken.content());
+                            }
                         }
                     }
                     break;

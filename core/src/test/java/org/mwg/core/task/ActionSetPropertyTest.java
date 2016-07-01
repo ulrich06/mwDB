@@ -1,18 +1,19 @@
-package org.mwg.core.task.node;
+package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Node;
 import org.mwg.Type;
+import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import static org.mwg.task.Actions.setWorld;
 
-public class ActionSetTest extends ActionNewNodeTest {
+public class ActionSetPropertyTest extends AbstractActionTest {
 
-    public ActionSetTest() {
+    public ActionSetPropertyTest() {
         super();
         initGraph();
     }
@@ -22,19 +23,19 @@ public class ActionSetTest extends ActionNewNodeTest {
         final long[] id = new long[1];
         setWorld(0)
                 .setTime(0)
-                .from("node").asVar("nodeName")
+                .inject("node").asVar("nodeName")
                 .newNode()
                 .setProperty("name", Type.STRING, "nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
                         Node node = (Node) context.result();
-                        Assert.assertNotNull(node);
                         Assert.assertEquals("node", node.get("name"));
 
                         id[0] = node.id();
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
             @Override
@@ -49,7 +50,7 @@ public class ActionSetTest extends ActionNewNodeTest {
         final long[] ids = new long[5];
         setWorld(0)
                 .setTime(0)
-                .from("node").asVar("nodeName")
+                .inject("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -64,15 +65,15 @@ public class ActionSetTest extends ActionNewNodeTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
                         Node[] nodes = (Node[]) context.result();
-                        Assert.assertNotNull(nodes);
 
                         for (int i = 0; i < 5; i++) {
                             Assert.assertEquals("node", nodes[i].get("name"));
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
@@ -89,7 +90,6 @@ public class ActionSetTest extends ActionNewNodeTest {
         final boolean[] nextCalled = new boolean[1];
         setWorld(0)
                 .setTime(0)
-                .from("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -102,9 +102,9 @@ public class ActionSetTest extends ActionNewNodeTest {
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         Assert.assertTrue(nextCalled[0]);
     }
-
+    
 }

@@ -19,7 +19,6 @@ class ActionFromIndexAll implements TaskAction {
             @Override
             public void on(Node[] result) {
                 context.setResult(result);
-                context.next();
             }
         });
     }

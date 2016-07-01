@@ -25,8 +25,9 @@ class ActionMap implements TaskAction {
             } else {
                 context.setResult(previousResult); //no map transform
             }
+        } else {
+            context.setResult(null);
         }
-        context.next();
     }
 
     private Object[] filterArray(Object[] current) {

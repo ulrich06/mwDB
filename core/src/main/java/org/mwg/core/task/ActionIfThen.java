@@ -1,6 +1,6 @@
 package org.mwg.core.task;
 
-import org.mwg.task.Action;
+import org.mwg.Callback;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionConditional;
@@ -17,16 +17,14 @@ class ActionIfThen implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         if (_condition.eval(context)) {
-            _action.executeThenAsync(context.graph(),context, context.result(), new Action() {
+            _action.executeWith(context.graph(), context, context.result(), new Callback<Object>() {
                 @Override
-                public void eval(TaskContext subTaskFinalContext) {
-                    context.setResult(subTaskFinalContext);
-                    context.next();
+                public void on(Object res) {
+                    context.setResult(res);
                 }
             });
         } else {
             context.setResult(context.result());
-            context.next();
         }
     }
 }

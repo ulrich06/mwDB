@@ -1,4 +1,4 @@
-package org.mwg.core.task.node;
+package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class ActionNewNodeTest extends AbstractActionTest {
                         Assert.assertEquals(587, n.time());
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
 
         graph.lookup(15, 587, id[0], new Callback<Node>() {
             @Override

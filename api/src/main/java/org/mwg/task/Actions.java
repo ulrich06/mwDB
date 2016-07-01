@@ -40,8 +40,8 @@ public class Actions {
         return newTask().then(action);
     }
 
-    public static Task from(Object input) {
-        return newTask().from(input);
+    public static Task inject(Object input) {
+        return newTask().inject(input);
     }
 
     public static Task fromVar(String variableName) {

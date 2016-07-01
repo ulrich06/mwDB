@@ -4,12 +4,13 @@ import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.core.CoreConstants;
+import org.mwg.core.task.math.CoreMathExpressionEngine;
+import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -186,12 +187,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task from(Object inputValue) {
+    public final org.mwg.task.Task inject(Object inputValue) {
         if (inputValue == null) {
             throw new RuntimeException("inputValue should not be null");
 
         }
-        addAction(new ActionFrom(inputValue));
+        addAction(new ActionInject(inputValue));
         return this;
     }
 
@@ -228,34 +229,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (p_action == null) {
             throw new RuntimeException("action should not be null");
         }
-        addAction(new ActionWrapper(p_action, true));
-        return this;
-    }
-
-    @Override
-    public final org.mwg.task.Task thenAsync(Action p_action) {
-        if (p_action == null) {
-            throw new RuntimeException("action should not be null");
-        }
-        addAction(new ActionWrapper(p_action, false));
-        return this;
-    }
-
-    @Override
-    public final <T> org.mwg.task.Task foreachThen(final Callback<T> action) {
-        if (action == null) {
-            throw new RuntimeException("action should not be null");
-        }
-        Task task = new CoreTask().then(new Action() {
-            @Override
-            public void eval(org.mwg.task.TaskContext context) {
-                Object previousResult = context.result();
-                if (previousResult != null) {
-                    action.on((T) previousResult);
-                }
-            }
-        });
-        foreach(task);
+        addAction(new ActionWrapper(p_action));
         return this;
     }
 
@@ -283,54 +257,23 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-    @Override
-    public final void execute(final Graph graph) {
-        executeThenAsync(graph, null, null, null);
-    }
 
     @Override
-    public void executeWith(final Graph graph, TaskContext initialContext) {
-        executeThenAsync(graph, initialContext, null, null);
-    }
-
-    @Override
-    public final void executeThen(final Graph graph, final Action p_action) {
-        executeThenAsync(graph, null, null, new Action() {
-            @Override
-            public void eval(TaskContext context) {
-                p_action.eval(new TaskContextWrapper(context));
-                context.next();
+    public void executeWith(Graph graph, TaskContext parentContext, Object initialResult, Callback<Object> result) {
+        if (_actionCursor == 0) {
+            if (result != null) {
+                result.on(null);
             }
-        });
-    }
-
-    @Override
-    public final void executeThenAsync(final Graph graph, final org.mwg.task.TaskContext parent, final Object initialResult, final Action p_finalAction) {
-        final TaskAction[] final_actions = new TaskAction[_actionCursor + 2];
-        System.arraycopy(_actions, 0, final_actions, 0, _actionCursor);
-        if (p_finalAction != null) {
-            final_actions[_actionCursor] = new ActionWrapper(p_finalAction, false);
         } else {
-            final_actions[_actionCursor] = new ActionNoop();
+            final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, result);
+            _actions[0].eval(context);
         }
-        final_actions[_actionCursor + 1] = new TaskAction() {
-            @Override
-            public void eval(org.mwg.task.TaskContext context) {
-                context.clean();
-            }
-        };
-        final org.mwg.task.TaskContext context = new CoreTaskContext(parent, protect(graph, initialResult), graph, final_actions);
-        if (parent != null) {
-            context.setWorld(parent.world());
-            context.setTime(parent.time());
-        }
-        graph.scheduler().dispatch(new Job() {
-            @Override
-            public void run() {
-                TaskAction first = final_actions[0];
-                first.eval(context);
-            }
-        });
+
+    }
+
+    @Override
+    public void execute(Graph graph, Callback<Object> result) {
+        executeWith(graph, null, null, result);
     }
 
     @Override
@@ -517,7 +460,7 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task repeat(int repetition, Task subTask) {
-        addAction(new ActionLoop(repetition, subTask));
+        addAction(new ActionRepeat(repetition, subTask));
         return this;
     }
 
@@ -539,12 +482,18 @@ public class CoreTask implements org.mwg.task.Task {
         while (cursor < input.length()) {
             if (input.charAt(cursor) == '{' && input.charAt(cursor - 1) == '{') {
                 previousPos = cursor + 1;
-            } else if (input.charAt(cursor) == '}' && input.charAt(cursor - 1) == '}') {
+            } else if (previousPos != -1 && input.charAt(cursor) == '}' && input.charAt(cursor - 1) == '}') {
                 if (buffer == null) {
                     buffer = new StringBuilder();
                     buffer.append(input.substring(0, previousPos - 2));
                 }
-                buffer.append(context.variable(input.substring(previousPos, cursor - 1)));
+                String contextKey = input.substring(previousPos, cursor - 1).trim();
+                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
+                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey);
+                    buffer.append(mathEngine.eval(null, context, new HashMap<String, Double>()));
+                } else {
+                    buffer.append(context.variable(contextKey));
+                }
                 previousPos = -1;
             } else {
                 if (previousPos == -1 && buffer != null) {

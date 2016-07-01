@@ -25,7 +25,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 
@@ -41,7 +41,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 
@@ -88,7 +88,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node3")
@@ -98,7 +98,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Node[] n = (Node[]) context.result();
                         Assert.assertEquals(0, n.length);
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         setTime(12)
                 .fromIndex("rootIndex", "name=root2")
@@ -110,7 +110,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
@@ -122,7 +122,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals("node1", n[0].get("name"));
                         Assert.assertEquals("node2", n[1].get("name"));
                     }
-                }).execute(graph);
+                }).execute(graph,null);
 
         setTime(13)
                 .fromIndex("rootIndex", "name=root2")
@@ -136,7 +136,7 @@ public class ActionTraverseTest extends AbstractActionTest {
                         Assert.assertEquals("node2", n[1].get("name"));
                         Assert.assertEquals("node3", n[2].get("name"));
                     }
-                }).execute(graph);
+                }).execute(graph,null);
         removeGraph();
     }
 

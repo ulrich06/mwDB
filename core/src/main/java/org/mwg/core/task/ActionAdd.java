@@ -27,7 +27,6 @@ class ActionAdd implements TaskAction {
             }
         }
         context.setResult(previousResult);
-        context.next();
     }
 
     private void addFromArray(final Object[] objs, final String relName, final Node toRemove) {

@@ -110,7 +110,7 @@ public class TestTMP {
                     }
                 }).executeSubTask(creationTask);
 
-                mainTask.execute(graph);
+                mainTask.execute(graph,null);
 
 
             }

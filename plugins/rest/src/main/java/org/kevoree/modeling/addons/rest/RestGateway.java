@@ -100,7 +100,7 @@ public class RestGateway implements HttpHandler {
                                 httpServerExchange.endExchange();
                             }
                         })
-                        .execute(graph);
+                        .execute(graph,null);
             } else {
                 //avoid blocking the main HTTP server thread
                 if (httpServerExchange.isInIoThread()) {
@@ -186,7 +186,7 @@ public class RestGateway implements HttpHandler {
                                 }
                             }
                         })
-                        .execute(graph);
+                        .execute(graph,null);
             }
 
         } catch (Exception e) {

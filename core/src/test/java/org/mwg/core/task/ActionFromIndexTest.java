@@ -6,14 +6,14 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
-import static org.mwg.task.Actions.from;
+import static org.mwg.task.Actions.inject;
 
 public class ActionFromIndexTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        from("uselessPayload")
+        inject("uselessPayload")
                 .fromIndex("nodes", "name=n0")
                 .then(new Action() {
                     @Override
@@ -22,7 +22,7 @@ public class ActionFromIndexTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 1);
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

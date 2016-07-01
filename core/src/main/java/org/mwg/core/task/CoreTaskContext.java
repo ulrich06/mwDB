@@ -12,27 +12,29 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CoreTaskContext implements org.mwg.task.TaskContext {
+public class CoreTaskContext implements TaskContext {
 
     private final Map<String, Object> _variables;
-    private final Object[] _results;
     private final Graph _graph;
     private final TaskAction[] _actions;
     private final AtomicInteger _currentTaskId;
-    private final org.mwg.task.TaskContext _parentContext;
-    private Object _initialResult;
+    private final TaskContext _parentContext;
+    private final Callback<Object> _callback;
+
+    //Mutable current result handler
+    private Object _result;
     private long _world;
     private long _time;
 
-    public CoreTaskContext(final org.mwg.task.TaskContext p_parentContext, final Object p_initialResult, final Graph p_graph, final TaskAction[] p_actions) {
+    public CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final Callback<Object> p_callback) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
         this._parentContext = p_parentContext;
-        this._initialResult = p_initialResult;
         this._variables = new ConcurrentHashMap<String, Object>();
-        this._results = new Object[p_actions.length];
+        this._result = initial;
         this._actions = p_actions;
+        this._callback = p_callback;
         this._currentTaskId = new AtomicInteger(0);
     }
 
@@ -74,92 +76,42 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
     }
 
     @Override
-    public String[] variablesKeys() {
-        String[] result = new String[this._variables.size()];
-        int index = 0;
-        for (String key : this._variables.keySet()) {
-            result[index++] = key;
-        }
-        return result;
-    }
-
-    @Override
-    public final void addToVariable(String name, Object value) {
-        Object result = this._variables.get(name);
-        if (result == null) {
-            Object[] newArr = new Object[1];
-            newArr[0] = value;
-            this._variables.put(name, newArr);
-        } else if (result instanceof Object[]) {
-            Object[] previous = (Object[]) result;
-            Object[] incArr = new Object[previous.length + 1];
-            System.arraycopy(previous, 0, incArr, 0, previous.length);
-            incArr[previous.length] = value;
-            this._variables.put(name, incArr);
-        } else {
-            Object[] newArr = new Object[2];
-            newArr[0] = result;
-            newArr[1] = value;
-            this._variables.put(name, newArr);
-        }
-    }
-
-    @Override
     public final void setVariable(String name, Object value) {
+        final Object previous = this._variables.get(name);
         if (value != null) {
-            this._variables.put(name, value);
+            Object protectedVar = CoreTask.protect(_graph, value);
+            this._variables.put(name, protectedVar);
         } else {
             this._variables.remove(name);
+        }
+        cleanObj(previous);
+    }
+
+    @Override
+    public final void addToVariable(final String name, final Object value) {
+        final Object result = this._variables.get(name);
+        final Object protectedVar = CoreTask.protect(_graph, value);
+        if (result == null) {
+            final Object[] newArr = new Object[1];
+            newArr[0] = protectedVar;
+            this._variables.put(name, newArr);
+        } else if (result instanceof Object[]) {
+            final Object[] previous = (Object[]) result;
+            final Object[] incArr = new Object[previous.length + 1];
+            System.arraycopy(previous, 0, incArr, 0, previous.length);
+            incArr[previous.length] = protectedVar;
+            this._variables.put(name, incArr);
+        } else {
+            final Object[] newArr = new Object[2];
+            newArr[0] = result;
+            newArr[1] = protectedVar;
+            this._variables.put(name, newArr);
         }
     }
 
     @Override
     public final Object result() {
-        int current = _currentTaskId.get();
-        if (current == 0) {
-            return _initialResult;
-        } else {
-            Object previousResult = _results[current - 1];
-            if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext) {
-                return ((org.mwg.task.TaskContext) previousResult).result();
-            } else if (previousResult != null && previousResult instanceof org.mwg.core.task.CoreTaskContext[]) {
-                org.mwg.core.task.CoreTaskContext[] contexts = (org.mwg.core.task.CoreTaskContext[]) previousResult;
-                Object[] result = new Object[contexts.length];
-                boolean allNodes = true;
-                int result_index = 0;
-                for (int i = 0; i < contexts.length; i++) {
-                    Object currentLoop = contexts[i].result();
-                    if (currentLoop != null) {
-                        result[result_index] = currentLoop;
-                        if (!(currentLoop instanceof AbstractNode)) {
-                            allNodes = false;
-                        }
-                        result_index++;
-                    }
-                }
-                if (contexts.length == result_index) {
-                    if (allNodes) {
-                        Node[] shrinked = new Node[result_index];
-                        System.arraycopy(result, 0, shrinked, 0, result_index);
-                        return shrinked;
-                    } else {
-                        return result;
-                    }
-                } else {
-                    if (allNodes) {
-                        Node[] shrinked = new Node[result_index];
-                        System.arraycopy(result, 0, shrinked, 0, result_index);
-                        return shrinked;
-                    } else {
-                        Object[] shrinked2 = new Object[result_index];
-                        System.arraycopy(result, 0, shrinked2, 0, result_index);
-                        return shrinked2;
-                    }
-                }
-            } else {
-                return previousResult;
-            }
-        }
+        return this._result;
     }
 
     @Override
@@ -189,39 +141,32 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
 
     @Override
     public final void setResult(Object actionResult) {
-        if (actionResult instanceof CoreTaskContext || actionResult instanceof TaskContextWrapper) {
-            mergeVariables((TaskContext) actionResult);
-        } else if (actionResult instanceof CoreTaskContext[] || actionResult instanceof TaskContextWrapper[]) {
-            for (org.mwg.task.TaskContext taskContext : (TaskContext[]) actionResult) {
-                mergeVariables(taskContext);
-            }
-        }
-        int i = _currentTaskId.get();
-        this._results[i] = actionResult;
-    }
-
-    private void mergeVariables(TaskContext actionResult) {
-        String[] variables = actionResult.variablesKeys();
-        for (String variableName : variables) {
-            this.setVariable(variableName, actionResult.variable(variableName));
-        }
-    }
-
-    @Override
-    public final void next() {
+        final Object protectedVar = CoreTask.protect(_graph, actionResult);
+        final Object previousResult = this._result;
+        this._result = protectedVar;
+        cleanObj(previousResult); //clean the previous result
+        //next step now...
         TaskAction nextAction = _actions[_currentTaskId.incrementAndGet()];
-        nextAction.eval(this);
-    }
+        if (nextAction == null) {
+            Object protectResult = null;
+            if (this._callback != null) {
+                protectResult = CoreTask.protect(_graph, result());
+            }
 
-    @Override
-    public final void clean() {
-        if (_initialResult != null) {
-            cleanObj(_initialResult);
-            _initialResult = null;
-        }
-        for (int i = 0; i < _results.length; i++) {
-            cleanObj(_results[i]);
-            _results[i] = null;
+            /* Clean */
+            cleanObj(this._result);
+            String[] variables = _variables.keySet().toArray(new String[_variables.keySet().size()]);
+            for (int i = 0; i < variables.length; i++) {
+                cleanObj(variable(variables[i]));
+            }
+            this._result = null;
+            /* End Clean */
+
+            if (this._callback != null) {
+                this._callback.on(protectResult);
+            }
+        } else {
+            nextAction.eval(this);
         }
     }
 
@@ -232,8 +177,6 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
             public void on(Object result) {
                 if (result instanceof AbstractNode) {
                     ((Node) result).free();
-                } else if (result instanceof org.mwg.core.task.CoreTaskContext) {
-                    ((org.mwg.task.TaskContext) result).clean();
                 } else {
                     selfPoiner.cleanObj(result);
                 }
@@ -241,8 +184,6 @@ public class CoreTaskContext implements org.mwg.task.TaskContext {
         })) {
             if (o instanceof AbstractNode) {
                 ((Node) o).free();
-            } else if (o instanceof org.mwg.core.task.CoreTaskContext) {
-                ((org.mwg.task.TaskContext) o).clean();
             }
         }
     }

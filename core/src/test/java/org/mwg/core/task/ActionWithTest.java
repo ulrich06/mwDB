@@ -21,7 +21,7 @@ public class ActionWithTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n0");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
 
         fromIndexAll("nodes")
                 .selectWith("name", "n.*")
@@ -32,7 +32,7 @@ public class ActionWithTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[1].get("name"), "n1");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
 
     }

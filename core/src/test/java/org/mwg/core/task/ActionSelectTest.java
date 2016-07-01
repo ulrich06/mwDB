@@ -27,7 +27,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[0].get("name"), "root");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 
@@ -48,7 +48,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 0);
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 
@@ -69,7 +69,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 3);
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

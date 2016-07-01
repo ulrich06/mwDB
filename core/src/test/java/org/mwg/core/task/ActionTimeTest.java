@@ -19,7 +19,7 @@ public class ActionTimeTest extends AbstractActionTest {
                         Assert.assertEquals(context.time(), 10);
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

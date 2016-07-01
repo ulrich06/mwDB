@@ -30,7 +30,7 @@ public class ActionMapTest extends AbstractActionTest {
                         Assert.assertEquals(names[2], "root");
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

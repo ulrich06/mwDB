@@ -44,21 +44,21 @@ class ActionSetProperty implements TaskAction {
             setFromArray((Object[]) previousResult, _relationName, savedVar);
         }
         context.setResult(previousResult);
-        context.next();
     }
 
     /**
      * @native ts
      * return parseInt(payload);
      */
-    private int parseInt(String payload){
+    private int parseInt(String payload) {
         return Integer.parseInt(payload);
     }
+
     /**
      * @native ts
      * return parseInt(payload);
      */
-    private long parseLong(String payload){
+    private long parseLong(String payload) {
         return Long.parseLong(payload);
     }
 

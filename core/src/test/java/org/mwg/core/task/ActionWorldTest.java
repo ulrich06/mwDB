@@ -19,7 +19,7 @@ public class ActionWorldTest extends AbstractActionTest {
                         Assert.assertEquals(context.world(), 10);
                     }
                 })
-                .execute(graph);
+                .execute(graph,null);
         removeGraph();
     }
 

@@ -17,7 +17,7 @@ public class ActionForeachParTest extends AbstractActionTest {
     public void test() {
         initGraph();
         final long[] i = {0};
-        from(new long[]{1, 2, 3}).foreachPar(then(new Action() {
+        inject(new long[]{1, 2, 3}).foreachPar(then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 i[0]++;
@@ -33,7 +33,7 @@ public class ActionForeachParTest extends AbstractActionTest {
                 Assert.assertEquals(result[1], 2l);
                 Assert.assertEquals(result[2], 3l);
             }
-        }).execute(graph);
+        }).execute(graph,null);
 
         fromIndexAll("nodes").foreachPar(new CoreTask().then(new Action() {
             @Override
@@ -49,13 +49,13 @@ public class ActionForeachParTest extends AbstractActionTest {
                 Assert.assertEquals(((Node) result[1]).get("name"), "n1");
                 Assert.assertEquals(((Node) result[2]).get("name"), "root");
             }
-        }).execute(graph);
+        }).execute(graph,null);
 
         List<String> paramIterable = new ArrayList<String>();
         paramIterable.add("n0");
         paramIterable.add("n1");
         paramIterable.add("root");
-        new CoreTask().from(paramIterable).foreachPar(new CoreTask().then(new Action() {
+        inject(paramIterable).foreachPar(new CoreTask().then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.setResult(context.result());
@@ -69,7 +69,7 @@ public class ActionForeachParTest extends AbstractActionTest {
                 Assert.assertEquals(result[1], "n1");
                 Assert.assertEquals(result[2], "root");
             }
-        }).execute(graph);
+        }).execute(graph,null);
 
         removeGraph();
     }

@@ -5,7 +5,6 @@ import org.mwg.core.chunk.GenChunk;
 import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.core.task.CoreTask;
-import org.mwg.core.task.CoreTaskContext;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.core.utility.PrimitiveHelper;
@@ -14,10 +13,7 @@ import org.mwg.struct.Buffer;
 import org.mwg.struct.BufferIterator;
 import org.mwg.struct.LongLongMap;
 import org.mwg.struct.LongLongMapCallBack;
-import org.mwg.task.Task;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskActionFactory;
-import org.mwg.task.TaskContext;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -368,11 +364,6 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     @Override
-    public TaskContext newTaskContext() {
-        return new CoreTaskContext(null, null, this, new TaskAction[0]);
-    }
-
-    @Override
     public Query newQuery() {
         return new CoreQuery(_resolver);
     }
@@ -675,11 +666,6 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public DeferCounter newCounter(int expectedCountCalls) {
         return new CoreDeferCounter(expectedCountCalls);
-    }
-
-    @Override
-    public Task newTask() {
-        return new CoreTask();
     }
 
     @Override

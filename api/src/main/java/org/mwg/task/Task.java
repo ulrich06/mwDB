@@ -53,7 +53,7 @@ public interface Task {
      * @param inputValue object used as source of a task
      * @return this task to chain actions (fluent API)
      */
-    Task from(Object inputValue);
+    Task inject(Object inputValue);
 
     /**
      * Retrieves indexed nodes that matches the query
@@ -169,23 +169,13 @@ public interface Task {
     Task foreach(Task subTask);
 
     /**
-     * Same as {@link #foreachThen(Callback)} method, but all the subtask are called in parallel
+     * Same as {@link #foreach(Task)} method, but all the subtask are called in parallel
      * There is thus as thread as element in the collection
      *
      * @param subTask sub task to call for each elements
      * @return this task to chain actions (fluent API)
      */
     Task foreachPar(Task subTask);
-
-    /**
-     * Iterate through a pre-loaded collection of object add apply the {@code action} on each element
-     * If you want to access/modify the context, please use {@link #foreach(Task)} method
-     *
-     * @param action action to apply on each element
-     * @param <T>    type of the element
-     * @return this task to chain actions (fluent API)
-     */
-    <T> Task foreachThen(Callback<T> action);
 
     /**
      * Execute and wait a sub task, result of this sub task is immediately enqueue and available for next
@@ -207,34 +197,8 @@ public interface Task {
     Task whileDo(TaskFunctionConditional cond, Task then);
 
     Task then(Action action);
-
-    Task thenAsync(Action action);
-
+    
     Task save();
-
-    /**
-     * Schedule and execute the current task program
-     */
-    void execute(final Graph graph);
-
-    /**
-     * Schedule and execute the current task program, when every actions will be execute the last action passed as parameter will be executed.
-     * This last action is synchronous, meaning that after the last statement the task is considered over and all intermediate results will be automatically cleaned.
-     *
-     * @param action last action the execution before the clean procedure
-     */
-    void executeThen(final Graph graph, Action action);
-
-    void executeWith(final Graph graph, TaskContext initialContext);
-
-    /**
-     * Schedule and execute the current task program. However
-     *
-     * @param parentContext initial context, only in case of cascade execution of tasks, null otherwise
-     * @param initialResult initial content if any, null otherwise
-     * @param finalAction   last action the execution before the clean procedure. Warning this last action will be executed in asynchronous mode. Therefore, no objects of the task will be freed before the call the method next on the parameter context.
-     */
-    void executeThenAsync(final Graph graph, final TaskContext parentContext, final Object initialResult, final Action finalAction);
 
     /**
      * Create a new node on the [world,time] of the context
@@ -314,4 +278,9 @@ public interface Task {
     Task repeatPar(int repetition, Task subTask);
 
     Task println();
+
+    void execute(final Graph graph, final Callback<Object> result);
+
+    void executeWith(final Graph graph, final TaskContext parentContext, Object initialResult, final Callback<Object> result);
+
 }

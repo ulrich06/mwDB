@@ -19,36 +19,36 @@ public class MathEngineTest {
             public void on(Boolean result) {
                 //Test Plus Operation
                 MathExpressionEngine engine = CoreMathExpressionEngine.parse("5+3");
-                double d = engine.eval(null, null);
+                double d = engine.eval(null, null, null);
                 Assert.assertTrue(d == 8);
 
                 //Test Multiply operation and priorities
                 engine = CoreMathExpressionEngine.parse("1+5*3+2");
-                d = engine.eval(null, null);
+                d = engine.eval(null, null, null);
                 Assert.assertTrue(d == 18);
 
                 //Test Division operation and priorities
                 engine = CoreMathExpressionEngine.parse("10/5");
-                d = engine.eval(null, null);
+                d = engine.eval(null, null, null);
                 Assert.assertTrue(d == 2);
 
                 //Test Division by 0
                 engine = CoreMathExpressionEngine.parse("10/0");
-                d = engine.eval(null, null);
+                d = engine.eval(null, null, null);
 
 
                 //Test Variables
                 engine = CoreMathExpressionEngine.parse("v+5");
                 Map<String, Double> hashmap = new HashMap<String, Double>();
                 hashmap.put("v", 20.0);
-                d = engine.eval(null, hashmap);
+                d = engine.eval(null, null, hashmap);
                 Assert.assertTrue(d == 25);
 
 
                 //Test Time extraction
                 engine = CoreMathExpressionEngine.parse("TIME");
                 Node context = graph.newNode(0, 200);
-                d = engine.eval(context, null);
+                d = engine.eval(context, null, null);
                 Assert.assertTrue(d == 200);
 
 
@@ -57,7 +57,7 @@ public class MathEngineTest {
                 context = graph.newNode(0, 200);
                 context.set("f1", 7);
                 context.set("f2", 8);
-                d = engine.eval(context, new HashMap<String, Double>());
+                d = engine.eval(context, null, new HashMap<String, Double>());
                 Assert.assertTrue(d == 7 * 7 + 8 * 7);
             }
         });

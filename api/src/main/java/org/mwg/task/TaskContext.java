@@ -17,8 +17,6 @@ public interface TaskContext {
 
     Object variable(String name);
 
-    String[] variablesKeys();
-
     void setVariable(String name, Object value);
 
     void addToVariable(String name, Object value);
@@ -39,9 +37,5 @@ public interface TaskContext {
     Node[] resultAsNodeArray();
 
     void setResult(Object actionResult);
-
-    void next();
-
-    void clean();
 
 }
