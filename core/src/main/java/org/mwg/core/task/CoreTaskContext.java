@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CoreTaskContext implements TaskContext {
 
     private final Map<String, Object> _variables;
+    private final boolean shouldFreeVar;
     private final Graph _graph;
     private final TaskAction[] _actions;
     private final int _actionCursor;
@@ -32,7 +33,13 @@ public class CoreTaskContext implements TaskContext {
         this._time = 0;
         this._graph = p_graph;
         this._parentContext = p_parentContext;
-        this._variables = new ConcurrentHashMap<String, Object>();
+        if (this._parentContext != null) {
+            this._variables = ((CoreTaskContext) p_parentContext)._variables;
+            shouldFreeVar = false;
+        } else {
+            this._variables = new ConcurrentHashMap<String, Object>();
+            shouldFreeVar = true;
+        }
         this._result = initial;
         this._actions = p_actions;
         this._actionCursor = p_actionCursor;
@@ -163,10 +170,13 @@ public class CoreTaskContext implements TaskContext {
 
             /* Clean */
             cleanObj(this._result);
-            String[] variables = _variables.keySet().toArray(new String[_variables.keySet().size()]);
-            for (int i = 0; i < variables.length; i++) {
-                cleanObj(variable(variables[i]));
+            if (shouldFreeVar) {
+                String[] variables = _variables.keySet().toArray(new String[_variables.keySet().size()]);
+                for (int i = 0; i < variables.length; i++) {
+                    cleanObj(variable(variables[i]));
+                }
             }
+
             this._result = null;
             /* End Clean */
             if (this._callback != null) {
