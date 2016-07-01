@@ -165,9 +165,11 @@ public class CoreTaskContext implements TaskContext {
         if (nextAction == null) {
             Object protectResult = null;
             if (this._callback != null) {
-                protectResult = CoreTask.protect(_graph, result());
+                Object currentResult = result();
+                if (currentResult != null) {
+                    protectResult = CoreTask.protect(_graph, currentResult);
+                }
             }
-
             /* Clean */
             cleanObj(this._result);
             if (shouldFreeVar) {
