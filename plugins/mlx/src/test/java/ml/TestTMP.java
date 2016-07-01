@@ -10,7 +10,7 @@ import org.mwg.task.*;
 
 import java.util.Arrays;
 
-import static org.mwg.task.Actions.from;
+import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.then;
 
 public class TestTMP {
@@ -103,7 +103,7 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = from(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
+                Task mainTask = inject(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         //call callbask
