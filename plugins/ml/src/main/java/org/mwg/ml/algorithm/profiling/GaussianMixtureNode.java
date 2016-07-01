@@ -157,7 +157,6 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 Node[] result = (Node[]) context.result();
                 GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
                 GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
-
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
                     context.setVariable("continueLoop", true);
@@ -165,16 +164,14 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 } else {
                     context.setVariable("continueLoop", false);
                 }
-
                 context.setResult(result);
             }
-        })
-                .ifThen(new TaskFunctionConditional() {
-                    @Override
-                    public boolean eval(TaskContext context) {
-                        return (Boolean) context.variable("continueLoop");
-                    }
-                }, traverse);
+        }).ifThen(new TaskFunctionConditional() {
+            @Override
+            public boolean eval(TaskContext context) {
+                return (Boolean) context.variable("continueLoop");
+            }
+        }, traverse);
 
         Task mainTask = setTime(time()).setWorld(world()).inject(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
         mainTask.execute(graph(), new Callback<Object>() {

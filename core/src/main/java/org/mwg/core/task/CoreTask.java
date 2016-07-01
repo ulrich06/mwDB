@@ -265,7 +265,7 @@ public class CoreTask implements org.mwg.task.Task {
                 result.on(null);
             }
         } else {
-            final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, result);
+            final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, _actionCursor, result);
             _actions[0].eval(context);
         }
 
@@ -489,7 +489,7 @@ public class CoreTask implements org.mwg.task.Task {
                 }
                 String contextKey = input.substring(previousPos, cursor - 1).trim();
                 if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
-                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey);
+                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     buffer.append(mathEngine.eval(null, context, new HashMap<String, Double>()));
                 } else {
                     buffer.append(context.variable(contextKey));

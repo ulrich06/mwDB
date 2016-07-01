@@ -17,6 +17,7 @@ public class CoreTaskContext implements TaskContext {
     private final Map<String, Object> _variables;
     private final Graph _graph;
     private final TaskAction[] _actions;
+    private final int _actionCursor;
     private final AtomicInteger _currentTaskId;
     private final TaskContext _parentContext;
     private final Callback<Object> _callback;
@@ -26,7 +27,7 @@ public class CoreTaskContext implements TaskContext {
     private long _world;
     private long _time;
 
-    public CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final Callback<Object> p_callback) {
+    public CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
@@ -34,6 +35,7 @@ public class CoreTaskContext implements TaskContext {
         this._variables = new ConcurrentHashMap<String, Object>();
         this._result = initial;
         this._actions = p_actions;
+        this._actionCursor = p_actionCursor;
         this._callback = p_callback;
         this._currentTaskId = new AtomicInteger(0);
     }
@@ -141,12 +143,18 @@ public class CoreTaskContext implements TaskContext {
 
     @Override
     public final void setResult(Object actionResult) {
-        final Object protectedVar = CoreTask.protect(_graph, actionResult);
         final Object previousResult = this._result;
-        this._result = protectedVar;
-        cleanObj(previousResult); //clean the previous result
+        //Optimization
+        if (actionResult != previousResult) {
+            this._result = CoreTask.protect(_graph, actionResult);
+            cleanObj(previousResult); //clean the previous result
+        }
         //next step now...
-        TaskAction nextAction = _actions[_currentTaskId.incrementAndGet()];
+        int nextCursor = _currentTaskId.incrementAndGet();
+        TaskAction nextAction = null;
+        if (nextCursor < _actionCursor) {
+            nextAction = _actions[nextCursor];
+        }
         if (nextAction == null) {
             Object protectResult = null;
             if (this._callback != null) {
@@ -161,7 +169,6 @@ public class CoreTaskContext implements TaskContext {
             }
             this._result = null;
             /* End Clean */
-
             if (this._callback != null) {
                 this._callback.on(protectResult);
             }
