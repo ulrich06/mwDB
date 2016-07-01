@@ -13,6 +13,7 @@ import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
 
+import static org.mwg.task.Actions.newTask;
 import static org.mwg.task.Actions.setTime;
 
 public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode {
@@ -139,41 +140,31 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
-        Task creationTask = setTime(time()).setWorld(world()).then(new Action() {
-            @Override
-            public void eval(TaskContext context) {
-                GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
-                //System.out.println("Vector: " + values[0] + " " + values[1]);
-                node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
-                context.setResult(context.result());
-            }
-        });
 
-
-        Task traverse = setTime(time()).setWorld(world());
-        traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
+        Task traverse = newTask();
+        traverse.asVar("parent").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Node[] result = (Node[]) context.result();
-                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
+                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("parent");
                 GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
-                    context.setVariable("continueLoop", true);
-                    context.setVariable("starterNode", resultChild);
+                    context.setResult(resultChild);
                 } else {
-                    context.setVariable("continueLoop", false);
+                    parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
+                    context.setResult(null);
                 }
-                context.setResult(result);
+
             }
         }).ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
-                return (Boolean) context.variable("continueLoop");
+                return (context.result()!=null);
             }
         }, traverse);
 
-        Task mainTask = setTime(time()).setWorld(world()).inject(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
+        Task mainTask = setTime(time()).setWorld(world()).inject(this).executeSubTask(traverse);
         mainTask.execute(graph(), new Callback<Object>() {
             @Override
             public void on(Object result) {
