@@ -11,7 +11,7 @@ class ActionSave implements TaskAction {
         context.graph().save(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                context.setResult(context.result());
+                context.setUnsafeResult(context.result());
             }
         });
     }

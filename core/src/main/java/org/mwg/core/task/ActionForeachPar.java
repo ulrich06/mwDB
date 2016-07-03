@@ -23,14 +23,16 @@ class ActionForeachPar implements TaskAction {
         counter.then(new Job() {
             @Override
             public void run() {
-                context.setResult(results);
+                context.setUnsafeResult(results);
             }
         });
         for (int i = 0; i < castedResult.length; i++) {
             final int finalI = i;
+            final Object loopInput = castedResult[finalI];
             _subTask.executeWith(context.graph(), context, castedResult[finalI], new Callback<Object>() {
                 @Override
                 public void on(final Object result) {
+                    context.cleanObj(loopInput);
                     results[finalI] = result;
                     counter.count();
                 }

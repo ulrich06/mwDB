@@ -14,7 +14,7 @@ class ActionTime implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         context.setTime(_time);
-        context.setResult(context.result());
+        context.setUnsafeResult(context.result());
     }
 
 }

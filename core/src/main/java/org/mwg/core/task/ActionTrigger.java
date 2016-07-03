@@ -15,10 +15,12 @@ class ActionTrigger implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        _subTask.executeWith(context.graph(), context, context.result(), new Callback<Object>() {
+        Object previous = context.result();
+        _subTask.executeWith(context.graph(), context, previous, new Callback<Object>() {
             @Override
             public void on(Object result) {
-                context.setResult(result);
+                context.cleanObj(previous);
+                context.setUnsafeResult(result);
             }
         });
     }

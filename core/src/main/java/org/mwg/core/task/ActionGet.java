@@ -49,6 +49,7 @@ class ActionGet implements TaskAction {
                             break;
                     }
                 }
+                loop.free();
             }
             final DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
             final Node[] resultNodes = new Node[collectedIds.size()];
@@ -81,10 +82,10 @@ class ActionGet implements TaskAction {
             } else {
                 //potentially shrink result array
                 final Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
-                context.setResult(finalCollectedProperties);
+                context.setUnsafeResult(finalCollectedProperties);
             }
         } else {
-            context.setResult(null);
+            context.setUnsafeResult(null);
         }
     }
 
@@ -109,6 +110,7 @@ class ActionGet implements TaskAction {
                             break;
                     }
                 }
+                loop.free();
             }
         }
     }

@@ -31,9 +31,11 @@ class ActionForeach implements TaskAction {
             public void on(final Object res) {
                 int current = cursor.getAndIncrement();
                 results[current] = res;
+                //free the previous used input
+                context.cleanObj(castedResult[current]);
                 int nextCursot = current + 1;
                 if (nextCursot == results.length) {
-                    context.setResult(results);
+                    context.setUnsafeResult(results);
                 } else {
                     //recursive call
                     selfPointer._subTask.executeWith(context.graph(), context, castedResult[nextCursot], recursiveAction[0]);

@@ -36,6 +36,9 @@ public interface TaskContext {
 
     Node[] resultAsNodeArray();
 
+    void setUnsafeResult(Object actionResult);
+
     void setResult(Object actionResult);
 
+    void cleanObj(Object o);
 }

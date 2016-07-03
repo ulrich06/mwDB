@@ -10,13 +10,13 @@ class ActionAdd implements TaskAction {
     private final String _relationName;
     private final String _variableNameToAdd;
 
-    ActionAdd(String relationName, String variableNameToAdd) {
+    ActionAdd(final String relationName, final String variableNameToAdd) {
         this._relationName = relationName;
         this._variableNameToAdd = variableNameToAdd;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final Object previousResult = context.result();
         final Object savedVar = context.variable(_variableNameToAdd);
         if (savedVar instanceof AbstractNode) {
@@ -26,7 +26,7 @@ class ActionAdd implements TaskAction {
                 addFromArray((Object[]) previousResult, _relationName, (Node) savedVar);
             }
         }
-        context.setResult(previousResult);
+        context.setUnsafeResult(previousResult);
     }
 
     private void addFromArray(final Object[] objs, final String relName, final Node toRemove) {

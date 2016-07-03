@@ -140,7 +140,6 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
-
         Task traverse = newTask();
         traverse.asVar("parent").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
@@ -160,7 +159,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         }).ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
-                return (context.result()!=null);
+                return (context.result() != null);
             }
         }, traverse);
 

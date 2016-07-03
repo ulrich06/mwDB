@@ -13,7 +13,8 @@ class ActionInject implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.setResult(CoreTask.protect(context.graph(),_value));
+        //set result already protect and free previous result
+        context.setResult(_value);
     }
 
 }

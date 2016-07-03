@@ -739,7 +739,9 @@ declare module org {
                 resultAsStringArray(): string[];
                 resultAsNode(): org.mwg.Node;
                 resultAsNodeArray(): org.mwg.Node[];
+                setUnsafeResult(actionResult: any): void;
                 setResult(actionResult: any): void;
+                cleanObj(o: any): void;
             }
             interface TaskFunctionConditional {
                 (context: org.mwg.task.TaskContext): boolean;
@@ -1582,8 +1584,10 @@ declare module org {
                     resultAsNode(): org.mwg.Node;
                     resultAsNodeArray(): org.mwg.Node[];
                     resultAsObjectArray(): any[];
+                    setUnsafeResult(actionResult: any): void;
                     setResult(actionResult: any): void;
-                    private cleanObj(o);
+                    private internal_setResult(actionResult, safe);
+                    cleanObj(o: any): void;
                 }
                 module math {
                     class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {

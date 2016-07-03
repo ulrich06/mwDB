@@ -43,7 +43,7 @@ class ActionSetProperty implements TaskAction {
         } else if (previousResult instanceof Object[]) {
             setFromArray((Object[]) previousResult, _relationName, savedVar);
         }
-        context.setResult(previousResult);
+        context.setUnsafeResult(previousResult);
     }
 
     /**

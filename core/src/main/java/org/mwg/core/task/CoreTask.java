@@ -262,7 +262,7 @@ public class CoreTask implements org.mwg.task.Task {
     public void executeWith(Graph graph, TaskContext parentContext, Object initialResult, Callback<Object> result) {
         if (_actionCursor == 0) {
             if (result != null) {
-                result.on(null);
+                result.on(protect(graph,initialResult));
             }
         } else {
             final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, _actionCursor, result);

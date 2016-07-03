@@ -150,13 +150,27 @@ public class CoreTaskContext implements TaskContext {
     }
 
     @Override
+    public final void setUnsafeResult(Object actionResult) {
+        internal_setResult(actionResult, false);
+    }
+
+    @Override
     public final void setResult(Object actionResult) {
+        internal_setResult(actionResult, true);
+    }
+
+    private void internal_setResult(Object actionResult, boolean safe) {
         final Object previousResult = this._result;
         //Optimization
-        if (actionResult != previousResult) {
-            this._result = CoreTask.protect(_graph, actionResult);
-            cleanObj(previousResult); //clean the previous result
+        if (safe) {
+            if (actionResult != previousResult) {
+                this._result = CoreTask.protect(_graph, actionResult);
+                cleanObj(previousResult); //clean the previous result
+            }
+        } else {
+            this._result = actionResult;
         }
+
         //next step now...
         int nextCursor = _currentTaskId.incrementAndGet();
         TaskAction nextAction = null;
@@ -190,7 +204,8 @@ public class CoreTaskContext implements TaskContext {
         }
     }
 
-    private void cleanObj(Object o) {
+    @Override
+    public void cleanObj(Object o) {
         final CoreTaskContext selfPoiner = this;
         if (!PrimitiveHelper.iterate(o, new Callback<Object>() {
             @Override

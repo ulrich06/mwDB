@@ -15,7 +15,7 @@ class ActionAsVar implements TaskAction {
     public void eval(final TaskContext context) {
         final Object previousResult = context.result();
         context.setVariable(_name, previousResult);
-        context.setResult(previousResult);
+        context.setUnsafeResult(previousResult);
     }
 
 }

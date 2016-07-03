@@ -37,6 +37,7 @@ class ActionTraverse implements TaskAction {
                         toLoad.add(interResult[j]);
                     }
                 }
+                loop.free();
             }
             final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()];
@@ -53,11 +54,11 @@ class ActionTraverse implements TaskAction {
             deferCounter.then(new Job() {
                 @Override
                 public void run() {
-                    context.setResult(resultNodes);
+                    context.setUnsafeResult(resultNodes);
                 }
             });
         } else {
-            context.setResult(null);
+            context.setUnsafeResult(null);
         }
     }
 
@@ -74,6 +75,7 @@ class ActionTraverse implements TaskAction {
                         toLoad.add(interResult[j]);
                     }
                 }
+                loop.free();
             }
         }
     }
