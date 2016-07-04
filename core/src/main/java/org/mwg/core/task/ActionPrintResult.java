@@ -5,11 +5,11 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-class ActionPrintln implements TaskAction {
+class ActionPrintResult implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        Object result = context.result();
+        final Object result = context.result();
         if (result instanceof AbstractNode[]) {
             Node[] casted = (Node[]) result;
             System.out.print("[");
@@ -23,7 +23,7 @@ class ActionPrintln implements TaskAction {
         } else {
             System.out.println(result);
         }
-        context.setResult(result);
+        context.setUnsafeResult(result);
     }
 
 }

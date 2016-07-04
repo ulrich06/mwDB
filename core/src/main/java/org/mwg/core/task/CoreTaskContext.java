@@ -75,14 +75,6 @@ public class CoreTaskContext implements TaskContext {
     @Override
     public final Object variable(String name) {
         return this._variables.get(name);
-        /*if (result != null) {
-            return result;
-        }*/
-        /*
-        if (_parentContext != null) {
-            return this._parentContext.variable(name);
-        }*/
-        //return result;
     }
 
     @Override

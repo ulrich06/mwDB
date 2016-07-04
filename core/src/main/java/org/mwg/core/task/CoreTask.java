@@ -470,8 +470,8 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task println() {
-        addAction(new ActionPrintln());
+    public Task printResult() {
+        addAction(new ActionPrintResult());
         return this;
     }
 

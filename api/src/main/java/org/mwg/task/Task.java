@@ -277,7 +277,7 @@ public interface Task {
 
     Task repeatPar(int repetition, Task subTask);
 
-    Task println();
+    Task printResult();
 
     void execute(final Graph graph, final Callback<Object> result);
 

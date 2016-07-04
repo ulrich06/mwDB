@@ -18,7 +18,7 @@ public interface TaskContext {
     Object variable(String name);
 
     void setVariable(String name, Object value);
-
+    
     void addToVariable(String name, Object value);
 
     //Object based results

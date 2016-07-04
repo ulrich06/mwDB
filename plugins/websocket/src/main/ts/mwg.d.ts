@@ -664,16 +664,23 @@ declare module org {
                 static parse(flatTask: string): org.mwg.task.Task;
                 static asVar(variableName: string): org.mwg.task.Task;
                 static setVar(variableName: string, inputValue: any): org.mwg.task.Task;
+                static map(mapFunction: org.mwg.task.TaskFunctionMap): org.mwg.task.Task;
                 static selectWith(name: string, pattern: string): org.mwg.task.Task;
                 static selectWithout(name: string, pattern: string): org.mwg.task.Task;
                 static select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
                 static traverse(relationName: string): org.mwg.task.Task;
                 static get(name: string): org.mwg.task.Task;
                 static traverseIndex(indexName: string, query: string): org.mwg.task.Task;
+                static traverseOrKeep(relationName: string): org.mwg.task.Task;
+                static traverseIndexAll(indexName: string): org.mwg.task.Task;
                 static repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
-                static println(): org.mwg.task.Task;
+                static printResult(): org.mwg.task.Task;
                 static setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
+                static selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                static foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                static foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                static math(expression: string): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -714,7 +721,7 @@ declare module org {
                 math(expression: string): org.mwg.task.Task;
                 repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
-                println(): org.mwg.task.Task;
+                printResult(): org.mwg.task.Task;
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                 executeWith(graph: org.mwg.Graph, parentContext: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
             }
@@ -1408,7 +1415,7 @@ declare module org {
                     constructor(actionName: string, flatParams: string);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
-                class ActionPrintln implements org.mwg.task.TaskAction {
+                class ActionPrintResult implements org.mwg.task.TaskAction {
                     eval(context: org.mwg.task.TaskContext): void;
                 }
                 class ActionRemove implements org.mwg.task.TaskAction {
@@ -1553,7 +1560,7 @@ declare module org {
                     math(expression: string): org.mwg.task.Task;
                     repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
-                    println(): org.mwg.task.Task;
+                    printResult(): org.mwg.task.Task;
                     static template(input: string, context: org.mwg.task.TaskContext): string;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }

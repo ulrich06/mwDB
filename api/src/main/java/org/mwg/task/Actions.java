@@ -68,6 +68,10 @@ public class Actions {
         return newTask().setVar(variableName, inputValue);
     }
 
+    public static Task map(TaskFunctionMap mapFunction) {
+        return newTask().map(mapFunction);
+    }
+
     public static Task selectWith(String name, String pattern) {
         return newTask().selectWith(name, pattern);
     }
@@ -92,6 +96,14 @@ public class Actions {
         return newTask().traverseIndex(indexName, query);
     }
 
+    public static Task traverseOrKeep(String relationName) {
+        return newTask().traverseOrKeep(relationName);
+    }
+
+    public static Task traverseIndexAll(String indexName) {
+        return newTask().traverseIndexAll(indexName);
+    }
+
     public static Task repeat(int repetition, Task subTask) {
         return newTask().repeat(repetition, subTask);
     }
@@ -100,11 +112,29 @@ public class Actions {
         return newTask().repeatPar(repetition, subTask);
     }
 
-    public static Task println() {
-        return newTask().println();
+    public static Task printResult() {
+        return newTask().printResult();
     }
 
     public static Task setProperty(String propertyName, byte propertyType, String variableNameToSet) {
         return newTask().setProperty(propertyName, propertyType, variableNameToSet);
     }
+
+    public static Task selectWhere(Task subTask) {
+        return newTask().selectWhere(subTask);
+    }
+
+    public static Task foreach(Task subTask) {
+        return newTask().foreach(subTask);
+    }
+
+    public static Task foreachPar(Task subTask) {
+        return newTask().foreachPar(subTask);
+    }
+
+    public static Task math(String expression) {
+        return newTask().math(expression);
+    }
+
+
 }
