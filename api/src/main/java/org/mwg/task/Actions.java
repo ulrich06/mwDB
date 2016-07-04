@@ -136,5 +136,28 @@ public class Actions {
         return newTask().math(expression);
     }
 
+    public static Task action(String name, String params) {
+        return newTask().action(name, params);
+    }
+
+    public static Task remove(String relationName, String variableNameToRemove) {
+        return newTask().remove(relationName, variableNameToRemove);
+    }
+
+    public static Task add(String relationName, String variableNameToAdd) {
+        return newTask().add(relationName, variableNameToAdd);
+    }
+
+    public static Task removeProperty(String propertyName) {
+        return newTask().removeProperty(propertyName);
+    }
+
+    public static Task newNode() {
+        return newTask().newNode();
+    }
+
+    public static Task save() {
+        return newTask().save();
+    }
 
 }

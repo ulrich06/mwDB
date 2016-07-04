@@ -1,12 +1,20 @@
 package org.mwg.importer;
 
-import org.mwg.Graph;
-import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractPlugin;
+import org.mwg.task.TaskAction;
+import org.mwg.task.TaskActionFactory;
 
-public class ImporterPlugin extends AbstractNode {
+public class ImporterPlugin extends AbstractPlugin {
 
-    public ImporterPlugin(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
-        super(p_world, p_time, p_id, p_graph, currentResolution);
+    public ImporterPlugin() {
+        declareTaskAction(ActionReadLines.READLINE_NAME, new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException(ActionReadLines.READLINE_NAME + " action need one parameter");
+                }
+                return new ActionReadLines(params[0]);
+            }
+        });
     }
-
 }

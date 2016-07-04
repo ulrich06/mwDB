@@ -395,6 +395,10 @@ declare module org {
             jump<A extends org.mwg.Node>(targetTime: number, callback: org.mwg.Callback<A>): void;
         }
         module plugin {
+            abstract class AbstractIterable {
+                abstract next(): any;
+                abstract close(): void;
+            }
             abstract class AbstractNode implements org.mwg.Node {
                 private _world;
                 private _time;
@@ -681,6 +685,12 @@ declare module org {
                 static foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static math(expression: string): org.mwg.task.Task;
+                static action(name: string, params: string): org.mwg.task.Task;
+                static remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
+                static add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
+                static removeProperty(propertyName: string): org.mwg.task.Task;
+                static newNode(): org.mwg.task.Task;
+                static save(): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -1734,6 +1744,14 @@ declare module org {
                     private static HMULT;
                     static hash(data: string): number;
                     static hashBytes(data: Int8Array): number;
+                }
+                class GenericIterable extends org.mwg.plugin.AbstractIterable {
+                    index: number;
+                    isArray: boolean;
+                    input: any;
+                    constructor(elem: any);
+                    next(): any;
+                    close(): void;
                 }
                 class HeapBuffer extends org.mwg.core.utility.AbstractBuffer {
                     private buffer;

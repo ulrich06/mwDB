@@ -2,6 +2,7 @@ package org.mwg.core.utility;
 
 import org.mwg.Callback;
 import org.mwg.Constants;
+import org.mwg.plugin.AbstractIterable;
 
 import java.util.Iterator;
 
@@ -318,6 +319,14 @@ public class PrimitiveHelper {
             Iterator it = ((Iterable) elem).iterator();
             while (it.hasNext()) {
                 callback.on(it.next());
+            }
+            return true;
+        } else if (elem instanceof AbstractIterable) {
+            AbstractIterable it = (AbstractIterable) elem;
+            Object next = it.next();
+            while (next != null) {
+                callback.on(next);
+                next = it.next();
             }
             return true;
         } else {
