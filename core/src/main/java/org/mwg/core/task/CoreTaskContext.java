@@ -166,6 +166,7 @@ public class CoreTaskContext implements TaskContext {
             if (actionResult != previousResult) {
                 this._result = CoreTask.protect(_graph, actionResult);
                 cleanObj(previousResult); //clean the previous result
+                cleanObj(actionResult); //clean the previous result
             }
         } else {
             this._result = actionResult;

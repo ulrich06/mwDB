@@ -56,6 +56,7 @@ public class ActionInjectTest extends AbstractActionTest {
                     }
                 } catch (Exception e) {
                     resultName[0] = "fail";
+                    e.printStackTrace();
                 }
 
                 Assert.assertArrayEquals(expected, resultName);
