@@ -21,7 +21,7 @@ public class ImporterTest {
         g.connect(connectionResult -> {
             Node newNode = g.newNode(0, 0);
             //final Task t = readLines("/Users/duke/dev/mwDB/plugins/importer/src/test/resources/smarthome/smarthome_1.T15.txt")
-            final Task t = readLines("smarthome/smarthome_1.T15.txt")
+            final Task t = readLines("smarthome/smarthome_mini_1.T15.txt")
                     .foreach(
                             ifThen(ctx -> !ctx.resultAsString().startsWith("1:Date"),
                                     then(context -> {

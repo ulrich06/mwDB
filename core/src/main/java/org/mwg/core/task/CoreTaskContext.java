@@ -203,20 +203,20 @@ public class CoreTaskContext implements TaskContext {
     public void cleanObj(Object o) {
         if (o == null) {
             return;
-        }
-        if (o instanceof AbstractIterable) {
+        } else if (o instanceof AbstractIterable) {
             ((AbstractIterable) o).close();
-        }
-        final CoreTaskContext selfPoiner = this;
-        final GenericIterable genericIterable = new GenericIterable(o);
-        Object current = genericIterable.next();
-        while (current != null) {
-            if (current instanceof AbstractNode) {
-                ((Node) current).free();
-            } else if (o != current) {
-                selfPoiner.cleanObj(current);
+        } else {
+            final CoreTaskContext selfPoiner = this;
+            final GenericIterable genericIterable = new GenericIterable(o);
+            Object current = genericIterable.next();
+            while (current != null) {
+                if (current instanceof AbstractNode) {
+                    ((Node) current).free();
+                } else if (o != current) {
+                    selfPoiner.cleanObj(current);
+                }
+                current = genericIterable.next();
             }
-            current = genericIterable.next();
         }
     }
 
