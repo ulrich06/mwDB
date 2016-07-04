@@ -207,8 +207,9 @@ public interface Task {
      */
     Task newNode();
 
+
     /**
-     * Sets the value of an attribute of a node or an array of nodes
+     * Sets the value of an attribute of a node or an array of nodes with a variable value
      * The node (or the array) should be init in the previous task
      *
      * @param propertyName      The name of the attribute. Must be unique per node.

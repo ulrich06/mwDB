@@ -413,7 +413,7 @@ public class CoreTask implements org.mwg.task.Task {
             throw new RuntimeException("propertyName should not be null");
         }
         if (variableNameToSet == null) {
-            throw new RuntimeException("propertyValue should not be null");
+            throw new RuntimeException("variableNameToSet should not be null");
         }
         addAction(new ActionSetProperty(propertyName, propertyType, variableNameToSet));
         return this;
