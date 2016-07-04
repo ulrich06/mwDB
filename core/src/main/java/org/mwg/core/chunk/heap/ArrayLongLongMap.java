@@ -3,9 +3,9 @@ package org.mwg.core.chunk.heap;
 
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.struct.LongLongMap;
 import org.mwg.struct.LongLongMapCallBack;
-import org.mwg.core.utility.PrimitiveHelper;
 
 public class ArrayLongLongMap implements LongLongMap {
 

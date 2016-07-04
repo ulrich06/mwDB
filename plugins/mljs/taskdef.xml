@@ -16,35 +16,35 @@
     <target name="other.run" depends="sys.check" if="isOther">
 
         <copy file="${basedir}/../../corejs/target/classes/mwg.d.ts"
-              todir="${basedir}/target/generated-sources/src/main"/>
+              todir="${basedir}/target/generated-sources/"/>
         <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
 
-        <copy file="${basedir}/src/mwg.ml.blas.ts" todir="${basedir}/target/generated-sources/src/main"/>
+        <copy file="${basedir}/src/mwg.ml.blas.ts" todir="${basedir}/target/generated-sources/"/>
 
         <exec executable="npm" dir="${basedir}/target">
             <arg value="install"/>
         </exec>
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc"
-              dir="${basedir}/target/generated-sources/src/main">
+              dir="${basedir}/target/generated-sources/">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
             <arg value="--target"/>
             <arg value="es5"/>
-            <arg value="${basedir}/target/generated-sources/src/main/mwg.ml.ts"/>
+            <arg value="${basedir}/target/generated-sources/mwg.ml.ts"/>
             <arg value="--out"/>
             <arg value="mwg.ml.js"/>
         </exec>
 
         <!-- Copy Result -->
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.d.ts" todir="${basedir}/target/classes"/>
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js" todir="${basedir}/target/classes"/>
-        <copy file="${basedir}/target/generated-sources/src/main/mwg.ml.js.map" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ml.d.ts" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ml.js" todir="${basedir}/target/classes"/>
+        <copy file="${basedir}/target/generated-sources/mwg.ml.js.map" todir="${basedir}/target/classes"/>
         <copy file="${basedir}/src/netlib.js" todir="${basedir}/target/classes"/>
 
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="--target"/>
             <arg value="es5"/>
-            <arg value="${basedir}/target/generated-test-sources/src/main/test.ts"/>
+            <arg value="${basedir}/target/generated-test-sources/test.ts"/>
             <arg value="--out"/>
             <arg value="${basedir}/target/test-classes/mwg.test.js"/>
         </exec>
@@ -57,7 +57,7 @@
             <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
-            <filelist dir="${basedir}/target/generated-test-sources/src/main/"
+            <filelist dir="${basedir}/target/generated-test-sources/"
                       files="testsRunner.js"/>
         </concat>
 
@@ -71,7 +71,7 @@
             <filelist dir="${basedir}/src" files="spacer.js"/>
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
             <filelist dir="${basedir}/src" files="spacer.js"/>
-            <filelist dir="${basedir}/target/generated-test-sources/src/main/"
+            <filelist dir="${basedir}/target/generated-test-sources/"
                       files="testsRunnerDev.js"/>
         </concat>
 

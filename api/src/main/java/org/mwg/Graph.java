@@ -3,7 +3,7 @@ package org.mwg;
 import org.mwg.plugin.*;
 import org.mwg.struct.Buffer;
 import org.mwg.task.Task;
-import org.mwg.task.TaskActionRegistry;
+import org.mwg.task.TaskActionFactory;
 import org.mwg.task.TaskContext;
 
 /**
@@ -22,11 +22,11 @@ public interface Graph {
     Node newNode(long world, long time);
 
     /**
-     * Creates a new {@link Node Node} using the {@link NodeFactory} previously declared with the {@link GraphBuilder#addNodeType(NodeFactory)} method and returns the new Node.
+     * Creates a new {@link Node Node} using the {@link NodeFactory} previously declared with the {@link GraphBuilder#withPlugin(Plugin)} method and returns the new Node.
      *
      * @param world    initial world of the node
      * @param time     initial time of the node
-     * @param nodeType name of the {@link NodeFactory} to be used, as previously declared with the {@link GraphBuilder#addNodeType(NodeFactory)} method.
+     * @param nodeType name of the {@link NodeFactory} to be used, as previously declared with the {@link GraphBuilder#withPlugin(Plugin)} method.
      * @return newly created node
      */
     Node newTypedNode(long world, long time, String nodeType);
@@ -207,32 +207,18 @@ public interface Graph {
     Query newQuery();
 
     /**
-     * Creates a new task object to manipulate Graph in an easy way
-     * By default, the world and the time of the task is 0
-     *
-     * @return newly created task object
-     */
-    Task newTask();
-
-    /**
-     * Creates a new task context that we can give to initialize a task
-     *
-     * @return newly created task context object
-     */
-    TaskContext newTaskContext();
-
-    /**
-     * Retrieves the shared action registry of Actions executed by task
-     *
-     * @return shared global action registry
-     */
-    TaskActionRegistry actions();
-
-    /**
      * Free the array of nodes (sequentially call the free method on all nodes)
      *
      * @param nodes
      */
     void freeNodes(Node[] nodes);
+
+    /**
+     * Retrieve a task action factory, resolved by its name
+     *
+     * @param name of the task action
+     * @return the resolved task action or null if not configured
+     */
+    TaskActionFactory taskAction(String name);
 
 }

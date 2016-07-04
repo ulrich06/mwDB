@@ -2,11 +2,10 @@ package org.mwg.ml.algorithm.profiling;
 
 import org.mwg.Callback;
 import org.mwg.Graph;
-import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
-import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 
 public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
@@ -108,33 +107,23 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
 
         int slot = getIntTime(time(), numOfSlot, periodSize);
         int index = slot * features;
+        //int indexSquare = slot * features * (features + 1) / 2;
 
         int[] total = (int[]) resolved.getFromKey(INTERNAL_TOTAL_KEY);
         double[] sum = (double[]) resolved.getFromKey(INTERNAL_SUM_KEY);
+        // double[] sumsq= (double[]) resolved.getFromKey(INTERNAL_SUMSQUARE_KEY);
 
         double[] result = new double[features];
         if (total != null) {
             if (total[slot] != 0) {
                 for (int j = 0; j < features; j++) {
                     result[j] = sum[j + index] / total[slot];
+                    //result[j] = Gaussian1D.draw(sum[j + index], sumsq[j+indexSquare], total[slot]);
                 }
             }
         }
+
         callback.on(result);
-    }
-
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianSlotNode(world, time, id, graph, initialResolution);
-        }
     }
 
     //Machine Learning Properties and their default values with _DEF
@@ -156,23 +145,20 @@ public class GaussianSlotNode extends AbstractMLNode implements ProfilingNode {
     private static final String INTERNAL_SUM_KEY = "_sum";
     private static final String INTERNAL_SUMSQUARE_KEY = "_sumSquare";
 
+    private static final Enforcer enforcer = new Enforcer()
+            .asPositiveInt(SLOTS_NUMBER)
+            .asPositiveLong(PERIOD_SIZE);
 
     //Override default Abstract node default setters and getters
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(SLOTS_NUMBER)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(PERIOD_SIZE)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.LONG);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
+        enforcer.check(propertyName, propertyType, propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
     public Object get(String attributeName) {
         NodeState state = this._resolver.resolveState(this, true);
-
         if (attributeName.equals(SLOTS_NUMBER)) {
             return state.getFromKeyWithDefault(SLOTS_NUMBER, SLOTS_NUMBER_DEF);
         } else if (attributeName.equals(PERIOD_SIZE)) {

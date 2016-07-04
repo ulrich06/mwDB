@@ -11,7 +11,7 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .traverseOrKeep("children")
                 .traverseOrKeep("children")
@@ -23,7 +23,7 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute();
+                .execute(graph,null);
         removeGraph();
     }
 

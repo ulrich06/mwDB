@@ -1,8 +1,9 @@
 package org.mwg.core.task;
 
+import org.mwg.Callback;
+import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
-import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
 import java.util.ArrayList;
@@ -23,24 +24,29 @@ class ActionForeach implements TaskAction {
         final ActionForeach selfPointer = this;
         final Object[] castedResult = convert(context.result());
         final AtomicInteger cursor = new AtomicInteger(0);
-        final TaskContext[] results = new CoreTaskContext[castedResult.length];
-        final Action[] recursiveAction = new Action[1];
-        recursiveAction[0] = new Action() {
+        final Object[] results = new Object[castedResult.length];
+        final Callback[] recursiveAction = new Callback[1];
+        recursiveAction[0] = new Callback() {
             @Override
-            public void eval(final TaskContext subTaskFinalContext) {
+            public void on(final Object res) {
                 int current = cursor.getAndIncrement();
-                results[current] = subTaskFinalContext;
+                results[current] = res;
+                //free the previous used input
+                context.cleanObj(castedResult[current]);
                 int nextCursot = current + 1;
                 if (nextCursot == results.length) {
-                    context.setResult(results);
-                    context.next();
+                    context.setUnsafeResult(results);
                 } else {
                     //recursive call
-                    selfPointer._subTask.executeThenAsync(context, castedResult[nextCursot], recursiveAction[0]);
+                    selfPointer._subTask.executeWith(context.graph(), context, castedResult[nextCursot], recursiveAction[0]);
                 }
             }
         };
-        _subTask.executeThenAsync(context, castedResult[0], recursiveAction[0]);
+        Object propagatedResult = null;
+        if (castedResult.length > 0) {
+            propagatedResult = castedResult[0];
+        }
+        _subTask.executeWith(context.graph(), context, propagatedResult, recursiveAction[0]);
     }
 
     /**

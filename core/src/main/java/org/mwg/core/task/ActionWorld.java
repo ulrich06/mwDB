@@ -14,8 +14,7 @@ class ActionWorld implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         context.setWorld(_world);
-        context.setResult(context.result());
-        context.next();
+        context.setUnsafeResult(context.result());
     }
 
 }

@@ -3,7 +3,7 @@ package org.mwg.core.task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-public class ActionSetVar implements TaskAction {
+class ActionSetVar implements TaskAction {
 
     private final String _name;
 
@@ -17,7 +17,6 @@ public class ActionSetVar implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         context.setVariable(this._name, this._value);
-        context.setResult(context.result());
-        context.next();
+        context.setUnsafeResult(context.result());//trigger next step
     }
 }

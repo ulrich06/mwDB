@@ -2,16 +2,20 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.Callback;
+import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+
+import static org.mwg.task.Actions.*;
 
 public class ActionGetTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .fromIndexAll("nodes")
+        fromIndexAll("nodes")
                 .get("children")
                 .get("name")
                 .then(new Action() {
@@ -22,15 +26,14 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1], "n1");
                     }
                 })
-                .execute();
+                .execute(graph, null);
         removeGraph();
     }
 
     @Test
     public void testDefaultSynthax() {
         initGraph();
-        graph.newTask()
-                .fromIndexAll("nodes")
+        fromIndexAll("nodes")
                 .parse("children.name")
                 .then(new Action() {
                     @Override
@@ -40,16 +43,15 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1], "n1");
                     }
                 })
-                .execute();
+                .execute(graph, null);
         removeGraph();
     }
 
-    /*
+
     @Test
     public void testParse() {
         initGraph();
-        graph.newTask()
-                .parse("fromIndexAll(nodes).traverse(children)")
+        parse("fromIndexAll(nodes).traverse(children)")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -58,7 +60,7 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(lastResult[1].get("name"), "n1");
                     }
                 })
-                .execute();
+                .execute(graph, null);
         removeGraph();
     }
 
@@ -96,8 +98,7 @@ public class ActionGetTest extends AbstractActionTest {
             }
         });
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
                     @Override
@@ -106,10 +107,9 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute();
+                }).execute(graph, null);
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node3")
                 .then(new Action() {
                     @Override
@@ -117,9 +117,9 @@ public class ActionGetTest extends AbstractActionTest {
                         Node[] n = (Node[]) context.result();
                         Assert.assertEquals(0, n.length);
                     }
-                }).execute();
+                }).execute(graph, null);
 
-        graph.newTask().time(12)
+        setTime(12)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
@@ -129,10 +129,9 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals(1, n.length);
                         Assert.assertEquals("node2", n[0].get("name"));
                     }
-                }).execute();
+                }).execute(graph, null);
 
-        graph.newTask()
-                .fromIndex("rootIndex", "name=root2")
+        fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {
                     @Override
@@ -142,9 +141,9 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals("node1", n[0].get("name"));
                         Assert.assertEquals("node2", n[1].get("name"));
                     }
-                }).execute();
+                }).execute(graph,null);
 
-        graph.newTask().time(13)
+        setTime(13)
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {
@@ -156,8 +155,8 @@ public class ActionGetTest extends AbstractActionTest {
                         Assert.assertEquals("node2", n[1].get("name"));
                         Assert.assertEquals("node3", n[2].get("name"));
                     }
-                }).execute();
+                }).execute(graph,null);
         removeGraph();
-    }*/
+    }
 
 }

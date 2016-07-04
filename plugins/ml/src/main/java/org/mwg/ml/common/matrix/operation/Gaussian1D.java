@@ -19,6 +19,14 @@ public class Gaussian1D {
         return 1/Math.sqrt(2*Math.PI*cov)*Math.exp(-(feature-avg)*(feature-avg)/(2*cov));
     }
 
+
+//    public static double draw(double sum, double sumSq, int total){
+//        double avg=sum/total;
+//        double cov=getCovariance(sum,sumSq,total);
+//        Random random=new Random();
+//        return random.nextGaussian()*Math.sqrt(cov)+avg;
+//    }
+
     public static double[] getDensityArray(double sum, double sumSq, int total, double[] feature){
         if(total<2){
             return null;

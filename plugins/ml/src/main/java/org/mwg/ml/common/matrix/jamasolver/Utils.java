@@ -1,8 +1,6 @@
 package org.mwg.ml.common.matrix.jamasolver;
 
-import org.mwg.ml.common.matrix.Matrix;
-
-public class Utils {
+class Utils {
 
     /**
      * sqrt(a^2 + b^2) without under/overflow.

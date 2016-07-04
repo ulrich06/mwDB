@@ -2,7 +2,10 @@ package org.mwg.core;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
+import org.mwg.Node;
 import org.mwg.core.chunk.offheap.OffHeapByteArray;
 import org.mwg.core.chunk.offheap.OffHeapDoubleArray;
 import org.mwg.core.chunk.offheap.OffHeapLongArray;

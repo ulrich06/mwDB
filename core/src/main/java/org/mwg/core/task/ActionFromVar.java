@@ -15,7 +15,6 @@ class ActionFromVar implements TaskAction {
     public void eval(final TaskContext context) {
         context.setResult(context.variable(_name));
         //continue for next step
-        context.next();
     }
 
 }

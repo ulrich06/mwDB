@@ -1,6 +1,8 @@
 package org.mwg.core.task;
 
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.DeferCounter;
+import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
@@ -35,6 +37,7 @@ class ActionTraverse implements TaskAction {
                         toLoad.add(interResult[j]);
                     }
                 }
+                loop.free();
             }
             final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()];
@@ -51,12 +54,11 @@ class ActionTraverse implements TaskAction {
             deferCounter.then(new Job() {
                 @Override
                 public void run() {
-                    context.setResult(resultNodes);
-                    context.next();
+                    context.setUnsafeResult(resultNodes);
                 }
             });
         } else {
-            context.next();
+            context.setUnsafeResult(null);
         }
     }
 
@@ -73,6 +75,7 @@ class ActionTraverse implements TaskAction {
                         toLoad.add(interResult[j]);
                     }
                 }
+                loop.free();
             }
         }
     }

@@ -1,20 +1,19 @@
 package ml.regression;
 
 import org.junit.Test;
-import org.mwg.Callback;
-import org.mwg.Graph;
-import org.mwg.GraphBuilder;
+import org.mwg.*;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.algorithm.regression.LinearRegressionNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.AbstractLinearRegressionNode;
+import org.mwg.mlx.algorithm.regression.LinearRegressionNode;
 
-import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise() {
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -24,10 +23,10 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 1) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bufferError < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.l2Reg < eps);
+                assertTrue(Math.abs(rjc.coefs[0] - 2) < eps);
+                assertTrue(Math.abs(rjc.intercept - 1) < eps);
+                assertTrue(rjc.bufferError < eps);
+                assertTrue(rjc.l2Reg < eps);
             }
         });
 
@@ -36,7 +35,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
     @Test
     public void testNormalPrecise2() {
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -46,9 +45,9 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept + 0.5) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 0.5) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bufferError < eps);
+                assertTrue(Math.abs(rjc.intercept + 0.5) < eps);
+                assertTrue(Math.abs(rjc.coefs[0] - 0.5) < eps);
+                assertTrue(rjc.bufferError < eps);
             }
         });
 
@@ -58,7 +57,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testSuddenError() {
         //This test fails only on crash. Otherwise, it is just for
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -68,15 +67,20 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
                 rjc.value = new double[]{6};
                 rjc.response = 1013;
-                lrNode.jump(dummyDataset1.length, rjc);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, rjc.bootstrapMode);
+                lrNode.jump(dummyDataset1.length, new Callback<Node>() {
+                    @Override
+                    public void on(Node result) {
+                        rjc.on((AbstractLinearRegressionNode) result);
+                    }
+                });
+                assertTrue(rjc.bootstrapMode);
 
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 2) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 1) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.bufferError - 166666.6666666) < eps);
+                assertTrue(Math.abs(rjc.coefs[0]  - 144.9) < 1);
+                assertTrue(Math.abs(rjc.intercept + 332.8) < 1);
+                assertTrue(Math.abs(rjc.bufferError - 79349.32) < 20);
             }
         });
     }
@@ -84,7 +88,7 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
     @Test
     public void testTooLargeRegularization() {
         //This test fails only on crash. Otherwise, it is just for
-        final Graph graph = new GraphBuilder().addNodeType(new LinearRegressionNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLXPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
@@ -95,16 +99,16 @@ public class LinearRegressionNodeTest extends AbstractLinearRegressionTest {
 
                 LinearRegressionNode lrNode = (LinearRegressionNode) graph.newTypedNode(0, 0, LinearRegressionNode.NAME);
                 standardSettings(lrNode);
-                lrNode.setL2Regularization(1000000000);
+                lrNode.setProperty(LinearRegressionNode.L2_COEF_KEY, Type.DOUBLE, 1000000000.0);
 
                 RegressionJumpCallback rjc = runThroughDummyDataset(lrNode, false);
 
                 lrNode.free();
                 graph.disconnect(null);
 
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.coefs[0] - 0) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.intercept - 6) < eps);
-                assertTrue(rjc.intercept + "\t" + rjc.coefs[0] + "\t" + rjc.bufferError + "\t" + rjc.l2Reg, Math.abs(rjc.bufferError - (resid / 6)) < eps);
+                assertTrue(Math.abs(rjc.coefs[0] - 0) < eps);
+                assertTrue(Math.abs(rjc.intercept - 6) < eps);
+                assertTrue(Math.abs(rjc.bufferError - (resid / 6)) < eps);
             }
         });
     }

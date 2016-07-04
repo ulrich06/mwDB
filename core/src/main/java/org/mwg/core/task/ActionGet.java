@@ -49,6 +49,7 @@ class ActionGet implements TaskAction {
                             break;
                     }
                 }
+                loop.free();
             }
             final DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
             final Node[] resultNodes = new Node[collectedIds.size()];
@@ -70,24 +71,21 @@ class ActionGet implements TaskAction {
                     public void run() {
                         if (finalCollectedProperties == null) {
                             context.setResult(resultNodes);
-                            context.next();
                         } else {
                             Object[] merged = new Object[resultNodes.length + finalCollectedProperties.length];
                             System.arraycopy(resultNodes, 0, merged, 0, resultNodes.length);
                             System.arraycopy(finalCollectedProperties, 0, merged, resultNodes.length, finalCollectedProperties.length);
                             context.setResult(merged);
-                            context.next();
                         }
                     }
                 });
             } else {
                 //potentially shrink result array
                 final Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
-                context.setResult(finalCollectedProperties);
-                context.next();
+                context.setUnsafeResult(finalCollectedProperties);
             }
         } else {
-            context.next();
+            context.setUnsafeResult(null);
         }
     }
 
@@ -112,6 +110,7 @@ class ActionGet implements TaskAction {
                             break;
                     }
                 }
+                loop.free();
             }
         }
     }

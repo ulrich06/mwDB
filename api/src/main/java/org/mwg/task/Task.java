@@ -1,6 +1,7 @@
 package org.mwg.task;
 
 import org.mwg.Callback;
+import org.mwg.Graph;
 import org.mwg.Type;
 
 public interface Task {
@@ -39,8 +40,9 @@ public interface Task {
 
     /**
      * Initializes a named variable into the task context.
+     *
      * @param variableName the name of the variable
-     * @param inputValue the value of the variable
+     * @param inputValue   the value of the variable
      * @return this task to chain actions (fluent API)
      */
     Task setVar(String variableName, Object inputValue);
@@ -51,7 +53,7 @@ public interface Task {
      * @param inputValue object used as source of a task
      * @return this task to chain actions (fluent API)
      */
-    Task from(Object inputValue);
+    Task inject(Object inputValue);
 
     /**
      * Retrieves indexed nodes that matches the query
@@ -72,7 +74,8 @@ public interface Task {
 
     /**
      * Filters the previous result to keep nodes which named attribute has a specific value
-     * @param name the name of the attribute used to filter
+     *
+     * @param name    the name of the attribute used to filter
      * @param pattern the value nodes must have for this attribute
      * @return this task to chain actions (fluent API)
      */
@@ -80,7 +83,8 @@ public interface Task {
 
     /**
      * Filters the previous result to keep nodes which named attribute do not have a given value
-     * @param name the name of the attribute used to filter
+     *
+     * @param name    the name of the attribute used to filter
      * @param pattern the value nodes must not have for this attribute
      * @return this task to chain actions (fluent API)
      */
@@ -165,23 +169,13 @@ public interface Task {
     Task foreach(Task subTask);
 
     /**
-     * Same as {@link #foreachThen(Callback)} method, but all the subtask are called in parallel
+     * Same as {@link #foreach(Task)} method, but all the subtask are called in parallel
      * There is thus as thread as element in the collection
      *
      * @param subTask sub task to call for each elements
      * @return this task to chain actions (fluent API)
      */
     Task foreachPar(Task subTask);
-
-    /**
-     * Iterate through a pre-loaded collection of object add apply the {@code action} on each element
-     * If you want to access/modify the context, please use {@link #foreach(Task)} method
-     *
-     * @param action action to apply on each element
-     * @param <T>    type of the element
-     * @return this task to chain actions (fluent API)
-     */
-    <T> Task foreachThen(Callback<T> action);
 
     /**
      * Execute and wait a sub task, result of this sub task is immediately enqueue and available for next
@@ -203,34 +197,8 @@ public interface Task {
     Task whileDo(TaskFunctionConditional cond, Task then);
 
     Task then(Action action);
-
-    Task thenAsync(Action action);
-
+    
     Task save();
-
-    /**
-     * Schedule and execute the current task program
-     */
-    void execute();
-
-    /**
-     * Schedule and execute the current task program, when every actions will be execute the last action passed as parameter will be executed.
-     * This last action is synchronous, meaning that after the last statement the task is considered over and all intermediate results will be automatically cleaned.
-     *
-     * @param action last action the execution before the clean procedure
-     */
-    void executeThen(Action action);
-
-    void executeWith(TaskContext initialContext);
-
-    /**
-     * Schedule and execute the current task program. However
-     *
-     * @param parentContext initial context, only in case of cascade execution of tasks, null otherwise
-     * @param initialResult initial content if any, null otherwise
-     * @param finalAction   last action the execution before the clean procedure. Warning this last action will be executed in asynchronous mode. Therefore, no objects of the task will be freed before the call the method next on the parameter context.
-     */
-    void executeThenAsync(final TaskContext parentContext, final Object initialResult, final Action finalAction);
 
     /**
      * Create a new node on the [world,time] of the context
@@ -239,15 +207,6 @@ public interface Task {
      */
     Task newNode();
 
-    /**
-     * Sets the value of an attribute of a node or an array of nodes with a variable value
-     * The node (or the array) should be init in the previous task
-     *
-     * @param propertyName      The name of the attribute. Must be unique per node.
-     * @param variableNameToSet The name of the property to set, should be stored previously as a variable in task context.
-     * @return this task to chain actions (fluent API)
-     */
-    Task set(String propertyName, String variableNameToSet);
 
     /**
      * Sets the value of an attribute of a node or an array of nodes with a variable value
@@ -314,5 +273,15 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task math(String expression);
+
+    Task repeat(int repetition, Task subTask);
+
+    Task repeatPar(int repetition, Task subTask);
+
+    Task println();
+
+    void execute(final Graph graph, final Callback<Object> result);
+
+    void executeWith(final Graph graph, final TaskContext parentContext, Object initialResult, final Callback<Object> result);
 
 }

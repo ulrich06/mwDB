@@ -10,7 +10,6 @@ class ActionNoop implements TaskAction {
         final Object previousResult = context.result();
         context.setResult(previousResult);
         //continue for next step
-        context.next();
     }
 
 }

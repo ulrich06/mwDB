@@ -1,5 +1,6 @@
 package org.mwg.core.utility;
 
+import org.mwg.Callback;
 import org.mwg.plugin.Job;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,5 +41,26 @@ public class CoreDeferCounter implements org.mwg.DeferCounter {
                 p_callback.run();
             }
         }
+    }
+
+    private Object _result = null;
+
+    @Override
+    public Callback wrap() {
+        return new Callback() {
+            @Override
+            public void on(Object result) {
+                _result = result;
+                count();
+            }
+        };
+    }
+
+    @Override
+    public Object waitResult() {
+        while (this._nb_down.get() != _counter) {
+            //TODO wait here better...
+        }
+        return _result;
     }
 }

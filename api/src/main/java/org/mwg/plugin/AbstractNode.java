@@ -617,34 +617,4 @@ public abstract class AbstractNode implements Node {
         return builder.toString();
     }
 
-    public void setPropertyWithType(String propertyName, byte propertyType, Object propertyValue, byte propertyTargetType) {
-        if (propertyType != propertyTargetType) {
-            if (propertyTargetType == Type.INT && propertyType == Type.LONG) {
-                NodeState preciseState = this._resolver.resolveState(this, false);
-                if (preciseState != null) {
-                    preciseState.set(this._resolver.stringToHash(propertyName, true), propertyTargetType, parseInteger(propertyValue.toString()));
-                } else {
-                    throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-                }
-            } else {
-                throw new RuntimeException("Property " + propertyName + " has a type mismatch, provided " + Type.typeName(propertyType) + " expected: " + Type.typeName(propertyTargetType));
-            }
-        } else {
-            NodeState preciseState = this._resolver.resolveState(this, false);
-            if (preciseState != null) {
-                preciseState.set(this._resolver.stringToHash(propertyName, true), propertyType, propertyValue);
-            } else {
-                throw new RuntimeException(Constants.CACHE_MISS_ERROR);
-            }
-        }
-    }
-
-    /**
-     * @native ts
-     * return parseInt(numberValue);
-     */
-    private Integer parseInteger(String numberValue){
-        return Integer.parseInt(numberValue);
-    }
-
 }

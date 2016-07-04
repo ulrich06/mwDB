@@ -4,14 +4,15 @@ package org.mwg.core.chunk.heap;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.core.CoreConstants;
+import org.mwg.core.chunk.ChunkListener;
+import org.mwg.core.chunk.Stack;
 import org.mwg.core.utility.BufferBuilder;
+import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.Chunk;
 import org.mwg.plugin.ChunkIterator;
 import org.mwg.plugin.ChunkSpace;
 import org.mwg.plugin.ChunkType;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.*;
-import org.mwg.core.utility.PrimitiveHelper;
+import org.mwg.struct.Buffer;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -440,7 +441,20 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         for (int i = 0; i < _values.length; i++) {
             if (_values[i] != null) {
                 if (_values[i].marks() != 0) {
-                    System.out.println(_values[i].chunkType() + "," + _values[i].world() + "," + _values[i].time() + "," + _values[i].id());
+                    switch (_values[i].chunkType()) {
+                        case ChunkType.STATE_CHUNK:
+                            System.out.println("STATE(" + _values[i].world() + "," + _values[i].time() + "," + _values[i].id() + ")->marks->" + _values[i].marks());
+                            break;
+                        case ChunkType.TIME_TREE_CHUNK:
+                            System.out.println("TIME_TREE(" + _values[i].world() + "," + _values[i].time() + "," + _values[i].id() + ")->marks->" + _values[i].marks());
+                            break;
+                        case ChunkType.WORLD_ORDER_CHUNK:
+                            System.out.println("WORLD_ORDER(" + _values[i].world() + "," + _values[i].time() + "," + _values[i].id() + ")->marks->" + _values[i].marks());
+                            break;
+                        case ChunkType.GEN_CHUNK:
+                            System.out.println("GENERATOR(" + _values[i].world() + "," + _values[i].time() + "," + _values[i].id() + ")->marks->" + _values[i].marks());
+                            break;
+                    }
                 }
             }
         }

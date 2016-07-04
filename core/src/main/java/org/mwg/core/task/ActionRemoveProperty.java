@@ -22,7 +22,6 @@ class ActionRemoveProperty implements TaskAction {
             removePropertyFromArray((Object[]) previousResult);
         }
         context.setResult(previousResult);
-        context.next();
     }
 
     private void removePropertyFromArray(Object[] objs) {

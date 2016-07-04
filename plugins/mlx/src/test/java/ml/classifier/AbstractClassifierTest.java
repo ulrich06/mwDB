@@ -1,10 +1,11 @@
 package ml.classifier;
 
 import org.mwg.Callback;
+import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
-import org.mwg.ml.common.AbstractClassifierSlidingWindowManagingNode;
-import org.mwg.ml.common.AbstractSlidingWindowManagingNode;
+import org.mwg.mlx.algorithm.AbstractAnySlidingWindowManagingNode;
+import org.mwg.mlx.algorithm.AbstractClassifierSlidingWindowManagingNode;
 
 /**
  * Created by andre on 5/9/2016.
@@ -82,29 +83,34 @@ public class AbstractClassifierTest {
             false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,};
 
     protected ClassificationJumpCallback runThroughDummyDataset(AbstractClassifierSlidingWindowManagingNode classfierNode){
-        ClassificationJumpCallback cjc = new ClassificationJumpCallback();
+        ClassificationJumpCallback cjc = new ClassificationJumpCallback(new String[]{FEATURE});
 
         for (int i = 0; i < dummyDataset1.length; i++) {
             cjc.value = new double[]{dummyDataset1[i][0]};
             cjc.expectedClass = (int) dummyDataset1[i][1];
             cjc.expectedBootstrap = bootstraps1[i];
-            classfierNode.jump(i, cjc);
+            classfierNode.jump(i, new Callback<Node>() {
+                @Override
+                public void on(Node result) {
+                    cjc.on((AbstractClassifierSlidingWindowManagingNode)result);
+                }
+            });
         }
 
         return cjc;
     }
 
     protected void standardSettings(AbstractMLNode node){
-        node.setProperty(AbstractSlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
-        node.setProperty(AbstractSlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
-        node.setProperty(AbstractSlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.BUFFER_SIZE_KEY, Type.INT, 60);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.LOW_ERROR_THRESH_KEY, Type.DOUBLE, 0.2);
+        node.setProperty(AbstractAnySlidingWindowManagingNode.HIGH_ERROR_THRESH_KEY, Type.DOUBLE, 0.3);
         node.set(AbstractMLNode.FROM, FEATURE);
     }
 
     /**
      * Created by andre on 5/9/2016.
      */
-    protected static class ClassificationJumpCallback implements Callback<AbstractClassifierSlidingWindowManagingNode> {
+    protected static class ClassificationJumpCallback {
 
         final String features[];
 
@@ -112,14 +118,10 @@ public class AbstractClassifierTest {
             this.features = featureNames;
         }
 
-        public ClassificationJumpCallback(){
-            this(new String[]{FEATURE});
-        }
-
         public int errors = 0;
         public double value[] = null;
         public boolean expectedBootstrap = true;
-        public int expectedClass = Integer.MIN_VALUE;
+        public int expectedClass = -10000;
 
         Callback<Boolean> cb = new Callback<Boolean>() {
             @Override
@@ -128,13 +130,14 @@ public class AbstractClassifierTest {
             }
         };
 
-        @Override
         public void on(AbstractClassifierSlidingWindowManagingNode result) {
             for (int i=0;i<features.length;i++){
                 result.set(features[i], value[i]);
             }
             result.learn(expectedClass, cb);
-            if (result.isInBootstrapMode() != expectedBootstrap) {
+            Boolean bootstrapObj = (Boolean)result.get(AbstractClassifierSlidingWindowManagingNode.BOOTSTRAP_MODE_KEY);
+            boolean curBootstrap = (bootstrapObj==null)?true:bootstrapObj;
+            if (curBootstrap != expectedBootstrap) {
                 errors++;
             }
             result.free();

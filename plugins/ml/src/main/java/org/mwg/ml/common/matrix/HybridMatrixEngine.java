@@ -2,6 +2,7 @@ package org.mwg.ml.common.matrix;
 
 import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
 import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
+import org.mwg.ml.common.matrix.operation.PInvSVD;
 
 /**
  * Created by assaad on 08/06/16.
@@ -75,12 +76,16 @@ public class HybridMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix pinv(Matrix mat, boolean invertInPlace) {
-        if(mat.rows()<PINV_LIMIT){
+        /*if(mat.rows()<PINV_LIMIT){
             return jama.pinv(mat,invertInPlace);
         }
         else {
             return blas.pinv(mat,invertInPlace);
-        }
+        }*/
+
+        PInvSVD res = new PInvSVD();
+        res.factor(mat,invertInPlace);
+        return res.getPInv();
     }
 
     @Override
@@ -95,12 +100,13 @@ public class HybridMatrixEngine implements MatrixEngine {
 
     @Override
     public Matrix solveQR(Matrix matA, Matrix matB, boolean workInPlace, TransposeType transB) {
-        if(matA.leadingDimension()<SOLVEQR_LIMIT &&matB.leadingDimension()<SOLVEQR_LIMIT){
+        /*if(matA.leadingDimension()<SOLVEQR_LIMIT &&matB.leadingDimension()<SOLVEQR_LIMIT){
             return jama.solveQR(matA, matB, workInPlace, transB);
         }
         else {
             return blas.solveQR(matA, matB, workInPlace, transB);
-        }
+        }*/
+       return blas.solveQR(matA, matB, workInPlace, transB);
     }
 
     @Override

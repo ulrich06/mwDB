@@ -2,9 +2,12 @@ package org.mwg.ml.profiling;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.*;
-import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.ml.MLPlugin;
+import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
 import org.mwg.ml.common.matrix.Matrix;
 
 /**
@@ -60,7 +63,7 @@ public class GaussianNodeTest {
 
     @Test
     public void test() {
-        final Graph graph = new GraphBuilder().addNodeType(new GaussianMixtureNode.Factory()).withScheduler(new NoopScheduler()).build();
+        final Graph graph = new GraphBuilder().withPlugin(new MLPlugin()).withScheduler(new NoopScheduler()).build();
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {

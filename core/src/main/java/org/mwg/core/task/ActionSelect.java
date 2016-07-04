@@ -24,13 +24,15 @@ class ActionSelect implements TaskAction {
                 if (_filter.select((Node) previousResult)) {
                     context.setResult(previousResult);
                 } else {
+                    ((AbstractNode) previousResult).free();
                     context.setResult(new Node[0]);
                 }
             } else {
-                context.setResult(previousResult); //no map transform
+                context.setUnsafeResult(previousResult); //no map transform
             }
+        } else {
+            context.setUnsafeResult(null);
         }
-        context.next();
     }
 
     private Object[] filterArray(Object[] current) {
@@ -49,6 +51,8 @@ class ActionSelect implements TaskAction {
                 if (_filter.select((Node) current[i])) {
                     filteredResult[cursor] = current[i];
                     cursor++;
+                } else {
+                    ((Node) current[i]).free();
                 }
             } else {
                 onlyContainsNodes = false;

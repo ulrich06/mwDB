@@ -1,26 +1,24 @@
 package ml.classifier;
 
 import org.junit.Test;
-import org.mwg.*;
+import org.mwg.Callback;
+import org.mwg.Graph;
+import org.mwg.GraphBuilder;
 import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.ml.algorithm.classifier.GaussianClassifierNode;
-import org.mwg.ml.algorithm.classifier.GaussianNaiveBayesianNode;
+import org.mwg.mlx.MLXPlugin;
+import org.mwg.mlx.algorithm.classifier.GaussianNaiveBayesianNode;
 
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Created by andre on 4/25/2016.
- */
-public class GaussianNaiveBayesianTest extends AbstractClassifierTest{
+public class GaussianNaiveBayesianTest extends AbstractClassifierTest {
 
     @Test
     public void test() {
         //This test fails if there are too many errors
 
         final Graph graph = new GraphBuilder()
-                .addNodeType(new GaussianNaiveBayesianNode.Factory())
+                .withPlugin(new MLXPlugin())
                 .withScheduler(new NoopScheduler())
-                .addNodeType(new GaussianClassifierNode.Factory())
                 .build();
         graph.connect(new Callback<Boolean>() {
             @Override
@@ -30,7 +28,7 @@ public class GaussianNaiveBayesianTest extends AbstractClassifierTest{
                 ClassificationJumpCallback cjc = runThroughDummyDataset(gaussianNBNode);
                 gaussianNBNode.free();
                 graph.disconnect(null);
-                assertTrue("Errors: "+cjc.errors, cjc.errors<=3);
+                assertTrue(cjc.errors <= 3);
             }
         });
     }

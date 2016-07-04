@@ -39,6 +39,7 @@ class ActionTraverseOrKeep implements TaskAction {
                 } else {
                     toLoad.add(loop.id()); //TODO change this quick and dirty solution
                 }
+                loop.free();
             }
             final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
             final Node[] resultNodes = new Node[toLoad.size()]; //toDo change abstractNode type
@@ -55,12 +56,11 @@ class ActionTraverseOrKeep implements TaskAction {
             deferCounter.then(new Job() {
                 @Override
                 public void run() {
-                    context.setResult(resultNodes);
-                    context.next();
+                    context.setUnsafeResult(resultNodes);
                 }
             });
         } else {
-            context.next();
+            context.setUnsafeResult(null);
         }
     }
 
@@ -79,6 +79,7 @@ class ActionTraverseOrKeep implements TaskAction {
                 } else {
                     toLoad.add(loop.id()); //TODO change this quick and dirty solution
                 }
+                loop.free();
             }
         }
     }

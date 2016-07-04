@@ -29,24 +29,23 @@ class ActionMath implements TaskAction {
             variables.put("PI", Math.PI);
             variables.put("TRUE", 1.0);
             variables.put("FALSE", 0.0);
-            result.add(_engine.eval((Node) previous, variables));
+            result.add(_engine.eval((Node) previous, context, variables));
         } else if (previous instanceof Object[]) {
-            arrayEval((Object[]) previous, result);
+            arrayEval((Object[]) previous, result, context);
         }
         context.setResult(result.toArray(new Double[result.size()]));
-        context.next();
     }
 
-    void arrayEval(Object[] objs, List<Double> result) {
+    void arrayEval(Object[] objs, List<Double> result, TaskContext context) {
         for (int i = 0; i < objs.length; i++) {
             if (objs[i] instanceof AbstractNode) {
                 Map<String, Double> variables = new HashMap<String, Double>();
                 variables.put("PI", Math.PI);
                 variables.put("TRUE", 1.0);
                 variables.put("FALSE", 0.0);
-                result.add(_engine.eval((Node) objs[i], variables));
+                result.add(_engine.eval((Node) objs[i], context, variables));
             } else if (objs[i] instanceof Object[]) {
-                arrayEval((Object[]) objs[i], result);
+                arrayEval((Object[]) objs[i], result, context);
             }
         }
     }

@@ -2,9 +2,6 @@ package org.mwg.ml.common;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.ml.common.matrix.Matrix;
-import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.ml.common.matrix.blassolver.blas.F2JBlas;
 import org.mwg.ml.common.matrix.operation.PolynomialFit;
 
 /**

@@ -2,18 +2,21 @@ package org.mwg.core.chunk;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.Type;
 import org.mwg.Constants;
 import org.mwg.Graph;
+import org.mwg.Type;
 import org.mwg.core.CoreConstants;
-import org.mwg.core.utility.BufferBuilder;
-import org.mwg.plugin.Chunk;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.heap.HeapStateChunk;
 import org.mwg.core.chunk.heap.HeapChunk;
+import org.mwg.core.chunk.heap.HeapStateChunk;
 import org.mwg.core.chunk.offheap.*;
+import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.core.utility.Unsafe;
+import org.mwg.plugin.Chunk;
+import org.mwg.struct.Buffer;
+import org.mwg.struct.LongLongArrayMap;
+import org.mwg.struct.LongLongMap;
+import org.mwg.struct.StringLongMap;
 
 public class StateChunkTest implements ChunkListener {
 

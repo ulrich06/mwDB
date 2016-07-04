@@ -2,9 +2,12 @@ package org.mwg.core.task;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mwg.task.*;
+import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskFunctionConditional;
+
+import static org.mwg.task.Actions.*;
 
 public class ActionIfThenTest extends AbstractActionTest {
 
@@ -13,37 +16,34 @@ public class ActionIfThenTest extends AbstractActionTest {
         initGraph();
         final boolean[] result = {false, false};
 
-        Task modifyResult0 = graph.newTask()
-                .then(new Action() {
-                    @Override
-                    public void eval(TaskContext context) {
-                        result[0] = true;
-                    }
-                });
+        Task modifyResult0 = then(new Action() {
+            @Override
+            public void eval(TaskContext context) {
+                result[0] = true;
+            }
+        });
 
-        Task modifyResult1 = graph.newTask()
-                .then(new Action() {
-                    @Override
-                    public void eval(TaskContext context) {
-                        result[0] = true;
-                    }
-                });
+        Task modifyResult1 = then(new Action() {
+            @Override
+            public void eval(TaskContext context) {
+                result[0] = true;
+            }
+        });
 
 
-        graph.newTask()
-                .ifThen(new TaskFunctionConditional() {
-                    @Override
-                    public boolean eval(TaskContext context) {
-                        return true;
-                    }
-                }, modifyResult0).execute();
+        new CoreTask().ifThen(new TaskFunctionConditional() {
+            @Override
+            public boolean eval(TaskContext context) {
+                return true;
+            }
+        }, modifyResult0).execute(graph,null);
 
-        graph.newTask().ifThen(new TaskFunctionConditional() {
+        new CoreTask().ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return false;
             }
-        }, modifyResult0).execute();
+        }, modifyResult0).execute(graph,null);
 
         Assert.assertEquals(true, result[0]);
         Assert.assertEquals(false, result[1]);
@@ -53,14 +53,14 @@ public class ActionIfThenTest extends AbstractActionTest {
     @Test
     public void testChainAfterIfThen() {
         initGraph();
-        Task addVarInContext = graph.newTask().from(5).asVar("variable").then(new Action() {
+        Task addVarInContext = inject(5).asVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 //empty action
             }
         });
 
-        graph.newTask().ifThen(new TaskFunctionConditional() {
+        new CoreTask().ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;
@@ -71,14 +71,14 @@ public class ActionIfThenTest extends AbstractActionTest {
                 Integer val = (Integer) context.result();
                 Assert.assertEquals(5, (int) val);
             }
-        }).execute();
+        }).execute(graph,null);
         removeGraph();
     }
 
     @Test
     public void accessContextVariableInThenTask() {
         initGraph();
-        Task accessVar = graph.newTask().then(new Action() {
+        Task accessVar = then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Integer variable = (Integer) context.variable("variable");
@@ -86,12 +86,12 @@ public class ActionIfThenTest extends AbstractActionTest {
             }
         });
 
-        graph.newTask().from(5).asVar("variable").ifThen(new TaskFunctionConditional() {
+        inject(5).asVar("variable").ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;
             }
-        }, accessVar).execute();
+        }, accessVar).execute(graph,null);
         removeGraph();
     }
 }

@@ -19,7 +19,7 @@ import org.mwg.ml.common.matrix.SVDDecompose;
  * rank can be computed from this decomposition.
  */
 
-public class SVD implements SVDDecompose {
+class SVD implements SVDDecompose {
 
 /* ------------------------
    Class variables

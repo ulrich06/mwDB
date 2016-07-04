@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kevoree.mwg</groupId>
     <artifactId>mwg</artifactId>
     <packaging>pom</packaging>
-    <version>3-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
     <name>mwg</name>
     <url>https://github.com/kevoree-modeling/mwDB</url>
     <description>Many-World Graph Database</description>
@@ -29,7 +28,7 @@
     </parent>
 
     <properties>
-        <java2typescript.plugin.version>57</java2typescript.plugin.version>
+        <java2typescript.plugin.version>63</java2typescript.plugin.version>
     </properties>
 
     <developers>
@@ -114,11 +113,10 @@
         <module>plugins/importer</module>
         <module>plugins/leveldb</module>
 
-
         <module>plugins/ml</module>
         <module>plugins/mljs</module>
         <module>plugins/mlx</module>
-
+        <!-- <module>plugins/mlxjs</module> -->
 
         <module>plugins/rest</module>
         <module>plugins/websocket</module>
@@ -150,7 +148,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
-                    <source>1.6</source>
+                    <source>1.8</source>
                     <target>1.8</target>
                     <compilerArguments>
                         <profile>compact1</profile>

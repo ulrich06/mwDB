@@ -27,7 +27,6 @@ class ActionRemove implements TaskAction {
             }
         }
         context.setResult(previousResult);
-        context.next();
     }
 
     private void removeFromArray(final Object[] objs, final String relName, final Node toRemove) {

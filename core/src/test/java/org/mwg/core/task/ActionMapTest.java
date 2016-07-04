@@ -7,13 +7,14 @@ import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
 
+import static org.mwg.task.Actions.fromIndexAll;
+
 public class ActionMapTest extends AbstractActionTest {
 
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
-                .fromIndexAll("nodes")
+        fromIndexAll("nodes")
                 .map(new TaskFunctionMap() {
                     @Override
                     public Object map(Node node) {
@@ -29,7 +30,7 @@ public class ActionMapTest extends AbstractActionTest {
                         Assert.assertEquals(names[2], "root");
                     }
                 })
-                .execute();
+                .execute(graph,null);
         removeGraph();
     }
 

@@ -16,7 +16,7 @@ import org.mwg.ml.common.matrix.Matrix;
  * linear equations.  This will fail if isNonsingular() returns false.
  */
 
-public class LU {
+class LU {
 
 /* ------------------------
    Class variables

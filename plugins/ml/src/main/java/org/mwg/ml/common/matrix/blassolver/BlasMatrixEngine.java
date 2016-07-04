@@ -6,7 +6,6 @@ import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.TransposeType;
 import org.mwg.ml.common.matrix.blassolver.blas.Blas;
 import org.mwg.ml.common.matrix.blassolver.blas.NetlibBlas;
-import org.mwg.ml.common.matrix.operation.PInvSVD;
 
 public class BlasMatrixEngine implements MatrixEngine {
 

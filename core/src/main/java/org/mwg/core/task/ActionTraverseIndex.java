@@ -80,7 +80,6 @@ class ActionTraverseIndex implements TaskAction {
                         System.arraycopy(resultNodes, 0, newResult, 0, cursor.get());
                         context.setResult(newResult);
                     }
-                    context.next();
                 }
             });
 

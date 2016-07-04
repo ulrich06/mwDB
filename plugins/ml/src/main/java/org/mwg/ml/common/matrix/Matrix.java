@@ -1,10 +1,8 @@
 package org.mwg.ml.common.matrix;
 
 
-import org.mwg.ml.common.matrix.blassolver.BlasMatrixEngine;
-import org.mwg.ml.common.matrix.jamasolver.JamaMatrixEngine;
-
-import java.util.BitSet;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.Random;
 
 //Most of the time we will be using column based matrix due to blas.
@@ -160,6 +158,7 @@ public class Matrix {
     public static MatrixEngine defaultEngine() {
         if (_defaultEngine == null) {
             _defaultEngine = new HybridMatrixEngine();
+
         }
         return _defaultEngine;
     }
@@ -320,44 +319,46 @@ public class Matrix {
     }
 
 
-    /*
-    public static Matrix fromPartialPivots(int[] pivots, boolean transposed) {
-        int[] permutations = new int[pivots.length];
-        for (int i = 0; i < pivots.length; i++) {
-            permutations[i] = i;
-        }
+    /**
+     * @ignore ts
+     */
+    public static Matrix loadFromCsv(String csvfile){
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(csvfile));
+            String line;
+            String[] data;
+            int row=0;
+            int column=0;
 
-        for (int i = 0; i < pivots.length; i++) {
-            int j = pivots[i] - 1;
-            if (j == i)
-                continue;
-            int tmp = permutations[i];
-            permutations[i] = permutations[j];
-            permutations[j] = tmp;
-        }
-
-        BitSet bitset = new BitSet();
-        for (int i : permutations) {
-            if (bitset.get(i))
-                throw new IllegalArgumentException("non-unique permutations: " + i);
-            bitset.set(i);
-        }
-
-        Matrix m = new Matrix(null, permutations.length, permutations.length);
-
-        double x;
-        for (int i = 0; i < permutations.length; i++) {
-            for (int j = 0; j < permutations.length; j++) {
-                if ((!transposed && permutations[i] == j) || (transposed && permutations[j] == i)) {
-                    x = 1;
-                } else {
-                    x = 0;
-                }
-                m.set(i, j, x);
+            while ((line = br.readLine()) != null) {
+                data = line.split(",");
+                column=data.length;
+                row++;
             }
+
+            Matrix X = new Matrix(null, row, column);
+
+            int i = 0;
+
+            br = new BufferedReader(new FileReader(csvfile));
+            while ((line = br.readLine()) != null) {
+                line = line.replace('"', ' ');
+                data = line.split(",");
+                int j = 0;
+                for (String k : data) {
+                    double d = Double.parseDouble(k);
+                    X.set(i, j, d);
+                    j++;
+                }
+                i++;
+            }
+            return X;
         }
-        return m;
-    }*/
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
     public static boolean testDimensionsAB(TransposeType transA, TransposeType transB, Matrix matA, Matrix matB) {
         if (transA.equals(TransposeType.NOTRANSPOSE)) {

@@ -6,11 +6,15 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.AbstractMLNode;
 import org.mwg.ml.ProfilingNode;
+import org.mwg.ml.common.NDimentionalArray;
 import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.operation.MultivariateNormalDistribution;
-import org.mwg.plugin.NodeFactory;
+import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.NodeState;
 import org.mwg.task.*;
+
+import static org.mwg.task.Actions.newTask;
+import static org.mwg.task.Actions.setTime;
 
 public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode {
 
@@ -45,40 +49,21 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
     private static final String INTERNAL_MIN_KEY = "_min";
     private static final String INTERNAL_MAX_KEY = "_max";
 
-
-    //Factory of the class integrated
-    public static class Factory implements NodeFactory {
-
-        @Override
-        public String name() {
-            return NAME;
-        }
-
-        @Override
-        public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
-            return new GaussianMixtureNode(world, time, id, graph, initialResolution);
-        }
-    }
-
     public GaussianMixtureNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
-    
+
+    private static final Enforcer enforcer = new Enforcer()
+            .asIntWithin(LEVEL, 0, 1000)
+            .asIntWithin(WIDTH, 1, 1000)
+            .asPositiveDouble(COMPRESSION_FACTOR)
+            .asPositiveDouble(THRESHOLD)
+            .asDoubleArray(PRECISION);
+
     @Override
     public void setProperty(String propertyName, byte propertyType, Object propertyValue) {
-        if (propertyName.equals(LEVEL)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(WIDTH)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.INT);
-        } else if (propertyName.equals(COMPRESSION_FACTOR)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(THRESHOLD)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE);
-        } else if (propertyName.equals(PRECISION)) {
-            super.setPropertyWithType(propertyName, propertyType, propertyValue, Type.DOUBLE_ARRAY);
-        } else {
-            super.setProperty(propertyName, propertyType, propertyValue);
-        }
+        enforcer.check(propertyName, propertyType, propertyValue);
+        super.setProperty(propertyName, propertyType, propertyValue);
     }
 
     @Override
@@ -155,43 +140,33 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         final double threshold = resolved.getFromKeyWithDefault(THRESHOLD, THRESHOLD_DEF);
 
 
-        Task creationTask = graph().newTask().then(new Action() {
-            @Override
-            public void eval(TaskContext context) {
-                GaussianMixtureNode node = (GaussianMixtureNode) context.variable("starterNode");
-                //System.out.println("Vector: " + values[0] + " " + values[1]);
-                node.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
-            }
-        });
-
-
-        Task traverse = graph().newTask();
-        traverse.fromVar("starterNode").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
+        Task traverse = newTask();
+        traverse.asVar("parent").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Node[] result = (Node[]) context.result();
-                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("starterNode");
+                GaussianMixtureNode parent = (GaussianMixtureNode) context.variable("parent");
                 GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
-                    context.setVariable("continueLoop", true);
-                    context.setVariable("starterNode", resultChild);
+                    context.setResult(resultChild);
                 } else {
-                    context.setVariable("continueLoop", false);
+                    parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
+                    context.setResult(null);
                 }
-            }
-        })
-                .ifThen(new TaskFunctionConditional() {
-                    @Override
-                    public boolean eval(TaskContext context) {
-                        return (Boolean) context.variable("continueLoop");
-                    }
-                }, traverse);
 
-        Task mainTask = graph().newTask().from(this).asVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
-        mainTask.executeThen(new Action() {
+            }
+        }).ifThen(new TaskFunctionConditional() {
             @Override
-            public void eval(TaskContext context) {
+            public boolean eval(TaskContext context) {
+                return (context.result() != null);
+            }
+        }, traverse);
+
+        Task mainTask = setTime(time()).setWorld(world()).inject(this).executeSubTask(traverse);
+        mainTask.execute(graph(), new Callback<Object>() {
+            @Override
+            public void on(Object result) {
                 if (callback != null) {
                     callback.on(true);
                 }
@@ -465,10 +440,10 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         //At this point we have min and max at least with 2xerr of difference
 
-        Task deepTraverseTask = graph().newTask();
+        Task deepTraverseTask = setTime(time()).setWorld(world());
         final int parentLevel = this.getLevel();
 
-        deepTraverseTask.from(new Node[]{this});
+        deepTraverseTask.inject(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
             deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
             final int finalI = i;
@@ -507,11 +482,13 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                         distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                     }
                 }
+                context.setResult(context.result());
                 callback.on(new ProbaDistribution(totals, distributions, globalTotal));
+
             }
         });
 
-        deepTraverseTask.execute();
+        deepTraverseTask.execute(graph(), null);
     }
 
 
@@ -533,9 +510,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         }
         final double[] err = initialPrecision;
 
-        Task deepTraverseTask = graph().newTask();
+        Task deepTraverseTask = setTime(time()).setWorld(world());
 
-        deepTraverseTask.from(new Node[]{this});
+        deepTraverseTask.inject(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
             deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
         }
@@ -567,27 +544,26 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                         distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                     }
                 }
+                context.setResult(context.result());
                 callback.on(new ProbaDistribution(totals, distributions, globalTotal));
             }
         });
 
-        deepTraverseTask.execute();
+        deepTraverseTask.execute(graph(), null);
     }
 
     @Override
     public String toString() {
-        return (String) get("name");
-//       double[] avg = getAvg();
-//        StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
-//        if (avg != null) {
-//            NumberFormat formatter = new DecimalFormat("#0.0");
-//            for (int i = 0; i < avg.length; i++) {
-//                sb.append(formatter.format(avg[i]));
-//                sb.append(" ");
-//            }
-//            sb.append(", total: ").append(getTotal());
-//        }
-//        return sb.toString();
+        return NAME;
+     /*  double[] avg = getAvg();
+        StringBuilder sb = new StringBuilder("[L-" + getLevel() + "]: ");
+        if (avg != null) {
+            for (int i = 0; i < avg.length; i++) {
+                sb.append(avg[i]).append(" ");
+            }
+            sb.append(", total: ").append(getTotal());
+        }
+        return sb.toString();*/
     }
 
 
@@ -906,5 +882,64 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
         }
         return Math.sqrt(max);
+    }
+
+
+    /**
+     * @ignore ts
+     */
+    public void predictValue(double[] temp, int[] pos, int level, Callback<double[]> callback) {
+        if (callback != null) {
+//            double[] values = new double[temp.length];
+//            System.arraycopy(temp, 0, values, 0, temp.length);
+
+            NodeState resolved = this._resolver.resolveState(this, true);
+            double[] initialPrecision = (double[]) resolved.getFromKey(PRECISION);
+            if (initialPrecision == null) {
+                initialPrecision = new double[temp.length];
+                for (int i = 0; i < temp.length; i++) {
+                    initialPrecision[i] = 1;
+                }
+            }
+            final double[] err = initialPrecision;
+            double[] min = getMin();
+            double[] max = getMax();
+
+
+            double[] minsearch = new double[temp.length];
+            double[] maxsearch = new double[temp.length];
+
+            for (int i = 0; i < temp.length; i++) {
+                minsearch[i] = temp[i] - Math.sqrt(err[i]);
+                maxsearch[i] = temp[i] + Math.sqrt(err[i]);
+            }
+
+            for (int i = 0; i < pos.length; i++) {
+                minsearch[pos[i]] = min[pos[i]];
+                maxsearch[pos[i]] = max[pos[i]];
+            }
+
+            query(level, minsearch, maxsearch, new Callback<ProbaDistribution>() {
+                @Override
+                public void on(ProbaDistribution probabilities) {
+                    ProbaDistribution2 newCalc = new ProbaDistribution2(probabilities.total, probabilities.distributions, probabilities.global);
+                    double[] best = new double[temp.length];
+                    System.arraycopy(temp, 0, best, 0, temp.length);
+                    if (probabilities.distributions.length == 0) {
+                        double[] avg = getAvg();
+                        for (int i = 0; i < pos.length; i++) {
+                            best[pos[i]] = avg[i];
+                        }
+                    } else {
+                        NDimentionalArray temp = newCalc.calculate(minsearch, maxsearch, err, err, null);
+                        best[pos[0]] = temp.getBestPrediction(pos[0]);
+                    }
+                    callback.on(best);
+
+                }
+            });
+
+
+        }
     }
 }

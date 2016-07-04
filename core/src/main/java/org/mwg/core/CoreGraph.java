@@ -1,21 +1,21 @@
 package org.mwg.core;
 
 import org.mwg.*;
+import org.mwg.core.chunk.GenChunk;
+import org.mwg.core.chunk.StateChunk;
+import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.core.task.CoreTask;
-import org.mwg.core.task.CoreTaskActionRegistry;
-import org.mwg.core.task.CoreTaskContext;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.CoreDeferCounter;
-import org.mwg.plugin.*;
-import org.mwg.struct.*;
-import org.mwg.core.chunk.heap.ArrayLongLongMap;
-import org.mwg.core.chunk.*;
 import org.mwg.core.utility.PrimitiveHelper;
-import org.mwg.task.Task;
-import org.mwg.task.TaskAction;
-import org.mwg.task.TaskActionRegistry;
-import org.mwg.task.TaskContext;
+import org.mwg.plugin.*;
+import org.mwg.struct.Buffer;
+import org.mwg.struct.BufferIterator;
+import org.mwg.struct.LongLongMap;
+import org.mwg.struct.LongLongMapCallBack;
+import org.mwg.task.TaskActionFactory;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class CoreGraph implements org.mwg.Graph {
@@ -28,9 +28,9 @@ class CoreGraph implements org.mwg.Graph {
 
     private final Resolver _resolver;
 
-    private final NodeFactory[] _factories;
+    private final java.util.Map<Long, NodeFactory> _nodeTypes;
 
-    private final LongLongMap _factoryNames;
+    private final java.util.Map<String, TaskActionFactory> _taskActions;
 
     boolean offHeapBuffer = false;
 
@@ -42,9 +42,7 @@ class CoreGraph implements org.mwg.Graph {
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
 
-    private TaskActionRegistry _registry;
-
-    CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, NodeFactory[] p_factories) {
+    CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, Plugin[] p_plugins) {
         //subElements set
         this._storage = p_storage;
         this._space = p_space;
@@ -52,18 +50,33 @@ class CoreGraph implements org.mwg.Graph {
         this._scheduler = p_scheduler;
         this._resolver = p_resolver;
 
-        this._factories = p_factories;
-        //will be initialise at the connection
-        if (this._factories != null) {
-            this._factoryNames = new ArrayLongLongMap(null, this._factories.length, null);
+
+        //init default taskActions
+        this._taskActions = new HashMap<String, TaskActionFactory>();
+        CoreTask.fillDefault(this._taskActions);
+
+        if (p_plugins != null) {
+            this._nodeTypes = new HashMap<Long, NodeFactory>();
+            for (int i = 0; i < p_plugins.length; i++) {
+                Plugin loopPlugin = p_plugins[i];
+                String[] plugin_names = loopPlugin.nodeTypes();
+                for (int j = 0; j < plugin_names.length; j++) {
+                    String plugin_name = plugin_names[j];
+                    this._nodeTypes.put(_resolver.stringToHash(plugin_name, false), loopPlugin.nodeType(plugin_name));
+                }
+                String[] task_names = loopPlugin.taskActionTypes();
+                for (int j = 0; j < task_names.length; j++) {
+                    String task_name = task_names[j];
+                    this._taskActions.put(task_name, loopPlugin.taskActionType(task_name));
+                }
+            }
         } else {
-            this._factoryNames = null;
+            this._nodeTypes = null;
         }
 
         //variables init
         this._isConnected = new AtomicBoolean(false);
         this._lock = new AtomicBoolean(false);
-        this._registry = new CoreTaskActionRegistry();
     }
 
     @Override
@@ -151,13 +164,17 @@ class CoreGraph implements org.mwg.Graph {
     }
 
     public NodeFactory factoryByCode(long code) {
-        if (_factoryNames != null && code != Constants.NULL_LONG) {
-            long resolvedFactoryIndex = _factoryNames.get(code);
-            if (resolvedFactoryIndex != Constants.NULL_LONG) {
-                return _factories[(int) resolvedFactoryIndex];
-            } else {
-                return null;
-            }
+        if (_nodeTypes != null && code != Constants.NULL_LONG) {
+            return _nodeTypes.get(code);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public TaskActionFactory taskAction(String taskActionName) {
+        if (this._taskActions != null && taskActionName != null) {
+            return _taskActions.get(taskActionName);
         } else {
             return null;
         }
@@ -256,13 +273,6 @@ class CoreGraph implements org.mwg.Graph {
                                             //init the resolver
                                             selfPointer._resolver.init(selfPointer);
 
-                                            final NodeFactory[] localFactories = selfPointer._factories;
-                                            if (localFactories != null) {
-                                                for (int i = 0; i < localFactories.length; i++) {
-                                                    final long encodedFactoryKey = selfPointer._resolver.stringToHash(localFactories[i].name(), false); //type are not inserted into the global dictionary
-                                                    selfPointer._factoryNames.put(encodedFactoryKey, i);
-                                                }
-                                            }
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                             noError = false;
@@ -351,16 +361,6 @@ class CoreGraph implements org.mwg.Graph {
         } else {
             return BufferBuilder.newHeapBuffer();
         }
-    }
-
-    @Override
-    public Task newTask() {
-        return new CoreTask(this);
-    }
-
-    @Override
-    public TaskContext newTaskContext() {
-        return new CoreTaskContext(null, null, this, new TaskAction[0]);
     }
 
     @Override
@@ -471,6 +471,10 @@ class CoreGraph implements org.mwg.Graph {
                             }
                         }
                     });
+                } else {
+                    if (PrimitiveHelper.isDefined(callback)) {
+                        callback.on(false);
+                    }
                 }
             }
         }, false);
@@ -677,11 +681,6 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public ChunkSpace space() {
         return _space;
-    }
-
-    @Override
-    public TaskActionRegistry actions() {
-        return _registry;
     }
 
     @Override

@@ -4,12 +4,12 @@
     <groupId>org.kevoree.mwg</groupId>
     <artifactId>corejs</artifactId>
     <name>mwg :: CoreJs</name>
-    <version>3-SNAPSHOT</version>
+    <version>6-SNAPSHOT</version>
 
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
-        <version>3-SNAPSHOT</version>
+        <version>6-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -77,7 +77,7 @@
                             <copyJRE>false</copyJRE>
                             <copyJunit>true</copyJunit>
                             <moduleImports>
-                                <moduleImport>../../../generated-sources/src/main/core.ts</moduleImport>
+                                <moduleImport>../generated-sources/core.ts</moduleImport>
                             </moduleImports>
                             <source>${basedir}/../core/src/test/java</source>
                             <target>${basedir}/target/generated-test-sources</target>

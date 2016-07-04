@@ -4,10 +4,14 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
-import org.mwg.task.*;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.core.task.CoreTask;
+import org.mwg.task.*;
 
 import java.util.Arrays;
+
+import static org.mwg.task.Actions.inject;
+import static org.mwg.task.Actions.then;
 
 public class TestTMP {
 
@@ -48,7 +52,7 @@ public class TestTMP {
 
                 n1.add("fils", n4);
 
-                Task creationTask = graph.newTask().then(new Action() {
+                Task creationTask = then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Node node = (Node) context.variable("starterNode");
@@ -58,7 +62,7 @@ public class TestTMP {
 
 
                 final int[] recursionNb = new int[]{0};
-                Task traverse = graph.newTask();
+                Task traverse = new CoreTask();
                 traverse.then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -99,14 +103,14 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = graph.newTask().from(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
+                Task mainTask = inject(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         //call callbask
                     }
                 }).executeSubTask(creationTask);
 
-                mainTask.execute();
+                mainTask.execute(graph,null);
 
 
             }

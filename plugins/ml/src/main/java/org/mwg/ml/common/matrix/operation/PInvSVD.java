@@ -4,9 +4,6 @@ import org.mwg.ml.common.matrix.Matrix;
 import org.mwg.ml.common.matrix.SVDDecompose;
 import org.mwg.ml.common.matrix.TransposeType;
 
-/**
- * Created by assaad on 24/03/16.
- */
 public class PInvSVD {
 
     private SVDDecompose _svd;

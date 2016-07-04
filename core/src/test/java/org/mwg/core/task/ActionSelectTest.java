@@ -13,7 +13,7 @@ public class ActionSelectTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
@@ -27,14 +27,14 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result())[0].get("name"), "root");
                     }
                 })
-                .execute();
+                .execute(graph,null);
         removeGraph();
     }
 
     @Test
     public void test2() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
@@ -48,14 +48,14 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 0);
                     }
                 })
-                .execute();
+                .execute(graph,null);
         removeGraph();
     }
 
     @Test
     public void test3() {
         initGraph();
-        graph.newTask()
+        new CoreTask()
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
@@ -69,7 +69,7 @@ public class ActionSelectTest extends AbstractActionTest {
                         Assert.assertEquals(((Node[]) context.result()).length, 3);
                     }
                 })
-                .execute();
+                .execute(graph,null);
         removeGraph();
     }
 

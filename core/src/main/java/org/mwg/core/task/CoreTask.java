@@ -4,24 +4,21 @@ import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.core.CoreConstants;
+import org.mwg.core.task.math.CoreMathExpressionEngine;
+import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class CoreTask implements org.mwg.task.Task {
 
-    private final Graph _graph;
     private TaskAction[] _actions = new TaskAction[10];
     private int _actionCursor = 0;
-
-    public CoreTask(final Graph p_graph) {
-        this._graph = p_graph;
-    }
 
     private void addAction(TaskAction task) {
         if (_actionCursor == _actions.length) {
@@ -111,7 +108,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (inputValue == null) {
             throw new RuntimeException("inputValue should not be null");
         }
-        addAction(new ActionSetVar(variableName,inputValue));
+        addAction(new ActionSetVar(variableName, inputValue));
         return this;
     }
 
@@ -190,12 +187,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task from(Object inputValue) {
+    public final org.mwg.task.Task inject(Object inputValue) {
         if (inputValue == null) {
             throw new RuntimeException("inputValue should not be null");
 
         }
-        addAction(new ActionFrom(protect(inputValue)));
+        addAction(new ActionInject(inputValue));
         return this;
     }
 
@@ -232,34 +229,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (p_action == null) {
             throw new RuntimeException("action should not be null");
         }
-        addAction(new ActionWrapper(p_action, true));
-        return this;
-    }
-
-    @Override
-    public final org.mwg.task.Task thenAsync(Action p_action) {
-        if (p_action == null) {
-            throw new RuntimeException("action should not be null");
-        }
-        addAction(new ActionWrapper(p_action, false));
-        return this;
-    }
-
-    @Override
-    public final <T> org.mwg.task.Task foreachThen(final Callback<T> action) {
-        if (action == null) {
-            throw new RuntimeException("action should not be null");
-        }
-        Task task = _graph.newTask().then(new Action() {
-            @Override
-            public void eval(org.mwg.task.TaskContext context) {
-                Object previousResult = context.result();
-                if (previousResult != null) {
-                    action.on((T) previousResult);
-                }
-            }
-        });
-        foreach(task);
+        addAction(new ActionWrapper(p_action));
         return this;
     }
 
@@ -287,56 +257,24 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-    @Override
-    public final void execute() {
-        executeThenAsync(null, null, null);
-    }
 
     @Override
-    public void executeWith(TaskContext initialContext) {
-        executeThenAsync(initialContext, null, null);
-    }
-
-    @Override
-    public final void executeThen(final Action p_action) {
-        executeThenAsync(null, null, new Action() {
-            @Override
-            public void eval(TaskContext context) {
-                p_action.eval(new TaskContextWrapper(context));
-                context.next();
+    public void executeWith(Graph graph, TaskContext parentContext, Object initialResult, Callback<Object> result) {
+        if (_actionCursor == 0) {
+            if (result != null) {
+                result.on(protect(graph,initialResult));
             }
-        });
-    }
-
-    @Override
-    public final void executeThenAsync(final org.mwg.task.TaskContext parent, final Object initialResult, final Action p_finalAction) {
-        final TaskAction[] final_actions = new TaskAction[_actionCursor + 2];
-        System.arraycopy(_actions, 0, final_actions, 0, _actionCursor);
-        if (p_finalAction != null) {
-            final_actions[_actionCursor] = new ActionWrapper(p_finalAction, false);
         } else {
-            final_actions[_actionCursor] = new ActionNoop();
+            final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, _actionCursor, result);
+            _actions[0].eval(context);
         }
-        final_actions[_actionCursor + 1] = new TaskAction() {
-            @Override
-            public void eval(org.mwg.task.TaskContext context) {
-                context.clean();
-            }
-        };
-        final org.mwg.task.TaskContext context = new CoreTaskContext(parent, protect(initialResult), _graph, final_actions);
-        if (parent != null) {
-            context.setWorld(parent.world());
-            context.setTime(parent.time());
-        }
-        _graph.scheduler().dispatch(new Job() {
-            @Override
-            public void run() {
-                TaskAction first = final_actions[0];
-                first.eval(context);
-            }
-        });
+
     }
 
+    @Override
+    public void execute(Graph graph, Callback<Object> result) {
+        executeWith(graph, null, null, result);
+    }
 
     @Override
     public Task action(String name, String flatParams) {
@@ -346,56 +284,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (flatParams == null) {
             throw new RuntimeException("flatParams should not be null");
         }
-        TaskActionFactory actionFactory = _graph.actions().get(name);
-        if (actionFactory == null) {
-            throw new RuntimeException("Unknown task action: " + name);
-        }
-        int paramsCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
-        String[] params = new String[paramsCapacity];
-        int paramsIndex = 0;
-        int cursor = 0;
-        int flatSize = flatParams.length();
-        int previous = 0;
-        while (cursor < flatSize) {
-            char current = flatParams.charAt(cursor);
-            if (current == Constants.QUERY_SEP) {
-                String param = flatParams.substring(previous, cursor);
-                if (param.length() > 0) {
-                    if (paramsIndex >= paramsCapacity) {
-                        int newParamsCapacity = paramsCapacity * 2;
-                        String[] newParams = new String[newParamsCapacity];
-                        System.arraycopy(params, 0, newParams, 0, paramsCapacity);
-                        params = newParams;
-                        paramsCapacity = newParamsCapacity;
-                    }
-                    params[paramsIndex] = param;
-                    paramsIndex++;
-                }
-                previous = cursor + 1;
-            }
-            cursor++;
-        }
-        //add last param
-        String param = flatParams.substring(previous, cursor);
-        if (param.length() > 0) {
-            if (paramsIndex >= paramsCapacity) {
-                int newParamsCapacity = paramsCapacity * 2;
-                String[] newParams = new String[newParamsCapacity];
-                System.arraycopy(params, 0, newParams, 0, paramsCapacity);
-                params = newParams;
-                paramsCapacity = newParamsCapacity;
-            }
-            params[paramsIndex] = param;
-            paramsIndex++;
-        }
-        //schrink
-        if (paramsIndex < params.length) {
-            String[] shrinked = new String[paramsIndex];
-            System.arraycopy(params, 0, shrinked, 0, paramsIndex);
-            params = shrinked;
-        }
-        //add the action to the action
-        addAction(actionFactory.create(params));
+        addAction(new ActionPlugin(name, flatParams));
         return this;
     }
 
@@ -461,15 +350,15 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-    private Object protect(Object input) {
+    public static Object protect(final Graph graph, final Object input) {
         if (input instanceof AbstractNode) {
-            return _graph.cloneNode((Node) input);
+            return graph.cloneNode((Node) input);
         } else if (input instanceof Object[]) {
             Object[] casted = (Object[]) input;
             Object[] cloned = new Object[casted.length];
             boolean isAllNode = true;
             for (int i = 0; i < casted.length; i++) {
-                cloned[i] = protect(casted[i]);
+                cloned[i] = protect(graph, casted[i]);
                 isAllNode = isAllNode && (cloned[i] instanceof AbstractNode);
             }
             if (isAllNode) {
@@ -496,7 +385,7 @@ public class CoreTask implements org.mwg.task.Task {
      * return input;
      * }
      */
-    private Object protectIterable(Object input) {
+    private static Object protectIterable(Object input) {
         if (input instanceof Collection) {
             Collection casted = (Collection) input;
             Object[] flat = new Object[casted.size()];
@@ -515,18 +404,6 @@ public class CoreTask implements org.mwg.task.Task {
     @Override
     public Task newNode() {
         addAction(new ActionNewNode());
-        return this;
-    }
-
-    @Override
-    public Task set(String propertyName, String variableNameToSet) {
-        if (propertyName == null) {
-            throw new RuntimeException("propertyName should not be null");
-        }
-        if (variableNameToSet == null) {
-            throw new RuntimeException("variableNameToSet should not be null");
-        }
-        addAction(new ActionSet(propertyName, variableNameToSet));
         return this;
     }
 
@@ -575,10 +452,136 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-
     @Override
     public Task math(String expression) {
         addAction(new ActionMath(expression));
         return this;
     }
+
+    @Override
+    public Task repeat(int repetition, Task subTask) {
+        addAction(new ActionRepeat(repetition, subTask));
+        return this;
+    }
+
+    @Override
+    public Task repeatPar(int repetition, Task subTask) {
+        throw new RuntimeException("Not implemented yet!");
+    }
+
+    @Override
+    public Task println() {
+        addAction(new ActionPrintln());
+        return this;
+    }
+
+    public static String template(String input, TaskContext context) {
+        int cursor = 1;
+        StringBuilder buffer = null;
+        int previousPos = -1;
+        while (cursor < input.length()) {
+            if (input.charAt(cursor) == '{' && input.charAt(cursor - 1) == '{') {
+                previousPos = cursor + 1;
+            } else if (previousPos != -1 && input.charAt(cursor) == '}' && input.charAt(cursor - 1) == '}') {
+                if (buffer == null) {
+                    buffer = new StringBuilder();
+                    buffer.append(input.substring(0, previousPos - 2));
+                }
+                String contextKey = input.substring(previousPos, cursor - 1).trim();
+                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
+                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
+                    buffer.append(mathEngine.eval(null, context, new HashMap<String, Double>()));
+                } else {
+                    buffer.append(context.variable(contextKey));
+                }
+                previousPos = -1;
+            } else {
+                if (previousPos == -1 && buffer != null) {
+                    buffer.append(input.charAt(cursor));
+                }
+            }
+            cursor++;
+        }
+        if (buffer == null) {
+            return input;
+        } else {
+            return buffer.toString();
+        }
+    }
+
+    public static void fillDefault(Map<String, TaskActionFactory> registry) {
+        registry.put("get", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("get action need one parameter");
+                }
+                return new ActionGet(params[0]);
+            }
+        });
+        registry.put("math", new TaskActionFactory() { //DefaultTask
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("math action need one parameter");
+                }
+                return new ActionMath(params[0]);
+            }
+        });
+        registry.put("traverse", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("traverse action need one parameter");
+                }
+                return new ActionTraverse(params[0]);
+            }
+        });
+        registry.put("traverseOrKeep", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("traverseOrKeep action need one parameter");
+                }
+                return new ActionTraverseOrKeep(params[0]);
+            }
+        });
+        registry.put("fromIndexAll", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException("fromIndexAll action need one parameter");
+                }
+                return new ActionFromIndexAll(params[0]);
+            }
+        });
+        registry.put("fromIndex", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("fromIndex action need two parameter");
+                }
+                return new ActionFromIndex(params[0], params[1]);
+            }
+        });
+        registry.put("with", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("with action need two parameter");
+                }
+                return new ActionWith(params[0], Pattern.compile(params[1]));
+            }
+        });
+        registry.put("without", new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 2) {
+                    throw new RuntimeException("without action need two parameter");
+                }
+                return new ActionWithout(params[0], Pattern.compile(params[1]));
+            }
+        });
+    }
+
 }

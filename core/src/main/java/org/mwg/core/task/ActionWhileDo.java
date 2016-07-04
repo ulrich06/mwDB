@@ -5,8 +5,6 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionConditional;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 class ActionWhileDo implements TaskAction {
 
     private final TaskFunctionConditional _cond;
@@ -20,6 +18,9 @@ class ActionWhileDo implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
+
+        //TODO
+
         /*
         TaskAction task = new TaskAction() {
             @Override

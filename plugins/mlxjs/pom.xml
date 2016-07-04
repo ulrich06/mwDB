@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.kevoree.mwg.plugins</groupId>
+    <artifactId>mlxjs</artifactId>
+    <name>mwg :: Plugins :: MLXJS</name>
+    <version>4-SNAPSHOT</version>
+
+    <parent>
+        <artifactId>mwg</artifactId>
+        <groupId>org.kevoree.mwg</groupId>
+        <version>4-SNAPSHOT</version>
+        <relativePath>../..</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg.plugins</groupId>
+            <artifactId>ml</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg.plugins</groupId>
+            <artifactId>mlx</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kevoree.mwg</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.kevoree.modeling.j2ts</groupId>
+                <artifactId>mavenplugin</artifactId>
+                <version>${java2typescript.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile-ml</id>
+                        <goals>
+                            <goal>java2ts</goal>
+                        </goals>
+                        <configuration>
+                            <name>mwg.mlx</name>
+                            <moduleImports>
+                                <moduleImport>mwg.d.ts</moduleImport>
+                                <moduleImport>mwg.ml.d.ts</moduleImport>
+                            </moduleImports>
+                            <source>${basedir}/../mlx/src/main/java</source>
+                            <target>${basedir}/target/generated-sources</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-test</id>
+                        <goals>
+                            <goal>java2ts</goal>
+                        </goals>
+                        <configuration>
+                            <name>test</name>
+                            <copyJRE>false</copyJRE>
+                            <copyJunit>true</copyJunit>
+                            <moduleImports>
+                                <moduleImport>../../../generated-sources/src/main/mwg.mlx.ts</moduleImport>
+                            </moduleImports>
+                            <source>${basedir}/../mlx/src/test/java</source>
+                            <target>${basedir}/target/generated-test-sources</target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <ant antfile="taskdef.xml" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

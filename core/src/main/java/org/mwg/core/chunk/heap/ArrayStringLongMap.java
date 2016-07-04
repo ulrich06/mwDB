@@ -1,12 +1,12 @@
 
 package org.mwg.core.chunk.heap;
 
-import org.mwg.core.utility.DataHasher;
-import org.mwg.struct.StringLongMap;
 import org.mwg.core.CoreConstants;
 import org.mwg.core.chunk.ChunkListener;
-import org.mwg.struct.StringLongMapCallBack;
+import org.mwg.core.utility.DataHasher;
 import org.mwg.core.utility.PrimitiveHelper;
+import org.mwg.struct.StringLongMap;
+import org.mwg.struct.StringLongMapCallBack;
 
 public class ArrayStringLongMap implements StringLongMap {
 
