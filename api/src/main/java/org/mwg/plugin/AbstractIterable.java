@@ -6,4 +6,6 @@ public abstract class AbstractIterable {
 
     public abstract void close();
 
+    public abstract int estimate();
+
 }

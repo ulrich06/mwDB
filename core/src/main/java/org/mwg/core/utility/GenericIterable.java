@@ -9,10 +9,12 @@ import java.util.Iterator;
  * index = 0;
  * isArray = false;
  * input = null;
+ * max = -1;
  * constructor(elem){
  *  super();
- *  if(Array.isArray(elem)){
+ *  if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
  *      this.isArray = true;
+ *      this.max = elem.length;
  *  }
  *  this.input = elem;
  * }
@@ -32,7 +34,9 @@ import java.util.Iterator;
  *     }
  * }
  * close():void{
- *
+ * }
+ * estimate():number{
+ *     return this.max;
  * }
  *
  */
@@ -53,7 +57,7 @@ public class GenericIterable extends AbstractIterable {
     private Object plainObj = null;
 
     private int index = 0;
-    private int max = 0;
+    private int max = -1;
 
     public GenericIterable(Object elem) {
         if (elem instanceof Object[]) {
@@ -103,6 +107,9 @@ public class GenericIterable extends AbstractIterable {
             type = 11;
         }
     }
+
+
+
 
     @Override
     public Object next() {
@@ -205,5 +212,10 @@ public class GenericIterable extends AbstractIterable {
         if (absIterable != null) {
             absIterable.close();
         }
+    }
+
+    @Override
+    public int estimate() {
+        return this.max;
     }
 }

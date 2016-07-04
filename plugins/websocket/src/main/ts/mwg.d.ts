@@ -398,6 +398,7 @@ declare module org {
             abstract class AbstractIterable {
                 abstract next(): any;
                 abstract close(): void;
+                abstract estimate(): number;
             }
             abstract class AbstractNode implements org.mwg.Node {
                 private _world;
@@ -691,6 +692,7 @@ declare module org {
                 static removeProperty(propertyName: string): org.mwg.task.Task;
                 static newNode(): org.mwg.task.Task;
                 static save(): org.mwg.task.Task;
+                static ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(world: number): org.mwg.task.Task;
@@ -1358,7 +1360,6 @@ declare module org {
                     private _subTask;
                     constructor(p_subTask: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
-                    static convert(elem: any): any[];
                 }
                 class ActionForeachPar implements org.mwg.task.TaskAction {
                     private _subTask;
@@ -1749,9 +1750,11 @@ declare module org {
                     index: number;
                     isArray: boolean;
                     input: any;
+                    max: number;
                     constructor(elem: any);
                     next(): any;
                     close(): void;
+                    estimate(): number;
                 }
                 class HeapBuffer extends org.mwg.core.utility.AbstractBuffer {
                     private buffer;
@@ -1779,7 +1782,6 @@ declare module org {
                     static DOUBLE_MIN_VALUE(): number;
                     static DOUBLE_MAX_VALUE(): number;
                     static isDefined(param: any): boolean;
-                    static iterate(elem: any, callback: org.mwg.Callback<any>): boolean;
                 }
                 class ReadOnlyStorage implements org.mwg.plugin.Storage {
                     private wrapped;

@@ -160,4 +160,8 @@ public class Actions {
         return newTask().save();
     }
 
+    public static Task ifThen(TaskFunctionConditional cond, Task then) {
+        return newTask().ifThen(cond, then);
+    }
+
 }

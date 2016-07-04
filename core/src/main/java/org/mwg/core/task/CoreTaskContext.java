@@ -5,6 +5,7 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.utility.GenericIterable;
 import org.mwg.core.utility.PrimitiveHelper;
+import org.mwg.plugin.AbstractIterable;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -200,13 +201,19 @@ public class CoreTaskContext implements TaskContext {
 
     @Override
     public void cleanObj(Object o) {
+        if (o == null) {
+            return;
+        }
+        if (o instanceof AbstractIterable) {
+            ((AbstractIterable) o).close();
+        }
         final CoreTaskContext selfPoiner = this;
         final GenericIterable genericIterable = new GenericIterable(o);
         Object current = genericIterable.next();
         while (current != null) {
             if (current instanceof AbstractNode) {
                 ((Node) current).free();
-            } else if(o != current) {
+            } else if (o != current) {
                 selfPoiner.cleanObj(current);
             }
             current = genericIterable.next();

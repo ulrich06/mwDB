@@ -21,11 +21,11 @@ class ActionReadLines implements TaskAction {
         context.cleanObj(previous);
         Object res = null;
         try {
-            res = new IterableFile(_path);
+            res = new IterableLines(_path);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        context.setResult(res);
+        context.setUnsafeResult(res);
     }
 
 }

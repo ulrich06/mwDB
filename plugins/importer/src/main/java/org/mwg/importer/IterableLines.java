@@ -4,15 +4,18 @@ import org.mwg.plugin.AbstractIterable;
 
 import java.io.*;
 
-public class IterableFile extends AbstractIterable {
+class IterableLines extends AbstractIterable {
 
-    private final File _file;
-    private final FileReader _reader;
+    private final Reader _reader;
     private final BufferedReader _buffer;
 
-    public IterableFile(String path) throws FileNotFoundException {
-        _file = new File(path);
-        _reader = new FileReader(_file);
+    IterableLines(String path) throws FileNotFoundException {
+        File file = new File(path);
+        if (file.exists()) {
+            _reader = new FileReader(file);
+        } else {
+            _reader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path));
+        }
         _buffer = new BufferedReader(_reader);
     }
 
@@ -34,5 +37,10 @@ public class IterableFile extends AbstractIterable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int estimate() {
+        return -1;
     }
 }
