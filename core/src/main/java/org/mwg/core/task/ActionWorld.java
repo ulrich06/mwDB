@@ -5,16 +5,25 @@ import org.mwg.task.TaskContext;
 
 class ActionWorld implements TaskAction {
 
-    private final long _world;
+    private final String _varName;
 
-    ActionWorld(final long p_world) {
-        this._world = p_world;
+    ActionWorld(final String p_varName) {
+        this._varName = p_varName;
     }
 
     @Override
     public void eval(final TaskContext context) {
-        context.setWorld(_world);
+        String flat = CoreTask.template(_varName, context);
+        context.setWorld(parse(flat));
         context.setUnsafeResult(context.result());
+    }
+
+    /**
+     * @native ts
+     * return parseInt(flat);
+     */
+    private long parse(String flat) {
+        return Long.parseLong(flat);
     }
 
 }

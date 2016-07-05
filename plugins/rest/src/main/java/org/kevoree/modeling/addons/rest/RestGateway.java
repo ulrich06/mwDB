@@ -68,8 +68,8 @@ public class RestGateway implements HttpHandler {
             }
             if (httpServerExchange.getRequestMethod().equalToString("GET")) {
                 httpServerExchange.dispatch();
-                setWorld(world)
-                        .setTime(time)
+                setWorld(world+"")
+                        .setTime(time+"")
                         .parse(concatQuery.toString())
                         .then(new Action() {
                             @Override
@@ -159,8 +159,8 @@ public class RestGateway implements HttpHandler {
                     }
                 }
 
-                setWorld(world)
-                        .setTime(time)
+                setWorld(world+"")
+                        .setTime(time+"")
                         .parse(concatQuery.toString())
                         .then(new Action() {
                             @Override

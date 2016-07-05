@@ -15,7 +15,6 @@ public class ImporterTest {
 
     @Test
     public void test() {
-
         final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
         final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
         g.connect(connectionResult -> {
@@ -41,8 +40,37 @@ public class ImporterTest {
                             ));
             t.execute(g, null);
         });
-
-
     }
+
+    @Test
+    public void testV2() {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
+        final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
+        g.connect(connectionResult -> {
+            Node newNode = g.newNode(0, 0);
+            final Task t = readLines("smarthome/smarthome_mini_1.T15.txt")
+                    .foreach(
+                            ifThen(ctx -> !ctx.resultAsString().startsWith("1:Date"),
+                                    split(" ")
+                                            .then(context -> {
+                                                String[] line = context.resultAsStringArray();
+                                                try {
+                                                    context.setVariable("time", dateFormat.parse(line[0] + "|" + line[1]).getTime());
+                                                    context.setVariable("value", Double.parseDouble(line[2]));
+                                                    context.setResult(null);
+                                                } catch (ParseException e) {
+                                                    e.printStackTrace();
+                                                    context.setResult(null);
+                                                }
+                                            })
+                                            .setTime("{{time}}")
+                                            .lookup("0", "{{time}}", "" + newNode.id())
+                                            .setProperty("value", Type.DOUBLE, "{{value}}")
+                                            .printResult()
+                            ));
+            t.execute(g, null);
+        });
+    }
+
 
 }

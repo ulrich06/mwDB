@@ -8,6 +8,7 @@ import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.setWorld;
 
 public class ActionNewNodeTest extends AbstractActionTest {
@@ -20,9 +21,8 @@ public class ActionNewNodeTest extends AbstractActionTest {
     @Test
     public void testCreateNode() {
         final long id[] = new long[1];
-        setWorld(15)
-                .setTime(587)
-                .newNode()
+        inject(15).asVar("world").setWorld("{{world}}").
+                inject(587).asVar("time").setTime("{{time}}").newNode()
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -33,7 +33,7 @@ public class ActionNewNodeTest extends AbstractActionTest {
                         Assert.assertEquals(587, n.time());
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
 
         graph.lookup(15, 587, id[0], new Callback<Node>() {
             @Override

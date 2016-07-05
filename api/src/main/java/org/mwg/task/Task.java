@@ -9,18 +9,18 @@ public interface Task {
     /**
      * Sets the task context to a particular world.
      *
-     * @param world that hasField to be set into the task context and will be used for next sub tasks.
+     * @param variableName that hasField to be set into the task context and will be used for next sub tasks.
      * @return this task to chain actions (fluent API)
      */
-    Task setWorld(long world);
+    Task setWorld(String variableName);
 
     /**
      * Sets the task context to a particular time.
      *
-     * @param time that hasField to be set into the task context and will be used for next sub tasks
+     * @param variableName that hasField to be set into the task context and will be used for next sub tasks
      * @return this task to chain actions (fluent API)
      */
-    Task setTime(long time);
+    Task setTime(String variableName);
 
     /**
      * Stores the current task result into a named variable
@@ -197,7 +197,7 @@ public interface Task {
     Task whileDo(TaskFunctionConditional cond, Task then);
 
     Task then(Action action);
-    
+
     Task save();
 
     /**
@@ -265,6 +265,10 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task action(String name, String params);
+
+    Task split(String splitPattern);
+
+    Task lookup(String world,String time, String id);
 
     /**
      * Execute a math expression on all nodes given from previous step
