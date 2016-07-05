@@ -252,6 +252,8 @@ class CoreTaskContext implements TaskContext {
                     }
                     if(foundVar != null){
                         buffer.append(foundVar);
+                    } else {
+                        throw new RuntimeException("Variable not found "+contextKey +" in:"+input);
                     }
                 }
                 previousPos = -1;
