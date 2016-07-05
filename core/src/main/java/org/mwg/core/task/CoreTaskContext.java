@@ -247,13 +247,13 @@ class CoreTaskContext implements TaskContext {
                     buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));
                 } else {
                     Object foundVar = variable(contextKey);
-                    if(foundVar == null && contextKey.equals("result")){
+                    if (foundVar == null && contextKey.equals("result")) {
                         foundVar = result();
                     }
-                    if(foundVar != null){
+                    if (foundVar != null) {
                         buffer.append(foundVar);
                     } else {
-                        throw new RuntimeException("Variable not found "+contextKey +" in:"+input);
+                        throw new RuntimeException("Variable not found " + contextKey + " in:" + input);
                     }
                 }
                 previousPos = -1;
