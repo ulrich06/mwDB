@@ -44,16 +44,3 @@ class IterableLines extends AbstractIterable {
         return -1;
     }
 }
-
-
-/*Task t = action(ActionReadFiles.READFILES_NAME,"smarthome").foreach(then(context -> {
-                System.err.println(context.result());
-                context.setResult(null);
-            }));
-            t.execute(g,null);
-
-            Task t = .foreach(then(context -> {
-                System.err.println(context.result());
-                context.setResult(null);
-            }));
-            t.execute(g,null);*/
