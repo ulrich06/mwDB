@@ -143,4 +143,39 @@ public class GaussianTreeNode extends GaussianNode implements ProfilingNode {
     public void predict(Callback<double[]> callback) {
 
     }
+
+    public void predictValue(double[] values, Callback<Double> callback){
+        double[] features = new double[values.length - 1];
+        System.arraycopy(values, 0, features, 0, values.length - 1);
+        final NodeState resolved = this._resolver.resolveState(this, true);
+        if (resolved.getFromKey(INTERNAL_KDROOT) == null) {
+            callback.on(null);
+        }
+        rel(INTERNAL_KDROOT, new Callback<Node[]>() {
+            @Override
+            public void on(Node[] result) {
+                KDNode root = (KDNode) result[0];
+                root.nearestWithinDistance(features, new Callback<Node>() {
+                    @Override
+                    public void on(Node result) {
+                        if (result != null) {
+                            GaussianNode profile = (GaussianNode) result;
+                            double[] avg = profile.getAvg();
+                            Double res = avg[avg.length - 1];
+                            profile.free();
+                            root.free();
+                            callback.on(res);
+                        }
+                        else {
+                            double[] avg=getAvg();
+                            Double res= avg[avg.length-1];
+                            root.free();
+                            callback.on(res);
+                        }
+                    }
+                });
+            }
+        });
+
+    }
 }
