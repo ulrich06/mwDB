@@ -13,9 +13,9 @@ import org.mwg.plugin.NodeState;
 /**
  * Created by assaad on 04/07/16.
  */
-public class KdGaussianNode extends GaussianNode implements ProfilingNode {
+public class GaussianTreeNode extends GaussianNode implements ProfilingNode {
 
-    public static String NAME = "KdGaussianNode";
+    public static String NAME = "GaussianTreeNode";
 
     public static final String THRESHOLD = "_threshold";  //Factor of distance before check inside fail
     public static final double THRESHOLD_DEF = 1.01;
@@ -24,7 +24,7 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
     private static String INTERNAL_KDROOT = "kdroot";
 
 
-    public KdGaussianNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
+    public GaussianTreeNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
     }
 
@@ -54,6 +54,7 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
                     root.setProperty(KDNode.DISTANCE_TYPE, Type.INT, DistanceEnum.GAUSSIAN);
                     root.setProperty(KDNode.DISTANCE_THRESHOLD, Type.DOUBLE, threshold);
                     root.setProperty(KDNode.DISTANCE_PRECISION, Type.DOUBLE_ARRAY, precisions);
+                    add(INTERNAL_KDROOT,root);
                     GaussianNode profile = (GaussianNode) graph().newTypedNode(world(), time(), GaussianNode.NAME);
 
                     profile.learnVector(values, new Callback<Boolean>() {
@@ -62,9 +63,12 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
                             root.insert(features, profile, new Callback<Boolean>() {
                                 @Override
                                 public void on(Boolean result) {
+
                                     root.free();
                                     profile.free();
-                                    callback.on(true);
+                                    if(callback!=null) {
+                                        callback.on(true);
+                                    }
                                 }
                             });
                         }
@@ -104,7 +108,9 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
                                             }
                                         });
                                     }
-                                    callback.on(true);
+                                    if(callback!=null) {
+                                        callback.on(true);
+                                    }
                                 }
                             });
                         }
@@ -115,6 +121,23 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
         });
     }
 
+
+    public int getNumNodes(){
+        int [] res=new int[1];
+        rel(INTERNAL_KDROOT, new Callback<Node[]>() {
+            @Override
+            public void on(Node[] result) {
+                if(result==null||result.length==0){
+                    res[0]=0;
+                }
+                else{
+                    KDNode root=(KDNode) result[0];
+                    res[0]=(Integer) root.get(KDNode.NUM_NODES);
+                }
+            }
+        });
+        return res[0];
+    }
 
     @Override
     public void predict(Callback<double[]> callback) {

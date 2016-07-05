@@ -17,7 +17,7 @@ public class KDNode extends AbstractNode {
 
     public static final String NAME = "KDNode";
 
-    private static final String INTERNAL_LEFT = "_left";            //to navigate left
+    private static final String INTERNAL_LEFT = "_left";                //to navigate left
     private static final String INTERNAL_RIGHT = "_right";           //to navigate right
 
     private static final String INTERNAL_KEY = "_key";                //Values of the node

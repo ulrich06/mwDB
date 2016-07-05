@@ -4,7 +4,9 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.ml.algorithm.anomalydetector.InterquartileRangeOutlierDetectorNode;
 import org.mwg.ml.algorithm.profiling.GaussianMixtureNode;
+import org.mwg.ml.algorithm.profiling.GaussianNode;
 import org.mwg.ml.algorithm.profiling.GaussianSlotNode;
+import org.mwg.ml.algorithm.profiling.GaussianTreeNode;
 import org.mwg.ml.algorithm.regression.LiveLinearRegressionNode;
 import org.mwg.ml.algorithm.regression.PolynomialNode;
 import org.mwg.ml.common.structure.KDNode;
@@ -55,6 +57,20 @@ public class MLPlugin extends AbstractPlugin {
             @Override
             public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
                 return new KDNode(world, time, id, graph, initialResolution);
+            }
+        });
+
+        declareNodeType(GaussianTreeNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new GaussianTreeNode(world, time, id, graph, initialResolution);
+            }
+        });
+
+        declareNodeType(GaussianNode.NAME, new NodeFactory() {
+            @Override
+            public Node create(long world, long time, long id, Graph graph, long[] initialResolution) {
+                return new GaussianNode(world, time, id, graph, initialResolution);
             }
         });
 
