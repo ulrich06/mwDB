@@ -4,6 +4,8 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Type;
 
+import java.util.Map;
+
 public interface Task {
 
     /**
@@ -286,6 +288,6 @@ public interface Task {
 
     void execute(final Graph graph, final Callback<Object> result);
 
-    void executeWith(final Graph graph, final TaskContext parentContext, Object initialResult, final Callback<Object> result);
+    void executeWith(final Graph graph, final Map<String,Object> variables, Object initialResult, final Callback<Object> result);
 
 }

@@ -25,7 +25,6 @@ class CoreTaskContext implements TaskContext {
     private final TaskAction[] _actions;
     private final int _actionCursor;
     private final AtomicInteger _currentTaskId;
-    private final TaskContext _parentContext;
     private final Callback<Object> _callback;
 
     //Mutable current result handler
@@ -33,13 +32,12 @@ class CoreTaskContext implements TaskContext {
     private long _world;
     private long _time;
 
-    CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
+    CoreTaskContext(final Map<String, Object> p_variables, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
-        this._parentContext = p_parentContext;
-        if (this._parentContext != null) {
-            this._variables = ((CoreTaskContext) p_parentContext)._variables;
+        if (p_variables != null) {
+            this._variables = p_variables;
             shouldFreeVar = false;
         } else {
             this._variables = new ConcurrentHashMap<String, Object>();
@@ -114,6 +112,11 @@ class CoreTaskContext implements TaskContext {
             newArr[1] = protectedVar;
             this._variables.put(name, newArr);
         }
+    }
+
+    @Override
+    public Map<String, Object> variables() {
+        return this._variables;
     }
 
     @Override

@@ -3,6 +3,8 @@ package org.mwg.task;
 import org.mwg.Graph;
 import org.mwg.Node;
 
+import java.util.Map;
+
 public interface TaskContext {
 
     Graph graph();
@@ -20,6 +22,8 @@ public interface TaskContext {
     void setVariable(String name, Object value);
 
     void addToVariable(String name, Object value);
+
+    Map<String,Object> variables();
 
     //Object based results
     Object result();

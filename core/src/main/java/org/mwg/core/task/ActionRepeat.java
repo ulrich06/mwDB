@@ -36,11 +36,11 @@ class ActionRepeat implements TaskAction {
                         context.setResult(results);
                     } else {
                         //recursive call
-                        selfPointer._subTask.executeWith(context.graph(), context, nextCursor, recursiveAction[0]);
+                        selfPointer._subTask.executeWith(context.graph(), context.variables(), nextCursor, recursiveAction[0]);
                     }
                 }
             };
-            _subTask.executeWith(context.graph(), context, cursor.get(), recursiveAction[0]);
+            _subTask.executeWith(context.graph(), context.variables(), cursor.get(), recursiveAction[0]);
         } else {
             context.setResult(results);
         }
