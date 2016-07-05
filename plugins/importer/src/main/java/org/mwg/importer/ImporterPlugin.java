@@ -16,5 +16,15 @@ public class ImporterPlugin extends AbstractPlugin {
                 return new ActionReadLines(params[0]);
             }
         });
+
+        declareTaskAction(ActionReadFiles.READFILES_NAME, new TaskActionFactory() {
+            @Override
+            public TaskAction create(String[] params) {
+                if (params.length != 1) {
+                    throw new RuntimeException(ActionReadFiles.READFILES_NAME + " action need one parameter");
+                }
+                return new ActionReadFiles(params[0]);
+            }
+        });
     }
 }
