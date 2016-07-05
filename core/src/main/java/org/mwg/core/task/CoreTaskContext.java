@@ -246,7 +246,13 @@ class CoreTaskContext implements TaskContext {
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));
                 } else {
-                    buffer.append(variable(contextKey));
+                    Object foundVar = variable(contextKey);
+                    if(foundVar == null && contextKey.equals("result")){
+                        foundVar = result();
+                    }
+                    if(foundVar != null){
+                        buffer.append(foundVar);
+                    }
                 }
                 previousPos = -1;
             } else {
