@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.ml.ProfilingNode;
 import org.mwg.ml.common.distance.Distance;
+import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.structure.KDNode;
 import org.mwg.plugin.NodeState;
 
@@ -50,7 +51,7 @@ public class KdGaussianNode extends GaussianNode implements ProfilingNode {
 
                 if (resolved.getFromKey(INTERNAL_KDROOT) == null) {
                     KDNode root = (KDNode) graph().newTypedNode(world(), time(), KDNode.NAME);
-                    root.setProperty(KDNode.DISTANCE_TYPE, Type.INT, Distance.GAUSSIAN);
+                    root.setProperty(KDNode.DISTANCE_TYPE, Type.INT, DistanceEnum.GAUSSIAN);
                     root.setProperty(KDNode.DISTANCE_THRESHOLD, Type.DOUBLE, threshold);
                     root.setProperty(KDNode.DISTANCE_PRECISION, Type.DOUBLE_ARRAY, precisions);
                     GaussianNode profile = (GaussianNode) graph().newTypedNode(world(), time(), GaussianNode.NAME);

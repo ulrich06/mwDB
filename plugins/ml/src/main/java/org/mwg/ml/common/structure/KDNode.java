@@ -2,6 +2,7 @@ package org.mwg.ml.common.structure;
 
 import org.mwg.*;
 import org.mwg.ml.common.distance.Distance;
+import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.distance.EuclideanDistance;
 import org.mwg.ml.common.distance.GaussianDistance;
 import org.mwg.plugin.AbstractNode;
@@ -50,9 +51,9 @@ public class KDNode extends AbstractNode {
     private Distance getDistance(NodeState state) {
         int d = state.getFromKeyWithDefault(DISTANCE_TYPE, DISTANCE_TYPE_DEF);
         Distance distance;
-        if (d == Distance.EUCLIDEAN) {
+        if (d == DistanceEnum.EUCLIDEAN) {
             distance = new EuclideanDistance();
-        } else if (d == Distance.GAUSSIAN) {
+        } else if (d == DistanceEnum.GAUSSIAN) {
             double[] precision = (double[]) state.getFromKey(DISTANCE_PRECISION);
             if (precision == null) {
                 throw new RuntimeException("covariance of gaussian distances cannot be null");

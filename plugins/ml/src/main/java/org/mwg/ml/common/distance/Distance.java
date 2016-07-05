@@ -4,9 +4,6 @@ package org.mwg.ml.common.distance;
  * Created by assaad on 29/06/16.
  */
 public interface Distance {
-    int EUCLIDEAN = 0;
-    int GAUSSIAN = 1;
-
 
     /**
      * Calculates the distance between two instances.
