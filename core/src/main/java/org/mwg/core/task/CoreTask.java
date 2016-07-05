@@ -4,13 +4,10 @@ import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.core.task.math.CoreMathExpressionEngine;
-import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.*;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -118,6 +115,15 @@ public class CoreTask implements org.mwg.task.Task {
             throw new RuntimeException("filter should not be null");
         }
         addAction(new ActionSelect(filter));
+        return this;
+    }
+
+    @Override
+    public final Task selectObject(TaskFunctionSelectObject filterFunction) {
+        if(filterFunction == null) {
+            throw new RuntimeException("filterFunction should not be null");
+        }
+        addAction(new ActionSelectObject(filterFunction));
         return this;
     }
 

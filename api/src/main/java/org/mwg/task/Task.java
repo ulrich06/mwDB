@@ -100,6 +100,13 @@ public interface Task {
     Task select(TaskFunctionSelect filterFunction);
 
     /**
+     * IN CONSTRUCTION - Not final state
+     *
+     * @param filterFunction condition that objects have to respect
+     */
+    Task selectObject(TaskFunctionSelectObject filterFunction);
+
+    /**
      * Filter the previous result to get nodes that respect the specified condition in {@code subTask}
      * Similar to {@link #select(TaskFunctionSelect)}, but allow access/modification of the context
      *
