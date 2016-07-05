@@ -8,6 +8,9 @@ import org.mwg.task.TaskFunctionSelectObject;
 
 import static org.mwg.task.Actions.newTask;
 
+/**
+@ignore ts
+ */
 public class ActionSelectObjectTest extends AbstractActionTest{
 
     @Test
@@ -166,6 +169,11 @@ public class ActionSelectObjectTest extends AbstractActionTest{
 
                 })
                 .execute(graph,null);
+
+        n1.free();
+        n2.free();
+        n3.free();
+
         removeGraph();
     }
 

@@ -4,14 +4,11 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelectObject;
 
-/**
- * Created by ludovicmouline on 05/07/16.
- */
-public class ActionSelectObject implements TaskAction {
+class ActionSelectObject implements TaskAction {
 
     private final TaskFunctionSelectObject _filter;
 
-    public ActionSelectObject(TaskFunctionSelectObject filterFunction) {
+    ActionSelectObject(TaskFunctionSelectObject filterFunction) {
         _filter = filterFunction;
     }
 
@@ -20,10 +17,10 @@ public class ActionSelectObject implements TaskAction {
         final Object previousResult = context.result();
         if (previousResult != null) {
             if (previousResult instanceof Object[]) {
-                context.setResult(filterArray((Object[]) previousResult, context));
+                context.setResult(filterArray((Object[]) previousResult, context));//fixme put unsafe
             } else {
                 if(_filter.select(previousResult)) {
-                    context.setResult(previousResult);
+                    context.setResult(previousResult);//fixme put unsafe
                 } else {
                     context.cleanObj(previousResult);
                     context.setUnsafeResult(null);

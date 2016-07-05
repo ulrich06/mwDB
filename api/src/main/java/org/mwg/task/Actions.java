@@ -84,6 +84,10 @@ public class Actions {
         return newTask().select(filterFunction);
     }
 
+    public static Task selectObject(TaskFunctionSelectObject filterFunction) {
+        return newTask().selectObject(filterFunction);
+    }
+
     public static Task traverse(String relationName) {
         return newTask().traverse(relationName);
     }
@@ -123,6 +127,8 @@ public class Actions {
     public static Task selectWhere(Task subTask) {
         return newTask().selectWhere(subTask);
     }
+
+
 
     public static Task foreach(Task subTask) {
         return newTask().foreach(subTask);
