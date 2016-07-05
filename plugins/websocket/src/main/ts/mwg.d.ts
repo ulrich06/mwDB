@@ -765,6 +765,7 @@ declare module org {
                 setUnsafeResult(actionResult: any): void;
                 setResult(actionResult: any): void;
                 cleanObj(o: any): void;
+                template(input: string): string;
             }
             interface TaskFunctionConditional {
                 (context: org.mwg.task.TaskContext): boolean;
@@ -1593,7 +1594,6 @@ declare module org {
                     repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     printResult(): org.mwg.task.Task;
-                    static template(input: string, context: org.mwg.task.TaskContext): string;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
@@ -1627,6 +1627,7 @@ declare module org {
                     setResult(actionResult: any): void;
                     private internal_setResult(actionResult, safe);
                     cleanObj(o: any): void;
+                    template(input: string): string;
                 }
                 module math {
                     class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
