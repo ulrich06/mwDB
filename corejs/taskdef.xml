@@ -14,11 +14,13 @@
         </condition>
     </target>
     <target name="other.run" depends="sys.check" if="isOther">
+        <echo message="Copying"/>
         <copy file="${basedir}/src/package.json" todir="${basedir}/target"/>
-
+        <echo message="NPM install"/>
         <exec executable="npm" dir="${basedir}/target" failonerror="true">
             <arg value="install"/>
         </exec>
+        <echo message="TSC Run (core)"/>
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="-d"/>
             <arg value="--sourceMap"/>
@@ -28,7 +30,7 @@
             <arg value="--out"/>
             <arg value="${basedir}/target/classes/mwg.js"/>
         </exec>
-
+        <echo message="TSC Run (test)"/>
         <exec executable="${basedir}/target/node_modules/typescript/bin/tsc" failonerror="true">
             <arg value="--target"/>
             <arg value="es5"/>
@@ -36,13 +38,13 @@
             <arg value="--out"/>
             <arg value="${basedir}/target/test-classes/mwg.test.js"/>
         </exec>
-
+        <echo message="Concat testRunner"/>
         <concat destfile="${basedir}/target/test-classes/test.all.js" force="no">
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
             <filelist dir="${basedir}/target/generated-test-sources/"
                       files="testsRunner.js"/>
         </concat>
-
+        <echo message="Concat testRunnerDev"/>
         <concat destfile="${basedir}/target/test-classes/test.all.dev.js" force="no">
             <filelist dir="${basedir}/target/test-classes" files="mwg.test.js"/>
             <filelist dir="${basedir}/target/generated-test-sources/"
@@ -50,11 +52,11 @@
         </concat>
 
         <copy file="${basedir}/src/test.js" todir="${basedir}/target"/>
-
+        <echo message="Node (test.js)"/>
         <exec executable="node" dir="${basedir}/target" failonerror="true">
             <arg value="test.js"/>
         </exec>
-
+        <echo message="Minify"/>
         <java jar="${basedir}/lib/compiler.jar" fork="true" failonerror="true">
             <arg value="--js"/>
             <arg value="${basedir}/target/classes/mwg.js"/>
