@@ -125,6 +125,8 @@
         -->
 
         <module>plugins/alljs</module>
+        <module>plugins/model</module>
+
 
     </modules>
 

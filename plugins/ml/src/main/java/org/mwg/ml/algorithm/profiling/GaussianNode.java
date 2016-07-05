@@ -169,7 +169,9 @@ public class GaussianNode extends AbstractMLNode implements ProfilingNode {
             set(INTERNAL_MAX_KEY, max);
             set(INTERNAL_SUMSQUARE_KEY, sumsquares);
         }
-
+        if(callback!=null) {
+            callback.on(true);
+        }
     }
 
 

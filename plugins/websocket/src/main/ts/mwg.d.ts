@@ -739,7 +739,7 @@ declare module org {
                 repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 printResult(): org.mwg.task.Task;
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
-                executeWith(graph: org.mwg.Graph, parentContext: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
+                executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, result: org.mwg.Callback<any>): void;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -756,6 +756,7 @@ declare module org {
                 variable(name: string): any;
                 setVariable(name: string, value: any): void;
                 addToVariable(name: string, value: any): void;
+                variables(): java.util.Map<string, any>;
                 result(): any;
                 resultAsObjectArray(): any[];
                 resultAsString(): string;
@@ -1578,7 +1579,7 @@ declare module org {
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
-                    executeWith(graph: org.mwg.Graph, parentContext: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
+                    executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, result: org.mwg.Callback<any>): void;
                     execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;
@@ -1603,12 +1604,11 @@ declare module org {
                     private _actions;
                     private _actionCursor;
                     private _currentTaskId;
-                    private _parentContext;
                     private _callback;
                     private _result;
                     private _world;
                     private _time;
-                    constructor(p_parentContext: org.mwg.task.TaskContext, initial: any, p_graph: org.mwg.Graph, p_actions: org.mwg.task.TaskAction[], p_actionCursor: number, p_callback: org.mwg.Callback<any>);
+                    constructor(p_variables: java.util.Map<string, any>, initial: any, p_graph: org.mwg.Graph, p_actions: org.mwg.task.TaskAction[], p_actionCursor: number, p_callback: org.mwg.Callback<any>);
                     graph(): org.mwg.Graph;
                     world(): number;
                     setWorld(p_world: number): void;
@@ -1617,6 +1617,7 @@ declare module org {
                     variable(name: string): any;
                     setVariable(name: string, value: any): void;
                     addToVariable(name: string, value: any): void;
+                    variables(): java.util.Map<string, any>;
                     result(): any;
                     resultAsString(): string;
                     resultAsStringArray(): string[];

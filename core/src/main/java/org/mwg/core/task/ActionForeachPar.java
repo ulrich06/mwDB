@@ -29,7 +29,7 @@ class ActionForeachPar implements TaskAction {
         Object loop = genericIterable.next();
         while (loop != null) {
             final DeferCounter waiter = context.graph().newCounter(1);
-            _subTask.executeWith(context.graph(), context, loop, waiter.wrap());
+            _subTask.executeWith(context.graph(), context.variables(), loop, waiter.wrap());
 
             if (index >= results.length) {
                 Object[] doubled_res = new Object[results.length * 2];

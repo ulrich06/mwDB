@@ -4,35 +4,32 @@ package org.mwg.ml.common.distance;
  * Created by assaad on 29/06/16.
  */
 public interface Distance {
+
     /**
      * Calculates the distance between two instances.
      *
-     * @param x
-     *            the first instance
-     * @param y
-     *            the second instance
+     * @param x the first instance
+     * @param y the second instance
      * @return the distance between the two instances
      */
-    public double measure(double[] x, double[] y);
+    double measure(double[] x, double[] y);
 
     /**
      * Returns whether the first distance, similarity or correlation is better
      * than the second distance, similarity or correlation.
-     *
+     * <p>
      * Both values should be calculated using the same measure.
-     *
+     * <p>
      * For similarity measures the higher the similarity the better the measure,
      * for distance measures it is the lower the better and for correlation
      * measure the absolute value must be higher.
      *
-     * @param x
-     *            the first distance, similarity or correlation
-     * @param y
-     *            the second distance, similarity or correlation
+     * @param x the first distance, similarity or correlation
+     * @param y the second distance, similarity or correlation
      * @return true if the first distance is better than the second, false in
-     *         other cases.
+     * other cases.
      */
-     public boolean compare(double x, double y);
+    boolean compare(double x, double y);
 
     /**
      * Returns the value that this distance metric produces for the lowest
@@ -40,11 +37,9 @@ public interface Distance {
      * variables to be used in comparisons with the compare method of this
      * class.
      *
-     *
-     *
      * @return minimum possible value of the distance metric
      */
-    public double getMinValue();
+    double getMinValue();
 
     /**
      * Returns the value that this distance metric produces for the highest
@@ -54,5 +49,5 @@ public interface Distance {
      *
      * @return maximum possible value of the distance metric
      */
-    public double getMaxValue();
+    double getMaxValue();
 }

@@ -16,7 +16,7 @@ class ActionTrigger implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         Object previous = context.result();
-        _subTask.executeWith(context.graph(), context, previous, new Callback<Object>() {
+        _subTask.executeWith(context.graph(), context.variables(), previous, new Callback<Object>() {
             @Override
             public void on(Object result) {
                 context.cleanObj(previous);

@@ -2,7 +2,9 @@ package org.mwg.ml.common.structure;
 
 import org.mwg.*;
 import org.mwg.ml.common.distance.Distance;
+import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.distance.EuclideanDistance;
+import org.mwg.ml.common.distance.GaussianDistance;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Enforcer;
 import org.mwg.plugin.Job;
@@ -15,7 +17,7 @@ public class KDNode extends AbstractNode {
 
     public static final String NAME = "KDNode";
 
-    private static final String INTERNAL_LEFT = "_left";            //to navigate left
+    private static final String INTERNAL_LEFT = "_left";                //to navigate left
     private static final String INTERNAL_RIGHT = "_right";           //to navigate right
 
     private static final String INTERNAL_KEY = "_key";                //Values of the node
@@ -24,8 +26,13 @@ public class KDNode extends AbstractNode {
 
     private static final String INTERNAL_DIM = "_dim";                //Values of the node
 
-    public static final String DISTANCE_THRESHOLD = "dist";          //Distance threshold
+    public static final String DISTANCE_THRESHOLD = "_threshold";          //Distance threshold
     public static final double DISTANCE_THRESHOLD_DEF = 1e-10;
+
+    public static final String DISTANCE_TYPE = "disttype";
+    public static final int DISTANCE_TYPE_DEF = 0;
+    public static final String DISTANCE_PRECISION = "_precision";
+
 
     public KDNode(long p_world, long p_time, long p_id, Graph p_graph, long[] currentResolution) {
         super(p_world, p_time, p_id, p_graph, currentResolution);
@@ -41,6 +48,24 @@ public class KDNode extends AbstractNode {
     }
 
 
+    private Distance getDistance(NodeState state) {
+        int d = state.getFromKeyWithDefault(DISTANCE_TYPE, DISTANCE_TYPE_DEF);
+        Distance distance;
+        if (d == DistanceEnum.EUCLIDEAN) {
+            distance = new EuclideanDistance();
+        } else if (d == DistanceEnum.GAUSSIAN) {
+            double[] precision = (double[]) state.getFromKey(DISTANCE_PRECISION);
+            if (precision == null) {
+                throw new RuntimeException("covariance of gaussian distances cannot be null");
+            }
+            distance = new GaussianDistance(precision);
+        } else {
+            throw new RuntimeException("Unknown distance code metric");
+        }
+        return distance;
+    }
+
+
     public void insert(final double[] key, final Node value, final Callback<Boolean> callback) {
         NodeState state = unphasedState();
         final int dim = state.getFromKeyWithDefault(INTERNAL_DIM, key.length);
@@ -50,7 +75,8 @@ public class KDNode extends AbstractNode {
             throw new RuntimeException("Key size should always be the same");
         }
 
-        internalInsert(this, this, key, 0, dim, err, value, callback);
+        Distance distance = getDistance(state);
+        internalInsert(this, this, distance, key, 0, dim, err, value, callback);
     }
 
 
@@ -68,7 +94,8 @@ public class KDNode extends AbstractNode {
         double max_dist_sqd = Double.MAX_VALUE;
 
         NearestNeighborList nnl = new NearestNeighborList(1);
-        internalNearest(this, key, hr, max_dist_sqd, 0, dim, err, nnl);
+        Distance distance = getDistance(state);
+        internalNearest(this, distance, key, hr, max_dist_sqd, 0, dim, err, nnl);
 
         long res = nnl.getHighest();
         graph().lookup(world(), time(), res, new Callback<Node>() {
@@ -77,8 +104,40 @@ public class KDNode extends AbstractNode {
                 callback.on(result);
             }
         });
-
     }
+
+    public void nearestWithinDistance(final double[] key, final Callback<Node> callback) {
+        NodeState state = unphasedState();
+        final int dim = state.getFromKeyWithDefault(INTERNAL_DIM, key.length);
+        final double err = state.getFromKeyWithDefault(DISTANCE_THRESHOLD, DISTANCE_THRESHOLD_DEF);
+
+        if (key.length != dim) {
+            throw new RuntimeException("Key size should always be the same");
+        }
+
+        // initial call is with infinite hyper-rectangle and max distance
+        HRect hr = HRect.infiniteHRect(key.length);
+        double max_dist_sqd = Double.MAX_VALUE;
+
+        NearestNeighborList nnl = new NearestNeighborList(1);
+        Distance distance = getDistance(state);
+        internalNearest(this, distance, key, hr, max_dist_sqd, 0, dim, err, nnl);
+
+        if(nnl.getBestDistance()<=err) {
+            long res = nnl.getHighest();
+
+            graph().lookup(world(), time(), res, new Callback<Node>() {
+                @Override
+                public void on(Node result) {
+                    callback.on(result);
+                }
+            });
+        }
+        else{
+            callback.on(null);
+        }
+    }
+
 
     public void nearestN(final double[] key, final int n, final Callback<Node[]> callback) {
         NodeState state = unphasedState();
@@ -94,7 +153,8 @@ public class KDNode extends AbstractNode {
         double max_dist_sqd = Double.MAX_VALUE;
 
         NearestNeighborList nnl = new NearestNeighborList(n);
-        internalNearest(this, key, hr, max_dist_sqd, 0, dim, err, nnl);
+        Distance distance = getDistance(state);
+        internalNearest(this, distance, key, hr, max_dist_sqd, 0, dim, err, nnl);
 
         long[] res = nnl.getAllNodes();
         DeferCounter counter = graph().newCounter(res.length);
@@ -121,6 +181,7 @@ public class KDNode extends AbstractNode {
     //protected static void nnbr(KDNode kd, HPoint target, HRect hr, double max_dist_sqd, int lev, int K,  NearestNeighborList nnl)
 
 
+    //todo make it async with callback
     protected KDNode getNode(NodeState state, String key) {
         long[] ids = (long[]) state.getFromKey(key);
         if (ids != null) {
@@ -142,7 +203,7 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private void internalNearest(KDNode node, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
+    private void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
         // 1. if kd is empty exit.
         if (node == null) {
             return;
@@ -160,8 +221,7 @@ public class KDNode extends AbstractNode {
 
         // 3. pivot := dom-elt field of kd
 
-        double pivot_to_target = distance(pivot, target);
-        pivot_to_target = pivot_to_target * pivot_to_target;
+        double pivot_to_target = distance.measure(pivot, target);
 
         // 4. Cut hr into to sub-hyperrectangles left-hr and right-hr.
         // The cut plane is through pivot and perpendicular to the s
@@ -203,8 +263,8 @@ public class KDNode extends AbstractNode {
         // (nearer-kd, target, nearer-hr, max-dist-sqd), storing the
         // results in nearest and dist-sqd
         //nnbr(nearer_kd, target, nearer_hr, max_dist_sqd, lev + 1, K, nnl);
-        internalNearest(nearer_kd, target, nearer_hr, max_dist_sqd, lev + 1, dim, err, nnl);
-        if(nearer_kd!=null){
+        internalNearest(nearer_kd, distance, target, nearer_hr, max_dist_sqd, lev + 1, dim, err, nnl);
+        if (nearer_kd != null) {
             nearer_kd.free();
         }
 
@@ -224,7 +284,7 @@ public class KDNode extends AbstractNode {
         // part of further-hr within distance sqrt(max-dist-sqd) of
         // target. If this is the case then
         double[] closest = further_hr.closest(target);
-        if (distance(closest, target) < Math.sqrt(max_dist_sqd)) {
+        if (distance.measure(closest, target) < max_dist_sqd) {
 
             // 10.1 if (pivot-target)^2 < dist-sqd then
             if (pivot_to_target < dist_sqd) {
@@ -246,17 +306,17 @@ public class KDNode extends AbstractNode {
             // (further-kd, target, further-hr, max-dist_sqd),
             // storing results in temp-nearest and temp-dist-sqd
             //nnbr(further_kd, target, further_hr, max_dist_sqd, lev + 1, K, nnl);
-            internalNearest(further_kd, target, further_hr, max_dist_sqd, lev + 1, dim, err, nnl);
+            internalNearest(further_kd, distance, target, further_hr, max_dist_sqd, lev + 1, dim, err, nnl);
         }
 
-        if(further_kd!=null){
+        if (further_kd != null) {
             further_kd.free();
         }
 
     }
 
 
-    private void internalInsert(final KDNode node, final KDNode root, final double[] key, final int lev, final int dim, final double err, final Node value, final Callback<Boolean> callback) {
+    private void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] key, final int lev, final int dim, final double err, final Node value, final Callback<Boolean> callback) {
         NodeState state = node.unphasedState();
         double[] tk = (double[]) state.getFromKey(INTERNAL_KEY);
         if (tk == null) {
@@ -272,7 +332,7 @@ public class KDNode extends AbstractNode {
                 callback.on(true);
             }
 
-        } else if (distance(key, tk) < err) {
+        } else if (distance.measure(key, tk) < err) {
             state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{value.id()});
             if (node != root) {
                 node.free();
@@ -303,7 +363,7 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        internalInsert((KDNode) result[0], root, key, (lev + 1) % dim, dim, err, value, callback);
+                        internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
                     }
                 });
             }
@@ -330,18 +390,11 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        internalInsert((KDNode) result[0], root, key, (lev + 1) % dim, dim, err, value, callback);
+                        internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
                     }
                 });
             }
         }
-    }
-
-
-    protected static final Distance d = new EuclideanDistance();
-
-    protected double distance(double[] key1, double[] key2) {
-        return d.measure(key1, key2);
     }
 
 

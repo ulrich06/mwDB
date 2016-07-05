@@ -80,6 +80,10 @@ class NearestNeighborList {
         return data[1];
     }
 
+    public double getBestDistance(){
+        return value[1];
+    }
+
     public boolean isEmpty() {
         return count == 0;
     }

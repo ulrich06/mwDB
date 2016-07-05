@@ -270,13 +270,13 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void executeWith(Graph graph, TaskContext parentContext, Object initialResult, Callback<Object> result) {
+    public void executeWith(final Graph graph, final Map<String, Object> variables, Object initialResult, Callback<Object> result) {
         if (_actionCursor == 0) {
             if (result != null) {
                 result.on(protect(graph, initialResult));
             }
         } else {
-            final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, _actionCursor, result);
+            final org.mwg.task.TaskContext context = new CoreTaskContext(variables, protect(graph, initialResult), graph, _actions, _actionCursor, result);
             _actions[0].eval(context);
         }
     }
