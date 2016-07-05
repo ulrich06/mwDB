@@ -23,7 +23,7 @@ class ActionSetProperty implements TaskAction {
         final Object previousResult = context.result();
         Object savedVar = context.variable(_variableNameToSet);
         if (savedVar == null) {
-            Object tempateBased = CoreTask.template(this._variableNameToSet, context);
+            Object tempateBased = context.template(this._variableNameToSet);
             switch (_propertyType) {
                 case Type.INT:
                     savedVar = parseInt(tempateBased.toString());

@@ -659,8 +659,8 @@ declare module org {
             class Actions {
                 private static _internalBuilder;
                 static newTask(): org.mwg.task.Task;
-                static setWorld(world: number): org.mwg.task.Task;
-                static setTime(world: number): org.mwg.task.Task;
+                static setWorld(variableName: string): org.mwg.task.Task;
+                static setTime(variableName: string): org.mwg.task.Task;
                 static then(action: org.mwg.task.Action): org.mwg.task.Task;
                 static inject(input: any): org.mwg.task.Task;
                 static fromVar(variableName: string): org.mwg.task.Task;
@@ -693,10 +693,12 @@ declare module org {
                 static newNode(): org.mwg.task.Task;
                 static save(): org.mwg.task.Task;
                 static ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
+                static split(splitPattern: string): org.mwg.task.Task;
+                static lookup(world: string, time: string, id: string): org.mwg.task.Task;
             }
             interface Task {
-                setWorld(world: number): org.mwg.task.Task;
-                setTime(time: number): org.mwg.task.Task;
+                setWorld(variableName: string): org.mwg.task.Task;
+                setTime(variableName: string): org.mwg.task.Task;
                 asVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
                 setVar(variableName: string, inputValue: any): org.mwg.task.Task;
@@ -730,6 +732,8 @@ declare module org {
                 remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                 parse(flat: string): org.mwg.task.Task;
                 action(name: string, params: string): org.mwg.task.Task;
+                split(splitPattern: string): org.mwg.task.Task;
+                lookup(world: string, time: string, id: string): org.mwg.task.Task;
                 math(expression: string): org.mwg.task.Task;
                 repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
@@ -761,6 +765,7 @@ declare module org {
                 setUnsafeResult(actionResult: any): void;
                 setResult(actionResult: any): void;
                 cleanObj(o: any): void;
+                template(input: string): string;
             }
             interface TaskFunctionConditional {
                 (context: org.mwg.task.TaskContext): boolean;
@@ -1399,6 +1404,14 @@ declare module org {
                     constructor(value: any);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
+                class ActionLookup implements org.mwg.task.TaskAction {
+                    private _world;
+                    private _time;
+                    private _id;
+                    constructor(p_world: string, p_time: string, p_id: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private parse(flat);
+                }
                 class ActionMap implements org.mwg.task.TaskAction {
                     private _map;
                     constructor(p_map: org.mwg.task.TaskFunctionMap);
@@ -1473,10 +1486,16 @@ declare module org {
                     constructor(name: string, value: any);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
-                class ActionTime implements org.mwg.task.TaskAction {
-                    private _time;
-                    constructor(p_time: number);
+                class ActionSplit implements org.mwg.task.TaskAction {
+                    private _splitPattern;
+                    constructor(p_splitPattern: string);
                     eval(context: org.mwg.task.TaskContext): void;
+                }
+                class ActionTime implements org.mwg.task.TaskAction {
+                    private _varName;
+                    constructor(p_varName: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private parse(flat);
                 }
                 class ActionTraverse implements org.mwg.task.TaskAction {
                     private _name;
@@ -1516,9 +1535,10 @@ declare module org {
                     constructor(name: string, pattern: RegExp);
                 }
                 class ActionWorld implements org.mwg.task.TaskAction {
-                    private _world;
-                    constructor(p_world: number);
+                    private _varName;
+                    constructor(p_varName: string);
                     eval(context: org.mwg.task.TaskContext): void;
+                    private parse(flat);
                 }
                 class ActionWrapper implements org.mwg.task.TaskAction {
                     private _wrapped;
@@ -1529,8 +1549,8 @@ declare module org {
                     private _actions;
                     private _actionCursor;
                     private addAction(task);
-                    setWorld(world: number): org.mwg.task.Task;
-                    setTime(time: number): org.mwg.task.Task;
+                    setWorld(variableName: string): org.mwg.task.Task;
+                    setTime(variableName: string): org.mwg.task.Task;
                     fromIndex(indexName: string, query: string): org.mwg.task.Task;
                     fromIndexAll(indexName: string): org.mwg.task.Task;
                     selectWith(name: string, pattern: string): org.mwg.task.Task;
@@ -1557,6 +1577,7 @@ declare module org {
                     foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
+                    lookup(world: string, time: string, id: string): org.mwg.task.Task;
                     executeWith(graph: org.mwg.Graph, parentContext: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
                     execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
@@ -1569,10 +1590,10 @@ declare module org {
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
                     remove(relationName: string, variableNameToRemove: string): org.mwg.task.Task;
                     math(expression: string): org.mwg.task.Task;
+                    split(splitPattern: string): org.mwg.task.Task;
                     repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     printResult(): org.mwg.task.Task;
-                    static template(input: string, context: org.mwg.task.TaskContext): string;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
@@ -1606,6 +1627,7 @@ declare module org {
                     setResult(actionResult: any): void;
                     private internal_setResult(actionResult, safe);
                     cleanObj(o: any): void;
+                    template(input: string): string;
                 }
                 module math {
                     class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {

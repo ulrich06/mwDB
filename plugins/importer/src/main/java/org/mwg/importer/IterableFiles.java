@@ -14,7 +14,7 @@ public class IterableFiles extends AbstractIterable {
         if(!file.exists()) {
             URL url = this.getClass().getClassLoader().getResource(path);
             if(url == null) {
-                throw new RuntimeException("File " + path + "does not exist and it is not present in resources directory.");
+                throw new RuntimeException("File " + path + " does not exist and it is not present in resources directory.");
             }
             file = new File(url.getPath());
         }

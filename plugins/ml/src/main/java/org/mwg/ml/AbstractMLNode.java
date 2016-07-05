@@ -52,8 +52,8 @@ public abstract class AbstractMLNode extends AbstractNode {
             String[] split = query.split(FROM_SEPARATOR);
             Task[] tasks = new Task[split.length];
             for (int i = 0; i < split.length; i++) {
-                Task t = setWorld(world());
-                t.setTime(time());
+                Task t = setWorld(""+world());
+                t.setTime(time()+"");
                 t.parse(split[i].trim());
                 tasks[i] = t;
             }

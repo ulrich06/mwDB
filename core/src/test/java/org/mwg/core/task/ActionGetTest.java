@@ -119,7 +119,7 @@ public class ActionGetTest extends AbstractActionTest {
                     }
                 }).execute(graph, null);
 
-        setTime(12)
+        inject(12).asVar("time").setTime("{{time}}")
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndex("childrenIndexed", "name=node2")
                 .then(new Action() {
@@ -143,7 +143,7 @@ public class ActionGetTest extends AbstractActionTest {
                     }
                 }).execute(graph,null);
 
-        setTime(13)
+        inject(13).asVar("time").setTime("{{time}}")
                 .fromIndex("rootIndex", "name=root2")
                 .traverseIndexAll("childrenIndexed")
                 .then(new Action() {

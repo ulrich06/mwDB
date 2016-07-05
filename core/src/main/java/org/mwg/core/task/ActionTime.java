@@ -5,16 +5,26 @@ import org.mwg.task.TaskContext;
 
 class ActionTime implements TaskAction {
 
-    private final long _time;
+    private final String _varName;
 
-    ActionTime(final long p_time) {
-        this._time = p_time;
+    ActionTime(final String p_varName) {
+        this._varName = p_varName;
     }
 
     @Override
     public void eval(final TaskContext context) {
-        context.setTime(_time);
+        String flat = context.template(_varName);
+        context.setTime(parse(flat));
         context.setUnsafeResult(context.result());
     }
 
+    /**
+     * @native ts
+     * return parseInt(flat);
+     */
+    private long parse(String flat) {
+        return Long.parseLong(flat);
+    }
+
 }
+

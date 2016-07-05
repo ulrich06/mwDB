@@ -28,12 +28,12 @@ public class Actions {
         return _internalBuilder.newTask();
     }
 
-    public static Task setWorld(long world) {
-        return newTask().setWorld(world);
+    public static Task setWorld(String variableName) {
+        return newTask().setWorld(variableName);
     }
 
-    public static Task setTime(long world) {
-        return newTask().setTime(world);
+    public static Task setTime(String variableName) {
+        return newTask().setTime(variableName);
     }
 
     public static Task then(Action action) {
@@ -162,6 +162,14 @@ public class Actions {
 
     public static Task ifThen(TaskFunctionConditional cond, Task then) {
         return newTask().ifThen(cond, then);
+    }
+
+    public static Task split(String splitPattern) {
+        return newTask().split(splitPattern);
+    }
+
+    public static Task lookup(String world, String time, String id) {
+        return newTask().lookup(world, time, id);
     }
 
 }

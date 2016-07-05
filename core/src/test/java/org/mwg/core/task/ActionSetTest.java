@@ -8,6 +8,7 @@ import org.mwg.Type;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
+import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.setWorld;
 
 public class ActionSetTest extends ActionNewNodeTest {
@@ -20,9 +21,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithOneNode() {
         final long[] id = new long[1];
-        setWorld(0)
-                .setTime(0)
-                .inject("node").asVar("nodeName")
+        inject("node").asVar("nodeName")
                 .newNode()
                 .setProperty("name", Type.STRING, "nodeName")
                 .then(new Action() {
@@ -34,7 +33,7 @@ public class ActionSetTest extends ActionNewNodeTest {
 
                         id[0] = node.id();
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
             @Override
@@ -47,9 +46,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithArray() {
         final long[] ids = new long[5];
-        setWorld(0)
-                .setTime(0)
-                .inject("node").asVar("nodeName")
+        inject("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -72,7 +69,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
@@ -87,9 +84,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithNull() {
         final boolean[] nextCalled = new boolean[1];
-        setWorld(0)
-                .setTime(0)
-                .inject("node").asVar("nodeName")
+        inject("node").asVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -102,7 +97,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         Assert.assertTrue(nextCalled[0]);
     }

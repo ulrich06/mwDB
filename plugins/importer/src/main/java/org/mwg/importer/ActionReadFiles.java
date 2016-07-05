@@ -1,6 +1,5 @@
 package org.mwg.importer;
 
-import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -18,7 +17,11 @@ public class ActionReadFiles implements TaskAction{
         Object previous = context.result();
         context.cleanObj(previous);
         Object res;
-        String path = Task.template(_pathOrTemplate,context);
+
+        String path = context.template(_pathOrTemplate);
+        if(path == null) {
+            throw new RuntimeException("Variable " + _pathOrTemplate + " does not exist in the context");
+        }
         res = new IterableFiles(path);
 
         context.setUnsafeResult(res);

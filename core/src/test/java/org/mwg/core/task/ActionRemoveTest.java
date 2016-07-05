@@ -8,7 +8,7 @@ import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
-import static org.mwg.task.Actions.setWorld;
+import static org.mwg.task.Actions.*;
 
 public class ActionRemoveTest extends AbstractActionTest {
 
@@ -22,9 +22,7 @@ public class ActionRemoveTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] id = new long[1];
-        setWorld(0)
-                .setTime(0)
-                .newNode()
+        newNode()
                 .inject(relatedNode).asVar("x")
                 .add("friend", "x")
                 .remove("friend", "x")
@@ -36,7 +34,7 @@ public class ActionRemoveTest extends AbstractActionTest {
                         Assert.assertNull(node.get("friend"));
                         id[0] = node.id();
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
 
         graph.lookup(0, 0, id[0], new Callback<Node>() {
@@ -52,9 +50,7 @@ public class ActionRemoveTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] ids = new long[5];
-        setWorld(0)
-                .setTime(0)
-                .inject(relatedNode).asVar("x")
+        inject(relatedNode).asVar("x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -78,7 +74,7 @@ public class ActionRemoveTest extends AbstractActionTest {
                             ids[i] = nodes[i].id();
                         }
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         for (int i = 0; i < ids.length; i++) {
             graph.lookup(0, 0, ids[i], new Callback<Node>() {
@@ -97,15 +93,12 @@ public class ActionRemoveTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final boolean[] nextCalled = new boolean[1];
-        setWorld(0)
-                .setTime(0)
-                .then(new Action() {
-                    @Override
-                    public void eval(TaskContext context) {
-                        context.setResult(null);
-                    }
-                })
-                .inject(relatedNode).asVar("x")
+        then(new Action() {
+            @Override
+            public void eval(TaskContext context) {
+                context.setResult(null);
+            }
+        }).inject(relatedNode).asVar("x")
                 .add("friend", "x")
                 .remove("friend", "x")
                 .then(new Action() {
@@ -113,7 +106,7 @@ public class ActionRemoveTest extends AbstractActionTest {
                     public void eval(TaskContext context) {
                         nextCalled[0] = true;
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         Assert.assertTrue(nextCalled[0]);
     }

@@ -31,14 +31,14 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task setWorld(long world) {
-        addAction(new ActionWorld(world));
+    public final org.mwg.task.Task setWorld(String variableName) {
+        addAction(new ActionWorld(variableName));
         return this;
     }
 
     @Override
-    public final org.mwg.task.Task setTime(long time) {
-        addAction(new ActionTime(time));
+    public final org.mwg.task.Task setTime(String variableName) {
+        addAction(new ActionTime(variableName));
         return this;
     }
 
@@ -257,18 +257,22 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
+    @Override
+    public Task lookup(String world, String time, String id) {
+        addAction(new ActionLookup(world, time, id));
+        return this;
+    }
 
     @Override
     public void executeWith(Graph graph, TaskContext parentContext, Object initialResult, Callback<Object> result) {
         if (_actionCursor == 0) {
             if (result != null) {
-                result.on(protect(graph,initialResult));
+                result.on(protect(graph, initialResult));
             }
         } else {
             final org.mwg.task.TaskContext context = new CoreTaskContext(parentContext, protect(graph, initialResult), graph, _actions, _actionCursor, result);
             _actions[0].eval(context);
         }
-
     }
 
     @Override
@@ -459,6 +463,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task split(String splitPattern) {
+        addAction(new ActionSplit(splitPattern));
+        return this;
+    }
+
+    @Override
     public Task repeat(int repetition, Task subTask) {
         addAction(new ActionRepeat(repetition, subTask));
         return this;
@@ -473,40 +483,6 @@ public class CoreTask implements org.mwg.task.Task {
     public Task printResult() {
         addAction(new ActionPrintResult());
         return this;
-    }
-
-    public static String template(String input, TaskContext context) {
-        int cursor = 1;
-        StringBuilder buffer = null;
-        int previousPos = -1;
-        while (cursor < input.length()) {
-            if (input.charAt(cursor) == '{' && input.charAt(cursor - 1) == '{') {
-                previousPos = cursor + 1;
-            } else if (previousPos != -1 && input.charAt(cursor) == '}' && input.charAt(cursor - 1) == '}') {
-                if (buffer == null) {
-                    buffer = new StringBuilder();
-                    buffer.append(input.substring(0, previousPos - 2));
-                }
-                String contextKey = input.substring(previousPos, cursor - 1).trim();
-                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
-                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
-                    buffer.append(mathEngine.eval(null, context, new HashMap<String, Double>()));
-                } else {
-                    buffer.append(context.variable(contextKey));
-                }
-                previousPos = -1;
-            } else {
-                if (previousPos == -1 && buffer != null) {
-                    buffer.append(input.charAt(cursor));
-                }
-            }
-            cursor++;
-        }
-        if (buffer == null) {
-            return input;
-        } else {
-            return buffer.toString();
-        }
     }
 
     public static void fillDefault(Map<String, TaskActionFactory> registry) {

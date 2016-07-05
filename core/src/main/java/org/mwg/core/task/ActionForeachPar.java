@@ -17,7 +17,8 @@ class ActionForeachPar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        final GenericIterable genericIterable = new GenericIterable(context.result());
+        final Object previousResult = context.result();
+        final GenericIterable genericIterable = new GenericIterable(previousResult);
         int plainEstimation = genericIterable.estimate();
         if (plainEstimation == -1) {
             plainEstimation = 16;
@@ -48,6 +49,7 @@ class ActionForeachPar implements TaskAction {
             results = shrinked_res;
         }
 
+        context.cleanObj(previousResult);
         context.setUnsafeResult(results);
 
     }

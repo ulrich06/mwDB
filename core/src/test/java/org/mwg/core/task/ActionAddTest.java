@@ -8,7 +8,7 @@ import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 
-import static org.mwg.task.Actions.setWorld;
+import static org.mwg.task.Actions.*;
 
 public class ActionAddTest extends AbstractActionTest {
 
@@ -21,9 +21,7 @@ public class ActionAddTest extends AbstractActionTest {
     public void testWithOneNode() {
         Node relatedNode = graph.newNode(0, 0);
         final long[] id = new long[1];
-        setWorld(0)
-                .setTime(0)
-                .newNode()
+        newNode()
                 .inject(relatedNode).asVar("x")
                 .add("friend", "x")
                 .then(new Action() {
@@ -50,9 +48,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] ids = new long[5];
-        setWorld(0)
-                .setTime(0)
-                .inject(relatedNode).asVar("x")
+        inject(relatedNode).asVar("x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -94,15 +90,13 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final boolean[] nextCalled = new boolean[1];
-        setWorld(0)
-                .setTime(0)
-                .then(new Action() {
-                    @Override
-                    public void eval(TaskContext context) {
-                        context.setResult(null);
-                    }
-                })
-                .inject(relatedNode).asVar("x")
+
+        then(new Action() {
+            @Override
+            public void eval(TaskContext context) {
+                context.setResult(null);
+            }
+        }).inject(relatedNode).asVar("x")
                 .add("friend", "x")
                 .then(new Action() {
                     @Override
