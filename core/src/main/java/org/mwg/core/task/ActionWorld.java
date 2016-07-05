@@ -13,7 +13,7 @@ class ActionWorld implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        String flat = CoreTask.template(_varName, context);
+        String flat = context.template(_varName);
         context.setWorld(parse(flat));
         context.setUnsafeResult(context.result());
     }

@@ -485,45 +485,6 @@ public class CoreTask implements org.mwg.task.Task {
         return this;
     }
 
-    public static String template(String input, TaskContext context) {
-        int cursor = 0;
-        StringBuilder buffer = null;
-        int previousPos = -1;
-        while (cursor < input.length()) {
-            char currentChar = input.charAt(cursor);
-            char previousChar = '0';
-            if(cursor > 0){
-                previousChar = input.charAt(cursor -1);
-            }
-            if (currentChar == '{' && previousChar == '{') {
-                previousPos = cursor + 1;
-            } else if (previousPos != -1 && currentChar == '}' && previousChar == '}') {
-                if (buffer == null) {
-                    buffer = new StringBuilder();
-                    buffer.append(input.substring(0, previousPos - 2));
-                }
-                String contextKey = input.substring(previousPos, cursor - 1).trim();
-                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
-                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
-                    buffer.append(mathEngine.eval(null, context, new HashMap<String, Double>()));
-                } else {
-                    buffer.append(context.variable(contextKey));
-                }
-                previousPos = -1;
-            } else {
-                if (previousPos == -1 && buffer != null) {
-                    buffer.append(input.charAt(cursor));
-                }
-            }
-            cursor++;
-        }
-        if (buffer == null) {
-            return input;
-        } else {
-            return buffer.toString();
-        }
-    }
-
     public static void fillDefault(Map<String, TaskActionFactory> registry) {
         registry.put("get", new TaskActionFactory() { //DefaultTask
             @Override

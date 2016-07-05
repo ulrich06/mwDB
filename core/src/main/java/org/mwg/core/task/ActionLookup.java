@@ -20,13 +20,13 @@ class ActionLookup implements TaskAction {
     @Override
     public void eval(TaskContext context) {
 
-        String parsedWorldResult = CoreTask.template(_world, context);
+        String parsedWorldResult = context.template(_world);
         long worldL = parse(parsedWorldResult);
 
-        String parseTimeResult = CoreTask.template(_time, context);
+        String parseTimeResult = context.template(_time);
         long timeL = parse(parseTimeResult);
 
-        String parsedId = CoreTask.template(_id, context);
+        String parsedId = context.template(_id);
         long idL = parse(parsedId);
 
         Object previous = context.result();

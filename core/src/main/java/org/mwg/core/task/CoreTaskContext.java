@@ -3,6 +3,8 @@ package org.mwg.core.task;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.Node;
+import org.mwg.core.task.math.CoreMathExpressionEngine;
+import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.core.utility.GenericIterable;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractIterable;
@@ -10,11 +12,12 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CoreTaskContext implements TaskContext {
+class CoreTaskContext implements TaskContext {
 
     private final Map<String, Object> _variables;
     private final boolean shouldFreeVar;
@@ -30,7 +33,7 @@ public class CoreTaskContext implements TaskContext {
     private long _world;
     private long _time;
 
-    public CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
+    CoreTaskContext(final TaskContext p_parentContext, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
@@ -217,6 +220,46 @@ public class CoreTaskContext implements TaskContext {
                 }
                 current = genericIterable.next();
             }
+        }
+    }
+
+    @Override
+    public String template(String input) {
+        int cursor = 0;
+        StringBuilder buffer = null;
+        int previousPos = -1;
+        while (cursor < input.length()) {
+            char currentChar = input.charAt(cursor);
+            char previousChar = '0';
+            if (cursor > 0) {
+                previousChar = input.charAt(cursor - 1);
+            }
+            if (currentChar == '{' && previousChar == '{') {
+                previousPos = cursor + 1;
+            } else if (previousPos != -1 && currentChar == '}' && previousChar == '}') {
+                if (buffer == null) {
+                    buffer = new StringBuilder();
+                    buffer.append(input.substring(0, previousPos - 2));
+                }
+                String contextKey = input.substring(previousPos, cursor - 1).trim();
+                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
+                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
+                    buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));
+                } else {
+                    buffer.append(variable(contextKey));
+                }
+                previousPos = -1;
+            } else {
+                if (previousPos == -1 && buffer != null) {
+                    buffer.append(input.charAt(cursor));
+                }
+            }
+            cursor++;
+        }
+        if (buffer == null) {
+            return input;
+        } else {
+            return buffer.toString();
         }
     }
 

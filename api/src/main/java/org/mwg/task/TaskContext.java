@@ -18,7 +18,7 @@ public interface TaskContext {
     Object variable(String name);
 
     void setVariable(String name, Object value);
-    
+
     void addToVariable(String name, Object value);
 
     //Object based results
@@ -41,4 +41,6 @@ public interface TaskContext {
     void setResult(Object actionResult);
 
     void cleanObj(Object o);
+
+    String template(String input);
 }
