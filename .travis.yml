@@ -21,6 +21,5 @@ branches:
 before_install:
   - sudo apt-get purge nodejs npm
   - curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-  - sudo apt-get -qq update
-  - sudo apt-get install nodejs
+  - sudo apt-get install -y nodejs
   - node -v
