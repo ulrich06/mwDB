@@ -1,26 +1,29 @@
 package org.mwg;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.importer.ActionReadFiles;
 import org.mwg.importer.ImporterPlugin;
 import org.mwg.task.Task;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
+import static org.mwg.importer.ImporterActions.readFiles;
 import static org.mwg.importer.ImporterActions.readLines;
 import static org.mwg.task.Actions.*;
 
 public class ImporterTest {
 
     @Test
-    public void test() {
+    public void testReadLines() {
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
         final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
         g.connect(connectionResult -> {
             Node newNode = g.newNode(0, 0);
-            //final Task t = readLines("/Users/duke/dev/mwDB/plugins/importer/src/test/resources/smarthome/smarthome_1.T15.txt")
+            //final Task t = readLines("/Users/duke/dev/mwDB/plugins/importer/src/testReadLines/resources/smarthome/smarthome_1.T15.txt")
             final Task t = readLines("smarthome/smarthome_1.T15.txt")
                     .foreach(
                             ifThen(ctx -> !ctx.resultAsString().startsWith("1:Date"),
@@ -41,8 +44,90 @@ public class ImporterTest {
                             ));
             t.execute(g, null);
         });
-
-
     }
+
+    @Test
+    public void testReadFilesStaticMethod() {
+        File fileChecked = new File(this.getClass().getClassLoader().getResource("smarthome").getPath());
+        final File[] subFiles = fileChecked.listFiles();
+
+        final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
+        g.connect(connectionResult -> {
+            final int[] nbFile = new int[1];
+            Task t = readFiles("smarthome").foreach(then(context -> {
+                File file = (File) context.result();
+                Assert.assertEquals(subFiles[nbFile[0]].getAbsolutePath(),file.getAbsolutePath());
+                nbFile[0] ++;
+                context.setResult(null);
+            }));
+            t.execute(g,null);
+
+            Assert.assertEquals(subFiles.length,nbFile[0]);
+        });
+    }
+
+    @Test
+    public void testReadFilesActionWithTemplate() {
+        File fileChecked = new File(this.getClass().getClassLoader().getResource("smarthome").getPath());
+        final File[] subFiles = fileChecked.listFiles();
+
+        final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
+        g.connect(connectionResult -> {
+            final int[] nbFile = new int[1];
+            Task t = inject("smarthome")
+                    .asVar("fileName")
+                    .action(ActionReadFiles.READFILES_NAME,"{{fileName}}")
+                    .foreach(then(context -> {
+                        File file = (File) context.result();
+                        Assert.assertEquals(subFiles[nbFile[0]].getAbsolutePath(),file.getAbsolutePath());
+                        nbFile[0] ++;
+                        context.setResult(null);
+                    }));
+            t.execute(g,null);
+
+            Assert.assertEquals(subFiles.length,nbFile[0]);
+        });
+    }
+
+    @Test
+    public void testReadFilesOnFile() {
+        final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
+        g.connect(connectionResult -> {
+            final int[] nbFile = new int[1];
+            Task t = readFiles("smarthome/readme.md").foreach(then(context -> {
+                File file = (File) context.result();
+                Assert.assertEquals("readme.md",file.getName());
+                nbFile[0] ++;
+                context.setResult(null);
+            }));
+            t.execute(g,null);
+
+            Assert.assertEquals(1,nbFile[0]);
+        });
+    }
+
+    @Test
+    public void testReadFileOnUnknowFile() {
+        final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
+        g.connect(connectionResult -> {
+            final int[] nbFile = new int[1];
+            Task t = readFiles("nonexistent-file.txt").foreach(then(context -> {
+                File file = (File) context.result();
+                Assert.assertEquals("readme.md",file.getName());
+                nbFile[0] ++;
+                context.setResult(null);
+            }));
+
+            boolean exceptionCaught = false;
+            try {
+                t.execute(g, null);
+            } catch (RuntimeException exception) {
+                exceptionCaught = true;
+            }
+
+            Assert.assertTrue(exceptionCaught);
+        });
+    }
+
 
 }

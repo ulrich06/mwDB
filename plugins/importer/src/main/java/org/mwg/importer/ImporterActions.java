@@ -10,4 +10,8 @@ public class ImporterActions {
         return newTask().action(ActionReadLines.READLINE_NAME, path);
     }
 
+    public static Task readFiles(String pathOrVar) {
+        return newTask().action(ActionReadFiles.READFILES_NAME,pathOrVar);
+    }
+
 }
