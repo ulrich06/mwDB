@@ -6,7 +6,7 @@ import java.io.File;
 
 public class GeneratorTest {
 
-    @Test
+    //@Test
     public void test() throws Exception {
         Generator gen = new Generator();
         gen.scan(new File("/Users/duke/dev/kmf/generator/src/test/resources"));
