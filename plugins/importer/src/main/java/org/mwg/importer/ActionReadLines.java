@@ -7,11 +7,9 @@ import java.io.FileNotFoundException;
 
 class ActionReadLines implements TaskAction {
 
-    public static final String READLINE_NAME = "readLines";
-
     private final String _path;
 
-    protected ActionReadLines(String p_path) {
+    ActionReadLines(String p_path) {
         this._path = p_path;
     }
 

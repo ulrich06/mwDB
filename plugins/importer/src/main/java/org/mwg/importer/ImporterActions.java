@@ -6,12 +6,16 @@ import static org.mwg.task.Actions.newTask;
 
 public class ImporterActions {
 
+    public static final String READFILES = "readFiles";
+
+    public static final String READLINES = "readLines";
+
     public static Task readLines(String path) {
-        return newTask().action(ActionReadLines.READLINE_NAME, path);
+        return newTask().action(READLINES, path);
     }
 
     public static Task readFiles(String pathOrVar) {
-        return newTask().action(ActionReadFiles.READFILES_NAME,pathOrVar);
+        return newTask().action(READFILES,pathOrVar);
     }
 
 }

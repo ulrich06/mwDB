@@ -7,21 +7,21 @@ import org.mwg.task.TaskActionFactory;
 public class ImporterPlugin extends AbstractPlugin {
 
     public ImporterPlugin() {
-        declareTaskAction(ActionReadLines.READLINE_NAME, new TaskActionFactory() {
+        declareTaskAction(ImporterActions.READLINES, new TaskActionFactory() {
             @Override
             public TaskAction create(String[] params) {
                 if (params.length != 1) {
-                    throw new RuntimeException(ActionReadLines.READLINE_NAME + " action need one parameter");
+                    throw new RuntimeException(ImporterActions.READLINES + " action need one parameter");
                 }
                 return new ActionReadLines(params[0]);
             }
         });
 
-        declareTaskAction(ActionReadFiles.READFILES_NAME, new TaskActionFactory() {
+        declareTaskAction(ImporterActions.READFILES, new TaskActionFactory() {
             @Override
             public TaskAction create(String[] params) {
                 if (params.length != 1) {
-                    throw new RuntimeException(ActionReadFiles.READFILES_NAME + " action need one parameter");
+                    throw new RuntimeException(ImporterActions.READFILES + " action need one parameter");
                 }
                 return new ActionReadFiles(params[0]);
             }

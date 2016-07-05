@@ -5,7 +5,7 @@ import org.mwg.plugin.AbstractIterable;
 import java.io.File;
 import java.net.URL;
 
-public class IterableFiles extends AbstractIterable {
+class IterableFiles extends AbstractIterable {
     private File[] _files;
     private int _nextIndex;
 

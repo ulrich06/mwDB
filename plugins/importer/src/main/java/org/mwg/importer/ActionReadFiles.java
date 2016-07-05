@@ -3,12 +3,11 @@ package org.mwg.importer;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-public class ActionReadFiles implements TaskAction{
-    public static final String READFILES_NAME = "readFiles";
+class ActionReadFiles implements TaskAction{
 
     private final String _pathOrTemplate;
 
-    protected ActionReadFiles(String _pathOrTemplate) {
+    ActionReadFiles(String _pathOrTemplate) {
         this._pathOrTemplate = _pathOrTemplate;
     }
 
