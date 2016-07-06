@@ -28,7 +28,7 @@ class ActionTime implements TaskAction {
 
     @Override
     public String toString() {
-        return "setTime(" + _varName + ")";
+        return "setTime(\'" + _varName + "\')";
     }
 
 }

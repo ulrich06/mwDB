@@ -42,7 +42,7 @@ class ActionAdd implements TaskAction {
 
     @Override
     public String toString() {
-        return "add(" + _relationName + Constants.QUERY_SEP + _variableNameToAdd + ")";
+        return "add(\'" + _relationName + "\'" + Constants.QUERY_SEP + "\'" + _variableNameToAdd + "\')";
     }
 
 }

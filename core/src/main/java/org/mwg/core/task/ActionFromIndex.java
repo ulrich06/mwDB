@@ -29,7 +29,7 @@ class ActionFromIndex implements TaskAction {
 
     @Override
     public String toString() {
-        return "fromIndex(" + _indexName + Constants.QUERY_SEP + _query + ")";
+        return "fromIndex(\'" + _indexName + "\'" + Constants.QUERY_SEP + "\'" + _query + "\')";
     }
 
 }

@@ -28,7 +28,7 @@ class ActionWorld implements TaskAction {
 
     @Override
     public String toString() {
-        return "setWorld(" + _varName + ")";
+        return "setWorld(\'" + _varName + "\')";
     }
 
 }

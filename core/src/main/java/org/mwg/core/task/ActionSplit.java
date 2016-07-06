@@ -27,7 +27,7 @@ class ActionSplit implements TaskAction {
 
     @Override
     public String toString() {
-        return "split(" + _splitPattern + ")";
+        return "split(\'" + _splitPattern + "\')";
     }
 
 }
