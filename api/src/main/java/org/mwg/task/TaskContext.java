@@ -47,4 +47,9 @@ public interface TaskContext {
     void cleanObj(Object o);
 
     String template(String input);
+
+    boolean isVerbose();
+
+    int ident();
+
 }

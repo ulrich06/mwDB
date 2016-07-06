@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
@@ -70,6 +71,11 @@ class ActionSetProperty implements TaskAction {
                 setFromArray((Object[]) objs[i], relName, toSet);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "setProperty(" + _relationName + Constants.QUERY_SEP + _propertyType + Constants.QUERY_SEP + _variableNameToSet + ")";
     }
 
 }

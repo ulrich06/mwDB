@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
@@ -69,5 +70,9 @@ class ActionMap implements TaskAction {
         }
     }
 
+    @Override
+    public String toString() {
+        return "map()";
+    }
 
 }

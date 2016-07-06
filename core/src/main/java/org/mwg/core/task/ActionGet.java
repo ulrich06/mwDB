@@ -1,9 +1,6 @@
 package org.mwg.core.task;
 
-import org.mwg.Callback;
-import org.mwg.DeferCounter;
-import org.mwg.Node;
-import org.mwg.Type;
+import org.mwg.*;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
@@ -115,4 +112,8 @@ class ActionGet implements TaskAction {
         }
     }
 
+    @Override
+    public String toString() {
+        return "get(" + _name + ")";
+    }
 }

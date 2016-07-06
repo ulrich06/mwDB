@@ -19,4 +19,9 @@ class ActionWrapper implements TaskAction {
         _wrapped.eval(context);
     }
 
+    @Override
+    public String toString() {
+        return "then()";
+    }
+
 }

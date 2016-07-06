@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
@@ -78,6 +79,11 @@ class ActionTraverse implements TaskAction {
                 loop.free();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "traverse(" + _name + ")";
     }
 
 }

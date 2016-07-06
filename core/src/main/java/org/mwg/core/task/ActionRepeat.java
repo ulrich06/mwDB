@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
@@ -36,14 +37,19 @@ class ActionRepeat implements TaskAction {
                         context.setResult(results);
                     } else {
                         //recursive call
-                        selfPointer._subTask.executeWith(context.graph(), context.variables(), nextCursor, recursiveAction[0]);
+                        selfPointer._subTask.executeFrom(context, nextCursor, recursiveAction[0]);
                     }
                 }
             };
-            _subTask.executeWith(context.graph(), context.variables(), cursor.get(), recursiveAction[0]);
+            _subTask.executeFrom(context, cursor.get(), recursiveAction[0]);
         } else {
             context.setResult(results);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "repeat(" + _iteration + ")";
     }
 
 }

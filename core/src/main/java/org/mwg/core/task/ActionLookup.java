@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -47,6 +48,11 @@ class ActionLookup implements TaskAction {
      */
     private long parse(String flat) {
         return Long.parseLong(flat);
+    }
+
+    @Override
+    public String toString() {
+        return "lookup(" + _world + Constants.QUERY_SEP + _time + Constants.QUERY_SEP + _id + ")";
     }
 
 }

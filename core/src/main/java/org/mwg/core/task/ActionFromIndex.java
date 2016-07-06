@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
@@ -24,6 +25,11 @@ class ActionFromIndex implements TaskAction {
                 context.setResult(result);
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return "fromIndex(" + _indexName + Constants.QUERY_SEP + _query + ")";
     }
 
 }

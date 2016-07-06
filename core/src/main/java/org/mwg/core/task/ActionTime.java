@@ -26,5 +26,10 @@ class ActionTime implements TaskAction {
         return Long.parseLong(flat);
     }
 
+    @Override
+    public String toString() {
+        return "setTime(" + _varName + ")";
+    }
+
 }
 

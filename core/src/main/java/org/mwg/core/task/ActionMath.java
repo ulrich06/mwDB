@@ -14,9 +14,12 @@ import java.util.Map;
 
 class ActionMath implements TaskAction {
 
-    MathExpressionEngine _engine;
+    final MathExpressionEngine _engine;
+
+    final String _expression;
 
     ActionMath(String mathExpression) {
+        _expression = mathExpression;
         _engine = CoreMathExpressionEngine.parse(mathExpression);
     }
 
@@ -48,6 +51,11 @@ class ActionMath implements TaskAction {
                 arrayEval((Object[]) objs[i], result, context);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "math(" + _expression + ")";
     }
 
 }

@@ -18,7 +18,7 @@ public class TrampolineSchedulerTest {
         g.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                repeatPar(100, printResult()).execute(g, new Callback<Object>() {
+                repeatPar(100, print("{{result}}")).execute(g, new Callback<Object>() {
                     @Override
                     public void on(Object result) {
                         System.out.println();

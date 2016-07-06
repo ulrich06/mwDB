@@ -277,7 +277,7 @@ public interface Task {
 
     Task split(String splitPattern);
 
-    Task lookup(String world,String time, String id);
+    Task lookup(String world, String time, String id);
 
     /**
      * Execute a math expression on all nodes given from previous step
@@ -291,10 +291,12 @@ public interface Task {
 
     Task repeatPar(int repetition, Task subTask);
 
-    Task printResult();
+    Task print(String name);
 
     void execute(final Graph graph, final Callback<Object> result);
 
-    void executeWith(final Graph graph, final Map<String,Object> variables, Object initialResult, final Callback<Object> result);
+    void executeWith(final Graph graph, final Map<String, Object> variables, Object initialResult, final boolean isVerbose, final Callback<Object> result);
+
+    void executeFrom(final TaskContext parent, final Object initialResult, final Callback<Object> result);
 
 }

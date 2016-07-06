@@ -1,8 +1,10 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.Query;
+import org.mwg.core.CoreConstants;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
@@ -117,4 +119,11 @@ class ActionTraverseIndex implements TaskAction {
         }
         return nbNoadToLoad;
     }
+
+    @Override
+    public String toString() {
+        return "traverseIndex(" + _indexName + CoreConstants.QUERY_SEP + _query + ")";
+    }
+
 }
+

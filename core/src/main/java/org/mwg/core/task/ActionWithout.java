@@ -22,4 +22,9 @@ class ActionWithout extends ActionSelect {
         });
     }
 
+    @Override
+    public String toString() {
+        return "without()";
+    }
+
 }

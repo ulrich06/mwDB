@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.Constants;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -14,6 +15,11 @@ class ActionSave implements TaskAction {
                 context.setUnsafeResult(context.result());
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return "save()";
     }
 
 }

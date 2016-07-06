@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
@@ -38,4 +39,10 @@ class ActionAdd implements TaskAction {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "add(" + _relationName + Constants.QUERY_SEP + _variableNameToAdd + ")";
+    }
+
 }

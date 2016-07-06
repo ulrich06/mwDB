@@ -28,7 +28,7 @@ class ActionForeach implements TaskAction {
         Object loop = genericIterable.next();
         while (loop != null) {
             final DeferCounter waiter = context.graph().newCounter(1);
-            _subTask.executeWith(context.graph(), context.variables(), loop, waiter.wrap());
+            _subTask.executeFrom(context, loop, waiter.wrap());
 
             if (index >= results.length) {
                 Object[] doubled_res = new Object[results.length * 2];
@@ -47,10 +47,16 @@ class ActionForeach implements TaskAction {
             System.arraycopy(results, 0, shrinked_res, 0, index);
             results = shrinked_res;
         }
-        
+
         context.cleanObj(previousResult);
         context.setUnsafeResult(results);
 
     }
+
+    @Override
+    public String toString() {
+        return "foreach()";
+    }
+
 
 }
