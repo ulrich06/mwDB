@@ -225,16 +225,10 @@ class CoreTaskContext implements TaskContext {
 
 
     void executeFirst(final Graph graph) {
-        final TaskContext selfPointer = this;
-        graph.scheduler().dispatch(new Job() {
-            @Override
-            public void run() {
-                if (verbose) {
-                    printDebug(_actions[0]);
-                }
-                _actions[0].eval(selfPointer);
-            }
-        });
+        if (verbose) {
+            printDebug(_actions[0]);
+        }
+        _actions[0].eval(this);
     }
 
     @Override
@@ -291,12 +285,12 @@ class CoreTaskContext implements TaskContext {
                     }
                     if (foundVar != null) {
                         //todo complexify
-                        if(foundVar instanceof Object[]) {
+                        if (foundVar instanceof Object[]) {
                             buffer.append("[");
                             Object[] foundVarTab = (Object[]) foundVar;
-                            for(int i=0;i<foundVarTab.length;i++) {
+                            for (int i = 0; i < foundVarTab.length; i++) {
                                 buffer.append(foundVarTab[i]);
-                                if(i < foundVarTab.length - 1) {
+                                if (i < foundVarTab.length - 1) {
                                     buffer.append(",");
                                 }
                             }

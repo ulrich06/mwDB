@@ -27,7 +27,7 @@ class ActionRepeatPar implements TaskAction {
             DeferCounter waiter = context.graph().newCounter(_iteration);
             for (int i = 0; i < _iteration; i++) {
                 final int finalI = i;
-                _subTask.executeFrom(context, finalI, new Callback<Object>() {
+                _subTask.executeFromPar(context, finalI, new Callback<Object>() {
                     @Override
                     public void on(Object result) {
                         results[finalI] = result;

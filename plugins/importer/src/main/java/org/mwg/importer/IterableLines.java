@@ -43,4 +43,5 @@ class IterableLines extends AbstractIterable {
     public int estimate() {
         return -1;
     }
+
 }

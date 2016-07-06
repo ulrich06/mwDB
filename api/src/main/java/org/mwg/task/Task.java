@@ -299,4 +299,6 @@ public interface Task {
 
     void executeFrom(final TaskContext parent, final Object initialResult, final Callback<Object> result);
 
+    void executeFromPar(final TaskContext parent, final Object initialResult, final Callback<Object> result);
+
 }

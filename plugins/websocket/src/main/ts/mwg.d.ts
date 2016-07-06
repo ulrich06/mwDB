@@ -746,6 +746,7 @@ declare module org {
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                 executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, isVerbose: boolean, result: org.mwg.Callback<any>): void;
                 executeFrom(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
+                executeFromPar(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -1639,6 +1640,7 @@ declare module org {
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
                     executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, isVerbose: boolean, result: org.mwg.Callback<any>): void;
                     executeFrom(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
+                    executeFromPar(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
                     execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;

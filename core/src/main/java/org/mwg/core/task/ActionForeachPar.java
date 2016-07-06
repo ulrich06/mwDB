@@ -32,8 +32,8 @@ class ActionForeachPar implements TaskAction {
         while (loopObj != null) {
             final int finalIndex = index;
             index++;
-            Object finalLoopObj = loopObj;
-            _subTask.executeFrom(context, loopObj, new Callback<Object>() {
+            final Object finalLoopObj = loopObj;
+            _subTask.executeFromPar(context, finalLoopObj, new Callback<Object>() {
                 @Override
                 public void on(Object result) {
                     flatResult[finalIndex] = result;

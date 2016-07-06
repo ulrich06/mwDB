@@ -5,9 +5,11 @@ import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -120,7 +122,7 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final Task selectObject(TaskFunctionSelectObject filterFunction) {
-        if(filterFunction == null) {
+        if (filterFunction == null) {
             throw new RuntimeException("filterFunction should not be null");
         }
         addAction(new ActionSelectObject(filterFunction));
@@ -291,6 +293,29 @@ public class CoreTask implements org.mwg.task.Task {
         } else {
             final CoreTaskContext context = new CoreTaskContext(parent.variables(), protect(graph, initialResult), graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
             context.executeFirst(graph);
+        }
+    }
+
+    @Override
+    public void executeFromPar(final TaskContext parent, final Object initialResult, final Callback<Object> result) {
+        final Graph graph = parent.graph();
+        if (_actionCursor == 0) {
+            if (result != null) {
+                result.on(protect(graph, initialResult));
+            }
+        } else {
+            final Map<String, Object> cloned = new HashMap<String, Object>();
+            String[] keys = cloned.keySet().toArray(new String[cloned.keySet().size()]);
+            for (int i = 0; i < keys.length; i++) {
+                cloned.put(keys[i], parent.variable(keys[i]));
+            }
+            graph.scheduler().dispatch(new Job() {
+                @Override
+                public void run() {
+                    final CoreTaskContext context = new CoreTaskContext(cloned, protect(graph, initialResult), graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
+                    context.executeFirst(graph);
+                }
+            });
         }
     }
 
