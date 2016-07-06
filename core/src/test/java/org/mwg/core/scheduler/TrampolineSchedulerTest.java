@@ -24,7 +24,6 @@ public class TrampolineSchedulerTest {
                         System.out.println();
                     }
                 });
-
             }
         });
     }

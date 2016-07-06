@@ -11,34 +11,33 @@ import java.util.Iterator;
  * input = null;
  * max = -1;
  * constructor(elem){
- *  super();
- *  if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
- *      this.isArray = true;
- *      this.max = elem.length;
- *  }
- *  this.input = elem;
+ * super();
+ * if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
+ * this.isArray = true;
+ * this.max = elem.length;
+ * }
+ * this.input = elem;
  * }
  * next(): any {
- *     if(this.isArray){
- *         var res = this.input[this.index];
- *         this.index = this.index + 1;
- *         return res;
- *     } else {
- *         if(this.input != null){
- *             var res = this.input;
- *             this.input = null;
- *             return res;
- *         } else {
- *             return null;
- *         }
- *     }
+ * if(this.isArray){
+ * var res = this.input[this.index];
+ * this.index = this.index + 1;
+ * return res;
+ * } else {
+ * if(this.input != null){
+ * var res = this.input;
+ * this.input = null;
+ * return res;
+ * } else {
+ * return null;
+ * }
+ * }
  * }
  * close():void{
  * }
  * estimate():number{
- *     return this.max;
+ * return this.max;
  * }
- *
  */
 public class GenericIterable extends AbstractIterable {
 
@@ -104,12 +103,10 @@ public class GenericIterable extends AbstractIterable {
             type = 10;
         } else {
             plainObj = elem;
+            max = 1;
             type = 11;
         }
     }
-
-
-
 
     @Override
     public Object next() {
