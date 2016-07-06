@@ -106,9 +106,10 @@ class CoreTaskContext implements TaskContext {
         final Object result = this._variables.get(name);
         final Object protectedVar = CoreTask.protect(_graph, value);
         if (result == null) {
-            final Object[] newArr = new Object[1];
+            /*final Object[] newArr = new Object[1];
             newArr[0] = protectedVar;
-            this._variables.put(name, newArr);
+            this._variables.put(name, newArr);*/
+            this._variables.put(name, protectedVar);
         } else if (result instanceof Object[]) {
             final Object[] previous = (Object[]) result;
             final Object[] incArr = new Object[previous.length + 1];
