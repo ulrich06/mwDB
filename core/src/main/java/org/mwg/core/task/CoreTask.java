@@ -482,7 +482,8 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task repeatPar(int repetition, Task subTask) {
-        throw new RuntimeException("Not implemented yet!");
+        addAction(new ActionRepeatPar(repetition, subTask));
+        return this;
     }
 
     @Override

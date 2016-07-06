@@ -1462,6 +1462,12 @@ declare module org {
                     constructor(p_iteration: number, p_subTask: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
+                class ActionRepeatPar implements org.mwg.task.TaskAction {
+                    private _subTask;
+                    private _iteration;
+                    constructor(p_iteration: number, p_subTask: org.mwg.task.Task);
+                    eval(context: org.mwg.task.TaskContext): void;
+                }
                 class ActionSave implements org.mwg.task.TaskAction {
                     eval(context: org.mwg.task.TaskContext): void;
                 }

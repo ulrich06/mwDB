@@ -197,15 +197,15 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public void connect(final Callback<Boolean> callback) {
         final CoreGraph selfPointer = this;
-        this._scheduler.dispatch(new Job() {
-            @Override
-            public void run() {
-                //negociate a lock
-                while (selfPointer._lock.compareAndSet(false, true)) ;
-                //ok we have it, let's go
-                if (_isConnected.compareAndSet(false, true)) {
-                    //first connect the scheduler
-                    selfPointer._scheduler.start();
+        //negociate a lock
+        while (selfPointer._lock.compareAndSet(false, true)) ;
+        //ok we have it, let's go
+        if (_isConnected.compareAndSet(false, true)) {
+            //first connect the scheduler
+            selfPointer._scheduler.start();
+            selfPointer._scheduler.dispatch(new Job() {
+                @Override
+                public void run() {
                     selfPointer._storage.connect(selfPointer, new Callback<Boolean>() {
                         @Override
                         public void on(Boolean connection) {
@@ -298,15 +298,15 @@ class CoreGraph implements org.mwg.Graph {
                             });
                         }
                     });
-                } else {
-                    //already connected
-                    selfPointer._lock.set(true);
-                    if (PrimitiveHelper.isDefined(callback)) {
-                        callback.on(null);
-                    }
                 }
+            });
+        } else {
+            //already connected
+            selfPointer._lock.set(true);
+            if (PrimitiveHelper.isDefined(callback)) {
+                callback.on(null);
             }
-        });
+        }
     }
 
     @Override
