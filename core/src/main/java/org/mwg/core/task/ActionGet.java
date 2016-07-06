@@ -114,6 +114,6 @@ class ActionGet implements TaskAction {
 
     @Override
     public String toString() {
-        return "get(" + _name + ")";
+        return "get(\'" + _name + "\')";
     }
 }

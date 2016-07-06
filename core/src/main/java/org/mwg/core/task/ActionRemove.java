@@ -42,7 +42,7 @@ class ActionRemove implements TaskAction {
 
     @Override
     public String toString() {
-        return "remove(" + _relationName + Constants.QUERY_SEP + _variableNameToRemove + ")";
+        return "remove(\'" + _relationName + "\'" + Constants.QUERY_SEP + "\'" + _variableNameToRemove + "\')";
     }
 
 

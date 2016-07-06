@@ -62,7 +62,7 @@ public abstract class AbstractMLNode extends AbstractNode {
             final DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
-                tasks[i].executeWith(graph(), null, this, new Callback<Object>() {
+                tasks[i].executeWith(graph(), null, this,false, new Callback<Object>() {
                     @Override
                     public void on(Object currentResult) {
                         if (currentResult == null) {

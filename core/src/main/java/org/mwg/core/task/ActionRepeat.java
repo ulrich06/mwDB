@@ -49,7 +49,7 @@ class ActionRepeat implements TaskAction {
 
     @Override
     public String toString() {
-        return "repeat(" + _iteration + ")";
+        return "repeat(\'" + _iteration + "\')";
     }
 
 }

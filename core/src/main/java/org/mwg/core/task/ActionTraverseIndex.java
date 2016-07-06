@@ -122,7 +122,7 @@ class ActionTraverseIndex implements TaskAction {
 
     @Override
     public String toString() {
-        return "traverseIndex(" + _indexName + CoreConstants.QUERY_SEP + _query + ")";
+        return "traverseIndex(\'" + _indexName + CoreConstants.QUERY_SEP + _query + "\')";
     }
 
 }

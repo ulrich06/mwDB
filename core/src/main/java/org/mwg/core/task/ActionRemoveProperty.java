@@ -37,7 +37,7 @@ class ActionRemoveProperty implements TaskAction {
 
     @Override
     public String toString() {
-        return "removeProperty(" + _propertyName + ")";
+        return "removeProperty(\'" + _propertyName + "\')";
     }
 
 

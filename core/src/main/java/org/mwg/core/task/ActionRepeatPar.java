@@ -48,7 +48,7 @@ class ActionRepeatPar implements TaskAction {
 
     @Override
     public String toString() {
-        return "repeatPar(" + _iteration + ")";
+        return "repeatPar(\'" + _iteration + "\')";
     }
 
 }
