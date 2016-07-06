@@ -165,6 +165,14 @@ public interface Graph {
     DeferCounter newCounter(int expectedEventsCount);
 
     /**
+     * Utility method to create a sync waiter based on a counter
+     *
+     * @param expectedEventsCount number of events expected before running a task.
+     * @return The waiter object.
+     */
+    DeferCounterSync newSyncCounter(int expectedEventsCount);
+
+    /**
      * Retrieves the current resolver
      *
      * @return current resolver

@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.DeferCounter;
+import org.mwg.DeferCounterSync;
 import org.mwg.core.utility.GenericIterable;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
@@ -27,7 +28,7 @@ class ActionForeach implements TaskAction {
 
         Object loop = genericIterable.next();
         while (loop != null) {
-            final DeferCounter waiter = context.graph().newCounter(1);
+            final DeferCounterSync waiter = context.graph().newSyncCounter(1);
             _subTask.executeFrom(context, loop, waiter.wrap());
 
             if (index >= results.length) {

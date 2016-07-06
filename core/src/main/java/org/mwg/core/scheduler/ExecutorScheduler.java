@@ -3,6 +3,7 @@ package org.mwg.core.scheduler;
 import org.mwg.plugin.Job;
 import org.mwg.plugin.Scheduler;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,7 +27,7 @@ public class ExecutorScheduler implements Scheduler {
             public void run() {
                 try {
                     job.run();
-                } catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -36,9 +37,9 @@ public class ExecutorScheduler implements Scheduler {
     @Override
     public void start() {
         if (_workers == -1) {
-            this.service = Executors.newCachedThreadPool();
+            this.service = Executors.newWorkStealingPool();
         } else {
-            this.service = Executors.newFixedThreadPool(this._workers);
+            this.service = Executors.newWorkStealingPool(_workers);
         }
     }
 

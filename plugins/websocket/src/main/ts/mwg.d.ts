@@ -318,6 +318,8 @@ declare module org {
             count(): void;
             then(job: org.mwg.plugin.Job): void;
             wrap(): org.mwg.Callback<any>;
+        }
+        interface DeferCounterSync extends org.mwg.DeferCounter {
             waitResult(): any;
         }
         interface Graph {
@@ -337,6 +339,7 @@ declare module org {
             findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
             getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
             newCounter(expectedEventsCount: number): org.mwg.DeferCounter;
+            newSyncCounter(expectedEventsCount: number): org.mwg.DeferCounterSync;
             resolver(): org.mwg.plugin.Resolver;
             scheduler(): org.mwg.plugin.Scheduler;
             space(): org.mwg.plugin.ChunkSpace;
@@ -1286,6 +1289,7 @@ declare module org {
                 getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
                 private getIndexOrCreate(world, time, indexName, callback, createIfNull);
                 newCounter(expectedCountCalls: number): org.mwg.DeferCounter;
+                newSyncCounter(expectedCountCalls: number): org.mwg.DeferCounterSync;
                 resolver(): org.mwg.plugin.Resolver;
                 scheduler(): org.mwg.plugin.Scheduler;
                 space(): org.mwg.plugin.ChunkSpace;
@@ -1817,6 +1821,15 @@ declare module org {
                     next(): org.mwg.struct.Buffer;
                 }
                 class CoreDeferCounter implements org.mwg.DeferCounter {
+                    private _nb_down;
+                    private _counter;
+                    private _end;
+                    constructor(nb: number);
+                    count(): void;
+                    then(p_callback: org.mwg.plugin.Job): void;
+                    wrap(): org.mwg.Callback<any>;
+                }
+                class CoreDeferCounterSync implements org.mwg.DeferCounterSync {
                     private _nb_down;
                     private _counter;
                     private _end;

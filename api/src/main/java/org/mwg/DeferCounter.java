@@ -23,7 +23,5 @@ public interface DeferCounter {
     /**
      */
     Callback wrap();
-
-    Object waitResult();
-
+    
 }

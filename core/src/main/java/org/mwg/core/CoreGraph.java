@@ -7,6 +7,7 @@ import org.mwg.core.chunk.WorldOrderChunk;
 import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.BufferBuilder;
 import org.mwg.core.utility.CoreDeferCounter;
+import org.mwg.core.utility.CoreDeferCounterSync;
 import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.*;
 import org.mwg.struct.Buffer;
@@ -667,6 +668,11 @@ class CoreGraph implements org.mwg.Graph {
     @Override
     public DeferCounter newCounter(int expectedCountCalls) {
         return new CoreDeferCounter(expectedCountCalls);
+    }
+
+    @Override
+    public DeferCounterSync newSyncCounter(int expectedCountCalls) {
+        return new CoreDeferCounterSync(expectedCountCalls);
     }
 
     @Override

@@ -186,7 +186,7 @@ public class KDNode extends AbstractNode {
         long[] ids = (long[]) state.getFromKey(key);
         if (ids != null) {
             KDNode[] res = new KDNode[1];
-            DeferCounter counter = graph().newCounter(1);
+            DeferCounterSync counter = graph().newSyncCounter(1);
             graph().lookup(world(), time(), ids[0], new Callback<Node>() {
                 @Override
                 public void on(Node result) {
