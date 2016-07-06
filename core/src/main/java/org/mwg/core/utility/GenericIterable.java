@@ -7,54 +7,60 @@ import java.util.Iterator;
 /**
  * @native ts
  * index = 0;
- * isArray = false;
+ * array = false;
  * input = null;
  * max = -1;
  * constructor(elem){
  *  super();
  *  if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
- *      this.isArray = true;
+ *      this.array = true;
  *      this.max = elem.length;
  *  }
  *  this.input = elem;
  * }
+ *
  * next(): any {
- *     if(this.isArray){
- *         var res = this.input[this.index];
- *         this.index = this.index + 1;
- *         return res;
- *     } else {
- *         if(this.input != null){
- *             var res = this.input;
- *             this.input = null;
- *             return res;
- *         } else {
- *             return null;
- *         }
- *     }
- * }
- * close():void{
- * }
- * estimate():number{
- *     return this.max;
+ *  if(this.array){
+ *      var res = this.input[this.index];
+ *      this.index = this.index + 1;
+ *      return res;
+ *  } else {
+ *      if(this.input != null){
+ *          var res = this.input;
+ *          this.input = null;
+ *          return res;
+ *      } else {
+ *          return null;
+ *      }
+ *  }
  * }
  *
+ * close():void{
+ * }
+ *
+ * estimate():number{
+ *  return this.max;
+ * }
+ *
+ * isArray():boolean{
+ *  return this.array;
+ * }
  */
 public class GenericIterable extends AbstractIterable {
 
-    public static final int UNKNOW = -1;
-    public static final int OBJ_ARRAY = 0;
-    public static final int BOOL_ARRAY = 1;
-    public static final int BYTE_ARRAY = 2;
-    public static final int SHORT_ARRAY = 3;
-    public static final int CHAR_ARRAY = 4;
-    public static final int INT_ARRAY = 5;
-    public static final int LONG_ARRAY = 6;
-    public static final int FLOAT_ARRAY = 7;
-    public static final int DOUBLE_ARRAY = 8;
-    public static final int ITERABLE = 9;
-    public static final int ABS_ITERABLE = 10;
-    public static final int PLAIN_OBJ = 11;
+    private static final int UNKNOW = -1;
+    private static final int OBJ_ARRAY = 0;
+    private static final int BOOL_ARRAY = 1;
+    private static final int BYTE_ARRAY = 2;
+    private static final int SHORT_ARRAY = 3;
+    private static final int CHAR_ARRAY = 4;
+    private static final int INT_ARRAY = 5;
+    private static final int LONG_ARRAY = 6;
+    private static final int FLOAT_ARRAY = 7;
+    private static final int DOUBLE_ARRAY = 8;
+    private static final int ITERABLE = 9;
+    private static final int ABS_ITERABLE = 10;
+    private static final int PLAIN_OBJ = 11;
 
     private byte type = UNKNOW;
     private Object[] objArray = null;
@@ -119,11 +125,9 @@ public class GenericIterable extends AbstractIterable {
         } else {
             plainObj = elem;
             type = PLAIN_OBJ;
+            max = 1;
         }
     }
-
-
-
 
     @Override
     public Object next() {
@@ -233,7 +237,7 @@ public class GenericIterable extends AbstractIterable {
         return this.max;
     }
 
-    public byte getType() {
-        return type;
+    public boolean isArray() {
+        return type != UNKNOW && type != PLAIN_OBJ;
     }
 }

@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 
 import static org.mwg.importer.ImporterActions.readFiles;
 import static org.mwg.importer.ImporterActions.readLines;
+
 import static org.mwg.task.Actions.*;
 
 public class ImporterTest {
@@ -21,6 +22,7 @@ public class ImporterTest {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
         final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
         g.connect(connectionResult -> {
+
             Node newNode = g.newNode(0, 0);
             //final Task t = readLines("/Users/duke/dev/mwDB/plugins/importer/src/test/resources/smarthome/smarthome_1.T15.txt")
             final Task t = readLines("smarthome/smarthome_mini_1.T15.txt")
@@ -175,6 +177,7 @@ public class ImporterTest {
                                             .setProperty("value", Type.DOUBLE, "{{value}}")
                             ));
             t.execute(g, null);
+
         });
     }
 
