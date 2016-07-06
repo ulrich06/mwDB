@@ -194,8 +194,8 @@ public class ImporterTest {
                                             .setProperty("value", Type.DOUBLE, "{{value}}")
                                             .print("insertedNode: {{result}} {{value}}")
                             ));
-            //t.execute(g, null);
-            t.executeWith(g, null, null, true, null);
+            t.execute(g, null);
+            //t.executeWith(g, null, null, true, null); //with debug
         });
     }
 
