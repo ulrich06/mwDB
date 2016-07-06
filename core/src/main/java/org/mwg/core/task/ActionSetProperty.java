@@ -75,7 +75,7 @@ class ActionSetProperty implements TaskAction {
 
     @Override
     public String toString() {
-        return "setProperty(" + _relationName + Constants.QUERY_SEP + _propertyType + Constants.QUERY_SEP + _variableNameToSet + ")";
+        return "setProperty(\'" + _relationName + "\'" + Constants.QUERY_SEP + "\'" + _propertyType + "\'" + Constants.QUERY_SEP + "\'" + _variableNameToSet + "\')";
     }
 
 }

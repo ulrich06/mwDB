@@ -106,10 +106,9 @@ class CoreTaskContext implements TaskContext {
         final Object result = this._variables.get(name);
         final Object protectedVar = CoreTask.protect(_graph, value);
         if (result == null) {
-            /*final Object[] newArr = new Object[1];
+            final Object[] newArr = new Object[1];
             newArr[0] = protectedVar;
-            this._variables.put(name, newArr);*/
-            this._variables.put(name, protectedVar);
+            this._variables.put(name, newArr);
         } else if (result instanceof Object[]) {
             final Object[] previous = (Object[]) result;
             final Object[] incArr = new Object[previous.length + 1];
@@ -291,7 +290,20 @@ class CoreTaskContext implements TaskContext {
                         foundVar = result();
                     }
                     if (foundVar != null) {
-                        buffer.append(foundVar);
+                        //todo complexify
+                        if(foundVar instanceof Object[]) {
+                            buffer.append("[");
+                            Object[] foundVarTab = (Object[]) foundVar;
+                            for(int i=0;i<foundVarTab.length;i++) {
+                                buffer.append(foundVarTab[i]);
+                                if(i < foundVarTab.length - 1) {
+                                    buffer.append(",");
+                                }
+                            }
+                            buffer.append("]");
+                        } else {
+                            buffer.append(foundVar);
+                        }
                     } else {
                         throw new RuntimeException("Variable not found " + contextKey + " in:" + input);
                     }

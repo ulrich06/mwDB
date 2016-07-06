@@ -28,7 +28,7 @@ class ActionPrint implements TaskAction {
 
     @Override
     public String toString() {
-        return "print(" + _name + ")";
+        return "print(\'" + _name + "\')";
     }
 
 }

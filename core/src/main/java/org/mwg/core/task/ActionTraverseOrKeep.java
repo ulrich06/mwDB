@@ -87,7 +87,7 @@ class ActionTraverseOrKeep implements TaskAction {
 
     @Override
     public String toString() {
-        return "traverseOrKeep(" + _name + ")";
+        return "traverseOrKeep(\'" + _name + "\')";
     }
 
 }

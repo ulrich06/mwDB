@@ -55,7 +55,7 @@ class ActionMath implements TaskAction {
 
     @Override
     public String toString() {
-        return "math(" + _expression + ")";
+        return "math(\'" + _expression + "\')";
     }
 
 }

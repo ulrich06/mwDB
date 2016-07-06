@@ -19,7 +19,7 @@ class ActionFromVar implements TaskAction {
 
     @Override
     public String toString() {
-        return "fromVar(" + _name + ")";
+        return "fromVar(\'" + _name + "\')";
     }
 
 }

@@ -83,7 +83,7 @@ class ActionTraverse implements TaskAction {
 
     @Override
     public String toString() {
-        return "traverse(" + _name + ")";
+        return "traverse(\'" + _name + "\')";
     }
 
 }

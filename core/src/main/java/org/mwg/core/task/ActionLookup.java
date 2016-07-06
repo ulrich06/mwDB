@@ -52,7 +52,7 @@ class ActionLookup implements TaskAction {
 
     @Override
     public String toString() {
-        return "lookup(" + _world + Constants.QUERY_SEP + _time + Constants.QUERY_SEP + _id + ")";
+        return "lookup(\'" + _world + "\'" + Constants.QUERY_SEP + "\'" + _time + "\'" + Constants.QUERY_SEP + "\'" + _id + "\")";
     }
 
 }

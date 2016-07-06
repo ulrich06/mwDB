@@ -22,7 +22,7 @@ class ActionSetVar implements TaskAction {
 
     @Override
     public String toString() {
-        return "setVar(" + _name + ")";
+        return "setVar(\'" + _name + "\')";
     }
     
 }

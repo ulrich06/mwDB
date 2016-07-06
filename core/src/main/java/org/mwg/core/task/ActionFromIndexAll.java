@@ -26,7 +26,7 @@ class ActionFromIndexAll implements TaskAction {
 
     @Override
     public String toString() {
-        return "fromIndexAll(" + _indexName + ")";
+        return "fromIndexAll(\'" + _indexName + "\')";
     }
 
 }
