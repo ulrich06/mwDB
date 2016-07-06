@@ -20,13 +20,13 @@ class ActionSelect implements TaskAction {
         final Object previousResult = context.result();
         if (previousResult != null) {
             if (previousResult instanceof Object[]) {
-                context.setResult(filterArray((Object[]) previousResult));
+                context.setUnsafeResult(filterArray((Object[]) previousResult));
             } else if (previousResult instanceof AbstractNode) {
                 if (_filter.select((Node) previousResult)) {
-                    context.setResult(previousResult);
+                    context.setUnsafeResult(previousResult);
                 } else {
                     ((AbstractNode) previousResult).free();
-                    context.setResult(new Node[0]);
+                    context.setUnsafeResult(new Node[0]);
                 }
             } else {
                 context.setUnsafeResult(previousResult); //no map transform

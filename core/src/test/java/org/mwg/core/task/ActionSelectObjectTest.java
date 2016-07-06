@@ -1,0 +1,311 @@
+package org.mwg.core.task;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
+import org.mwg.task.Action;
+import org.mwg.task.TaskContext;
+import org.mwg.task.TaskFunctionSelectObject;
+
+import static org.mwg.task.Actions.newTask;
+
+public class ActionSelectObjectTest extends AbstractActionTest{
+
+    @Test
+    public void testSelectOneObject() {
+        initGraph();
+        startMemoryLeakTest();
+        newTask().inject(55)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return false;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNull(context.result());
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(55)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return true;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(55, context.result());
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(55)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return (Integer) object == 55;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(55, context.result());
+                    }
+                })
+                .execute(graph,null);
+
+        endMemoryLeakTest();
+        removeGraph();
+    }
+
+    /*@Test
+    public void testSelectObjectPrimitiveArray() {
+        for(int i=0;i<10;i++) {
+            Assert.assertEquals(1.,1.,0.);
+        }
+
+        *//*double[] toInject = new double[]{1,2,3,4,5,6,7,8,9,10};
+
+        initGraph();
+        startMemoryLeakTest();
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return false;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] objects = (Object[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return true;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+//                        Assert.assertNotNull(context.result());
+//                        Object[] doubleResult = (Object[]) context.result();
+//                        for(int i=0;i<toInject.length;i++) {
+//                            Assert.assertEquals(toInject[i],(Double)doubleResult[i],0);
+//                        }
+                        for(int i=0;i<10;i++) {
+                            Assert.assertEquals(1.,1.,0.);
+                        }
+                    }
+                })
+                .execute(graph,null);
+
+        for(int i=0;i<10;i++) {
+            Assert.assertEquals(1.,1.,0.);
+        }
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return (Double) object % 2 == 0;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Object[] evenNumbers = new Object[]{2., 4., 6., 8., 10.};
+                        Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
+                    }
+                })
+                .execute(graph,null);
+
+        endMemoryLeakTest();
+        removeGraph();*//*
+    }*/
+
+    @Test
+    public void testSelectObjectArray() {
+        Integer[] toInject = new Integer[]{1,2,3,4,5,6,7,8,9,10};
+
+        initGraph();
+        startMemoryLeakTest();
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return false;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] objects = (Object[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                        context.setUnsafeResult(null);
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return true;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertArrayEquals(toInject, (Object[]) context.result());
+                        context.setUnsafeResult(null);
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return (Integer) object % 2 == 0;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Integer[] evenNumbers = new Integer[]{2, 4, 6, 8, 10};
+                        Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
+                        context.setUnsafeResult(null);
+                    }
+                })
+                .execute(graph,null);
+
+        endMemoryLeakTest();
+        removeGraph();
+    }
+
+    @Test
+    public void testSelectComplexObjectArray() {
+        initGraph();
+
+        final Object[] innerTab = new Object[3];
+        innerTab[0] = 55;
+        final Node n1 = graph.newNode(0,0);
+        final Node n2 = graph.newNode(0,0);
+        innerTab[1] = n1;
+        innerTab[2] = n2;
+
+        final Object[] toInject = new Object[3];
+        final Node n3 = graph.newNode(0,0);
+        toInject[0] = n3;
+        toInject[1] = innerTab;
+        toInject[2] = "A simple String";
+
+       startMemoryLeakTest();
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return false;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] objects = (Object[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                        context.setUnsafeResult(null);
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return true;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        ActionSelectObjectTest.this.compareArray(toInject, (Object[]) context.result());
+                        context.setUnsafeResult(null);
+                    }
+                })
+                .execute(graph,null);
+
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return object instanceof AbstractNode;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] result = new Object[2];
+                        result[0] = n3;
+                        Object[] insideResult = new Object[2];
+                        insideResult[0] = n1;
+                        insideResult[1] = n2;
+                        result[1] = insideResult;
+
+                        ActionSelectObjectTest.this.compareArray(result, (Object[]) context.result());
+
+                        context.setUnsafeResult(null);
+
+                    }
+                })
+                .execute(graph,null);
+
+        n1.free();
+        n2.free();
+        n3.free();
+
+        endMemoryLeakTest();
+
+        removeGraph();
+    }
+
+    private void compareArray(Object[] expected,Object[] result) {
+        Assert.assertNotNull(result);
+
+        Assert.assertEquals(expected.length,result.length);
+
+        for(int i=0;i<expected.length;i++) {
+            if(expected[i] instanceof Object[]) {
+                compareArray((Object[])expected[i],(Object[])result[i]);
+            } else if(expected[i] instanceof AbstractNode) {
+                Assert.assertEquals(((Node)expected[i]).id(),((Node)result[i]).id());
+            } else {
+                Assert.assertEquals(expected[i],result[i]);
+            }
+        }
+    }
+
+}

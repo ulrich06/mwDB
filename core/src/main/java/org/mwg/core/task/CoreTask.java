@@ -119,6 +119,15 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public final Task selectObject(TaskFunctionSelectObject filterFunction) {
+        if(filterFunction == null) {
+            throw new RuntimeException("filterFunction should not be null");
+        }
+        addAction(new ActionSelectObject(filterFunction));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task selectWhere(org.mwg.task.Task subTask) {
         throw new RuntimeException("Not implemented yet");
     }

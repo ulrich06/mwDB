@@ -7,10 +7,10 @@ import java.io.FileNotFoundException;
 
 class ActionReadLines implements TaskAction {
 
-    private final String _path;
+    private final String _pathOrTemplate;
 
-    ActionReadLines(String p_path) {
-        this._path = p_path;
+    ActionReadLines(String p_pathOrTemplate) {
+        this._pathOrTemplate = p_pathOrTemplate;
     }
 
     @Override
@@ -18,8 +18,10 @@ class ActionReadLines implements TaskAction {
         Object previous = context.result();
         context.cleanObj(previous);
         Object res = null;
+
+        String path = context.template(_pathOrTemplate);
         try {
-            res = new IterableLines(_path);
+            res = new IterableLines(path);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
