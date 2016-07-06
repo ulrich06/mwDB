@@ -62,12 +62,7 @@ public class QueryTest implements Resolver {
     public void freeNode(Node node) {
 
     }
-
-    @Override
-    public <A extends Node> Job lookupJob(long world, long time, long id, Callback<A> callback) {
-        return null;
-    }
-
+    
     @Override
     public <A extends Node> void lookup(long world, long time, long id, Callback<A> callback) {
 

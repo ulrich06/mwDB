@@ -571,7 +571,6 @@ declare module org {
                 markNodeAndGetType(node: org.mwg.Node): number;
                 initWorld(parentWorld: number, childWorld: number): void;
                 freeNode(node: org.mwg.Node): void;
-                lookupJob<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): org.mwg.plugin.Job;
                 lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
                 resolveState(node: org.mwg.Node, allowDephasing: boolean): org.mwg.plugin.NodeState;
                 newState(node: org.mwg.Node, world: number, time: number): org.mwg.plugin.NodeState;
@@ -1336,7 +1335,6 @@ declare module org {
                 initWorld(parentWorld: number, childWorld: number): void;
                 freeNode(node: org.mwg.Node): void;
                 lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
-                lookupJob<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): org.mwg.plugin.Job;
                 private resolve_world(globalWorldOrder, nodeWorldOrder, timeToResolve, originWorld);
                 private getOrLoadAndMark(type, world, time, id, callback);
                 private getOrLoadAndMarkAll(types, keys, callback);

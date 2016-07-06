@@ -48,17 +48,6 @@ public interface Resolver {
     void freeNode(Node node);
 
     /**
-     * Creates a lookup job to retrieve a particular node based on world/time/node_id
-     *
-     * @param world    The world identifier
-     * @param time     The timepoint.
-     * @param id       The id of the node to retrieve.
-     * @param callback Called when the node is retrieved.
-     * @return The created lookup job to be given to the scheduler.
-     */
-    <A extends Node> Job lookupJob(long world, long time, long id, Callback<A> callback);
-
-    /**
      * Creates and schedules a lookup task.
      *
      * @param world    The world identifier
