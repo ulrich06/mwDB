@@ -160,6 +160,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         Object[] objects = (Object[]) context.result();
                         Assert.assertNotNull(context.result());
                         Assert.assertEquals(0, objects.length);
+                        context.setUnsafeResult(null);
                     }
                 })
                 .execute(graph,null);
@@ -176,6 +177,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                     public void eval(TaskContext context) {
                         Assert.assertNotNull(context.result());
                         Assert.assertArrayEquals(toInject, (Object[]) context.result());
+                        context.setUnsafeResult(null);
                     }
                 })
                 .execute(graph,null);
@@ -193,6 +195,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         Assert.assertNotNull(context.result());
                         Integer[] evenNumbers = new Integer[]{2, 4, 6, 8, 10};
                         Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
+                        context.setUnsafeResult(null);
                     }
                 })
                 .execute(graph,null);
@@ -233,6 +236,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         Object[] objects = (Object[]) context.result();
                         Assert.assertNotNull(context.result());
                         Assert.assertEquals(0, objects.length);
+                        context.setUnsafeResult(null);
                     }
                 })
                 .execute(graph,null);
@@ -248,6 +252,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                     @Override
                     public void eval(TaskContext context) {
                         ActionSelectObjectTest.this.compareArray(toInject, (Object[]) context.result());
+                        context.setUnsafeResult(null);
                     }
                 })
                 .execute(graph,null);
@@ -271,6 +276,8 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         result[1] = insideResult;
 
                         ActionSelectObjectTest.this.compareArray(result, (Object[]) context.result());
+
+                        context.setUnsafeResult(null);
 
                     }
                 })
