@@ -45,6 +45,6 @@ class IterableFiles extends AbstractIterable {
 
     @Override
     public int estimate() {
-        return -1;
+        return _filesPath.length;
     }
 }
