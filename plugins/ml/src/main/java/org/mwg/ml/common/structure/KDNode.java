@@ -203,7 +203,7 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
+    private static void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
         // 1. if kd is empty exit.
         if (node == null) {
             return;
@@ -367,7 +367,7 @@ public class KDNode extends AbstractNode {
                             node.free();
                         }
                         if(result==null|| result.length==0|| result[0]==null){
-                            System.out.println("res right null! "+result.length+" "+right[0]);
+                            System.out.println("RES RIGHT NULL !!! "+result.length+" "+right[0]);
                         }
                         else {
                             internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
@@ -401,7 +401,7 @@ public class KDNode extends AbstractNode {
                             node.free();
                         }
                         if(result==null|| result.length==0|| result[0]==null){
-                            System.out.println("res left null! "+result.length+" "+left[0]);
+                            System.out.println("RES LEFT NULL !!!! "+result.length+" "+left[0]);
                         }
                         else {
                             internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
