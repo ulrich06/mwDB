@@ -203,7 +203,7 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
+    private static void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
         // 1. if kd is empty exit.
         if (node == null) {
             return;
@@ -316,7 +316,7 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] key, final int lev, final int dim, final double err, final Node value, final Callback<Boolean> callback) {
+    private static void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] key, final int lev, final int dim, final double err, final Node value, final Callback<Boolean> callback) {
         NodeState state = node.unphasedState();
         double[] tk = (double[]) state.getFromKey(INTERNAL_KEY);
         if (tk == null) {
@@ -331,6 +331,7 @@ public class KDNode extends AbstractNode {
             if (callback != null) {
                 callback.on(true);
             }
+            return;
 
         } else if (distance.measure(key, tk) < err) {
             state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{value.id()});
@@ -340,11 +341,12 @@ public class KDNode extends AbstractNode {
             if (callback != null) {
                 callback.on(true);
             }
+            return;
         } else if (key[lev] > tk[lev]) {
             //check right
             long[] right = (long[]) state.getFromKey(INTERNAL_RIGHT);
-            if (right == null) {
-                KDNode rightNode = (KDNode) graph().newTypedNode(world(), time(), NAME);
+            if (right == null||right.length==0) {
+                KDNode rightNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
                 rightNode.set(INTERNAL_KEY, key);
                 rightNode.add(INTERNAL_VALUE, value);
                 state.setFromKey(INTERNAL_RIGHT, Type.RELATION, new long[]{rightNode.id()});
@@ -356,6 +358,7 @@ public class KDNode extends AbstractNode {
                 if (callback != null) {
                     callback.on(true);
                 }
+                return;
             } else {
                 node.rel(INTERNAL_RIGHT, new Callback<Node[]>() {
                     @Override
@@ -363,15 +366,21 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        if(result==null|| result.length==0|| result[0]==null){
+                            System.out.println("RES RIGHT NULL !!! "+result.length+" "+right[0]);
+                        }
+                        else {
+                            internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        }
                     }
                 });
+                return;
             }
 
         } else {
             long[] left = (long[]) state.getFromKey(INTERNAL_LEFT);
             if (left == null) {
-                KDNode leftNode = (KDNode) graph().newTypedNode(world(), time(), NAME);
+                KDNode leftNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
                 leftNode.set(INTERNAL_KEY, key);
                 leftNode.add(INTERNAL_VALUE, value);
                 state.setFromKey(INTERNAL_LEFT, Type.RELATION, new long[]{leftNode.id()});
@@ -383,6 +392,7 @@ public class KDNode extends AbstractNode {
                 if (callback != null) {
                     callback.on(true);
                 }
+                return;
             } else {
                 node.rel(INTERNAL_LEFT, new Callback<Node[]>() {
                     @Override
@@ -390,9 +400,15 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        if(result==null|| result.length==0|| result[0]==null){
+                            System.out.println("RES LEFT NULL !!!! "+result.length+" "+left[0]);
+                        }
+                        else {
+                            internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        }
                     }
                 });
+                return;
             }
         }
     }
