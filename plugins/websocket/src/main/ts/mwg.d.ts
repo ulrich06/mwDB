@@ -26,6 +26,9 @@ declare module java {
             static NEGATIVE_INFINITY: number;
             static NaN: number;
         }
+        class Long {
+            static parseLong(d: any): number;
+        }
     }
     namespace util {
         namespace concurrent {
@@ -1511,6 +1514,7 @@ declare module org {
                     constructor(filterFunction: org.mwg.task.TaskFunctionSelectObject);
                     eval(context: org.mwg.task.TaskContext): void;
                     private filter(current, context);
+                    toString(): string;
                 }
                 class ActionSetProperty implements org.mwg.task.TaskAction {
                     private _relationName;

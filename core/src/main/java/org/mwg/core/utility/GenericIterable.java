@@ -11,39 +11,39 @@ import java.util.Iterator;
  * input = null;
  * max = -1;
  * constructor(elem){
- *  super();
- *  if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
- *      this.array = true;
- *      this.max = elem.length;
- *  }
- *  this.input = elem;
+ * super();
+ * if(Array.isArray(elem) || elem instanceof Int8Array || elem instanceof Int16Array || elem instanceof Int32Array || elem instanceof Uint8Array || elem instanceof Uint8ClampedArray || elem instanceof Uint16Array || elem instanceof Uint32Array || elem instanceof Float32Array || elem instanceof Float64Array){
+ * this.array = true;
+ * this.max = elem.length;
  * }
- *
+ * this.input = elem;
+ * }
+ * <p>
  * next(): any {
- *  if(this.array){
- *      var res = this.input[this.index];
- *      this.index = this.index + 1;
- *      return res;
- *  } else {
- *      if(this.input != null){
- *          var res = this.input;
- *          this.input = null;
- *          return res;
- *      } else {
- *          return null;
- *      }
- *  }
+ * if(this.array){
+ * var res = this.input[this.index];
+ * this.index = this.index + 1;
+ * return res;
+ * } else {
+ * if(this.input != null){
+ * var res = this.input;
+ * this.input = null;
+ * return res;
+ * } else {
+ * return null;
  * }
- *
+ * }
+ * }
+ * <p>
  * close():void{
  * }
- *
+ * <p>
  * estimate():number{
- *  return this.max;
+ * return this.max;
  * }
- *
+ * <p>
  * isArray():boolean{
- *  return this.array;
+ * return this.array;
  * }
  */
 public class GenericIterable extends AbstractIterable {
@@ -122,6 +122,7 @@ public class GenericIterable extends AbstractIterable {
         } else if (elem instanceof AbstractIterable) {
             absIterable = (AbstractIterable) elem;
             type = ABS_ITERABLE;
+            max = absIterable.estimate();
         } else {
             plainObj = elem;
             type = PLAIN_OBJ;

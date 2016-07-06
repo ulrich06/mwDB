@@ -2,6 +2,7 @@ package org.mwg;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mwg.core.scheduler.ExecutorScheduler;
 import org.mwg.importer.ImporterActions;
 import org.mwg.importer.ImporterPlugin;
 import org.mwg.task.Action;
@@ -192,11 +193,39 @@ public class ImporterTest {
                                             .setTime("{{time}}")
                                             .lookup("0", "{{time}}", "" + newNode.id())
                                             .setProperty("value", Type.DOUBLE, "{{value}}")
-                                            //.print("insertedNode: {{result}} {{value}}")
+                                    //.print("insertedNode: {{result}} {{value}}")
                             ));
             //t.execute(g, null);
             t.executeWith(g, null, null, true, null); //with debug
         });
+    }
+
+    @Test
+    public void testV3() {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
+        final Graph g = new GraphBuilder()
+                .withPlugin(new ImporterPlugin())
+                .withScheduler(new ExecutorScheduler())
+                .build();
+        g.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                final Task t = readFiles("/Users/duke/Downloads/ex").foreachPar(print("{{result}}"));
+                t.executeWith(g, null, null, false, new Callback<Object>() {
+                    @Override
+                    public void on(Object result) {
+                        System.out.println("end!");
+                    }
+                });
+            }
+        });
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
