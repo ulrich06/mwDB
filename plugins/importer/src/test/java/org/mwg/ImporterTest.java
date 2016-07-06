@@ -210,7 +210,29 @@ public class ImporterTest {
         g.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                final Task t = readFiles("/Users/duke/Downloads/ex").foreachPar(print("{{result}}"));
+                final Task t = readFiles("/Users/duke/Downloads/ex")
+                        .foreachPar(
+                                then(new Action() {
+                                    @Override
+                                    public void eval(TaskContext context) {
+                                        //create node and set as var
+                                    }
+                                }).action("readLines", "{{result}}")
+                                        .foreach(
+                                                split(",").then(new Action() {
+                                                    @Override
+                                                    public void eval(TaskContext context) {
+                                                        String[] values = context.resultAsStringArray();
+                                                        //TODO lookup and train
+
+                                                        //end
+                                                        context.setUnsafeResult(null);
+
+
+                                                    }
+                                                })
+                                        )
+                        );
                 t.executeWith(g, null, null, false, new Callback<Object>() {
                     @Override
                     public void on(Object result) {

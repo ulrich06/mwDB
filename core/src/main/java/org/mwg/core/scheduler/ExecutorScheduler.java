@@ -24,7 +24,11 @@ public class ExecutorScheduler implements Scheduler {
         service.submit(new Runnable() {
             @Override
             public void run() {
-                job.run();
+                try {
+                    job.run();
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
     }
