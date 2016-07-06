@@ -6,9 +6,9 @@ import org.mwg.Node;
 import org.mwg.core.task.math.CoreMathExpressionEngine;
 import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.core.utility.GenericIterable;
-import org.mwg.core.utility.PrimitiveHelper;
 import org.mwg.plugin.AbstractIterable;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -26,13 +26,17 @@ class CoreTaskContext implements TaskContext {
     private final int _actionCursor;
     private final AtomicInteger _currentTaskId;
     private final Callback<Object> _callback;
+    private final boolean verbose;
+    private final int _ident;
 
     //Mutable current result handler
     private Object _result;
     private long _world;
     private long _time;
 
-    CoreTaskContext(final Map<String, Object> p_variables, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final Callback<Object> p_callback) {
+    CoreTaskContext(final Map<String, Object> p_variables, final Object initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final boolean isVerbose, final int p_ident, final Callback<Object> p_callback) {
+        this.verbose = isVerbose;
+        this._ident = p_ident;
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
@@ -48,6 +52,11 @@ class CoreTaskContext implements TaskContext {
         this._actionCursor = p_actionCursor;
         this._callback = p_callback;
         this._currentTaskId = new AtomicInteger(0);
+    }
+
+    @Override
+    public int ident() {
+        return this._ident;
     }
 
     @Override
@@ -194,15 +203,38 @@ class CoreTaskContext implements TaskContext {
                     cleanObj(variable(variables[i]));
                 }
             }
-
             this._result = null;
             /* End Clean */
             if (this._callback != null) {
                 this._callback.on(protectResult);
             }
         } else {
+            if (verbose) {
+                printDebug(nextAction);
+            }
             nextAction.eval(this);
         }
+    }
+
+    private void printDebug(TaskAction t) {
+        for (int i = 0; i < _ident; i++) {
+            System.out.print("\t");
+        }
+        System.out.println(t);
+    }
+
+
+    void executeFirst(final Graph graph) {
+        final TaskContext selfPointer = this;
+        graph.scheduler().dispatch(new Job() {
+            @Override
+            public void run() {
+                if (verbose) {
+                    printDebug(_actions[0]);
+                }
+                _actions[0].eval(selfPointer);
+            }
+        });
     }
 
     @Override
@@ -234,8 +266,12 @@ class CoreTaskContext implements TaskContext {
         while (cursor < input.length()) {
             char currentChar = input.charAt(cursor);
             char previousChar = '0';
+            char nextChar = '0';
             if (cursor > 0) {
                 previousChar = input.charAt(cursor - 1);
+            }
+            if (cursor + 1 < input.length()) {
+                nextChar = input.charAt(cursor + 1);
             }
             if (currentChar == '{' && previousChar == '{') {
                 previousPos = cursor + 1;
@@ -262,7 +298,12 @@ class CoreTaskContext implements TaskContext {
                 previousPos = -1;
             } else {
                 if (previousPos == -1 && buffer != null) {
-                    buffer.append(input.charAt(cursor));
+                    //check if we are not opening a {{
+                    if (currentChar == '{' && nextChar == '{') {
+                        //noop
+                    } else {
+                        buffer.append(input.charAt(cursor));
+                    }
                 }
             }
             cursor++;
@@ -274,4 +315,8 @@ class CoreTaskContext implements TaskContext {
         }
     }
 
+    @Override
+    public boolean isVerbose() {
+        return this.verbose;
+    }
 }

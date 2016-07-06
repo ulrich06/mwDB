@@ -17,4 +17,9 @@ class ActionFromVar implements TaskAction {
         //continue for next step
     }
 
+    @Override
+    public String toString() {
+        return "fromVar(" + _name + ")";
+    }
+
 }

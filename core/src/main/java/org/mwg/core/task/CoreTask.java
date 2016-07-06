@@ -4,14 +4,10 @@ import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.Graph;
 import org.mwg.Node;
-import org.mwg.core.task.math.CoreMathExpressionEngine;
-import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.Job;
 import org.mwg.task.*;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -265,25 +261,33 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void executeWith(final Graph graph, final Map<String, Object> variables, final Object initialResult, final Callback<Object> result) {
+    public void executeWith(final Graph graph, final Map<String, Object> variables, final Object initialResult, final boolean isVerbose, final Callback<Object> result) {
         if (_actionCursor == 0) {
             if (result != null) {
                 result.on(protect(graph, initialResult));
             }
         } else {
-            final org.mwg.task.TaskContext context = new CoreTaskContext(variables, protect(graph, initialResult), graph, _actions, _actionCursor, result);
-            graph.scheduler().dispatch(new Job() {
-                @Override
-                public void run() {
-                    _actions[0].eval(context);
-                }
-            });
+            final CoreTaskContext context = new CoreTaskContext(variables, protect(graph, initialResult), graph, _actions, _actionCursor, isVerbose, 0, result);
+            context.executeFirst(graph);
+        }
+    }
+
+    @Override
+    public void executeFrom(final TaskContext parent, final Object initialResult, final Callback<Object> result) {
+        final Graph graph = parent.graph();
+        if (_actionCursor == 0) {
+            if (result != null) {
+                result.on(protect(graph, initialResult));
+            }
+        } else {
+            final CoreTaskContext context = new CoreTaskContext(parent.variables(), protect(graph, initialResult), graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
+            context.executeFirst(graph);
         }
     }
 
     @Override
     public void execute(Graph graph, Callback<Object> result) {
-        executeWith(graph, null, null, result);
+        executeWith(graph, null, null, false, result);
     }
 
     @Override
@@ -487,8 +491,8 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task printResult() {
-        addAction(new ActionPrintResult());
+    public Task print(String name) {
+        addAction(new ActionPrint(name));
         return this;
     }
 

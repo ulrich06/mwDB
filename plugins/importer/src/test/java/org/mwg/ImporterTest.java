@@ -175,9 +175,10 @@ public class ImporterTest {
                                             .setTime("{{time}}")
                                             .lookup("0", "{{time}}", "" + newNode.id())
                                             .setProperty("value", Type.DOUBLE, "{{value}}")
+                                            .print("insertedNode: {{result}} {{value}}")
                             ));
-            t.execute(g, null);
-
+            //t.execute(g, null);
+            t.executeWith(g, null, null, true, null);
         });
     }
 

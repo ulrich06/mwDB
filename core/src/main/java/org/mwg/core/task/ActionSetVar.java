@@ -19,4 +19,10 @@ class ActionSetVar implements TaskAction {
         context.setVariable(this._name, this._value);
         context.setUnsafeResult(context.result());//trigger next step
     }
+
+    @Override
+    public String toString() {
+        return "setVar(" + _name + ")";
+    }
+    
 }

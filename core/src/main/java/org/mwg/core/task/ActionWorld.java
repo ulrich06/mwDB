@@ -26,4 +26,9 @@ class ActionWorld implements TaskAction {
         return Long.parseLong(flat);
     }
 
+    @Override
+    public String toString() {
+        return "setWorld(" + _varName + ")";
+    }
+
 }

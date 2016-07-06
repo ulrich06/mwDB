@@ -18,4 +18,10 @@ class ActionAsVar implements TaskAction {
         context.setUnsafeResult(previousResult);
     }
 
+    @Override
+    public String toString() {
+        return "add(" + _name + ")";
+    }
+
+
 }

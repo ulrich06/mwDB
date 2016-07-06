@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
@@ -73,6 +74,11 @@ class ActionSelect implements TaskAction {
                 return shrinkedResult;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "select()";
     }
 
 

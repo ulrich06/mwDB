@@ -112,8 +112,8 @@ public class Actions {
         return newTask().repeatPar(repetition, subTask);
     }
 
-    public static Task printResult() {
-        return newTask().printResult();
+    public static Task print(String name) {
+        return newTask().print(name);
     }
 
     public static Task setProperty(String propertyName, byte propertyType, String variableNameToSet) {

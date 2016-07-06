@@ -8,8 +8,6 @@ import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 class ActionForeachPar implements TaskAction {
 
     private final Task _subTask;
@@ -35,7 +33,7 @@ class ActionForeachPar implements TaskAction {
             final int finalIndex = index;
             index++;
             Object finalLoopObj = loopObj;
-            _subTask.executeWith(context.graph(), context.variables(), loopObj, new Callback<Object>() {
+            _subTask.executeFrom(context, loopObj, new Callback<Object>() {
                 @Override
                 public void on(Object result) {
                     flatResult[finalIndex] = result;
@@ -51,6 +49,11 @@ class ActionForeachPar implements TaskAction {
                 context.setUnsafeResult(flatResult);
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return "foreachPar()";
     }
 
 }

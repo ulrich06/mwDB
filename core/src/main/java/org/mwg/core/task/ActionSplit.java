@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.Constants;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -23,4 +24,10 @@ class ActionSplit implements TaskAction {
             context.setUnsafeResult(new String[0]);
         }
     }
+
+    @Override
+    public String toString() {
+        return "split(" + _splitPattern + ")";
+    }
+
 }

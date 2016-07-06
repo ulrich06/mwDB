@@ -16,7 +16,7 @@ class ActionPlugin implements TaskAction {
 
     private TaskAction subAction = null;
 
-    public ActionPlugin(String actionName, String flatParams) {
+    ActionPlugin(String actionName, String flatParams) {
         this._actionName = actionName;
         this._flatParams = flatParams;
     }
@@ -82,4 +82,10 @@ class ActionPlugin implements TaskAction {
             context.setResult(context.result());
         }
     }
+
+    @Override
+    public String toString() {
+        return _actionName + "(" + _flatParams + ")";
+    }
+
 }

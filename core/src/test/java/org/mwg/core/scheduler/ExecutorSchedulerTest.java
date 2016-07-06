@@ -5,7 +5,7 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 
-import static org.mwg.task.Actions.printResult;
+import static org.mwg.task.Actions.print;
 import static org.mwg.task.Actions.repeatPar;
 
 /**
@@ -20,7 +20,7 @@ public class ExecutorSchedulerTest {
             @Override
             public void on(Boolean result) {
 
-                repeatPar(100, printResult()).execute(g, new Callback<Object>() {
+                repeatPar(100, print("{{result}}")).execute(g, new Callback<Object>() {
                     @Override
                     public void on(Object result) {
                         System.out.println();
