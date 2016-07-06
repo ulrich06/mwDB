@@ -20,9 +20,13 @@ class IterableFiles extends AbstractIterable {
         }
 
         if(file.isDirectory()) {
-            _filesPath = file.list();
+            File[] listFiles = file.listFiles();
+            _filesPath = new String[listFiles.length];
+            for(int i=0;i<listFiles.length;i++) {
+                _filesPath[i] = listFiles[i].getAbsolutePath();
+            }
         } else {
-            _filesPath = new String[] {path};
+            _filesPath = new String[] {file.getAbsolutePath()};
         }
     }
 
