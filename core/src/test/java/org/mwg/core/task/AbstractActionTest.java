@@ -7,6 +7,7 @@ import org.mwg.core.scheduler.NoopScheduler;
 public abstract class AbstractActionTest {
 
     protected Graph graph;
+    protected long startMemory;
 
     protected void initGraph() {
         graph = new GraphBuilder().withScheduler(new NoopScheduler()).build();
@@ -45,6 +46,24 @@ public abstract class AbstractActionTest {
             @Override
             public void on(Boolean result) {
                 Assert.assertEquals(true, result);
+            }
+        });
+    }
+
+    protected void startMemoryLeakTest() {
+        graph.save(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+               startMemory = graph.space().available();
+            }
+        });
+    }
+
+    protected void endMemoryLeakTest() {
+        graph.save(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                Assert.assertEquals(startMemory,graph.space().available());
             }
         });
     }

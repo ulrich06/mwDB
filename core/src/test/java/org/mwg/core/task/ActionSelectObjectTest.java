@@ -4,57 +4,129 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.task.Action;
+import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelectObject;
 
 import static org.mwg.task.Actions.newTask;
 
-/**
-@ignore ts
- */
 public class ActionSelectObjectTest extends AbstractActionTest{
 
     @Test
     public void testSelectOneObject() {
         initGraph();
-        newTask().inject(new Integer(55))
+        startMemoryLeakTest();
+        newTask().inject(55)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
                     public boolean select(Object object) {
                         return false;
                     }
                 })
-                .then(context -> {
-                    Assert.assertNull(context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNull(context.result());
+                    }
                 })
                 .execute(graph,null);
 
-        newTask().inject(new Integer(55))
+        newTask().inject(55)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
                     public boolean select(Object object) {
                         return true;
                     }
                 })
-                .then(context -> {
-                    Assert.assertNotNull(context.result());
-                    Assert.assertEquals(55,context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(55, context.result());
+                    }
                 })
                 .execute(graph,null);
 
-        newTask().inject(new Integer(55))
+        newTask().inject(55)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
                     public boolean select(Object object) {
                         return (Integer) object == 55;
                     }
                 })
-                .then(context -> {
-                    Assert.assertNotNull(context.result());
-                    Assert.assertEquals(55,context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(55, context.result());
+                    }
                 })
                 .execute(graph,null);
 
+        endMemoryLeakTest();
+        removeGraph();
+    }
 
+    @Test
+    public void testSelectObjectPrimitiveArray() {
+        double[] toInject = new double[]{1,2,3,4,5,6,7,8,9,10};
+
+        initGraph();
+        startMemoryLeakTest();
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return false;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Double[] objects = (Double[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return true;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Double[] doubleResult = (Double[]) context.result();
+                        for(int i=0;i<toInject.length;i++) {
+//                            Assert.assertEquals(toInject[i],doubleResult[i],0);
+                        }
+                    }
+                })
+                .execute(graph,null);
+
+        newTask().inject(toInject)
+                .selectObject(new TaskFunctionSelectObject() {
+                    @Override
+                    public boolean select(Object object) {
+                        return (Double) object % 2 == 0;
+                    }
+                })
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Double[] evenNumbers = new Double[]{2., 4., 6., 8., 10.};
+                        Assert.assertArrayEquals(evenNumbers, (Double[]) context.result());
+                    }
+                })
+                .execute(graph,null);
+
+        endMemoryLeakTest();
         removeGraph();
     }
 
@@ -63,6 +135,7 @@ public class ActionSelectObjectTest extends AbstractActionTest{
         Integer[] toInject = new Integer[]{1,2,3,4,5,6,7,8,9,10};
 
         initGraph();
+        startMemoryLeakTest();
         newTask().inject(toInject)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
@@ -70,10 +143,13 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return false;
                     }
                 })
-                .then(context -> {
-                    Object[] objects = (Object[]) context.result();
-                    Assert.assertNotNull(context.result());
-                    Assert.assertEquals(0,objects.length);
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] objects = (Object[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                    }
                 })
                 .execute(graph,null);
 
@@ -84,9 +160,12 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return true;
                     }
                 })
-                .then(context -> {
-                    Assert.assertNotNull(context.result());
-                    Assert.assertArrayEquals(toInject, (Object[]) context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Assert.assertArrayEquals(toInject, (Object[]) context.result());
+                    }
                 })
                 .execute(graph,null);
 
@@ -97,12 +176,17 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return (Integer) object % 2 == 0;
                     }
                 })
-                .then(context -> {
-                    Assert.assertNotNull(context.result());
-                    Integer[] evenNumbers = new Integer[]{2,4,6,8,10};
-                    Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Assert.assertNotNull(context.result());
+                        Integer[] evenNumbers = new Integer[]{2, 4, 6, 8, 10};
+                        Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
+                    }
                 })
                 .execute(graph,null);
+
+        endMemoryLeakTest();
         removeGraph();
     }
 
@@ -123,6 +207,8 @@ public class ActionSelectObjectTest extends AbstractActionTest{
         toInject[1] = innerTab;
         toInject[2] = "A simple String";
 
+       startMemoryLeakTest();
+
         newTask().inject(toInject)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
@@ -130,10 +216,13 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return false;
                     }
                 })
-                .then(context -> {
-                    Object[] objects = (Object[]) context.result();
-                    Assert.assertNotNull(context.result());
-                    Assert.assertEquals(0,objects.length);
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] objects = (Object[]) context.result();
+                        Assert.assertNotNull(context.result());
+                        Assert.assertEquals(0, objects.length);
+                    }
                 })
                 .execute(graph,null);
 
@@ -144,8 +233,11 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return true;
                     }
                 })
-                .then(context -> {
-                    compareArray(toInject, (Object[]) context.result());
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        ActionSelectObjectTest.this.compareArray(toInject, (Object[]) context.result());
+                    }
                 })
                 .execute(graph,null);
 
@@ -157,22 +249,27 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                         return object instanceof AbstractNode;
                     }
                 })
-                .then(context -> {
-                    Object[] result = new Object[2];
-                    result[0] = n3;
-                    Object[] insideResult = new Object[2];
-                    insideResult[0] = n1;
-                    insideResult[1] = n2;
-                    result[1] = insideResult;
+                .then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        Object[] result = new Object[2];
+                        result[0] = n3;
+                        Object[] insideResult = new Object[2];
+                        insideResult[0] = n1;
+                        insideResult[1] = n2;
+                        result[1] = insideResult;
 
-                    compareArray(result, (Object[]) context.result());
+                        ActionSelectObjectTest.this.compareArray(result, (Object[]) context.result());
 
+                    }
                 })
                 .execute(graph,null);
 
         n1.free();
         n2.free();
         n3.free();
+
+        endMemoryLeakTest();
 
         removeGraph();
     }
