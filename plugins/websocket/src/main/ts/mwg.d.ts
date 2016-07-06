@@ -673,6 +673,7 @@ declare module org {
                 static selectWith(name: string, pattern: string): org.mwg.task.Task;
                 static selectWithout(name: string, pattern: string): org.mwg.task.Task;
                 static select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
+                static selectObject(filterFunction: org.mwg.task.TaskFunctionSelectObject): org.mwg.task.Task;
                 static traverse(relationName: string): org.mwg.task.Task;
                 static get(name: string): org.mwg.task.Task;
                 static traverseIndex(indexName: string, query: string): org.mwg.task.Task;
@@ -708,6 +709,7 @@ declare module org {
                 selectWith(name: string, pattern: string): org.mwg.task.Task;
                 selectWithout(name: string, pattern: string): org.mwg.task.Task;
                 select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
+                selectObject(filterFunction: org.mwg.task.TaskFunctionSelectObject): org.mwg.task.Task;
                 selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 traverse(relationName: string): org.mwg.task.Task;
                 get(name: string): org.mwg.task.Task;
@@ -738,9 +740,9 @@ declare module org {
                 repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 print(name: string): org.mwg.task.Task;
-                verbose(): void;
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
-                executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, result: org.mwg.Callback<any>): void;
+                executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, isVerbose: boolean, result: org.mwg.Callback<any>): void;
+                executeFrom(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
             }
             interface TaskAction {
                 eval(context: org.mwg.task.TaskContext): void;
@@ -768,6 +770,8 @@ declare module org {
                 setResult(actionResult: any): void;
                 cleanObj(o: any): void;
                 template(input: string): string;
+                isVerbose(): boolean;
+                ident(): number;
             }
             interface TaskFunctionConditional {
                 (context: org.mwg.task.TaskContext): boolean;
@@ -783,6 +787,9 @@ declare module org {
             }
             interface TaskFunctionSelect {
                 (node: org.mwg.Node): boolean;
+            }
+            interface TaskFunctionSelectObject {
+                (object: any): boolean;
             }
         }
         class Type {
@@ -1499,6 +1506,12 @@ declare module org {
                     private filterArray(current);
                     toString(): string;
                 }
+                class ActionSelectObject implements org.mwg.task.TaskAction {
+                    private _filter;
+                    constructor(filterFunction: org.mwg.task.TaskFunctionSelectObject);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private filter(current, context);
+                }
                 class ActionSetProperty implements org.mwg.task.TaskAction {
                     private _relationName;
                     private _variableNameToSet;
@@ -1589,7 +1602,6 @@ declare module org {
                 class CoreTask implements org.mwg.task.Task {
                     private _actions;
                     private _actionCursor;
-                    private isVerbose;
                     private addAction(task);
                     setWorld(variableName: string): org.mwg.task.Task;
                     setTime(variableName: string): org.mwg.task.Task;
@@ -1601,6 +1613,7 @@ declare module org {
                     fromVar(variableName: string): org.mwg.task.Task;
                     setVar(variableName: string, inputValue: any): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
+                    selectObject(filterFunction: org.mwg.task.TaskFunctionSelectObject): org.mwg.task.Task;
                     selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     get(name: string): org.mwg.task.Task;
                     traverse(relationName: string): org.mwg.task.Task;
@@ -1620,7 +1633,8 @@ declare module org {
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
-                    executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, result: org.mwg.Callback<any>): void;
+                    executeWith(graph: org.mwg.Graph, variables: java.util.Map<string, any>, initialResult: any, isVerbose: boolean, result: org.mwg.Callback<any>): void;
+                    executeFrom(parent: org.mwg.task.TaskContext, initialResult: any, result: org.mwg.Callback<any>): void;
                     execute(graph: org.mwg.Graph, result: org.mwg.Callback<any>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;
@@ -1636,7 +1650,6 @@ declare module org {
                     repeat(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: number, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     print(name: string): org.mwg.task.Task;
-                    verbose(): void;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
                 class CoreTaskContext implements org.mwg.task.TaskContext {
@@ -1648,10 +1661,12 @@ declare module org {
                     private _currentTaskId;
                     private _callback;
                     private verbose;
+                    private _ident;
                     private _result;
                     private _world;
                     private _time;
-                    constructor(p_variables: java.util.Map<string, any>, initial: any, p_graph: org.mwg.Graph, p_actions: org.mwg.task.TaskAction[], p_actionCursor: number, p_callback: org.mwg.Callback<any>, isVerbose: boolean);
+                    constructor(p_variables: java.util.Map<string, any>, initial: any, p_graph: org.mwg.Graph, p_actions: org.mwg.task.TaskAction[], p_actionCursor: number, isVerbose: boolean, p_ident: number, p_callback: org.mwg.Callback<any>);
+                    ident(): number;
                     graph(): org.mwg.Graph;
                     world(): number;
                     setWorld(p_world: number): void;
@@ -1670,9 +1685,11 @@ declare module org {
                     setUnsafeResult(actionResult: any): void;
                     setResult(actionResult: any): void;
                     private internal_setResult(actionResult, safe);
+                    private printDebug(t);
                     executeFirst(graph: org.mwg.Graph): void;
                     cleanObj(o: any): void;
                     template(input: string): string;
+                    isVerbose(): boolean;
                 }
                 module math {
                     class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
@@ -1815,13 +1832,14 @@ declare module org {
                 }
                 class GenericIterable extends org.mwg.plugin.AbstractIterable {
                     index: number;
-                    isArray: boolean;
+                    array: boolean;
                     input: any;
                     max: number;
                     constructor(elem: any);
                     next(): any;
                     close(): void;
                     estimate(): number;
+                    isArray(): boolean;
                 }
                 class HeapBuffer extends org.mwg.core.utility.AbstractBuffer {
                     private buffer;
