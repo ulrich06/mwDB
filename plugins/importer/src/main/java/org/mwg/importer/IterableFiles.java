@@ -6,7 +6,7 @@ import java.io.File;
 import java.net.URL;
 
 class IterableFiles extends AbstractIterable {
-    private File[] _files;
+    private String[] _filesPath;
     private int _nextIndex;
 
     IterableFiles(String path) {
@@ -20,23 +20,23 @@ class IterableFiles extends AbstractIterable {
         }
 
         if(file.isDirectory()) {
-            _files = file.listFiles();
+            _filesPath = file.list();
         } else {
-            _files = new File[] {file};
+            _filesPath = new String[] {path};
         }
     }
 
     @Override
     public Object next() {
-        if(_nextIndex == _files.length ) {
+        if(_nextIndex == _filesPath.length ) {
             return null;
         }
-        return _files[_nextIndex++];
+        return _filesPath[_nextIndex++];
     }
 
     @Override
     public void close() {
-        _files = null;
+        _filesPath = null;
     }
 
     @Override
