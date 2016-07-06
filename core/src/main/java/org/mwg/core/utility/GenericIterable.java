@@ -18,7 +18,6 @@ import java.util.Iterator;
  * }
  * this.input = elem;
  * }
- * <p>
  * next(): any {
  * if(this.array){
  * var res = this.input[this.index];
@@ -34,14 +33,11 @@ import java.util.Iterator;
  * }
  * }
  * }
- * <p>
  * close():void{
  * }
- * <p>
  * estimate():number{
  * return this.max;
  * }
- * <p>
  * isArray():boolean{
  * return this.array;
  * }

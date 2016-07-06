@@ -200,6 +200,7 @@ public class ImporterTest {
         });
     }
 
+    /*
     @Test
     public void testV3() {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
@@ -230,6 +231,11 @@ public class ImporterTest {
 
 
                                                     }
+                                                }).then(new Action() {
+                                                    @Override
+                                                    public void eval(TaskContext context) {
+                                                        //count
+                                                    }
                                                 })
                                         )
                         );
@@ -248,6 +254,6 @@ public class ImporterTest {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
 }
