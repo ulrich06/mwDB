@@ -42,7 +42,21 @@ import java.util.Iterator;
  */
 public class GenericIterable extends AbstractIterable {
 
-    private byte type = -1;
+    public static final int UNKNOW = -1;
+    public static final int OBJ_ARRAY = 0;
+    public static final int BOOL_ARRAY = 1;
+    public static final int BYTE_ARRAY = 2;
+    public static final int SHORT_ARRAY = 3;
+    public static final int CHAR_ARRAY = 4;
+    public static final int INT_ARRAY = 5;
+    public static final int LONG_ARRAY = 6;
+    public static final int FLOAT_ARRAY = 7;
+    public static final int DOUBLE_ARRAY = 8;
+    public static final int ITERABLE = 9;
+    public static final int ABS_ITERABLE = 10;
+    public static final int PLAIN_OBJ = 11;
+
+    private byte type = UNKNOW;
     private Object[] objArray = null;
     private boolean[] boolArray = null;
     private byte[] byteArray = null;
@@ -63,48 +77,48 @@ public class GenericIterable extends AbstractIterable {
         if (elem instanceof Object[]) {
             objArray = (Object[]) elem;
             max = objArray.length;
-            type = 0;
+            type = OBJ_ARRAY;
         } else if (elem instanceof boolean[]) {
             boolArray = (boolean[]) elem;
             max = boolArray.length;
-            type = 1;
+            type = BOOL_ARRAY;
         } else if (elem instanceof byte[]) {
             byteArray = (byte[]) elem;
             max = byteArray.length;
-            type = 2;
+            type = BYTE_ARRAY;
         } else if (elem instanceof short[]) {
             shortArray = (short[]) elem;
             max = shortArray.length;
-            type = 3;
+            type = SHORT_ARRAY;
         } else if (elem instanceof char[]) {
             charArray = (char[]) elem;
             max = charArray.length;
-            type = 4;
+            type = CHAR_ARRAY;
         } else if (elem instanceof int[]) {
             intArray = (int[]) elem;
             max = intArray.length;
-            type = 5;
+            type = CHAR_ARRAY;
         } else if (elem instanceof long[]) {
             longArray = (long[]) elem;
             max = longArray.length;
-            type = 6;
+            type = LONG_ARRAY;
         } else if (elem instanceof float[]) {
             floatArray = (float[]) elem;
             max = floatArray.length;
-            type = 7;
+            type = FLOAT_ARRAY;
         } else if (elem instanceof double[]) {
             doubleArray = (double[]) elem;
             max = doubleArray.length;
-            type = 8;
+            type = DOUBLE_ARRAY;
         } else if (elem instanceof Iterable) {
             iterator = ((Iterable) elem).iterator();
-            type = 9;
+            type = ITERABLE;
         } else if (elem instanceof AbstractIterable) {
             absIterable = (AbstractIterable) elem;
-            type = 10;
+            type = ABS_ITERABLE;
         } else {
             plainObj = elem;
-            type = 11;
+            type = PLAIN_OBJ;
         }
     }
 
@@ -114,7 +128,7 @@ public class GenericIterable extends AbstractIterable {
     @Override
     public Object next() {
         switch (type) {
-            case 0:
+            case OBJ_ARRAY:
                 if (index < max) {
                     Object res = objArray[index];
                     index++;
@@ -122,7 +136,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 1:
+            case BOOL_ARRAY:
                 if (index < max) {
                     Object res = boolArray[index];
                     index++;
@@ -130,7 +144,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 2:
+            case BYTE_ARRAY:
                 if (index < max) {
                     Object res = byteArray[index];
                     index++;
@@ -138,7 +152,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 3:
+            case SHORT_ARRAY:
                 if (index < max) {
                     Object res = shortArray[index];
                     index++;
@@ -146,7 +160,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 4:
+            case CHAR_ARRAY:
                 if (index < max) {
                     Object res = charArray[index];
                     index++;
@@ -154,7 +168,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 5:
+            case INT_ARRAY:
                 if (index < max) {
                     Object res = intArray[index];
                     index++;
@@ -162,7 +176,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 6:
+            case LONG_ARRAY:
                 if (index < max) {
                     Object res = longArray[index];
                     index++;
@@ -170,7 +184,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 7:
+            case FLOAT_ARRAY:
                 if (index < max) {
                     Object res = floatArray[index];
                     index++;
@@ -178,7 +192,7 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 8:
+            case DOUBLE_ARRAY:
                 if (index < max) {
                     Object res = doubleArray[index];
                     index++;
@@ -186,15 +200,15 @@ public class GenericIterable extends AbstractIterable {
                 } else {
                     return null;
                 }
-            case 9:
+            case ITERABLE:
                 if (iterator.hasNext()) {
                     return iterator.next();
                 } else {
                     return null;
                 }
-            case 10:
+            case ABS_ITERABLE:
                 return absIterable.next();
-            case 11:
+            case PLAIN_OBJ:
                 if (plainObj != null) {
                     Object res = plainObj;
                     plainObj = null;
@@ -217,5 +231,9 @@ public class GenericIterable extends AbstractIterable {
     @Override
     public int estimate() {
         return this.max;
+    }
+
+    public byte getType() {
+        return type;
     }
 }

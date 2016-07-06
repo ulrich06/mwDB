@@ -1,5 +1,6 @@
 package org.mwg.core.task;
 
+import org.mwg.core.utility.GenericIterable;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelectObject;
@@ -16,7 +17,7 @@ class ActionSelectObject implements TaskAction {
     public void eval(TaskContext context) {
         final Object previousResult = context.result();
         if (previousResult != null) {
-            if (previousResult instanceof Object[]) {
+            /*if (previousResult instanceof Object[]) {
                 context.setUnsafeResult(filterArray((Object[]) previousResult, context));//fixme put unsafe
             } else if(previousResult instanceof int[]) {
                 int[] intResult = (int[]) previousResult;
@@ -69,7 +70,7 @@ class ActionSelectObject implements TaskAction {
                     System.arraycopy(nextResult,0,shrinkedResult,0,cursor);
                     context.setUnsafeResult(shrinkedResult);
                 }
-            } /*else if(previousResult instanceof byte[]) {
+            } *//*else if(previousResult instanceof byte[]) {
                 Byte[] byteResult = (Byte[]) previousResult;
                 Byte[] nextResult = new Byte[byteResult.length];
                 int cursor = 0;
@@ -154,20 +155,24 @@ class ActionSelectObject implements TaskAction {
                     System.arraycopy(nextResult,0,shrinkedResult,0,cursor);
                     context.setUnsafeResult(shrinkedResult);
                 }
-            }*/ else {
+            }*//* else {
                 if(_filter.select(previousResult)) {
                     context.setUnsafeResult(previousResult);//fixme put unsafe
                 } else {
                     context.cleanObj(previousResult);
                     context.setUnsafeResult(null);
                 }
-            }
+            }*/
+
+            GenericIterable it = new GenericIterable(context.result());
+
+
         } else {
             context.setUnsafeResult(null);
         }
     }
 
-    private Object[] filterArray(Object[] current, TaskContext context) {
+    /*private Object[] filterArray(Object[] current, TaskContext context) {
         Object[] filteredResult = new Object[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
@@ -195,5 +200,29 @@ class ActionSelectObject implements TaskAction {
             return shrinkedResult;
         }
 
-    }
+    }*/
+
+   private Object filter(Object current, TaskContext context) {
+       GenericIterable iterable = new GenericIterable(current);
+       if(iterable.getType() == GenericIterable.PLAIN_OBJ) {
+           return current;
+       }
+
+       Object result;
+       if(iterable.estimate() == -1) {
+           result = new Object[16];
+       } else {
+           result = new Object[iterable.estimate()];
+       }
+       Object loop = iterable.next();
+       int index = 0;
+       while(loop != null) {
+           ((Object[])result)[index] = filter(loop,context);
+           index++;
+           loop = iterable.next();
+       }
+       return result;
+   }
+
+
 }
