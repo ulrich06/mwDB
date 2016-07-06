@@ -3,6 +3,7 @@ package org.mwg.core.utility;
 import org.mwg.Callback;
 import org.mwg.plugin.Job;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CoreDeferCounter implements org.mwg.DeferCounter {
@@ -58,8 +59,13 @@ public class CoreDeferCounter implements org.mwg.DeferCounter {
 
     @Override
     public Object waitResult() {
-        while (this._nb_down.get() != _counter) {
-            //TODO wait here better...
+        if (this._nb_down.get() != _counter) {
+            return _result;
+        } else {
+            //TODO replace by a counter latch
+            while (this._nb_down.get() != _counter) {
+                //TODO wait here better...
+            }
         }
         return _result;
     }
