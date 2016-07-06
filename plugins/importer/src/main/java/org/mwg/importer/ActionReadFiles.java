@@ -18,6 +18,9 @@ class ActionReadFiles implements TaskAction{
         Object res;
 
         String path = context.template(_pathOrTemplate);
+        if(path == null) {
+            throw new RuntimeException("Variable " + _pathOrTemplate + " does not exist in the context");
+        }
         res = new IterableFiles(path);
 
         context.setUnsafeResult(res);

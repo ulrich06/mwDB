@@ -73,5 +73,8 @@ class ActionSelectObject implements TaskAction {
        return result;
    }
 
-
+    @Override
+    public String toString() {
+        return "selectObject()";
+    }
 }

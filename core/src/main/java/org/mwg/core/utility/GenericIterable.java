@@ -103,7 +103,7 @@ public class GenericIterable extends AbstractIterable {
         } else if (elem instanceof int[]) {
             intArray = (int[]) elem;
             max = intArray.length;
-            type = CHAR_ARRAY;
+            type = INT_ARRAY;
         } else if (elem instanceof long[]) {
             longArray = (long[]) elem;
             max = longArray.length;

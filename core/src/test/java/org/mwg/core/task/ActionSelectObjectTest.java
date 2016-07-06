@@ -67,13 +67,9 @@ public class ActionSelectObjectTest extends AbstractActionTest{
         removeGraph();
     }
 
-    /*@Test
+    @Test
     public void testSelectObjectPrimitiveArray() {
-        for(int i=0;i<10;i++) {
-            Assert.assertEquals(1.,1.,0.);
-        }
-
-        *//*double[] toInject = new double[]{1,2,3,4,5,6,7,8,9,10};
+        int[] toInject = new int[]{1,2,3,4,5,6,7,8,9,10};
 
         initGraph();
         startMemoryLeakTest();
@@ -104,42 +100,35 @@ public class ActionSelectObjectTest extends AbstractActionTest{
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-//                        Assert.assertNotNull(context.result());
-//                        Object[] doubleResult = (Object[]) context.result();
-//                        for(int i=0;i<toInject.length;i++) {
-//                            Assert.assertEquals(toInject[i],(Double)doubleResult[i],0);
-//                        }
-                        for(int i=0;i<10;i++) {
-                            Assert.assertEquals(1.,1.,0.);
+                        Assert.assertNotNull(context.result());
+                        Object[] doubleResult = (Object[]) context.result();
+                        for(int i=0;i<toInject.length;i++) {
+                            Assert.assertEquals((Integer) toInject[i],(Integer)doubleResult[i]);
                         }
                     }
                 })
                 .execute(graph,null);
 
-        for(int i=0;i<10;i++) {
-            Assert.assertEquals(1.,1.,0.);
-        }
-
         newTask().inject(toInject)
                 .selectObject(new TaskFunctionSelectObject() {
                     @Override
                     public boolean select(Object object) {
-                        return (Double) object % 2 == 0;
+                        return (Integer) object % 2 == 0;
                     }
                 })
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         Assert.assertNotNull(context.result());
-                        Object[] evenNumbers = new Object[]{2., 4., 6., 8., 10.};
+                        Object[] evenNumbers = new Object[]{2, 4, 6, 8, 10};
                         Assert.assertArrayEquals(evenNumbers, (Object[]) context.result());
                     }
                 })
                 .execute(graph,null);
 
         endMemoryLeakTest();
-        removeGraph();*//*
-    }*/
+        removeGraph();
+    }
 
     @Test
     public void testSelectObjectArray() {

@@ -20,7 +20,7 @@ class ActionAsVar implements TaskAction {
 
     @Override
     public String toString() {
-        return "add(\'" + _name + "\')";
+        return "asVar(\'" + _name + "\')";
     }
 
 
