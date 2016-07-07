@@ -1,6 +1,5 @@
 package org.mwg.core.task;
 
-import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
@@ -20,9 +19,9 @@ class ActionSelect implements TaskAction {
         final Object previousResult = context.result();
         if (previousResult != null) {
             if (previousResult instanceof Object[]) {
-                context.setUnsafeResult(filterArray((Object[]) previousResult));
+                context.setUnsafeResult(filterArray((Object[]) previousResult,context));
             } else if (previousResult instanceof AbstractNode) {
-                if (_filter.select((Node) previousResult)) {
+                if (_filter.select((Node) previousResult,context)) {
                     context.setUnsafeResult(previousResult);
                 } else {
                     ((AbstractNode) previousResult).free();
@@ -36,20 +35,20 @@ class ActionSelect implements TaskAction {
         }
     }
 
-    private Object[] filterArray(Object[] current) {
+    private Object[] filterArray(Object[] current, TaskContext context) {
         boolean onlyContainsNodes = true;
         Object[] filteredResult = new Object[current.length];
         int cursor = 0;
         for (int i = 0; i < current.length; i++) {
             if (current[i] instanceof Object[]) {
                 onlyContainsNodes = false;
-                Object[] filtered = filterArray((Object[]) current[i]);
+                Object[] filtered = filterArray((Object[]) current[i],context);
                 if (filtered != null && filtered.length > 0) {
                     filteredResult[cursor] = filtered;
                     cursor++;
                 }
             } else if (current[i] != null && current[i] instanceof AbstractNode) {
-                if (_filter.select((Node) current[i])) {
+                if (_filter.select((Node) current[i],context)) {
                     filteredResult[cursor] = current[i];
                     cursor++;
                 } else {

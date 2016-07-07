@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class CoreTask implements org.mwg.task.Task {
 
@@ -67,7 +66,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (pattern == null) {
             throw new RuntimeException("pattern should not be null");
         }
-        addAction(new ActionWith(name, Pattern.compile(pattern)));
+        addAction(new ActionWith(name, pattern));
         return this;
     }
 
@@ -76,7 +75,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (pattern == null) {
             throw new RuntimeException("pattern should not be null");
         }
-        addAction(new ActionWithout(name, Pattern.compile(pattern)));
+        addAction(new ActionWithout(name, pattern));
         return this;
     }
 
@@ -591,7 +590,7 @@ public class CoreTask implements org.mwg.task.Task {
                 if (params.length != 2) {
                     throw new RuntimeException("with action need two parameter");
                 }
-                return new ActionWith(params[0], Pattern.compile(params[1]));
+                return new ActionWith(params[0], params[1]);
             }
         });
         registry.put("without", new TaskActionFactory() {
@@ -600,7 +599,7 @@ public class CoreTask implements org.mwg.task.Task {
                 if (params.length != 2) {
                     throw new RuntimeException("without action need two parameter");
                 }
-                return new ActionWithout(params[0], Pattern.compile(params[1]));
+                return new ActionWithout(params[0], params[1]);
             }
         });
     }
