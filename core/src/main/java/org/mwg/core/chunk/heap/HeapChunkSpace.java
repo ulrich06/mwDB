@@ -56,7 +56,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         private final AtomicInteger _iterationCounter;
         private final HeapChunkSpace _parent;
 
-        public InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
+        InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
 
             this._dirtyElements = new int[maxSize];
 
@@ -145,32 +145,45 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
     @Override
     public final Chunk getAndMark(byte type, long world, long time, long id) {
-        int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
+        final int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
         int m = this._elementHash[index];
-        while (m != -1) {
-            HeapChunk foundChunk = (HeapChunk) this._values[m];
-            if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
-                //GET VALUE
-                if (foundChunk.mark() == 1) {
-                    //was at zero before, risky operation, check selectWith LRU
-                    if (this._lru.dequeue(m)) {
-                        return foundChunk;
-                    } else {
-                        if (foundChunk.marks() > 1) {
-                            //ok fine we are several on the same object...
+        Chunk result = null;
+        while (!this._elementHashLock.compareAndSet(index, -1, 1)) ;
+        try {
+            while (m != -1) {
+                HeapChunk foundChunk = (HeapChunk) this._values[m];
+                if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
+                    //GET VALUE
+                    if (foundChunk.mark() == 1) {
+                        //was at zero before, risky operation, check selectWith LRU
+                        if (this._lru.dequeue(m)) {
+                            result = foundChunk;
+                            break;
                         } else {
-                            //better return null the object will be recycled by somebody else...
-                            return null;
+                            if (foundChunk.marks() > 1) {
+                                //ok fine we are several on the same object...
+                                result = foundChunk;
+                                break;
+                            } else {
+                                //better return null the object will be recycled by somebody else...
+                                result = null;
+                                break;
+                            }
                         }
+                    } else {
+                        result = foundChunk;
+                        break;
                     }
                 } else {
-                    return foundChunk;
+                    m = this._elementNext[m];
                 }
-            } else {
-                m = this._elementNext[m];
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            this._elementHashLock.set(index, -1);
         }
-        return null;
+        return result;
     }
 
     @Override
