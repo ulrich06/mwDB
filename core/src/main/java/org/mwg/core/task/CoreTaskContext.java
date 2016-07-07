@@ -275,6 +275,9 @@ class CoreTaskContext implements TaskContext {
                     buffer.append(input.substring(0, previousPos - 2));
                 }
                 String contextKey = input.substring(previousPos, cursor - 1).trim();
+
+                //TODO extract context potential index, if yes reset context key cleaned
+
                 if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));

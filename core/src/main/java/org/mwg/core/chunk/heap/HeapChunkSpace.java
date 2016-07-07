@@ -56,7 +56,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         private final AtomicInteger _iterationCounter;
         private final HeapChunkSpace _parent;
 
-        public InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
+        InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
 
             this._dirtyElements = new int[maxSize];
 
