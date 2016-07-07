@@ -148,41 +148,36 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         final int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
         int m = this._elementHash[index];
         Chunk result = null;
-        while (!this._elementHashLock.compareAndSet(index, -1, 1)) ;
-        try {
-            while (m != -1) {
-                HeapChunk foundChunk = (HeapChunk) this._values[m];
-                if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
-                    //GET VALUE
-                    if (foundChunk.mark() == 1) {
-                        //was at zero before, risky operation, check selectWith LRU
-                        if (this._lru.dequeue(m)) {
+
+        while (m != -1) {
+            HeapChunk foundChunk = (HeapChunk) this._values[m];
+            if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
+                //GET VALUE
+                if (foundChunk.mark() == 1) {
+                    //was at zero before, risky operation, check selectWith LRU
+                    if (this._lru.dequeue(m)) {
+                        result = foundChunk;
+                        break;
+                    } else {
+                        if (foundChunk.marks() > 1) {
+                            //ok fine we are several on the same object...
                             result = foundChunk;
                             break;
                         } else {
-                            if (foundChunk.marks() > 1) {
-                                //ok fine we are several on the same object...
-                                result = foundChunk;
-                                break;
-                            } else {
-                                //better return null the object will be recycled by somebody else...
-                                result = null;
-                                break;
-                            }
+                            //better return null the object will be recycled by somebody else...
+                            result = null;
+                            break;
                         }
-                    } else {
-                        result = foundChunk;
-                        break;
                     }
                 } else {
-                    m = this._elementNext[m];
+                    result = foundChunk;
+                    break;
                 }
+            } else {
+                m = this._elementNext[m];
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            this._elementHashLock.set(index, -1);
         }
+
         return result;
     }
 
