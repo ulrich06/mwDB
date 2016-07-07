@@ -46,7 +46,7 @@ public class CoreTaskContextTests {
                                 }
                                 Assert.assertTrue(exceptionCaught);
 
-                                Assert.assertEquals("9.0",context.template("{{=(1 + 2) + (array[6] - 4) * 2 }}"));
+                                Assert.assertEquals("9.1",context.template("{{=((1 + 2) + (array[6] - 4) * 2) + 0.1 }}"));
                             }
                         })
                         .execute(graph,null);
