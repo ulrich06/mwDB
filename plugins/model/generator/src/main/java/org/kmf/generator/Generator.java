@@ -120,7 +120,7 @@ public class Generator {
                             getter.setReturnType(typeToClassName(prop.type()) + "[]");
                             getter.setName(toCamelCase("get " + prop.name()));
                             getter.setBody(
-                                    "org.mwg.DeferCounter waiter = this.graph().newCounter(1);\n" +
+                                    "org.mwg.DeferCounterSync waiter = this.graph().newSyncCounter(1);\n" +
                                             "this.rel(" + prop.name().toUpperCase() + ", waiter.wrap());\n" +
                                             "org.mwg.Node[] raw = (org.mwg.Node[]) waiter.waitResult();" +
                                             typeToClassName(prop.type()) + "[] casted = new " + typeToClassName(prop.type()) + "[raw.length];" +
@@ -154,7 +154,7 @@ public class Generator {
                                 getter.setReturnType(typeToClassName(prop.type()));
                                 getter.setName(toCamelCase("get " + prop.name()));
 
-                                getter.setBody("\t\tfinal org.mwg.DeferCounter waiter = this.graph().newCounter(1);\n" +
+                                getter.setBody("\t\tfinal org.mwg.DeferCounterSync waiter = this.graph().newSyncCounter(1);\n" +
                                         "this.rel(" + prop.name().toUpperCase() + ", new org.mwg.Callback<org.mwg.Node[]>() {\n" +
                                         "@Override\n" +
                                         "public void on(org.mwg.Node[] raw) {\n" +
@@ -176,7 +176,7 @@ public class Generator {
                                 setter.addParameter(typeToClassName(prop.type()), "value");
 
                                 StringBuffer buffer = new StringBuffer();
-                                buffer.append(" final org.mwg.DeferCounter waiter = this.graph().newCounter(1);\n" +
+                                buffer.append(" final org.mwg.DeferCounterSync waiter = this.graph().newSyncCounter(1);\n" +
                                         "        final " + classifier.fqn() + " selfPointer = this;\n" +
                                         "        this.rel(" + prop.name().toUpperCase() + ", new org.mwg.Callback<org.mwg.Node[]>() {\n" +
                                         "            @Override\n" +
@@ -220,8 +220,8 @@ public class Generator {
                                 StringBuffer buffer = new StringBuffer();
                                 if (prop.indexes().length > 0) {
                                     buffer.append("final " + classifier.fqn() + " self = this;\n");
-                                    buffer.append("final org.mwg.DeferCounter waiterUnIndex = this.graph().newCounter(" + prop.indexes().length + ");\n");
-                                    buffer.append("final org.mwg.DeferCounter waiterIndex = this.graph().newCounter(" + prop.indexes().length + ");\n");
+                                    buffer.append("final org.mwg.DeferCounterSync waiterUnIndex = this.graph().newSyncCounter(" + prop.indexes().length + ");\n");
+                                    buffer.append("final org.mwg.DeferCounterSync waiterIndex = this.graph().newSyncCounter(" + prop.indexes().length + ");\n");
 
                                     for (KIndex index : prop.indexes()) {
                                         String queryParam = "";
@@ -308,9 +308,9 @@ public class Generator {
         MethodSource<JavaClassSource> modelConstructor = modelClass.addMethod().setConstructor(true);
         modelConstructor.addParameter(GraphBuilder.class, "builder");
         if (useML) {
-            modelConstructor.setBody("this._graph = builder.withPlugin(new org.mwg.ml.MLPlugin()).withPlugin(new samplePlugin()).build();");
+            modelConstructor.setBody("this._graph = builder.withPlugin(new org.mwg.ml.MLPlugin()).withPlugin(new " + name + "Plugin()).build();");
         } else {
-            modelConstructor.setBody("this._graph = builder.withPlugin(new samplePlugin()).build();");
+            modelConstructor.setBody("this._graph = builder.withPlugin(new " + name + "Plugin()).build();");
         }
         modelClass.addMethod().setName("graph").setBody("return this._graph;").setVisibility(Visibility.PUBLIC).setFinal(true).setReturnType(Graph.class);
 
@@ -332,7 +332,7 @@ public class Generator {
                 loopFindMethod.addParameter("long", "time");
                 loopFindMethod.addParameter("String", "query");
                 loopFindMethod.setBody("" +
-                        "        final org.mwg.DeferCounter waiter = _graph.newCounter(1);\n" +
+                        "        final org.mwg.DeferCounterSync waiter = _graph.newSyncCounter(1);\n" +
                         "        this._graph.find(world, time, \"" + casted.fqn() + "\", query, new org.mwg.Callback<org.mwg.Node[]>() {\n" +
                         "            @Override\n" +
                         "            public void on(org.mwg.Node[] result) {\n" +
@@ -351,7 +351,7 @@ public class Generator {
                 loopFindAllMethod.addParameter("long", "world");
                 loopFindAllMethod.addParameter("long", "time");
                 loopFindAllMethod.setBody("" +
-                        "        final org.mwg.DeferCounter waiter = _graph.newCounter(1);\n" +
+                        "        final org.mwg.DeferCounterSync waiter = _graph.newSyncCounter(1);\n" +
                         "        this._graph.findAll(world, time, \"" + casted.fqn() + "\", new org.mwg.Callback<org.mwg.Node[]>() {\n" +
                         "            @Override\n" +
                         "            public void on(org.mwg.Node[] result) {\n" +
@@ -417,6 +417,8 @@ public class Generator {
                 return Type.LONG;
             case "String":
                 return Type.STRING;
+            case "Double":
+                return Type.DOUBLE;
         }
         return -1;
     }
