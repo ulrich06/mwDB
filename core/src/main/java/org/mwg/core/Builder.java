@@ -1,6 +1,7 @@
 package org.mwg.core;
 
 import org.mwg.GraphBuilder;
+import org.mwg.core.chunk.AtomicSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
 import org.mwg.core.scheduler.NoopScheduler;
@@ -61,9 +62,9 @@ public class Builder implements GraphBuilder.InternalBuilder {
      */
     private ChunkSpace createSpace(boolean usingOffHeapMemory, long memorySize, long autoSaveSize) {
         if (usingOffHeapMemory) {
-            return new OffHeapChunkSpace(memorySize, autoSaveSize);
+            return new AtomicSpace(new OffHeapChunkSpace(memorySize, autoSaveSize));
         } else {
-            return new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
+            return new AtomicSpace(new HeapChunkSpace((int) memorySize, (int) autoSaveSize));
         }
     }
 
