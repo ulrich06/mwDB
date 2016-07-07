@@ -46,6 +46,21 @@ class MathExpressionTokenizer {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
+            if(pos < input.length()) {
+                if(input.charAt(pos) == '[') {
+                    token.append(input.charAt(pos++));
+                    ch = pos == input.length() ? '\0' : input.charAt(pos);
+                    while(CoreMathExpressionEngine.isDigit(ch) && pos < input.length()) {
+                        token.append(input.charAt(pos++));
+                        ch = pos == input.length() ? '\0' : input.charAt(pos);
+                    }
+                    if(input.charAt(pos) != ']') {
+                        throw new RuntimeException("Error in array definition '" + token + "' at position " + (pos - token.length() + 1));
+                    } else {
+                        token.append(input.charAt(pos++));
+                    }
+                }
+            }
         } else if (ch == '(' || ch == ')' || ch == ',') {
             token.append(ch);
             pos++;
