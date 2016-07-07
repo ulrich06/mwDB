@@ -36,6 +36,7 @@ class ActionMath implements TaskAction {
         } else if (previous instanceof Object[]) {
             arrayEval((Object[]) previous, result, context);
         }
+        //todo put setUnsafe
         context.setResult(result.toArray(new Double[result.size()]));
     }
 

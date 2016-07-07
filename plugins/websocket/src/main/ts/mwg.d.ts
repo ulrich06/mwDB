@@ -703,8 +703,8 @@ declare module org {
                 static lookup(world: string, time: string, id: string): org.mwg.task.Task;
             }
             interface Task {
-                setWorld(variableName: string): org.mwg.task.Task;
-                setTime(variableName: string): org.mwg.task.Task;
+                setWorld(template: string): org.mwg.task.Task;
+                setTime(template: string): org.mwg.task.Task;
                 asVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
                 setVar(variableName: string, inputValue: any): org.mwg.task.Task;
@@ -792,7 +792,7 @@ declare module org {
                 (node: org.mwg.Node): any;
             }
             interface TaskFunctionSelect {
-                (node: org.mwg.Node): boolean;
+                (node: org.mwg.Node, context: org.mwg.task.TaskContext): boolean;
             }
             interface TaskFunctionSelectObject {
                 (object: any): boolean;
@@ -1413,7 +1413,7 @@ declare module org {
                     private _name;
                     constructor(p_name: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private collectArray(current, toLoad, leafs);
+                    private collectArray(current, toLoad, leafs, flatName);
                     toString(): string;
                 }
                 class ActionIfThen implements org.mwg.task.TaskAction {
@@ -1484,7 +1484,7 @@ declare module org {
                     private _propertyName;
                     constructor(propertyName: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private removePropertyFromArray(objs);
+                    private removePropertyFromArray(objs, templatedName);
                     toString(): string;
                 }
                 class ActionRepeat implements org.mwg.task.TaskAction {
@@ -1509,7 +1509,7 @@ declare module org {
                     private _filter;
                     constructor(p_filter: org.mwg.task.TaskFunctionSelect);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private filterArray(current);
+                    private filterArray(current, context);
                     toString(): string;
                 }
                 class ActionSelectObject implements org.mwg.task.TaskAction {
@@ -1554,7 +1554,7 @@ declare module org {
                     private _name;
                     constructor(p_name: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private collectArray(current, toLoad);
+                    private collectArray(current, toLoad, flatName);
                     toString(): string;
                 }
                 class ActionTraverseIndex implements org.mwg.task.TaskAction {
@@ -1563,14 +1563,14 @@ declare module org {
                     constructor(indexName: string, query: string);
                     eval(context: org.mwg.task.TaskContext): void;
                     private getNodes(previousResult);
-                    private countNbNodeToLoad(nodes);
+                    private countNbNodeToLoad(nodes, flatIndexName);
                     toString(): string;
                 }
                 class ActionTraverseOrKeep implements org.mwg.task.TaskAction {
                     private _name;
                     constructor(p_name: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private collectArray(current, toLoad);
+                    private collectArray(current, toLoad, flatName);
                     toString(): string;
                 }
                 class ActionTrigger implements org.mwg.task.TaskAction {
@@ -1586,11 +1586,11 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                 }
                 class ActionWith extends org.mwg.core.task.ActionSelect {
-                    constructor(name: string, pattern: RegExp);
+                    constructor(name: string, stringPattern: string);
                     toString(): string;
                 }
                 class ActionWithout extends org.mwg.core.task.ActionSelect {
-                    constructor(name: string, pattern: RegExp);
+                    constructor(name: string, stringPattern: string);
                     toString(): string;
                 }
                 class ActionWorld implements org.mwg.task.TaskAction {
@@ -1610,8 +1610,8 @@ declare module org {
                     private _actions;
                     private _actionCursor;
                     private addAction(task);
-                    setWorld(variableName: string): org.mwg.task.Task;
-                    setTime(variableName: string): org.mwg.task.Task;
+                    setWorld(template: string): org.mwg.task.Task;
+                    setTime(template: string): org.mwg.task.Task;
                     fromIndex(indexName: string, query: string): org.mwg.task.Task;
                     fromIndexAll(indexName: string): org.mwg.task.Task;
                     selectWith(name: string, pattern: string): org.mwg.task.Task;

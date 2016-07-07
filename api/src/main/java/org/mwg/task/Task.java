@@ -11,18 +11,18 @@ public interface Task {
     /**
      * Sets the task context to a particular world.
      *
-     * @param variableName that hasField to be set into the task context and will be used for next sub tasks.
+     * @param template to be set into the task context and will be used for next sub tasks.
      * @return this task to chain actions (fluent API)
      */
-    Task setWorld(String variableName);
+    Task setWorld(String template);
 
     /**
      * Sets the task context to a particular time.
      *
-     * @param variableName that hasField to be set into the task context and will be used for next sub tasks
+     * @param template that hasField to be set into the task context and will be used for next sub tasks
      * @return this task to chain actions (fluent API)
      */
-    Task setTime(String variableName);
+    Task setTime(String template);
 
     /**
      * Stores the current task result into a named variable
@@ -74,6 +74,7 @@ public interface Task {
      */
     Task fromIndexAll(String indexName);
 
+    //TODO put template for parameter
     /**
      * Filters the previous result to keep nodes which named attribute has a specific value
      *
@@ -83,6 +84,8 @@ public interface Task {
      */
     Task selectWith(String name, String pattern);
 
+
+    //TODO put template for parameter
     /**
      * Filters the previous result to keep nodes which named attribute do not have a given value
      *

@@ -17,7 +17,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
-                    public boolean select(Node node) {
+                    public boolean select(Node node, TaskContext context) {
                         return PrimitiveHelper.equals(node.get("name").toString(), "root");
                     }
                 })
@@ -38,7 +38,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
-                    public boolean select(Node node) {
+                    public boolean select(Node node, TaskContext context) {
                         return false;
                     }
                 })
@@ -59,7 +59,7 @@ public class ActionSelectTest extends AbstractActionTest {
                 .fromIndexAll("nodes")
                 .select(new TaskFunctionSelect() {
                     @Override
-                    public boolean select(Node node) {
+                    public boolean select(Node node, TaskContext context) {
                         return true;
                     }
                 })

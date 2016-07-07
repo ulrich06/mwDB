@@ -16,7 +16,7 @@ class ActionSetVar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.setVariable(this._name, this._value);
+        context.setVariable(context.template(this._name), this._value);
         context.setUnsafeResult(context.result());//trigger next step
     }
 

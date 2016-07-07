@@ -57,7 +57,7 @@ public class ContextCleanTest {
                 inject(new Node[]{n0, n1})
                         .select(new TaskFunctionSelect() {
                             @Override
-                            public boolean select(Node node) {
+                            public boolean select(Node node,TaskContext context) {
                                 return true;
                             }
                         })

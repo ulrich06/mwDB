@@ -15,5 +15,5 @@ public interface TaskFunctionSelect {
      * @param node node to select or not for next action
      * @return true to keep this node for the next action
      */
-    boolean select(Node node);
+    boolean select(Node node, TaskContext context);
 }

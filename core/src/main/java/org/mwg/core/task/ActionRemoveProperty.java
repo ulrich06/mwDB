@@ -1,6 +1,5 @@
 package org.mwg.core.task;
 
-import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
@@ -18,19 +17,19 @@ class ActionRemoveProperty implements TaskAction {
     public void eval(TaskContext context) {
         Object previousResult = context.result();
         if (previousResult instanceof AbstractNode) {
-            ((Node) previousResult).removeProperty(_propertyName);
+            ((Node) previousResult).removeProperty(context.template(_propertyName));
         } else if (previousResult instanceof Object[]) {
-            removePropertyFromArray((Object[]) previousResult);
+            removePropertyFromArray((Object[]) previousResult,context.template(_propertyName));
         }
         context.setResult(previousResult);
     }
 
-    private void removePropertyFromArray(Object[] objs) {
+    private void removePropertyFromArray(Object[] objs, String templatedName) {
         for (int i = 0; i < objs.length; i++) {
             if (objs[i] instanceof AbstractNode) {
-                ((AbstractNode) objs[i]).removeProperty(_propertyName);
+                ((AbstractNode) objs[i]).removeProperty(templatedName);
             } else if (objs[i] instanceof Object[]) {
-                removePropertyFromArray((Object[]) objs[i]);
+                removePropertyFromArray((Object[]) objs[i],templatedName);
             }
         }
     }

@@ -24,16 +24,17 @@ class ActionGet implements TaskAction {
     public final void eval(final TaskContext context) {
         Object previousResult = context.result();
         if (previousResult != null) {
+            String flatName = context.template(_name);
             //dry execute to count waiter
             Set<Long> collectedIds = new HashSet<Long>();
             List<Object> collectedProperties = new ArrayList<Object>();
             if (previousResult instanceof Object[]) {
-                collectArray((Object[]) previousResult, collectedIds, collectedProperties);
+                collectArray((Object[]) previousResult, collectedIds, collectedProperties,flatName);
             } else if (previousResult instanceof AbstractNode) {
                 Node loop = (Node) previousResult;
-                Object propValue = loop.get(_name);
+                Object propValue = loop.get(flatName);
                 if (propValue != null) {
-                    byte propType = loop.type(_name);
+                    byte propType = loop.type(flatName);
                     switch (propType) {
                         case Type.RELATION:
                             long[] propValueRef = (long[]) propValue;
@@ -86,15 +87,15 @@ class ActionGet implements TaskAction {
         }
     }
 
-    private void collectArray(Object[] current, Set<Long> toLoad, List<Object> leafs) {
+    private void collectArray(Object[] current, Set<Long> toLoad, List<Object> leafs,String flatName) {
         for (int i = 0; i < current.length; i++) {
             if (current[i] instanceof Object[]) {
-                collectArray((Object[]) current[i], toLoad, leafs);
+                collectArray((Object[]) current[i], toLoad, leafs,flatName);
             } else if (current[i] instanceof AbstractNode) {
                 Node loop = (Node) current[i];
-                Object propValue = loop.get(_name);
+                Object propValue = loop.get(flatName);
                 if (propValue != null) {
-                    byte propType = loop.type(_name);
+                    byte propType = loop.type(flatName);
                     switch (propType) {
                         case Type.RELATION:
                             long[] interResult = (long[]) propValue;

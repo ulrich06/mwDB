@@ -1,7 +1,6 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.Query;
 import org.mwg.core.CoreConstants;
@@ -25,8 +24,11 @@ class ActionTraverseIndex implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+        //todo replace setResult by setUnsafeResult
         Object previousResult = context.result();
         if (previousResult != null) {
+            String flatIndexName = context.template(_indexName);
+            String flatQuery = context.template(_query);
             Node[] toLoad;
             if (previousResult instanceof AbstractNode) {
                 toLoad = new Node[]{(Node) previousResult};
@@ -35,18 +37,18 @@ class ActionTraverseIndex implements TaskAction {
             } else {
                 toLoad = new Node[0];
             }
-            int countNbNodeToLoad = countNbNodeToLoad(toLoad);
+            int countNbNodeToLoad = countNbNodeToLoad(toLoad,flatIndexName);
             final CoreDeferCounter counter = new CoreDeferCounter(toLoad.length);
             final Node[] resultNodes = new AbstractNode[countNbNodeToLoad];
             final AtomicInteger cursor = new AtomicInteger(0);
             for (int i = 0; i < toLoad.length; i++) {
                 Node node = toLoad[i];
-                if (_query != null) {
+                if (flatQuery != null) {
                     Query queryObj = node.graph().newQuery();
                     queryObj.setWorld(context.world());
                     queryObj.setTime(context.time());
-                    queryObj.parse(_query);
-                    queryObj.setIndexName(_indexName);
+                    queryObj.parse(flatQuery);
+                    queryObj.setIndexName(flatIndexName);
                     node.findByQuery(queryObj, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
@@ -59,7 +61,7 @@ class ActionTraverseIndex implements TaskAction {
                         }
                     });
                 } else {
-                    node.findAll(_indexName, new Callback<Node[]>() {
+                    node.findAll(flatIndexName, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             for (Node n : result) {
@@ -85,6 +87,8 @@ class ActionTraverseIndex implements TaskAction {
                 }
             });
 
+        } else {
+            context.setUnsafeResult(null);
         }
     }
 
@@ -107,11 +111,11 @@ class ActionTraverseIndex implements TaskAction {
         return result;
     }
 
-    private int countNbNodeToLoad(Node[] nodes) {
+    private int countNbNodeToLoad(Node[] nodes, String flatIndexName) {
         int nbNoadToLoad = 0;
         for (Node node : nodes) {
             if (node != null) {
-                LongLongArrayMap indexed = (LongLongArrayMap) node.get(_indexName);
+                LongLongArrayMap indexed = (LongLongArrayMap) node.get(flatIndexName);
                 if (indexed != null) {//no index value
                     nbNoadToLoad += indexed.size();
                 }

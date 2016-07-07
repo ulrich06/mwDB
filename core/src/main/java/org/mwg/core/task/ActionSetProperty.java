@@ -22,27 +22,30 @@ class ActionSetProperty implements TaskAction {
     @Override
     public void eval(TaskContext context) {
         final Object previousResult = context.result();
+        String flatRelationName = context.template(_relationName);
+
         Object savedVar = context.variable(_variableNameToSet);
         if (savedVar == null) {
-            Object tempateBased = context.template(this._variableNameToSet);
+            Object templateBased = context.template(this._variableNameToSet);
             switch (_propertyType) {
                 case Type.INT:
-                    savedVar = parseInt(tempateBased.toString());
+                    savedVar = parseInt(templateBased.toString());
                     break;
                 case Type.DOUBLE:
-                    savedVar = Double.parseDouble(tempateBased.toString());
+                    savedVar = Double.parseDouble(templateBased.toString());
                     break;
                 case Type.LONG:
-                    savedVar = parseLong(tempateBased.toString());
+                    savedVar = parseLong(templateBased.toString());
                     break;
                 default:
-                    savedVar = tempateBased;
+                    savedVar = templateBased;
             }
         }
+
         if (previousResult instanceof AbstractNode) {
-            ((Node) previousResult).setProperty(_relationName, _propertyType, savedVar);
+            ((Node) previousResult).setProperty(flatRelationName, _propertyType, savedVar);
         } else if (previousResult instanceof Object[]) {
-            setFromArray((Object[]) previousResult, _relationName, savedVar);
+            setFromArray((Object[]) previousResult, flatRelationName, savedVar);
         }
         context.setUnsafeResult(previousResult);
     }
