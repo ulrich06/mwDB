@@ -19,6 +19,7 @@ public class CoreTaskContextTests {
             @Override
             public void on(Boolean result) {
                 newTask()
+                        .setVar("i",4)
                         .setVar("array",new int[]{1,2,3,4,5,6,7,8,9})
                         .fromVar("array")
                         .then(new Action() {
@@ -45,7 +46,7 @@ public class CoreTaskContextTests {
                                 }
                                 Assert.assertTrue(exceptionCaught);
 
-
+                                Assert.assertEquals("9.0",context.template("{{=(1 + 2) + (array[6] - 4) * 2 }}"));
                             }
                         })
                         .execute(graph,null);

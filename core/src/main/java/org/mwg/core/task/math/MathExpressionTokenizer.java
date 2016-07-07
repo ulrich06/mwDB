@@ -46,6 +46,7 @@ class MathExpressionTokenizer {
                 token.append(input.charAt(pos++));
                 ch = pos == input.length() ? '\0' : input.charAt(pos);
             }
+            //todo keep oer delete?
             if(pos < input.length()) {
                 if(input.charAt(pos) == '[') {
                     token.append(input.charAt(pos++));

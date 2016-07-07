@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import static java.lang.Integer.parseInt;
 
 public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
 
@@ -207,7 +206,7 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                             }
                             if (taskContext != null) {
                                 if (resolved == null) {
-//                                    resolved = taskContext.variable(tokenName);
+                                    //todo keep or delete?
                                     if(tokenName.charAt(tokenName.length() - 1) == ']') { //array access
                                         int indexStart = -1;
                                         int indexArray = -1;
@@ -299,6 +298,14 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
      */
     private double parseDouble(String val) {
         return Double.parseDouble(val);
+    }
+
+    /**
+     * @native ts
+     * return parseInt(val);
+     */
+    private int parseInt(String val) {
+        return Integer.parseInt(val);
     }
 
 
