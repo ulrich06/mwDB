@@ -12,7 +12,7 @@ import static org.mwg.task.Actions.repeatPar;
  */
 public class ExecutorSchedulerTest {
 
-    @Test
+    //@Test
     public void test() {
         Graph g = new GraphBuilder().withScheduler(new ExecutorScheduler()).build();
         DeferCounterSync waiter = g.newSyncCounter(1);

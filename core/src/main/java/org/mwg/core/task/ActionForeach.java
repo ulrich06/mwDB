@@ -9,6 +9,7 @@ import org.mwg.task.TaskContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class ActionForeach implements TaskAction {
@@ -77,40 +78,45 @@ class ActionForeach implements TaskAction {
                 dynResults = null;
             } else {
                 plainResults = null;
-                dynResult s= new HashMap<Integer, Object>();
+                dynResults = new HashMap<Integer, Object>();
             }
             final AtomicInteger cursor = new AtomicInteger(0);
             final Callback[] recursiveAction = new Callback[1];
+            final Object[] loopRes = new Object[1];
             recursiveAction[0] = new Callback() {
                 @Override
                 public void on(final Object res) {
                     int current = cursor.getAndIncrement();
-                    if(plainResults == null){
-
+                    if (plainResults != null) {
+                        plainResults[current] = res;
+                    } else {
+                        dynResults.put(current, res);
                     }
-
-
-
-                /*
-                int current = cursor.getAndIncrement();
-                results[current] = res;
-                //free the previous used input
-                context.cleanObj(castedResult[current]);
-                int nextCursot = current + 1;
-                if (nextCursot == results.length) {
-                    context.setUnsafeResult(results);
-                } else {
-                    //recursive call
-                    selfPointer._subTask.executeWith(context.graph(), context, castedResult[nextCursot], recursiveAction[0]);
-                }
-                */
+                    context.cleanObj(loopRes);
+                    loopRes[0] = genericIterable.next();
+                    if (loopRes[0] == null) {
+                        Object[] finalResults;
+                        if (plainResults != null) {
+                            finalResults = new Object[current + 1];
+                            System.arraycopy(plainResults, 0, finalResults, 0, current + 1);
+                        } else {
+                            int mapSize = dynResults.size();
+                            finalResults = new Object[mapSize];
+                            for (int i = 0; i < mapSize; i++) {
+                                finalResults[i] = dynResults.get(i);
+                            }
+                        }
+                        context.setUnsafeResult(finalResults);
+                    } else {
+                        selfPointer._subTask.executeFrom(context, loopRes[0], recursiveAction[0]);
+                    }
                 }
             };
-            Object loopRes = genericIterable.next();
+            loopRes[0] = genericIterable.next();
             context.graph().scheduler().dispatch(new Job() {
                 @Override
                 public void run() {
-                    _subTask.executeFrom(context, loopRes, recursiveAction[0]);
+                    _subTask.executeFrom(context, loopRes[0], recursiveAction[0]);
                 }
             });
         }
