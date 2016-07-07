@@ -125,7 +125,7 @@ public class AtomicSpace implements ChunkSpace {
 
     @Override
     public void free() {
-        space.clear();
+        space.free();
     }
 
     @Override
