@@ -1,11 +1,15 @@
 package org.mwg.core.task;
 
-import org.mwg.DeferCounter;
-import org.mwg.DeferCounterSync;
+import org.mwg.Callback;
 import org.mwg.core.utility.GenericIterable;
+import org.mwg.plugin.Job;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class ActionForeach implements TaskAction {
 
@@ -15,6 +19,8 @@ class ActionForeach implements TaskAction {
         _subTask = p_subTask;
     }
 
+
+    /*
     @Override
     public void eval(final TaskContext context) {
         final Object previousResult = context.result();
@@ -36,7 +42,7 @@ class ActionForeach implements TaskAction {
                 System.arraycopy(results, 0, doubled_res, 0, results.length);
                 results = doubled_res;
             }
-
+            //TODO rewrite with a pure iteration, DeferWaiter are slow
             results[index] = waiter.waitResult();
             index++;
             context.cleanObj(loop);
@@ -52,6 +58,62 @@ class ActionForeach implements TaskAction {
         context.cleanObj(previousResult);
         context.setUnsafeResult(results);
 
+    }*/
+
+
+    @Override
+    public void eval(final TaskContext context) {
+        final ActionForeach selfPointer = this;
+        final Object previousResult = context.result();
+        if (previousResult == null) {
+            context.setUnsafeResult(null);
+        } else {
+            final GenericIterable genericIterable = new GenericIterable(previousResult);
+            int plainEstimation = genericIterable.estimate();
+            final Object[] plainResults;
+            final Map<Integer, Object> dynResults;
+            if (plainEstimation != -1) {
+                plainResults = new Object[plainEstimation];
+                dynResults = null;
+            } else {
+                plainResults = null;
+                dynResult s= new HashMap<Integer, Object>();
+            }
+            final AtomicInteger cursor = new AtomicInteger(0);
+            final Callback[] recursiveAction = new Callback[1];
+            recursiveAction[0] = new Callback() {
+                @Override
+                public void on(final Object res) {
+                    int current = cursor.getAndIncrement();
+                    if(plainResults == null){
+
+                    }
+
+
+
+                /*
+                int current = cursor.getAndIncrement();
+                results[current] = res;
+                //free the previous used input
+                context.cleanObj(castedResult[current]);
+                int nextCursot = current + 1;
+                if (nextCursot == results.length) {
+                    context.setUnsafeResult(results);
+                } else {
+                    //recursive call
+                    selfPointer._subTask.executeWith(context.graph(), context, castedResult[nextCursot], recursiveAction[0]);
+                }
+                */
+                }
+            };
+            Object loopRes = genericIterable.next();
+            context.graph().scheduler().dispatch(new Job() {
+                @Override
+                public void run() {
+                    _subTask.executeFrom(context, loopRes, recursiveAction[0]);
+                }
+            });
+        }
     }
 
     @Override
