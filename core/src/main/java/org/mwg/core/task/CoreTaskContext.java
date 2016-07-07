@@ -264,12 +264,16 @@ class CoreTaskContext implements TaskContext {
             char currentChar = input.charAt(cursor);
             char previousChar = '0';
             char nextChar = '0';
+
             if (cursor > 0) {
                 previousChar = input.charAt(cursor - 1);
             }
+
             if (cursor + 1 < input.length()) {
                 nextChar = input.charAt(cursor + 1);
             }
+
+
             if (currentChar == '{' && previousChar == '{') {
                 previousPos = cursor + 1;
             } else if (previousPos != -1 && currentChar == '}' && previousChar == '}') {
@@ -279,31 +283,70 @@ class CoreTaskContext implements TaskContext {
                 }
                 String contextKey = input.substring(previousPos, cursor - 1).trim();
 
-                //TODO extract context potential index, if yes reset context key cleaned
 
-                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') {
+                if (contextKey.length() > 0 && contextKey.charAt(0) == '=') { //Math expression
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));
-                } else {
+                } else {//variable name or array access
+
+                    //check if it is an array access
+                    int indexArray = -1;
+                    if(contextKey.charAt(contextKey.length() - 1) == ']') {
+                        int indexStart = -1;
+                        for(int i = contextKey.length() - 3;i >= 0;i--) {
+                            if(contextKey.charAt(i) == '[') {
+                                indexStart = i + 1;
+                                break;
+                            }
+                        }
+
+                        if(indexStart != -1) {
+                            indexArray = parseInt(contextKey.substring(indexStart,contextKey.length() - 1));
+                            contextKey = contextKey.substring(0,indexStart - 1);
+
+                            if(indexArray < 0) {
+                                throw new RuntimeException("Array index out of range: " + indexArray);
+                            }
+                        }
+                    }
+
+
                     Object foundVar = variable(contextKey);
-                    if (foundVar == null && contextKey.equals("result")) {
+                    if(foundVar == null && contextKey.equals("result")) {
                         foundVar = result();
                     }
+
                     if (foundVar != null) {
-                        //todo complexify
-                        if (foundVar instanceof Object[]) {
-                            buffer.append("[");
-                            Object[] foundVarTab = (Object[]) foundVar;
-                            for (int i = 0; i < foundVarTab.length; i++) {
-                                buffer.append(foundVarTab[i]);
-                                if (i < foundVarTab.length - 1) {
-                                    buffer.append(",");
+                        GenericIterable iterable = new GenericIterable(foundVar);
+                        if(iterable.isArray() && indexArray != -1) {
+                            //show element of array
+                            Object toShow = null;
+                            for(int i=0;i<=indexArray;i++) {
+                                toShow = iterable.next();
+                                if(toShow == null) {
+                                    throw new RuntimeException("Array index out of range: " + indexArray);
                                 }
                             }
+                            buffer.append(toShow);
+                        } else if(iterable.isArray()) {
+                            //show all
+                            buffer.append("[");
+                            boolean isFirst = true;
+                            Object next = iterable.next();
+                            while(next != null) {
+                                if(isFirst) {
+                                    isFirst = false;
+                                } else {
+                                    buffer.append(",");
+                                }
+                                buffer.append(next);
+                                next = iterable.next();
+                            }
                             buffer.append("]");
-                        } else {
+                        } else { //is not an array
                             buffer.append(foundVar);
                         }
+
                     } else {
                         throw new RuntimeException("Variable not found " + contextKey + " in:" + input);
                     }
@@ -326,6 +369,16 @@ class CoreTaskContext implements TaskContext {
         } else {
             return buffer.toString();
         }
+    }
+
+
+    //todo fix(?)
+    /**
+     * @native ts
+     * return parseInt(s);
+     */
+    private int parseInt(String s) {
+        return Integer.parseInt(s);
     }
 
     @Override

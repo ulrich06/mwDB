@@ -1697,6 +1697,7 @@ declare module org {
                     executeFirst(graph: org.mwg.Graph): void;
                     cleanObj(o: any): void;
                     template(input: string): string;
+                    private parseInt(s);
                     isVerbose(): boolean;
                 }
                 module math {

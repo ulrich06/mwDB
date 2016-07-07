@@ -74,7 +74,6 @@ public interface Task {
      */
     Task fromIndexAll(String indexName);
 
-    //TODO put template for parameter
     /**
      * Filters the previous result to keep nodes which named attribute has a specific value
      *
@@ -85,7 +84,6 @@ public interface Task {
     Task selectWith(String name, String pattern);
 
 
-    //TODO put template for parameter
     /**
      * Filters the previous result to keep nodes which named attribute do not have a given value
      *
