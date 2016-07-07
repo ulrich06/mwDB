@@ -15,8 +15,9 @@ class ActionFromVar implements TaskAction {
     public void eval(final TaskContext context) {
         Object prev = context.result();
         context.cleanObj(prev);
-        context.setUnsafeResult(CoreTask.protect(context.graph(),context.variable(_name)));
-        //continue for next step
+        String name = context.template(_name);
+        Object protectedVar = CoreTask.protect(context.graph(),context.variable(name));
+        context.setUnsafeResult(protectedVar);
     }
 
     @Override

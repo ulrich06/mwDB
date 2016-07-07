@@ -1,7 +1,6 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.Constants;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
@@ -25,13 +24,14 @@ class ActionTraverseOrKeep implements TaskAction {
     public final void eval(final TaskContext context) {
         Object previousResult = context.result();
         if (previousResult != null) {
+            String flatName = context.template(_name);
             //dry execute to count waiter
             Set<Long> toLoad = new HashSet<Long>();
             if (previousResult instanceof Object[]) {
-                collectArray((Object[]) previousResult, toLoad);
+                collectArray((Object[]) previousResult, toLoad,flatName);
             } else if (previousResult instanceof AbstractNode) {
                 Node loop = (Node) previousResult;
-                Object rel = loop.get(_name);
+                Object rel = loop.get(flatName);
                 if (rel != null && rel instanceof long[]) {
                     long[] interResult = (long[]) rel;
                     for (int j = 0; j < interResult.length; j++) {
@@ -65,13 +65,13 @@ class ActionTraverseOrKeep implements TaskAction {
         }
     }
 
-    private void collectArray(Object[] current, Set<Long> toLoad) {
+    private void collectArray(Object[] current, Set<Long> toLoad,String flatName) {
         for (int i = 0; i < current.length; i++) {
             if (current[i] instanceof Object[]) {
-                collectArray((Object[]) current[i], toLoad);
+                collectArray((Object[]) current[i], toLoad,flatName);
             } else if (current[i] instanceof AbstractNode) {
                 Node loop = (Node) current[i];
-                Object rel = loop.get(_name);
+                Object rel = loop.get(flatName);
                 if (rel != null && rel instanceof long[]) {
                     long[] interResult = (long[]) rel;
                     for (int j = 0; j < interResult.length; j++) {

@@ -8,7 +8,6 @@ import org.mwg.core.task.math.MathExpressionEngine;
 import org.mwg.core.utility.GenericIterable;
 import org.mwg.plugin.AbstractIterable;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
@@ -254,6 +253,10 @@ class CoreTaskContext implements TaskContext {
 
     @Override
     public String template(String input) {
+        if(input == null) {
+            return null;
+        }
+
         int cursor = 0;
         StringBuilder buffer = null;
         int previousPos = -1;

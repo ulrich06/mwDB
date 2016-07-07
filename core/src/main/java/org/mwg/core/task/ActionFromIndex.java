@@ -19,7 +19,9 @@ class ActionFromIndex implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.graph().find(context.world(), context.time(), _indexName, _query, new Callback<Node[]>() {
+        String flatIndexName = context.template(_indexName);
+        String flatQuery = context.template(_query);
+        context.graph().find(context.world(), context.time(), flatIndexName, flatQuery, new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
                 context.setResult(result);

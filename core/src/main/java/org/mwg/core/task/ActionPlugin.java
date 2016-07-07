@@ -23,21 +23,23 @@ class ActionPlugin implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
+        String templatedName = context.template(_actionName);
+        String templatedParams = context.template(_flatParams);
         if (!initilized) {
-            TaskActionFactory actionFactory = context.graph().taskAction(_actionName);
+            TaskActionFactory actionFactory = context.graph().taskAction(templatedName);
             if (actionFactory == null) {
-                throw new RuntimeException("Unknown task action: " + _actionName);
+                throw new RuntimeException("Unknown task action: " + templatedName);
             }
             int paramsCapacity = CoreConstants.MAP_INITIAL_CAPACITY;
             String[] params = new String[paramsCapacity];
             int paramsIndex = 0;
             int cursor = 0;
-            int flatSize = _flatParams.length();
+            int flatSize = templatedParams.length();
             int previous = 0;
             while (cursor < flatSize) {
-                char current = _flatParams.charAt(cursor);
+                char current = templatedParams.charAt(cursor);
                 if (current == Constants.QUERY_SEP) {
-                    String param = _flatParams.substring(previous, cursor);
+                    String param = templatedParams.substring(previous, cursor);
                     if (param.length() > 0) {
                         if (paramsIndex >= paramsCapacity) {
                             int newParamsCapacity = paramsCapacity * 2;
@@ -54,7 +56,7 @@ class ActionPlugin implements TaskAction {
                 cursor++;
             }
             //add last param
-            String param = _flatParams.substring(previous, cursor);
+            String param = templatedParams.substring(previous, cursor);
             if (param.length() > 0) {
                 if (paramsIndex >= paramsCapacity) {
                     int newParamsCapacity = paramsCapacity * 2;

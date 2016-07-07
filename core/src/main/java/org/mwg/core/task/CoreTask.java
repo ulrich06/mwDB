@@ -30,14 +30,14 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task setWorld(String variableName) {
-        addAction(new ActionWorld(variableName));
+    public final org.mwg.task.Task setWorld(String template) {
+        addAction(new ActionWorld(template));
         return this;
     }
 
     @Override
-    public final org.mwg.task.Task setTime(String variableName) {
-        addAction(new ActionTime(variableName));
+    public final org.mwg.task.Task setTime(String template) {
+        addAction(new ActionTime(template));
         return this;
     }
 
