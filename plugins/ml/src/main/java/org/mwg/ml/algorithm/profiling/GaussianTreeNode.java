@@ -89,6 +89,10 @@ public class GaussianTreeNode extends GaussianNode implements ProfilingNode {
                                             public void on(Boolean result) {
                                                 root.free();
                                                 profile.free();
+
+                                                if(callback!=null) {
+                                                    callback.on(true);
+                                                }
                                             }
                                         });
                                     }
@@ -102,14 +106,15 @@ public class GaussianTreeNode extends GaussianNode implements ProfilingNode {
                                                     public void on(Boolean result) {
                                                         root.free();
                                                         profile.free();
+
+                                                        if(callback!=null) {
+                                                            callback.on(true);
+                                                        }
                                                     }
                                                 });
 
                                             }
                                         });
-                                    }
-                                    if(callback!=null) {
-                                        callback.on(true);
                                     }
                                 }
                             });
@@ -145,6 +150,9 @@ public class GaussianTreeNode extends GaussianNode implements ProfilingNode {
     }
 
     public void predictValue(double[] values, Callback<Double> callback){
+        if(callback==null){
+            return;
+        }
         double[] features = new double[values.length - 1];
         System.arraycopy(values, 0, features, 0, values.length - 1);
         final NodeState resolved = this._resolver.resolveState(this, true);
