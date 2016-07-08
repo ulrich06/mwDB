@@ -75,6 +75,24 @@ public interface Task {
     Task fromIndexAll(String indexName);
 
     /**
+     * Index the node (or the array of nodes) present in the result
+     *
+     * @param indexName index name
+     * @param flatKeyAttributes node attributes used to index
+     * @return this task to chain actions (fluent API)
+     */
+    Task indexNode(String indexName, String flatKeyAttributes);
+
+    /**
+     * Unindex the node (or the array of nodes) present in the result
+     *
+     * @param indexName index name
+     * @param flatKeyAttributes node attributes used to index
+     * @return this task to chain actions (fluent API)
+     */
+    Task unindexNode(String indexName, String flatKeyAttributes);
+
+    /**
      * Filters the previous result to keep nodes which named attribute has a specific value
      *
      * @param name    the name of the attribute used to filter
