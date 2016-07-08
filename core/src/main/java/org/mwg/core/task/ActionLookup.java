@@ -22,13 +22,13 @@ class ActionLookup implements TaskAction {
     public void eval(TaskContext context) {
 
         String parsedWorldResult = context.template(_world);
-        long worldL = parse(parsedWorldResult);
+        long worldL = Long.parseLong(parsedWorldResult);
 
         String parseTimeResult = context.template(_time);
-        long timeL = parse(parseTimeResult);
+        long timeL = Long.parseLong(parseTimeResult);
 
         String parsedId = context.template(_id);
-        long idL = parse(parsedId);
+        long idL = Long.parseLong(parsedId);
 
         Object previous = context.result();
         context.cleanObj(previous);
@@ -40,14 +40,6 @@ class ActionLookup implements TaskAction {
             }
         });
 
-    }
-
-    /**
-     * @native ts
-     * return parseInt(flat);
-     */
-    private long parse(String flat) {
-        return Long.parseLong(flat);
     }
 
     @Override

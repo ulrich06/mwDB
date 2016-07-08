@@ -716,6 +716,8 @@ declare module org {
                 inject(inputValue: any): org.mwg.task.Task;
                 fromIndex(indexName: string, query: string): org.mwg.task.Task;
                 fromIndexAll(indexName: string): org.mwg.task.Task;
+                indexNode(indexName: string, flatKeyAttributes: string): org.mwg.task.Task;
+                unindexNode(indexName: string, flatKeyAttributes: string): org.mwg.task.Task;
                 selectWith(name: string, pattern: string): org.mwg.task.Task;
                 selectWithout(name: string, pattern: string): org.mwg.task.Task;
                 select(filterFunction: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
@@ -1432,6 +1434,15 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionIndexOrUnindexNode implements org.mwg.task.TaskAction {
+                    private _indexName;
+                    private _flatKeyAttributes;
+                    private _isIndexation;
+                    constructor(indexName: string, flatKeyAttributes: string, isIndexation: boolean);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    private getNodes(previousResult);
+                    toString(): string;
+                }
                 class ActionInject implements org.mwg.task.TaskAction {
                     private _value;
                     constructor(value: any);
@@ -1558,7 +1569,6 @@ declare module org {
                     private _varName;
                     constructor(p_varName: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private parse(flat);
                     toString(): string;
                 }
                 class ActionTraverse implements org.mwg.task.TaskAction {
@@ -1608,7 +1618,6 @@ declare module org {
                     private _varName;
                     constructor(p_varName: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private parse(flat);
                     toString(): string;
                 }
                 class ActionWrapper implements org.mwg.task.TaskAction {
@@ -1625,6 +1634,8 @@ declare module org {
                     setTime(template: string): org.mwg.task.Task;
                     fromIndex(indexName: string, query: string): org.mwg.task.Task;
                     fromIndexAll(indexName: string): org.mwg.task.Task;
+                    indexNode(indexName: string, flatKeyAttributes: string): org.mwg.task.Task;
+                    unindexNode(indexName: string, flatKeyAttributes: string): org.mwg.task.Task;
                     selectWith(name: string, pattern: string): org.mwg.task.Task;
                     selectWithout(name: string, pattern: string): org.mwg.task.Task;
                     asVar(variableName: string): org.mwg.task.Task;
