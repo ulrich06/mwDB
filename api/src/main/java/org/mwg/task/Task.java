@@ -217,6 +217,12 @@ public interface Task {
      */
     Task newNode();
 
+    /**
+     * Create a new typed node on the [world,time] of the context
+     *
+     * @return this task to chain actions (fluent API)
+     */
+    Task newTypedNode(String typeNode);
 
     /**
      * Sets the value of an attribute of a node or an array of nodes with a variable value

@@ -162,6 +162,10 @@ public class Actions {
         return newTask().newNode();
     }
 
+    public static Task newTypedNode(String nodeType) {
+        return newTask().newTypedNode(nodeType);
+    }
+
     public static Task save() {
         return newTask().save();
     }

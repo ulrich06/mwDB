@@ -450,7 +450,13 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task newNode() {
-        addAction(new ActionNewNode());
+        addAction(new ActionNewNode(null));
+        return this;
+    }
+
+    @Override
+    public Task newTypedNode(String typeNode) {
+        addAction(new ActionNewNode(typeNode));
         return this;
     }
 
