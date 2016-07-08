@@ -15,7 +15,7 @@ class ActionNewNode implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-            Object previous = context.result();
+        Object previous = context.result();
 
         Node newNode;
         if(typeNode == null) {
@@ -32,6 +32,9 @@ class ActionNewNode implements TaskAction {
 
     @Override
     public String toString() {
+        if(typeNode != null) {
+            return "newTypedNode(" + typeNode + ")";
+        }
         return "newNode()";
     }
 
