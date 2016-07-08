@@ -49,6 +49,13 @@ public interface Node {
     byte type(String propertyName);
 
     /**
+     * Allows to know the type name of the current node (case of typed node).
+     *
+     * @return The type name of the current node.
+     */
+    String nodeTypeName();
+
+    /**
      * Sets the value of an attribute of this node, for its current world and time.<br>
      * This method hasField to be used for primitive types.
      *

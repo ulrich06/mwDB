@@ -43,6 +43,8 @@ class CoreGraph implements org.mwg.Graph {
     private final AtomicBoolean _isConnected;
     private final AtomicBoolean _lock;
 
+    private final Plugin[] _plugins;
+
     CoreGraph(Storage p_storage, ChunkSpace p_space, Scheduler p_scheduler, Resolver p_resolver, Plugin[] p_plugins) {
         //subElements set
         this._storage = p_storage;
@@ -50,12 +52,9 @@ class CoreGraph implements org.mwg.Graph {
         this._space.setGraph(this);
         this._scheduler = p_scheduler;
         this._resolver = p_resolver;
-
-
         //init default taskActions
         this._taskActions = new HashMap<String, TaskActionFactory>();
         CoreTask.fillDefault(this._taskActions);
-
         if (p_plugins != null) {
             this._nodeTypes = new HashMap<Long, NodeFactory>();
             for (int i = 0; i < p_plugins.length; i++) {
@@ -74,10 +73,10 @@ class CoreGraph implements org.mwg.Graph {
         } else {
             this._nodeTypes = null;
         }
-
         //variables init
         this._isConnected = new AtomicBoolean(false);
         this._lock = new AtomicBoolean(false);
+        this._plugins = p_plugins;
     }
 
     @Override
@@ -92,7 +91,6 @@ class CoreGraph implements org.mwg.Graph {
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
-
         long[] initPreviouslyResolved = new long[6];
         //init previously resolved values
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
@@ -102,7 +100,6 @@ class CoreGraph implements org.mwg.Graph {
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
-
         org.mwg.Node newNode = new CoreNode(world, time, this._nodeKeyCalculator.newKey(), this, initPreviouslyResolved);
         this._resolver.initNode(newNode, Constants.NULL_LONG);
         return newNode;
@@ -116,7 +113,6 @@ class CoreGraph implements org.mwg.Graph {
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
-
         long[] initPreviouslyResolved = new long[6];
         //init previously resolved values
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_INDEX] = world;
@@ -126,7 +122,6 @@ class CoreGraph implements org.mwg.Graph {
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_WORLD_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_SUPER_TIME_MAGIC] = Constants.NULL_LONG;
         initPreviouslyResolved[CoreConstants.PREVIOUS_RESOLVED_TIME_MAGIC] = Constants.NULL_LONG;
-
         long extraCode = _resolver.stringToHash(nodeType, false);
         NodeFactory resolvedFactory = factoryByCode(extraCode);
         AbstractNode newNode;
@@ -273,6 +268,19 @@ class CoreGraph implements org.mwg.Graph {
 
                                             //init the resolver
                                             selfPointer._resolver.init(selfPointer);
+
+                                            if (_plugins != null) {
+                                                for (int i = 0; i < _plugins.length; i++) {
+                                                    String[] nodeTypes = _plugins[i].nodeTypes();
+                                                    if (nodeTypes != null) {
+                                                        for (int j = 0; j < nodeTypes.length; j++) {
+                                                            String pluginName = nodeTypes[j];
+                                                            //make sure that all plugins are present to the graph dictionary
+                                                            selfPointer._resolver.stringToHash(pluginName, true);
+                                                        }
+                                                    }
+                                                }
+                                            }
 
                                         } catch (Exception e) {
                                             e.printStackTrace();

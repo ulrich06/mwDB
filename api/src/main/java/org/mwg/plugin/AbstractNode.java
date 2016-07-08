@@ -42,6 +42,11 @@ public abstract class AbstractNode implements Node {
         //noop
     }
 
+    @Override
+    public String nodeTypeName() {
+        return this._resolver.typeName(this);
+    }
+
     protected NodeState unphasedState() {
         return this._resolver.resolveState(this, true);
     }
