@@ -381,6 +381,7 @@ declare module org {
             id(): number;
             get(propertyName: string): any;
             type(propertyName: string): number;
+            nodeTypeName(): string;
             set(propertyName: string, propertyValue: any): void;
             setProperty(propertyName: string, propertyType: number, propertyValue: any): void;
             getOrCreateMap(propertyName: string, propertyType: number): org.mwg.struct.Map;
@@ -415,6 +416,7 @@ declare module org {
                 _previousResolveds: java.util.concurrent.atomic.AtomicReference<Float64Array>;
                 constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
                 init(): void;
+                nodeTypeName(): string;
                 unphasedState(): org.mwg.plugin.NodeState;
                 phasedState(): org.mwg.plugin.NodeState;
                 newState(time: number): org.mwg.plugin.NodeState;
@@ -574,6 +576,8 @@ declare module org {
                 markNodeAndGetType(node: org.mwg.Node): number;
                 initWorld(parentWorld: number, childWorld: number): void;
                 freeNode(node: org.mwg.Node): void;
+                typeName(node: org.mwg.Node): string;
+                typeCode(node: org.mwg.Node): number;
                 lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
                 resolveState(node: org.mwg.Node, allowDephasing: boolean): org.mwg.plugin.NodeState;
                 newState(node: org.mwg.Node, world: number, time: number): org.mwg.plugin.NodeState;
@@ -697,6 +701,7 @@ declare module org {
                 static add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
                 static removeProperty(propertyName: string): org.mwg.task.Task;
                 static newNode(): org.mwg.task.Task;
+                static newTypedNode(nodeType: string): org.mwg.task.Task;
                 static save(): org.mwg.task.Task;
                 static ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 static split(splitPattern: string): org.mwg.task.Task;
@@ -733,6 +738,7 @@ declare module org {
                 then(action: org.mwg.task.Action): org.mwg.task.Task;
                 save(): org.mwg.task.Task;
                 newNode(): org.mwg.task.Task;
+                newTypedNode(typeNode: string): org.mwg.task.Task;
                 setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
                 removeProperty(propertyName: string): org.mwg.task.Task;
                 add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
@@ -1266,6 +1272,7 @@ declare module org {
                 private _worldKeyCalculator;
                 private _isConnected;
                 private _lock;
+                private _plugins;
                 constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_plugins: org.mwg.plugin.Plugin[]);
                 fork(world: number): number;
                 newNode(world: number, time: number): org.mwg.Node;
@@ -1334,6 +1341,8 @@ declare module org {
                 private static KEY_SIZE;
                 constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_tracker: org.mwg.core.NodeTracker, p_scheduler: org.mwg.plugin.Scheduler);
                 init(graph: org.mwg.Graph): void;
+                typeName(node: org.mwg.Node): string;
+                typeCode(node: org.mwg.Node): number;
                 markNodeAndGetType(node: org.mwg.Node): number;
                 initNode(node: org.mwg.Node, codeType: number): void;
                 initWorld(parentWorld: number, childWorld: number): void;
@@ -1454,6 +1463,8 @@ declare module org {
                     toString(): string;
                 }
                 class ActionNewNode implements org.mwg.task.TaskAction {
+                    private typeNode;
+                    constructor(typeNode: string);
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
@@ -1649,6 +1660,7 @@ declare module org {
                     static protect(graph: org.mwg.Graph, input: any): any;
                     private static protectIterable(input);
                     newNode(): org.mwg.task.Task;
+                    newTypedNode(typeNode: string): org.mwg.task.Task;
                     setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
                     removeProperty(propertyName: string): org.mwg.task.Task;
                     add(relationName: string, variableNameToAdd: string): org.mwg.task.Task;
@@ -1715,6 +1727,7 @@ declare module org {
                         eval(context: org.mwg.Node, taskContext: org.mwg.task.TaskContext, variables: java.util.Map<string, number>): number;
                         private buildAST(rpn);
                         private parseDouble(val);
+                        private parseInt(val);
                     }
                     class MathDoubleToken implements org.mwg.core.task.math.MathToken {
                         private _content;

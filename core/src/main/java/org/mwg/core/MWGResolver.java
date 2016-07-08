@@ -2,6 +2,7 @@ package org.mwg.core;
 
 import org.mwg.Callback;
 import org.mwg.Constants;
+import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.core.chunk.StateChunk;
 import org.mwg.core.chunk.TimeTreeChunk;
@@ -42,6 +43,22 @@ class MWGResolver implements Resolver {
     public final void init(org.mwg.Graph graph) {
         _graph = graph;
         dictionary = (StateChunk) this._space.getAndMark(ChunkType.STATE_CHUNK, CoreConstants.GLOBAL_DICTIONARY_KEY[0], CoreConstants.GLOBAL_DICTIONARY_KEY[1], CoreConstants.GLOBAL_DICTIONARY_KEY[2]);
+    }
+
+    @Override
+    public String typeName(Node node) {
+        return hashToString(typeCode(node));
+    }
+
+    @Override
+    public long typeCode(Node node) {
+        WorldOrderChunk worldOrderChunk = (WorldOrderChunk) this._space.getAndMark(ChunkType.WORLD_ORDER_CHUNK, Constants.NULL_LONG, Constants.NULL_LONG, node.id());
+        if (worldOrderChunk == null) {
+            return Constants.NULL_LONG;
+        }
+        long result = worldOrderChunk.extra();
+        this._space.unmarkChunk(worldOrderChunk);
+        return result;
     }
 
     @Override

@@ -86,6 +86,8 @@ public class NodeFactoryTest {
             public void on(Boolean result) {
                 Node specializedNode = graph.newTypedNode(0, 0, NAME);
 
+                Assert.assertEquals(specializedNode.nodeTypeName(), "HelloWorldNode");
+
                 String hw = (String) specializedNode.get("hello");
                 Assert.assertTrue(hw.equals("world"));
 
