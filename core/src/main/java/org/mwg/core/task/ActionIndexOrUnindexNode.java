@@ -88,4 +88,13 @@ class ActionIndexOrUnindexNode implements TaskAction {
         throw new RuntimeException("[ActionIndexOrUnindexNode] Wrong type of result. Expected type is AbstractNode or an array of AbstractNode." +
                 "Actual type is " + previousResult);
     }
+
+    @Override
+    public String toString() {
+        if(_isIndexation) {
+            return "index('" + _indexName + "','" + _flatKeyAttributes + "')";
+        } else {
+            return "unindex('" + _indexName + "','" + _flatKeyAttributes + "')";
+        }
+    }
 }
