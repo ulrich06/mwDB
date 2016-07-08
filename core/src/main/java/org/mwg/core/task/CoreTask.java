@@ -63,7 +63,13 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task indexNode(String indexName, String flatKeyAttributes) {
-        addAction(new ActionIndexNode(indexName,flatKeyAttributes));
+        addAction(new ActionIndexOrUnindexNode(indexName,flatKeyAttributes,true));
+        return this;
+    }
+
+    @Override
+    public Task unindexNode(String indexName, String flatKeyAttributes) {
+        addAction(new ActionIndexOrUnindexNode(indexName,flatKeyAttributes,false));
         return this;
     }
 

@@ -9,13 +9,15 @@ import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-class ActionIndexNode implements TaskAction {
+class ActionIndexOrUnindexNode implements TaskAction {
     private final String _indexName;
     private final String _flatKeyAttributes;
+    private final boolean _isIndexation;
 
-    public ActionIndexNode(String indexName, String flatKeyAttributes) {
+    public ActionIndexOrUnindexNode(String indexName, String flatKeyAttributes, boolean isIndexation) {
         this._indexName = indexName;
         this._flatKeyAttributes = flatKeyAttributes;
+        this._isIndexation = isIndexation;
     }
 
     @Override
@@ -27,18 +29,26 @@ class ActionIndexNode implements TaskAction {
 
         Node[] nodes = getNodes(previousResult);
         DeferCounter counter = new CoreDeferCounter(nodes.length);
-        for(int i = 0;i < nodes.length; i++) {
-            context.graph().index(templatedIndexName, nodes[i], templatedKeyAttributes, new Callback<Boolean>() {
-                @Override
-                public void on(Boolean succeed) {
-                    if(succeed) {
-                       counter.count();
-                    } else {
-                        throw new RuntimeException("Error during indexation of node with id " + ((AbstractNode) previousResult).id());
-                    }
+
+        Callback<Boolean> end = new Callback<Boolean>() {
+            @Override
+            public void on(Boolean succeed) {
+                if (succeed) {
+                    counter.count();
+                } else {
+                    throw new RuntimeException("Error during indexation of node with id " + ((AbstractNode) previousResult).id());
                 }
-            });
+            }
+        };
+
+        for(int i = 0;i < nodes.length; i++) {
+            if(_isIndexation) {
+                context.graph().index(templatedIndexName, nodes[i], templatedKeyAttributes, end);
+            } else {
+                context.graph().unindex(templatedIndexName, nodes[i], templatedKeyAttributes, end);
+            }
         }
+
         counter.then(new Job() {
             @Override
             public void run() {
@@ -68,14 +78,14 @@ class ActionIndexNode implements TaskAction {
                     System.arraycopy(innerNodes,0,tmp,nodes.length,innerNodes.length);
                     nodes = tmp;
                 } else {
-                    throw new RuntimeException("[ActionIndexNode] The array in result contains an element with wrong type. " +
+                    throw new RuntimeException("[ActionIndexOrUnindexNode] The array in result contains an element with wrong type. " +
                             "Expected type: AbstractNode. Actual type: " + resAsArray[i]);
                 }
             }
             return nodes;
         }
 
-        throw new RuntimeException("[ActionIndexNode] Wrong type of result. Expected type is AbstractNode or an array of AbstractNode." +
+        throw new RuntimeException("[ActionIndexOrUnindexNode] Wrong type of result. Expected type is AbstractNode or an array of AbstractNode." +
                 "Actual type is " + previousResult);
     }
 }

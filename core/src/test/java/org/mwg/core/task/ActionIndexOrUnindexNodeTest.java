@@ -10,7 +10,7 @@ import org.mwg.task.TaskContext;
 
 import static org.mwg.task.Actions.newTask;
 
-public class ActionIndexNodeTest {
+public class ActionIndexOrUnindexNodeTest {
 
     @Test
     public void testIndexOneNode() {
@@ -35,6 +35,19 @@ public class ActionIndexNodeTest {
 
                                 Assert.assertEquals(1,nodes.length);
                                 Assert.assertEquals(indexedNode.id(),nodes[0].id());
+                                context.setUnsafeResult(context.result());
+                            }
+                        })
+                        .unindexNode("indexName","name")
+                        .fromIndexAll("indexName")
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                Assert.assertNotNull(context.result());
+
+                                Node[] nodes = (Node[]) context.result();
+                                Assert.assertEquals(0,nodes.length);
+                                context.setResult(null);
                             }
                         })
                         .execute(graph,null);
@@ -81,6 +94,19 @@ public class ActionIndexNodeTest {
                                     }
                                 }
 
+                                context.setUnsafeResult(context.result());
+                            }
+                        })
+                        .unindexNode("indexName","name")
+                        .fromIndexAll("indexName")
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                Assert.assertNotNull(context.result());
+
+                                Node[] nodes = (Node[]) context.result();
+                                Assert.assertEquals(0,nodes.length);
+                                context.setResult(null);
                             }
                         })
                         .execute(graph,null);
@@ -95,9 +121,13 @@ public class ActionIndexNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Task withOneIncoorectInput = Actions.newTask()
+                Task indexWithOneIncoorectInput = Actions.newTask()
                         .inject(55)
                         .indexNode("indexName","name");
+
+                Task unindexWithOneIncoorectInput = Actions.newTask()
+                        .inject(55)
+                        .unindexNode("indexName","name");
 
                 Object complexArray= new Object[3];
 
@@ -116,13 +146,17 @@ public class ActionIndexNodeTest {
 
 
 
-               Task withIncorrectArray = newTask()
+               Task indexwithIncorrectArray = newTask()
                         .inject(complexArray)
                         .indexNode("indexName","name");
 
+                Task unindexwithIncorrectArray = newTask()
+                        .inject(complexArray)
+                        .unindexNode("indexName","name");
+
                 boolean exceptionCaught = false;
                 try {
-                    withOneIncoorectInput.execute(graph,null);
+                    indexWithOneIncoorectInput.execute(graph,null);
                 } catch (RuntimeException ex) {
                     exceptionCaught = true;
                 }
@@ -130,7 +164,23 @@ public class ActionIndexNodeTest {
 
                 exceptionCaught = false;
                 try {
-                    withIncorrectArray.execute(graph,null);
+                    unindexWithOneIncoorectInput.execute(graph,null);
+                } catch (RuntimeException ex) {
+                    exceptionCaught = true;
+                }
+                Assert.assertTrue(exceptionCaught);
+
+                exceptionCaught = false;
+                try {
+                    indexwithIncorrectArray.execute(graph,null);
+                } catch (RuntimeException ex) {
+                    exceptionCaught = true;
+                }
+                Assert.assertTrue(exceptionCaught);
+
+                exceptionCaught = false;
+                try {
+                    unindexwithIncorrectArray.execute(graph,null);
                 } catch (RuntimeException ex) {
                     exceptionCaught = true;
                 }
