@@ -69,13 +69,13 @@ class ActionIndexNode implements TaskAction {
                     nodes = tmp;
                 } else {
                     throw new RuntimeException("[ActionIndexNode] The array in result contains an element with wrong type. " +
-                            "Expected type: AbstractNode. Actual type: " + resAsArray[i].getClass());
+                            "Expected type: AbstractNode. Actual type: " + resAsArray[i]);
                 }
             }
             return nodes;
         }
 
         throw new RuntimeException("[ActionIndexNode] Wrong type of result. Expected type is AbstractNode or an array of AbstractNode." +
-                "Actual type is " + previousResult.getClass());
+                "Actual type is " + previousResult);
     }
 }

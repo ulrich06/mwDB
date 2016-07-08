@@ -49,13 +49,15 @@ public class ActionIndexNodeTest {
         graph.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                Node[][] complexArray= new Node[3][2];
+                Object complexArray= new Object[3];
 
                 for(int i=0;i<3;i++) {
+                    Object[] inner = new Node[2];
                     for(int j=0;j<2;j++) {
-                        complexArray[i][j] = graph.newNode(0,0);
-                        complexArray[i][j].set("name","node" + i + j);
+                        inner[j] = graph.newNode(0,0);
+                        ((Node)inner[j]).set("name","node" + i + j);
                     }
+                    ((Object[])complexArray)[i] = inner;
                 }
 
                 newTask()
@@ -73,8 +75,9 @@ public class ActionIndexNodeTest {
                                 Assert.assertEquals(6,nodes.length);
 
                                 for(int i=0;i<3;i++) {
+                                    Object inner = ((Object[]) complexArray)[i];
                                     for(int j=0;j<2;j++) {
-                                        Assert.assertEquals(complexArray[i][j].get("name"),"node" + i + j);
+                                        Assert.assertEquals(((Node[])inner)[j].get("name"),"node" + i + j);
                                     }
                                 }
 
@@ -96,20 +99,24 @@ public class ActionIndexNodeTest {
                         .inject(55)
                         .indexNode("indexName","name");
 
-                Object[][] complexArray= new Object[3][2];
+                Object complexArray= new Object[3];
 
                 for(int i=0;i<3;i++) {
+                    Object[] inner = new Object[2];
                     for(int j=0;j<2;j++) {
                         if(i == 2 && j == 0) {
-                            complexArray[i][j] = graph.newNode(0,0);
-                            ((Node)complexArray[i][j]).set("name","node" + i + j);
+                            inner[j] = 55;
                         } else {
-                            complexArray[i][j] = 55;
+                            inner[j] = graph.newNode(0, 0);
+                            ((Node) inner[j]).set("name", "node" + i + j);
                         }
                     }
+                    ((Object[])complexArray)[i] = inner;
                 }
 
-                Task withIncorrectArray = newTask()
+
+
+               Task withIncorrectArray = newTask()
                         .inject(complexArray)
                         .indexNode("indexName","name");
 
