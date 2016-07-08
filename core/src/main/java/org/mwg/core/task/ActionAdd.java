@@ -19,12 +19,12 @@ class ActionAdd implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         final Object previousResult = context.result();
-        final Object savedVar = context.variable(_variableNameToAdd);
+        final Object savedVar = context.variable(context.template(_variableNameToAdd));
         if (savedVar instanceof AbstractNode) {
             if (previousResult instanceof AbstractNode) {
-                ((Node) previousResult).add(_relationName, (Node) savedVar);
+                ((Node) previousResult).add(context.template(_relationName), (Node) savedVar);
             } else if (previousResult instanceof Object[]) {
-                addFromArray((Object[]) previousResult, _relationName, (Node) savedVar);
+                addFromArray((Object[]) previousResult, context.template(_relationName), (Node) savedVar);
             }
         }
         context.setUnsafeResult(previousResult);
