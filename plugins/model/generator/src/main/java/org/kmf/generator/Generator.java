@@ -7,6 +7,7 @@ import org.jboss.forge.roaster.model.source.JavaEnumSource;
 import org.jboss.forge.roaster.model.source.JavaSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.kevoree.modeling.ast.*;
+import org.kevoree.modeling.ast.impl.Index;
 import org.kevoree.modeling.ast.impl.Model;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
@@ -224,15 +225,6 @@ public class Generator {
                                     buffer.append("final org.mwg.DeferCounterSync waiterIndex = this.graph().newSyncCounter(" + prop.indexes().length + ");\n");
 
                                     for (KIndex index : prop.indexes()) {
-                                        //add helper name
-                                        javaClass.addField()
-                                                .setVisibility(Visibility.PUBLIC)
-                                                .setFinal(true)
-                                                .setStatic(true)
-                                                .setName("IDX_" + index.fqn().toUpperCase())
-                                                .setType(String.class)
-                                                .setStringInitializer(index.name());
-
                                         String queryParam = "";
                                         for (KProperty loopP : index.properties()) {
                                             if (!queryParam.isEmpty()) {
@@ -240,7 +232,7 @@ public class Generator {
                                             }
                                             queryParam += loopP.name();
                                         }
-                                        buffer.append("this.graph().unindex(" + "IDX_" + index.fqn().toUpperCase() + ",this,\"" + queryParam + "\",waiterUnIndex.wrap());");
+                                        buffer.append("this.graph().unindex(" + name + "Model.IDX_" + index.fqn().toUpperCase() + ",this,\"" + queryParam + "\",waiterUnIndex.wrap());");
                                     }
 
                                     buffer.append("waiterUnIndex.then(new org.mwg.plugin.Job() {");
@@ -255,7 +247,7 @@ public class Generator {
                                             }
                                             queryParam += loopP.name();
                                         }
-                                        buffer.append("self.graph().index(" + "IDX_" + index.fqn().toUpperCase() + ",self,\"" + queryParam + "\",waiterIndex.wrap());");
+                                        buffer.append("self.graph().index(" + name + "Model.IDX_" + index.fqn().toUpperCase() + ",self,\"" + queryParam + "\",waiterIndex.wrap());");
                                     }
 
                                     buffer.append("}\n});");
@@ -313,6 +305,20 @@ public class Generator {
             modelClass.setName(name + "Model");
         }
         modelClass.addField().setName("_graph").setVisibility(Visibility.PRIVATE).setType(Graph.class).setFinal(true);
+
+        //add indexes name
+        for(KClassifier classifier : model.classifiers()) {
+            if(classifier instanceof Index) {
+                Index index = (Index) classifier;
+                modelClass.addField()
+                        .setVisibility(Visibility.PUBLIC)
+                        .setStatic(true)
+                        .setFinal(true)
+                        .setName("IDX_" + index.name().toUpperCase())
+                        .setType(String.class)
+                        .setStringInitializer(index.name());
+            }
+        }
 
         MethodSource<JavaClassSource> modelConstructor = modelClass.addMethod().setConstructor(true);
         modelConstructor.addParameter(GraphBuilder.class, "builder");
