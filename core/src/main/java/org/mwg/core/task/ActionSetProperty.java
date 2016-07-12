@@ -35,7 +35,7 @@ class ActionSetProperty implements TaskAction {
                     savedVar = Double.parseDouble(templateBased.toString());
                     break;
                 case Type.LONG:
-                    savedVar = parseLong(templateBased.toString());
+                    savedVar = Long.parseLong(templateBased.toString());
                     break;
                 default:
                     savedVar = templateBased;
@@ -56,14 +56,6 @@ class ActionSetProperty implements TaskAction {
      */
     private int parseInt(String payload) {
         return Integer.parseInt(payload);
-    }
-
-    /**
-     * @native ts
-     * return parseInt(payload);
-     */
-    private long parseLong(String payload) {
-        return Long.parseLong(payload);
     }
 
     private void setFromArray(final Object[] objs, final String relName, final Object toSet) {

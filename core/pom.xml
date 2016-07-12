@@ -4,12 +4,12 @@
     <groupId>org.kevoree.mwg</groupId>
     <artifactId>core</artifactId>
     <name>mwg :: Core</name>
-    <version>6-SNAPSHOT</version>
+    <version>7-SNAPSHOT</version>
 
     <parent>
         <artifactId>mwg</artifactId>
         <groupId>org.kevoree.mwg</groupId>
-        <version>6-SNAPSHOT</version>
+        <version>7-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 

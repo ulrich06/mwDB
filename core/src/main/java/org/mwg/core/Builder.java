@@ -62,9 +62,9 @@ public class Builder implements GraphBuilder.InternalBuilder {
      */
     private ChunkSpace createSpace(boolean usingOffHeapMemory, long memorySize, long autoSaveSize) {
         if (usingOffHeapMemory) {
-            return new AtomicSpace(new OffHeapChunkSpace(memorySize, autoSaveSize));
+            return new OffHeapChunkSpace(memorySize, autoSaveSize);
         } else {
-            return new AtomicSpace(new HeapChunkSpace((int) memorySize, (int) autoSaveSize));
+            return new HeapChunkSpace((int) memorySize, (int) autoSaveSize);
         }
     }
 
