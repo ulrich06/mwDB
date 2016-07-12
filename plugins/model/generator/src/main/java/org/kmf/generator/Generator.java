@@ -224,6 +224,15 @@ public class Generator {
                                     buffer.append("final org.mwg.DeferCounterSync waiterIndex = this.graph().newSyncCounter(" + prop.indexes().length + ");\n");
 
                                     for (KIndex index : prop.indexes()) {
+                                        //add helper name
+                                        javaClass.addField()
+                                                .setVisibility(Visibility.PUBLIC)
+                                                .setFinal(true)
+                                                .setStatic(true)
+                                                .setName("IDX_" + index.fqn().toUpperCase())
+                                                .setType(String.class)
+                                                .setStringInitializer(index.name());
+
                                         String queryParam = "";
                                         for (KProperty loopP : index.properties()) {
                                             if (!queryParam.isEmpty()) {
@@ -231,7 +240,7 @@ public class Generator {
                                             }
                                             queryParam += loopP.name();
                                         }
-                                        buffer.append("this.graph().unindex(\"" + index.fqn() + "\",this,\"" + queryParam + "\",waiterUnIndex.wrap());");
+                                        buffer.append("this.graph().unindex(" + "IDX_" + index.fqn().toUpperCase() + ",this,\"" + queryParam + "\",waiterUnIndex.wrap());");
                                     }
 
                                     buffer.append("waiterUnIndex.then(new org.mwg.plugin.Job() {");
@@ -246,7 +255,7 @@ public class Generator {
                                             }
                                             queryParam += loopP.name();
                                         }
-                                        buffer.append("self.graph().index(\"" + index.fqn() + "\",self,\"" + queryParam + "\",waiterIndex.wrap());");
+                                        buffer.append("self.graph().index(" + "IDX_" + index.fqn().toUpperCase() + ",self,\"" + queryParam + "\",waiterIndex.wrap());");
                                     }
 
                                     buffer.append("}\n});");
