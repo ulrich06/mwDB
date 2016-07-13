@@ -13,6 +13,13 @@ public interface DeferCounter {
      */
     void count();
 
+
+    /**
+     * Get the current countdown
+     */
+    int getCount();
+
+
     /**
      * Registers the task, in form of a {@link Job}, to be called when all awaited events have occurred.
      *
