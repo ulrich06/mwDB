@@ -29,7 +29,7 @@ class ActionSetProperty implements TaskAction {
             Object templateBased = context.template(this._variableNameToSet);
             switch (_propertyType) {
                 case Type.INT:
-                    savedVar = parseInt(templateBased.toString());
+                    savedVar = TaskHelper.parseInt(templateBased.toString());
                     break;
                 case Type.DOUBLE:
                     savedVar = Double.parseDouble(templateBased.toString());
@@ -50,13 +50,6 @@ class ActionSetProperty implements TaskAction {
         context.setUnsafeResult(previousResult);
     }
 
-    /**
-     * @native ts
-     * return parseInt(payload);
-     */
-    private int parseInt(String payload) {
-        return Integer.parseInt(payload);
-    }
 
     private void setFromArray(final Object[] objs, final String relName, final Object toSet) {
         for (int i = 0; i < objs.length; i++) {

@@ -27,7 +27,8 @@ class ActionIndexOrUnindexNode implements TaskAction {
         String templatedIndexName = context.template(_indexName);
         String templatedKeyAttributes = context.template(_flatKeyAttributes);
 
-        Node[] nodes = getNodes(previousResult);
+//        Node[] nodes = getNodes(previousResult);
+        Node[] nodes = TaskHelper.flatNodes(previousResult,true);
         DeferCounter counter = new CoreDeferCounter(nodes.length);
 
         Callback<Boolean> end = new Callback<Boolean>() {
@@ -57,7 +58,7 @@ class ActionIndexOrUnindexNode implements TaskAction {
         });
     }
 
-    private Node[] getNodes(Object previousResult) {
+   /* private Node[] getNodes(Object previousResult) {
         if(previousResult instanceof AbstractNode) {
             return new Node[]{(Node) previousResult};
         }
@@ -87,7 +88,7 @@ class ActionIndexOrUnindexNode implements TaskAction {
 
         throw new RuntimeException("[ActionIndexOrUnindexNode] Wrong type of result. Expected type is AbstractNode or an array of AbstractNode." +
                 "Actual type is " + previousResult);
-    }
+    }*/
 
     @Override
     public String toString() {

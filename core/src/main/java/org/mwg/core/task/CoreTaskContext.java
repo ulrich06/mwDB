@@ -301,7 +301,7 @@ class CoreTaskContext implements TaskContext {
                         }
 
                         if(indexStart != -1) {
-                            indexArray = parseInt(contextKey.substring(indexStart,contextKey.length() - 1));
+                            indexArray = TaskHelper.parseInt(contextKey.substring(indexStart,contextKey.length() - 1));
                             contextKey = contextKey.substring(0,indexStart - 1);
 
                             if(indexArray < 0) {
@@ -371,15 +371,6 @@ class CoreTaskContext implements TaskContext {
         }
     }
 
-
-    //todo fix(?)
-    /**
-     * @native ts
-     * return parseInt(s);
-     */
-    private int parseInt(String s) {
-        return Integer.parseInt(s);
-    }
 
     @Override
     public boolean isVerbose() {

@@ -29,14 +29,15 @@ class ActionTraverseIndex implements TaskAction {
         if (previousResult != null) {
             String flatIndexName = context.template(_indexName);
             String flatQuery = context.template(_query);
-            Node[] toLoad;
+            /*Node[] toLoad;
             if (previousResult instanceof AbstractNode) {
                 toLoad = new Node[]{(Node) previousResult};
             } else if (previousResult instanceof Object[]) {
                 toLoad = getNodes((Object[]) previousResult);
             } else {
                 toLoad = new Node[0];
-            }
+            }*/
+            Node[] toLoad = TaskHelper.flatNodes(previousResult,false);
             int countNbNodeToLoad = countNbNodeToLoad(toLoad,flatIndexName);
             final CoreDeferCounter counter = new CoreDeferCounter(toLoad.length);
             final Node[] resultNodes = new AbstractNode[countNbNodeToLoad];
@@ -78,10 +79,12 @@ class ActionTraverseIndex implements TaskAction {
                 @Override
                 public void run() {
                     if (cursor.get() == resultNodes.length) {
+                        //todo set with unsafe
                         context.setResult(resultNodes);
                     } else {
                         Node[] newResult = new Node[cursor.get()];
                         System.arraycopy(resultNodes, 0, newResult, 0, cursor.get());
+                        //todo set with unsafe
                         context.setResult(newResult);
                     }
                 }
@@ -92,24 +95,24 @@ class ActionTraverseIndex implements TaskAction {
         }
     }
 
-    private Node[] getNodes(Object[] previousResult) {
-        Node[] result = new Node[0];
-        for (int i = 0; i < previousResult.length; i++) {
-            if (previousResult[i] instanceof AbstractNode) {
-                Node[] tmp = new Node[result.length + 1];
-                System.arraycopy(result, 0, tmp, 0, result.length);
-                tmp[result.length] = (Node) previousResult[i];
-                result = tmp;
-            } else if (previousResult[i] instanceof Object[]) {
-                Node[] nodes = getNodes((Object[]) previousResult[i]);
-                Node[] tmp = new Node[result.length + nodes.length];
-                System.arraycopy(result, 0, tmp, 0, result.length);
-                System.arraycopy(nodes, 0, tmp, result.length, nodes.length);
-                result = tmp;
-            }
-        }
-        return result;
-    }
+//    private Node[] getNodes(Object[] previousResult) {
+//        Node[] result = new Node[0];
+//        for (int i = 0; i < previousResult.length; i++) {
+//            if (previousResult[i] instanceof AbstractNode) {
+//                Node[] tmp = new Node[result.length + 1];
+//                System.arraycopy(result, 0, tmp, 0, result.length);
+//                tmp[result.length] = (Node) previousResult[i];
+//                result = tmp;
+//            } else if (previousResult[i] instanceof Object[]) {
+//                Node[] nodes = getNodes((Object[]) previousResult[i]);
+//                Node[] tmp = new Node[result.length + nodes.length];
+//                System.arraycopy(result, 0, tmp, 0, result.length);
+//                System.arraycopy(nodes, 0, tmp, result.length, nodes.length);
+//                result = tmp;
+//            }
+//        }
+//        return result;
+//    }
 
     private int countNbNodeToLoad(Node[] nodes, String flatIndexName) {
         int nbNoadToLoad = 0;

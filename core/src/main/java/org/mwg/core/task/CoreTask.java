@@ -515,6 +515,15 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task jump(String time) {
+        if(time == null) {
+            throw new RuntimeException("time should not be null");
+        }
+        addAction(new ActionJump(time));
+        return this;
+    }
+
+    @Override
     public Task math(String expression) {
         addAction(new ActionMath(expression));
         return this;

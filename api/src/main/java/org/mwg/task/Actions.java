@@ -152,6 +152,10 @@ public class Actions {
         return newTask().add(relationName, variableNameToAdd);
     }
 
+    public static Task jump(String time) {
+        return newTask().jump(time);
+    }
+
     public static Task removeProperty(String propertyName) {
         return newTask().removeProperty(propertyName);
     }

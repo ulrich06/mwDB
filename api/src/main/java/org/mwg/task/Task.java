@@ -281,6 +281,14 @@ public interface Task {
     Task remove(String relationName, String variableNameToRemove);
 
     /**
+     * Jump the node , or the array of nodes, in the result to the given time
+     *
+     * @param time Time to jump for each nodes
+     * @return this task to chain actions (fluent API)
+     */
+    Task jump(String time);
+
+    /**
      * Parse a string to build the current task. Syntax is as follow: actionName(param).actionName2(param2)...
      * In case actionName() are empty, default task is get(name).
      * Therefore the following: children.name should be read as get(children).get(name)
