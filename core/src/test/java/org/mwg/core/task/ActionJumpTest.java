@@ -25,7 +25,6 @@ public class ActionJumpTest extends AbstractActionTest {
                     public void eval(TaskContext context) {
                         Node it = (Node) context.result();
                         Assert.assertEquals(0,it.time());
-                        System.err.println(it.time());
                         context.setResult(null);
                     }
                 }))
@@ -36,7 +35,6 @@ public class ActionJumpTest extends AbstractActionTest {
                     public void eval(TaskContext context) {
                         Node it = (Node) context.result();
                         Assert.assertEquals(10,it.time());
-                        System.err.println(it.time());
                         context.setResult(null);
                     }
                 }))

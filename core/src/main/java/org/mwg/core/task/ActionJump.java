@@ -47,4 +47,9 @@ public class ActionJump implements TaskAction {
         });
 
     }
+
+    @Override
+    public String toString() {
+        return "jump(" + _time + ")";
+    }
 }

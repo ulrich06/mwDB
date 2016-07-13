@@ -286,7 +286,13 @@ class CoreTaskContext implements TaskContext {
 
                 if (contextKey.length() > 0 && contextKey.charAt(0) == '=') { //Math expression
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
-                    buffer.append(mathEngine.eval(null, this, new HashMap<String, Double>()));
+                    double value = mathEngine.eval(null,this,new HashMap<String, Double>());
+                    //supress ".0" if it exists
+                    if(value == (int)value) {
+                        buffer.append((int)value);
+                    } else {
+                        buffer.append(value);
+                    }
                 } else {//variable name or array access
 
                     //check if it is an array access

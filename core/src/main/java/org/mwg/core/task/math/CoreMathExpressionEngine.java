@@ -206,7 +206,6 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                             }
                             if (taskContext != null) {
                                 if (resolved == null) {
-                                    //todo keep or delete?
                                     if(tokenName.charAt(tokenName.length() - 1) == ']') { //array access
                                         int indexStart = -1;
                                         int indexArray = -1;
