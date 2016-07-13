@@ -316,6 +316,7 @@ declare module org {
         }
         interface DeferCounter {
             count(): void;
+            getCount(): number;
             then(job: org.mwg.plugin.Job): void;
             wrap(): org.mwg.Callback<any>;
         }
@@ -1455,7 +1456,6 @@ declare module org {
                     private _id;
                     constructor(p_world: string, p_time: string, p_id: string);
                     eval(context: org.mwg.task.TaskContext): void;
-                    private parse(flat);
                     toString(): string;
                 }
                 class ActionMap implements org.mwg.task.TaskAction {
@@ -1548,7 +1548,6 @@ declare module org {
                     constructor(relationName: string, propertyType: number, variableNameToSet: string);
                     eval(context: org.mwg.task.TaskContext): void;
                     private parseInt(payload);
-                    private parseLong(payload);
                     private setFromArray(objs, relName, toSet);
                     toString(): string;
                 }
@@ -1851,6 +1850,7 @@ declare module org {
                     private _end;
                     constructor(nb: number);
                     count(): void;
+                    getCount(): number;
                     then(p_callback: org.mwg.plugin.Job): void;
                     wrap(): org.mwg.Callback<any>;
                 }
@@ -1861,6 +1861,7 @@ declare module org {
                     private _result;
                     constructor(nb: number);
                     count(): void;
+                    getCount(): number;
                     then(p_callback: org.mwg.plugin.Job): void;
                     wrap(): org.mwg.Callback<any>;
                     waitResult(): any;

@@ -54,6 +54,11 @@ public class CoreDeferCounterSync implements org.mwg.DeferCounterSync {
     }
 
     @Override
+    public int getCount() {
+        return _nb_down.get();
+    }
+
+    @Override
     public void then(Job p_callback) {
         this._end = p_callback;
         if (this._nb_down.get() == _counter) {
