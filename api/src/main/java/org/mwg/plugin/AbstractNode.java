@@ -622,4 +622,15 @@ public abstract class AbstractNode implements Node {
         return builder.toString();
     }
 
+    @Override
+    public Node clone() {
+        long[] initPreviouslyResolved = _previousResolveds.get();
+        if (initPreviouslyResolved == null) {
+            throw new RuntimeException("This Node has been tagged destroyed, please don't use it anymore! node id: " + id());
+        }
+
+        long typeCode = _resolver.markNodeAndGetType(this);
+        NodeFactory resolvedFactory = _graph.factoryByCode(typeCode);
+        return resolvedFactory.create(world(), time(), id(), _graph, initPreviouslyResolved);
+    }
 }

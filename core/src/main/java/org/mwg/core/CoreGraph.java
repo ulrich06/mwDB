@@ -143,7 +143,7 @@ class CoreGraph implements org.mwg.Graph {
         if (!_isConnected.get()) {
             throw new RuntimeException(CoreConstants.DISCONNECTED_ERROR);
         }
-        AbstractNode castedOrigin = (AbstractNode) origin;
+       /* AbstractNode castedOrigin = (AbstractNode) origin;
         long[] initPreviouslyResolved = castedOrigin._previousResolveds.get();
         if (initPreviouslyResolved == null) {
             throw new RuntimeException(CoreConstants.DEAD_NODE_ERROR + " node id: " + origin.id());
@@ -156,7 +156,8 @@ class CoreGraph implements org.mwg.Graph {
         } else {
             newNode = resolvedFactory.create(castedOrigin.world(), castedOrigin.time(), castedOrigin.id(), this, initPreviouslyResolved);
         }
-        return newNode;
+        return newNode;*/
+        return origin.clone();
     }
 
     public NodeFactory factoryByCode(long code) {

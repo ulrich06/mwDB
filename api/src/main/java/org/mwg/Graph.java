@@ -2,9 +2,7 @@ package org.mwg;
 
 import org.mwg.plugin.*;
 import org.mwg.struct.Buffer;
-import org.mwg.task.Task;
 import org.mwg.task.TaskActionFactory;
-import org.mwg.task.TaskContext;
 
 /**
  * Graph is the main structure of mwDB.
@@ -220,6 +218,14 @@ public interface Graph {
      * @param nodes
      */
     void freeNodes(Node[] nodes);
+
+
+    /** Keep or not?
+     *
+     * @param code code of the factory
+     * @return Node factory
+     */
+    NodeFactory factoryByCode(long code);
 
     /**
      * Retrieve a task action factory, resolved by its name
