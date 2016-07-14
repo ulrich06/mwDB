@@ -249,5 +249,5 @@ public class PrimitiveHelper {
     public static boolean isDefined(Object param) {
         return param != null;
     }
-    
+
 }
