@@ -287,12 +287,19 @@ class CoreTaskContext implements TaskContext {
                 if (contextKey.length() > 0 && contextKey.charAt(0) == '=') { //Math expression
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     double value = mathEngine.eval(null,this,new HashMap<String, Double>());
+
                     //supress ".0" if it exists
-                    if(value == (int)value) {
-                        buffer.append((int)value);
-                    } else {
-                        buffer.append(value);
+                    String valueStr = value + "";
+                    for(int i=valueStr.length() - 1;i>=0;i--) {
+                        if(valueStr.charAt(i) == '.') {
+                            valueStr = valueStr.substring(0,i);
+                            break;
+                        } else if(valueStr.charAt(i) != '0') {
+                            break;
+                        }
                     }
+
+                    buffer.append(valueStr);
                 } else {//variable name or array access
 
                     //check if it is an array access

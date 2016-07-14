@@ -9,7 +9,7 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
 
-public class ActionJump implements TaskAction {
+class ActionJump implements TaskAction {
     private final String _time;
 
     public ActionJump(String time) {
@@ -50,6 +50,6 @@ public class ActionJump implements TaskAction {
 
     @Override
     public String toString() {
-        return "jump(" + _time + ")";
+        return "jump(\'" + _time + "\')";
     }
 }
