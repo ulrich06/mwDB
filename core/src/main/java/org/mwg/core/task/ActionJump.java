@@ -8,11 +8,10 @@ import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 
-
-public class ActionJump implements TaskAction {
+class ActionJump implements TaskAction {
     private final String _time;
 
-    public ActionJump(String time) {
+    ActionJump(String time) {
         _time = time;
     }
 
