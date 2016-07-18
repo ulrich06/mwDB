@@ -218,11 +218,11 @@ class CoreTaskContext implements TaskContext {
                     MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     double value = mathEngine.eval(null, this, new HashMap<String, Double>());
                     //supress ".0" if it exists
-                    if (value == (int) value) {
-                        buffer.append((int) value);
-                    } else {
-                        buffer.append(value);
-                    }
+                    // if (value == (int) value) {
+                    //    buffer.append((int) value);
+                    //} else {
+                    buffer.append(value);
+                    //}
                 } else {//variable name or array access
                     //check if it is an array access
                     int indexArray = -1;
