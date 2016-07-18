@@ -77,15 +77,15 @@ public class TestTMP {
                         .ifThen(new TaskFunctionConditional() {
                             @Override
                             public boolean eval(TaskContext context) {
-                                Node[] result = (Node[]) context.variable("childNode");
+                                TaskResult<Node> result = context.variable("childNode");
 
-                                if (result.length > 0) {
-                                    context.setVariable("starterNode", result[0]);
+                                if (result.size() > 0) {
+                                    context.setVariable("starterNode", context.wrap(result.get(0)));
                                     Node starter = (Node) context.variable("starterNode");
-                                    System.out.println(recursionNb[0] + " 1er ifThen " + starter + " -> " + Arrays.toString(result));
+                                    System.out.println(recursionNb[0] + " 1er ifThen " + starter + " -> " + result);
 
                                 }
-                                return result.length > 0;
+                                return result.size() > 0;
                             }
                         }, traverse);
                 /*.ifThen(new TaskFunctionConditional() {
@@ -110,7 +110,7 @@ public class TestTMP {
                     }
                 }).executeSubTask(creationTask);
 
-                mainTask.execute(graph,null);
+                mainTask.execute(graph, null);
 
 
             }

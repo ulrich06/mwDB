@@ -10,7 +10,6 @@ import org.mwg.task.TaskResult;
 class ActionFromIndex implements TaskAction {
 
     private final String _indexName;
-
     private final String _query;
 
     ActionFromIndex(final String p_indexName, final String p_query) {

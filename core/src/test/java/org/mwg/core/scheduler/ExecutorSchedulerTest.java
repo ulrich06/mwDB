@@ -2,6 +2,7 @@ package org.mwg.core.scheduler;
 
 import org.junit.Test;
 import org.mwg.*;
+import org.mwg.task.TaskResult;
 
 import static org.mwg.task.Actions.print;
 import static org.mwg.task.Actions.repeat;
@@ -19,9 +20,9 @@ public class ExecutorSchedulerTest {
         g.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                repeatPar(100, print("{{result}}")).execute(g, new Callback<Object>() {
+                repeatPar("100", print("{{result}}")).execute(g, new Callback<TaskResult>() {
                     @Override
-                    public void on(Object result) {
+                    public void on(TaskResult result) {
                         System.out.println("end");
                         g.disconnect(new Callback<Boolean>() {
                             @Override

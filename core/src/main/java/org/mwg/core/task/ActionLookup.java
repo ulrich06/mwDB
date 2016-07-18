@@ -20,7 +20,7 @@ class ActionLookup implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-/*
+
         String parsedWorldResult = context.template(_world);
         long worldL = Long.parseLong(parsedWorldResult);
 
@@ -30,16 +30,13 @@ class ActionLookup implements TaskAction {
         String parsedId = context.template(_id);
         long idL = Long.parseLong(parsedId);
 
-        Object previous = context.result();
-        context.cleanObj(previous);
-
         context.graph().lookup(worldL, timeL, idL, new Callback<Node>() {
             @Override
             public void on(Node result) {
-                context.setUnsafeResult(result);
+                context.continueWith(context.wrap(result));
             }
         });
-        */
+
 
     }
 

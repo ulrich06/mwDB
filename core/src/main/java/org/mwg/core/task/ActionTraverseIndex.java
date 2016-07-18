@@ -1,6 +1,7 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.Query;
 import org.mwg.core.CoreConstants;
@@ -10,6 +11,7 @@ import org.mwg.plugin.Job;
 import org.mwg.struct.LongLongArrayMap;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,71 +26,44 @@ class ActionTraverseIndex implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        /*
-        //todo replace setResult by setUnsafeResult
-        Object previousResult = context.result();
+        final TaskResult finalResult = context.wrap(null);
+        final String flatName = context.template(_indexName);
+        final TaskResult previousResult = context.result();
         if (previousResult != null) {
-            String flatIndexName = context.template(_indexName);
-            String flatQuery = context.template(_query);
-            Node[] toLoad = TaskHelper.flatNodes(previousResult,false);
-            int countNbNodeToLoad = countNbNodeToLoad(toLoad,flatIndexName);
-            final CoreDeferCounter counter = new CoreDeferCounter(toLoad.length);
-            final Node[] resultNodes = new AbstractNode[countNbNodeToLoad];
-            final AtomicInteger cursor = new AtomicInteger(0);
-            for (int i = 0; i < toLoad.length; i++) {
-                Node node = toLoad[i];
-                if (flatQuery != null) {
-                    Query queryObj = node.graph().newQuery();
-                    queryObj.setWorld(context.world());
-                    queryObj.setTime(context.time());
-                    queryObj.parse(flatQuery);
-                    queryObj.setIndexName(flatIndexName);
-                    node.findByQuery(queryObj, new Callback<Node[]>() {
+            final int previousSize = previousResult.size();
+            final DeferCounter defer = context.graph().newCounter(previousSize);
+            for (int i = 0; i < previousSize; i++) {
+                final Object loop = previousResult.get(i);
+                if (loop instanceof AbstractNode) {
+                    Node casted = (Node) loop;
+                    casted.find(flatName, _query, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
-                            for (Node n : result) {
-                                if (n != null) {
-                                    resultNodes[cursor.getAndIncrement()] = n;
+                            if (result != null) {
+                                for (int j = 0; j < result.length; j++) {
+                                    if (result[j] != null) {
+                                        finalResult.add(result[j]);
+                                    }
                                 }
                             }
-                            counter.count();
+                            defer.count();
                         }
                     });
                 } else {
-                    node.findAll(flatIndexName, new Callback<Node[]>() {
-                        @Override
-                        public void on(Node[] result) {
-                            for (Node n : result) {
-                                if (n != null) {
-                                    resultNodes[cursor.getAndIncrement()] = n;
-                                }
-                            }
-                            counter.count();
-                        }
-                    });
+                    //TODO add closable management
+                    finalResult.add(loop);
+                    defer.count();
                 }
             }
-            counter.then(new Job() {
+            defer.then(new Job() {
                 @Override
                 public void run() {
-                    if (cursor.get() == resultNodes.length) {
-                        //todo set with unsafe
-                        context.setResult(resultNodes);
-                    } else {
-                        Node[] newResult = new Node[cursor.get()];
-                        System.arraycopy(resultNodes, 0, newResult, 0, cursor.get());
-                        //todo set with unsafe
-                        context.setResult(newResult);
-                    }
+                    context.continueWith(finalResult);
                 }
             });
-
         } else {
-            context.setRawResult(null);
+            context.continueTask();
         }
-
-*/
-
     }
 
     @Override

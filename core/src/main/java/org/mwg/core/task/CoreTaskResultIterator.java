@@ -1,4 +1,4 @@
-package org.mwg.core.utility;
+package org.mwg.core.task;
 
 import org.mwg.task.TaskResultIterator;
 

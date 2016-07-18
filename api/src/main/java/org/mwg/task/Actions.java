@@ -108,11 +108,11 @@ public class Actions {
         return newTask().traverseIndexAll(indexName);
     }
 
-    public static Task repeat(int repetition, Task subTask) {
+    public static Task repeat(String repetition, Task subTask) {
         return newTask().repeat(repetition, subTask);
     }
 
-    public static Task repeatPar(int repetition, Task subTask) {
+    public static Task repeatPar(String repetition, Task subTask) {
         return newTask().repeatPar(repetition, subTask);
     }
 

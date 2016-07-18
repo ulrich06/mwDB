@@ -23,10 +23,10 @@ class ActionPlugin implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        String templatedName = context.template(_actionName);
-        String templatedParams = context.template(_flatParams);
+        final String templatedName = context.template(_actionName);
+        final String templatedParams = context.template(_flatParams);
         if (!initilized) {
-            TaskActionFactory actionFactory = context.graph().taskAction(templatedName);
+            final TaskActionFactory actionFactory = context.graph().taskAction(templatedName);
             if (actionFactory == null) {
                 throw new RuntimeException("Unknown task action: " + templatedName);
             }

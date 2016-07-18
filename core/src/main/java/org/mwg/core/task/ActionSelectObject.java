@@ -1,7 +1,6 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
-import org.mwg.core.utility.GenericIterable;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;

@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionSplit implements TaskAction {
 
@@ -13,21 +14,23 @@ class ActionSplit implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-
-        /*
-
-        Object previous = context.result();
-        if (previous != null) {
-            String flat = context.resultAsString();
-            String[] nextRes = flat.split(context.template(this._splitPattern));
-            context.cleanObj(previous);
-            context.setUnsafeResult(nextRes);
-        } else {
-            context.setUnsafeResult(new String[0]);
+        final String splitPattern = context.template(this._splitPattern);
+        TaskResult previous = context.result();
+        TaskResult next = context.wrap(null);
+        for (int i = 0; i < previous.size(); i++) {
+            final Object loop = previous.get(0);
+            if(loop instanceof String){
+                String[] splitted = ((String) loop).split(splitPattern);
+                if(previous.size() == 1){
+                    for(int j=0;j<splitted.length;j++){
+                        next.add(splitted[j]);
+                    }
+                } else {
+                    next.add(splitted);
+                }
+            }
         }
-
-        */
-
+        context.continueWith(next);
     }
 
     @Override

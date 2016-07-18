@@ -7,7 +7,9 @@ import org.mwg.Graph;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.Task;
+import org.mwg.task.TaskResult;
 
+import static org.mwg.task.Actions.newTask;
 import static org.mwg.task.Actions.setWorld;
 
 public abstract class AbstractMLNode extends AbstractNode {
@@ -52,8 +54,8 @@ public abstract class AbstractMLNode extends AbstractNode {
             String[] split = query.split(FROM_SEPARATOR);
             Task[] tasks = new Task[split.length];
             for (int i = 0; i < split.length; i++) {
-                Task t = setWorld(""+world());
-                t.setTime(time()+"");
+                Task t = setWorld("" + world());
+                t.setTime(time() + "");
                 t.parse(split[i].trim());
                 tasks[i] = t;
             }
@@ -62,25 +64,16 @@ public abstract class AbstractMLNode extends AbstractNode {
             final DeferCounter waiter = graph().newCounter(tasks.length);
             for (int i = 0; i < split.length; i++) {
                 final int taskIndex = i;
-                tasks[i].executeWith(graph(), null, this, false,new Callback<Object>() {
+                final TaskResult initial = newTask().emptyResult();
+                initial.add(this);
+                tasks[i].executeWith(graph(), null, initial, false, new Callback<TaskResult>() {
                     @Override
-                    public void on(Object currentResult) {
+                    public void on(TaskResult currentResult) {
                         if (currentResult == null) {
                             result[taskIndex] = Constants.NULL_LONG;
                         } else {
-                            if (currentResult instanceof Double) {
-                                result[taskIndex] = (Double) currentResult;
-                            } else if (currentResult instanceof Object[]) {
-                                Object[] currentArr = (Object[]) currentResult;
-                                if (currentArr.length == 1) {
-                                    result[taskIndex] = parseDouble(currentArr[0].toString());
-                                } else {
-                                    throw new RuntimeException("Bad Extractor");
-                                }
-                            } else {
-                                result[taskIndex] = parseDouble(currentResult.toString());
-                                throw new RuntimeException("Bad Extractor");
-                            }
+                            result[taskIndex] = Double.parseDouble(currentResult.get(0).toString());
+                            currentResult.free();
                         }
                         waiter.count();
                     }
@@ -96,14 +89,5 @@ public abstract class AbstractMLNode extends AbstractNode {
             callback.on(null);
         }
     }
-
-    /**
-     * @native ts
-     * return parseFloat(payload);
-     */
-    public double parseDouble(String payload) {
-        return Double.parseDouble(payload);
-    }
-
 
 }

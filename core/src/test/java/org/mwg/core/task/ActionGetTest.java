@@ -21,9 +21,8 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] lastResult = (Object[]) context.result();
-                        Assert.assertEquals(lastResult[0], "n0");
-                        Assert.assertEquals(lastResult[1], "n1");
+                        Assert.assertEquals(context.result().get(0), "n0");
+                        Assert.assertEquals(context.result().get(1), "n1");
                     }
                 })
                 .execute(graph, null);
@@ -38,9 +37,8 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] lastResult = (Object[]) context.result();
-                        Assert.assertEquals(lastResult[0], "n0");
-                        Assert.assertEquals(lastResult[1], "n1");
+                        Assert.assertEquals(context.result().get(0), "n0");
+                        Assert.assertEquals(context.result().get(1), "n1");
                     }
                 })
                 .execute(graph, null);
@@ -55,9 +53,8 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] lastResult = (Node[]) context.result();
-                        Assert.assertEquals(lastResult[0].get("name"), "n0");
-                        Assert.assertEquals(lastResult[1].get("name"), "n1");
+                        Assert.assertEquals(context.resultAsNodes().get(0).get("name"), "n0");
+                        Assert.assertEquals(context.resultAsNodes().get(1).get("name"), "n1");
                     }
                 })
                 .execute(graph, null);
@@ -103,9 +100,8 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.result();
-                        Assert.assertEquals(1, n.length);
-                        Assert.assertEquals("node2", n[0].get("name"));
+                        Assert.assertEquals(1, context.result().size());
+                        Assert.assertEquals("node2", context.resultAsNodes().get(0).get("name"));
                     }
                 }).execute(graph, null);
 
@@ -114,8 +110,7 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.result();
-                        Assert.assertEquals(0, n.length);
+                        Assert.assertEquals(0, context.result().size());
                     }
                 }).execute(graph, null);
 
@@ -125,9 +120,8 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.result();
-                        Assert.assertEquals(1, n.length);
-                        Assert.assertEquals("node2", n[0].get("name"));
+                        Assert.assertEquals(1, context.result().size());
+                        Assert.assertEquals("node2", context.resultAsNodes().get(0).get("name"));
                     }
                 }).execute(graph, null);
 
@@ -136,12 +130,11 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.result();
-                        Assert.assertEquals(2, n.length);
-                        Assert.assertEquals("node1", n[0].get("name"));
-                        Assert.assertEquals("node2", n[1].get("name"));
+                        Assert.assertEquals(2, context.result().size());
+                        Assert.assertEquals("node1", context.resultAsNodes().get(0).get("name"));
+                        Assert.assertEquals("node2", context.resultAsNodes().get(1).get("name"));
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
 
         inject(13).asVar("time").setTime("{{time}}")
                 .fromIndex("rootIndex", "name=root2")
@@ -149,13 +142,12 @@ public class ActionGetTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] n = (Node[]) context.result();
-                        Assert.assertEquals(3, n.length);
-                        Assert.assertEquals("node1", n[0].get("name"));
-                        Assert.assertEquals("node2", n[1].get("name"));
-                        Assert.assertEquals("node3", n[2].get("name"));
+                        Assert.assertEquals(3, context.result().size());
+                        Assert.assertEquals("node1", context.resultAsNodes().get(0).get("name"));
+                        Assert.assertEquals("node2", context.resultAsNodes().get(1).get("name"));
+                        Assert.assertEquals("node3", context.resultAsNodes().get(2).get("name"));
                     }
-                }).execute(graph,null);
+                }).execute(graph, null);
         removeGraph();
     }
 

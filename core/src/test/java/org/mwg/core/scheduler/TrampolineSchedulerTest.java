@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
+import org.mwg.task.TaskResult;
 
 import static org.mwg.task.Actions.*;
 
@@ -18,9 +19,9 @@ public class TrampolineSchedulerTest {
         g.connect(new Callback<Boolean>() {
             @Override
             public void on(Boolean result) {
-                repeatPar(100, print("{{result}}")).execute(g, new Callback<Object>() {
+                repeatPar("100", print("{{result}}")).execute(g, new Callback<TaskResult>() {
                     @Override
-                    public void on(Object result) {
+                    public void on(TaskResult result) {
                         System.out.println();
                     }
                 });

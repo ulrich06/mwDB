@@ -1,17 +1,19 @@
-package org.mwg.core.utility;
+package org.mwg.core.task;
 
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskResult;
 import org.mwg.task.TaskResultIterator;
 
-public class CoreTaskResult<A> implements TaskResult<A> {
+import java.util.ArrayList;
+
+class CoreTaskResult<A> implements TaskResult<A> {
 
     private Object[] _backend;
     private int _capacity = 0;
     private int _size = 0;
 
-    public CoreTaskResult(Object toWrap, boolean protect) {
+    CoreTaskResult(Object toWrap, boolean protect) {
         if (toWrap instanceof Object[]) {
             Object[] castedToWrap = (Object[]) toWrap;
             _size = ((Object[]) toWrap).length;
@@ -30,6 +32,38 @@ public class CoreTaskResult<A> implements TaskResult<A> {
             } else {
                 System.arraycopy(castedToWrap, 0, _backend, 0, this._size);
             }
+        } else if (toWrap instanceof long[]) {
+            long[] castedOther = (long[]) toWrap;
+            _backend = new Object[castedOther.length];
+            for (int i = 0; i < castedOther.length; i++) {
+                _backend[i] = castedOther[i];
+            }
+            _capacity = _backend.length;
+            _size = _capacity;
+        } else if (toWrap instanceof int[]) {
+            int[] castedOther = (int[]) toWrap;
+            _backend = new Object[castedOther.length];
+            for (int i = 0; i < castedOther.length; i++) {
+                _backend[i] = castedOther[i];
+            }
+            _capacity = _backend.length;
+            _size = _capacity;
+        } else if (toWrap instanceof double[]) {
+            double[] castedOther = (double[]) toWrap;
+            _backend = new Object[castedOther.length];
+            for (int i = 0; i < castedOther.length; i++) {
+                _backend[i] = castedOther[i];
+            }
+            _capacity = _backend.length;
+            _size = _capacity;
+        } else if (toWrap instanceof ArrayList) {
+            ArrayList<Object> castedOtherList = (ArrayList<Object>) toWrap;
+            _backend = new Object[castedOtherList.size()];
+            for (int i = 0; i < castedOtherList.size(); i++) {
+                _backend[i] = castedOtherList.get(i);
+            }
+            _capacity = _backend.length;
+            _size = _capacity;
         } else if (toWrap instanceof CoreTaskResult) {
             CoreTaskResult other = (CoreTaskResult) toWrap;
             _size = other._size;

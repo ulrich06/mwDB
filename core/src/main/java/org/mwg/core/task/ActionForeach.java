@@ -31,7 +31,7 @@ class ActionForeach implements TaskAction {
                 @Override
                 public void on(final TaskResult res) {
                     int current = cursor.getAndIncrement();
-                    if(res != null && res.size() == 1){
+                    if (res != null && res.size() == 1) {
                         finalResult.set(current, res.get(0));
                     } else {
                         finalResult.set(current, res);
@@ -39,24 +39,29 @@ class ActionForeach implements TaskAction {
                     loopRes[0].free();
                     Object nextResult = it.next();
                     if (nextResult != null) {
-                        loopRes[0] = context.wrap(it.next());
+                        loopRes[0] = context.wrap(nextResult);
                     } else {
                         loopRes[0] = null;
                     }
                     if (nextResult == null) {
                         context.continueWith(finalResult);
                     } else {
-                        selfPointer._subTask.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                        selfPointer._subTask.executeFrom(context, loopRes[0], recursiveAction[0]);
                     }
                 }
             };
-            loopRes[0] = context.wrap(it.next());
-            context.graph().scheduler().dispatch(new Job() {
-                @Override
-                public void run() {
-                    _subTask.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
-                }
-            });
+            Object nextRes = it.next();
+            loopRes[0] = context.wrap(nextRes);
+            if(nextRes != null){
+                context.graph().scheduler().dispatch(new Job() {
+                    @Override
+                    public void run() {
+                        _subTask.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                    }
+                });
+            } else {
+                context.continueWith(finalResult);
+            }
         }
     }
 

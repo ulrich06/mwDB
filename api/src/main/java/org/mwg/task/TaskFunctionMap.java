@@ -14,4 +14,5 @@ public interface TaskFunctionMap {
      * @return converted results, can be any object
      */
     Object map(Node node);
+
 }

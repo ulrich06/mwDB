@@ -1,14 +1,13 @@
 package org.mwg.core.task.math;
 
 import org.mwg.Node;
-import org.mwg.core.utility.GenericIterable;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
 
 public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
 
@@ -206,30 +205,25 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                             }
                             if (taskContext != null) {
                                 if (resolved == null) {
-                                    if(tokenName.charAt(tokenName.length() - 1) == ']') { //array access
+                                    if (tokenName.charAt(tokenName.length() - 1) == ']') { //array access
                                         int indexStart = -1;
                                         int indexArray = -1;
-                                        for(int i = tokenName.length() - 3;i >= 0;i--) {
-                                            if(tokenName.charAt(i) == '[') {
+                                        for (int i = tokenName.length() - 3; i >= 0; i--) {
+                                            if (tokenName.charAt(i) == '[') {
                                                 indexStart = i + 1;
                                                 break;
                                             }
                                         }
 
-                                        if(indexStart != -1) {
-                                            indexArray = parseInt(tokenName.substring(indexStart,tokenName.length() - 1));
-                                            tokenName = tokenName.substring(0,indexStart - 1);
+                                        if (indexStart != -1) {
+                                            indexArray = parseInt(tokenName.substring(indexStart, tokenName.length() - 1));
+                                            tokenName = tokenName.substring(0, indexStart - 1);
                                         }
 
-                                        GenericIterable iterable = new GenericIterable(taskContext.variable(tokenName));
-                                        Object toShow = null;
-                                        for(int i=0;i<=indexArray;i++) {
-                                            toShow = iterable.next();
-                                            if(toShow == null) {
-                                                throw new RuntimeException("Array index out of range: " + indexArray);
-                                            }
+                                        TaskResult varRes = taskContext.variable(tokenName);
+                                        if (varRes != null && varRes.size() > indexArray) {
+                                            resolved = varRes.get(indexArray);
                                         }
-                                        resolved = toShow;
                                     } else {
                                         resolved = taskContext.variable(tokenName);
                                     }

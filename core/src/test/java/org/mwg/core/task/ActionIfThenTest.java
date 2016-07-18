@@ -30,20 +30,19 @@ public class ActionIfThenTest extends AbstractActionTest {
             }
         });
 
-
-        new CoreTask().ifThen(new TaskFunctionConditional() {
+        ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;
             }
-        }, modifyResult0).execute(graph,null);
+        }, modifyResult0).execute(graph, null);
 
-        new CoreTask().ifThen(new TaskFunctionConditional() {
+        ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return false;
             }
-        }, modifyResult0).execute(graph,null);
+        }, modifyResult0).execute(graph, null);
 
         Assert.assertEquals(true, result[0]);
         Assert.assertEquals(false, result[1]);
@@ -56,11 +55,12 @@ public class ActionIfThenTest extends AbstractActionTest {
         Task addVarInContext = inject(5).asVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
+                context.continueTask();
                 //empty action
             }
         });
 
-        new CoreTask().ifThen(new TaskFunctionConditional() {
+        ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;
@@ -68,10 +68,10 @@ public class ActionIfThenTest extends AbstractActionTest {
         }, addVarInContext).fromVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Integer val = (Integer) context.result();
+                Integer val = (Integer) context.result().get(0);
                 Assert.assertEquals(5, (int) val);
             }
-        }).execute(graph,null);
+        }).execute(graph, null);
         removeGraph();
     }
 
@@ -81,8 +81,9 @@ public class ActionIfThenTest extends AbstractActionTest {
         Task accessVar = then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Integer variable = (Integer) context.variable("variable");
+                Integer variable = (Integer) context.variable("variable").get(0);
                 Assert.assertEquals(5, (int) variable);
+                context.continueTask();
             }
         });
 
@@ -91,7 +92,7 @@ public class ActionIfThenTest extends AbstractActionTest {
             public boolean eval(TaskContext context) {
                 return true;
             }
-        }, accessVar).execute(graph,null);
+        }, accessVar).execute(graph, null);
         removeGraph();
     }
 }

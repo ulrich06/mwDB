@@ -6,33 +6,36 @@ import org.mwg.plugin.Job;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionRepeatPar implements TaskAction {
 
     private final Task _subTask;
 
-    private final int _iteration;
+    private final String _iterationTemplate;
 
-    ActionRepeatPar(int p_iteration, final Task p_subTask) {
+    ActionRepeatPar(String p_iteration, final Task p_subTask) {
         this._subTask = p_subTask;
-        this._iteration = p_iteration;
+        this._iterationTemplate = p_iteration;
     }
 
     @Override
     public void eval(final TaskContext context) {
-
-        /*
-        final Object previous = context.result();
-        context.cleanObj(previous);
-        final Object[] results = new Object[_iteration];
-        if (_iteration > 0) {
-            DeferCounter waiter = context.graph().newCounter(_iteration);
-            for (int i = 0; i < _iteration; i++) {
+        final int nbIteration = TaskHelper.parseInt(context.template(_iterationTemplate));
+        final TaskResult next = context.wrap(null);
+        next.allocate(nbIteration);
+        if (nbIteration > 0) {
+            DeferCounter waiter = context.graph().newCounter(nbIteration);
+            for (int i = 0; i < nbIteration; i++) {
                 final int finalI = i;
-                _subTask.executeFromPar(context, finalI, new Callback<Object>() {
+                _subTask.executeFromPar(context, context.wrap(finalI), new Callback<TaskResult>() {
                     @Override
-                    public void on(Object result) {
-                        results[finalI] = result;
+                    public void on(TaskResult result) {
+                        if (result != null && result.size() == 1) {
+                            next.add(result.get(0));
+                        } else {
+                            next.add(result);
+                        }
                         waiter.count();
                     }
                 });
@@ -40,20 +43,17 @@ class ActionRepeatPar implements TaskAction {
             waiter.then(new Job() {
                 @Override
                 public void run() {
-                    context.setUnsafeResult(results);
+                    context.continueWith(next);
                 }
             });
         } else {
-            context.setResult(results);
+            context.continueWith(next);
         }
-
-        */
-
     }
 
     @Override
     public String toString() {
-        return "repeatPar(\'" + _iteration + "\')";
+        return "repeatPar(\'" + _iterationTemplate + "\')";
     }
 
 }

@@ -5,6 +5,7 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,98 +23,49 @@ class ActionGet implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        /*
-
-        Object previousResult = context.result();
+        final TaskResult finalResult = context.wrap(null);
+        final String flatName = context.template(_name);
+        final TaskResult previousResult = context.result();
         if (previousResult != null) {
-            String flatName = context.template(_name);
-            //dry execute to count waiter
-            Set<Long> collectedIds = new HashSet<Long>();
-            List<Object> collectedProperties = new ArrayList<Object>();
-            if (previousResult instanceof Object[]) {
-                collectArray((Object[]) previousResult, collectedIds, collectedProperties,flatName);
-            } else if (previousResult instanceof AbstractNode) {
-                Node loop = (Node) previousResult;
-                Object propValue = loop.get(flatName);
-                if (propValue != null) {
-                    byte propType = loop.type(flatName);
-                    switch (propType) {
-                        case Type.RELATION:
-                            long[] propValueRef = (long[]) propValue;
-                            for (int j = 0; j < propValueRef.length; j++) {
-                                collectedIds.add(propValueRef[j]);
+            final int previousSize = previousResult.size();
+            final DeferCounter defer = context.graph().newCounter(previousSize);
+            for (int i = 0; i < previousSize; i++) {
+                final Object loop = previousResult.get(i);
+                if (loop instanceof AbstractNode) {
+                    Node casted = (Node) loop;
+                    if (casted.type(flatName) == Type.RELATION) {
+                        casted.rel(flatName, new Callback<Node[]>() {
+                            @Override
+                            public void on(Node[] result) {
+                                if (result != null) {
+                                    for (int j = 0; j < result.length; j++) {
+                                        finalResult.add(result[j]);
+                                    }
+                                }
+                                defer.count();
                             }
-                            break;
-                        default:
-                            collectedProperties.add(propValue);
-                            break;
-                    }
-                }
-                loop.free();
-            }
-            final DeferCounter deferCounter = context.graph().newCounter(collectedIds.size());
-            final Node[] resultNodes = new Node[collectedIds.size()];
-
-            if (collectedIds.size() > 0) {
-                final AtomicInteger cursor = new AtomicInteger(0);
-                for (Long idNode : collectedIds) {
-                    context.graph().lookup(context.world(), context.time(), idNode, new Callback<Node>() {
-                        @Override
-                        public void on(Node result) {
-                            resultNodes[cursor.getAndIncrement()] = result;
-                            deferCounter.count();
+                        });
+                    } else {
+                        Object resolved = casted.get(flatName);
+                        if(resolved != null){
+                            finalResult.add(resolved);
                         }
-                    });
-                }
-                final Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
-                deferCounter.then(new Job() {
-                    @Override
-                    public void run() {
-                        if (finalCollectedProperties == null) {
-                            context.setResult(resultNodes);
-                        } else {
-                            Object[] merged = new Object[resultNodes.length + finalCollectedProperties.length];
-                            System.arraycopy(resultNodes, 0, merged, 0, resultNodes.length);
-                            System.arraycopy(finalCollectedProperties, 0, merged, resultNodes.length, finalCollectedProperties.length);
-                            context.setResult(merged);
-                        }
+                        defer.count();
                     }
-                });
-            } else {
-                //potentially shrink result array
-                final Object[] finalCollectedProperties = collectedProperties.toArray(new Object[collectedProperties.size()]);
-                context.setUnsafeResult(finalCollectedProperties);
+                } else {
+                    //TODO add closable management
+                    finalResult.add(loop);
+                    defer.count();
+                }
             }
+            defer.then(new Job() {
+                @Override
+                public void run() {
+                    context.continueWith(finalResult);
+                }
+            });
         } else {
-            context.setUnsafeResult(null);
-        }
-        */
-
-    }
-
-    private void collectArray(Object[] current, Set<Long> toLoad, List<Object> leafs,String flatName) {
-        for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof Object[]) {
-                collectArray((Object[]) current[i], toLoad, leafs,flatName);
-            } else if (current[i] instanceof AbstractNode) {
-                Node loop = (Node) current[i];
-                Object propValue = loop.get(flatName);
-                if (propValue != null) {
-                    byte propType = loop.type(flatName);
-                    switch (propType) {
-                        case Type.RELATION:
-                            long[] interResult = (long[]) propValue;
-                            for (int j = 0; j < interResult.length; j++) {
-                                toLoad.add(interResult[j]);
-                            }
-                            break;
-                        default:
-                            leafs.add(propValue);
-                            break;
-                    }
-                }
-                loop.free();
-            }
+            context.continueTask();
         }
     }
 

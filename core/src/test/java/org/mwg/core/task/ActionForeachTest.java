@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +23,18 @@ public class ActionForeachTest extends AbstractActionTest {
                     @Override
                     public void eval(TaskContext context) {
                         i[0]++;
-                        Assert.assertEquals(context.result(), i[0]);
-                        context.setResult(context.result());//propagate result
+                        Assert.assertEquals(context.result().get(0), i[0]);
+                        context.continueTask();
                     }
                 }))
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] result = (Object[]) context.result();
-                        Assert.assertEquals(result.length, 3);
-                        Assert.assertEquals(result[0], 1l);
-                        Assert.assertEquals(result[1], 2l);
-                        Assert.assertEquals(result[2], 3l);
+                        TaskResult<Long> result = context.result();
+                        Assert.assertEquals(result.size(), 3);
+                        Assert.assertEquals(result.get(0), (Long) 1l);
+                        Assert.assertEquals(result.get(1), (Long) 2l);
+                        Assert.assertEquals(result.get(2), (Long) 3l);
                     }
                 })
                 .execute(graph, null);
@@ -41,16 +42,16 @@ public class ActionForeachTest extends AbstractActionTest {
         fromIndexAll("nodes").foreach(then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(context.result());
+                context.continueTask();
             }
         })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Object[] result = (Object[]) context.result();
-                Assert.assertEquals(result.length, 3);
-                Assert.assertEquals(((Node) result[0]).get("name"), "n0");
-                Assert.assertEquals(((Node) result[1]).get("name"), "n1");
-                Assert.assertEquals(((Node) result[2]).get("name"), "root");
+                TaskResult<Node> nodes = context.resultAsNodes();
+                Assert.assertEquals(nodes.size(), 3);
+                Assert.assertEquals(nodes.get(0).get("name"), "n0");
+                Assert.assertEquals(nodes.get(1).get("name"), "n1");
+                Assert.assertEquals(nodes.get(2).get("name"), "root");
             }
         }).execute(graph, null);
 
@@ -61,16 +62,16 @@ public class ActionForeachTest extends AbstractActionTest {
         inject(paramIterable).foreach(then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(context.result());
+                context.continueTask();
             }
         })).then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Object[] result = (Object[]) context.result();
-                Assert.assertEquals(result.length, 3);
-                Assert.assertEquals(result[0], "n0");
-                Assert.assertEquals(result[1], "n1");
-                Assert.assertEquals(result[2], "root");
+                TaskResult<String> names = context.result();
+                Assert.assertEquals(names.size(), 3);
+                Assert.assertEquals(names.get(0), "n0");
+                Assert.assertEquals(names.get(1), "n1");
+                Assert.assertEquals(names.get(2), "root");
             }
         }).execute(graph, null);
 

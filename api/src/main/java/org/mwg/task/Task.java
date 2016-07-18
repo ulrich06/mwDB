@@ -320,9 +320,9 @@ public interface Task {
      */
     Task math(String expression);
 
-    Task repeat(int repetition, Task subTask);
+    Task repeat(String repetition, Task subTask);
 
-    Task repeatPar(int repetition, Task subTask);
+    Task repeatPar(String repetition, Task subTask);
 
     Task print(String name);
 
@@ -333,5 +333,7 @@ public interface Task {
     void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
 
     void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
+
+    TaskResult emptyResult();
 
 }

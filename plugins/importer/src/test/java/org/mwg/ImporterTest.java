@@ -8,6 +8,7 @@ import org.mwg.importer.ImporterPlugin;
 import org.mwg.task.Action;
 import org.mwg.task.Task;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.io.File;
 import java.net.URL;
@@ -20,6 +21,7 @@ import static org.mwg.task.Actions.*;
 
 public class ImporterTest {
 
+
     @Test
     public void testReadLines() {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
@@ -30,19 +32,19 @@ public class ImporterTest {
             //final Task t = readLines("/Users/duke/dev/mwDB/plugins/importer/src/test/resources/smarthome/smarthome_1.T15.txt")
             final Task t = readLines("smarthome/smarthome_mini_1.T15.txt")
                     .foreach(
-                            ifThen(ctx -> !ctx.resultAsString().startsWith("1:Date"),
+                            ifThen(ctx -> !ctx.result().get(0).toString().startsWith("1:Date"),
                                     then(context -> {
-                                        String[] line = context.resultAsString().split(" ");
+                                        String[] line = context.result().get(0).toString().split(" ");
                                         try {
                                             long time = dateFormat.parse(line[0] + "|" + line[1]).getTime();
                                             double value = Double.parseDouble(line[2]);
                                             newNode.jump(time, timedNode -> {
                                                 timedNode.setProperty("value", Type.DOUBLE, value);
-                                                context.setResult(timedNode);
+                                                context.continueWith(context.wrap(timedNode));
                                             });
                                         } catch (ParseException e) {
                                             e.printStackTrace();
-                                            context.setResult(null);
+                                            context.continueWith(null);
                                         }
                                     })
                             ));
@@ -63,15 +65,13 @@ public class ImporterTest {
                 Task t = readFiles("smarthome").foreach(then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        String filePath = (String) context.result();
-                        System.out.println(filePath);
+                        String filePath = (String) context.result().get(0);
                         Assert.assertEquals(subFiles[nbFile[0]].getAbsolutePath(), filePath);
                         nbFile[0]++;
-                        context.setResult(null);
+                        context.continueWith(null);
                     }
                 }));
                 t.execute(g, null);
-
                 Assert.assertEquals(subFiles.length, nbFile[0]);
             }
         });
@@ -93,10 +93,10 @@ public class ImporterTest {
                         .foreach(then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
-                                String file = (String) context.result();
+                                String file = (String) context.result().get(0);
                                 Assert.assertEquals(subFiles[nbFile[0]].getAbsolutePath(), file);
                                 nbFile[0]++;
-                                context.setResult(null);
+                                context.continueWith(null);
                             }
                         }));
                 t.execute(g, null);
@@ -118,10 +118,10 @@ public class ImporterTest {
                 Task t = readFiles(urlFIle.getPath()).foreach(then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        String file = (String) context.result();
+                        String file = (String) context.result().get(0);
                         Assert.assertEquals(urlFIle.getPath(), file);
                         nbFile[0]++;
-                        context.setResult(null);
+                        context.continueWith(null);
                     }
                 }));
                 t.execute(g, null);
@@ -136,7 +136,6 @@ public class ImporterTest {
         final Graph g = new GraphBuilder().withPlugin(new ImporterPlugin()).build();
         g.connect(connectionResult -> {
             Task t = readFiles("nonexistent-file.txt");
-
             boolean exceptionCaught = false;
             try {
                 t.execute(g, null);
@@ -147,6 +146,7 @@ public class ImporterTest {
             Assert.assertTrue(exceptionCaught);
         });
     }
+
 
     @Test
     public void testReadFileOnIncorrectVar() {
@@ -177,17 +177,17 @@ public class ImporterTest {
             Node newNode = g.newNode(0, 0);
             final Task t = readLines("smarthome/smarthome_mini_1.T15.txt")
                     .foreach(
-                            ifThen(ctx -> !ctx.resultAsString().startsWith("1:Date"),
+                            ifThen(ctx -> !ctx.result().get(0).toString().startsWith("1:Date"),
                                     split(" ")
                                             .then(context -> {
-                                                String[] line = context.resultAsStringArray();
+                                                TaskResult<String> line = context.result();
                                                 try {
-                                                    context.setVariable("time", dateFormat.parse(line[0] + "|" + line[1]).getTime());
-                                                    context.setVariable("value", Double.parseDouble(line[2]));
-                                                    context.setResult(null);
+                                                    context.setVariable("time", context.wrap(dateFormat.parse(line.get(0) + "|" + line.get(1)).getTime()));
+                                                    context.setVariable("value", context.wrap(Double.parseDouble(line.get(2))));
+                                                    context.continueWith(null);
                                                 } catch (ParseException e) {
                                                     e.printStackTrace();
-                                                    context.setResult(null);
+                                                    context.continueWith(null);
                                                 }
                                             })
                                             .setTime("{{time}}")
@@ -199,61 +199,5 @@ public class ImporterTest {
             //t.executeWith(g, null, null, true, null); //with debug
         });
     }
-
-    /*
-    @Test
-    public void testV3() {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy|HH:mm");
-        final Graph g = new GraphBuilder()
-                .withPlugin(new ImporterPlugin())
-                .withScheduler(new ExecutorScheduler())
-                .build();
-        g.connect(new Callback<Boolean>() {
-            @Override
-            public void on(Boolean result) {
-                final Task t = readFiles("/Users/duke/Downloads/ex")
-                        .foreachPar(
-                                then(new Action() {
-                                    @Override
-                                    public void eval(TaskContext context) {
-                                        //create node and set as var
-                                    }
-                                }).action("readLines", "{{result}}")
-                                        .foreach(
-                                                split(",").then(new Action() {
-                                                    @Override
-                                                    public void eval(TaskContext context) {
-                                                        String[] values = context.resultAsStringArray();
-                                                        //TODO lookup and train
-
-                                                        //end
-                                                        context.setUnsafeResult(null);
-
-
-                                                    }
-                                                }).then(new Action() {
-                                                    @Override
-                                                    public void eval(TaskContext context) {
-                                                        //count
-                                                    }
-                                                })
-                                        )
-                        );
-                t.executeWith(g, null, null, false, new Callback<Object>() {
-                    @Override
-                    public void on(Object result) {
-                        System.out.println("end!");
-                    }
-                });
-            }
-        });
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }*/
 
 }

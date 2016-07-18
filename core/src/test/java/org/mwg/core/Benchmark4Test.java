@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * @ignore ts
+ */
 public class Benchmark4Test {
 
     @Test

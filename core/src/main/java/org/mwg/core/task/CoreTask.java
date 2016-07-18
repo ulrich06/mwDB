@@ -549,13 +549,13 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task repeat(int repetition, Task subTask) {
+    public Task repeat(String repetition, Task subTask) {
         addAction(new ActionRepeat(repetition, subTask));
         return this;
     }
 
     @Override
-    public Task repeatPar(int repetition, Task subTask) {
+    public Task repeatPar(String repetition, Task subTask) {
         addAction(new ActionRepeatPar(repetition, subTask));
         return this;
     }
@@ -564,6 +564,11 @@ public class CoreTask implements org.mwg.task.Task {
     public Task print(String name) {
         addAction(new ActionPrint(name));
         return this;
+    }
+
+    @Override
+    public TaskResult emptyResult() {
+        return new CoreTaskResult(null, false);
     }
 
     public static void fillDefault(Map<String, TaskActionFactory> registry) {

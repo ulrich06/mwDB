@@ -15,17 +15,8 @@ class ActionReadLines implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        Object previous = context.result();
-        context.cleanObj(previous);
-        Object res = null;
-
-        String path = context.template(_pathOrTemplate);
-        try {
-            res = new IterableLines(path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        context.setUnsafeResult(res);
+        final String path = context.template(_pathOrTemplate);
+        context.continueWith(new IterableLines(path));
     }
 
 }
