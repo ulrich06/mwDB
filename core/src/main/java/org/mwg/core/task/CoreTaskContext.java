@@ -107,25 +107,12 @@ class CoreTaskContext implements TaskContext {
 
     @Override
     public final void addToVariable(final String name, final TaskResult value) {
-        /*
-        final Object result = this._variables.get(name);
-        final Object protectedVar = CoreTask.protect(_graph, value);
-        if (result == null) {
-            final Object[] newArr = new Object[1];
-            newArr[0] = protectedVar;
-            this._variables.put(name, newArr);
-        } else if (result instanceof Object[]) {
-            final Object[] previous = (Object[]) result;
-            final Object[] incArr = new Object[previous.length + 1];
-            System.arraycopy(previous, 0, incArr, 0, previous.length);
-            incArr[previous.length] = protectedVar;
-            this._variables.put(name, incArr);
-        } else {
-            final Object[] newArr = new Object[2];
-            newArr[0] = result;
-            newArr[1] = protectedVar;
-            this._variables.put(name, newArr);
-        }*/
+        TaskResult previous = this._variables.get(name);
+        if (previous == null) {
+            previous = new CoreTaskResult(null, false);
+            this._variables.put(name, previous);
+        }
+        previous.add(value);
     }
 
     @Override
