@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionFromVar implements TaskAction {
 
@@ -13,11 +14,9 @@ class ActionFromVar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        Object prev = context.result();
-        context.cleanObj(prev);
-        String name = context.template(_name);
-        Object protectedVar = CoreTask.protect(context.graph(),context.variable(name));
-        context.setUnsafeResult(protectedVar);
+        final String evaluatedName = context.template(_name);
+        final TaskResult varResult = context.variable(evaluatedName);
+        context.continueWith(varResult.clone());
     }
 
     @Override

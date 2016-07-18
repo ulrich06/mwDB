@@ -17,17 +17,16 @@ class ActionSetVar implements TaskAction {
     @Override
     public void eval(final TaskContext context) {
         Object addedValue = this._value;
-        if(addedValue instanceof String) {
+        if (addedValue instanceof String) {
             addedValue = context.template((String) addedValue);
         }
-        
-        context.setVariable(context.template(this._name), addedValue);
-        context.setUnsafeResult(context.result());//trigger next step
+        context.setVariable(context.template(this._name), context.wrap(addedValue));
+        context.continueTask();
     }
 
     @Override
     public String toString() {
         return "setVar(\'" + _name + "\')";
     }
-    
+
 }

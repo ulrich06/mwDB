@@ -20,6 +20,8 @@ class ActionRepeatPar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+
+        /*
         final Object previous = context.result();
         context.cleanObj(previous);
         final Object[] results = new Object[_iteration];
@@ -44,6 +46,9 @@ class ActionRepeatPar implements TaskAction {
         } else {
             context.setResult(results);
         }
+
+        */
+
     }
 
     @Override

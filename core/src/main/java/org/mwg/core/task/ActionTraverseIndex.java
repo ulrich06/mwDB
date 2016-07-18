@@ -24,19 +24,12 @@ class ActionTraverseIndex implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+        /*
         //todo replace setResult by setUnsafeResult
         Object previousResult = context.result();
         if (previousResult != null) {
             String flatIndexName = context.template(_indexName);
             String flatQuery = context.template(_query);
-            /*Node[] toLoad;
-            if (previousResult instanceof AbstractNode) {
-                toLoad = new Node[]{(Node) previousResult};
-            } else if (previousResult instanceof Object[]) {
-                toLoad = getNodes((Object[]) previousResult);
-            } else {
-                toLoad = new Node[0];
-            }*/
             Node[] toLoad = TaskHelper.flatNodes(previousResult,false);
             int countNbNodeToLoad = countNbNodeToLoad(toLoad,flatIndexName);
             final CoreDeferCounter counter = new CoreDeferCounter(toLoad.length);
@@ -91,40 +84,11 @@ class ActionTraverseIndex implements TaskAction {
             });
 
         } else {
-            context.setUnsafeResult(null);
+            context.setRawResult(null);
         }
-    }
 
-//    private Node[] getNodes(Object[] previousResult) {
-//        Node[] result = new Node[0];
-//        for (int i = 0; i < previousResult.length; i++) {
-//            if (previousResult[i] instanceof AbstractNode) {
-//                Node[] tmp = new Node[result.length + 1];
-//                System.arraycopy(result, 0, tmp, 0, result.length);
-//                tmp[result.length] = (Node) previousResult[i];
-//                result = tmp;
-//            } else if (previousResult[i] instanceof Object[]) {
-//                Node[] nodes = getNodes((Object[]) previousResult[i]);
-//                Node[] tmp = new Node[result.length + nodes.length];
-//                System.arraycopy(result, 0, tmp, 0, result.length);
-//                System.arraycopy(nodes, 0, tmp, result.length, nodes.length);
-//                result = tmp;
-//            }
-//        }
-//        return result;
-//    }
+*/
 
-    private int countNbNodeToLoad(Node[] nodes, String flatIndexName) {
-        int nbNoadToLoad = 0;
-        for (Node node : nodes) {
-            if (node != null) {
-                LongLongArrayMap indexed = (LongLongArrayMap) node.get(flatIndexName);
-                if (indexed != null) {//no index value
-                    nbNoadToLoad += indexed.size();
-                }
-            }
-        }
-        return nbNoadToLoad;
     }
 
     @Override

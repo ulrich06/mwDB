@@ -4,11 +4,14 @@ import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.core.utility.CoreDeferCounter;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionJump implements TaskAction {
+
     private final String _time;
 
     ActionJump(String time) {
@@ -17,38 +20,38 @@ class ActionJump implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        String templatedTime = context.template(_time);
-        long time = Long.parseLong(templatedTime);
-
-        Object previousResult = context.result();
-        Node[] jumpedNodes = TaskHelper.flatNodes(previousResult,false);
-        final DeferCounter defer = new CoreDeferCounter(jumpedNodes.length);
-
-        Node[] result = new Node[jumpedNodes.length];
-
-        for(int i=0;i<jumpedNodes.length;i++) {
-            final int ii = i;
-            jumpedNodes[i].jump(time, new Callback<Node>() {
-                @Override
-                public void on(Node jumped) {
-                    result[ii] = jumped;
-                    defer.count();
-                }
-            });
+        final String flatTime = context.template(_time);
+        final long parsedTime = Long.parseLong(flatTime);
+        final TaskResult previous = context.result();
+        final DeferCounter defer = new CoreDeferCounter(previous.size());
+        final int previousSize = previous.size();
+        for (int i = 0; i < previousSize; i++) {
+            Object loopObj = previous.get(i);
+            if (loopObj instanceof AbstractNode) {
+                Node castedPreviousNode = (Node) loopObj;
+                final int finalIndex = i;
+                castedPreviousNode.jump(parsedTime, new Callback<Node>() {
+                    @Override
+                    public void on(Node result) {
+                        castedPreviousNode.free();
+                        previous.set(finalIndex, result);
+                        defer.count();
+                    }
+                });
+            } else {
+                defer.count();
+            }
         }
-
         defer.then(new Job() {
             @Override
             public void run() {
-                context.cleanObj(previousResult);
-                context.setUnsafeResult(result);
+                context.continueTask();
             }
         });
-
     }
 
     @Override
     public String toString() {
-        return "jump(" + _time + ")";
+        return "jump(\'" + _time + "\')";
     }
 }

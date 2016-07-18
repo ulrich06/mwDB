@@ -16,9 +16,9 @@ public class ActionFromIndexAllTest extends AbstractActionTest {
         inject("uselessPayload").fromIndexAll("nodes").then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n0");
-                Assert.assertEquals(((Node[]) context.result())[1].get("name"), "n1");
-                Assert.assertEquals(((Node[]) context.result())[2].get("name"), "root");
+                Assert.assertEquals(context.resultAsNodes().get(0).get("name"), "n0");
+                Assert.assertEquals(context.resultAsNodes().get(1).get("name"), "n1");
+                Assert.assertEquals(context.resultAsNodes().get(2).get("name"), "root");
             }
         }).execute(graph,null);
         removeGraph();

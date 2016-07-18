@@ -1,10 +1,10 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.Constants;
 import org.mwg.task.Task;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionTrigger implements TaskAction {
 
@@ -16,12 +16,14 @@ class ActionTrigger implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        Object previous = context.result();
-        _subTask.executeFrom(context, previous, new Callback<Object>() {
+        final TaskResult previous = context.result();
+        _subTask.executeFrom(context, previous, new Callback<TaskResult>() {
             @Override
-            public void on(Object result) {
-                context.cleanObj(previous);
-                context.setUnsafeResult(result);
+            public void on(TaskResult subTaskResult) {
+                if (previous != null) {
+                    previous.free();
+                }
+                context.continueWith(subTaskResult);
             }
         });
     }

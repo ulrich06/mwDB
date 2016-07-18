@@ -7,6 +7,7 @@ import org.mwg.Node;
 import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import static org.mwg.task.Actions.*;
 
@@ -27,7 +28,7 @@ public class ActionAddTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.result();
+                        Node node = (Node) context.result().get(0);
                         Assert.assertNotNull(node);
                         Assert.assertEquals(1, ((long[]) node.get("friend")).length);
                         id[0] = node.id();
@@ -56,19 +57,18 @@ public class ActionAddTest extends AbstractActionTest {
                         for (int i = 0; i < 5; i++) {
                             nodes[i] = graph.newNode(0, 0);
                         }
-                        context.setResult(nodes);
+                        context.continueWith(context.wrap(nodes));
                     }
                 })
                 .add("friend", "x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] nodes = (Node[]) context.result();
+                        TaskResult<Node> nodes = context.resultAsNodes();
                         Assert.assertNotNull(nodes);
-
                         for (int i = 0; i < 5; i++) {
-                            Assert.assertEquals(1, ((long[]) nodes[i].get("friend")).length);
-                            ids[i] = nodes[i].id();
+                            Assert.assertEquals(1, ((long[]) nodes.get(i).get("friend")).length);
+                            ids[i] = nodes.get(i).id();
                         }
                     }
                 }).execute(graph, null);
@@ -94,7 +94,7 @@ public class ActionAddTest extends AbstractActionTest {
         then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(null);
+                context.continueWith(null);
             }
         }).inject(relatedNode).asVar("x")
                 .add("friend", "x")

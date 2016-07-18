@@ -6,6 +6,7 @@ import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionSetProperty implements TaskAction {
 
@@ -13,7 +14,7 @@ class ActionSetProperty implements TaskAction {
     private final String _variableNameToSet;
     private final byte _propertyType;
 
-    ActionSetProperty(String relationName, byte propertyType, String variableNameToSet) {
+    ActionSetProperty(final String relationName, final byte propertyType, final String variableNameToSet) {
         this._relationName = relationName;
         this._variableNameToSet = variableNameToSet;
         this._propertyType = propertyType;
@@ -21,44 +22,33 @@ class ActionSetProperty implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object previousResult = context.result();
-        String flatRelationName = context.template(_relationName);
-
-        Object savedVar = context.variable(_variableNameToSet);
-        if (savedVar == null) {
+        final TaskResult previousResult = context.result();
+        final String flatRelationName = context.template(_relationName);
+        if (previousResult != null) {
+            Object toSet;
             Object templateBased = context.template(this._variableNameToSet);
             switch (_propertyType) {
                 case Type.INT:
-                    savedVar = TaskHelper.parseInt(templateBased.toString());
+                    toSet = TaskHelper.parseInt(templateBased.toString());
                     break;
                 case Type.DOUBLE:
-                    savedVar = Double.parseDouble(templateBased.toString());
+                    toSet = Double.parseDouble(templateBased.toString());
                     break;
                 case Type.LONG:
-                    savedVar = Long.parseLong(templateBased.toString());
+                    toSet = Long.parseLong(templateBased.toString());
                     break;
                 default:
-                    savedVar = templateBased;
+                    toSet = templateBased;
+            }
+            for (int i = 0; i < previousResult.size(); i++) {
+                Object loopObj = previousResult.get(i);
+                if (loopObj instanceof AbstractNode) {
+                    Node loopNode = (Node) loopObj;
+                    loopNode.setProperty(flatRelationName, _propertyType, toSet);
+                }
             }
         }
-
-        if (previousResult instanceof AbstractNode) {
-            ((Node) previousResult).setProperty(flatRelationName, _propertyType, savedVar);
-        } else if (previousResult instanceof Object[]) {
-            setFromArray((Object[]) previousResult, flatRelationName, savedVar);
-        }
-        context.setUnsafeResult(previousResult);
-    }
-
-
-    private void setFromArray(final Object[] objs, final String relName, final Object toSet) {
-        for (int i = 0; i < objs.length; i++) {
-            if (objs[i] instanceof AbstractNode) {
-                ((AbstractNode) objs[i]).setProperty(relName, _propertyType, toSet);
-            } else if (objs[i] instanceof Object[]) {
-                setFromArray((Object[]) objs[i], relName, toSet);
-            }
-        }
+        context.continueTask();
     }
 
     @Override

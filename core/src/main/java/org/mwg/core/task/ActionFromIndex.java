@@ -5,6 +5,7 @@ import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionFromIndex implements TaskAction {
 
@@ -19,15 +20,12 @@ class ActionFromIndex implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        Object previousResult = context.result();
-
-        String flatIndexName = context.template(_indexName);
-        String flatQuery = context.template(_query);
+        final String flatIndexName = context.template(_indexName);
+        final String flatQuery = context.template(_query);
         context.graph().find(context.world(), context.time(), flatIndexName, flatQuery, new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
-                context.cleanObj(previousResult);
-                context.setUnsafeResult(result);
+                context.continueWith(context.wrap(result));
             }
         });
     }

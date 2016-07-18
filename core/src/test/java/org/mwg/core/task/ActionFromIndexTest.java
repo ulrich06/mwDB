@@ -18,11 +18,11 @@ public class ActionFromIndexTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n0");
-                        Assert.assertEquals(((Node[]) context.result()).length, 1);
+                        Assert.assertEquals(context.resultAsNodes().get(0).get("name"), "n0");
+                        Assert.assertEquals(context.result().size(), 1);
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
         removeGraph();
     }
 

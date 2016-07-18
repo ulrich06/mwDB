@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 public class ActionTraverseOrKeepTest extends AbstractActionTest {
 
@@ -18,12 +19,12 @@ public class ActionTraverseOrKeepTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] lastResult = (Node[]) context.result();
-                        Assert.assertEquals(lastResult[0].get("name"), "n0");
-                        Assert.assertEquals(lastResult[1].get("name"), "n1");
+                        TaskResult<Node> nodes = context.resultAsNodes();
+                        Assert.assertEquals(nodes.get(0).get("name"), "n0");
+                        Assert.assertEquals(nodes.get(1).get("name"), "n1");
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
         removeGraph();
     }
 

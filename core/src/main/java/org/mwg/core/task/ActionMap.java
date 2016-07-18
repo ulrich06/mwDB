@@ -17,6 +17,9 @@ class ActionMap implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
+
+        /*
+
         final Object previousResult = context.result();
         if (previousResult != null) {
             if (previousResult instanceof Object[]) {
@@ -29,6 +32,7 @@ class ActionMap implements TaskAction {
         } else {
             context.setResult(null);
         }
+        */
     }
 
     private Object[] filterArray(Object[] current) {

@@ -6,6 +6,7 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
+import org.mwg.task.TaskResult;
 
 import static org.mwg.task.Actions.fromIndexAll;
 
@@ -24,13 +25,13 @@ public class ActionMapTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Object[] names = (Object[]) context.result();
-                        Assert.assertEquals(names[0], "n0");
-                        Assert.assertEquals(names[1], "n1");
-                        Assert.assertEquals(names[2], "root");
+                        TaskResult<String> names = context.resultAsStrings();
+                        Assert.assertEquals(names.get(0), "n0");
+                        Assert.assertEquals(names.get(1), "n1");
+                        Assert.assertEquals(names.get(2), "root");
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
         removeGraph();
     }
 

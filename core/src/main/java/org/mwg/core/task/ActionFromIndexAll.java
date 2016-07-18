@@ -5,6 +5,7 @@ import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionFromIndexAll implements TaskAction {
 
@@ -19,7 +20,7 @@ class ActionFromIndexAll implements TaskAction {
         context.graph().findAll(context.world(), context.time(), _indexName, new Callback<Node[]>() {
             @Override
             public void on(Node[] result) {
-                context.setResult(result);
+                context.continueWith(context.wrap(result));
             }
         });
     }

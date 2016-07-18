@@ -63,13 +63,13 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task indexNode(String indexName, String flatKeyAttributes) {
-        addAction(new ActionIndexOrUnindexNode(indexName,flatKeyAttributes,true));
+        addAction(new ActionIndexOrUnindexNode(indexName, flatKeyAttributes, true));
         return this;
     }
 
     @Override
     public Task unindexNode(String indexName, String flatKeyAttributes) {
-        addAction(new ActionIndexOrUnindexNode(indexName,flatKeyAttributes,false));
+        addAction(new ActionIndexOrUnindexNode(indexName, flatKeyAttributes, false));
         return this;
     }
 
@@ -174,7 +174,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (indexName == null) {
             throw new RuntimeException("indexName should not be null");
         }
-        addAction(new ActionTraverseIndex(indexName, null));
+        addAction(new ActionTraverseIndexAll(indexName));
         return this;
     }
 
@@ -280,56 +280,69 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void executeWith(final Graph graph, final Map<String, Object> variables, final Object initialResult, final boolean isVerbose, final Callback<Object> result) {
+    public void execute(Graph graph, Callback<TaskResult> result) {
+        executeWith(graph, null, null, false, result);
+    }
+
+    @Override
+    public void executeWith(final Graph graph, final Map<String, TaskResult> variables, final TaskResult initialResult, final boolean isVerbose, final Callback<TaskResult> result) {
+        TaskResult initialResultSafe = initialResult;
+        if (initialResultSafe != null) {
+            initialResultSafe = initialResultSafe.clone();
+        }
         if (_actionCursor == 0) {
             if (result != null) {
-                result.on(protect(graph, initialResult));
+                result.on(initialResultSafe);
             }
         } else {
-            final CoreTaskContext context = new CoreTaskContext(variables, protect(graph, initialResult), graph, _actions, _actionCursor, isVerbose, 0, result);
-            context.executeFirst(graph);
+            final CoreTaskContext context = new CoreTaskContext(variables, initialResultSafe, graph, _actions, _actionCursor, isVerbose, 0, result);
+            context.executeFirst();
         }
     }
 
     @Override
-    public void executeFrom(final TaskContext parent, final Object initialResult, final Callback<Object> result) {
+    public void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result) {
         final Graph graph = parent.graph();
+        TaskResult initialResultSafe = initialResult;
+        if (initialResultSafe != null) {
+            initialResultSafe = initialResultSafe.clone();
+        }
         if (_actionCursor == 0) {
             if (result != null) {
-                result.on(protect(graph, initialResult));
+                result.on(initialResultSafe);
             }
         } else {
-            final CoreTaskContext context = new CoreTaskContext(parent.variables(), protect(graph, initialResult), graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
-            context.executeFirst(graph);
+            final CoreTaskContext context = new CoreTaskContext(parent.variables(), initialResultSafe, graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
+            context.executeFirst();
         }
     }
 
     @Override
-    public void executeFromPar(final TaskContext parent, final Object initialResult, final Callback<Object> result) {
+    public void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result) {
         final Graph graph = parent.graph();
+        TaskResult initialResultSafe = initialResult;
+        if (initialResultSafe != null) {
+            initialResultSafe = initialResultSafe.clone();
+        }
         if (_actionCursor == 0) {
             if (result != null) {
-                result.on(protect(graph, initialResult));
+                result.on(initialResultSafe);
             }
         } else {
-            final Map<String, Object> cloned = new HashMap<String, Object>();
+            final Map<String, TaskResult> cloned = new HashMap<String, TaskResult>();
             String[] keys = cloned.keySet().toArray(new String[cloned.keySet().size()]);
             for (int i = 0; i < keys.length; i++) {
                 cloned.put(keys[i], parent.variable(keys[i]));
             }
+            final TaskResult finalInitialResultSafe = initialResultSafe;
             graph.scheduler().dispatch(new Job() {
                 @Override
                 public void run() {
-                    final CoreTaskContext context = new CoreTaskContext(cloned, protect(graph, initialResult), graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
-                    context.executeFirst(graph);
+                    final CoreTaskContext context = new CoreTaskContext(cloned, finalInitialResultSafe, graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
+                    context.executeFirst();
                 }
             });
         }
-    }
-
-    @Override
-    public void execute(Graph graph, Callback<Object> result) {
-        executeWith(graph, null, null, false, result);
     }
 
     @Override
@@ -516,7 +529,7 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public Task jump(String time) {
-        if(time == null) {
+        if (time == null) {
             throw new RuntimeException("time should not be null");
         }
         addAction(new ActionJump(time));

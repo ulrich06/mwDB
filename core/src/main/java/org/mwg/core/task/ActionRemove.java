@@ -5,6 +5,8 @@ import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
+import org.mwg.task.TaskResultIterator;
 
 class ActionRemove implements TaskAction {
 
@@ -17,27 +19,28 @@ class ActionRemove implements TaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
-        final Object previousResult = context.result();
-        final Object savedVar = context.variable(_variableNameToRemove);
-        if (savedVar instanceof AbstractNode) {
-            if (previousResult instanceof AbstractNode) {
-                ((Node) previousResult).remove(_relationName, (Node) savedVar);
-            } else if (previousResult instanceof Object[]) {
-                removeFromArray((Object[]) previousResult, _relationName, (Node) savedVar);
+    public void eval(final TaskContext context) {
+        final TaskResult previousResult = context.result();
+        final TaskResult savedVar = context.variable(context.template(_variableNameToRemove));
+        if (previousResult != null && savedVar != null) {
+            final String relName = context.template(_relationName);
+            final TaskResultIterator previousResultIt = previousResult.iterator();
+            Object iter = previousResultIt.next();
+            while (iter != null) {
+                if (iter instanceof AbstractNode) {
+                    final TaskResultIterator savedVarIt = savedVar.iterator();
+                    Object toRemoveIter = savedVarIt.next();
+                    while (toRemoveIter != null) {
+                        if (toRemoveIter instanceof AbstractNode) {
+                            ((Node) iter).remove(relName, (Node) toRemoveIter);
+                        }
+                        toRemoveIter = savedVarIt.next();
+                    }
+                }
+                iter = previousResultIt.next();
             }
         }
-        context.setResult(previousResult);
-    }
-
-    private void removeFromArray(final Object[] objs, final String relName, final Node toRemove) {
-        for (int i = 0; i < objs.length; i++) {
-            if (objs[i] instanceof AbstractNode) {
-                ((AbstractNode) objs[i]).remove(relName, toRemove);
-            } else if (objs[i] instanceof Object[]) {
-                removeFromArray((Object[]) objs[i], relName, toRemove);
-            }
-        }
+        context.continueTask();
     }
 
     @Override

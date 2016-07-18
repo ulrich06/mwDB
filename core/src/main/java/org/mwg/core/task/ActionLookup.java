@@ -20,7 +20,7 @@ class ActionLookup implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-
+/*
         String parsedWorldResult = context.template(_world);
         long worldL = Long.parseLong(parsedWorldResult);
 
@@ -39,6 +39,7 @@ class ActionLookup implements TaskAction {
                 context.setUnsafeResult(result);
             }
         });
+        */
 
     }
 

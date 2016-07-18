@@ -1,0 +1,147 @@
+package org.mwg.core.utility;
+
+import org.mwg.Node;
+import org.mwg.plugin.AbstractNode;
+import org.mwg.task.TaskResult;
+import org.mwg.task.TaskResultIterator;
+
+public class CoreTaskResult<A> implements TaskResult<A> {
+
+    private Object[] _backend;
+    private int _capacity = 0;
+    private int _size = 0;
+
+    public CoreTaskResult(Object toWrap, boolean protect) {
+        if (toWrap instanceof Object[]) {
+            Object[] castedToWrap = (Object[]) toWrap;
+            _size = ((Object[]) toWrap).length;
+            _capacity = _size;
+            _backend = new Object[this._size];
+            if (protect) {
+                for (int i = 0; i < _size; i++) {
+                    Object loopObj = castedToWrap[i];
+                    if (loopObj instanceof AbstractNode) {
+                        Node loopNode = (Node) loopObj;
+                        _backend[i] = loopNode.graph().cloneNode(loopNode);
+                    } else {
+                        _backend[i] = loopObj;
+                    }
+                }
+            } else {
+                System.arraycopy(castedToWrap, 0, _backend, 0, this._size);
+            }
+        } else if (toWrap instanceof CoreTaskResult) {
+            CoreTaskResult other = (CoreTaskResult) toWrap;
+            _size = other._size;
+            _capacity = other._capacity;
+            if (other._backend != null) {
+                _backend = new Object[other._backend.length];
+                if (protect) {
+                    for (int i = 0; i < _size; i++) {
+                        Object loopObj = other._backend[i];
+                        if (loopObj instanceof AbstractNode) {
+                            Node loopNode = (Node) loopObj;
+                            _backend[i] = loopNode.graph().cloneNode(loopNode);
+                        } else {
+                            _backend[i] = loopObj;
+                        }
+                    }
+                } else {
+                    System.arraycopy(other._backend, 0, _backend, 0, _size);
+                }
+            }
+        } else {
+            if (toWrap != null) {
+                _backend = new Object[1];
+                _capacity = 1;
+                _size = 1;
+                if (toWrap instanceof AbstractNode) {
+                    Node toWrapNode = (Node) toWrap;
+                    _backend[0] = toWrapNode.graph().cloneNode(toWrapNode);
+                } else {
+                    _backend[0] = toWrap;
+                }
+            }
+        }
+    }
+
+    @Override
+    public TaskResultIterator iterator() {
+        return new CoreTaskResultIterator(_backend);
+    }
+
+    @Override
+    public A get(int index) {
+        if (index < _size) {
+            return (A) _backend[index];
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void set(int index, A input) {
+        if (index >= _capacity) {
+            extendTil(index);
+        }
+        _backend[index] = input;
+        if (index >= _size) {
+            _size++;
+        }
+    }
+
+    @Override
+    public void allocate(int index) {
+        if (index >= _capacity) {
+            if (_backend == null) {
+                _backend = new Object[index];
+                _capacity = index;
+            } else {
+                throw new RuntimeException("Not implemented yet!!!");
+            }
+        }
+    }
+
+    @Override
+    public void add(A input) {
+        if (_size >= _capacity) {
+            extendTil(_size);
+        }
+        set(_size, input);
+    }
+
+    @Override
+    public TaskResult<A> clone() {
+        return new CoreTaskResult<A>(this, true);
+    }
+
+    @Override
+    public void free() {
+        for (int i = 0; i < _capacity; i++) {
+            if (_backend[i] instanceof AbstractNode) {
+                ((Node) _backend[i]).free();
+            }
+        }
+    }
+
+    @Override
+    public int size() {
+        return this._size;
+    }
+
+    private synchronized void extendTil(int index) {
+        if (_capacity <= index) {
+            int newCapacity = _capacity * 2;
+            if (newCapacity <= index) {
+                newCapacity = index + 1;
+            }
+            Object[] extendedBackend = new Object[newCapacity];
+            if (_backend != null) {
+                System.arraycopy(_backend, 0, extendedBackend, 0, _size);
+            }
+            _backend = extendedBackend;
+            _capacity = newCapacity;
+        }
+    }
+
+}

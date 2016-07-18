@@ -3,10 +3,12 @@ package org.mwg.core.task;
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
+import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,62 +24,41 @@ class ActionTraverse implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        Object previousResult = context.result();
+        final TaskResult finalResult = context.wrap(null);
+        final String flatName = context.template(_name);
+        final TaskResult previousResult = context.result();
         if (previousResult != null) {
-            String flatName = context.template(_name);
-            //dry execute to count waiter
-            Set<Long> toLoad = new HashSet<Long>();
-            if (previousResult instanceof Object[]) {
-                collectArray((Object[]) previousResult, toLoad,flatName);
-            } else if (previousResult instanceof AbstractNode) {
-                Node loop = (Node) previousResult;
-                Object rel = loop.get(flatName);
-                if (rel != null && rel instanceof long[]) {
-                    long[] interResult = (long[]) rel;
-                    for (int j = 0; j < interResult.length; j++) {
-                        toLoad.add(interResult[j]);
-                    }
+            final int previousSize = previousResult.size();
+            final DeferCounter defer = context.graph().newCounter(previousSize);
+            for (int i = 0; i < previousSize; i++) {
+                final Object loop = previousResult.get(i);
+                if (loop instanceof AbstractNode) {
+                    Node casted = (Node) loop;
+                    casted.rel(flatName, new Callback<Node[]>() {
+                        @Override
+                        public void on(Node[] result) {
+                            if (result != null) {
+                                for (int j = 0; j < result.length; j++) {
+                                    finalResult.add(result[j]);
+                                }
+                            }
+                            defer.count();
+                        }
+                    });
+                } else {
+                    //TODO add closable management
+                    finalResult.add(loop);
+                    defer.count();
                 }
-                loop.free();
             }
-            final DeferCounter deferCounter = context.graph().newCounter(toLoad.size());
-            final Node[] resultNodes = new Node[toLoad.size()];
-            final AtomicInteger cursor = new AtomicInteger(0);
-            for (Long idNode : toLoad) {
-                context.graph().lookup(context.world(), context.time(), idNode, new Callback<Node>() {
-                    @Override
-                    public void on(Node result) {
-                        resultNodes[cursor.getAndIncrement()] = result;
-                        deferCounter.count();
-                    }
-                });
-            }
-            deferCounter.then(new Job() {
+            defer.then(new Job() {
                 @Override
                 public void run() {
-                    context.setUnsafeResult(resultNodes);
+                    context.continueWith(finalResult);
                 }
             });
         } else {
-            context.setUnsafeResult(null);
-        }
-    }
-
-    private void collectArray(Object[] current, Set<Long> toLoad,String flatName) {
-        for (int i = 0; i < current.length; i++) {
-            if (current[i] instanceof Object[]) {
-                collectArray((Object[]) current[i], toLoad,flatName);
-            } else if (current[i] instanceof AbstractNode) {
-                Node loop = (Node) current[i];
-                Object rel = loop.get(flatName);
-                if (rel != null && rel instanceof long[]) {
-                    long[] interResult = (long[]) rel;
-                    for (int j = 0; j < interResult.length; j++) {
-                        toLoad.add(interResult[j]);
-                    }
-                }
-                loop.free();
-            }
+            context.continueTask();
         }
     }
 

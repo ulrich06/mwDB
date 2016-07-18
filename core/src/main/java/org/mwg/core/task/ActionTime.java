@@ -13,9 +13,9 @@ class ActionTime implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        String flat = context.template(_varName);
+        final String flat = context.template(_varName);
         context.setTime(Long.parseLong(flat));
-        context.setUnsafeResult(context.result());
+        context.continueTask();
     }
 
     @Override

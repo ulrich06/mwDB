@@ -73,14 +73,14 @@ public class Benchmark4Test {
         HeapChunkSpace space = new HeapChunkSpace(nb, nb);
         Map<Long, Chunk> map = new HashMap<Long, Chunk>();
         for (int i = 0; i < nb; i++) {
-            long hashed = PrimitiveHelper.tripleHash(ChunkType.STATE_CHUNK,0,0,i, nb);
+            long hashed = PrimitiveHelper.tripleHash(ChunkType.STATE_CHUNK, 0, 0, i, nb);
             map.put(hashed, space.create(ChunkType.STATE_CHUNK, 0, 0, i, null, null));
         }
         long begin = System.currentTimeMillis();
         for (int i = 0; i < nb; i++) {
-            long hashed = PrimitiveHelper.tripleHash(ChunkType.STATE_CHUNK,0,0,i, nb);
+            long hashed = PrimitiveHelper.tripleHash(ChunkType.STATE_CHUNK, 0, 0, i, nb);
             Chunk o = map.get(hashed);
-            if(o instanceof StateChunk){
+            if (o instanceof StateChunk) {
 
             }
         }
@@ -94,6 +94,7 @@ public class Benchmark4Test {
     public void testlookup() {
         Graph graph = new GraphBuilder()
                 .withMemorySize(3000000)
+                //.withOffHeapMemory()
                 .saveEvery(10000)
                 .withScheduler(new NoopScheduler())
                 .build();

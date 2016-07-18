@@ -22,6 +22,8 @@ class ActionGet implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
+        /*
+
         Object previousResult = context.result();
         if (previousResult != null) {
             String flatName = context.template(_name);
@@ -85,6 +87,8 @@ class ActionGet implements TaskAction {
         } else {
             context.setUnsafeResult(null);
         }
+        */
+
     }
 
     private void collectArray(Object[] current, Set<Long> toLoad, List<Object> leafs,String flatName) {

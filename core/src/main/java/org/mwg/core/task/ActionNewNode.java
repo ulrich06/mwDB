@@ -3,37 +3,32 @@ package org.mwg.core.task;
 import org.mwg.Node;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionNewNode implements TaskAction {
 
-    private final String typeNode;
+    private final String _typeNode;
 
-
-    public ActionNewNode(String typeNode) {
-        this.typeNode = typeNode;
+    ActionNewNode(final String typeNode) {
+        this._typeNode = typeNode;
     }
 
     @Override
     public void eval(TaskContext context) {
-        Object previous = context.result();
-
         Node newNode;
-        if(typeNode == null) {
-           newNode = context.graph().newNode(context.world(), context.time());
+        if (_typeNode == null) {
+            newNode = context.graph().newNode(context.world(), context.time());
         } else {
-            String templatedType = context.template(typeNode);
-            context.cleanObj(previous);
-            newNode = context.graph().newTypedNode(context.world(),context.time(),templatedType);
+            String templatedType = context.template(_typeNode);
+            newNode = context.graph().newTypedNode(context.world(), context.time(), templatedType);
         }
-
-        context.cleanObj(previous);
-        context.setUnsafeResult(newNode);
+        context.continueWith(context.wrap(newNode));
     }
 
     @Override
     public String toString() {
-        if(typeNode != null) {
-            return "newTypedNode(" + typeNode + ")";
+        if (_typeNode != null) {
+            return "newTypedNode(\'" + _typeNode + "\')";
         }
         return "newNode()";
     }

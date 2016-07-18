@@ -17,34 +17,26 @@ public interface TaskContext {
 
     void setTime(long time);
 
-    Object variable(String name);
+    TaskResult variable(String name);
 
-    void setVariable(String name, Object value);
+    TaskResult wrap(Object input);
 
-    void addToVariable(String name, Object value);
+    void setVariable(String name, TaskResult value);
 
-    Map<String,Object> variables();
+    void addToVariable(String name, TaskResult value);
+
+    Map<String, TaskResult> variables();
 
     //Object based results
-    Object result();
+    TaskResult result();
 
-    Object[] resultAsObjectArray();
+    TaskResult<Node> resultAsNodes();
 
-    //String based results
-    String resultAsString();
+    TaskResult<String> resultAsStrings();
 
-    String[] resultAsStringArray();
+    void continueTask();
 
-    //Node based results
-    Node resultAsNode();
-
-    Node[] resultAsNodeArray();
-
-    void setUnsafeResult(Object actionResult);
-
-    void setResult(Object actionResult);
-
-    void cleanObj(Object o);
+    void continueWith(TaskResult nextResult);
 
     String template(String input);
 

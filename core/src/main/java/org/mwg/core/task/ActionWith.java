@@ -14,6 +14,7 @@ class ActionWith extends ActionSelect {
             public boolean select(Node node, TaskContext context) {
                 if (node != null) {
                     Object currentName = node.get(name);
+                    //TODO optimize this
                     Pattern pattern = Pattern.compile(context.template(stringPattern));
                     if (currentName != null && pattern.matcher(currentName.toString()).matches()) {
                         return true;

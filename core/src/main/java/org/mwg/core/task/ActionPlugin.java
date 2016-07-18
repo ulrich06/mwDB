@@ -81,7 +81,7 @@ class ActionPlugin implements TaskAction {
         if (subAction != null) {
             subAction.eval(context);
         } else {
-            context.setResult(context.result());
+            context.continueTask();
         }
     }
 

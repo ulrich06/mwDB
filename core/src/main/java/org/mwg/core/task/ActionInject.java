@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionInject implements TaskAction {
 
@@ -13,9 +14,7 @@ class ActionInject implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        //set result already protect and free previous result
-        context.cleanObj(context.result());
-        context.setUnsafeResult(CoreTask.protect(context.graph(), _value));
+        context.continueWith(context.wrap(_value));
     }
 
     @Override

@@ -4,9 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mwg.core.CoreConstants;
 
-/**
- * Created by gnain on 23/05/16.
- */
 public class PrimitiveHelperTest {
 
     // Integer.MIN_VALUE == 0x80000000

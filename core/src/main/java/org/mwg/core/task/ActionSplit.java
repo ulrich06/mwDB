@@ -13,6 +13,9 @@ class ActionSplit implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
+
+        /*
+
         Object previous = context.result();
         if (previous != null) {
             String flat = context.resultAsString();
@@ -22,6 +25,9 @@ class ActionSplit implements TaskAction {
         } else {
             context.setUnsafeResult(new String[0]);
         }
+
+        */
+
     }
 
     @Override

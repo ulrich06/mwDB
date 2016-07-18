@@ -4,6 +4,7 @@ import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionRemoveProperty implements TaskAction {
 
@@ -15,23 +16,18 @@ class ActionRemoveProperty implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        Object previousResult = context.result();
-        if (previousResult instanceof AbstractNode) {
-            ((Node) previousResult).removeProperty(context.template(_propertyName));
-        } else if (previousResult instanceof Object[]) {
-            removePropertyFromArray((Object[]) previousResult,context.template(_propertyName));
-        }
-        context.setResult(previousResult);
-    }
-
-    private void removePropertyFromArray(Object[] objs, String templatedName) {
-        for (int i = 0; i < objs.length; i++) {
-            if (objs[i] instanceof AbstractNode) {
-                ((AbstractNode) objs[i]).removeProperty(templatedName);
-            } else if (objs[i] instanceof Object[]) {
-                removePropertyFromArray((Object[]) objs[i],templatedName);
+        final TaskResult previousResult = context.result();
+        if (previousResult != null) {
+            final String flatRelationName = context.template(_propertyName);
+            for (int i = 0; i < previousResult.size(); i++) {
+                Object loopObj = previousResult.get(i);
+                if (loopObj instanceof AbstractNode) {
+                    Node loopNode = (Node) loopObj;
+                    loopNode.removeProperty(flatRelationName);
+                }
             }
         }
+        context.continueTask();
     }
 
     @Override

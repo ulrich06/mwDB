@@ -18,21 +18,21 @@ public class ActionWithTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n0");
+                        Assert.assertEquals(context.resultAsNodes().get(0).get("name"), "n0");
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
 
         fromIndexAll("nodes")
                 .selectWith("name", "n.*")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(((Node[]) context.result())[0].get("name"), "n0");
-                        Assert.assertEquals(((Node[]) context.result())[1].get("name"), "n1");
+                        Assert.assertEquals(context.resultAsNodes().get(0).get("name"), "n0");
+                        Assert.assertEquals(context.resultAsNodes().get(1).get("name"), "n1");
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
         removeGraph();
 
     }

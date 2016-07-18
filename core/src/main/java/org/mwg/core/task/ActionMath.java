@@ -25,6 +25,7 @@ class ActionMath implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
+        /*
         Object previous = context.result();
         List<Double> result = new ArrayList<Double>();
         if (previous instanceof AbstractNode) {
@@ -37,7 +38,8 @@ class ActionMath implements TaskAction {
             arrayEval((Object[]) previous, result, context);
         }
         context.cleanObj(previous);
-        context.setUnsafeResult(result.toArray(new Double[result.size()]));
+        context.setRawResult(result.toArray(new Double[result.size()]));
+        */
     }
 
     void arrayEval(Object[] objs, List<Double> result, TaskContext context) {

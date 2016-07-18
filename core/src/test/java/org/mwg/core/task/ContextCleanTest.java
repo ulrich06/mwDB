@@ -17,6 +17,9 @@ public class ContextCleanTest {
 
     // @Test
     public void finalCleanTest() {
+
+
+        /*
         final TaskContext[] retention = new TaskContext[1];
 
         final Graph graph = new GraphBuilder().build();
@@ -42,6 +45,7 @@ public class ContextCleanTest {
             shouldCrash = true;
         }
         Assert.assertEquals(shouldCrash, true);
+        */
     }
 
     // @Test

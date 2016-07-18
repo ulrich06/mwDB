@@ -8,10 +8,9 @@ import org.mwg.Type;
 import org.mwg.core.task.AbstractActionTest;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
-import static org.mwg.task.Actions.inject;
-import static org.mwg.task.Actions.setWorld;
-import static org.mwg.task.Actions.then;
+import static org.mwg.task.Actions.*;
 
 public class ActionRemovePropertyTest extends AbstractActionTest {
 
@@ -23,18 +22,17 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
     @Test
     public void testWithOneNode() {
         final long[] id = new long[1];
-        inject("node").asVar("nodeName")
+        setVar("node", "nodeName")
                 .newNode()
                 .setProperty("name", Type.STRING, "nodeName")
                 .removeProperty("name")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.result();
-                        Assert.assertNotNull(node);
-                        Assert.assertNull(node.get("name"));
-
-                        id[0] = node.id();
+                        TaskResult<Node> nodes = context.resultAsNodes();
+                        Assert.assertNotNull(nodes.get(0));
+                        Assert.assertNull(nodes.get(0).get("name"));
+                        id[0] = nodes.get(0).id();
                     }
                 }).execute(graph, null);
 
@@ -57,7 +55,7 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
                         for (int i = 0; i < 5; i++) {
                             nodes[i] = graph.newNode(0, 0);
                         }
-                        context.setResult(nodes);
+                        context.continueWith(context.wrap(nodes));
                     }
                 })
                 .setProperty("name", Type.STRING, "nodeName")
@@ -65,12 +63,12 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] nodes = (Node[]) context.result();
+                        TaskResult<Node> nodes = context.resultAsNodes();
                         Assert.assertNotNull(nodes);
 
                         for (int i = 0; i < 5; i++) {
-                            Assert.assertNull(nodes[i].get("name"));
-                            ids[i] = nodes[i].id();
+                            Assert.assertNull(nodes.get(i).get("name"));
+                            ids[i] = nodes.get(i).id();
                         }
                     }
                 }).execute(graph, null);
@@ -91,7 +89,7 @@ public class ActionRemovePropertyTest extends AbstractActionTest {
         then(new Action() {
             @Override
             public void eval(TaskContext context) {
-                context.setResult(null);
+                context.continueWith(null);
             }
         }).setProperty("name", Type.STRING, "node")
                 .removeProperty("name")

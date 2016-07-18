@@ -2,11 +2,9 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
-import org.mwg.core.utility.GenericIterable;
+import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
-import org.mwg.task.Task;
-import org.mwg.task.TaskAction;
-import org.mwg.task.TaskContext;
+import org.mwg.task.*;
 
 class ActionForeachPar implements TaskAction {
 
@@ -18,35 +16,40 @@ class ActionForeachPar implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        final Object previousResult = context.result();
-        final GenericIterable genericIterable = new GenericIterable(previousResult);
-        int index = 0;
-        int plainEstimation = genericIterable.estimate();
-        if (plainEstimation == -1) {
+        final TaskResult previousResult = context.result();
+        final TaskResult finalResult = context.wrap(null);
+        final TaskResultIterator it = previousResult.iterator();
+        final int previousSize = previousResult.size();
+        if (previousSize == -1) {
             throw new RuntimeException("Foreach on non array structure are not supported yet!");
         }
-        final Object[] flatResult = new Object[plainEstimation];
-        final DeferCounter waiter = context.graph().newCounter(plainEstimation);
-
-        Object loopObj = genericIterable.next();
-        while (loopObj != null) {
+        finalResult.allocate(previousSize);
+        final DeferCounter waiter = context.graph().newCounter(previousSize);
+        Object loop = it.next();
+        int index = 0;
+        while (loop != null) {
             final int finalIndex = index;
-            index++;
-            final Object finalLoopObj = loopObj;
-            _subTask.executeFromPar(context, finalLoopObj, new Callback<Object>() {
+            final TaskResult loopResult = context.wrap(loop);
+            _subTask.executeFromPar(context, loopResult, new Callback<TaskResult>() {
                 @Override
-                public void on(Object result) {
-                    flatResult[finalIndex] = result;
-                    context.cleanObj(finalLoopObj);
+                public void on(TaskResult result) {
+                    loopResult.free();
+                    if(result != null && result.size() == 1){
+                        finalResult.set(finalIndex, result.get(0));
+                    } else {
+                        finalResult.set(finalIndex, result);
+
+                    }
                     waiter.count();
                 }
             });
-            loopObj = genericIterable.next();
+            index++;
+            loop = it.next();
         }
         waiter.then(new Job() {
             @Override
             public void run() {
-                context.setUnsafeResult(flatResult);
+                context.continueWith(finalResult);
             }
         });
     }

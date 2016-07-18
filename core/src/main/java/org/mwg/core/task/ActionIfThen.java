@@ -17,6 +17,9 @@ class ActionIfThen implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+
+        /*
+
         if (_condition.eval(context)) {
             _action.executeFrom(context, context.result(), new Callback<Object>() {
                 @Override
@@ -27,6 +30,9 @@ class ActionIfThen implements TaskAction {
         } else {
             context.setResult(context.result());
         }
+
+        */
+
     }
 
     @Override

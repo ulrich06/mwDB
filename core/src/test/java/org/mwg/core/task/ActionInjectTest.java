@@ -18,10 +18,10 @@ public class ActionInjectTest extends AbstractActionTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Assert.assertEquals(context.result(), "uselessPayload");
+                        Assert.assertEquals(context.resultAsStrings().get(0), "uselessPayload");
                     }
                 })
-                .execute(graph,null);
+                .execute(graph, null);
         removeGraph();
     }
 
@@ -81,7 +81,7 @@ public class ActionInjectTest extends AbstractActionTest {
                                 //empty task
                             }
                         })
-                        .execute(graph,null);
+                        .execute(graph, null);
                 String name;
                 try {
                     name = (String) result[0].get("name");

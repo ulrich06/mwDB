@@ -7,6 +7,7 @@ import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.setWorld;
@@ -23,11 +24,11 @@ public class ActionSetTest extends ActionNewNodeTest {
         final long[] id = new long[1];
         inject("node").asVar("nodeName")
                 .newNode()
-                .setProperty("name", Type.STRING, "nodeName")
+                .setProperty("name", Type.STRING, "{{nodeName}}")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node node = (Node) context.result();
+                        Node node = (Node) context.result().get(0);
                         Assert.assertNotNull(node);
                         Assert.assertEquals("node", node.get("name"));
 
@@ -54,19 +55,18 @@ public class ActionSetTest extends ActionNewNodeTest {
                         for (int i = 0; i < 5; i++) {
                             nodes[i] = graph.newNode(0, 0);
                         }
-                        context.setResult(nodes);
+                        context.continueWith(context.wrap(nodes));
                     }
                 })
-                .setProperty("name", Type.STRING, "nodeName")
+                .setProperty("name", Type.STRING, "{{nodeName}}")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node[] nodes = (Node[]) context.result();
+                        TaskResult<Node> nodes = context.resultAsNodes();
                         Assert.assertNotNull(nodes);
-
                         for (int i = 0; i < 5; i++) {
-                            Assert.assertEquals("node", nodes[i].get("name"));
-                            ids[i] = nodes[i].id();
+                            Assert.assertEquals("node", nodes.get(i).get("name"));
+                            ids[i] = nodes.get(i).id();
                         }
                     }
                 }).execute(graph, null);
@@ -88,7 +88,7 @@ public class ActionSetTest extends ActionNewNodeTest {
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        context.setResult(null);
+                        context.continueWith(null);
                     }
                 })
                 .setProperty("name", Type.STRING, "node")

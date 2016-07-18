@@ -6,39 +6,40 @@ import org.mwg.Node;
 import org.mwg.task.Action;
 import org.mwg.task.Actions;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
+import static org.mwg.task.Actions.newTask;
+import static org.mwg.task.Actions.then;
 
-/**
- * Created by ludovicmouline on 13/07/16.
- */
 public class ActionJumpTest extends AbstractActionTest {
 
     @Test
     public void testJump() {
         initGraph();
 
-        Actions.newTask()
+        newTask()
                 .fromIndexAll("nodes")
                 .asVar("nodes")
-                .foreach(Actions.then(new Action() {
+                .foreach(then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node it = (Node) context.result();
-                        Assert.assertEquals(0,it.time());
-                        context.setResult(null);
+                        TaskResult<Node> nodes = context.resultAsNodes();
+                        Assert.assertEquals(0, nodes.get(0).time());
+                        context.continueWith(null);
                     }
                 }))
                 .fromVar("nodes")
                 .jump("10")
-                .foreach(Actions.then(new Action() {
+                .foreach(then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        Node it = (Node) context.result();
-                        Assert.assertEquals(10,it.time());
-                        context.setResult(null);
+                        TaskResult<Node> nodes = context.resultAsNodes();
+                        Node it = nodes.get(0);
+                        Assert.assertEquals(10, it.time());
+                        context.continueWith(null);
                     }
                 }))
-                .execute(graph,null);
+                .execute(graph, null);
 
 
         removeGraph();

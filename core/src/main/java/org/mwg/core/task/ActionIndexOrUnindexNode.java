@@ -8,13 +8,14 @@ import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 class ActionIndexOrUnindexNode implements TaskAction {
     private final String _indexName;
     private final String _flatKeyAttributes;
     private final boolean _isIndexation;
 
-    public ActionIndexOrUnindexNode(String indexName, String flatKeyAttributes, boolean isIndexation) {
+    ActionIndexOrUnindexNode(String indexName, String flatKeyAttributes, boolean isIndexation) {
         this._indexName = indexName;
         this._flatKeyAttributes = flatKeyAttributes;
         this._isIndexation = isIndexation;
@@ -22,13 +23,14 @@ class ActionIndexOrUnindexNode implements TaskAction {
 
     @Override
     public void eval(TaskContext context) {
-        final Object previousResult = context.result();
 
+        /*
+        final TaskResult previousResult = context.result();
         String templatedIndexName = context.template(_indexName);
         String templatedKeyAttributes = context.template(_flatKeyAttributes);
 
 //        Node[] nodes = getNodes(previousResult);
-        Node[] nodes = TaskHelper.flatNodes(previousResult,true);
+        Node[] nodes = TaskHelper.flatNodes(previousResult, true);
         DeferCounter counter = new CoreDeferCounter(nodes.length);
 
         Callback<Boolean> end = new Callback<Boolean>() {
@@ -42,8 +44,8 @@ class ActionIndexOrUnindexNode implements TaskAction {
             }
         };
 
-        for(int i = 0;i < nodes.length; i++) {
-            if(_isIndexation) {
+        for (int i = 0; i < nodes.length; i++) {
+            if (_isIndexation) {
                 context.graph().index(templatedIndexName, nodes[i], templatedKeyAttributes, end);
             } else {
                 context.graph().unindex(templatedIndexName, nodes[i], templatedKeyAttributes, end);
@@ -53,9 +55,10 @@ class ActionIndexOrUnindexNode implements TaskAction {
         counter.then(new Job() {
             @Override
             public void run() {
-                context.setUnsafeResult(previousResult);
+                context.setRawResult(previousResult);
             }
         });
+        */
     }
 
    /* private Node[] getNodes(Object previousResult) {
@@ -92,7 +95,7 @@ class ActionIndexOrUnindexNode implements TaskAction {
 
     @Override
     public String toString() {
-        if(_isIndexation) {
+        if (_isIndexation) {
             return "index('" + _indexName + "','" + _flatKeyAttributes + "')";
         } else {
             return "unindex('" + _indexName + "','" + _flatKeyAttributes + "')";

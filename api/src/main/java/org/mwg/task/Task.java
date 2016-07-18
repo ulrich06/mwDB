@@ -77,7 +77,7 @@ public interface Task {
     /**
      * Index the node (or the array of nodes) present in the result
      *
-     * @param indexName index name
+     * @param indexName         index name
      * @param flatKeyAttributes node attributes used to index
      * @return this task to chain actions (fluent API)
      */
@@ -86,7 +86,7 @@ public interface Task {
     /**
      * Unindex the node (or the array of nodes) present in the result
      *
-     * @param indexName index name
+     * @param indexName         index name
      * @param flatKeyAttributes node attributes used to index
      * @return this task to chain actions (fluent API)
      */
@@ -326,12 +326,12 @@ public interface Task {
 
     Task print(String name);
 
-    void execute(final Graph graph, final Callback<Object> result);
+    void execute(final Graph graph, final Callback<TaskResult> result);
 
-    void executeWith(final Graph graph, final Map<String, Object> variables, Object initialResult, final boolean isVerbose, final Callback<Object> result);
+    void executeWith(final Graph graph, final Map<String, TaskResult> variables, TaskResult initialResult, final boolean isVerbose, final Callback<TaskResult> result);
 
-    void executeFrom(final TaskContext parent, final Object initialResult, final Callback<Object> result);
+    void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
 
-    void executeFromPar(final TaskContext parent, final Object initialResult, final Callback<Object> result);
+    void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
 
 }

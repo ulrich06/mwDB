@@ -22,6 +22,9 @@ class ActionRepeat implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+
+        /*
+
         final ActionRepeat selfPointer = this;
         final AtomicInteger cursor = new AtomicInteger(0);
         final Object[] results = new Object[_iteration];
@@ -45,6 +48,9 @@ class ActionRepeat implements TaskAction {
         } else {
             context.setResult(results);
         }
+
+        */
+
     }
 
     @Override
