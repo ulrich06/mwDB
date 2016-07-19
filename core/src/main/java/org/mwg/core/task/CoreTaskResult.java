@@ -95,6 +95,10 @@ class CoreTaskResult<A> implements TaskResult<A> {
                 } else {
                     _backend[0] = toWrap;
                 }
+            } else {
+                _backend = new Object[0];
+                _capacity = 0;
+                _size = 0;
             }
         }
     }

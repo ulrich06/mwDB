@@ -61,9 +61,9 @@ class ActionIndexOrUnindexNode implements TaskAction {
     @Override
     public String toString() {
         if (_isIndexation) {
-            return "index('" + _indexName + "','" + _flatKeyAttributes + "')";
+            return "indexNode('" + _indexName + "','" + _flatKeyAttributes + "')";
         } else {
-            return "unindex('" + _indexName + "','" + _flatKeyAttributes + "')";
+            return "unindexNode('" + _indexName + "','" + _flatKeyAttributes + "')";
         }
     }
 }
