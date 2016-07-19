@@ -131,7 +131,7 @@ class CoreTaskResult<A> implements TaskResult<A> {
     @Override
     public void allocate(int index) {
         if (index >= _capacity) {
-            if (_backend == null) {
+            if (_backend.length == 0) {
                 _backend = new Object[index];
                 _capacity = index;
             } else {
