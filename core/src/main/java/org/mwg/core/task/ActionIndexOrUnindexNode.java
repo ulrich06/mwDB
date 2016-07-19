@@ -26,9 +26,8 @@ class ActionIndexOrUnindexNode implements TaskAction {
         final TaskResult previousResult = context.result();
         final String templatedIndexName = context.template(_indexName);
         final String templatedKeyAttributes = context.template(_flatKeyAttributes);
-        DeferCounter counter = new CoreDeferCounter(previousResult.size());
-
-        Callback<Boolean> end = new Callback<Boolean>() {
+        final DeferCounter counter = new CoreDeferCounter(previousResult.size());
+        final Callback<Boolean> end = new Callback<Boolean>() {
             @Override
             public void on(Boolean succeed) {
                 if (succeed) {
@@ -39,7 +38,7 @@ class ActionIndexOrUnindexNode implements TaskAction {
             }
         };
         for (int i = 0; i < previousResult.size(); i++) {
-            Object loop = previousResult.get(i);
+            final Object loop = previousResult.get(i);
             if (loop instanceof AbstractNode) {
                 if (_isIndexation) {
                     context.graph().index(templatedIndexName, (Node) loop, templatedKeyAttributes, end);
