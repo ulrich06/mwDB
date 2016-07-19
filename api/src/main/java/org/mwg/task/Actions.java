@@ -48,6 +48,10 @@ public class Actions {
         return newTask().fromVar(variableName);
     }
 
+    public static Task fromVarAt(String variableName, int index) {
+        return newTask().fromVarAt(variableName,index);
+    }
+
     public static Task fromIndexAll(String indexName) {
         return newTask().fromIndexAll(indexName);
     }

@@ -106,9 +106,19 @@ public class CoreTask implements org.mwg.task.Task {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
-        addAction(new ActionFromVar(variableName));
+        addAction(new ActionFromVar(variableName,-1));
         return this;
     }
+
+    @Override
+    public final org.mwg.task.Task fromVarAt(String variableName, int index) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        addAction(new ActionFromVar(variableName,index));
+        return this;
+    }
+
 
     @Override
     public Task setVar(String variableName, Object inputValue) {

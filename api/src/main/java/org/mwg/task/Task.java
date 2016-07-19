@@ -33,12 +33,23 @@ public interface Task {
     Task asVar(String variableName);
 
     /**
-     * Retrieves a previous task result and stack it for next sub tasks.
+     * Retrieves a stored variable and stack it for next sub tasks.
      *
-     * @param variableName identifying a previous result
+     * @param variableName identifying a variable
      * @return this task to chain actions (fluent API)
      */
     Task fromVar(String variableName);
+
+
+    /**
+     * Retrieves a stored array and stack the element at the specified index for next sub tasks.
+     *
+     * @param variableName identifying a previous array
+     * @param index the index element in the array
+     *
+     * @return this task to chain actions (fluent API)
+     */
+    Task fromVarAt(String variableName, int index);
 
     /**
      * Initializes a named variable into the task context.

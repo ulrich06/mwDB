@@ -7,15 +7,23 @@ import org.mwg.task.TaskResult;
 class ActionFromVar implements TaskAction {
 
     private final String _name;
+    private final int _index;
 
-    ActionFromVar(final String p_name) {
+
+    public ActionFromVar(String p_name, int p_index) {
         this._name = p_name;
+        this._index = p_index;
     }
 
     @Override
     public void eval(final TaskContext context) {
         final String evaluatedName = context.template(_name);
-        final TaskResult varResult = context.variable(evaluatedName);
+        final TaskResult varResult;
+        if(_index != -1) {
+            varResult = context.wrap(context.variable(evaluatedName).get(_index));
+        } else {
+            varResult = context.variable(evaluatedName);
+        }
         context.continueWith(varResult.clone());
     }
 
