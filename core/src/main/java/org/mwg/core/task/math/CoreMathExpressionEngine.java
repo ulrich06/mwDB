@@ -221,11 +221,20 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                                         }
 
                                         TaskResult varRes = taskContext.variable(tokenName);
+                                        if(varRes == null && tokenName.equals("result")) {
+                                            varRes = taskContext.result();
+                                        }
                                         if (varRes != null && varRes.size() > indexArray) {
                                             resolved = varRes.get(indexArray);
                                         }
                                     } else {
-                                        resolved = taskContext.variable(tokenName).get(0);
+                                        TaskResult varRes = taskContext.variable(tokenName);
+                                        if(varRes == null && tokenName.equals("result")) {
+                                            varRes = taskContext.result();
+                                        }
+                                        if(varRes != null) {
+                                            resolved = varRes.get(0);
+                                        }
                                     }
                                 }
                             }

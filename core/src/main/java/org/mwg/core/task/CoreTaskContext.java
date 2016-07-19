@@ -177,7 +177,8 @@ class CoreTaskContext implements TaskContext {
         for (int i = 0; i < _ident; i++) {
             System.out.print("\t");
         }
-        System.out.println(t);
+        String taskName = t.toString();
+        System.out.println(template(taskName));
     }
 
 

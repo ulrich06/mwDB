@@ -101,12 +101,21 @@ public class MathEngineTest {
                                 context.continueTask();
                             }
                         })
-                        .setVar("anArray",new int[]{1})
+                        .inject(new int[]{1,2,3})
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
-                                String computedValue = context.template("{{=anArray * 2}}");
-                                Assert.assertEquals("2",computedValue);
+                                String computedValue = context.template("{{=result[2] * 2}}");
+                                Assert.assertEquals("6",computedValue);
+                                context.continueTask();
+                            }
+                        })
+                        .inject(8)
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                String computedValue = context.template("{{=result * 2}}");
+                                Assert.assertEquals("16",computedValue);
                                 context.continueTask();
                             }
                         })
