@@ -225,7 +225,7 @@ public class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpr
                                             resolved = varRes.get(indexArray);
                                         }
                                     } else {
-                                        resolved = taskContext.variable(tokenName);
+                                        resolved = taskContext.variable(tokenName).get(0);
                                     }
                                 }
                             }

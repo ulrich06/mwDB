@@ -6,6 +6,10 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
+import org.mwg.task.Action;
+import org.mwg.task.Actions;
+import org.mwg.task.TaskContext;
+import org.mwg.task.TaskResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +63,59 @@ public class MathEngineTest {
                 context.set("f2", 8);
                 d = engine.eval(context, null, new HashMap<String, Double>());
                 Assert.assertTrue(d == 7 * 7 + 8 * 7);
+            }
+        });
+    }
+
+    @Test
+    public void textMathEngineFromTask() {
+        final Graph graph = new GraphBuilder().build();
+        graph.connect(new Callback<Boolean>() {
+            @Override
+            public void on(Boolean result) {
+                Actions.newTask()
+                        .setVar("aVar",55)
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                String computedValue = context.template("{{=aVar * 2}}");
+                                Assert.assertEquals("110",computedValue);
+                                context.continueTask();
+                            }
+                        })
+                        .setVar("anArray",new int[]{1,2})
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                String computedValue = context.template("{{=anArray[0] +  anArray[1] * 2}}");
+                                Assert.assertEquals("5",computedValue);
+                                context.continueTask();
+                            }
+                        })
+                        .setVar("anArray",new int[]{1})
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                String computedValue = context.template("{{=anArray * 2}}");
+                                Assert.assertEquals("2",computedValue);
+                                context.continueTask();
+                            }
+                        })
+                        .setVar("anArray",new int[]{1})
+                        .then(new Action() {
+                            @Override
+                            public void eval(TaskContext context) {
+                                String computedValue = context.template("{{=anArray * 2}}");
+                                Assert.assertEquals("2",computedValue);
+                                context.continueTask();
+                            }
+                        })
+                        .execute(graph, new Callback<TaskResult>() {
+                            @Override
+                            public void on(TaskResult result) {
+                                graph.disconnect(null);
+                            }
+                        });
             }
         });
     }
