@@ -11,8 +11,12 @@ class CoreTaskResultIterator<A> implements TaskResultIterator<A> {
     private int _current = 0;
 
     CoreTaskResultIterator(Object[] p_backend) {
-        this._backend = p_backend;
-        this._size = p_backend.length;
+        if(p_backend != null) {
+            this._backend = p_backend;
+        } else {
+            _backend = new Object[0];
+        }
+        _size = _backend.length;
     }
 
     @Override

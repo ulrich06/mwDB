@@ -95,10 +95,6 @@ class CoreTaskResult<A> implements TaskResult<A> {
                 } else {
                     _backend[0] = toWrap;
                 }
-            } else {
-                _backend = new Object[0];
-                _capacity = 0;
-                _size = 0;
             }
         }
     }
@@ -131,7 +127,7 @@ class CoreTaskResult<A> implements TaskResult<A> {
     @Override
     public void allocate(int index) {
         if (index >= _capacity) {
-            if (_backend.length == 0) {
+            if (_backend == null) {
                 _backend = new Object[index];
                 _capacity = index;
             } else {
