@@ -14,7 +14,7 @@ class ActionInject implements TaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        context.continueWith(context.wrap(_value));
+        context.continueWith(context.wrap(_value).clone());
     }
 
     @Override
