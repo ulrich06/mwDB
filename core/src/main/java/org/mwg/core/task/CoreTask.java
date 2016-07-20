@@ -227,7 +227,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (subTask == null) {
             throw new RuntimeException("subTask should not be null");
         }
-        addAction(new ActionTrigger(subTask));
+        addAction(new ActionSubTask(subTask));
         return this;
     }
 

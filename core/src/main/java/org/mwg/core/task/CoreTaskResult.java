@@ -91,7 +91,11 @@ class CoreTaskResult<A> implements TaskResult<A> {
                 _size = 1;
                 if (toWrap instanceof AbstractNode) {
                     Node toWrapNode = (Node) toWrap;
-                    _backend[0] = toWrapNode.graph().cloneNode(toWrapNode);
+                    if(protect){
+                        _backend[0] = toWrapNode.graph().cloneNode(toWrapNode);
+                    } else {
+                        _backend[0] = toWrapNode;
+                    }
                 } else {
                     _backend[0] = toWrap;
                 }

@@ -93,6 +93,16 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
+    public TaskResult wrapClone(Object input) {
+        return new CoreTaskResult(input, true);
+    }
+
+    @Override
+    public TaskResult newResult() {
+        return new CoreTaskResult(null, false);
+    }
+
+    @Override
     public final void setVariable(String name, TaskResult value) {
         final TaskResult previous = this._variables.get(name);
         if (value != null) {
@@ -220,11 +230,11 @@ class CoreTaskContext implements TaskContext {
                     double value = mathEngine.eval(null, this, new HashMap<String, Double>());
                     //supress ".0" if it exists
                     String valueStr = value + "";
-                    for(int i=valueStr.length() - 1;i>=0;i--) {
-                        if(valueStr.charAt(i) == '.') {
-                            valueStr = valueStr.substring(0,i);
+                    for (int i = valueStr.length() - 1; i >= 0; i--) {
+                        if (valueStr.charAt(i) == '.') {
+                            valueStr = valueStr.substring(0, i);
                             break;
-                        } else if(valueStr.charAt(i) != '0') {
+                        } else if (valueStr.charAt(i) != '0') {
                             break;
                         }
                     }

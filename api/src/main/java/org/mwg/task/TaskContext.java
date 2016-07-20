@@ -21,6 +21,10 @@ public interface TaskContext {
 
     TaskResult wrap(Object input);
 
+    TaskResult wrapClone(Object input);
+
+    TaskResult newResult();
+
     void setVariable(String name, TaskResult value);
 
     void addToVariable(String name, TaskResult value);

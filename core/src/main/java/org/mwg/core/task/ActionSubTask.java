@@ -6,11 +6,11 @@ import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionTrigger implements TaskAction {
+class ActionSubTask implements TaskAction {
 
     private final Task _subTask;
 
-    ActionTrigger(final Task p_subTask) {
+    ActionSubTask(final Task p_subTask) {
         _subTask = p_subTask;
     }
 
@@ -20,9 +20,6 @@ class ActionTrigger implements TaskAction {
         _subTask.executeFrom(context, previous, new Callback<TaskResult>() {
             @Override
             public void on(TaskResult subTaskResult) {
-                if (previous != null) {
-                    previous.free();
-                }
                 context.continueWith(subTaskResult);
             }
         });
@@ -30,7 +27,7 @@ class ActionTrigger implements TaskAction {
 
     @Override
     public String toString() {
-        return "trigger()";
+        return "subTask()";
     }
 
 }

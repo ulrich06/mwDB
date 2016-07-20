@@ -674,6 +674,7 @@ declare module org {
                 static then(action: org.mwg.task.Action): org.mwg.task.Task;
                 static inject(input: any): org.mwg.task.Task;
                 static fromVar(variableName: string): org.mwg.task.Task;
+                static fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                 static fromIndexAll(indexName: string): org.mwg.task.Task;
                 static fromIndex(indexName: string, query: string): org.mwg.task.Task;
                 static parse(flatTask: string): org.mwg.task.Task;
@@ -714,6 +715,7 @@ declare module org {
                 setTime(template: string): org.mwg.task.Task;
                 asVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
+                fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                 setVar(variableName: string, inputValue: any): org.mwg.task.Task;
                 inject(inputValue: any): org.mwg.task.Task;
                 fromIndex(indexName: string, query: string): org.mwg.task.Task;
@@ -776,6 +778,8 @@ declare module org {
                 setTime(time: number): void;
                 variable(name: string): org.mwg.task.TaskResult<any>;
                 wrap(input: any): org.mwg.task.TaskResult<any>;
+                wrapClone(input: any): org.mwg.task.TaskResult<any>;
+                newResult(): org.mwg.task.TaskResult<any>;
                 setVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                 addToVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                 variables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
@@ -1429,7 +1433,8 @@ declare module org {
                 }
                 class ActionFromVar implements org.mwg.task.TaskAction {
                     private _name;
-                    constructor(p_name: string);
+                    private _index;
+                    constructor(p_name: string, p_index: number);
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
@@ -1572,6 +1577,12 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionSubTask implements org.mwg.task.TaskAction {
+                    private _subTask;
+                    constructor(p_subTask: org.mwg.task.Task);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
                 class ActionTime implements org.mwg.task.TaskAction {
                     private _varName;
                     constructor(p_varName: string);
@@ -1600,12 +1611,6 @@ declare module org {
                 class ActionTraverseOrKeep implements org.mwg.task.TaskAction {
                     private _name;
                     constructor(p_name: string);
-                    eval(context: org.mwg.task.TaskContext): void;
-                    toString(): string;
-                }
-                class ActionTrigger implements org.mwg.task.TaskAction {
-                    private _subTask;
-                    constructor(p_subTask: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
@@ -1649,6 +1654,7 @@ declare module org {
                     selectWithout(name: string, pattern: string): org.mwg.task.Task;
                     asVar(variableName: string): org.mwg.task.Task;
                     fromVar(variableName: string): org.mwg.task.Task;
+                    fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                     setVar(variableName: string, inputValue: any): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
                     selectObject(filterFunction: org.mwg.task.TaskFunctionSelectObject): org.mwg.task.Task;
@@ -1716,6 +1722,8 @@ declare module org {
                     setTime(p_time: number): void;
                     variable(name: string): org.mwg.task.TaskResult<any>;
                     wrap(input: any): org.mwg.task.TaskResult<any>;
+                    wrapClone(input: any): org.mwg.task.TaskResult<any>;
+                    newResult(): org.mwg.task.TaskResult<any>;
                     setVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                     addToVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                     variables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
