@@ -149,7 +149,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                 GaussianMixtureNode resultChild = filter(result, values, precisions, threshold, parent.getLevel() - 1.0);
                 if (resultChild != null) {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, false);
-                    context.continueWith(context.wrap(resultChild.graph().cloneNode(resultChild)));
+                    context.continueWith(context.wrapClone(resultChild));
                 } else {
                     parent.internallearn(values, width, compressionFactor, compressionIter, precisions, threshold, true);
                     context.continueWith(null);
@@ -444,6 +444,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
         Task deepTraverseTask = setTime(time() + "").setWorld(world() + "");
         final int parentLevel = this.getLevel();
+
+        graph().save(null);
+        System.out.println("b1: "+graph().space().available());
 
         deepTraverseTask.inject(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
