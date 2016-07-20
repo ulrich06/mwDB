@@ -174,6 +174,10 @@ class CoreTaskContext implements TaskContext {
             /* End Clean */
             if (this._callback != null) {
                 this._callback.on(_result);
+            } else {
+                if (this._result != null) {
+                    this._result.free();
+                }
             }
         } else {
             if (verbose) {
