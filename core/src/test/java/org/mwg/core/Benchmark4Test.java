@@ -93,7 +93,7 @@ public class Benchmark4Test {
         System.out.println((nb / 1000) / diffSecond);
     }
 
-    //@Test
+    @Test
     public void testlookup() {
         Graph graph = new GraphBuilder()
                 .withMemorySize(3000000)

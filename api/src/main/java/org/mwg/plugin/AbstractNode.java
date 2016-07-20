@@ -211,52 +211,60 @@ public abstract class AbstractNode implements Node {
 
     @Override
     public void add(String relationName, Node relatedNode) {
-        NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToHash(relationName, true);
-        if (preciseState != null) {
-            long[] previous = (long[]) preciseState.get(relationKey);
-            if (previous == null) {
-                previous = new long[1];
-                previous[0] = relatedNode.id();
+        if (relatedNode != null) {
+            NodeState preciseState = this._resolver.resolveState(this, false);
+            long relationKey = this._resolver.stringToHash(relationName, true);
+            if (preciseState != null) {
+
+                long[] previous = (long[]) preciseState.get(relationKey);
+                if (previous == null) {
+                    previous = new long[1];
+                    previous[0] = relatedNode.id();
+                } else {
+                    long[] incArray = new long[previous.length + 1];
+                    System.arraycopy(previous, 0, incArray, 0, previous.length);
+                    incArray[previous.length] = relatedNode.id();
+                    previous = incArray;
+                }
+                preciseState.set(relationKey, Type.RELATION, previous);
+
+
+                //   preciseState.append(relationKey, Type.RELATION, relatedNode.id());
             } else {
-                long[] incArray = new long[previous.length + 1];
-                System.arraycopy(previous, 0, incArray, 0, previous.length);
-                incArray[previous.length] = relatedNode.id();
-                previous = incArray;
+                throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }
-            preciseState.set(relationKey, Type.RELATION, previous);
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 
     @Override
     public void remove(String relationName, Node relatedNode) {
-        NodeState preciseState = this._resolver.resolveState(this, false);
-        long relationKey = this._resolver.stringToHash(relationName, false);
-        if (preciseState != null) {
-            long[] previous = (long[]) preciseState.get(relationKey);
-            if (previous != null) {
-                int indexToRemove = -1;
-                for (int i = 0; i < previous.length; i++) {
-                    if (previous[i] == relatedNode.id()) {
-                        indexToRemove = i;
-                        break;
+        if (relatedNode != null) {
+            NodeState preciseState = this._resolver.resolveState(this, false);
+            long relationKey = this._resolver.stringToHash(relationName, false);
+            if (preciseState != null) {
+                long[] previous = (long[]) preciseState.get(relationKey);
+                if (previous != null) {
+                    int indexToRemove = -1;
+                    for (int i = 0; i < previous.length; i++) {
+                        if (previous[i] == relatedNode.id()) {
+                            indexToRemove = i;
+                            break;
+                        }
+                    }
+                    if (indexToRemove != -1) {
+                        if ((previous.length - 1) == 0) {
+                            preciseState.set(relationKey, Type.RELATION, null);
+                        } else {
+                            long[] newArray = new long[previous.length - 1];
+                            System.arraycopy(previous, 0, newArray, 0, indexToRemove);
+                            System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
+                            preciseState.set(relationKey, Type.RELATION, newArray);
+                        }
                     }
                 }
-                if (indexToRemove != -1) {
-                    if ((previous.length - 1) == 0) {
-                        preciseState.set(relationKey, Type.RELATION, null);
-                    } else {
-                        long[] newArray = new long[previous.length - 1];
-                        System.arraycopy(previous, 0, newArray, 0, indexToRemove);
-                        System.arraycopy(previous, indexToRemove + 1, newArray, indexToRemove, previous.length - indexToRemove - 1);
-                        preciseState.set(relationKey, Type.RELATION, newArray);
-                    }
-                }
+            } else {
+                throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }
-        } else {
-            throw new RuntimeException(Constants.CACHE_MISS_ERROR);
         }
     }
 

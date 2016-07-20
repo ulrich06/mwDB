@@ -29,6 +29,15 @@ public interface NodeState {
     void set(long index, byte elemType, Object elem);
 
     /**
+     * Append the Object elem with the given index
+     *
+     * @param index    unique key of element
+     * @param elemType type of the element (based on Type definition)
+     * @param elem     element to be set
+     */
+    //void append(long index, byte elemType, Object elem);
+
+    /**
      * Set the named state element
      *
      * @param key      unique key of element

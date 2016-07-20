@@ -805,7 +805,7 @@ declare module org {
                 (node: org.mwg.Node): any;
             }
             interface TaskFunctionSelect {
-                (node: org.mwg.Node, context: org.mwg.task.TaskContext): boolean;
+                (node: org.mwg.Node): boolean;
             }
             interface TaskFunctionSelectObject {
                 (object: any, context: org.mwg.task.TaskContext): boolean;
@@ -1620,13 +1620,19 @@ declare module org {
                     constructor(p_cond: org.mwg.task.TaskFunctionConditional, p_then: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
                 }
-                class ActionWith extends org.mwg.core.task.ActionSelect {
+                class ActionWith implements org.mwg.task.TaskAction {
+                    private _patternTemplate;
+                    private _name;
                     constructor(name: string, stringPattern: string);
                     toString(): string;
+                    eval(context: org.mwg.task.TaskContext): void;
                 }
-                class ActionWithout extends org.mwg.core.task.ActionSelect {
+                class ActionWithout implements org.mwg.task.TaskAction {
+                    private _patternTemplate;
+                    private _name;
                     constructor(name: string, stringPattern: string);
                     toString(): string;
+                    eval(context: org.mwg.task.TaskContext): void;
                 }
                 class ActionWorld implements org.mwg.task.TaskAction {
                     private _varName;

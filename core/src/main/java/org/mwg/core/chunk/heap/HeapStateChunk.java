@@ -237,6 +237,11 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
     }
 
+    // @Override
+    //  public void append(long index, byte elemType, Object elem) {
+    //TODO
+    //  }
+
     @Override
     public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
         internal_set(_space.graph().resolver().stringToHash(key, true), p_elemType, p_unsafe_elem, true);

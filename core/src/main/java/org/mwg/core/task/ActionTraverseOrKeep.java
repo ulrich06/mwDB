@@ -20,10 +20,12 @@ class ActionTraverseOrKeep implements TaskAction {
 
     @Override
     public final void eval(final TaskContext context) {
-        final TaskResult finalResult = context.wrap(null);
+
         final String flatName = context.template(_name);
         final TaskResult previousResult = context.result();
+
         if (previousResult != null) {
+            final TaskResult finalResult = context.newResult();
             final int previousSize = previousResult.size();
             final DeferCounter defer = context.graph().newCounter(previousSize);
             for (int i = 0; i < previousSize; i++) {

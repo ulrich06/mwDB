@@ -18,13 +18,13 @@ class ActionSelect implements TaskAction {
     @Override
     public final void eval(final TaskContext context) {
         final TaskResult previous = context.result();
-        final TaskResult next = context.wrap(null);
+        final TaskResult next = context.newResult();
         final int previousSize = previous.size();
         for (int i = 0; i < previousSize; i++) {
             final Object obj = previous.get(i);
             if (obj instanceof AbstractNode) {
                 final Node casted = (Node) obj;
-                if (_filter.select(casted, context)) {
+                if (_filter.select(casted)) {
                     next.add(casted.graph().cloneNode(casted));
                 }
             } else {

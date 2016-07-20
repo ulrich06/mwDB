@@ -454,7 +454,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             final int finalI = i;
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
-                public boolean select(Node node, TaskContext context) {
+                public boolean select(Node node) {
                     return ((GaussianMixtureNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
                 }
             });
