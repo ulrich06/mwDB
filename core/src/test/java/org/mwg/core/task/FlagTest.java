@@ -12,9 +12,6 @@ import org.mwg.task.*;
 import static org.mwg.task.Actions.newTask;
 import static org.mwg.task.Actions.setTime;
 
-/**
- * Created by assaad on 20/07/16.
- */
 public class FlagTest {
     @Test
     public void traverse() {
@@ -112,7 +109,7 @@ public class FlagTest {
 
 
     @Test
-    public void traverseOrKeep(){
+    public void traverseOrKeep() {
         Graph graph = new GraphBuilder()
                 .withMemorySize(30000)
                 .saveEvery(10000)
@@ -166,22 +163,21 @@ public class FlagTest {
             Assert.assertTrue(graph.space().available() == initcache);
 
 
-
             Task traverse = newTask();
 
             traverse.asVar("parent").traverseOrKeep(relName).then(new Action() {
                 @Override
                 public void eval(TaskContext context) {
                     TaskResult<Integer> count = context.variable("count");
-                    int c=0;
-                    if(count!=null){
-                        c=(int)count.get(0)+1;
+                    int c = 0;
+                    if (count != null) {
+                        c = count.get(0) + 1;
                     }
-                    context.setVariable("count",context.wrap(c));
+                    context.setVariable("count", context.wrap(c));
 
                     TaskResult<Node> children = context.resultAsNodes();
-                    if (children.size() != 0) {
-                        context.continueWith(context.wrap(graph.cloneNode(children.get(0))));
+                    if (children != null && children.size() != 0) {
+                        context.continueWith(context.wrapClone(children.get(0)));
                     } else {
                         context.continueWith(null);
                     }
@@ -189,26 +185,23 @@ public class FlagTest {
             }).ifThen(new TaskFunctionConditional() {
                 @Override
                 public boolean eval(TaskContext context) {
-                    int x=(int)context.variable("count").get(0);
-                    return (x!=3);
+                    int x = (int) context.variable("count").get(0);
+                    return (x != 3);
                 }
             }, traverse);
-
 
             Task mainTask = setTime("13").setWorld("0").inject(n1).executeSubTask(traverse);
             mainTask.execute(graph, new Callback<TaskResult>() {
                 @Override
                 public void on(TaskResult result) {
-                    graph.save(null);
-                   // System.out.println(graph.space().available() + " , "+ initcache);
-                    Assert.assertTrue(graph.space().available() == initcache);
                     if (result != null) {
                         result.free();
                     }
+                    graph.save(null);
+                    Assert.assertEquals(graph.space().available(), initcache);
                 }
 
             });
-
             graph.save(null);
             Assert.assertTrue(graph.space().available() == initcache);
         });
