@@ -445,43 +445,37 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         Task deepTraverseTask = setTime(time() + "").setWorld(world() + "");
         final int parentLevel = this.getLevel();
 
-        graph().save(null);
-        System.out.println("b1: "+graph().space().available());
-
         deepTraverseTask.inject(new Node[]{this});
         for (int i = 0; i < this.getLevel() - level; i++) {
             deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
             final int finalI = i;
-            graph().save(null);
-            System.out.println("cache sel: "+graph().space().available());
-
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
                 public boolean select(Node node) {
-                    return ((GaussianMixtureNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
+
+                    boolean res = ((GaussianMixtureNode) node).checkInside(finalMin, finalMax, err, threshold, parentLevel - finalI);
+
+                    return res;
                 }
             });
         }
-        deepTraverseTask.then(new Action() {
+
+        deepTraverseTask.execute(graph(), new Callback<TaskResult>() {
             @Override
-            public void eval(TaskContext context) {
+            public void on(TaskResult result) {
 
-                graph().save(null);
-                System.out.println("cache then start: "+graph().space().available());
-
-                TaskResult<Node> leaves = context.resultAsNodes();   // to check
                 Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
                 for (int i = 0; i < nbfeature; i++) {
                     covBackup.set(i, i, err[i]);
                 }
                 MultivariateNormalDistribution mvnBackup = new MultivariateNormalDistribution(null, covBackup, false);
 
-                int[] totals = new int[leaves.size()];
+                int[] totals = new int[result.size()];
                 int globalTotal = 0;
 
-                MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[leaves.size()];
-                for (int i = 0; i < leaves.size(); i++) {
-                    GaussianMixtureNode temp = ((GaussianMixtureNode) leaves.get(i));
+                MultivariateNormalDistribution[] distributions = new MultivariateNormalDistribution[result.size()];
+                for (int i = 0; i < result.size(); i++) {
+                    GaussianMixtureNode temp = ((GaussianMixtureNode) result.get(i));
                     totals[i] = temp.getTotal();
                     globalTotal += totals[i];
                     double[] avg = temp.getAvg();
@@ -494,16 +488,10 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                     }
                 }
 
-
-                context.continueTask();
-
-                graph().save(null);
-                System.out.println("cache then end: "+graph().space().available());
+                result.free();
                 callback.on(new ProbaDistribution(totals, distributions, globalTotal));
             }
         });
-
-        deepTraverseTask.execute(graph(), null);
     }
 
 
