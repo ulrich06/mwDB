@@ -452,6 +452,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         for (int i = 0; i < this.getLevel() - level; i++) {
             deepTraverseTask.traverseOrKeep(INTERNAL_SUBGAUSSIAN);
             final int finalI = i;
+            graph().save(null);
+            System.out.println("cache sel: "+graph().space().available());
+
             deepTraverseTask.select(new TaskFunctionSelect() {
                 @Override
                 public boolean select(Node node) {
@@ -462,6 +465,9 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
         deepTraverseTask.then(new Action() {
             @Override
             public void eval(TaskContext context) {
+
+                graph().save(null);
+                System.out.println("cache then start: "+graph().space().available());
 
                 TaskResult<Node> leaves = context.resultAsNodes();   // to check
                 Matrix covBackup = new Matrix(null, nbfeature, nbfeature);
@@ -487,9 +493,13 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
                         distributions[i] = mvnBackup.clone(avg); //this can be optimized later by inverting covBackup only once
                     }
                 }
-                context.continueTask();
-                callback.on(new ProbaDistribution(totals, distributions, globalTotal));
 
+
+                context.continueTask();
+
+                graph().save(null);
+                System.out.println("cache then end: "+graph().space().available());
+                callback.on(new ProbaDistribution(totals, distributions, globalTotal));
             }
         });
 
