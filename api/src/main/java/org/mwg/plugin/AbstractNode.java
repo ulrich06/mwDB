@@ -216,6 +216,7 @@ public abstract class AbstractNode implements Node {
             long relationKey = this._resolver.stringToHash(relationName, true);
             if (preciseState != null) {
 
+                /*
                 long[] previous = (long[]) preciseState.get(relationKey);
                 if (previous == null) {
                     previous = new long[1];
@@ -227,9 +228,10 @@ public abstract class AbstractNode implements Node {
                     previous = incArray;
                 }
                 preciseState.set(relationKey, Type.RELATION, previous);
+                */
 
 
-                //   preciseState.append(relationKey, Type.RELATION, relatedNode.id());
+                preciseState.append(relationKey, Type.RELATION, relatedNode.id());
             } else {
                 throw new RuntimeException(Constants.CACHE_MISS_ERROR);
             }

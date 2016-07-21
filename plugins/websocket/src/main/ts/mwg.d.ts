@@ -550,6 +550,7 @@ declare module org {
                 world(): number;
                 time(): number;
                 set(index: number, elemType: number, elem: any): void;
+                append(index: number, elemType: number, elem: any): void;
                 setFromKey(key: string, elemType: number, elem: any): void;
                 get(index: number): any;
                 getFromKey(key: string): any;
@@ -1059,8 +1060,9 @@ declare module org {
                         mark(): number;
                         unmark(): number;
                         set(p_elementIndex: number, p_elemType: number, p_unsafe_elem: any): void;
+                        append(p_elementIndex: number, elemType: number, elem: any): void;
                         setFromKey(key: string, p_elemType: number, p_unsafe_elem: any): void;
-                        private internal_set(p_elementIndex, p_elemType, p_unsafe_elem, replaceIfPresent);
+                        private internal_set(p_elementIndex, p_elemType, p_unsafe_elem, replaceIfPresent, rawRel);
                         get(p_elementIndex: number): any;
                         getFromKey(key: string): any;
                         getFromKeyWithDefault<A>(key: string, defaultValue: A): A;

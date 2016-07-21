@@ -35,7 +35,7 @@ public interface NodeState {
      * @param elemType type of the element (based on Type definition)
      * @param elem     element to be set
      */
-    //void append(long index, byte elemType, Object elem);
+    void append(long index, byte elemType, Object elem);
 
     /**
      * Set the named state element

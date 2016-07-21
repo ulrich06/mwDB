@@ -917,6 +917,27 @@ public class OffHeapStateChunk implements StateChunk, ChunkListener, OffHeapChun
     }
 
     @Override
+    public void append(long index, byte elemType, Object elem) {
+        switch (elemType) {
+            case Type.RELATION:
+                long[] previous = (long[]) get(index);
+                if (previous == null) {
+                    previous = new long[1];
+                    previous[0] = (Long) elem;
+                } else {
+                    long[] incArray = new long[previous.length + 1];
+                    System.arraycopy(previous, 0, incArray, 0, previous.length);
+                    incArray[previous.length] = (Long) elem;
+                    previous = incArray;
+                }
+                internal_set(index, elemType, previous, true);
+                break;
+            default:
+                throw new RuntimeException("Append is only implemented for relationships!");
+        }
+    }
+
+    @Override
     public void setFromKey(String key, byte elemType, Object elem) {
         set(_space.graph().resolver().stringToHash(key, true), elemType, elem);
     }

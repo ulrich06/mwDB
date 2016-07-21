@@ -21,7 +21,7 @@ import java.util.Random;
  */
 public class Benchmark4Test {
 
-   // @Test
+    // @Test
     public void test() {
 
         int nb = 1000000;
@@ -70,7 +70,7 @@ public class Benchmark4Test {
     }
 
 
-  //  @Test
+    //  @Test
     public void test3() {
         int nb = 1000000;
         HeapChunkSpace space = new HeapChunkSpace(nb, nb);

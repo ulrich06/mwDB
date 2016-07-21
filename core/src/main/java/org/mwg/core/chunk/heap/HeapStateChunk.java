@@ -230,24 +230,61 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
      * if(p_elemType == org.mwg.Type.LONG_TO_LONG_MAP){ if(!(typeof p_unsafe_elem === 'boolean')){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * if(p_elemType == org.mwg.Type.LONG_TO_LONG_ARRAY_MAP){ if(!(typeof p_unsafe_elem === 'boolean')){ throw new Error("mwDB usage error, set method called with type " + org.mwg.Type.typeName(p_elemType) + " while param object is " + p_unsafe_elem); } }
      * }
-     * this.internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
+     * this.internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true,false);
      */
     @Override
     public final void set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem) {
-        internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true);
+        internal_set(p_elementIndex, p_elemType, p_unsafe_elem, true, false);
     }
 
-    // @Override
-    //  public void append(long index, byte elemType, Object elem) {
-    //TODO
-    //  }
+    @Override
+    public void append(long p_elementIndex, byte elemType, Object elem) {
+        final InternalState internalState = state;
+        int hashIndex = (int) PrimitiveHelper.longHash(p_elementIndex, internalState._elementDataSize);
+        int m = internalState._elementHash[hashIndex];
+        Object result = null;
+        while (m >= 0) {
+            if (p_elementIndex == internalState._elementK[m] /* getKey */) {
+                result = internalState._elementV[m]; /* getValue */
+                break;
+            } else {
+                m = internalState._elementNext[m];
+            }
+        }
+        switch (elemType) {
+            case Type.RELATION:
+                long[] previous = (long[]) result;
+                if (previous == null || previous.length == 0) {
+                    previous = new long[8];
+                    previous[0] = 1;
+                    previous[1] = (Long) elem;
+                    internal_set(p_elementIndex, elemType, previous, false, true);
+                } else {
+                    int size = (int) previous[0];
+                    if (size + 1 < previous.length) {
+                        previous[0] = size + 1;
+                        previous[size + 1] = (Long) elem;
+                    } else {
+                        int newSize = previous.length * 2;
+                        long[] newRel = new long[newSize];
+                        System.arraycopy(previous, 0, newRel, 0, size + 1);
+                        newRel[0] = size + 1;
+                        newRel[size + 1] = (Long) elem;
+                        internal_set(p_elementIndex, elemType, newRel, true, true);
+                    }
+                }
+                break;
+            default:
+                throw new RuntimeException("append is only implemented for relationships");
+        }
+    }
 
     @Override
     public void setFromKey(String key, byte p_elemType, Object p_unsafe_elem) {
-        internal_set(_space.graph().resolver().stringToHash(key, true), p_elemType, p_unsafe_elem, true);
+        internal_set(_space.graph().resolver().stringToHash(key, true), p_elemType, p_unsafe_elem, true, false);
     }
 
-    private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent) {
+    private synchronized void internal_set(final long p_elementIndex, final byte p_elemType, final Object p_unsafe_elem, boolean replaceIfPresent, boolean rawRel) {
         Object param_elem = null;
         //check the param type
 
@@ -285,6 +322,18 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                         }
                         break;
                     case Type.RELATION:
+                        if (p_unsafe_elem != null) {
+                            if (!rawRel) {
+                                long[] castedParamLong = (long[]) p_unsafe_elem;
+                                long[] clonedLongArray = new long[castedParamLong.length + 1];
+                                System.arraycopy(castedParamLong, 0, clonedLongArray, 1, castedParamLong.length);
+                                clonedLongArray[0] = castedParamLong.length;
+                                param_elem = clonedLongArray;
+                            } else {
+                                param_elem = (long[]) p_unsafe_elem;
+                            }
+                        }
+                        break;
                     case Type.LONG_ARRAY:
                         if (p_unsafe_elem != null) {
                             long[] castedParamLong = (long[]) p_unsafe_elem;
@@ -414,10 +463,10 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 m = internalState._elementNext[m];
             }
         }
-
         if (result == null) {
             return null;
         }
+
         switch (internalState._elementType[m]) {
             case Type.DOUBLE_ARRAY:
                 double[] castedResultD = (double[]) result;
@@ -425,6 +474,15 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 System.arraycopy(castedResultD, 0, copyD, 0, castedResultD.length);
                 return copyD;
             case Type.RELATION:
+                long[] castedResultR = (long[]) result;
+                if (castedResultR == null || castedResultR.length < 1) {
+                    return null;
+                } else {
+                    int relSize = (int) castedResultR[0];
+                    long[] copyR = new long[relSize];
+                    System.arraycopy(castedResultR, 1, copyR, 0, relSize);
+                    return copyR;
+                }
             case Type.LONG_ARRAY:
                 long[] castedResultL = (long[]) result;
                 long[] copyL = new long[castedResultL.length];
@@ -487,13 +545,13 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         }
         switch (elemType) {
             case Type.STRING_TO_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayStringLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false, false);
                 break;
             case Type.LONG_TO_LONG_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false, false);
                 break;
             case Type.LONG_TO_LONG_ARRAY_MAP:
-                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false);
+                internal_set(p_elementIndex, elemType, new ArrayLongLongArrayMap(this, CoreConstants.MAP_INITIAL_CAPACITY, null), false, false);
                 break;
         }
         return get(p_elementIndex);
@@ -509,7 +567,15 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
         final InternalState currentState = this.state;
         for (int i = 0; i < (currentState._elementCount); i++) {
             if (currentState._elementV[i] != null) {
-                callBack.on(currentState._elementK[i], currentState._elementType[i], currentState._elementV[i]);
+                if (currentState._elementType[i] == Type.RELATION) {
+                    long[] castedRel = (long[]) currentState._elementV[i];
+                    int relSize = (int) castedRel[0];
+                    long[] shrinkedRel = new long[relSize];
+                    System.arraycopy(castedRel, 1, shrinkedRel, 0, relSize);
+                    callBack.on(currentState._elementK[i], currentState._elementType[i], shrinkedRel);
+                } else {
+                    callBack.on(currentState._elementK[i], currentState._elementType[i], currentState._elementV[i]);
+                }
             }
         }
     }
@@ -628,6 +694,16 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 toInsert = currentDoubleArr;
                                 break;
                             case Type.RELATION:
+                                if (currentLongArr == null) {
+                                    long relSize = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                                    currentLongArr = new long[(int) relSize + 1];
+                                    currentLongArr[0] = relSize;
+                                    currentSubIndex = 1;
+                                } else {
+                                    currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                                }
+                                toInsert = currentLongArr;
+                                break;
                             case Type.LONG_ARRAY:
                                 if (currentLongArr == null) {
                                     currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
@@ -636,7 +712,6 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                                 }
                                 toInsert = currentLongArr;
                                 break;
-
                             case Type.INT_ARRAY:
                                 if (currentIntArr == null) {
                                     currentIntArr = new int[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
@@ -669,7 +744,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             //insert K/V
 
                             if (isMerge) {
-                                internal_set(currentChunkElemKey, currentChunkElemType, toInsert, true); //enhance this with boolean array
+                                internal_set(currentChunkElemKey, currentChunkElemType, toInsert, true, false); //enhance this with boolean array
                             } else {
                                 int newIndex = currentElemIndex;
                                 newElementK[newIndex] = currentChunkElemKey;
@@ -714,6 +789,10 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             currentDoubleArr = new double[(int) currentSubSize];
                             break;
                         case Type.RELATION:
+                            currentLongArr = new long[(int) currentSubSize + 1];
+                            currentLongArr[0] = currentSubSize;
+                            currentSubIndex = 1;
+                            break;
                         case Type.LONG_ARRAY:
                             currentLongArr = new long[(int) currentSubSize];
                             break;
@@ -838,6 +917,16 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                     toInsert = currentDoubleArr;
                     break;
                 case Type.RELATION:
+                    if (currentLongArr == null) {
+                        int relSize = Base64.decodeToIntWithBounds(payload, previousStart, cursor);
+                        currentLongArr = new long[relSize + 1];
+                        currentLongArr[0] = relSize;
+                        currentSubIndex = 1;
+                    } else {
+                        currentLongArr[currentSubIndex] = Base64.decodeToLongWithBounds(payload, previousStart, cursor);
+                    }
+                    toInsert = currentLongArr;
+                    break;
                 case Type.LONG_ARRAY:
                     if (currentLongArr == null) {
                         currentLongArr = new long[Base64.decodeToIntWithBounds(payload, previousStart, cursor)];
@@ -879,7 +968,7 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                 //insert K/V
 
                 if (isMerge) {
-                    internal_set(currentChunkElemKey, currentChunkElemType, toInsert, true); //enhance this with boolean array
+                    internal_set(currentChunkElemKey, currentChunkElemType, toInsert, true, false); //enhance this with boolean array
                 } else {
                     newElementK[currentElemIndex] = currentChunkElemKey;
                     newElementV[currentElemIndex] = toInsert;
@@ -949,6 +1038,14 @@ public class HeapStateChunk implements HeapChunk, StateChunk, ChunkListener {
                             }
                             break;
                         case Type.RELATION:
+                            long[] castedLongArrRel = (long[]) loopValue;
+                            int relSize = (int) castedLongArrRel[0];
+                            Base64.encodeIntToBuffer(relSize, buffer);
+                            for (int j = 1; j <= relSize; j++) {
+                                buffer.write(CoreConstants.CHUNK_SUB_SUB_SEP);
+                                Base64.encodeLongToBuffer(castedLongArrRel[j], buffer);
+                            }
+                            break;
                         case Type.LONG_ARRAY:
                             long[] castedLongArr = (long[]) loopValue;
                             Base64.encodeIntToBuffer(castedLongArr.length, buffer);
