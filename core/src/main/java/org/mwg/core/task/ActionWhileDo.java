@@ -2,6 +2,7 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.plugin.Job;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,10 +50,9 @@ class ActionWhileDo implements TaskAction {
                     }
                 }
             };
-
             if (_cond.eval(context)) {
                 loopRes[0] = context.wrap(it.next());
-                context.graph().scheduler().dispatch(new Job() {
+                context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                     @Override
                     public void run() {
                         _then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);

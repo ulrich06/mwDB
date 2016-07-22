@@ -6,7 +6,7 @@ import org.mwg.plugin.Scheduler;
 public class NoopScheduler implements Scheduler {
 
     @Override
-    public void dispatch(Job job) {
+    public void dispatch(byte affinity, Job job) {
         job.run();
     }
 

@@ -6,6 +6,7 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
 import org.mwg.plugin.Job;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.Collection;
@@ -106,7 +107,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
-        addAction(new ActionFromVar(variableName,-1));
+        addAction(new ActionFromVar(variableName, -1));
         return this;
     }
 
@@ -115,7 +116,7 @@ public class CoreTask implements org.mwg.task.Task {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
-        addAction(new ActionFromVar(variableName,index));
+        addAction(new ActionFromVar(variableName, index));
         return this;
     }
 
@@ -345,7 +346,7 @@ public class CoreTask implements org.mwg.task.Task {
                 cloned.put(keys[i], parent.variable(keys[i]));
             }
             final TaskResult finalInitialResultSafe = initialResultSafe;
-            graph.scheduler().dispatch(new Job() {
+            graph.scheduler().dispatch(SchedulerAffinity.ANY_LOCAL_THREAD, new Job() {
                 @Override
                 public void run() {
                     final CoreTaskContext context = new CoreTaskContext(cloned, finalInitialResultSafe, graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);

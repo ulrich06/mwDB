@@ -8,16 +8,19 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @ignore ts
  * boing,boing,boing....
  */
 public class TrampolineScheduler implements Scheduler {
 
+    /**
+     * @native ts
+     * private queue = new org.mwg.core.scheduler.JobQueue();
+     */
     private final BlockingDeque<Job> queue = new LinkedBlockingDeque<Job>();
-    private final AtomicInteger wip = new AtomicInteger();
+    private final AtomicInteger wip = new AtomicInteger(0);
 
     @Override
-    public void dispatch(Job job) {
+    public void dispatch(final byte affinity, Job job) {
         queue.add(job);
         if (wip.getAndIncrement() == 0) {
             do {
@@ -35,6 +38,7 @@ public class TrampolineScheduler implements Scheduler {
 
     @Override
     public void stop() {
+
     }
 
 }

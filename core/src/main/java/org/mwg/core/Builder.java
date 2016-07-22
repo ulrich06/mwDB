@@ -5,6 +5,7 @@ import org.mwg.core.chunk.AtomicSpace;
 import org.mwg.core.chunk.heap.HeapChunkSpace;
 import org.mwg.core.chunk.offheap.OffHeapChunkSpace;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.core.scheduler.TrampolineScheduler;
 import org.mwg.core.task.CoreTask;
 import org.mwg.core.utility.ReadOnlyStorage;
 import org.mwg.plugin.ChunkSpace;
@@ -26,7 +27,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
         }
         Scheduler scheduler = p_scheduler;
         if (scheduler == null) {
-            scheduler = new NoopScheduler();
+            scheduler = new TrampolineScheduler();
         }
         NodeTracker nodeTracker;
         if (p_usingGC) {

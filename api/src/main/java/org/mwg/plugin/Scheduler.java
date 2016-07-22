@@ -8,9 +8,10 @@ public interface Scheduler {
     /**
      * Registers a job for execution.
      *
-     * @param job The new job to execute.
+     * @param affinity The job thread affinity
+     * @param job      The new job to execute.
      */
-    void dispatch(Job job);
+    void dispatch(byte affinity, Job job);
 
     /**
      * Starts the scheduler (i.e.: the execution of tasks).

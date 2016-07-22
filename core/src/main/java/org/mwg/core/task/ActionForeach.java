@@ -2,6 +2,8 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.plugin.Job;
+import org.mwg.plugin.Scheduler;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,8 +54,8 @@ class ActionForeach implements TaskAction {
             };
             Object nextRes = it.next();
             loopRes[0] = context.wrap(nextRes);
-            if(nextRes != null){
-                context.graph().scheduler().dispatch(new Job() {
+            if (nextRes != null) {
+                context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                     @Override
                     public void run() {
                         _subTask.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);

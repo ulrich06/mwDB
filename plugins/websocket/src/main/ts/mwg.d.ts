@@ -588,9 +588,15 @@ declare module org {
                 hashToString(key: number): string;
             }
             interface Scheduler {
-                dispatch(job: org.mwg.plugin.Job): void;
+                dispatch(affinity: number, job: org.mwg.plugin.Job): void;
                 start(): void;
                 stop(): void;
+            }
+            class SchedulerAffinity {
+                static SAME_THREAD: number;
+                static ANY_LOCAL_THREAD: number;
+                static OTHER_LOCAL_THREAD: number;
+                static ANY_REMOTE_THREAD: number;
             }
             interface Storage {
                 get(keys: org.mwg.struct.Buffer, callback: org.mwg.Callback<org.mwg.struct.Buffer>): void;
@@ -1388,8 +1394,28 @@ declare module org {
                 monitor(node: org.mwg.Node): void;
             }
             module scheduler {
+                class JobQueue {
+                    private first;
+                    private last;
+                    add(item: org.mwg.plugin.Job): void;
+                    poll(): org.mwg.plugin.Job;
+                }
+                module JobQueue {
+                    class JobQueueElem {
+                        _ptr: org.mwg.plugin.Job;
+                        _next: org.mwg.core.scheduler.JobQueue.JobQueueElem;
+                        constructor(ptr: org.mwg.plugin.Job, next: org.mwg.core.scheduler.JobQueue.JobQueueElem);
+                    }
+                }
                 class NoopScheduler implements org.mwg.plugin.Scheduler {
-                    dispatch(job: org.mwg.plugin.Job): void;
+                    dispatch(affinity: number, job: org.mwg.plugin.Job): void;
+                    start(): void;
+                    stop(): void;
+                }
+                class TrampolineScheduler implements org.mwg.plugin.Scheduler {
+                    private queue;
+                    private wip;
+                    dispatch(affinity: number, job: org.mwg.plugin.Job): void;
                     start(): void;
                     stop(): void;
                 }

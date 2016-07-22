@@ -21,7 +21,7 @@ public class ExecutorScheduler implements Scheduler {
     }
 
     @Override
-    public void dispatch(final Job job) {
+    public void dispatch(final byte affinity, final Job job) {
         service.submit(new Runnable() {
             @Override
             public void run() {
@@ -37,7 +37,7 @@ public class ExecutorScheduler implements Scheduler {
     @Override
     public void start() {
         if (_workers == -1) {
-            this.service = Executors.newWorkStealingPool();
+            this.service = Executors.newCachedThreadPool();
         } else {
             this.service = Executors.newWorkStealingPool(_workers);
         }
