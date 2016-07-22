@@ -5,10 +5,7 @@ import org.mwg.ml.common.distance.Distance;
 import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.distance.EuclideanDistance;
 import org.mwg.ml.common.distance.GaussianDistance;
-import org.mwg.plugin.AbstractNode;
-import org.mwg.plugin.Enforcer;
-import org.mwg.plugin.Job;
-import org.mwg.plugin.NodeState;
+import org.mwg.plugin.*;
 
 /**
  * Created by assaad on 29/06/16.
@@ -123,7 +120,7 @@ public class KDNode extends AbstractNode {
         Distance distance = getDistance(state);
         internalNearest(this, distance, key, hr, max_dist_sqd, 0, dim, err, nnl);
 
-        if(nnl.getBestDistance()<=err) {
+        if (nnl.getBestDistance() <= err) {
             long res = nnl.getHighest();
 
             graph().lookup(world(), time(), res, new Callback<Node>() {
@@ -132,8 +129,7 @@ public class KDNode extends AbstractNode {
                     callback.on(result);
                 }
             });
-        }
-        else{
+        } else {
             callback.on(null);
         }
     }
@@ -203,7 +199,7 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private static void internalNearest(KDNode node, final Distance distance, double[] target, HRect hr, double max_dist_sqd, int lev, int dim, double err, NearestNeighborList nnl) {
+    private static void internalNearest(KDNode node, final Distance distance, final double[] target, final HRect hr, final double max_dist_sqd, final int lev, final int dim, final double err, final NearestNeighborList nnl) {
         // 1. if kd is empty exit.
         if (node == null) {
             return;
@@ -263,10 +259,17 @@ public class KDNode extends AbstractNode {
         // (nearer-kd, target, nearer-hr, max-dist-sqd), storing the
         // results in nearest and dist-sqd
         //nnbr(nearer_kd, target, nearer_hr, max_dist_sqd, lev + 1, K, nnl);
-        internalNearest(nearer_kd, distance, target, nearer_hr, max_dist_sqd, lev + 1, dim, err, nnl);
-        if (nearer_kd != null) {
-            nearer_kd.free();
-        }
+
+        double finalMax_dist_sqd = max_dist_sqd;
+        node.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+            @Override
+            public void run() {
+                internalNearest(nearer_kd, distance, target, nearer_hr, finalMax_dist_sqd, lev + 1, dim, err, nnl);
+                if (nearer_kd != null) {
+                    nearer_kd.free();
+                }
+            }
+        });
 
 
         double dist_sqd;
@@ -278,7 +281,7 @@ public class KDNode extends AbstractNode {
         }
 
         // 9. max-dist-sqd := minimum of max-dist-sqd and dist-sqd
-        max_dist_sqd = Math.min(max_dist_sqd, dist_sqd);
+        double max_dist_sqd2 = Math.min(max_dist_sqd, dist_sqd);
 
         // 10. A nearer point could only lie in further-kd if there were some
         // part of further-hr within distance sqrt(max-dist-sqd) of
@@ -296,9 +299,9 @@ public class KDNode extends AbstractNode {
                 // 10.1.3 max-dist-sqd = dist-sqd
                 // max_dist_sqd = dist_sqd;
                 if (nnl.isCapacityReached()) {
-                    max_dist_sqd = nnl.getMaxPriority();
+                    max_dist_sqd2 = nnl.getMaxPriority();
                 } else {
-                    max_dist_sqd = Double.MAX_VALUE;
+                    max_dist_sqd2 = Double.MAX_VALUE;
                 }
             }
 
@@ -306,11 +309,22 @@ public class KDNode extends AbstractNode {
             // (further-kd, target, further-hr, max-dist_sqd),
             // storing results in temp-nearest and temp-dist-sqd
             //nnbr(further_kd, target, further_hr, max_dist_sqd, lev + 1, K, nnl);
-            internalNearest(further_kd, distance, target, further_hr, max_dist_sqd, lev + 1, dim, err, nnl);
-        }
 
-        if (further_kd != null) {
-            further_kd.free();
+            double finalMax_dist_sqd1 = max_dist_sqd2;
+            node.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+                @Override
+                public void run() {
+                    internalNearest(further_kd, distance, target, further_hr, finalMax_dist_sqd1, lev + 1, dim, err, nnl);
+
+                    if (further_kd != null) {
+                        further_kd.free();
+                    }
+                }
+            });
+        } else {
+            if (further_kd != null) {
+                further_kd.free();
+            }
         }
 
     }
@@ -345,7 +359,7 @@ public class KDNode extends AbstractNode {
         } else if (key[lev] > tk[lev]) {
             //check right
             long[] right = (long[]) state.getFromKey(INTERNAL_RIGHT);
-            if (right == null||right.length==0) {
+            if (right == null || right.length == 0) {
                 KDNode rightNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
                 rightNode.set(INTERNAL_KEY, key);
                 rightNode.add(INTERNAL_VALUE, value);
@@ -366,11 +380,15 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        if(result==null|| result.length==0|| result[0]==null){
-                            System.out.println("RES RIGHT NULL !!! "+result.length+" "+right[0]);
-                        }
-                        else {
-                            internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        if (result == null || result.length == 0 || result[0] == null) {
+                            System.out.println("RES RIGHT NULL !!! " + result.length + " " + right[0]);
+                        } else {
+                            root.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+                                @Override
+                                public void run() {
+                                    internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                                }
+                            });
                         }
                     }
                 });
@@ -400,11 +418,15 @@ public class KDNode extends AbstractNode {
                         if (node != root) {
                             node.free();
                         }
-                        if(result==null|| result.length==0|| result[0]==null){
-                            System.out.println("RES LEFT NULL !!!! "+result.length+" "+left[0]);
-                        }
-                        else {
-                            internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                        if (result == null || result.length == 0 || result[0] == null) {
+                            System.out.println("RES LEFT NULL !!!! " + result.length + " " + left[0]);
+                        } else {
+                            root.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+                                @Override
+                                public void run() {
+                                    internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                                }
+                            });
                         }
                     }
                 });
