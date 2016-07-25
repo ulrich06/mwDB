@@ -28,7 +28,7 @@
     </parent>
 
     <properties>
-        <java2typescript.plugin.version>66</java2typescript.plugin.version>
+        <java2typescript.plugin.version>67</java2typescript.plugin.version>
     </properties>
 
     <developers>

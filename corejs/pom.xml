@@ -59,7 +59,7 @@
                         </goals>
                         <configuration>
                             <name>core</name>
-                            <copyJRE>true</copyJRE>
+                            <copyJRE>false</copyJRE>
                             <moduleImports>
                                 <moduleImport>./api.ts</moduleImport>
                             </moduleImports>
