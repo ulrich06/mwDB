@@ -29,6 +29,9 @@ declare module java {
         class Long {
             static parseLong(d: any): number;
         }
+        class Integer {
+            static parseInt(d: any): number;
+        }
     }
     namespace util {
         namespace concurrent {
@@ -402,6 +405,34 @@ declare module org {
             graph(): org.mwg.Graph;
             jump<A extends org.mwg.Node>(targetTime: number, callback: org.mwg.Callback<A>): void;
         }
+        interface Query {
+            parse(flatQuery: string): org.mwg.Query;
+            add(attributeName: string, value: any): org.mwg.Query;
+            setWorld(initialWorld: number): org.mwg.Query;
+            world(): number;
+            setTime(initialTime: number): org.mwg.Query;
+            time(): number;
+            setIndexName(indexName: string): org.mwg.Query;
+            indexName(): string;
+            hash(): number;
+            attributes(): Float64Array;
+            values(): any[];
+        }
+        class Type {
+            static BOOL: number;
+            static STRING: number;
+            static LONG: number;
+            static INT: number;
+            static DOUBLE: number;
+            static DOUBLE_ARRAY: number;
+            static LONG_ARRAY: number;
+            static INT_ARRAY: number;
+            static LONG_TO_LONG_MAP: number;
+            static LONG_TO_LONG_ARRAY_MAP: number;
+            static STRING_TO_LONG_MAP: number;
+            static RELATION: number;
+            static typeName(p_type: number): string;
+        }
         module plugin {
             abstract class AbstractIterable {
                 abstract next(): any;
@@ -608,19 +639,6 @@ declare module org {
                 disconnect(callback: org.mwg.Callback<boolean>): void;
             }
         }
-        interface Query {
-            parse(flatQuery: string): org.mwg.Query;
-            add(attributeName: string, value: any): org.mwg.Query;
-            setWorld(initialWorld: number): org.mwg.Query;
-            world(): number;
-            setTime(initialTime: number): org.mwg.Query;
-            time(): number;
-            setIndexName(indexName: string): org.mwg.Query;
-            indexName(): string;
-            hash(): number;
-            attributes(): Float64Array;
-            values(): any[];
-        }
         module struct {
             interface Buffer {
                 write(b: number): void;
@@ -701,6 +719,8 @@ declare module org {
                 static repeatPar(repetition: string, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static print(name: string): org.mwg.task.Task;
                 static setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
+                static whileDo(condition: org.mwg.task.TaskFunctionConditional, task: org.mwg.task.Task): org.mwg.task.Task;
+                static doWhile(task: org.mwg.task.Task, condition: org.mwg.task.TaskFunctionConditional): org.mwg.task.Task;
                 static selectWhere(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 static foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
@@ -748,6 +768,7 @@ declare module org {
                 executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
+                doWhile(then: org.mwg.task.Task, conditional: org.mwg.task.TaskFunctionConditional): org.mwg.task.Task;
                 then(action: org.mwg.task.Action): org.mwg.task.Task;
                 save(): org.mwg.task.Task;
                 newNode(): org.mwg.task.Task;
@@ -831,21 +852,6 @@ declare module org {
                 next(): A;
             }
         }
-        class Type {
-            static BOOL: number;
-            static STRING: number;
-            static LONG: number;
-            static INT: number;
-            static DOUBLE: number;
-            static DOUBLE_ARRAY: number;
-            static LONG_ARRAY: number;
-            static INT_ARRAY: number;
-            static LONG_TO_LONG_MAP: number;
-            static LONG_TO_LONG_ARRAY_MAP: number;
-            static STRING_TO_LONG_MAP: number;
-            static RELATION: number;
-            static typeName(p_type: number): string;
-        }
     }
 }
 declare module org {
@@ -867,6 +873,148 @@ declare module org {
                 newTask(): org.mwg.task.Task;
                 private createSpace(usingOffHeapMemory, memorySize, autoSaveSize);
             }
+            class CoreConstants extends org.mwg.Constants {
+                static CHUNK_SEP: number;
+                static CHUNK_SUB_SEP: number;
+                static CHUNK_SUB_SUB_SEP: number;
+                static CHUNK_SUB_SUB_SUB_SEP: number;
+                static DIRTY_BIT: number;
+                static PREVIOUS_RESOLVED_WORLD_INDEX: number;
+                static PREVIOUS_RESOLVED_SUPER_TIME_INDEX: number;
+                static PREVIOUS_RESOLVED_TIME_INDEX: number;
+                static PREVIOUS_RESOLVED_WORLD_MAGIC: number;
+                static PREVIOUS_RESOLVED_SUPER_TIME_MAGIC: number;
+                static PREVIOUS_RESOLVED_TIME_MAGIC: number;
+                static PREFIX_TO_SAVE_SIZE: number;
+                static NULL_KEY: Float64Array;
+                static GLOBAL_UNIVERSE_KEY: Float64Array;
+                static GLOBAL_DICTIONARY_KEY: Float64Array;
+                static GLOBAL_INDEX_KEY: Float64Array;
+                static INDEX_ATTRIBUTE: string;
+                static MAP_INITIAL_CAPACITY: number;
+                static MAP_LOAD_FACTOR: number;
+                static DISCONNECTED_ERROR: string;
+                static OFFHEAP_NULL_PTR: number;
+                static OFFHEAP_CHUNK_INDEX_WORLD: number;
+                static OFFHEAP_CHUNK_INDEX_TIME: number;
+                static OFFHEAP_CHUNK_INDEX_ID: number;
+                static OFFHEAP_CHUNK_INDEX_TYPE: number;
+                static OFFHEAP_CHUNK_INDEX_FLAGS: number;
+                static OFFHEAP_CHUNK_INDEX_MARKS: number;
+                static SCALE_1: number;
+                static SCALE_2: number;
+                static SCALE_3: number;
+                static SCALE_4: number;
+                static DEAD_NODE_ERROR: string;
+                static BOOL_TRUE: number;
+                static BOOL_FALSE: number;
+            }
+            class CoreGraph implements org.mwg.Graph {
+                private _storage;
+                private _space;
+                private _scheduler;
+                private _resolver;
+                private _nodeTypes;
+                private _taskActions;
+                offHeapBuffer: boolean;
+                private _prefix;
+                private _nodeKeyCalculator;
+                private _worldKeyCalculator;
+                private _isConnected;
+                private _lock;
+                private _plugins;
+                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_plugins: org.mwg.plugin.Plugin[]);
+                fork(world: number): number;
+                newNode(world: number, time: number): org.mwg.Node;
+                newTypedNode(world: number, time: number, nodeType: string): org.mwg.Node;
+                cloneNode(origin: org.mwg.Node): org.mwg.Node;
+                factoryByCode(code: number): org.mwg.plugin.NodeFactory;
+                taskAction(taskActionName: string): org.mwg.task.TaskActionFactory;
+                lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
+                save(callback: org.mwg.Callback<boolean>): void;
+                connect(callback: org.mwg.Callback<boolean>): void;
+                disconnect(callback: org.mwg.Callback<any>): void;
+                newBuffer(): org.mwg.struct.Buffer;
+                newQuery(): org.mwg.Query;
+                private saveDirtyList(dirtyIterator, callback);
+                index(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
+                unindex(indexName: string, nodeToUnindex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
+                indexes(world: number, time: number, callback: org.mwg.Callback<string[]>): void;
+                find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
+                getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
+                private getIndexOrCreate(world, time, indexName, callback, createIfNull);
+                newCounter(expectedCountCalls: number): org.mwg.DeferCounter;
+                newSyncCounter(expectedCountCalls: number): org.mwg.DeferCounterSync;
+                resolver(): org.mwg.plugin.Resolver;
+                scheduler(): org.mwg.plugin.Scheduler;
+                space(): org.mwg.plugin.ChunkSpace;
+                storage(): org.mwg.plugin.Storage;
+                freeNodes(nodes: org.mwg.Node[]): void;
+            }
+            class CoreNode extends org.mwg.plugin.AbstractNode {
+                constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
+            }
+            class CoreQuery implements org.mwg.Query {
+                private _resolver;
+                private capacity;
+                private _attributes;
+                private _values;
+                private size;
+                private _hash;
+                private _world;
+                private _time;
+                private _indexName;
+                constructor(p_resolver: org.mwg.plugin.Resolver);
+                parse(flatQuery: string): org.mwg.Query;
+                add(attributeName: string, value: any): org.mwg.Query;
+                setWorld(initialWorld: number): org.mwg.Query;
+                world(): number;
+                setTime(initialTime: number): org.mwg.Query;
+                time(): number;
+                setIndexName(indexName: string): org.mwg.Query;
+                indexName(): string;
+                hash(): number;
+                attributes(): Float64Array;
+                values(): any[];
+                private internal_add(att, val);
+                private compute();
+            }
+            class MWGResolver implements org.mwg.plugin.Resolver {
+                private _storage;
+                private _space;
+                private _tracker;
+                private _scheduler;
+                private _graph;
+                private dictionary;
+                private static KEY_SIZE;
+                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_tracker: org.mwg.core.NodeTracker, p_scheduler: org.mwg.plugin.Scheduler);
+                init(graph: org.mwg.Graph): void;
+                typeName(node: org.mwg.Node): string;
+                typeCode(node: org.mwg.Node): number;
+                markNodeAndGetType(node: org.mwg.Node): number;
+                initNode(node: org.mwg.Node, codeType: number): void;
+                initWorld(parentWorld: number, childWorld: number): void;
+                freeNode(node: org.mwg.Node): void;
+                lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
+                private resolve_world(globalWorldOrder, nodeWorldOrder, timeToResolve, originWorld);
+                private getOrLoadAndMark(type, world, time, id, callback);
+                private getOrLoadAndMarkAll(types, keys, callback);
+                newState(node: org.mwg.Node, world: number, time: number): org.mwg.plugin.NodeState;
+                resolveState(node: org.mwg.Node, allowDephasing: boolean): org.mwg.plugin.NodeState;
+                resolveTimepoints(node: org.mwg.Node, beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
+                private resolveTimepointsFromWorlds(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds, collectedWorldsSize, callback);
+                private resolveTimepointsFromSuperTimes(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds, collectedSuperTimes, collectedSize, callback);
+                stringToHash(name: string, insertIfNotExists: boolean): number;
+                hashToString(key: number): string;
+            }
+            interface NodeTracker {
+                monitor(node: org.mwg.Node): void;
+            }
+            class NoopNodeTracker implements org.mwg.core.NodeTracker {
+                monitor(node: org.mwg.Node): void;
+            }
             module chunk {
                 interface ChunkListener {
                     declareDirty(chunk: org.mwg.plugin.Chunk): void;
@@ -874,6 +1022,36 @@ declare module org {
                 }
                 interface GenChunk extends org.mwg.plugin.Chunk {
                     newKey(): number;
+                }
+                interface LongTree {
+                    insert(key: number): void;
+                    unsafe_insert(key: number): void;
+                    previousOrEqual(key: number): number;
+                    clearAt(max: number): void;
+                    range(startKey: number, endKey: number, maxElements: number, walker: org.mwg.core.chunk.TreeWalker): void;
+                    magic(): number;
+                    size(): number;
+                }
+                interface Stack {
+                    enqueue(index: number): boolean;
+                    dequeueTail(): number;
+                    dequeue(index: number): boolean;
+                    free(): void;
+                    size(): number;
+                }
+                interface StateChunk extends org.mwg.plugin.Chunk, org.mwg.plugin.NodeState {
+                }
+                interface TimeTreeChunk extends org.mwg.core.chunk.LongTree, org.mwg.plugin.Chunk {
+                }
+                interface TreeWalker {
+                    (t: number): void;
+                }
+                interface WorldOrderChunk extends org.mwg.plugin.Chunk, org.mwg.struct.LongLongMap {
+                    magic(): number;
+                    lock(): void;
+                    unlock(): void;
+                    extra(): number;
+                    setExtra(extraValue: number): void;
                 }
                 module heap {
                     class ArrayLongLongArrayMap implements org.mwg.struct.LongLongArrayMap {
@@ -1218,180 +1396,8 @@ declare module org {
                         }
                     }
                 }
-                interface LongTree {
-                    insert(key: number): void;
-                    unsafe_insert(key: number): void;
-                    previousOrEqual(key: number): number;
-                    clearAt(max: number): void;
-                    range(startKey: number, endKey: number, maxElements: number, walker: org.mwg.core.chunk.TreeWalker): void;
-                    magic(): number;
-                    size(): number;
-                }
                 module offheap {
                 }
-                interface Stack {
-                    enqueue(index: number): boolean;
-                    dequeueTail(): number;
-                    dequeue(index: number): boolean;
-                    free(): void;
-                    size(): number;
-                }
-                interface StateChunk extends org.mwg.plugin.Chunk, org.mwg.plugin.NodeState {
-                }
-                interface TimeTreeChunk extends org.mwg.core.chunk.LongTree, org.mwg.plugin.Chunk {
-                }
-                interface TreeWalker {
-                    (t: number): void;
-                }
-                interface WorldOrderChunk extends org.mwg.plugin.Chunk, org.mwg.struct.LongLongMap {
-                    magic(): number;
-                    lock(): void;
-                    unlock(): void;
-                    extra(): number;
-                    setExtra(extraValue: number): void;
-                }
-            }
-            class CoreConstants extends org.mwg.Constants {
-                static CHUNK_SEP: number;
-                static CHUNK_SUB_SEP: number;
-                static CHUNK_SUB_SUB_SEP: number;
-                static CHUNK_SUB_SUB_SUB_SEP: number;
-                static DIRTY_BIT: number;
-                static PREVIOUS_RESOLVED_WORLD_INDEX: number;
-                static PREVIOUS_RESOLVED_SUPER_TIME_INDEX: number;
-                static PREVIOUS_RESOLVED_TIME_INDEX: number;
-                static PREVIOUS_RESOLVED_WORLD_MAGIC: number;
-                static PREVIOUS_RESOLVED_SUPER_TIME_MAGIC: number;
-                static PREVIOUS_RESOLVED_TIME_MAGIC: number;
-                static PREFIX_TO_SAVE_SIZE: number;
-                static NULL_KEY: Float64Array;
-                static GLOBAL_UNIVERSE_KEY: Float64Array;
-                static GLOBAL_DICTIONARY_KEY: Float64Array;
-                static GLOBAL_INDEX_KEY: Float64Array;
-                static INDEX_ATTRIBUTE: string;
-                static MAP_INITIAL_CAPACITY: number;
-                static MAP_LOAD_FACTOR: number;
-                static DISCONNECTED_ERROR: string;
-                static OFFHEAP_NULL_PTR: number;
-                static OFFHEAP_CHUNK_INDEX_WORLD: number;
-                static OFFHEAP_CHUNK_INDEX_TIME: number;
-                static OFFHEAP_CHUNK_INDEX_ID: number;
-                static OFFHEAP_CHUNK_INDEX_TYPE: number;
-                static OFFHEAP_CHUNK_INDEX_FLAGS: number;
-                static OFFHEAP_CHUNK_INDEX_MARKS: number;
-                static SCALE_1: number;
-                static SCALE_2: number;
-                static SCALE_3: number;
-                static SCALE_4: number;
-                static DEAD_NODE_ERROR: string;
-                static BOOL_TRUE: number;
-                static BOOL_FALSE: number;
-            }
-            class CoreGraph implements org.mwg.Graph {
-                private _storage;
-                private _space;
-                private _scheduler;
-                private _resolver;
-                private _nodeTypes;
-                private _taskActions;
-                offHeapBuffer: boolean;
-                private _prefix;
-                private _nodeKeyCalculator;
-                private _worldKeyCalculator;
-                private _isConnected;
-                private _lock;
-                private _plugins;
-                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_scheduler: org.mwg.plugin.Scheduler, p_resolver: org.mwg.plugin.Resolver, p_plugins: org.mwg.plugin.Plugin[]);
-                fork(world: number): number;
-                newNode(world: number, time: number): org.mwg.Node;
-                newTypedNode(world: number, time: number, nodeType: string): org.mwg.Node;
-                cloneNode(origin: org.mwg.Node): org.mwg.Node;
-                factoryByCode(code: number): org.mwg.plugin.NodeFactory;
-                taskAction(taskActionName: string): org.mwg.task.TaskActionFactory;
-                lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
-                save(callback: org.mwg.Callback<boolean>): void;
-                connect(callback: org.mwg.Callback<boolean>): void;
-                disconnect(callback: org.mwg.Callback<any>): void;
-                newBuffer(): org.mwg.struct.Buffer;
-                newQuery(): org.mwg.Query;
-                private saveDirtyList(dirtyIterator, callback);
-                index(indexName: string, toIndexNode: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
-                unindex(indexName: string, nodeToUnindex: org.mwg.Node, flatKeyAttributes: string, callback: org.mwg.Callback<boolean>): void;
-                indexes(world: number, time: number, callback: org.mwg.Callback<string[]>): void;
-                find(world: number, time: number, indexName: string, query: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                findByQuery(query: org.mwg.Query, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                findAll(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node[]>): void;
-                getIndexNode(world: number, time: number, indexName: string, callback: org.mwg.Callback<org.mwg.Node>): void;
-                private getIndexOrCreate(world, time, indexName, callback, createIfNull);
-                newCounter(expectedCountCalls: number): org.mwg.DeferCounter;
-                newSyncCounter(expectedCountCalls: number): org.mwg.DeferCounterSync;
-                resolver(): org.mwg.plugin.Resolver;
-                scheduler(): org.mwg.plugin.Scheduler;
-                space(): org.mwg.plugin.ChunkSpace;
-                storage(): org.mwg.plugin.Storage;
-                freeNodes(nodes: org.mwg.Node[]): void;
-            }
-            class CoreNode extends org.mwg.plugin.AbstractNode {
-                constructor(p_world: number, p_time: number, p_id: number, p_graph: org.mwg.Graph, currentResolution: Float64Array);
-            }
-            class CoreQuery implements org.mwg.Query {
-                private _resolver;
-                private capacity;
-                private _attributes;
-                private _values;
-                private size;
-                private _hash;
-                private _world;
-                private _time;
-                private _indexName;
-                constructor(p_resolver: org.mwg.plugin.Resolver);
-                parse(flatQuery: string): org.mwg.Query;
-                add(attributeName: string, value: any): org.mwg.Query;
-                setWorld(initialWorld: number): org.mwg.Query;
-                world(): number;
-                setTime(initialTime: number): org.mwg.Query;
-                time(): number;
-                setIndexName(indexName: string): org.mwg.Query;
-                indexName(): string;
-                hash(): number;
-                attributes(): Float64Array;
-                values(): any[];
-                private internal_add(att, val);
-                private compute();
-            }
-            class MWGResolver implements org.mwg.plugin.Resolver {
-                private _storage;
-                private _space;
-                private _tracker;
-                private _scheduler;
-                private _graph;
-                private dictionary;
-                private static KEY_SIZE;
-                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_tracker: org.mwg.core.NodeTracker, p_scheduler: org.mwg.plugin.Scheduler);
-                init(graph: org.mwg.Graph): void;
-                typeName(node: org.mwg.Node): string;
-                typeCode(node: org.mwg.Node): number;
-                markNodeAndGetType(node: org.mwg.Node): number;
-                initNode(node: org.mwg.Node, codeType: number): void;
-                initWorld(parentWorld: number, childWorld: number): void;
-                freeNode(node: org.mwg.Node): void;
-                lookup<A extends org.mwg.Node>(world: number, time: number, id: number, callback: org.mwg.Callback<A>): void;
-                private resolve_world(globalWorldOrder, nodeWorldOrder, timeToResolve, originWorld);
-                private getOrLoadAndMark(type, world, time, id, callback);
-                private getOrLoadAndMarkAll(types, keys, callback);
-                newState(node: org.mwg.Node, world: number, time: number): org.mwg.plugin.NodeState;
-                resolveState(node: org.mwg.Node, allowDephasing: boolean): org.mwg.plugin.NodeState;
-                resolveTimepoints(node: org.mwg.Node, beginningOfSearch: number, endOfSearch: number, callback: org.mwg.Callback<Float64Array>): void;
-                private resolveTimepointsFromWorlds(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds, collectedWorldsSize, callback);
-                private resolveTimepointsFromSuperTimes(globalWorldOrder, objectWorldOrder, node, beginningOfSearch, endOfSearch, collectedWorlds, collectedSuperTimes, collectedSize, callback);
-                stringToHash(name: string, insertIfNotExists: boolean): number;
-                hashToString(key: number): string;
-            }
-            interface NodeTracker {
-                monitor(node: org.mwg.Node): void;
-            }
-            class NoopNodeTracker implements org.mwg.core.NodeTracker {
-                monitor(node: org.mwg.Node): void;
             }
             module scheduler {
                 class JobQueue {
@@ -1433,6 +1439,12 @@ declare module org {
                     constructor(p_name: string);
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
+                }
+                class ActionDoWhile implements org.mwg.task.TaskAction {
+                    private _cond;
+                    private _then;
+                    constructor(p_then: org.mwg.task.Task, p_cond: org.mwg.task.TaskFunctionConditional);
+                    eval(context: org.mwg.task.TaskContext): void;
                 }
                 class ActionForeach implements org.mwg.task.TaskAction {
                     private _subTask;
@@ -1706,6 +1718,7 @@ declare module org {
                     executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                     whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
+                    doWhile(then: org.mwg.task.Task, cond: org.mwg.task.TaskFunctionConditional): org.mwg.task.Task;
                     then(p_action: org.mwg.task.Action): org.mwg.task.Task;
                     foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
@@ -1793,6 +1806,10 @@ declare module org {
                     constructor(p_backend: any[]);
                     next(): A;
                 }
+                class TaskHelper {
+                    static flatNodes(toFLat: any, strict: boolean): org.mwg.Node[];
+                    static parseInt(s: string): number;
+                }
                 module math {
                     class CoreMathExpressionEngine implements org.mwg.core.task.math.MathExpressionEngine {
                         static decimalSeparator: string;
@@ -1872,10 +1889,6 @@ declare module org {
                     interface MathToken {
                         type(): number;
                     }
-                }
-                class TaskHelper {
-                    static flatNodes(toFLat: any, strict: boolean): org.mwg.Node[];
-                    static parseInt(s: string): number;
                 }
             }
             module utility {

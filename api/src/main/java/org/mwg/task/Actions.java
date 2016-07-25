@@ -49,7 +49,7 @@ public class Actions {
     }
 
     public static Task fromVarAt(String variableName, int index) {
-        return newTask().fromVarAt(variableName,index);
+        return newTask().fromVarAt(variableName, index);
     }
 
     public static Task fromIndexAll(String indexName) {
@@ -128,10 +128,18 @@ public class Actions {
         return newTask().setProperty(propertyName, propertyType, variableNameToSet);
     }
 
+    public static Task whileDo(TaskFunctionConditional condition, Task task) {
+        return newTask().whileDo(condition, task);
+    }
+
+    public static Task doWhile(Task task, TaskFunctionConditional condition) {
+        return newTask().doWhile(task, condition);
+    }
+
     public static Task selectWhere(Task subTask) {
         return newTask().selectWhere(subTask);
     }
-    
+
     public static Task foreach(Task subTask) {
         return newTask().foreach(subTask);
     }
