@@ -91,7 +91,7 @@ class CoreTaskResult<A> implements TaskResult<A> {
                 _size = 1;
                 if (toWrap instanceof AbstractNode) {
                     Node toWrapNode = (Node) toWrap;
-                    if(protect){
+                    if (protect) {
                         _backend[0] = toWrapNode.graph().cloneNode(toWrapNode);
                     } else {
                         _backend[0] = toWrapNode;
@@ -180,6 +180,27 @@ class CoreTaskResult<A> implements TaskResult<A> {
             _backend = extendedBackend;
             _capacity = newCapacity;
         }
+    }
+
+    @Override
+    public String toString() {
+        return export(true);
+    }
+
+    private String export(boolean withContent) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (int i = 0; i < _size; i++) {
+            if (i != 0) {
+                builder.append(",");
+            }
+            Object loop = _backend[i];
+            if (loop != null) {
+                builder.append(loop.toString());
+            }
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

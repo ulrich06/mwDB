@@ -45,20 +45,28 @@ public interface Task {
      * Retrieves a stored array and stack the element at the specified index for next sub tasks.
      *
      * @param variableName identifying a previous array
-     * @param index the index element in the array
-     *
+     * @param index        the index element in the array
      * @return this task to chain actions (fluent API)
      */
     Task fromVarAt(String variableName, int index);
 
     /**
-     * Initializes a named variable into the task context.
+     * Initializes a named variable into the task context with a global scope.
      *
      * @param variableName the name of the variable
      * @param inputValue   the value of the variable
      * @return this task to chain actions (fluent API)
      */
-    Task setVar(String variableName, Object inputValue);
+    Task setGlobalVar(String variableName, Object inputValue);
+
+    /**
+     * Initializes a named variable into the task context with a scope local (override global with same name).
+     *
+     * @param variableName the name of the variable
+     * @param inputValue   the value of the variable
+     * @return this task to chain actions (fluent API)
+     */
+    Task setLocalVar(String variableName, Object inputValue);
 
     /**
      * Method to initialise a task with any object

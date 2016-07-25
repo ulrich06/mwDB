@@ -68,8 +68,12 @@ public class Actions {
         return newTask().asVar(variableName);
     }
 
-    public static Task setVar(String variableName, Object inputValue) {
-        return newTask().setVar(variableName, inputValue);
+    public static Task setLocalVar(String variableName, Object inputValue) {
+        return newTask().setLocalVar(variableName, inputValue);
+    }
+
+    public static Task setGlobalVar(String variableName, Object inputValue) {
+        return newTask().setLocalVar(variableName, inputValue);
     }
 
     public static Task map(TaskFunctionMap mapFunction) {

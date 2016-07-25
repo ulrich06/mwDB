@@ -114,16 +114,16 @@ public class DFSTest {
                                     context.continueWith(nextStep);
                                 }
                             }).ifThen(new TaskFunctionConditional() {
-                        @Override
-                        public boolean eval(TaskContext context) {
-                            return context.result().size() > 0;
-                        }
-                    }, dfs).then(new Action() {
-                        @Override
-                        public void eval(TaskContext context) {
-                            context.continueTask();
-                        }
-                    })).fromVar("nnl");
+                                @Override
+                                public boolean eval(TaskContext context) {
+                                    return context.result().size() > 0;
+                                }
+                            }, dfs).then(new Action() {
+                                @Override
+                                public void eval(TaskContext context) {
+                                    context.continueTask();
+                                }
+                            })).fromVar("nnl");
 
                     TaskResult initialResult = newTask().emptyResult();
                     initialResult.add(n1);
