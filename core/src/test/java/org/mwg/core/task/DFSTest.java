@@ -72,7 +72,7 @@ public class DFSTest {
     }
 
 
-   // @Test
+    @Test
     public void traverse() {
         baseGrap(new Callback<Node>() {
             @Override
