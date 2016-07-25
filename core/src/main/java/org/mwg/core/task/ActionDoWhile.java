@@ -7,23 +7,21 @@ import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ActionWhileDo implements TaskAction {
+public class ActionDoWhile implements TaskAction {
 
     private final TaskFunctionConditional _cond;
 
     private final Task _then;
 
-    ActionWhileDo(final TaskFunctionConditional p_cond, final Task p_then) {
+    ActionDoWhile(final Task p_then, final TaskFunctionConditional p_cond) {
         _cond = p_cond;
         _then = p_then;
     }
 
     @Override
     public void eval(TaskContext context) {
-        final ActionWhileDo selfPointer = this;
-
+        final ActionDoWhile selfPointer = this;
         final TaskResult previousResult = context.result();
-
         if (previousResult == null) {
             context.continueTask();
         } else {
@@ -52,18 +50,14 @@ class ActionWhileDo implements TaskAction {
                     }
                 }
             };
-            if (_cond.eval(context)) {
-                loopRes[0] = context.wrap(it.next());
-                context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
-                    @Override
-                    public void run() {
-                        _then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
-                    }
-                });
-            } else {
-                context.continueWith(finalResult);
-            }
+
+            loopRes[0] = context.wrap(it.next());
+            context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+                @Override
+                public void run() {
+                    _then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                }
+            });
         }
     }
-
 }

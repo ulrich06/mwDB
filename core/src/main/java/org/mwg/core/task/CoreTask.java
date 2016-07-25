@@ -246,9 +246,15 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public final org.mwg.task.Task whileDo(TaskFunctionConditional cond, org.mwg.task.Task then) {
-        //addAction(new ActionWhileDo(cond, then));
-        //return this;
-        throw new RuntimeException("Not implemented yet");
+        addAction(new ActionWhileDo(cond, then));
+        return this;
+        //throw new RuntimeException("Not implemented yet");
+    }
+
+    @Override
+    public final org.mwg.task.Task doWhile(Task then, TaskFunctionConditional cond){
+        addAction(new ActionDoWhile(then,cond));
+        return this;
     }
 
     @Override

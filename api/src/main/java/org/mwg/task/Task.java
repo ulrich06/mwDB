@@ -235,6 +235,8 @@ public interface Task {
 
     Task whileDo(TaskFunctionConditional cond, Task then);
 
+    Task doWhile(Task then, TaskFunctionConditional conditional);
+
     Task then(Action action);
 
     Task save();
