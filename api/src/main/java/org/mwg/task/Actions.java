@@ -128,14 +128,6 @@ public class Actions {
         return newTask().setProperty(propertyName, propertyType, variableNameToSet);
     }
 
-    public static Task whileDo(TaskFunctionConditional condition, Task task) {
-        return newTask().whileDo(condition, task);
-    }
-
-    public static Task doWhile(Task task, TaskFunctionConditional condition) {
-        return newTask().doWhile(task, condition);
-    }
-
     public static Task selectWhere(Task subTask) {
         return newTask().selectWhere(subTask);
     }

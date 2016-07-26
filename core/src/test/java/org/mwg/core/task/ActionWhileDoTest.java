@@ -16,7 +16,7 @@ public class ActionWhileDoTest extends AbstractActionTest {
             @Override
             public void on(Node root) {
 
-                Task whiletask = newTask().inject(root).asVar("parent").whileDo(new TaskFunctionConditional() {
+                Task whiletask = newTask().inject(root).asGlobalVar("parent").whileDo(new TaskFunctionConditional() {
                     @Override
                     public boolean eval(TaskContext context) {
                         //System.out.println("condition");

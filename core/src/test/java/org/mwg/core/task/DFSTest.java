@@ -131,7 +131,7 @@ public class DFSTest {
                     dfs.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
                         @Override
                         public void on(TaskResult result) {
-                          //  System.out.println(result);
+                            System.out.println(result);
                         }
                     });
 
