@@ -1,10 +1,10 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 
-class ActionSave implements TaskAction {
+class ActionSave extends AbstractTaskAction {
 
     @Override
     public void eval(final TaskContext context) {

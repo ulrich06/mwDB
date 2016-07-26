@@ -23,7 +23,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
         final long[] id = new long[1];
         newNode()
-                .inject(relatedNode).asVar("x")
+                .inject(relatedNode).asGlobalVar("x")
                 .add("friend", "x")
                 .then(new Action() {
                     @Override
@@ -33,13 +33,15 @@ public class ActionAddTest extends AbstractActionTest {
                         Assert.assertEquals(1, ((long[]) node.get("friend")).length);
                         id[0] = node.id();
                     }
-                }).execute(graph, null);
-
-
-        graph.lookup(0, 0, id[0], new Callback<Node>() {
+                }).execute(graph, new Callback<TaskResult>() {
             @Override
-            public void on(Node result) {
-                Assert.assertEquals(1, ((long[]) result.get("friend")).length);
+            public void on(TaskResult result) {
+                graph.lookup(0, 0, id[0], new Callback<Node>() {
+                    @Override
+                    public void on(Node result) {
+                        Assert.assertEquals(1, ((long[]) result.get("friend")).length);
+                    }
+                });
             }
         });
     }
@@ -49,7 +51,7 @@ public class ActionAddTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] ids = new long[5];
-        inject(relatedNode).asVar("x")
+        inject(relatedNode).asGlobalVar("x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -96,7 +98,7 @@ public class ActionAddTest extends AbstractActionTest {
             public void eval(TaskContext context) {
                 context.continueWith(null);
             }
-        }).inject(relatedNode).asVar("x")
+        }).inject(relatedNode).asGlobalVar("x")
                 .add("friend", "x")
                 .then(new Action() {
                     @Override

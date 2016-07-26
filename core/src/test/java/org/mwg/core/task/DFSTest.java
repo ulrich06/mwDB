@@ -81,9 +81,9 @@ public class DFSTest {
                 if (n1 != null) {
                     //DO BFS from n1
                     Task dfs = newTask();
-                    dfs.foreach(asVar("parent")
-                            .traverse("left").asVar("left")
-                            .fromVar("parent").traverse("right").asVar("right")
+                    dfs.foreach(asLocalVar("parent")
+                            .traverse("left").asLocalVar("left")
+                            .fromVar("parent").traverse("right").asLocalVar("right")
                             .then(new Action() {
                                 @Override
                                 public void eval(TaskContext context) {
@@ -108,8 +108,8 @@ public class DFSTest {
                                         nextStep.add(left.graph().cloneNode(left));
                                     }
                                     if (left != null) {
-                                        context.addToVariable("nnl", context.wrap(left.id()));
-                                        context.addToVariable("nnld", context.wrap(left.id() / 2));
+                                        context.addToGlobalVariable("nnl", context.wrap(left.id()));
+                                        context.addToGlobalVariable("nnld", context.wrap(left.id() / 2));
                                     }
                                     context.continueWith(nextStep);
                                 }
@@ -128,10 +128,10 @@ public class DFSTest {
                     TaskResult initialResult = newTask().emptyResult();
                     initialResult.add(n1);
 
-                    dfs.executeWith(n1.graph(), null, initialResult, true, new Callback<TaskResult>() {
+                    dfs.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
                         @Override
                         public void on(TaskResult result) {
-                            System.out.println(result);
+                          //  System.out.println(result);
                         }
                     });
 

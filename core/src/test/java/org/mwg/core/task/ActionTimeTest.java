@@ -13,7 +13,7 @@ public class ActionTimeTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        inject(10).asVar("time").setTime("{{time}}")
+        inject(10).asGlobalVar("time").setTime("{{time}}")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

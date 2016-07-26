@@ -3,22 +3,18 @@ package org.mwg.core.task;
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
-import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-class ActionTraverse implements TaskAction {
+class ActionTraverse extends AbstractTaskAction {
 
     private final String _name;
 
     ActionTraverse(final String p_name) {
+        super();
         this._name = p_name;
     }
 
@@ -33,7 +29,7 @@ class ActionTraverse implements TaskAction {
             for (int i = 0; i < previousSize; i++) {
                 final Object loop = previousResult.get(i);
                 if (loop instanceof AbstractNode) {
-                    Node casted = (Node) loop;
+                    final Node casted = (Node) loop;
                     casted.rel(flatName, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
@@ -42,11 +38,11 @@ class ActionTraverse implements TaskAction {
                                     finalResult.add(result[j]);
                                 }
                             }
+                            casted.free();
                             defer.count();
                         }
                     });
                 } else {
-                    //TODO add closable management
                     finalResult.add(loop);
                     defer.count();
                 }
@@ -54,6 +50,8 @@ class ActionTraverse implements TaskAction {
             defer.then(new Job() {
                 @Override
                 public void run() {
+                    //optimization to avoid agin iteration on the previous result set
+                    previousResult.clear();
                     context.continueWith(finalResult);
                 }
             });

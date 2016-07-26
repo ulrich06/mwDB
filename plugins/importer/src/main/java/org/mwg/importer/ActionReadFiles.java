@@ -1,13 +1,13 @@
 package org.mwg.importer;
 
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
 import java.io.File;
 import java.net.URL;
 
-class ActionReadFiles implements TaskAction {
+class ActionReadFiles extends AbstractTaskAction {
 
     private final String _pathOrTemplate;
 
@@ -16,7 +16,7 @@ class ActionReadFiles implements TaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final TaskResult next = context.wrap(null);
         final String path = context.template(_pathOrTemplate);
         if (path == null) {

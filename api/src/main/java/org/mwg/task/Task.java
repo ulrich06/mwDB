@@ -25,12 +25,20 @@ public interface Task {
     Task setTime(String template);
 
     /**
-     * Stores the current task result into a named variable
+     * Stores the current task result into a named variable with a global scope
      *
      * @param variableName identifier of this result
      * @return this task to chain actions (fluent API)
      */
-    Task asVar(String variableName);
+    Task asGlobalVar(String variableName);
+
+    /**
+     * Stores the current task result into a named variable with a local scope
+     *
+     * @param variableName identifier of this result
+     * @return this task to chain actions (fluent API)
+     */
+    Task asLocalVar(String variableName);
 
     /**
      * Retrieves a stored variable and stack it for next sub tasks.
@@ -40,7 +48,6 @@ public interface Task {
      */
     Task fromVar(String variableName);
 
-
     /**
      * Retrieves a stored array and stack the element at the specified index for next sub tasks.
      *
@@ -49,24 +56,6 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task fromVarAt(String variableName, int index);
-
-    /**
-     * Initializes a named variable into the task context with a global scope.
-     *
-     * @param variableName the name of the variable
-     * @param inputValue   the value of the variable
-     * @return this task to chain actions (fluent API)
-     */
-    Task setGlobalVar(String variableName, Object inputValue);
-
-    /**
-     * Initializes a named variable into the task context with a scope local (override global with same name).
-     *
-     * @param variableName the name of the variable
-     * @param inputValue   the value of the variable
-     * @return this task to chain actions (fluent API)
-     */
-    Task setLocalVar(String variableName, Object inputValue);
 
     /**
      * Method to initialise a task with any object
@@ -157,7 +146,6 @@ public interface Task {
 
     /**
      * Traverse the specified relation
-     * If it is followed by {@link #asVar(String)} method, the element are stored in an array
      *
      * @param relationName relation to traverse
      * @return this task to chain actions (fluent API)
@@ -175,7 +163,6 @@ public interface Task {
 
     /**
      * Traverse the specified relation if not empty, otherwise keep leaf nodes
-     * If it is followed by {@link #asVar(String)} method, the element are stored in an array
      *
      * @param relationName relation to traverse if not empty
      * @return this task to chain actions (fluent API)
@@ -240,6 +227,16 @@ public interface Task {
      * @return this task to chain actions (fluent API)
      */
     Task ifThen(TaskFunctionConditional cond, Task then);
+
+    /**
+     * Execute a sub task if the condition is satisfied
+     *
+     * @param cond    condition to check
+     * @param thenSub sub task to execute if the condition is satisfied
+     * @param elseSub sub task to execute if the condition is not satisfied
+     * @return this task to chain actions (fluent API)
+     */
+    Task ifThenElse(TaskFunctionConditional cond, Task thenSub, Task elseSub);
 
     Task whileDo(TaskFunctionConditional cond, Task then);
 
@@ -349,11 +346,21 @@ public interface Task {
 
     void execute(final Graph graph, final Callback<TaskResult> result);
 
+    void executeVerbose(final Graph graph, final Callback<TaskResult> result);
+
+    void executeWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
+
+    void executeVerboseWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
+
+    void executeFrom(final TaskContext context, final Object initial, final byte affinity, final Callback<TaskResult> result);
+
+/*
     void executeWith(final Graph graph, final Map<String, TaskResult> variables, TaskResult initialResult, final boolean isVerbose, final Callback<TaskResult> result);
 
     void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
 
     void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
+*/
 
     TaskResult emptyResult();
 

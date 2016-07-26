@@ -66,7 +66,7 @@ public abstract class AbstractMLNode extends AbstractNode {
                 final int taskIndex = i;
                 final TaskResult initial = newTask().emptyResult();
                 initial.add(this);
-                tasks[i].executeWith(graph(), null, initial, false, new Callback<TaskResult>() {
+                tasks[i].executeWith(graph(), initial, new Callback<TaskResult>() {
                     @Override
                     public void on(TaskResult currentResult) {
                         if (currentResult == null) {

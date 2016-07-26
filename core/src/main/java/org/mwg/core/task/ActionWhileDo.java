@@ -1,25 +1,26 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ActionWhileDo implements TaskAction {
+class ActionWhileDo extends AbstractTaskAction {
 
     private final TaskFunctionConditional _cond;
-
     private final Task _then;
 
     ActionWhileDo(final TaskFunctionConditional p_cond, final Task p_then) {
-        _cond = p_cond;
-        _then = p_then;
+        super();
+        this._cond = p_cond;
+        this._then = p_then;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final ActionWhileDo selfPointer = this;
 
         final TaskResult previousResult = context.result();
@@ -48,7 +49,12 @@ class ActionWhileDo implements TaskAction {
                     if (nextResult == null) {
                         context.continueWith(finalResult);
                     } else {
-                        selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                        context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
+                            @Override
+                            public void run() {
+                                selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
+                            }
+                        });
                     }
                 }
             };
@@ -57,7 +63,7 @@ class ActionWhileDo implements TaskAction {
                 context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                     @Override
                     public void run() {
-                        _then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                        _then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                     }
                 });
             } else {

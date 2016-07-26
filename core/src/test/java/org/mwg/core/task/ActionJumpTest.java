@@ -19,7 +19,7 @@ public class ActionJumpTest extends AbstractActionTest {
 
         newTask()
                 .fromIndexAll("nodes")
-                .asVar("nodes")
+                .asGlobalVar("nodes")
                 .foreach(then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

@@ -5,25 +5,24 @@ import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionTraverseOrKeep implements TaskAction {
+class ActionTraverseOrKeep extends AbstractTaskAction {
 
     private final String _name;
 
     ActionTraverseOrKeep(final String p_name) {
+        super();
         this._name = p_name;
     }
 
     @Override
     public final void eval(final TaskContext context) {
-
         final String flatName = context.template(_name);
         final TaskResult previousResult = context.result();
-
         if (previousResult != null) {
             final TaskResult finalResult = context.newResult();
             final int previousSize = previousResult.size();

@@ -22,8 +22,8 @@ public class ActionNewNodeTest extends AbstractActionTest {
     @Test
     public void testCreateNode() {
         final long id[] = new long[1];
-        inject(15).asVar("world").setWorld("{{world}}").
-                inject(587).asVar("time").setTime("{{time[0]}}").newNode()
+        inject(15).asGlobalVar("world").setWorld("{{world}}").
+                inject(587).asGlobalVar("time").setTime("{{time[0]}}").newNode()
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

@@ -1,20 +1,20 @@
 package org.mwg.core.task;
 
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
-import org.mwg.task.TaskResult;
 
-class ActionNewNode implements TaskAction {
+class ActionNewNode extends AbstractTaskAction {
 
     private final String _typeNode;
 
     ActionNewNode(final String typeNode) {
+        super();
         this._typeNode = typeNode;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         Node newNode;
         if (_typeNode == null) {
             newNode = context.graph().newNode(context.world(), context.time());
@@ -29,8 +29,9 @@ class ActionNewNode implements TaskAction {
     public String toString() {
         if (_typeNode != null) {
             return "newTypedNode(\'" + _typeNode + "\')";
+        } else {
+            return "newNode()";
         }
-        return "newNode()";
     }
 
 }

@@ -72,7 +72,7 @@ public class RobustnessTests {
     public void robustnessAsVar() {
         boolean exceptionCaught = false;
         try {
-            inject(1).asVar(null).execute(_graph, null);
+            inject(1).asGlobalVar(null).execute(_graph, null);
         } catch (RuntimeException npe) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -439,7 +439,7 @@ public class RobustnessTests {
         //relationName
         boolean exceptionCaught = false;
         try {
-            inject(_graph.newNode(0, 0)).asVar("x").add(null, "x").execute(_graph, null);
+            inject(_graph.newNode(0, 0)).asGlobalVar("x").add(null, "x").execute(_graph, null);
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {
@@ -464,7 +464,7 @@ public class RobustnessTests {
         //relationName
         boolean exceptionCaught = false;
         try {
-            inject(_graph.newNode(0, 0)).asVar("x").remove(null, "x").execute(_graph, null);
+            inject(_graph.newNode(0, 0)).asGlobalVar("x").remove(null, "x").execute(_graph, null);
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {

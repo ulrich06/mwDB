@@ -2,19 +2,21 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.Task;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionRepeatPar implements TaskAction {
+class ActionRepeatPar extends AbstractTaskAction {
 
     private final Task _subTask;
 
     private final String _iterationTemplate;
 
-    ActionRepeatPar(String p_iteration, final Task p_subTask) {
+    ActionRepeatPar(final String p_iteration, final Task p_subTask) {
+        super();
         this._subTask = p_subTask;
         this._iterationTemplate = p_iteration;
     }
@@ -28,7 +30,7 @@ class ActionRepeatPar implements TaskAction {
             DeferCounter waiter = context.graph().newCounter(nbIteration);
             for (int i = 0; i < nbIteration; i++) {
                 final int finalI = i;
-                _subTask.executeFromPar(context, context.wrap(finalI), new Callback<TaskResult>() {
+                _subTask.executeFrom(context, context.wrap(finalI), SchedulerAffinity.ANY_LOCAL_THREAD, new Callback<TaskResult>() {
                     @Override
                     public void on(TaskResult result) {
                         if (result != null && result.size() == 1) {

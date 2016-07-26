@@ -52,7 +52,7 @@ public class ActionIfThenTest extends AbstractActionTest {
     @Test
     public void testChainAfterIfThen() {
         initGraph();
-        Task addVarInContext = inject(5).asVar("variable").then(new Action() {
+        Task addVarInContext = inject(5).asGlobalVar("variable").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 context.continueTask();
@@ -87,7 +87,7 @@ public class ActionIfThenTest extends AbstractActionTest {
             }
         });
 
-        inject(5).asVar("variable").ifThen(new TaskFunctionConditional() {
+        inject(5).asGlobalVar("variable").ifThen(new TaskFunctionConditional() {
             @Override
             public boolean eval(TaskContext context) {
                 return true;

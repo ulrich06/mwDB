@@ -24,7 +24,7 @@ public class ActionRemoveTest extends AbstractActionTest {
 
         final long[] id = new long[1];
         newNode()
-                .inject(relatedNode).asVar("x")
+                .inject(relatedNode).asGlobalVar("x")
                 .add("friend", "x")
                 .remove("friend", "x")
                 .then(new Action() {
@@ -51,7 +51,7 @@ public class ActionRemoveTest extends AbstractActionTest {
         Node relatedNode = graph.newNode(0, 0);
 
         final long[] ids = new long[5];
-        inject(relatedNode).asVar("x")
+        inject(relatedNode).asGlobalVar("x")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -98,7 +98,7 @@ public class ActionRemoveTest extends AbstractActionTest {
             public void eval(TaskContext context) {
                 context.continueWith(null);
             }
-        }).inject(relatedNode).asVar("x")
+        }).inject(relatedNode).asGlobalVar("x")
                 .add("friend", "x")
                 .remove("friend", "x")
                 .then(new Action() {

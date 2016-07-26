@@ -149,6 +149,13 @@ class CoreTaskResult<A> implements TaskResult<A> {
     }
 
     @Override
+    public void clear() {
+        this._backend = null;
+        this._capacity = 0;
+        this._size = 0;
+    }
+
+    @Override
     public TaskResult<A> clone() {
         return new CoreTaskResult<A>(this, true);
     }
@@ -184,10 +191,10 @@ class CoreTaskResult<A> implements TaskResult<A> {
 
     @Override
     public String toString() {
-        return export(true);
+        return toJson(true);
     }
 
-    private String export(boolean withContent) {
+    private String toJson(boolean withContent) {
         final StringBuilder builder = new StringBuilder();
         builder.append("[");
         for (int i = 0; i < _size; i++) {

@@ -3,30 +3,28 @@ package org.mwg.core.task;
 import org.mwg.Callback;
 import org.mwg.Constants;
 import org.mwg.Graph;
-import org.mwg.Node;
-import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
+import org.mwg.task.Action;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class CoreTask implements org.mwg.task.Task {
 
-    private TaskAction[] _actions = new TaskAction[10];
-    private int _actionCursor = 0;
+    private AbstractTaskAction _first = null;
+    private AbstractTaskAction _last = null;
 
-    private void addAction(TaskAction task) {
-        if (_actionCursor == _actions.length) {
-            TaskAction[] temp_actions = new TaskAction[_actions.length * 2];
-            System.arraycopy(_actions, 0, temp_actions, 0, _actions.length);
-            _actions = temp_actions;
+
+    private void addAction(AbstractTaskAction nextAction) {
+        if (_first == null) {
+            _first = nextAction;
+            _last = _first;
+        } else {
+            _last.setNext(nextAction);
+            _last = nextAction;
         }
-        _actions[_actionCursor] = task;
-        _actionCursor++;
     }
 
     @Override
@@ -93,14 +91,22 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task asVar(String variableName) {
+    public final org.mwg.task.Task asGlobalVar(String variableName) {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
-        addAction(new ActionAsVar(variableName));
+        addAction(new ActionAsVar(variableName, true));
         return this;
     }
 
+    @Override
+    public final org.mwg.task.Task asLocalVar(String variableName) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        addAction(new ActionAsVar(variableName, true));
+        return this;
+    }
 
     @Override
     public final org.mwg.task.Task fromVar(String variableName) {
@@ -117,16 +123,6 @@ public class CoreTask implements org.mwg.task.Task {
             throw new RuntimeException("variableName should not be null");
         }
         addAction(new ActionFromVar(variableName, index));
-        return this;
-    }
-
-
-    @Override
-    public Task setVar(String variableName, Object inputValue) {
-        if (variableName == null) {
-            throw new RuntimeException("variableName should not be null");
-        }
-        addAction(new ActionSetVar(variableName, inputValue));
         return this;
     }
 
@@ -245,6 +241,21 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task ifThenElse(TaskFunctionConditional cond, Task thenSub, Task elseSub) {
+        if (cond == null) {
+            throw new RuntimeException("condition should not be null");
+        }
+        if (thenSub == null) {
+            throw new RuntimeException("thenSub should not be null");
+        }
+        if (elseSub == null) {
+            throw new RuntimeException("elseSub should not be null");
+        }
+        addAction(new ActionIfThenElse(cond, thenSub, elseSub));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task whileDo(TaskFunctionConditional cond, org.mwg.task.Task then) {
         addAction(new ActionWhileDo(cond, then));
         return this;
@@ -252,8 +263,8 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task doWhile(Task then, TaskFunctionConditional cond){
-        addAction(new ActionDoWhile(then,cond));
+    public final org.mwg.task.Task doWhile(Task then, TaskFunctionConditional cond) {
+        addAction(new ActionDoWhile(then, cond));
         return this;
     }
 
@@ -297,68 +308,67 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void execute(Graph graph, Callback<TaskResult> result) {
-        executeWith(graph, null, null, false, result);
+    public void execute(final Graph graph, final Callback<TaskResult> callback) {
+        internal_executeWith(graph, null, callback, false);
     }
 
     @Override
-    public void executeWith(final Graph graph, final Map<String, TaskResult> variables, final TaskResult initialResult, final boolean isVerbose, final Callback<TaskResult> result) {
-        TaskResult initialResultSafe = initialResult;
-        if (initialResultSafe != null) {
-            initialResultSafe = initialResultSafe.clone();
-        }
-        if (_actionCursor == 0) {
-            if (result != null) {
-                result.on(initialResultSafe);
-            }
-        } else {
-            final CoreTaskContext context = new CoreTaskContext(variables, initialResultSafe, graph, _actions, _actionCursor, isVerbose, 0, result);
-            context.executeFirst();
-        }
+    public void executeVerbose(final Graph graph, final Callback<TaskResult> callback) {
+        internal_executeWith(graph, null, callback, true);
     }
 
     @Override
-    public void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result) {
-        final Graph graph = parent.graph();
-        TaskResult initialResultSafe = initialResult;
-        if (initialResultSafe != null) {
-            initialResultSafe = initialResultSafe.clone();
-        }
-        if (_actionCursor == 0) {
-            if (result != null) {
-                result.on(initialResultSafe);
-            }
-        } else {
-            final CoreTaskContext context = new CoreTaskContext(parent.variables(), initialResultSafe, graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
-            context.executeFirst();
-        }
+    public void executeWith(final Graph graph, final Object initial, final Callback<TaskResult> callback) {
+        internal_executeWith(graph, initial, callback, false);
     }
 
     @Override
-    public void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result) {
-        final Graph graph = parent.graph();
-        TaskResult initialResultSafe = initialResult;
-        if (initialResultSafe != null) {
-            initialResultSafe = initialResultSafe.clone();
-        }
-        if (_actionCursor == 0) {
-            if (result != null) {
-                result.on(initialResultSafe);
+    public void executeVerboseWith(final Graph graph, final Object initial, final Callback<TaskResult> callback) {
+        internal_executeWith(graph, initial, callback, true);
+    }
+
+    private void internal_executeWith(final Graph graph, final Object initial, final Callback<TaskResult> callback, final boolean isVerbose) {
+        if (_first != null) {
+            final TaskResult initalRes;
+            if (initial instanceof CoreTaskResult) {
+                initalRes = ((TaskResult) initial).clone();
+            } else {
+                initalRes = new CoreTaskResult(initial, true);
             }
-        } else {
-            final Map<String, TaskResult> cloned = new HashMap<String, TaskResult>();
-            String[] keys = cloned.keySet().toArray(new String[cloned.keySet().size()]);
-            for (int i = 0; i < keys.length; i++) {
-                cloned.put(keys[i], parent.variable(keys[i]));
-            }
-            final TaskResult finalInitialResultSafe = initialResultSafe;
-            graph.scheduler().dispatch(SchedulerAffinity.ANY_LOCAL_THREAD, new Job() {
+            final CoreTaskContext context = new CoreTaskContext(null, initalRes, graph, isVerbose, 0, callback);
+            graph.scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                 @Override
                 public void run() {
-                    final CoreTaskContext context = new CoreTaskContext(cloned, finalInitialResultSafe, graph, _actions, _actionCursor, parent.isVerbose(), parent.ident() + 1, result);
-                    context.executeFirst();
+                    context.execute(_first);
                 }
             });
+        } else {
+            if (callback != null) {
+                callback.on(emptyResult());
+            }
+        }
+    }
+
+    @Override
+    public void executeFrom(final TaskContext parentContext, final Object initial, byte affinity, final Callback<TaskResult> callback) {
+        if (_first != null) {
+            final TaskResult initalRes;
+            if (initial instanceof CoreTaskResult) {
+                initalRes = ((TaskResult) initial).clone();
+            } else {
+                initalRes = new CoreTaskResult(initial, true);
+            }
+            final CoreTaskContext context = new CoreTaskContext(parentContext, initalRes, parentContext.graph(), parentContext.isVerbose(), parentContext.ident() + 1, callback);
+            parentContext.graph().scheduler().dispatch(affinity, new Job() {
+                @Override
+                public void run() {
+                    context.execute(_first);
+                }
+            });
+        } else {
+            if (callback != null) {
+                callback.on(emptyResult());
+            }
         }
     }
 
@@ -434,57 +444,6 @@ public class CoreTask implements org.mwg.task.Task {
             }
         }
         return this;
-    }
-
-    public static Object protect(final Graph graph, final Object input) {
-        if (input instanceof AbstractNode) {
-            return graph.cloneNode((Node) input);
-        } else if (input instanceof Object[]) {
-            Object[] casted = (Object[]) input;
-            Object[] cloned = new Object[casted.length];
-            boolean isAllNode = true;
-            for (int i = 0; i < casted.length; i++) {
-                cloned[i] = protect(graph, casted[i]);
-                isAllNode = isAllNode && (cloned[i] instanceof AbstractNode);
-            }
-            if (isAllNode) {
-                Node[] typedResult = new Node[cloned.length];
-                System.arraycopy(cloned, 0, typedResult, 0, cloned.length);
-                return typedResult;
-            }
-            return cloned;
-        } else {
-            return protectIterable(input);
-        }
-    }
-
-    /**
-     * @native ts
-     * if(input != null && input != undefined && input['iterator'] != undefined){
-     * var flat = [];
-     * var it = input['iterator']();
-     * while(it.hasNext()){
-     * flat.push(it.next());
-     * }
-     * return flat;
-     * } else {
-     * return input;
-     * }
-     */
-    private static Object protectIterable(Object input) {
-        if (input instanceof Collection) {
-            Collection casted = (Collection) input;
-            Object[] flat = new Object[casted.size()];
-            int flat_index = 0;
-            Iterator it = casted.iterator();
-            while (it.hasNext()) {
-                flat[flat_index] = it.next();
-                flat_index++;
-            }
-            return flat;
-        }
-
-        return input;
     }
 
     @Override

@@ -2,16 +2,17 @@ package org.mwg.core.task;
 
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionMap;
 import org.mwg.task.TaskResult;
 
-class ActionMap implements TaskAction {
+class ActionMap extends AbstractTaskAction {
 
     private final TaskFunctionMap _map;
 
     ActionMap(final TaskFunctionMap p_map) {
+        super();
         this._map = p_map;
     }
 

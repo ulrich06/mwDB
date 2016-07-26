@@ -14,7 +14,7 @@ public class ActionFromVarTest extends AbstractActionTest {
     public void test() {
         initGraph();
         fromIndexAll("nodes")
-                .asVar("x")
+                .asGlobalVar("x")
                 .inject("uselessPayload")
                 .fromVar("x")
                 .then(new Action() {

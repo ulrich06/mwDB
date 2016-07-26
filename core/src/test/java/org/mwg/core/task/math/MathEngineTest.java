@@ -74,39 +74,39 @@ public class MathEngineTest {
             @Override
             public void on(Boolean result) {
                 Actions.newTask()
-                        .setVar("aVar",55)
+                        .inject(55).asGlobalVar("aVar")
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 String computedValue = context.template("{{=aVar * 2}}");
-                                Assert.assertEquals("110",computedValue);
+                                Assert.assertEquals("110", computedValue);
                                 context.continueTask();
                             }
                         })
-                        .setVar("anArray",new int[]{1,2})
+                        .inject(new int[]{1, 2}).asGlobalVar("anArray")
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 String computedValue = context.template("{{=anArray[0] +  anArray[1] * 2}}");
-                                Assert.assertEquals("5",computedValue);
+                                Assert.assertEquals("5", computedValue);
                                 context.continueTask();
                             }
                         })
-                        .setVar("anArray",new int[]{1})
+                        .inject(new int[]{1}).asGlobalVar("anArray")
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 String computedValue = context.template("{{=anArray * 2}}");
-                                Assert.assertEquals("2",computedValue);
+                                Assert.assertEquals("2", computedValue);
                                 context.continueTask();
                             }
                         })
-                        .inject(new int[]{1,2,3})
+                        .inject(new int[]{1, 2, 3})
                         .then(new Action() {
                             @Override
                             public void eval(TaskContext context) {
                                 String computedValue = context.template("{{=result[2] * 2}}");
-                                Assert.assertEquals("6",computedValue);
+                                Assert.assertEquals("6", computedValue);
                                 context.continueTask();
                             }
                         })
@@ -115,7 +115,7 @@ public class MathEngineTest {
                             @Override
                             public void eval(TaskContext context) {
                                 String computedValue = context.template("{{=result * 2}}");
-                                Assert.assertEquals("16",computedValue);
+                                Assert.assertEquals("16", computedValue);
                                 context.continueTask();
                             }
                         })

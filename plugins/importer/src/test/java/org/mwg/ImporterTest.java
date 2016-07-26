@@ -88,7 +88,7 @@ public class ImporterTest {
             public void on(Boolean connectionResult) {
                 final int[] nbFile = new int[1];
                 Task t = inject("smarthome")
-                        .asVar("fileName")
+                        .asGlobalVar("fileName")
                         .action(ImporterActions.READFILES, "{{fileName}}")
                         .foreach(then(new Action() {
                             @Override
@@ -182,8 +182,8 @@ public class ImporterTest {
                                             .then(context -> {
                                                 TaskResult<String> line = context.result();
                                                 try {
-                                                    context.setVariable("time", context.wrap(dateFormat.parse(line.get(0) + "|" + line.get(1)).getTime()));
-                                                    context.setVariable("value", context.wrap(Double.parseDouble(line.get(2))));
+                                                    context.setGlobalVariable("time", context.wrap(dateFormat.parse(line.get(0) + "|" + line.get(1)).getTime()));
+                                                    context.setGlobalVariable("value", context.wrap(Double.parseDouble(line.get(2))));
                                                     context.continueWith(null);
                                                 } catch (ParseException e) {
                                                     e.printStackTrace();

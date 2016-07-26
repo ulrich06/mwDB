@@ -141,7 +141,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
 
 
         Task traverse = newTask();
-        traverse.asVar("parent").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
+        traverse.asGlobalVar("parent").traverse(INTERNAL_SUBGAUSSIAN).then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 TaskResult<Node> result = context.resultAsNodes();

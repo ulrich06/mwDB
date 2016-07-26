@@ -73,14 +73,14 @@ public class TestTMP {
                     public boolean select(Node node) {
                         return (Boolean) node.get("enter");
                     }
-                }).asVar("childNode")
+                }).asGlobalVar("childNode")
                         .ifThen(new TaskFunctionConditional() {
                             @Override
                             public boolean eval(TaskContext context) {
                                 TaskResult<Node> result = context.variable("childNode");
 
                                 if (result.size() > 0) {
-                                    context.setVariable("starterNode", context.wrap(result.get(0)));
+                                    context.setGlobalVariable("starterNode", context.wrap(result.get(0)));
                                     Node starter = (Node) context.variable("starterNode");
                                     System.out.println(recursionNb[0] + " 1er ifThen " + starter + " -> " + result);
 
@@ -103,12 +103,7 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = inject(root).asVar("starterNode").executeSubTask(traverse).then(new Action() {
-                    @Override
-                    public void eval(TaskContext context) {
-                        //call callbask
-                    }
-                }).executeSubTask(creationTask);
+                Task mainTask = inject(root).asGlobalVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
 
                 mainTask.execute(graph, null);
 

@@ -23,7 +23,7 @@ public class ActionIndexOrUnindexNodeTest {
                         .newNode()
                         .setProperty("name", Type.STRING, "root")
                         .indexNode("indexName", "name")
-                        .asVar("nodeIndexed")
+                        .asGlobalVar("nodeIndexed")
                         .fromIndexAll("indexName")
                         .then(new Action() {
                             @Override

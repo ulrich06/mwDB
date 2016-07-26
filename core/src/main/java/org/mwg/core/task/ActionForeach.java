@@ -1,18 +1,19 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.plugin.Scheduler;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ActionForeach implements TaskAction {
+class ActionForeach extends AbstractTaskAction {
 
     private final Task _subTask;
 
     ActionForeach(final Task p_subTask) {
+        super();
         _subTask = p_subTask;
     }
 
@@ -48,7 +49,7 @@ class ActionForeach implements TaskAction {
                     if (nextResult == null) {
                         context.continueWith(finalResult);
                     } else {
-                        selfPointer._subTask.executeFrom(context, loopRes[0], recursiveAction[0]);
+                        selfPointer._subTask.executeFrom(context, loopRes[0], SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                     }
                 }
             };
@@ -58,7 +59,7 @@ class ActionForeach implements TaskAction {
                 context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                     @Override
                     public void run() {
-                        _subTask.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                        _subTask.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                     }
                 });
             } else {

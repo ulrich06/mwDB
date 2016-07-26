@@ -67,6 +67,11 @@ class IterableLines implements TaskResult<String> {
     }
 
     @Override
+    public void clear() {
+        //noop
+    }
+
+    @Override
     public TaskResult<String> clone() {
         return null;
     }

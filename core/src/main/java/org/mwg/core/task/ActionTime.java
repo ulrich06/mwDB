@@ -1,13 +1,14 @@
 package org.mwg.core.task;
 
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 
-class ActionTime implements TaskAction {
+class ActionTime extends AbstractTaskAction {
 
     private final String _varName;
 
     ActionTime(final String p_varName) {
+        super();
         this._varName = p_varName;
     }
 

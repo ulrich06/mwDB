@@ -5,24 +5,25 @@ import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionIndexOrUnindexNode implements TaskAction {
+class ActionIndexOrUnindexNode extends AbstractTaskAction {
     private final String _indexName;
     private final String _flatKeyAttributes;
     private final boolean _isIndexation;
 
-    ActionIndexOrUnindexNode(String indexName, String flatKeyAttributes, boolean isIndexation) {
+    ActionIndexOrUnindexNode(final String indexName, final String flatKeyAttributes, final boolean isIndexation) {
+        super();
         this._indexName = indexName;
         this._flatKeyAttributes = flatKeyAttributes;
         this._isIndexation = isIndexation;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final TaskResult previousResult = context.result();
         final String templatedIndexName = context.template(_indexName);
         final String templatedKeyAttributes = context.template(_flatKeyAttributes);

@@ -1,14 +1,14 @@
 package org.mwg.core.task;
 
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
-import org.mwg.task.TaskResult;
 
-class ActionInject implements TaskAction {
+class ActionInject extends AbstractTaskAction {
 
     private final Object _value;
 
     ActionInject(final Object value) {
+        super();
         this._value = value;
     }
 

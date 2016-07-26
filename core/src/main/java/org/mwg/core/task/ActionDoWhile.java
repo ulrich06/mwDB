@@ -1,21 +1,22 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
 import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ActionDoWhile implements TaskAction {
+class ActionDoWhile extends AbstractTaskAction {
 
     private final TaskFunctionConditional _cond;
-
     private final Task _then;
 
     ActionDoWhile(final Task p_then, final TaskFunctionConditional p_cond) {
-        _cond = p_cond;
-        _then = p_then;
+        super();
+        this._cond = p_cond;
+        this._then = p_then;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ActionDoWhile implements TaskAction {
                     if (nextResult == null) {
                         context.continueWith(finalResult);
                     } else {
-                        selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                        selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                     }
                 }
             };
@@ -55,7 +56,7 @@ public class ActionDoWhile implements TaskAction {
             context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                 @Override
                 public void run() {
-                    _then.executeFrom(context, context.wrap(loopRes[0]), recursiveAction[0]);
+                    _then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                 }
             });
         }

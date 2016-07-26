@@ -19,8 +19,8 @@ public class CoreTaskContextTests {
             @Override
             public void on(Boolean result) {
                 newTask()
-                        .setVar("i", 4)
-                        .setVar("array", new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9})
+                        .inject(4).asGlobalVar("i")
+                        .inject(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9}).asGlobalVar("array")
                         .fromVar("array")
                         .then(new Action() {
                             @Override

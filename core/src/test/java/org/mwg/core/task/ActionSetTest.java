@@ -22,7 +22,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithOneNode() {
         final long[] id = new long[1];
-        inject("node").asVar("nodeName")
+        inject("node").asGlobalVar("nodeName")
                 .newNode()
                 .setProperty("name", Type.STRING, "{{nodeName}}")
                 .then(new Action() {
@@ -47,7 +47,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithArray() {
         final long[] ids = new long[5];
-        inject("node").asVar("nodeName")
+        inject("node").asGlobalVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
@@ -84,7 +84,7 @@ public class ActionSetTest extends ActionNewNodeTest {
     @Test
     public void testWithNull() {
         final boolean[] nextCalled = new boolean[1];
-        inject("node").asVar("nodeName")
+        inject("node").asGlobalVar("nodeName")
                 .then(new Action() {
                     @Override
                     public void eval(TaskContext context) {

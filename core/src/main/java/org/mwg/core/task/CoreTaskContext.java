@@ -5,51 +5,48 @@ import org.mwg.Graph;
 import org.mwg.Node;
 import org.mwg.core.task.math.CoreMathExpressionEngine;
 import org.mwg.core.task.math.MathExpressionEngine;
-import org.mwg.task.TaskAction;
-import org.mwg.task.TaskContext;
-import org.mwg.task.TaskResult;
-import org.mwg.task.TaskResultIterator;
+import org.mwg.plugin.AbstractTaskAction;
+import org.mwg.task.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class CoreTaskContext implements TaskContext {
 
-    private final Map<String, TaskResult> _variables;
-    private final boolean shouldFreeVar;
+    private final Map<String, TaskResult> _globalVariables;
+    private final TaskContext _parent;
     private final Graph _graph;
-    private final TaskAction[] _actions;
-    private final int _actionCursor;
-    private final AtomicInteger _currentTaskId;
     private final Callback<TaskResult> _callback;
     private final boolean verbose;
     private final int _ident;
 
-    //Mutable current result handler
+    private Map<String, TaskResult> _localVariables = null;
+    private AbstractTaskAction _current;
     private TaskResult _result;
     private long _world;
     private long _time;
 
-    CoreTaskContext(final Map<String, TaskResult> p_variables, final TaskResult initial, final Graph p_graph, final TaskAction[] p_actions, final int p_actionCursor, final boolean isVerbose, final int p_ident, final Callback<TaskResult> p_callback) {
+    CoreTaskContext(final TaskContext parentContext, final TaskResult initial, final Graph p_graph, final boolean isVerbose, final int p_ident, final Callback<TaskResult> p_callback) {
         this.verbose = isVerbose;
         this._ident = p_ident;
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
-        if (p_variables != null) {
-            this._variables = p_variables;
-            shouldFreeVar = false;
+        this._parent = parentContext;
+
+        //Global variable management
+        if (parentContext == null) {
+            this._globalVariables = new ConcurrentHashMap<String, TaskResult>();
         } else {
-            this._variables = new ConcurrentHashMap<String, TaskResult>();
-            shouldFreeVar = true;
+            this._globalVariables = _parent.globalVariables();
         }
+
+        //Local initialisation
         this._result = initial;
-        this._actions = p_actions;
-        this._actionCursor = p_actionCursor;
         this._callback = p_callback;
-        this._currentTaskId = new AtomicInteger(0);
     }
 
     @Override
@@ -83,8 +80,24 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
-    public final TaskResult variable(String name) {
-        return this._variables.get(name);
+    public final TaskResult variable(final String name) {
+        TaskResult resolved = this._globalVariables.get(name);
+        if (resolved == null) {
+            resolved = internal_deep_resolve(name);
+        }
+        return resolved;
+    }
+
+    private TaskResult internal_deep_resolve(final String name) {
+        TaskResult resolved = null;
+        if (this._localVariables != null) {
+            resolved = this._localVariables.get(name);
+        }
+        if (resolved == null && this._parent != null) {
+            return ((CoreTaskContext) _parent).internal_deep_resolve(name);
+        } else {
+            return resolved;
+        }
     }
 
     @Override
@@ -103,31 +116,77 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
-    public final void setVariable(String name, TaskResult value) {
-        final TaskResult previous = this._variables.get(name);
-        if (value != null) {
-            this._variables.put(name, value.clone());
-        } else {
-            this._variables.remove(name);
-        }
+    public final void setGlobalVariable(final String name, final TaskResult value) {
+        final TaskResult previous = this._globalVariables.put(name, value.clone());
         if (previous != null) {
             previous.free();
         }
     }
 
     @Override
-    public final void addToVariable(final String name, final TaskResult value) {
-        TaskResult previous = this._variables.get(name);
-        if (previous == null) {
-            previous = new CoreTaskResult(null, false);
-            this._variables.put(name, previous);
+    public final void setLocalVariable(final String name, final TaskResult value) {
+        Map<String, TaskResult> target = internal_deep_resolve_map(name);
+        if (target == null) {
+            if (this._localVariables == null) {
+                this._localVariables = new HashMap<String, TaskResult>();
+            }
+            target = this._localVariables;
         }
-        previous.add(value);
+        final TaskResult previous = target.put(name, value.clone());
+        if (previous != null) {
+            previous.free();
+        }
+    }
+
+    private Map<String, TaskResult> internal_deep_resolve_map(final String name) {
+        if (this._localVariables != null) {
+            TaskResult resolved = this._localVariables.get(name);
+            if (resolved != null) {
+                return this._localVariables;
+            }
+        }
+        if (this._parent != null) {
+            return ((CoreTaskContext) _parent).internal_deep_resolve_map(name);
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public Map<String, TaskResult> variables() {
-        return this._variables;
+    public final void addToGlobalVariable(final String name, final TaskResult value) {
+        TaskResult previous = this._globalVariables.get(name);
+        if (previous == null) {
+            previous = new CoreTaskResult(null, false);
+            this._globalVariables.put(name, previous);
+        }
+        previous.add(value.clone());
+    }
+
+    @Override
+    public final void addToLocalVariable(final String name, final TaskResult value) {
+        Map<String, TaskResult> target = internal_deep_resolve_map(name);
+        if (target == null) {
+            if (this._localVariables == null) {
+                this._localVariables = new HashMap<String, TaskResult>();
+            }
+            target = this._localVariables;
+        }
+        TaskResult previous = target.get(name);
+        if (previous == null) {
+            previous = new CoreTaskResult(null, false);
+            target.put(name, previous);
+        }
+        previous.add(value.clone());
+    }
+
+    @Override
+    public Map<String, TaskResult> globalVariables() {
+        return this._globalVariables;
+    }
+
+    @Override
+    public Map<String, TaskResult> localVariables() {
+        return this._localVariables;
     }
 
     @Override
@@ -158,17 +217,22 @@ class CoreTaskContext implements TaskContext {
     @Override
     public final void continueTask() {
         //next step now...
-        int nextCursor = _currentTaskId.incrementAndGet();
-        TaskAction nextAction = null;
-        if (nextCursor < _actionCursor) {
-            nextAction = _actions[nextCursor];
-        }
+        final AbstractTaskAction nextAction = _current.next();
+        _current = nextAction;
         if (nextAction == null) {
             /* Clean */
-            if (shouldFreeVar) {
-                String[] variables = _variables.keySet().toArray(new String[_variables.keySet().size()]);
-                for (int i = 0; i < variables.length; i++) {
-                    variable(variables[i]).free();
+            if (this._localVariables != null) {
+                Set<String> localValues = this._localVariables.keySet();
+                String[] flatLocalValues = localValues.toArray(new String[localValues.size()]);
+                for (int i = 0; i < flatLocalValues.length; i++) {
+                    this._localVariables.get(flatLocalValues[i]).free();
+                }
+            }
+            if (this._parent == null) {
+                Set<String> globalValues = this._globalVariables.keySet();
+                String[] globalFlatValues = globalValues.toArray(new String[globalValues.size()]);
+                for (int i = 0; i < globalFlatValues.length; i++) {
+                    this._globalVariables.get(globalFlatValues[i]).free();
                 }
             }
             /* End Clean */
@@ -195,16 +259,16 @@ class CoreTaskContext implements TaskContext {
         System.out.println(template(taskName));
     }
 
-
-    void executeFirst() {
+    final void execute(AbstractTaskAction initialTaskAction) {
+        this._current = initialTaskAction;
         if (verbose) {
-            printDebug(_actions[0]);
+            printDebug(_current);
         }
-        _actions[0].eval(this);
+        this._current.eval(this);
     }
 
     @Override
-    public String template(String input) {
+    public final String template(String input) {
         if (input == null) {
             return null;
         }
@@ -230,7 +294,7 @@ class CoreTaskContext implements TaskContext {
                 }
                 String contextKey = input.substring(previousPos, cursor - 1).trim();
                 if (contextKey.length() > 0 && contextKey.charAt(0) == '=') { //Math expression
-                    MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
+                    final MathExpressionEngine mathEngine = CoreMathExpressionEngine.parse(contextKey.substring(1));
                     double value = mathEngine.eval(null, this, new HashMap<String, Double>());
                     //supress ".0" if it exists
                     String valueStr = value + "";
@@ -242,7 +306,6 @@ class CoreTaskContext implements TaskContext {
                             break;
                         }
                     }
-
                     buffer.append(valueStr);
                 } else {//variable name or array access
                     //check if it is an array access
@@ -294,7 +357,6 @@ class CoreTaskContext implements TaskContext {
                             }
                             buffer.append("]");
                         }
-
                     } else {
                         throw new RuntimeException("Variable not found " + contextKey + " in:" + input);
                     }

@@ -1,14 +1,16 @@
 package org.mwg.core.task;
 
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionPrint implements TaskAction {
+class ActionPrint extends AbstractTaskAction {
 
-    private String _name;
+    private final String _name;
 
-    ActionPrint(String p_name) {
+    ActionPrint(final String p_name) {
+        super();
         this._name = p_name;
     }
 

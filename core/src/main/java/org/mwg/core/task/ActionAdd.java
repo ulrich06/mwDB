@@ -3,17 +3,18 @@ package org.mwg.core.task;
 import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 import org.mwg.task.TaskResultIterator;
 
-class ActionAdd implements TaskAction {
+class ActionAdd extends AbstractTaskAction {
 
     private final String _relationName;
     private final String _variableNameToAdd;
 
     ActionAdd(final String relationName, final String variableNameToAdd) {
+        super();
         this._relationName = relationName;
         this._variableNameToAdd = variableNameToAdd;
     }

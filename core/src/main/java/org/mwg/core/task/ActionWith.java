@@ -3,6 +3,7 @@ package org.mwg.core.task;
 import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskFunctionSelect;
@@ -10,12 +11,13 @@ import org.mwg.task.TaskResult;
 
 import java.util.regex.Pattern;
 
-class ActionWith implements TaskAction {
+class ActionWith extends AbstractTaskAction {
 
     private final String _patternTemplate;
     private final String _name;
 
     ActionWith(final String name, final String stringPattern) {
+        super();
         this._patternTemplate = stringPattern;
         this._name = name;
     }
@@ -26,7 +28,7 @@ class ActionWith implements TaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final Pattern pattern = Pattern.compile(context.template(_patternTemplate));
         final TaskResult previous = context.result();
         final TaskResult next = context.newResult();

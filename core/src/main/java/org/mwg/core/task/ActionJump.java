@@ -5,21 +5,22 @@ import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionJump implements TaskAction {
+class ActionJump extends AbstractTaskAction {
 
     private final String _time;
 
-    ActionJump(String time) {
+    ActionJump(final String time) {
+        super();
         _time = time;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final String flatTime = context.template(_time);
         final long parsedTime = Long.parseLong(flatTime);
         final TaskResult previous = context.result();

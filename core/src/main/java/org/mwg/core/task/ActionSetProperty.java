@@ -4,24 +4,25 @@ import org.mwg.Constants;
 import org.mwg.Node;
 import org.mwg.Type;
 import org.mwg.plugin.AbstractNode;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionSetProperty implements TaskAction {
+class ActionSetProperty extends AbstractTaskAction {
 
     private final String _relationName;
     private final String _variableNameToSet;
     private final byte _propertyType;
 
     ActionSetProperty(final String relationName, final byte propertyType, final String variableNameToSet) {
+        super();
         this._relationName = relationName;
         this._variableNameToSet = variableNameToSet;
         this._propertyType = propertyType;
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
         final TaskResult previousResult = context.result();
         final String flatRelationName = context.template(_relationName);
         if (previousResult != null) {

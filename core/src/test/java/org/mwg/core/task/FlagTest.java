@@ -70,7 +70,7 @@ public class FlagTest {
 
             Task traverse = newTask();
 
-            traverse.asVar("parent").traverse(relName).then(new Action() {
+            traverse.asGlobalVar("parent").traverse(relName).then(new Action() {
                 @Override
                 public void eval(TaskContext context) {
 
@@ -165,7 +165,7 @@ public class FlagTest {
 
             Task traverse = newTask();
 
-            traverse.asVar("parent").traverseOrKeep(relName).then(new Action() {
+            traverse.asGlobalVar("parent").traverseOrKeep(relName).then(new Action() {
                 @Override
                 public void eval(TaskContext context) {
                     TaskResult<Integer> count = context.variable("count");
@@ -173,7 +173,7 @@ public class FlagTest {
                     if (count != null) {
                         c = count.get(0) + 1;
                     }
-                    context.setVariable("count", context.wrap(c));
+                    context.setGlobalVariable("count", context.wrap(c));
 
                     TaskResult<Node> children = context.resultAsNodes();
                     if (children != null && children.size() != 0) {

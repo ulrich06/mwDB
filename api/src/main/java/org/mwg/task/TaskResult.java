@@ -12,6 +12,8 @@ public interface TaskResult<A> {
 
     void add(A input);
 
+    void clear();
+
     TaskResult<A> clone();
 
     void free();

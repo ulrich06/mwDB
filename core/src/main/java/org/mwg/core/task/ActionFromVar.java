@@ -1,16 +1,16 @@
 package org.mwg.core.task;
 
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionFromVar implements TaskAction {
+class ActionFromVar extends AbstractTaskAction {
 
     private final String _name;
     private final int _index;
 
-
-    public ActionFromVar(String p_name, int p_index) {
+    ActionFromVar(String p_name, int p_index) {
+        super();
         this._name = p_name;
         this._index = p_index;
     }

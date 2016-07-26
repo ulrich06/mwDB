@@ -1,17 +1,16 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.Constants;
 import org.mwg.Node;
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
-import org.mwg.task.TaskResult;
 
-class ActionFromIndexAll implements TaskAction {
+class ActionFromIndexAll extends AbstractTaskAction {
 
     private final String _indexName;
 
     ActionFromIndexAll(final String p_indexName) {
+        super();
         _indexName = p_indexName;
     }
 

@@ -64,16 +64,12 @@ public class Actions {
         return newTask().parse(flatTask);
     }
 
-    public static Task asVar(String variableName) {
-        return newTask().asVar(variableName);
+    public static Task asGlobalVar(String variableName) {
+        return newTask().asGlobalVar(variableName);
     }
 
-    public static Task setLocalVar(String variableName, Object inputValue) {
-        return newTask().setLocalVar(variableName, inputValue);
-    }
-
-    public static Task setGlobalVar(String variableName, Object inputValue) {
-        return newTask().setLocalVar(variableName, inputValue);
+    public static Task asLocalVar(String variableName) {
+        return newTask().asGlobalVar(variableName);
     }
 
     public static Task map(TaskFunctionMap mapFunction) {
@@ -190,6 +186,18 @@ public class Actions {
 
     public static Task ifThen(TaskFunctionConditional cond, Task then) {
         return newTask().ifThen(cond, then);
+    }
+
+    public static Task ifThenElse(TaskFunctionConditional cond, Task thenSub, Task elseSub) {
+        return newTask().ifThenElse(cond, thenSub, elseSub);
+    }
+
+    public static Task whileDo(TaskFunctionConditional cond, Task then) {
+        return newTask().whileDo(cond, then);
+    }
+
+    public static Task doWhile(Task then, TaskFunctionConditional cond) {
+        return newTask().doWhile(then, cond);
     }
 
     public static Task split(String splitPattern) {

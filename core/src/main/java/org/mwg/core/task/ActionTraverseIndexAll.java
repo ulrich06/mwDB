@@ -4,17 +4,17 @@ import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-
-class ActionTraverseIndexAll implements TaskAction {
+class ActionTraverseIndexAll extends AbstractTaskAction {
 
     private final String _indexName;
 
-    ActionTraverseIndexAll(String indexName) {
+    ActionTraverseIndexAll(final String indexName) {
+        super();
         this._indexName = indexName;
     }
 
@@ -29,17 +29,18 @@ class ActionTraverseIndexAll implements TaskAction {
             for (int i = 0; i < previousSize; i++) {
                 final Object loop = previousResult.get(i);
                 if (loop instanceof AbstractNode) {
-                    Node casted = (Node) loop;
+                    final Node casted = (Node) loop;
                     casted.findAll(flatName, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
                             if (result != null) {
                                 for (int j = 0; j < result.length; j++) {
-                                    if(result[j] != null){
+                                    if (result[j] != null) {
                                         finalResult.add(result[j]);
                                     }
                                 }
                             }
+                            casted.free();
                             defer.count();
                         }
                     });
@@ -52,6 +53,8 @@ class ActionTraverseIndexAll implements TaskAction {
             defer.then(new Job() {
                 @Override
                 public void run() {
+                    //optimization to avoid iteration on previous result for free
+                    previousResult.clear();
                     context.continueWith(finalResult);
                 }
             });

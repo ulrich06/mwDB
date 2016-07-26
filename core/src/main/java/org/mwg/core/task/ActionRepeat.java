@@ -1,18 +1,20 @@
 package org.mwg.core.task;
 
 import org.mwg.Callback;
-import org.mwg.Constants;
+import org.mwg.plugin.AbstractTaskAction;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ActionRepeat implements TaskAction {
+class ActionRepeat extends AbstractTaskAction {
 
     private final Task _subTask;
 
     private final String _iterationTemplate;
 
-    ActionRepeat(String p_iteration, final Task p_subTask) {
+    ActionRepeat(final String p_iteration, final Task p_subTask) {
+        super();
         this._subTask = p_subTask;
         this._iterationTemplate = p_iteration;
     }
@@ -40,11 +42,11 @@ class ActionRepeat implements TaskAction {
                         context.continueWith(results);
                     } else {
                         //recursive call
-                        selfPointer._subTask.executeFrom(context, context.wrap(nextCursor), recursiveAction[0]);
+                        selfPointer._subTask.executeFrom(context, context.wrap(nextCursor), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                     }
                 }
             };
-            _subTask.executeFrom(context, context.wrap(cursor.get()), recursiveAction[0]);
+            _subTask.executeFrom(context, context.wrap(cursor.get()), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
         } else {
             context.continueWith(results);
         }

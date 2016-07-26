@@ -1,14 +1,15 @@
 package org.mwg.core.task;
 
-import org.mwg.task.TaskAction;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-class ActionSplit implements TaskAction {
+class ActionSplit extends AbstractTaskAction {
 
     private String _splitPattern;
 
-    public ActionSplit(String p_splitPattern) {
+    ActionSplit(String p_splitPattern) {
+        super();
         this._splitPattern = p_splitPattern;
     }
 

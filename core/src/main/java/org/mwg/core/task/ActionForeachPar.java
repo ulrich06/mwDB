@@ -2,15 +2,17 @@ package org.mwg.core.task;
 
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
-import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
-class ActionForeachPar implements TaskAction {
+class ActionForeachPar extends AbstractTaskAction {
 
     private final Task _subTask;
 
     ActionForeachPar(final Task p_subTask) {
+        super();
         _subTask = p_subTask;
     }
 
@@ -30,11 +32,11 @@ class ActionForeachPar implements TaskAction {
         while (loop != null) {
             final int finalIndex = index;
             final TaskResult loopResult = context.wrap(loop);
-            _subTask.executeFromPar(context, loopResult, new Callback<TaskResult>() {
+            _subTask.executeFrom(context, loopResult, SchedulerAffinity.ANY_LOCAL_THREAD, new Callback<TaskResult>() {
                 @Override
                 public void on(TaskResult result) {
                     loopResult.free();
-                    if(result != null && result.size() == 1){
+                    if (result != null && result.size() == 1) {
                         finalResult.set(finalIndex, result.get(0));
                     } else {
                         finalResult.set(finalIndex, result);

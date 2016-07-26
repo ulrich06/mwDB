@@ -3,23 +3,19 @@ package org.mwg.core.task;
 import org.mwg.Callback;
 import org.mwg.DeferCounter;
 import org.mwg.Node;
-import org.mwg.Query;
 import org.mwg.core.CoreConstants;
-import org.mwg.core.utility.CoreDeferCounter;
 import org.mwg.plugin.AbstractNode;
+import org.mwg.plugin.AbstractTaskAction;
 import org.mwg.plugin.Job;
-import org.mwg.struct.LongLongArrayMap;
-import org.mwg.task.TaskAction;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-class ActionTraverseIndex implements TaskAction {
+class ActionTraverseIndex extends AbstractTaskAction {
     private String _indexName;
     private String _query;
 
-    ActionTraverseIndex(String indexName, String query) {
+    ActionTraverseIndex(final String indexName, final String query) {
+        super();
         this._query = query;
         this._indexName = indexName;
     }
@@ -35,7 +31,7 @@ class ActionTraverseIndex implements TaskAction {
             for (int i = 0; i < previousSize; i++) {
                 final Object loop = previousResult.get(i);
                 if (loop instanceof AbstractNode) {
-                    Node casted = (Node) loop;
+                    final Node casted = (Node) loop;
                     casted.find(flatName, _query, new Callback<Node[]>() {
                         @Override
                         public void on(Node[] result) {
@@ -46,6 +42,7 @@ class ActionTraverseIndex implements TaskAction {
                                     }
                                 }
                             }
+                            casted.free();
                             defer.count();
                         }
                     });
@@ -58,6 +55,8 @@ class ActionTraverseIndex implements TaskAction {
             defer.then(new Job() {
                 @Override
                 public void run() {
+                    //optimization to avoid iteration on previous result for free
+                    previousResult.clear();
                     context.continueWith(finalResult);
                 }
             });

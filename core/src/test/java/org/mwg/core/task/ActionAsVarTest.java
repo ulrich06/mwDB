@@ -14,7 +14,7 @@ public class ActionAsVarTest extends AbstractActionTest {
     @Test
     public void test() {
         initGraph();
-        inject("hello").asVar("myVar").then(new Action() {
+        inject("hello").asGlobalVar("myVar").then(new Action() {
             @Override
             public void eval(TaskContext context) {
                 Assert.assertEquals(context.result().get(0), "hello");
