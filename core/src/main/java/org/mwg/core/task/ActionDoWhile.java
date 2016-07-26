@@ -20,45 +20,34 @@ class ActionDoWhile extends AbstractTaskAction {
     }
 
     @Override
-    public void eval(TaskContext context) {
+    public void eval(final TaskContext context) {
+        final CoreTaskContext coreTaskContext = (CoreTaskContext) context;
         final ActionDoWhile selfPointer = this;
-        final TaskResult previousResult = context.result();
-        if (previousResult == null) {
-            context.continueTask();
-        } else {
-            final TaskResultIterator it = previousResult.iterator();
-            final TaskResult finalResult = context.wrap(null);
-            finalResult.allocate(previousResult.size());
-            final AtomicInteger cursor = new AtomicInteger(0);
-            final Callback[] recursiveAction = new Callback[1];
-            final TaskResult[] loopRes = new TaskResult[1];
-            recursiveAction[0] = new Callback<TaskResult>() {
-                @Override
-                public void on(final TaskResult res) {
-                    int current = cursor.getAndIncrement();
-                    finalResult.set(current, res);
-                    loopRes[0].free();
-                    Object nextResult = it.next();
-                    if (_cond.eval(context)) {
-                        loopRes[0] = context.wrap(it.next());
-                    } else {
-                        loopRes[0] = null;
+        final Callback[] recursiveAction = new Callback[1];
+        recursiveAction[0] = new Callback<TaskResult>() {
+            @Override
+            public void on(final TaskResult res) {
+                final TaskResult previous = coreTaskContext._result;
+                coreTaskContext._result = res;
+                if (_cond.eval(context)) {
+                    if (previous != null) {
+                        previous.free();
                     }
-                    if (nextResult == null) {
-                        context.continueWith(finalResult);
-                    } else {
-                        selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
+                    selfPointer._then.executeFrom(context, ((CoreTaskContext) context)._result, SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
+                } else {
+                    if (previous != null) {
+                        previous.free();
                     }
+                    context.continueWith(res);
                 }
-            };
-
-            loopRes[0] = context.wrap(it.next());
-            context.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
-                @Override
-                public void run() {
-                    _then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
-                }
-            });
-        }
+            }
+        };
+        _then.executeFrom(context, coreTaskContext._result, SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
     }
+
+    @Override
+    public String toString() {
+        return "doWhile()";
+    }
+
 }

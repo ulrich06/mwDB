@@ -18,24 +18,29 @@ class ActionWhileDo extends AbstractTaskAction {
 
     @Override
     public void eval(final TaskContext context) {
+        final CoreTaskContext coreTaskContext = (CoreTaskContext) context;
         final ActionWhileDo selfPointer = this;
         final Callback[] recursiveAction = new Callback[1];
-        final TaskResult[] loopRes = new TaskResult[1];
         recursiveAction[0] = new Callback<TaskResult>() {
             @Override
             public void on(final TaskResult res) {
+                final TaskResult previous = coreTaskContext._result;
+                coreTaskContext._result = res;
                 if (_cond.eval(context)) {
-                    loopRes[0].free();
-                    loopRes[0] = res;
-                    selfPointer._then.executeFrom(context, context.wrap(loopRes[0]), SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
+                    if (previous != null) {
+                        previous.free();
+                    }
+                    selfPointer._then.executeFrom(context, ((CoreTaskContext) context)._result, SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
                 } else {
+                    if (previous != null) {
+                        previous.free();
+                    }
                     context.continueWith(res);
                 }
             }
         };
         if (_cond.eval(context)) {
-            loopRes[0] = context.result();
-            _then.executeFrom(context, loopRes[0], SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
+            _then.executeFrom(context, coreTaskContext._result, SchedulerAffinity.SAME_THREAD, recursiveAction[0]);
         } else {
             context.continueTask();
         }

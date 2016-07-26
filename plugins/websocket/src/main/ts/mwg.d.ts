@@ -554,6 +554,11 @@ declare module org {
                 static WORLD_ORDER_CHUNK: number;
                 static GEN_CHUNK: number;
             }
+            class ConsoleHook implements org.mwg.task.TaskHook {
+                private static _instance;
+                static instance(): org.mwg.plugin.ConsoleHook;
+                on(previous: org.mwg.task.TaskAction, next: org.mwg.task.TaskAction, context: org.mwg.task.TaskContext): void;
+            }
             class Enforcer {
                 private checkers;
                 asBool(propertyName: string): org.mwg.plugin.Enforcer;
@@ -794,10 +799,9 @@ declare module org {
                 repeat(repetition: string, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 repeatPar(repetition: string, subTask: org.mwg.task.Task): org.mwg.task.Task;
                 print(name: string): org.mwg.task.Task;
+                hook(hook: org.mwg.task.TaskHook): org.mwg.task.Task;
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
-                executeVerbose(graph: org.mwg.Graph, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 executeWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
-                executeVerboseWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 executeFrom(context: org.mwg.task.TaskContext, initial: any, affinity: number, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 emptyResult(): org.mwg.task.TaskResult<any>;
             }
@@ -829,7 +833,7 @@ declare module org {
                 continueTask(): void;
                 continueWith(nextResult: org.mwg.task.TaskResult<any>): void;
                 template(input: string): string;
-                isVerbose(): boolean;
+                hook(): org.mwg.task.TaskHook;
                 ident(): number;
             }
             interface TaskFunctionConditional {
@@ -849,6 +853,9 @@ declare module org {
             }
             interface TaskFunctionSelectObject {
                 (object: any, context: org.mwg.task.TaskContext): boolean;
+            }
+            interface TaskHook {
+                on(previous: org.mwg.task.TaskAction, next: org.mwg.task.TaskAction, context: org.mwg.task.TaskContext): void;
             }
             interface TaskResult<A> {
                 iterator(): org.mwg.task.TaskResultIterator<any>;
@@ -1459,6 +1466,7 @@ declare module org {
                     private _then;
                     constructor(p_then: org.mwg.task.Task, p_cond: org.mwg.task.TaskFunctionConditional);
                     eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
                 }
                 class ActionForeach extends org.mwg.plugin.AbstractTaskAction {
                     private _subTask;
@@ -1674,6 +1682,7 @@ declare module org {
                     private _then;
                     constructor(p_cond: org.mwg.task.TaskFunctionConditional, p_then: org.mwg.task.Task);
                     eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
                 }
                 class ActionWith extends org.mwg.plugin.AbstractTaskAction {
                     private _patternTemplate;
@@ -1704,6 +1713,7 @@ declare module org {
                 class CoreTask implements org.mwg.task.Task {
                     private _first;
                     private _last;
+                    private _hook;
                     private addAction(nextAction);
                     setWorld(template: string): org.mwg.task.Task;
                     setTime(template: string): org.mwg.task.Task;
@@ -1741,10 +1751,7 @@ declare module org {
                     save(): org.mwg.task.Task;
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
                     execute(graph: org.mwg.Graph, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
-                    executeVerbose(graph: org.mwg.Graph, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     executeWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
-                    executeVerboseWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
-                    private internal_executeWith(graph, initial, callback, isVerbose);
                     executeFrom(parentContext: org.mwg.task.TaskContext, initial: any, affinity: number, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;
@@ -1760,6 +1767,7 @@ declare module org {
                     repeat(repetition: string, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     repeatPar(repetition: string, subTask: org.mwg.task.Task): org.mwg.task.Task;
                     print(name: string): org.mwg.task.Task;
+                    hook(p_hook: org.mwg.task.TaskHook): org.mwg.task.Task;
                     emptyResult(): org.mwg.task.TaskResult<any>;
                     static fillDefault(registry: java.util.Map<string, org.mwg.task.TaskActionFactory>): void;
                 }
@@ -1768,14 +1776,14 @@ declare module org {
                     private _parent;
                     private _graph;
                     private _callback;
-                    private verbose;
                     private _ident;
                     private _localVariables;
                     private _current;
-                    private _result;
+                    _result: org.mwg.task.TaskResult<any>;
                     private _world;
                     private _time;
-                    constructor(parentContext: org.mwg.task.TaskContext, initial: org.mwg.task.TaskResult<any>, p_graph: org.mwg.Graph, isVerbose: boolean, p_ident: number, p_callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>);
+                    private _hook;
+                    constructor(parentContext: org.mwg.task.TaskContext, initial: org.mwg.task.TaskResult<any>, p_graph: org.mwg.Graph, p_hook: org.mwg.task.TaskHook, p_ident: number, p_callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>);
                     ident(): number;
                     graph(): org.mwg.Graph;
                     world(): number;
@@ -1799,10 +1807,9 @@ declare module org {
                     resultAsStrings(): org.mwg.task.TaskResult<string>;
                     continueWith(nextResult: org.mwg.task.TaskResult<any>): void;
                     continueTask(): void;
-                    private printDebug(t);
                     execute(initialTaskAction: org.mwg.plugin.AbstractTaskAction): void;
                     template(input: string): string;
-                    isVerbose(): boolean;
+                    hook(): org.mwg.task.TaskHook;
                 }
                 class CoreTaskResult<A> implements org.mwg.task.TaskResult<A> {
                     private _backend;

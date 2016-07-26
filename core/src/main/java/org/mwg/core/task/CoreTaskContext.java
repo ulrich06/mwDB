@@ -24,7 +24,7 @@ class CoreTaskContext implements TaskContext {
 
     private Map<String, TaskResult> _localVariables = null;
     private AbstractTaskAction _current;
-    private TaskResult _result;
+    TaskResult _result;
     private long _world;
     private long _time;
     private final TaskHook _hook;
@@ -155,7 +155,12 @@ class CoreTaskContext implements TaskContext {
             previous = new CoreTaskResult(null, false);
             this._globalVariables.put(name, previous);
         }
-        previous.add(value.clone());
+        if (value != null) {
+            TaskResult clonedValue = value.clone();
+            for (int i = 0; i < clonedValue.size(); i++) {
+                previous.add(clonedValue.get(i));
+            }
+        }
     }
 
     @Override
@@ -172,7 +177,12 @@ class CoreTaskContext implements TaskContext {
             previous = new CoreTaskResult(null, false);
             target.put(name, previous);
         }
-        previous.add(value.clone());
+        if (value != null) {
+            TaskResult clonedValue = value.clone();
+            for (int i = 0; i < clonedValue.size(); i++) {
+                previous.add(clonedValue.get(i));
+            }
+        }
     }
 
     @Override

@@ -38,7 +38,7 @@ public class ActionWhileDoTest extends AbstractActionTest {
                                 context.continueWith(null);
                             }
                         })))
-                )/*.fromVar("leaves")*/.then(new Action() {
+                ).fromVar("leaves").then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
                         //System.out.println("done with "+context.result().size());
@@ -47,10 +47,15 @@ public class ActionWhileDoTest extends AbstractActionTest {
                 });
 
 
-                whiletask.hook(ConsoleHook.instance()).execute(graph, new Callback<TaskResult>() {
+                whiletask/*.hook(ConsoleHook.instance())*/.hook(new TaskHook() {
+                    @Override
+                    public void on(TaskAction previous, TaskAction next, TaskContext context) {
+                        //System.out.println(next);
+                    }
+                }).execute(graph, new Callback<TaskResult>() {
                     @Override
                     public void on(TaskResult result) {
-                        System.out.println("end "+result.size());
+                        System.out.println(result);
                     }
                 });
 

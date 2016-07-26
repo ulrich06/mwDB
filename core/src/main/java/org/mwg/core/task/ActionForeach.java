@@ -27,17 +27,15 @@ class ActionForeach extends AbstractTaskAction {
             final TaskResultIterator it = previousResult.iterator();
             final TaskResult finalResult = context.wrap(null);
             finalResult.allocate(previousResult.size());
-            final AtomicInteger cursor = new AtomicInteger(0);
             final Callback[] recursiveAction = new Callback[1];
             final TaskResult[] loopRes = new TaskResult[1];
             recursiveAction[0] = new Callback<TaskResult>() {
                 @Override
                 public void on(final TaskResult res) {
-                    int current = cursor.getAndIncrement();
-                    if (res != null && res.size() == 1) {
-                        finalResult.set(current, res.get(0));
-                    } else {
-                        finalResult.set(current, res);
+                    if (res != null) {
+                        for (int i = 0; i < res.size(); i++) {
+                            finalResult.add(res.get(i));
+                        }
                     }
                     loopRes[0].free();
                     Object nextResult = it.next();

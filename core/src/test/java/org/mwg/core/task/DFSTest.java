@@ -138,7 +138,7 @@ public class DFSTest {
                     })*/.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
                         @Override
                         public void on(TaskResult result) {
-                            Assert.assertEquals(result.toString(),"[[2],[4],[5],[7]]");
+                            Assert.assertEquals(result.toString(),"[2,4,5,7]");
                         }
                     });
 
