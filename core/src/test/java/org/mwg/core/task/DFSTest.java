@@ -7,6 +7,8 @@ import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
 import org.mwg.core.scheduler.NoopScheduler;
+import org.mwg.plugin.ConsoleHook;
+import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import static org.mwg.task.Actions.*;
@@ -128,16 +130,19 @@ public class DFSTest {
                     TaskResult initialResult = newTask().emptyResult();
                     initialResult.add(n1);
 
-                    dfs.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
+                    dfs/*.hook(ConsoleHook.instance())/*.hook(new TaskHook() {
+                        @Override
+                        public void on(TaskAction previous, TaskAction next, TaskContext context) {
+                            System.out.println(next);
+                        }
+                    })*/.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
                         @Override
                         public void on(TaskResult result) {
-                            System.out.println(result);
+                            Assert.assertEquals(result.toString(),"[[2],[4],[5],[7]]");
                         }
                     });
 
-
                 }
-
 
             }
         });

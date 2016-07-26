@@ -50,7 +50,7 @@ public interface TaskContext {
 
     String template(String input);
 
-    boolean isVerbose();
+    TaskHook hook();
 
     int ident();
 

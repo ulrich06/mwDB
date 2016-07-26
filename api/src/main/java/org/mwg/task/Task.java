@@ -344,23 +344,13 @@ public interface Task {
 
     Task print(String name);
 
-    void execute(final Graph graph, final Callback<TaskResult> result);
+    Task hook(TaskHook hook);
 
-    void executeVerbose(final Graph graph, final Callback<TaskResult> result);
+    void execute(final Graph graph, final Callback<TaskResult> result);
 
     void executeWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
 
-    void executeVerboseWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
-
     void executeFrom(final TaskContext context, final Object initial, final byte affinity, final Callback<TaskResult> result);
-
-/*
-    void executeWith(final Graph graph, final Map<String, TaskResult> variables, TaskResult initialResult, final boolean isVerbose, final Callback<TaskResult> result);
-
-    void executeFrom(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
-
-    void executeFromPar(final TaskContext parent, final TaskResult initialResult, final Callback<TaskResult> result);
-*/
 
     TaskResult emptyResult();
 

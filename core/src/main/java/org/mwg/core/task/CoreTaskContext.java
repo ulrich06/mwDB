@@ -20,7 +20,6 @@ class CoreTaskContext implements TaskContext {
     private final TaskContext _parent;
     private final Graph _graph;
     private final Callback<TaskResult> _callback;
-    private final boolean verbose;
     private final int _ident;
 
     private Map<String, TaskResult> _localVariables = null;
@@ -28,23 +27,20 @@ class CoreTaskContext implements TaskContext {
     private TaskResult _result;
     private long _world;
     private long _time;
+    private final TaskHook _hook;
 
-    CoreTaskContext(final TaskContext parentContext, final TaskResult initial, final Graph p_graph, final boolean isVerbose, final int p_ident, final Callback<TaskResult> p_callback) {
-        this.verbose = isVerbose;
+    CoreTaskContext(final TaskContext parentContext, final TaskResult initial, final Graph p_graph, final TaskHook p_hook, final int p_ident, final Callback<TaskResult> p_callback) {
+        this._hook = p_hook;
         this._ident = p_ident;
         this._world = 0;
         this._time = 0;
         this._graph = p_graph;
         this._parent = parentContext;
-
-        //Global variable management
         if (parentContext == null) {
             this._globalVariables = new ConcurrentHashMap<String, TaskResult>();
         } else {
             this._globalVariables = _parent.globalVariables();
         }
-
-        //Local initialisation
         this._result = initial;
         this._callback = p_callback;
     }
@@ -217,6 +213,7 @@ class CoreTaskContext implements TaskContext {
     @Override
     public final void continueTask() {
         //next step now...
+        final AbstractTaskAction previousAction = _current;
         final AbstractTaskAction nextAction = _current.next();
         _current = nextAction;
         if (nextAction == null) {
@@ -244,25 +241,17 @@ class CoreTaskContext implements TaskContext {
                 }
             }
         } else {
-            if (verbose) {
-                printDebug(nextAction);
+            if (this._hook != null) {
+                this._hook.on(previousAction, nextAction, this);
             }
             nextAction.eval(this);
         }
     }
 
-    private void printDebug(TaskAction t) {
-        for (int i = 0; i < _ident; i++) {
-            System.out.print("\t");
-        }
-        String taskName = t.toString();
-        System.out.println(template(taskName));
-    }
-
     final void execute(AbstractTaskAction initialTaskAction) {
         this._current = initialTaskAction;
-        if (verbose) {
-            printDebug(_current);
+        if (this._hook != null) {
+            this._hook.on(null, _current, this);
         }
         this._current.eval(this);
     }
@@ -383,7 +372,7 @@ class CoreTaskContext implements TaskContext {
 
 
     @Override
-    public boolean isVerbose() {
-        return this.verbose;
+    public TaskHook hook() {
+        return this._hook;
     }
 }

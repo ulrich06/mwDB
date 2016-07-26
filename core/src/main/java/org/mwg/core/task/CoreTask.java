@@ -15,7 +15,7 @@ public class CoreTask implements org.mwg.task.Task {
 
     private AbstractTaskAction _first = null;
     private AbstractTaskAction _last = null;
-
+    private TaskHook _hook = null;
 
     private void addAction(AbstractTaskAction nextAction) {
         if (_first == null) {
@@ -309,25 +309,11 @@ public class CoreTask implements org.mwg.task.Task {
 
     @Override
     public void execute(final Graph graph, final Callback<TaskResult> callback) {
-        internal_executeWith(graph, null, callback, false);
-    }
-
-    @Override
-    public void executeVerbose(final Graph graph, final Callback<TaskResult> callback) {
-        internal_executeWith(graph, null, callback, true);
+        executeWith(graph, null, callback);
     }
 
     @Override
     public void executeWith(final Graph graph, final Object initial, final Callback<TaskResult> callback) {
-        internal_executeWith(graph, initial, callback, false);
-    }
-
-    @Override
-    public void executeVerboseWith(final Graph graph, final Object initial, final Callback<TaskResult> callback) {
-        internal_executeWith(graph, initial, callback, true);
-    }
-
-    private void internal_executeWith(final Graph graph, final Object initial, final Callback<TaskResult> callback, final boolean isVerbose) {
         if (_first != null) {
             final TaskResult initalRes;
             if (initial instanceof CoreTaskResult) {
@@ -335,7 +321,7 @@ public class CoreTask implements org.mwg.task.Task {
             } else {
                 initalRes = new CoreTaskResult(initial, true);
             }
-            final CoreTaskContext context = new CoreTaskContext(null, initalRes, graph, isVerbose, 0, callback);
+            final CoreTaskContext context = new CoreTaskContext(null, initalRes, graph, this._hook, 0, callback);
             graph.scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                 @Override
                 public void run() {
@@ -358,7 +344,7 @@ public class CoreTask implements org.mwg.task.Task {
             } else {
                 initalRes = new CoreTaskResult(initial, true);
             }
-            final CoreTaskContext context = new CoreTaskContext(parentContext, initalRes, parentContext.graph(), parentContext.isVerbose(), parentContext.ident() + 1, callback);
+            final CoreTaskContext context = new CoreTaskContext(parentContext, initalRes, parentContext.graph(), parentContext.hook(), parentContext.ident() + 1, callback);
             parentContext.graph().scheduler().dispatch(affinity, new Job() {
                 @Override
                 public void run() {
@@ -539,6 +525,12 @@ public class CoreTask implements org.mwg.task.Task {
     @Override
     public Task print(String name) {
         addAction(new ActionPrint(name));
+        return this;
+    }
+
+    @Override
+    public Task hook(final TaskHook p_hook) {
+        this._hook = p_hook;
         return this;
     }
 
