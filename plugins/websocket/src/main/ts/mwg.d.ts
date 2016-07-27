@@ -810,6 +810,8 @@ declare module org {
                 hook(hook: org.mwg.task.TaskHook): org.mwg.task.Task;
                 execute(graph: org.mwg.Graph, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 executeWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
+                prepareWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): org.mwg.task.TaskContext;
+                executeUsing(preparedContext: org.mwg.task.TaskContext): void;
                 executeFrom(context: org.mwg.task.TaskContext, initial: any, affinity: number, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 emptyResult(): org.mwg.task.TaskResult<any>;
             }
@@ -1788,6 +1790,8 @@ declare module org {
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
                     execute(graph: org.mwg.Graph, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     executeWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
+                    prepareWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): org.mwg.task.TaskContext;
+                    executeUsing(preparedContext: org.mwg.task.TaskContext): void;
                     executeFrom(parentContext: org.mwg.task.TaskContext, initial: any, affinity: number, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;

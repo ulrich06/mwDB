@@ -381,6 +381,10 @@ public interface Task {
 
     void executeWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
 
+    TaskContext prepareWith(final Graph graph, final Object initial, final Callback<TaskResult> result);
+
+    void executeUsing(TaskContext preparedContext);
+
     void executeFrom(final TaskContext context, final Object initial, final byte affinity, final Callback<TaskResult> result);
 
     TaskResult emptyResult();

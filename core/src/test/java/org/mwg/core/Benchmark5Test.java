@@ -22,8 +22,8 @@ public class Benchmark5Test {
     public static void main(String[] args) {
         Graph g = new GraphBuilder()
                 //.withScheduler(new HybridScheduler())
-                  //.withScheduler(new TrampolineScheduler())
-                   .withScheduler(new ExecutorScheduler())
+                //.withScheduler(new TrampolineScheduler())
+                .withScheduler(new ExecutorScheduler())
                 .build();
         g.connect(new Callback<Boolean>() {
             @Override
@@ -35,7 +35,7 @@ public class Benchmark5Test {
                     @Override
                     public void eval(TaskContext context) {
                         Random random = new Random();
-                        for(int i=0;i<100;i++){
+                        for (int i = 0; i < 100; i++) {
                             random.nextFloat();
                         }
                         context.continueTask();
