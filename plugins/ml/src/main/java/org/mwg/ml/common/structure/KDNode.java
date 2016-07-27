@@ -6,6 +6,12 @@ import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.distance.EuclideanDistance;
 import org.mwg.ml.common.distance.GaussianDistance;
 import org.mwg.plugin.*;
+import org.mwg.task.Action;
+import org.mwg.task.Task;
+import org.mwg.task.TaskContext;
+import org.mwg.task.TaskFunctionConditional;
+
+import static org.mwg.task.Actions.*;
 
 /**
  * Created by assaad on 29/06/16.
@@ -330,12 +336,73 @@ public class KDNode extends AbstractNode {
     }
 
 
-    private static void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] key, final int lev, final int dim, final double err, final Node value, final Callback<Boolean> callback) {
+    static Task insert = whileDo(new TaskFunctionConditional() {
+        @Override
+        public boolean eval(TaskContext context) {
+
+            Node current = context.resultAsNodes().get(0);
+            double[] nodeKey = (double[]) current.get(INTERNAL_KEY);
+
+
+            //Get variables from context
+            double[] keyToInsert = (double[]) context.globalVariables().get("key").get(0);
+            Node valueToInsert = (Node) context.globalVariables().get("value").get(0);
+            Node root = (Node) context.globalVariables().get("root").get(0);
+            Distance distance = (Distance) context.globalVariables().get("distance").get(0);
+            double err = (double) context.globalVariables().get("err").get(0);
+            int lev = (int) context.globalVariables().get("lev").get(0);
+            int dim = keyToInsert.length;
+
+
+            //Bootstrap, first insert ever
+            if (nodeKey == null) {
+                current.set(INTERNAL_KEY, keyToInsert);
+                current.set(INTERNAL_VALUE, valueToInsert);
+                current.set(NUM_NODES, 1);
+                return false; //stop the while loop and insert here
+            } else if (distance.measure(keyToInsert, nodeKey) < err) {
+                current.set(INTERNAL_VALUE, valueToInsert);
+                return false; //insert in the current node, and done with it, no need to continue looping
+            }
+            else {
+                //Decision point for next step
+                long[] child = null;
+                String nextRel;
+                if (keyToInsert[lev] > nodeKey[lev]) {
+                    child = (long[]) current.get(INTERNAL_RIGHT);
+                    nextRel = INTERNAL_RIGHT;
+                } else {
+                    child = (long[]) current.get(INTERNAL_LEFT);
+                    nextRel = INTERNAL_LEFT;
+                }
+
+                //If there is no node to the right, we create one and the game is over
+                if (child == null || child.length == 0) {
+                    KDNode childNode = (KDNode) context.graph().newTypedNode(current.world(), current.time(), NAME);
+                    childNode.set(INTERNAL_KEY, keyToInsert);
+                    childNode.add(INTERNAL_VALUE, valueToInsert);
+                    current.add(nextRel, childNode);
+                    root.set(NUM_NODES, (Integer) root.get(NUM_NODES) + 1);
+                    childNode.free();
+                    return false;
+                } else {
+                    //Otherwise we need to prepare for the next while iteration
+                    context.setGlobalVariable("next", context.wrap(nextRel));
+                    context.setGlobalVariable("lev", context.wrap((lev + 1) % dim));
+                    return true;
+                }
+            }
+        }
+
+    }, traverse("{{next}}"));
+
+
+    private static void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] keyToInsert, final int lev, final int dim, final double err, final Node valueToInsert, final Callback<Boolean> callback) {
         NodeState state = node.unphasedState();
-        double[] tk = (double[]) state.getFromKey(INTERNAL_KEY);
-        if (tk == null) {
-            state.setFromKey(INTERNAL_KEY, Type.DOUBLE_ARRAY, key);
-            state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{value.id()});
+        double[] nodeKey = (double[]) state.getFromKey(INTERNAL_KEY);
+        if (nodeKey == null) {
+            state.setFromKey(INTERNAL_KEY, Type.DOUBLE_ARRAY, keyToInsert);
+            state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{valueToInsert.id()});
             if (node == root) {
                 state.setFromKey(NUM_NODES, Type.INT, 1);
             }
@@ -347,8 +414,8 @@ public class KDNode extends AbstractNode {
             }
             return;
 
-        } else if (distance.measure(key, tk) < err) {
-            state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{value.id()});
+        } else if (distance.measure(keyToInsert, nodeKey) < err) {
+            state.setFromKey(INTERNAL_VALUE, Type.RELATION, new long[]{valueToInsert.id()});
             if (node != root) {
                 node.free();
             }
@@ -356,54 +423,25 @@ public class KDNode extends AbstractNode {
                 callback.on(true);
             }
             return;
-        } else if (key[lev] > tk[lev]) {
-            //check right
-            long[] right = (long[]) state.getFromKey(INTERNAL_RIGHT);
-            if (right == null || right.length == 0) {
-                KDNode rightNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
-                rightNode.set(INTERNAL_KEY, key);
-                rightNode.add(INTERNAL_VALUE, value);
-                state.setFromKey(INTERNAL_RIGHT, Type.RELATION, new long[]{rightNode.id()});
-                root.set(NUM_NODES, (Integer) root.get(NUM_NODES) + 1);
-                rightNode.free();
-                if (node != root) {
-                    node.free();
-                }
-                if (callback != null) {
-                    callback.on(true);
-                }
-                return;
+        }
+        else {
+            long[] child = null;
+            String nextRel;
+            if (keyToInsert[lev] > nodeKey[lev]) {
+                child = (long[]) state.getFromKey(INTERNAL_RIGHT);
+                nextRel = INTERNAL_RIGHT;
             } else {
-                node.rel(INTERNAL_RIGHT, new Callback<Node[]>() {
-                    @Override
-                    public void on(Node[] result) {
-                        if (node != root) {
-                            node.free();
-                        }
-                        if (result == null || result.length == 0 || result[0] == null) {
-                            System.out.println("RES RIGHT NULL !!! " + result.length + " " + right[0]);
-                        } else {
-                            root.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
-                                @Override
-                                public void run() {
-                                    internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
-                                }
-                            });
-                        }
-                    }
-                });
-                return;
+                child = (long[]) state.getFromKey(INTERNAL_LEFT);
+                nextRel = INTERNAL_LEFT;
             }
 
-        } else {
-            long[] left = (long[]) state.getFromKey(INTERNAL_LEFT);
-            if (left == null) {
-                KDNode leftNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
-                leftNode.set(INTERNAL_KEY, key);
-                leftNode.add(INTERNAL_VALUE, value);
-                state.setFromKey(INTERNAL_LEFT, Type.RELATION, new long[]{leftNode.id()});
+            if (child == null || child.length == 0) {
+                KDNode childNode = (KDNode) root.graph().newTypedNode(root.world(), root.time(), NAME);
+                childNode.set(INTERNAL_KEY, keyToInsert);
+                childNode.add(INTERNAL_VALUE, valueToInsert);
+                state.setFromKey(nextRel, Type.RELATION, new long[]{childNode.id()});
                 root.set(NUM_NODES, (Integer) root.get(NUM_NODES) + 1);
-                leftNode.free();
+                childNode.free();
                 if (node != root) {
                     node.free();
                 }
@@ -412,19 +450,19 @@ public class KDNode extends AbstractNode {
                 }
                 return;
             } else {
-                node.rel(INTERNAL_LEFT, new Callback<Node[]>() {
+                node.rel(nextRel, new Callback<Node[]>() {
                     @Override
                     public void on(Node[] result) {
                         if (node != root) {
                             node.free();
                         }
                         if (result == null || result.length == 0 || result[0] == null) {
-                            System.out.println("RES LEFT NULL !!!! " + result.length + " " + left[0]);
+                            System.out.println("RES NULL !!! " + result.length);
                         } else {
                             root.graph().scheduler().dispatch(SchedulerAffinity.SAME_THREAD, new Job() {
                                 @Override
                                 public void run() {
-                                    internalInsert((KDNode) result[0], root, distance, key, (lev + 1) % dim, dim, err, value, callback);
+                                    internalInsert((KDNode) result[0], root, distance, keyToInsert, (lev + 1) % dim, dim, err, valueToInsert, callback);
                                 }
                             });
                         }
