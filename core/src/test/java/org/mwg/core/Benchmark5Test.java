@@ -10,6 +10,8 @@ import org.mwg.task.Action;
 import org.mwg.task.TaskContext;
 import org.mwg.task.TaskResult;
 
+import java.util.Random;
+
 import static org.mwg.task.Actions.*;
 
 /**
@@ -19,9 +21,9 @@ public class Benchmark5Test {
 
     public static void main(String[] args) {
         Graph g = new GraphBuilder()
-                .withScheduler(new HybridScheduler())
-              //  .withScheduler(new TrampolineScheduler())
-               //   .withScheduler(new ExecutorScheduler())
+                //.withScheduler(new HybridScheduler())
+                  //.withScheduler(new TrampolineScheduler())
+                   .withScheduler(new ExecutorScheduler())
                 .build();
         g.connect(new Callback<Boolean>() {
             @Override
@@ -29,10 +31,19 @@ public class Benchmark5Test {
 
                 final long previous = System.currentTimeMillis();
 
-                repeatPar("100", repeat("1000", newTask())).then(new Action() {
+                repeatPar("1000", repeat("1000", newTask().then(new Action() {
                     @Override
                     public void eval(TaskContext context) {
-                        System.out.println("End "+(System.currentTimeMillis()-previous)+" ms");
+                        Random random = new Random();
+                        for(int i=0;i<100;i++){
+                            random.nextFloat();
+                        }
+                        context.continueTask();
+                    }
+                }))).then(new Action() {
+                    @Override
+                    public void eval(TaskContext context) {
+                        System.out.println("End " + (System.currentTimeMillis() - previous) + " ms");
                         g.disconnect(null);
                     }
                 }).execute(g, new Callback<TaskResult>() {
@@ -43,14 +54,12 @@ public class Benchmark5Test {
                 });
             }
         });
-
         /*
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
-
     }
 
 }
