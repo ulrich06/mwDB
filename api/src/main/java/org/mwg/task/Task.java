@@ -275,6 +275,8 @@ public interface Task {
 
     Task save();
 
+    Task clear();
+
     /**
      * Create a new node on the [world,time] of the context
      *

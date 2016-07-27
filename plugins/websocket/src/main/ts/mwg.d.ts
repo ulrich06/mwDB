@@ -750,6 +750,7 @@ declare module org {
                 static doWhile(then: org.mwg.task.Task, cond: org.mwg.task.TaskFunctionConditional): org.mwg.task.Task;
                 static split(splitPattern: string): org.mwg.task.Task;
                 static lookup(world: string, time: string, id: string): org.mwg.task.Task;
+                static clear(): org.mwg.task.Task;
             }
             interface Task {
                 setWorld(template: string): org.mwg.task.Task;
@@ -790,6 +791,7 @@ declare module org {
                 doWhile(then: org.mwg.task.Task, conditional: org.mwg.task.TaskFunctionConditional): org.mwg.task.Task;
                 then(action: org.mwg.task.Action): org.mwg.task.Task;
                 save(): org.mwg.task.Task;
+                clear(): org.mwg.task.Task;
                 newNode(): org.mwg.task.Task;
                 newTypedNode(typeNode: string): org.mwg.task.Task;
                 setProperty(propertyName: string, propertyType: number, variableNameToSet: string): org.mwg.task.Task;
@@ -1474,6 +1476,10 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionClear extends org.mwg.plugin.AbstractTaskAction {
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
                 class ActionDoWhile extends org.mwg.plugin.AbstractTaskAction {
                     private _cond;
                     private _then;
@@ -1778,6 +1784,7 @@ declare module org {
                     foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     save(): org.mwg.task.Task;
+                    clear(): org.mwg.task.Task;
                     lookup(world: string, time: string, id: string): org.mwg.task.Task;
                     execute(graph: org.mwg.Graph, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     executeWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;

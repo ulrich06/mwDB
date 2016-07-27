@@ -16,15 +16,7 @@ class ActionPrint extends AbstractTaskAction {
 
     @Override
     public void eval(final TaskContext context) {
-        /*if (context.isVerbose()) {
-            for (int i = 0; i < context.ident() + 1; i++) {
-                System.out.print("\t");
-            }
-            System.out.println(context.template(_name));
-        } else {
-        */
         System.out.println(context.template(_name));
-        //}
         context.continueTask();
     }
 

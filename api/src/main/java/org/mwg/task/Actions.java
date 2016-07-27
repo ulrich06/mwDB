@@ -206,4 +206,8 @@ public class Actions {
         return newTask().lookup(world, time, id);
     }
 
+    public static Task clear() {
+        return newTask().clear();
+    }
+
 }

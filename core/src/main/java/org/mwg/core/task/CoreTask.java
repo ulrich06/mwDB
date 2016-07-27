@@ -338,6 +338,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task clear() {
+        addAction(new ActionClear());
+        return this;
+    }
+
+    @Override
     public Task lookup(String world, String time, String id) {
         addAction(new ActionLookup(world, time, id));
         return this;
