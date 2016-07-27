@@ -21,7 +21,7 @@ class ActionAsVar extends AbstractTaskAction {
         if (_global) {
             context.setGlobalVariable(context.template(_name), previousResult);
         } else {
-            context.setLocalVariable(context.template(_name), previousResult);
+            context.setVariable(context.template(_name), previousResult);
         }
         context.continueTask();
     }
@@ -31,7 +31,7 @@ class ActionAsVar extends AbstractTaskAction {
         if (_global) {
             return "asGlobalVar(\'" + _name + "\')";
         } else {
-            return "asLocalVar(\'" + _name + "\')";
+            return "asVar(\'" + _name + "\')";
         }
     }
 

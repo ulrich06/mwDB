@@ -6,9 +6,6 @@ import org.mwg.Callback;
 import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 import org.mwg.Node;
-import org.mwg.core.scheduler.NoopScheduler;
-import org.mwg.plugin.ConsoleHook;
-import org.mwg.plugin.SchedulerAffinity;
 import org.mwg.task.*;
 
 import static org.mwg.task.Actions.*;
@@ -83,9 +80,9 @@ public class DFSTest {
                 if (n1 != null) {
                     //DO BFS from n1
                     Task dfs = newTask();
-                    dfs.foreach(asLocalVar("parent")
-                            .traverse("left").asLocalVar("left")
-                            .fromVar("parent").traverse("right").asLocalVar("right")
+                    dfs.foreach(asVar("parent")
+                            .traverse("left").asVar("left")
+                            .fromVar("parent").traverse("right").asVar("right")
                             .then(new Action() {
                                 @Override
                                 public void eval(TaskContext context) {
@@ -130,7 +127,7 @@ public class DFSTest {
                     TaskResult initialResult = newTask().emptyResult();
                     initialResult.add(n1);
 
-                    dfs/*.hook(ConsoleHook.instance())/*.hook(new TaskHook() {
+                    dfs/*.hook(ConsoleHook.instance())/*/ /*.hook(ConsoleHook.instance())/*.hook(new TaskHook() {
                         @Override
                         public void on(TaskAction previous, TaskAction next, TaskContext context) {
                             System.out.println(next);
@@ -138,7 +135,7 @@ public class DFSTest {
                     })*/.executeWith(n1.graph(), initialResult, new Callback<TaskResult>() {
                         @Override
                         public void on(TaskResult result) {
-                            Assert.assertEquals(result.toString(),"[2,4,5,7]");
+                            Assert.assertEquals(result.toString(), "[2,4,5,7]");
                         }
                     });
 

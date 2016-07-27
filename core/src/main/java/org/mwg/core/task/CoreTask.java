@@ -100,11 +100,20 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task asLocalVar(String variableName) {
+    public final org.mwg.task.Task asVar(String variableName) {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
         addAction(new ActionAsVar(variableName, true));
+        return this;
+    }
+
+    @Override
+    public final org.mwg.task.Task defineVar(String variableName) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        addAction(new ActionDefineVar(variableName));
         return this;
     }
 
@@ -118,7 +127,7 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public Task addToLocalVar(String variableName) {
+    public Task addToVar(String variableName) {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
         }
@@ -399,14 +408,12 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public void executeFrom(final TaskContext parentContext, final Object initial, byte affinity, final Callback<TaskResult> callback) {
+    public void executeFrom(final TaskContext parentContext, final TaskResult initial, byte affinity, final Callback<TaskResult> callback) {
         if (_first != null) {
-            final TaskResult initalRes;
-            if (initial instanceof CoreTaskResult) {
-                initalRes = ((TaskResult) initial).clone();
-            } else {
-                initalRes = new CoreTaskResult(initial, true);
-            }
+            TaskResult initalRes = initial;
+            //if(affinity != SchedulerAffinity.SAME_THREAD){
+            initalRes = initalRes.clone();
+            // }
             final CoreTaskContext context = new CoreTaskContext(parentContext, initalRes, parentContext.graph(), parentContext.hook(), parentContext.ident() + 1, callback);
             parentContext.graph().scheduler().dispatch(affinity, new Job() {
                 @Override

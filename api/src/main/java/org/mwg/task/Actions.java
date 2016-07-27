@@ -62,6 +62,8 @@ public class Actions {
         return newTask().parse(flatTask);
     }
 
+
+
     public static Task asGlobalVar(String variableName) {
         return newTask().asGlobalVar(variableName);
     }
@@ -70,12 +72,12 @@ public class Actions {
         return newTask().addToGlobalVar(variableName);
     }
 
-    public static Task asLocalVar(String variableName) {
+    public static Task asVar(String variableName) {
         return newTask().asGlobalVar(variableName);
     }
 
-    public static Task addToLocalVar(String variableName) {
-        return newTask().addToLocalVar(variableName);
+    public static Task addToVar(String variableName) {
+        return newTask().addToVar(variableName);
     }
 
     public static Task map(TaskFunctionMap mapFunction) {

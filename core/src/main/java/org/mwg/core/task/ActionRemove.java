@@ -48,6 +48,5 @@ class ActionRemove extends AbstractTaskAction {
     public String toString() {
         return "remove(\'" + _relationName + "\'" + Constants.QUERY_SEP + "\'" + _variableNameToRemove + "\')";
     }
-
-
+    
 }

@@ -716,8 +716,8 @@ declare module org {
                 static parse(flatTask: string): org.mwg.task.Task;
                 static asGlobalVar(variableName: string): org.mwg.task.Task;
                 static addToGlobalVar(variableName: string): org.mwg.task.Task;
-                static asLocalVar(variableName: string): org.mwg.task.Task;
-                static addToLocalVar(variableName: string): org.mwg.task.Task;
+                static asVar(variableName: string): org.mwg.task.Task;
+                static addToVar(variableName: string): org.mwg.task.Task;
                 static map(mapFunction: org.mwg.task.TaskFunctionMap): org.mwg.task.Task;
                 static selectWith(name: string, pattern: string): org.mwg.task.Task;
                 static selectWithout(name: string, pattern: string): org.mwg.task.Task;
@@ -755,10 +755,11 @@ declare module org {
             interface Task {
                 setWorld(template: string): org.mwg.task.Task;
                 setTime(template: string): org.mwg.task.Task;
+                defineVar(variableName: string): org.mwg.task.Task;
                 asGlobalVar(variableName: string): org.mwg.task.Task;
                 addToGlobalVar(variableName: string): org.mwg.task.Task;
-                asLocalVar(variableName: string): org.mwg.task.Task;
-                addToLocalVar(variableName: string): org.mwg.task.Task;
+                asVar(variableName: string): org.mwg.task.Task;
+                addToVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
                 fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                 inject(inputValue: any): org.mwg.task.Task;
@@ -812,7 +813,7 @@ declare module org {
                 executeWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 prepareWith(graph: org.mwg.Graph, initial: any, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): org.mwg.task.TaskContext;
                 executeUsing(preparedContext: org.mwg.task.TaskContext): void;
-                executeFrom(context: org.mwg.task.TaskContext, initial: any, affinity: number, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
+                executeFrom(context: org.mwg.task.TaskContext, initial: org.mwg.task.TaskResult<any>, affinity: number, result: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                 emptyResult(): org.mwg.task.TaskResult<any>;
             }
             interface TaskAction {
@@ -831,12 +832,13 @@ declare module org {
                 wrap(input: any): org.mwg.task.TaskResult<any>;
                 wrapClone(input: any): org.mwg.task.TaskResult<any>;
                 newResult(): org.mwg.task.TaskResult<any>;
+                defineVariable(name: string): void;
                 setGlobalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
-                setLocalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
+                setVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                 addToGlobalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
-                addToLocalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
+                addToVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                 globalVariables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
-                localVariables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
+                variables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
                 result(): org.mwg.task.TaskResult<any>;
                 resultAsNodes(): org.mwg.task.TaskResult<org.mwg.Node>;
                 resultAsStrings(): org.mwg.task.TaskResult<string>;
@@ -1482,6 +1484,12 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionDefineVar extends org.mwg.plugin.AbstractTaskAction {
+                    private _name;
+                    constructor(p_name: string);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
                 class ActionDoWhile extends org.mwg.plugin.AbstractTaskAction {
                     private _cond;
                     private _then;
@@ -1757,9 +1765,10 @@ declare module org {
                     selectWith(name: string, pattern: string): org.mwg.task.Task;
                     selectWithout(name: string, pattern: string): org.mwg.task.Task;
                     asGlobalVar(variableName: string): org.mwg.task.Task;
-                    asLocalVar(variableName: string): org.mwg.task.Task;
+                    asVar(variableName: string): org.mwg.task.Task;
+                    defineVar(variableName: string): org.mwg.task.Task;
                     addToGlobalVar(variableName: string): org.mwg.task.Task;
-                    addToLocalVar(variableName: string): org.mwg.task.Task;
+                    addToVar(variableName: string): org.mwg.task.Task;
                     fromVar(variableName: string): org.mwg.task.Task;
                     fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
@@ -1792,7 +1801,7 @@ declare module org {
                     executeWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     prepareWith(graph: org.mwg.Graph, initial: any, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): org.mwg.task.TaskContext;
                     executeUsing(preparedContext: org.mwg.task.TaskContext): void;
-                    executeFrom(parentContext: org.mwg.task.TaskContext, initial: any, affinity: number, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
+                    executeFrom(parentContext: org.mwg.task.TaskContext, initial: org.mwg.task.TaskResult<any>, affinity: number, callback: org.mwg.Callback<org.mwg.task.TaskResult<any>>): void;
                     action(name: string, flatParams: string): org.mwg.task.Task;
                     parse(flat: string): org.mwg.task.Task;
                     newNode(): org.mwg.task.Task;
@@ -1835,13 +1844,14 @@ declare module org {
                     wrap(input: any): org.mwg.task.TaskResult<any>;
                     wrapClone(input: any): org.mwg.task.TaskResult<any>;
                     newResult(): org.mwg.task.TaskResult<any>;
+                    defineVariable(name: string): void;
                     setGlobalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
-                    setLocalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
+                    setVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                     private internal_deep_resolve_map(name);
                     addToGlobalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
-                    addToLocalVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
+                    addToVariable(name: string, value: org.mwg.task.TaskResult<any>): void;
                     globalVariables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
-                    localVariables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
+                    variables(): java.util.Map<string, org.mwg.task.TaskResult<any>>;
                     result(): org.mwg.task.TaskResult<any>;
                     resultAsNodes(): org.mwg.task.TaskResult<org.mwg.Node>;
                     resultAsStrings(): org.mwg.task.TaskResult<string>;

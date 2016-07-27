@@ -112,6 +112,14 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
+    public void defineVariable(final String name) {
+        if (this._localVariables == null) {
+            this._localVariables = new HashMap<String, TaskResult>();
+        }
+        this._localVariables.put(name, new CoreTaskResult(null, false));
+    }
+
+    @Override
     public final void setGlobalVariable(final String name, final TaskResult value) {
         final TaskResult previous = this._globalVariables.put(name, value.clone());
         if (previous != null) {
@@ -120,7 +128,7 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
-    public final void setLocalVariable(final String name, final TaskResult value) {
+    public final void setVariable(final String name, final TaskResult value) {
         Map<String, TaskResult> target = internal_deep_resolve_map(name);
         if (target == null) {
             if (this._localVariables == null) {
@@ -164,7 +172,7 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
-    public final void addToLocalVariable(final String name, final TaskResult value) {
+    public final void addToVariable(final String name, final TaskResult value) {
         Map<String, TaskResult> target = internal_deep_resolve_map(name);
         if (target == null) {
             if (this._localVariables == null) {
@@ -191,7 +199,7 @@ class CoreTaskContext implements TaskContext {
     }
 
     @Override
-    public Map<String, TaskResult> localVariables() {
+    public Map<String, TaskResult> variables() {
         return this._localVariables;
     }
 
@@ -213,7 +221,7 @@ class CoreTaskContext implements TaskContext {
     @Override
     public final void continueWith(TaskResult nextResult) {
         final TaskResult previousResult = this._result;
-        if (previousResult != null) {
+        if (previousResult != null && previousResult != nextResult) {
             previousResult.free();
         }
         _result = nextResult;
