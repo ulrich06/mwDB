@@ -247,6 +247,24 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task subTasks(Task[] subTasks) {
+        if (subTasks == null) {
+            throw new RuntimeException("subTask should not be null");
+        }
+        addAction(new ActionSubTasks(subTasks));
+        return this;
+    }
+
+    @Override
+    public Task subTasksPar(Task[] subTasks) {
+        if (subTasks == null) {
+            throw new RuntimeException("subTask should not be null");
+        }
+        addAction(new ActionSubTasksPar(subTasks));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task ifThen(TaskFunctionConditional cond, Task then) {
         if (cond == null) {
             throw new RuntimeException("condition should not be null");

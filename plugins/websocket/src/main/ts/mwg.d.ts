@@ -782,6 +782,8 @@ declare module org {
                 foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 subTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                subTasks(subTasks: org.mwg.task.Task[]): org.mwg.task.Task;
+                subTasksPar(subTasks: org.mwg.task.Task[]): org.mwg.task.Task;
                 ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 ifThenElse(cond: org.mwg.task.TaskFunctionConditional, thenSub: org.mwg.task.Task, elseSub: org.mwg.task.Task): org.mwg.task.Task;
                 whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
@@ -1657,6 +1659,18 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionSubTasks extends org.mwg.plugin.AbstractTaskAction {
+                    private _subTasks;
+                    constructor(p_subTasks: org.mwg.task.Task[]);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
+                class ActionSubTasksPar extends org.mwg.plugin.AbstractTaskAction {
+                    private _subTasks;
+                    constructor(p_subTasks: org.mwg.task.Task[]);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
                 class ActionTime extends org.mwg.plugin.AbstractTaskAction {
                     private _varName;
                     constructor(p_varName: string);
@@ -1754,6 +1768,8 @@ declare module org {
                     groupWhere(groupSubTask: org.mwg.task.Task): org.mwg.task.Task;
                     inject(inputValue: any): org.mwg.task.Task;
                     subTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    subTasks(subTasks: org.mwg.task.Task[]): org.mwg.task.Task;
+                    subTasksPar(subTasks: org.mwg.task.Task[]): org.mwg.task.Task;
                     ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                     ifThenElse(cond: org.mwg.task.TaskFunctionConditional, thenSub: org.mwg.task.Task, elseSub: org.mwg.task.Task): org.mwg.task.Task;
                     whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;

@@ -232,6 +232,13 @@ public interface Task {
      */
     Task subTask(Task subTask);
 
+    /**
+     * Execute and wait various sub tasks, result of this sub task is immediately enqueue and available for next
+     *
+     * @param subTasks that have to be executed
+     * @return this task to chain actions (fluent API)
+     */
+    Task subTasks(Task[] subTasks);
 
     /**
      * Execute and wait various sub tasks, result of this sub task is immediately enqueue and available for next
@@ -239,8 +246,7 @@ public interface Task {
      * @param subTasks that have to be executed
      * @return this task to chain actions (fluent API)
      */
-    //Task subTasks(Task[] subTasks);
-
+    Task subTasksPar(Task[] subTasks);
 
     /**
      * Execute a sub task if the condition is satisfied
