@@ -25,6 +25,14 @@ public interface Task {
     Task setTime(String template);
 
     /**
+     * Initialise a new scope context for a variable (copy the parent and isolate all set, such as re-definition in imperative languages)
+     *
+     * @param variableName identifier of this result
+     * @return this task to chain actions (fluent API)
+     */
+    Task defineVar(String variableName);
+
+    /**
      * Stores the current task result into a named variable with a global scope
      *
      * @param variableName identifier of this result
@@ -46,7 +54,7 @@ public interface Task {
      * @param variableName identifier of this result
      * @return this task to chain actions (fluent API)
      */
-    Task asLocalVar(String variableName);
+    Task asVar(String variableName);
 
     /**
      * Add the current task result to the local named variable
@@ -54,7 +62,7 @@ public interface Task {
      * @param variableName identifier of this result
      * @return this task to chain actions (fluent API)
      */
-    Task addToLocalVar(String variableName);
+    Task addToVar(String variableName);
 
     /**
      * Retrieves a stored variable and stack it for next sub tasks.
@@ -385,7 +393,7 @@ public interface Task {
 
     void executeUsing(TaskContext preparedContext);
 
-    void executeFrom(final TaskContext context, final Object initial, final byte affinity, final Callback<TaskResult> result);
+    void executeFrom(final TaskContext context, final TaskResult initial, final byte affinity, final Callback<TaskResult> result);
 
     TaskResult emptyResult();
 

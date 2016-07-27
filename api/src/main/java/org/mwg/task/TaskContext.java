@@ -25,17 +25,19 @@ public interface TaskContext {
 
     TaskResult newResult();
 
+    void defineVariable(String name);
+
     void setGlobalVariable(String name, TaskResult value);
 
-    void setLocalVariable(String name, TaskResult value);
+    void setVariable(String name, TaskResult value);
 
     void addToGlobalVariable(String name, TaskResult value);
 
-    void addToLocalVariable(String name, TaskResult value);
+    void addToVariable(String name, TaskResult value);
 
     Map<String, TaskResult> globalVariables();
 
-    Map<String, TaskResult> localVariables();
+    Map<String, TaskResult> variables();
 
     //Object based results
     TaskResult result();
