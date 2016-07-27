@@ -715,7 +715,9 @@ declare module org {
                 static fromIndex(indexName: string, query: string): org.mwg.task.Task;
                 static parse(flatTask: string): org.mwg.task.Task;
                 static asGlobalVar(variableName: string): org.mwg.task.Task;
+                static addToGlobalVar(variableName: string): org.mwg.task.Task;
                 static asLocalVar(variableName: string): org.mwg.task.Task;
+                static addToLocalVar(variableName: string): org.mwg.task.Task;
                 static map(mapFunction: org.mwg.task.TaskFunctionMap): org.mwg.task.Task;
                 static selectWith(name: string, pattern: string): org.mwg.task.Task;
                 static selectWithout(name: string, pattern: string): org.mwg.task.Task;
@@ -753,7 +755,9 @@ declare module org {
                 setWorld(template: string): org.mwg.task.Task;
                 setTime(template: string): org.mwg.task.Task;
                 asGlobalVar(variableName: string): org.mwg.task.Task;
+                addToGlobalVar(variableName: string): org.mwg.task.Task;
                 asLocalVar(variableName: string): org.mwg.task.Task;
+                addToLocalVar(variableName: string): org.mwg.task.Task;
                 fromVar(variableName: string): org.mwg.task.Task;
                 fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                 inject(inputValue: any): org.mwg.task.Task;
@@ -777,7 +781,7 @@ declare module org {
                 groupWhere(groupSubTask: org.mwg.task.Task): org.mwg.task.Task;
                 foreach(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 foreachPar(subTask: org.mwg.task.Task): org.mwg.task.Task;
-                executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                subTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                 ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                 ifThenElse(cond: org.mwg.task.TaskFunctionConditional, thenSub: org.mwg.task.Task, elseSub: org.mwg.task.Task): org.mwg.task.Task;
                 whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
@@ -1454,6 +1458,13 @@ declare module org {
                     eval(context: org.mwg.task.TaskContext): void;
                     toString(): string;
                 }
+                class ActionAddToVar extends org.mwg.plugin.AbstractTaskAction {
+                    private _name;
+                    private _global;
+                    constructor(p_name: string, p_global: boolean);
+                    eval(context: org.mwg.task.TaskContext): void;
+                    toString(): string;
+                }
                 class ActionAsVar extends org.mwg.plugin.AbstractTaskAction {
                     private _name;
                     private _global;
@@ -1725,6 +1736,8 @@ declare module org {
                     selectWithout(name: string, pattern: string): org.mwg.task.Task;
                     asGlobalVar(variableName: string): org.mwg.task.Task;
                     asLocalVar(variableName: string): org.mwg.task.Task;
+                    addToGlobalVar(variableName: string): org.mwg.task.Task;
+                    addToLocalVar(variableName: string): org.mwg.task.Task;
                     fromVar(variableName: string): org.mwg.task.Task;
                     fromVarAt(variableName: string, index: number): org.mwg.task.Task;
                     select(filter: org.mwg.task.TaskFunctionSelect): org.mwg.task.Task;
@@ -1740,7 +1753,7 @@ declare module org {
                     group(groupFunction: org.mwg.task.TaskFunctionGroup): org.mwg.task.Task;
                     groupWhere(groupSubTask: org.mwg.task.Task): org.mwg.task.Task;
                     inject(inputValue: any): org.mwg.task.Task;
-                    executeSubTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
+                    subTask(subTask: org.mwg.task.Task): org.mwg.task.Task;
                     ifThen(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;
                     ifThenElse(cond: org.mwg.task.TaskFunctionConditional, thenSub: org.mwg.task.Task, elseSub: org.mwg.task.Task): org.mwg.task.Task;
                     whileDo(cond: org.mwg.task.TaskFunctionConditional, then: org.mwg.task.Task): org.mwg.task.Task;

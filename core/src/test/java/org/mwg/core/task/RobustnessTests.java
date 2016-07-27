@@ -281,7 +281,7 @@ public class RobustnessTests {
     public void robustnessWait() {
         boolean exceptionCaught = false;
         try {
-            new CoreTask().executeSubTask(null).execute(_graph, null);
+            new CoreTask().subTask(null).execute(_graph, null);
         } catch (RuntimeException e) {
             exceptionCaught = true;
         } catch (Exception e) {

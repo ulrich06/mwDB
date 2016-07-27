@@ -109,6 +109,24 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
+    public Task addToGlobalVar(String variableName) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        addAction(new ActionAddToVar(variableName, true));
+        return this;
+    }
+
+    @Override
+    public Task addToLocalVar(String variableName) {
+        if (variableName == null) {
+            throw new RuntimeException("variableName should not be null");
+        }
+        addAction(new ActionAddToVar(variableName, false));
+        return this;
+    }
+
+    @Override
     public final org.mwg.task.Task fromVar(String variableName) {
         if (variableName == null) {
             throw new RuntimeException("variableName should not be null");
@@ -220,7 +238,7 @@ public class CoreTask implements org.mwg.task.Task {
     }
 
     @Override
-    public final org.mwg.task.Task executeSubTask(Task subTask) {
+    public final org.mwg.task.Task subTask(Task subTask) {
         if (subTask == null) {
             throw new RuntimeException("subTask should not be null");
         }

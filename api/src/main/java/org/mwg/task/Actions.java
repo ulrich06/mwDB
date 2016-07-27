@@ -1,6 +1,5 @@
 package org.mwg.task;
 
-import org.mwg.Graph;
 import org.mwg.GraphBuilder;
 
 public class Actions {
@@ -10,7 +9,6 @@ public class Actions {
     /**
      * To call oce all options have been set, to actually create a task instance.
      *
-     * @return the {@link Graph}
      * @native ts
      * if (org.mwg.task.Actions._internalBuilder == null) {
      * org.mwg.task.Actions._internalBuilder = new org.mwg.core.Builder();
@@ -68,8 +66,16 @@ public class Actions {
         return newTask().asGlobalVar(variableName);
     }
 
+    public static Task addToGlobalVar(String variableName) {
+        return newTask().addToGlobalVar(variableName);
+    }
+
     public static Task asLocalVar(String variableName) {
         return newTask().asGlobalVar(variableName);
+    }
+
+    public static Task addToLocalVar(String variableName) {
+        return newTask().addToLocalVar(variableName);
     }
 
     public static Task map(TaskFunctionMap mapFunction) {

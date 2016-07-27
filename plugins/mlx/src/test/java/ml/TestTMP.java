@@ -8,8 +8,6 @@ import org.mwg.core.scheduler.NoopScheduler;
 import org.mwg.core.task.CoreTask;
 import org.mwg.task.*;
 
-import java.util.Arrays;
-
 import static org.mwg.task.Actions.inject;
 import static org.mwg.task.Actions.then;
 
@@ -103,7 +101,7 @@ public class TestTMP {
                     }
                 },creationTask);*/
 
-                Task mainTask = inject(root).asGlobalVar("starterNode").executeSubTask(traverse).executeSubTask(creationTask);
+                Task mainTask = inject(root).asGlobalVar("starterNode").subTask(traverse).subTask(creationTask);
 
                 mainTask.execute(graph, null);
 

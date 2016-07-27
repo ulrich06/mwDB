@@ -33,12 +33,28 @@ public interface Task {
     Task asGlobalVar(String variableName);
 
     /**
+     * Add the current task result to the global named variable
+     *
+     * @param variableName identifier of this result
+     * @return this task to chain actions (fluent API)
+     */
+    Task addToGlobalVar(String variableName);
+
+    /**
      * Stores the current task result into a named variable with a local scope
      *
      * @param variableName identifier of this result
      * @return this task to chain actions (fluent API)
      */
     Task asLocalVar(String variableName);
+
+    /**
+     * Add the current task result to the local named variable
+     *
+     * @param variableName identifier of this result
+     * @return this task to chain actions (fluent API)
+     */
+    Task addToLocalVar(String variableName);
 
     /**
      * Retrieves a stored variable and stack it for next sub tasks.
@@ -109,7 +125,6 @@ public interface Task {
      */
     Task selectWith(String name, String pattern);
 
-
     /**
      * Filters the previous result to keep nodes which named attribute do not have a given value
      *
@@ -129,8 +144,6 @@ public interface Task {
     Task select(TaskFunctionSelect filterFunction);
 
     /**
-     * IN CONSTRUCTION - Not final state
-     *
      * @param filterFunction condition that objects have to respect
      */
     Task selectObject(TaskFunctionSelectObject filterFunction);
@@ -217,7 +230,17 @@ public interface Task {
      * @param subTask that have to be executed
      * @return this task to chain actions (fluent API)
      */
-    Task executeSubTask(Task subTask);
+    Task subTask(Task subTask);
+
+
+    /**
+     * Execute and wait various sub tasks, result of this sub task is immediately enqueue and available for next
+     *
+     * @param subTasks that have to be executed
+     * @return this task to chain actions (fluent API)
+     */
+    //Task subTasks(Task[] subTasks);
+
 
     /**
      * Execute a sub task if the condition is satisfied

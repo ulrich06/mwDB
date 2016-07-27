@@ -89,7 +89,7 @@ public class FlagTest {
             }, traverse);
 
 
-            Task mainTask = setTime("13").setWorld("0").inject(n1).executeSubTask(traverse);
+            Task mainTask = setTime("13").setWorld("0").inject(n1).subTask(traverse);
             mainTask.execute(graph, new Callback<TaskResult>() {
                 @Override
                 public void on(TaskResult result) {
@@ -190,7 +190,7 @@ public class FlagTest {
                 }
             }, traverse);
 
-            Task mainTask = setTime("13").setWorld("0").inject(n1).executeSubTask(traverse);
+            Task mainTask = setTime("13").setWorld("0").inject(n1).subTask(traverse);
             mainTask.execute(graph, new Callback<TaskResult>() {
                 @Override
                 public void on(TaskResult result) {

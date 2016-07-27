@@ -163,7 +163,7 @@ public class GaussianMixtureNode extends AbstractMLNode implements ProfilingNode
             }
         }, traverse);
 
-        Task mainTask = setTime(time() + "").setWorld(world() + "").inject(this).executeSubTask(traverse);
+        Task mainTask = setTime(time() + "").setWorld(world() + "").inject(this).subTask(traverse);
         mainTask.execute(graph(), new Callback<TaskResult>() {
             @Override
             public void on(TaskResult result) {
