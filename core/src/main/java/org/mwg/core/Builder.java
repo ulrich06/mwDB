@@ -45,7 +45,7 @@ public class Builder implements GraphBuilder.InternalBuilder {
             autoSaveSize = memorySize;
         }
         space = createSpace(p_usingOffHeapMemory, memorySize, autoSaveSize);
-        org.mwg.core.CoreGraph graph = new org.mwg.core.CoreGraph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker, scheduler), p_plugins);
+        org.mwg.core.CoreGraph graph = new org.mwg.core.CoreGraph(storage, space, scheduler, new MWGResolver(storage, space, nodeTracker), p_plugins);
         if (p_usingOffHeapMemory) {
             graph.offHeapBuffer = true;
         }

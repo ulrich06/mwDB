@@ -20,10 +20,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
+    private static final int HASH_LOAD_FACTOR = 4;
+
     /**
      * Global variables
      */
     private final int _maxEntries;
+    private final int _hashEntries;
+
     private final int _saveBatchSize;
     private final AtomicInteger _elementCount;
     private final Stack _lru;
@@ -48,7 +52,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         return this._graph;
     }
 
-    final class InternalDirtyStateList implements ChunkIterator {
+    final private class InternalDirtyStateList implements ChunkIterator {
 
         private final AtomicInteger _nextCounter;
         private final int[] _dirtyElements;
@@ -57,12 +61,9 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         private final HeapChunkSpace _parent;
 
         InternalDirtyStateList(int maxSize, HeapChunkSpace p_parent) {
-
             this._dirtyElements = new int[maxSize];
-
             this._nextCounter = new AtomicInteger(0);
             this._iterationCounter = new AtomicInteger(0);
-
             this._max = maxSize;
             this._parent = p_parent;
         }
@@ -123,6 +124,8 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         }
 
         this._maxEntries = initialCapacity;
+        this._hashEntries = initialCapacity * HASH_LOAD_FACTOR;
+
         this._saveBatchSize = saveBatchSize;
         this._lru = new FixedStack(initialCapacity);
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
@@ -130,25 +133,29 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
         //init std variables
         this._elementNext = new int[initialCapacity];
-        this._elementHashLock = new AtomicIntegerArray(new int[initialCapacity]);
-        this._elementHash = new int[initialCapacity];
         this._values = new Chunk[initialCapacity];
         this._elementCount = new AtomicInteger(0);
+
+        this._elementHashLock = new AtomicIntegerArray(new int[_hashEntries]);
+        this._elementHash = new int[_hashEntries];
+
 
         //init internal structures
         for (int i = 0; i < initialCapacity; i++) {
             this._elementNext[i] = -1;
+        }
+        for (int i = 0; i < _hashEntries; i++) {
             this._elementHash[i] = -1;
             this._elementHashLock.set(i, -1);
         }
+
     }
 
     @Override
     public final Chunk getAndMark(byte type, long world, long time, long id) {
-        final int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
+        final int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._hashEntries);
         int m = this._elementHash[index];
         Chunk result = null;
-
         while (m != -1) {
             HeapChunk foundChunk = (HeapChunk) this._values[m];
             if (foundChunk != null && type == foundChunk.chunkType() && world == foundChunk.world() && time == foundChunk.time() && id == foundChunk.id()) {
@@ -215,7 +222,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
 
     @Override
     public void unmark(byte type, long world, long time, long id) {
-        int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
+        int index = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._hashEntries);
         int m = this._elementHash[index];
         while (m != -1) {
             HeapChunk foundChunk = (HeapChunk) this._values[m];
@@ -239,7 +246,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
             long nodeTime = chunk.time();
             long nodeId = chunk.id();
             byte nodeType = chunk.chunkType();
-            int index = (int) PrimitiveHelper.tripleHash(chunk.chunkType(), nodeWorld, nodeTime, nodeId, this._maxEntries);
+            int index = (int) PrimitiveHelper.tripleHash(chunk.chunkType(), nodeWorld, nodeTime, nodeId, this._hashEntries);
             int m = this._elementHash[index];
             while (m != -1) {
                 Chunk foundChunk = this._values[m];
@@ -282,7 +289,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
             throw new RuntimeException("Warning, trying to put an unsafe object " + p_elem);
         }
         int entry = -1;
-        int hashIndex = (int) PrimitiveHelper.tripleHash(p_elem.chunkType(), p_elem.world(), p_elem.time(), p_elem.id(), this._maxEntries);
+        int hashIndex = (int) PrimitiveHelper.tripleHash(p_elem.chunkType(), p_elem.world(), p_elem.time(), p_elem.id(), this._hashEntries);
         int m = this._elementHash[hashIndex];
         while (m >= 0) {
             Chunk currentM = this._values[m];
@@ -315,7 +322,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
                 long victimTime = victim.time();
                 long victimObj = victim.id();
                 byte victimType = victim.chunkType();
-                int indexVictim = (int) PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._maxEntries);
+                int indexVictim = (int) PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._hashEntries);
 
                 //negociate a lock on the indexVictim hash
                 while (!this._elementHashLock.compareAndSet(indexVictim, -1, 1)) ;
@@ -374,7 +381,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
         byte type = dirtyChunk.chunkType();
-        int hashIndex = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
+        int hashIndex = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._hashEntries);
         int m = this._elementHash[hashIndex];
         while (m >= 0) {
             HeapChunk currentM = (HeapChunk) this._values[m];
@@ -407,7 +414,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         long time = cleanChunk.time();
         long id = cleanChunk.id();
         byte type = cleanChunk.chunkType();
-        int hashIndex = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._maxEntries);
+        int hashIndex = (int) PrimitiveHelper.tripleHash(type, world, time, id, this._hashEntries);
         int m = this._elementHash[hashIndex];
         while (m >= 0) {
             HeapChunk currentM = (HeapChunk) this._values[m];

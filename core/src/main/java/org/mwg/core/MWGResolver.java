@@ -24,19 +24,16 @@ class MWGResolver implements Resolver {
 
     private final NodeTracker _tracker;
 
-    private final Scheduler _scheduler;
-
     private org.mwg.Graph _graph;
 
     private StateChunk dictionary;
 
     private static int KEY_SIZE = 3;
 
-    MWGResolver(Storage p_storage, ChunkSpace p_space, NodeTracker p_tracker, Scheduler p_scheduler) {
+    MWGResolver(Storage p_storage, ChunkSpace p_space, NodeTracker p_tracker) {
         this._storage = p_storage;
         this._space = p_space;
         this._tracker = p_tracker;
-        this._scheduler = p_scheduler;
     }
 
     @Override

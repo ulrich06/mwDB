@@ -1017,11 +1017,10 @@ declare module org {
                 private _storage;
                 private _space;
                 private _tracker;
-                private _scheduler;
                 private _graph;
                 private dictionary;
                 private static KEY_SIZE;
-                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_tracker: org.mwg.core.NodeTracker, p_scheduler: org.mwg.plugin.Scheduler);
+                constructor(p_storage: org.mwg.plugin.Storage, p_space: org.mwg.plugin.ChunkSpace, p_tracker: org.mwg.core.NodeTracker);
                 init(graph: org.mwg.Graph): void;
                 typeName(node: org.mwg.Node): string;
                 typeCode(node: org.mwg.Node): number;
@@ -1186,7 +1185,9 @@ declare module org {
                         setFlags(bitsToEnable: number, bitsToDisable: number): boolean;
                     }
                     class HeapChunkSpace implements org.mwg.plugin.ChunkSpace, org.mwg.core.chunk.ChunkListener {
+                        private static HASH_LOAD_FACTOR;
                         private _maxEntries;
+                        private _hashEntries;
                         private _saveBatchSize;
                         private _elementCount;
                         private _lru;

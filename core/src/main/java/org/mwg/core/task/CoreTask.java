@@ -410,11 +410,7 @@ public class CoreTask implements org.mwg.task.Task {
     @Override
     public void executeFrom(final TaskContext parentContext, final TaskResult initial, byte affinity, final Callback<TaskResult> callback) {
         if (_first != null) {
-            TaskResult initalRes = initial;
-            //if(affinity != SchedulerAffinity.SAME_THREAD){
-            initalRes = initalRes.clone();
-            // }
-            final CoreTaskContext context = new CoreTaskContext(parentContext, initalRes, parentContext.graph(), parentContext.hook(), parentContext.ident() + 1, callback);
+            final CoreTaskContext context = new CoreTaskContext(parentContext, initial.clone(), parentContext.graph(), parentContext.hook(), parentContext.ident() + 1, callback);
             parentContext.graph().scheduler().dispatch(affinity, new Job() {
                 @Override
                 public void run() {

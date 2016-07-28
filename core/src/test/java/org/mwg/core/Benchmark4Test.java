@@ -21,12 +21,13 @@ import java.util.Random;
  */
 public class Benchmark4Test {
 
-    // @Test
+    //@Test
     public void test() {
 
-        int nb = 1000000;
+        int nb = 3000000;
 
-        HeapChunkSpace space = new HeapChunkSpace(nb * 3, nb * 3);
+        long init = System.currentTimeMillis();
+        HeapChunkSpace space = new HeapChunkSpace(nb * 2, nb * 2);
         for (int i = 0; i < nb; i++) {
             StateChunk c = (StateChunk) space.create(ChunkType.STATE_CHUNK, 0, 0, i, null, null);
             space.putAndMark(c);
@@ -43,14 +44,17 @@ public class Benchmark4Test {
 
         System.out.println((nb / 1000) / diffSecond);
 
+        System.out.println("total " + (after - init) + "ms, " + ((nb / 1000) / ((double) (after - init) / 1000d)) + " k/s");
+        System.out.println("insert " + (begin - init) + "ms, " + ((nb / 1000) / ((double) (begin - init) / 1000d)) + " k/s");
+        System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k/s");
     }
 
-    //@Test
+    @Test
     public void test2() {
 
-        int nb = 1000000;
+        int nb = 3000000;
 
-        OffHeapChunkSpace space = new OffHeapChunkSpace(nb * 3, nb * 3 - 1);
+        OffHeapChunkSpace space = new OffHeapChunkSpace(nb * 2, nb * 2);
         for (int i = 0; i < nb; i++) {
             StateChunk c = (StateChunk) space.create(ChunkType.STATE_CHUNK, 0, 0, i, null, null);
             space.putAndMark(c);

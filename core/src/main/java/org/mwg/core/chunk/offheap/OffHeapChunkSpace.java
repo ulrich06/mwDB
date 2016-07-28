@@ -23,10 +23,14 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
 
+    private static final int HASH_LOAD_FACTOR = 4;
+
     /**
      * Global variables
      */
     private final long _capacity;
+    private final long _hashCapacity;
+
     private final long _saveBatchSize;
     private final Stack _lru;
 
@@ -54,7 +58,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         return _graph;
     }
 
-    final class InternalDirtyStateList implements ChunkIterator {
+    final private class InternalDirtyStateList implements ChunkIterator {
 
         private final long _dirtyElements;
         private final long _max;
@@ -62,7 +66,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         private final AtomicLong _nextCounter;
         private final OffHeapChunkSpace _parent;
 
-        public InternalDirtyStateList(long dirtiesCapacity, OffHeapChunkSpace p_parent) {
+        InternalDirtyStateList(long dirtiesCapacity, OffHeapChunkSpace p_parent) {
             this._dirtyElements = OffHeapLongArray.allocate(dirtiesCapacity);
             this._nextCounter = new AtomicLong(0);
             this._iterationCounter = new AtomicLong(0);
@@ -127,6 +131,8 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         }
 
         this._capacity = initialCapacity;
+        this._hashCapacity = initialCapacity * HASH_LOAD_FACTOR;
+
         this._saveBatchSize = saveBatchSize;
         this._lru = new OffHeapFixedStack(initialCapacity); //only one object
         this._dirtyState = new AtomicReference<InternalDirtyStateList>();
@@ -134,15 +140,17 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
 
         //init std variables
         this._elementNext = OffHeapLongArray.allocate(initialCapacity);
-        this._elementHash = OffHeapLongArray.allocate(initialCapacity);
         this._elementValues = OffHeapLongArray.allocate(initialCapacity);
-        this._elementHashLock = OffHeapLongArray.allocate(initialCapacity);
+
+        this._elementHash = OffHeapLongArray.allocate(_hashCapacity);
+        this._elementHashLock = OffHeapLongArray.allocate(_hashCapacity);
+
         this._elementCount = new AtomicInteger(0);
     }
 
     @Override
     public final Chunk getAndMark(byte type, long world, long time, long id) {
-        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -231,7 +239,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
 
     @Override
     public void unmark(byte type, long world, long time, long id) {
-        long index = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+        long index = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
         long m = OffHeapLongArray.get(_elementHash, index);
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -281,7 +289,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
             long time = chunk.time();
             long id = chunk.id();
             byte type = chunk.chunkType();
-            long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+            long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
             long m = OffHeapLongArray.get(_elementHash, hashIndex);
             while (m != CoreConstants.OFFHEAP_NULL_PTR) {
                 long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -355,7 +363,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         final byte type = (byte) OffHeapLongArray.get(elemPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
 
         long entry = -1;
-        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != -1) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -393,7 +401,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
                 long victimObj = OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_ID);
                 byte victimType = (byte) OffHeapLongArray.get(currentVictimPtr, CoreConstants.OFFHEAP_CHUNK_INDEX_TYPE);
 
-                long indexVictim = PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._capacity);
+                long indexVictim = PrimitiveHelper.tripleHash(victimType, victimWorld, victimTime, victimObj, this._hashCapacity);
 
                 //negociate a lock on the indexVictim hash
                 while (!OffHeapLongArray.compareAndSwap(_elementHashLock, indexVictim, -1, 0)) ;
@@ -472,7 +480,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         long time = dirtyChunk.time();
         long id = dirtyChunk.id();
         byte type = dirtyChunk.chunkType();
-        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
@@ -522,7 +530,7 @@ public class OffHeapChunkSpace implements ChunkSpace, ChunkListener {
         long time = cleanChunk.time();
         long id = cleanChunk.id();
         byte type = cleanChunk.chunkType();
-        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._capacity);
+        long hashIndex = PrimitiveHelper.tripleHash(type, world, time, id, this._hashCapacity);
         long m = OffHeapLongArray.get(_elementHash, hashIndex);
         while (m != CoreConstants.OFFHEAP_NULL_PTR) {
             long foundChunkPtr = OffHeapLongArray.get(_elementValues, m);
