@@ -525,7 +525,6 @@ public class Base64 {
 
 
     /*
-
     private static String printBits(long val) {
         String toString = Long.toBinaryString(val);
         String res = "";
@@ -535,7 +534,6 @@ public class Base64 {
         }
         return res + toString;
     }
-
     private static String printBits(int val) {
         String toString = Integer.toBinaryString(val);
         String res = "";

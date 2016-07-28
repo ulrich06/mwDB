@@ -281,6 +281,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
         return null;
     }
 
+    //TODO, this method has performance issue
     @Override
     public Chunk putAndMark(Chunk p_elem) {
         //first mark the object
@@ -306,6 +307,7 @@ public class HeapChunkSpace implements ChunkSpace, ChunkListener {
                 //TODO cache is full :(
                 System.gc();
                 try {
+                    System.err.println("GC failback...");
                     Thread.sleep(100);
                 } catch (Exception e) {
                     e.printStackTrace();

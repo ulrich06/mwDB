@@ -21,39 +21,30 @@ import java.util.Random;
  */
 public class Benchmark4Test {
 
-    //@Test
+    // @Test
     public void test() {
-
         int nb = 3000000;
-
         long init = System.currentTimeMillis();
         HeapChunkSpace space = new HeapChunkSpace(nb * 2, nb * 2);
         for (int i = 0; i < nb; i++) {
             StateChunk c = (StateChunk) space.create(ChunkType.STATE_CHUNK, 0, 0, i, null, null);
             space.putAndMark(c);
         }
-
         long begin = System.currentTimeMillis();
         for (int i = 0; i < nb; i++) {
             StateChunk c = (StateChunk) space.getAndMark(ChunkType.STATE_CHUNK, 0, 0, i);
             space.unmarkChunk(c);
         }
         long after = System.currentTimeMillis();
-        long diff = after - begin;
-        double diffSecond = diff / 1000d;
-
-        System.out.println((nb / 1000) / diffSecond);
-
-        System.out.println("total " + (after - init) + "ms, " + ((nb / 1000) / ((double) (after - init) / 1000d)) + " k/s");
-        System.out.println("insert " + (begin - init) + "ms, " + ((nb / 1000) / ((double) (begin - init) / 1000d)) + " k/s");
-        System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k/s");
+        System.out.println("total " + (after - init) + "ms, " + ((nb / 1000) / ((double) (after - init) / 1000d)) + " k chunk/s");
+        System.out.println("insert " + (begin - init) + "ms, " + ((nb / 1000) / ((double) (begin - init) / 1000d)) + " k chunk/s");
+        System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k chunk/s");
     }
 
-  //  @Test
+    // @Test
     public void test2() {
-
         int nb = 3000000;
-
+        long init = System.currentTimeMillis();
         OffHeapChunkSpace space = new OffHeapChunkSpace(nb * 2, nb * 2);
         for (int i = 0; i < nb; i++) {
             StateChunk c = (StateChunk) space.create(ChunkType.STATE_CHUNK, 0, 0, i, null, null);
@@ -66,11 +57,9 @@ public class Benchmark4Test {
             space.unmarkChunk(c);
         }
         long after = System.currentTimeMillis();
-        long diff = after - begin;
-        double diffSecond = diff / 1000d;
-
-        System.out.println((nb / 1000) / diffSecond);
-
+        System.out.println("total " + (after - init) + "ms, " + ((nb / 1000) / ((double) (after - init) / 1000d)) + " k chunk/s");
+        System.out.println("insert " + (begin - init) + "ms, " + ((nb / 1000) / ((double) (begin - init) / 1000d)) + " k chunk/s");
+        System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k chunk/s");
     }
 
 
