@@ -62,7 +62,6 @@ public class Benchmark4Test {
         System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k chunk/s");
     }
 
-
     //  @Test
     public void test3() {
         int nb = 1000000;
@@ -99,7 +98,6 @@ public class Benchmark4Test {
         graph.connect(result -> {
             Node root = graph.newNode(0, 0);
             Random rand = new Random();
-
             long begin = System.currentTimeMillis();
             for (int i = 0; i < nb; i++) {
                 Node x = graph.newNode(0, 0);
@@ -113,6 +111,5 @@ public class Benchmark4Test {
 
         });
     }
-
 
 }
