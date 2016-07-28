@@ -6,10 +6,7 @@ import org.mwg.ml.common.distance.DistanceEnum;
 import org.mwg.ml.common.distance.EuclideanDistance;
 import org.mwg.ml.common.distance.GaussianDistance;
 import org.mwg.plugin.*;
-import org.mwg.task.Action;
-import org.mwg.task.Task;
-import org.mwg.task.TaskContext;
-import org.mwg.task.TaskFunctionConditional;
+import org.mwg.task.*;
 
 import static org.mwg.task.Actions.*;
 
@@ -204,6 +201,29 @@ public class KDNode extends AbstractNode {
         return null;
     }
 
+//
+//    Task nearWhile = whileDo(new TaskFunctionConditional() {
+//        @Override
+//        public boolean eval(TaskContext context) {
+//            Node current = context.resultAsNodes().get(0);
+//            double[] nodeKey = (double[]) current.get(INTERNAL_KEY);
+//
+//            //Get variables from context
+//
+//            int dim = (int) context.globalVariables().get("dim").get(0);
+//            double[] target = (double[]) context.globalVariables().get("key").get(0);
+//            Distance distance = (Distance) context.globalVariables().get("distance").get(0);
+//
+//            int lev = (int) context.localVariables().get("lev").get(0);
+//            HRect hr =(HRect) context.localVariables().get("hrect").get(0);
+//            double max_dist_sqd=(double) context.localVariables().get("maxdist").get(0);
+//
+//
+//        }
+//    }, newTask());
+
+
+
 
     private static void internalNearest(KDNode node, final Distance distance, final double[] target, final HRect hr, final double max_dist_sqd, final int lev, final int dim, final double err, final NearestNeighborList nnl) {
         // 1. if kd is empty exit.
@@ -216,7 +236,6 @@ public class KDNode extends AbstractNode {
         if (pivot == null) {
             return;
         }
-
 
         // 2. s := split field of kd
         int s = lev % dim;
@@ -343,28 +362,28 @@ public class KDNode extends AbstractNode {
             Node current = context.resultAsNodes().get(0);
             double[] nodeKey = (double[]) current.get(INTERNAL_KEY);
 
-
             //Get variables from context
+
+            int dim = (int) context.globalVariables().get("dim").get(0);
             double[] keyToInsert = (double[]) context.globalVariables().get("key").get(0);
+
             Node valueToInsert = (Node) context.globalVariables().get("value").get(0);
             Node root = (Node) context.globalVariables().get("root").get(0);
             Distance distance = (Distance) context.globalVariables().get("distance").get(0);
             double err = (double) context.globalVariables().get("err").get(0);
             int lev = (int) context.globalVariables().get("lev").get(0);
-            int dim = keyToInsert.length;
 
 
             //Bootstrap, first insert ever
             if (nodeKey == null) {
-                current.set(INTERNAL_KEY, keyToInsert);
-                current.set(INTERNAL_VALUE, valueToInsert);
-                current.set(NUM_NODES, 1);
+                current.setProperty(INTERNAL_KEY, Type.DOUBLE_ARRAY, keyToInsert);
+                current.setProperty(INTERNAL_VALUE, Type.RELATION, new long[]{valueToInsert.id()});
+                current.setProperty(NUM_NODES, Type.INT, 1);
                 return false; //stop the while loop and insert here
             } else if (distance.measure(keyToInsert, nodeKey) < err) {
-                current.set(INTERNAL_VALUE, valueToInsert);
+                current.setProperty(INTERNAL_VALUE, Type.RELATION, new long[]{valueToInsert.id()});
                 return false; //insert in the current node, and done with it, no need to continue looping
-            }
-            else {
+            } else {
                 //Decision point for next step
                 long[] child = null;
                 String nextRel;
@@ -379,10 +398,10 @@ public class KDNode extends AbstractNode {
                 //If there is no node to the right, we create one and the game is over
                 if (child == null || child.length == 0) {
                     KDNode childNode = (KDNode) context.graph().newTypedNode(current.world(), current.time(), NAME);
-                    childNode.set(INTERNAL_KEY, keyToInsert);
-                    childNode.add(INTERNAL_VALUE, valueToInsert);
-                    current.add(nextRel, childNode);
-                    root.set(NUM_NODES, (Integer) root.get(NUM_NODES) + 1);
+                    childNode.setProperty(INTERNAL_KEY, Type.DOUBLE_ARRAY, keyToInsert);
+                    childNode.setProperty(INTERNAL_VALUE, Type.RELATION, new long[]{valueToInsert.id()});
+                    current.setProperty(nextRel, Type.RELATION, new long[]{childNode.id()});
+                    root.setProperty(NUM_NODES, Type.INT, (Integer) root.get(NUM_NODES) + 1);
                     childNode.free();
                     return false;
                 } else {
@@ -395,6 +414,30 @@ public class KDNode extends AbstractNode {
         }
 
     }, traverse("{{next}}"));
+
+
+    private static void internalInsertTask(final KDNode node, final KDNode root, final Distance distance, final double[] keyToInsert, final int lev, final int dim, final double err, final Node valueToInsert, final Callback<Boolean> callback) {
+        TaskContext tc = insert.prepareWith(node.graph(), root, new Callback<TaskResult>() {
+            @Override
+            public void on(TaskResult result) {
+                if (callback != null) {
+                    callback.on(true);
+                }
+            }
+        });
+
+        TaskResult res = tc.newResult();
+        res.add(keyToInsert);
+
+        tc.setGlobalVariable("key", res);
+        tc.setGlobalVariable("value", tc.wrap(valueToInsert));
+        tc.setGlobalVariable("root", tc.wrap(root));
+        tc.setGlobalVariable("distance", tc.wrap(distance));
+        tc.setGlobalVariable("err", tc.wrap(err));
+        tc.setGlobalVariable("lev", tc.wrap(lev));
+        tc.setGlobalVariable("dim", tc.wrap(dim));
+        insert.executeUsing(tc);
+    }
 
 
     private static void internalInsert(final KDNode node, final KDNode root, final Distance distance, final double[] keyToInsert, final int lev, final int dim, final double err, final Node valueToInsert, final Callback<Boolean> callback) {
@@ -423,8 +466,7 @@ public class KDNode extends AbstractNode {
                 callback.on(true);
             }
             return;
-        }
-        else {
+        } else {
             long[] child = null;
             String nextRel;
             if (keyToInsert[lev] > nodeKey[lev]) {
