@@ -9,5 +9,5 @@ public interface HeapChunk extends Chunk {
     long unmark();
 
     boolean setFlags(long bitsToEnable, long bitsToDisable);
-
+    
 }

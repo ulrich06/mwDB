@@ -49,7 +49,7 @@ public class Benchmark4Test {
         System.out.println("lookup " + (after - begin) + "ms, " + ((nb / 1000) / ((double) (after - begin) / 1000d)) + " k/s");
     }
 
-    @Test
+  //  @Test
     public void test2() {
 
         int nb = 3000000;
